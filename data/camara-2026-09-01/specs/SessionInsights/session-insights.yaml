@@ -1,0 +1,820 @@
+openapi: 3.0.3
+info:
+  title: Session Insights
+  version: wip
+  x-camara-commonalities: 0.8.0
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  description: |
+    The Session Insights API is part of the CAMARA Connectivity Insights API group. It extends the capabilities of the Connectivity Insights API by enabling applications to continuously monitor and evaluate their real-time session quality, based on application-observed network metrics and API provider feedback.
+
+    While the Connectivity Insights API allows applications to query whether a network can meet predefined performance thresholds (e.g., jitter, packet loss, bitrate), the Session Insights API supports the lifecycle of an ongoing insights session. It allows applications to send metrics to the API provider, receive dynamic scoring on current session performance via asynchronous notifications, and engage in adaptive optimization strategies.
+
+    # Key Features
+
+    - Create an insights session using a selected Application Profile identifier (obtained via GET application-profiles as defined in the CAMARA ApplicationProfiles project).
+    - Send application-observed network metrics (e.g., packet delay, jitter, packet error/loss rate, bitrate) to the API provider.
+    - Receive a Session Insights score reflecting the API provider's evaluation of session quality, delivered asynchronously via notification.
+    - Respond to notifications and adjust application configuration.
+    - Receive root cause analysis notifications when session quality degrades.
+    - Request network service improvements using complementary CAMARA APIs (e.g., QualityOnDemand, NetworkAccessManagement).
+    - Gracefully terminate the insights session when monitoring is no longer needed.
+
+    # Use of Application Profiles API
+
+    This API leverages CAMARA’s [Application Profiles](https://github.com/camaraproject/ApplicationProfiles) to define threshold criteria for session quality. A selected Application Profile (obtained via the Application Profiles API) specifies the application’s expected network performance requirements and is referenced when creating a session.
+
+    # Session Identifiers
+
+    The API uses three distinct identifiers for sessions:
+
+    - **`sessionId`** (path parameter): The operator-assigned unique identifier for the session, used in all path-based operations (e.g., GET /sessions/{sessionId}). This is assigned by the API provider when the session is created.
+    - **`id`** (property of session objects): Same as `sessionId` — the operator-assigned session identifier, returned within session response objects.
+    - **`applicationSessionId`** (optional property): An application-provided reference (e.g., a meeting ID, match ID, or stream ID) used for correlation between the application and the API provider. This is set by the API consumer during session creation.
+
+    # Object Relationships
+
+    - One **device** can have multiple active sessions (e.g., a phone running both a video call and a game stream).
+    - One **application** is associated with one **Application Profile** per session, which defines the performance thresholds for that session.
+    - One **application** can create multiple sessions across different devices or for different use cases.
+
+    # Example Use Cases
+
+    ## Wi-Fi Congestion Mitigation
+    - Application sets thresholds for latency and packet loss.
+    - Session score drops due to congestion, triggering a notification diagnosing the problem and suggesting corrective action.
+    - Root cause analysis identifies local Wi-Fi congestion; application adjusts QoS policies (e.g., enables Wi-Fi Multimedia (WMM) prioritization) to prioritize traffic.
+
+    ## Access Network Impairment
+    - Degraded score attributed to poor signal or congestion in the access network.
+    - Application requests service enhancement through complementary CAMARA APIs (e.g., QualityOnDemand, NetworkAccessManagement).
+
+    # Session Quality Score
+
+    The session quality score is a numeric value from 0 to 100, where 100 represents optimal session quality and 0 represents severe degradation. The network operator computes the score by combining its own network telemetry with the application-observed metrics submitted via `sendSessionMetrics`.
+
+    The score is not returned synchronously. `POST /sessions/{sessionId}/metrics` returns `204 No Content` to acknowledge receipt of the submitted metrics. The computed score is delivered asynchronously to the configured `sink` as a `quality-score` notification. A notification may not be issued after every metrics submission — delivery frequency is determined by the provider.
+
+    # Session Notifications
+
+    Session creation implicitly establishes a notification subscription — there is no separate subscription step and no event type selection. The `sink` address specified at session creation serves as the notification endpoint throughout the insights session lifecycle, and all session notifications are delivered to it.
+
+    Unlike other implicit-subscription CAMARA APIs where `sink` is optional, `sink` is required in this API: asynchronous delivery of the session quality score is the core function of the API, so a session without a notification endpoint would serve no purpose.
+
+    To protect the notification endpoint, providing `sinkCredential` is RECOMMENDED. In the current version, `sinkCredential.credentialType` MUST be set to `ACCESSTOKEN` or `PRIVATE_KEY_JWT` if provided.
+
+    The API provider delivers the following notification types asynchronously to the configured `sink`:
+
+    - **`org.camaraproject.session-insights.v0.quality-score`**: Sent when the provider evaluates session quality. Always contains the `score` (0–100); when the score has degraded and the provider has determined a root cause, it additionally contains a `proposedResolution` with the recommended corrective action.
+    - **`org.camaraproject.session-insights.v0.session-ended`**: Sent when the session ends for any reason (expiry, deletion, or network-initiated termination). No further notifications will be delivered afterward.
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    <!-- CAMARA:MANDATORY:identifying-device-from-access-token:BEGIN -->
+    # Identifying the device from the access token
+
+    This API requires the API consumer to identify a device as the subject of the API as follows:
+    - When the API is invoked using a two-legged access token, the subject will be identified from the optional `device` object, which therefore MUST be provided.
+    - When a three-legged access token is used however, this optional identifier MUST NOT be provided, as the subject will be uniquely identified from the access token.
+
+    This approach simplifies API usage for API consumers using a three-legged access token to invoke the API by relying on the information that is associated with the access token and was identified during the authentication process.
+
+    ## Error handling:
+
+    - If the subject cannot be identified from the access token and the optional `device` object is not included in the request, then the server will return an error with the `422 MISSING_IDENTIFIER` error code.
+
+    - If the subject can be identified from the access token and the optional `device` object is also included in the request, then the server will return an error with the `422 UNNECESSARY_IDENTIFIER` error code. This will be the case even if the same device is identified by these two methods, as the server is unable to make this comparison.
+    <!-- CAMARA:MANDATORY:identifying-device-from-access-token:END -->
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+
+externalDocs:
+  description: Project documentation at CAMARA
+  url: https://github.com/camaraproject/SessionInsights
+
+servers:
+  - url: "{apiRoot}/session-insights/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+
+tags:
+  - name: Session Insights
+    description: |
+      Manage the lifecycle of insights sessions between an application and the network.
+      Applications send session metrics, receive quality scores and notifications, and take actions
+      based on current session quality and network conditions.
+
+
+paths:
+  /sessions:
+    post:
+      tags:
+        - Session Insights
+      summary: Create a Session Insights session
+      description: |
+        Create a new insights session for monitoring application performance and
+        network quality. The session can be used to send application-observed
+        metrics, receive session quality scores asynchronously via notifications,
+        and receive root cause analysis when quality degrades.
+
+        The session is created using a selected Application Profile, which
+        defines the expected performance thresholds and other parameters.
+      operationId: createSession
+      security:
+        - openId:
+            - session-insights:sessions:create
+      parameters:
+        - $ref: "#/components/parameters/x-correlator"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionRequest"
+      responses:
+        "201":
+          description: |
+            Session created. Note that `sinkCredential` is not returned in
+            the response for security reasons.
+          headers:
+            x-correlator:
+              $ref: "#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "400":
+          $ref: "#/components/responses/CreateSessionBadRequest400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "409":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic409"
+        "422":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic422"
+        "429":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+      callbacks:
+        notifications:
+          "{$request.body#/sink}":
+            post:
+              summary: Session Insights notification callback
+              description: |
+                Important: this endpoint is to be implemented by the API consumer.
+                The Session Insights server will call this endpoint whenever a
+                session quality or session-lifecycle event occurs.
+              operationId: postNotification
+              parameters:
+                - $ref: "#/components/parameters/x-correlator"
+              requestBody:
+                required: true
+                content:
+                  application/cloudevents+json:
+                    schema:
+                      $ref: "#/components/schemas/SessionNotificationEvent"
+              responses:
+                "204":
+                  description: Successful notification
+                  headers:
+                    x-correlator:
+                      $ref: "#/components/headers/x-correlator"
+                "400":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+                "401":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+                "403":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+                "410":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic410"
+                "429":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+              security:
+                - {}
+                - notificationsBearerAuth: []
+
+  /sessions/{sessionId}:
+    get:
+      tags:
+        - Session Insights
+      summary: "Get session by sessionId"
+      description: |
+        Retrieve the details of a specific session by its operator-assigned
+        session ID.
+      operationId: getSession
+      security:
+        - openId:
+            - session-insights:sessions:read
+      parameters:
+        - name: sessionId
+          in: path
+          description: Operator-assigned session ID
+          required: true
+          schema:
+            $ref: "#/components/schemas/SessionId"
+        - $ref: "#/components/parameters/x-correlator"
+      responses:
+        "200":
+          description: Session detail
+          headers:
+            x-correlator:
+              $ref: "#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+        "410":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic410"
+
+    delete:
+      tags:
+        - Session Insights
+      summary: Delete session
+      description: |
+        Delete an insights session by its operator-assigned session ID. This will stop
+        all notifications and metric reporting for the session.
+      operationId: deleteSession
+      security:
+        - openId:
+            - session-insights:sessions:delete
+      parameters:
+        - name: sessionId
+          in: path
+          description: Operator-assigned session ID
+          required: true
+          schema:
+            $ref: "#/components/schemas/SessionId"
+        - $ref: "#/components/parameters/x-correlator"
+      responses:
+        "204":
+          description: Deleted
+          headers:
+            x-correlator:
+              $ref: "#/components/headers/x-correlator"
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+        "410":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic410"
+
+  /retrieve-sessions:
+    post:
+      tags:
+        - Session Insights
+      summary: Retrieve Session Insights sessions by device
+      description: |
+        Retrieve all Session Insights sessions for a given device.
+
+        **Notes:**
+        - This operation allows retrieving all active or historical sessions associated with a device.
+        - It uses POST instead of GET to allow passing sensitive device identifiers in the body, per CAMARA guidelines.
+        - The request must include a `device` object if using a two-legged token. If using a three-legged token, do not provide a `device` as the device is derived from the token.
+
+      operationId: retrieveSessionsByDevice
+      security:
+        - openId:
+            - session-insights:sessions:retrieve-by-device
+      parameters:
+        - $ref: "#/components/parameters/x-correlator"
+      requestBody:
+        description: Parameters to get Session Insights session information by device
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RetrieveSessionsInput"
+        required: true
+      responses:
+        "200":
+          description: An array of sessions matching the specified device. Empty array if none found.
+          headers:
+            x-correlator:
+              $ref: "#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetrieveSessionsOutput"
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+        "422":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic422"
+        "429":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+
+  /sessions/{sessionId}/metrics:
+    post:
+      tags:
+        - Session Insights
+      summary: Send session metrics
+      description: |
+        Send application-observed session metrics to the API provider for the
+        specified session. The API provider uses these metrics to evaluate session
+        quality and delivers a session quality notification asynchronously to the
+        session's configured sink. This operation returns 204 No Content to
+        acknowledge receipt; the resulting quality score is delivered via
+        notification, not in this response.
+      operationId: sendSessionMetrics
+      security:
+        - openId:
+            - session-insights:sessions:write
+      parameters:
+        - name: sessionId
+          in: path
+          description: Operator-assigned session ID
+          required: true
+          schema:
+            $ref: "#/components/schemas/SessionId"
+        - $ref: "#/components/parameters/x-correlator"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MetricsPayload"
+      responses:
+        "204":
+          description: Metrics accepted
+          headers:
+            x-correlator:
+              $ref: "#/components/headers/x-correlator"
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+        "410":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic410"
+        "422":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic422"
+
+components:
+  parameters:
+    x-correlator:
+      $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+
+  headers:
+    x-correlator:
+      $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+
+  securitySchemes:
+    openId:
+      $ref: "../common/CAMARA_common.yaml#/components/securitySchemes/openId"
+    notificationsBearerAuth:
+      $ref: "../common/CAMARA_event_common.yaml#/components/securitySchemes/notificationsBearerAuth"
+
+  schemas:
+    SessionId:
+      description: Session ID in UUID format
+      type: string
+      format: uuid
+      maxLength: 36
+
+    SessionRequest:
+      description: |
+        Request body for creating a new session. The session is created using
+        a selected Application Profile, which defines the expected
+        performance thresholds and other parameters.
+      type: object
+      properties:
+        applicationProfileId:
+          $ref: "#/components/schemas/ApplicationProfileId"
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Device"
+        applicationServer:
+          $ref: "#/components/schemas/ApplicationServer"
+        applicationSessionId:
+          type: string
+          description: |
+            Optional app-level meeting / match / stream ID used for correlation.
+          pattern: '^[a-zA-Z0-9._\-/:+]{1,256}$'
+          maxLength: 256
+          example: "meet-12345"
+        sink:
+          type: string
+          format: uri
+          pattern: ^https:\/\/.+$
+          maxLength: 2048
+          description: |
+            The address to which notifications shall be delivered. Must be HTTPS.
+          example: "https://endpoint.example.com/sink"
+        sinkCredential:
+          description: A sink credential provides authentication or authorization information necessary to enable delivery of notifications to a target.
+          allOf:
+            - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SinkCredential"
+      required:
+        - applicationProfileId
+        - applicationServer
+        - sink
+
+    Session:
+      description: |
+        A Session Insights session.
+      type: object
+      properties:
+        id:
+          type: string
+          description: Operator-assigned session ID
+          format: uuid
+          maxLength: 36
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        applicationSessionId:
+          type: string
+          description: Application's own session reference (e.g., a meeting ID, match ID, or game ID) used for correlation. Distinct from the operator-assigned `sessionId`.
+          pattern: '^[a-zA-Z0-9._\-/:+]{1,256}$'
+          maxLength: 256
+          example: "meet-12345"
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+        applicationServer:
+          $ref: "#/components/schemas/ApplicationServer"
+        sink:
+          type: string
+          format: uri
+          pattern: ^https:\/\/.+$
+          maxLength: 2048
+          description: |
+            The notification endpoint address. The HTTPS webhook URL provided
+            in the request.
+        startsAt:
+          type: string
+          format: date-time
+          description: |
+            The date and time when the session became active, expressed in
+            RFC 3339 / ISO 8601 `date-time` format.
+          maxLength: 40
+        expiresAt:
+          type: string
+          format: date-time
+          description: |
+            The date and time when the session will expire, expressed in
+            RFC 3339 / ISO 8601 `date-time` format.
+          maxLength: 40
+        status:
+          $ref: "#/components/schemas/SessionStatus"
+      required:
+        - id
+        - applicationServer
+        - sink
+        - startsAt
+        - status
+
+    ApplicationProfileId:
+      description: Identifier for the Application Profile
+      type: string
+      format: uuid
+      maxLength: 36
+
+    ApplicationServer:
+      description: |
+        Identifies the application server endpoint the session relates to. At
+        least one identifier must be provided.
+      type: object
+      minProperties: 1
+      properties:
+        domainName:
+          type: string
+          description: Fully qualified domain name of the application server.
+          pattern: '^[a-zA-Z0-9\-\.]{1,253}$'
+          maxLength: 253
+        ipv4Address:
+          type: string
+          description: IPv4 address of the application server.
+          format: ipv4
+          maxLength: 15
+        ipv6Address:
+          type: string
+          description: IPv6 address of the application server.
+          format: ipv6
+          maxLength: 45
+        port:
+          type: integer
+          description: TCP/UDP port of the application server.
+          format: int32
+          minimum: 0
+          maximum: 65535
+
+    SessionEventType:
+      type: string
+      description: |
+        Enum of event types for the Session Insights API. Following the
+        CAMARA event naming convention:
+        org.camaraproject.<api-name>.<event-version>.<event-name>
+      enum:
+        - org.camaraproject.session-insights.v0.quality-score
+        - org.camaraproject.session-insights.v0.session-ended
+
+    SessionStatus:
+      type: string
+      description: The current lifecycle status of the session.
+      enum:
+        - ACTIVE
+        - EXPIRED
+        - DELETED
+
+    # ---------- CloudEvent data payloads ----------
+    SessionQualityData:
+      description: |
+        Data payload for the quality-score notification, reporting the API
+        provider's evaluation of current session quality. Always contains the
+        `score`; `proposedResolution` is included only when the score has
+        degraded and the provider has determined a root cause and a
+        recommended corrective action.
+      type: object
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+          maxLength: 36
+          description: The ID of the session the score applies to.
+        score:
+          type: integer
+          description: |
+            The Session Insights Score reflecting the API provider's evaluation
+            of session quality, from 0 (worst) to 100 (best).
+          format: int32
+          minimum: 0
+          maximum: 100
+        proposedResolution:
+          $ref: "#/components/schemas/ProposedResolution"
+      required:
+        - sessionId
+        - score
+
+    ProposedResolution:
+      description: |
+        A recommended corrective action to improve session quality, included
+        in a quality-score notification when the provider has determined a
+        root cause for degradation.
+      type: object
+      properties:
+        resolutionType:
+          type: string
+          description: The category of the proposed resolution.
+          enum:
+            - NETWORK_QOS
+            - APPLICATION_CONFIG
+            - OTHER
+        description:
+          type: string
+          description: |
+            Human-readable description of the root cause and the recommended
+            corrective action.
+          pattern: '^.{0,2048}$'
+          maxLength: 2048
+      required:
+        - resolutionType
+        - description
+
+    SessionEndedData:
+      type: object
+      description: Data payload for the session-ended notification.
+      properties:
+        sessionId:
+          type: string
+          description: The ID of the session that ended.
+          format: uuid
+          maxLength: 36
+        terminationReason:
+          type: string
+          description: The reason the session was terminated.
+          enum:
+            - NETWORK_TERMINATED
+            - SESSION_EXPIRED
+            - ACCESS_TOKEN_EXPIRED
+            - SESSION_DELETED
+      required:
+        - sessionId
+        - terminationReason
+
+    SessionNotificationEvent:
+      description: |
+        Notification event for Session Insights sessions. Extends the
+        CloudEvent envelope and constrains `type` to the event types defined
+        by this API.
+      allOf:
+        - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/CloudEvent"
+        - type: object
+          properties:
+            type:
+              $ref: "#/components/schemas/SessionEventType"
+      discriminator:
+        propertyName: "type"
+        mapping:
+          org.camaraproject.session-insights.v0.quality-score: "#/components/schemas/EventQualityScore"
+          org.camaraproject.session-insights.v0.session-ended: "#/components/schemas/EventSessionEnded"
+
+    EventQualityScore:
+      description: |
+        Event notifying a session quality score evaluation.
+      allOf:
+        - $ref: "#/components/schemas/SessionNotificationEvent"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/SessionQualityData"
+          required:
+            - data
+
+    EventSessionEnded:
+      description: |
+        Event notifying that the session has ended. Delivered for every
+        session that ends, whatever the reason.
+      allOf:
+        - $ref: "#/components/schemas/SessionNotificationEvent"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/SessionEndedData"
+          required:
+            - data
+
+    MetricsPayload:
+      type: object
+      description: Application-observed session metrics submitted via sendSessionMetrics.
+      properties:
+        packetDelay:
+          description: Application-observed one-way packet delay.
+          allOf:
+            - $ref: "#/components/schemas/Duration"
+        jitter:
+          description: Application-observed packet delay variation.
+          allOf:
+            - $ref: "#/components/schemas/Duration"
+        packetLossErrorRate:
+          type: integer
+          description: |
+            Application-observed packet loss rate. The value is an exponent of 10,
+            so a value of 3 means that up to 10⁻³, or 0.1%, of the data packets were lost.
+          format: int32
+          minimum: 1
+          maximum: 10
+        upstreamRate:
+          description: Application-observed upstream bitrate.
+          allOf:
+            - $ref: "#/components/schemas/Rate"
+        downstreamRate:
+          description: Application-observed downstream bitrate.
+          allOf:
+            - $ref: "#/components/schemas/Rate"
+      required:
+        - packetDelay
+        - jitter
+        - packetLossErrorRate
+
+    Rate:
+      description: Specification of rate
+      type: object
+      properties:
+        value:
+          description: Quantity of rate
+          type: integer
+          example: 10
+          format: int32
+          minimum: 0
+          maximum: 1024
+        unit:
+          $ref: "#/components/schemas/RateUnitEnum"
+
+    Duration:
+      description: Specification of duration
+      type: object
+      properties:
+        value:
+          description: Quantity of duration
+          type: integer
+          example: 12
+          format: int32
+          minimum: 1
+          maximum: 500
+        unit:
+          $ref: "#/components/schemas/TimeUnitEnum"
+
+    TimeUnitEnum:
+      description: Units of time
+      type: string
+      enum:
+        - Days
+        - Hours
+        - Minutes
+        - Seconds
+        - Milliseconds
+        - Microseconds
+        - Nanoseconds
+
+    RateUnitEnum:
+      description: Units of rate
+      type: string
+      enum:
+        - Bps
+        - Kbps
+        - Mbps
+        - Gbps
+        - Tbps
+
+    RetrieveSessionsInput:
+      description: Parameters to retrieve Session Insights sessions by device
+      type: object
+      properties:
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Device"
+
+    RetrieveSessionsOutput:
+      description: Session Insights session information for a given device
+      type: array
+      items:
+        $ref: "#/components/schemas/Session"
+      minItems: 0
+      maxItems: 100
+
+
+  responses:
+    CreateSessionBadRequest400:
+      description: Bad request when creating a session
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 400
+                  code:
+                    enum:
+                      - INVALID_ARGUMENT
+                      - INVALID_CREDENTIAL
+                      - INVALID_TOKEN
+                      - INVALID_SINK
+          examples:
+            GENERIC_400_INVALID_ARGUMENT:
+              description: Invalid Argument. Generic Syntax Exception
+              value:
+                status: 400
+                code: INVALID_ARGUMENT
+                message: Client specified an invalid argument, request body or query param.
+            GENERIC_400_INVALID_CREDENTIAL:
+              value:
+                status: 400
+                code: INVALID_CREDENTIAL
+                message: Only Access token is supported.
+            GENERIC_400_INVALID_TOKEN:
+              value:
+                status: 400
+                code: INVALID_TOKEN
+                message: Only bearer token is supported.
+            GENERIC_400_INVALID_SINK:
+              description: Invalid sink value
+              value:
+                status: 400
+                code: INVALID_SINK
+                message: sink not valid for the specified protocol.

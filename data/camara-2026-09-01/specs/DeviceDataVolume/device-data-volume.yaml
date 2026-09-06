@@ -1,0 +1,355 @@
+openapi: 3.0.3
+info:
+  title: Device Data Volume
+  description: |
+    This API offers detailed insights into the end user's data usage status, either retrieving their remaining data allowance, or an indication that their remaining data allowance is above a specified threshold.
+
+    # Introduction
+
+    API consumers are able to retrieve data usage information for a given mobile subscription, either retrieving the estimated remaining data allowance, or checking if the remaining data allowance is above an API consumer specified threshold.
+
+    # Relevant terms and definitions
+
+    * **Device**: A device refers to any physical entity that can connect to a network and participate in network communication.
+
+        At least one identifier for the device out of four options must be provided: IPv4 address, IPv6 address, Phone number, or Network Access Identifier assigned by the mobile network operator for the device. Where more than one device identifier is provided, only one identifier will be selected by the implementation and this choice indicated to the API consumer in the session creation response.
+
+        Note: Network Access Identifier is defined for future use and will not be supported with this version of the API.
+
+    # API Functionality
+
+    The API exposes two endpoints/operations:
+
+    - The endpoint `POST /retrieve` allows the API consumer to retrieve the remaining data allowance for a specified device
+    - The endpoint `POST /check` allows the API consumer to check if the remaining data allowance for a specified device is above a certain threshold
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    # Identifying the device from the access token
+
+    This API requires the API consumer to identify a device as the subject of the API as follows:
+    - When the API is invoked using a two-legged access token, the subject will be identified from the optional `device` object, which therefore MUST be provided.
+    - When a three-legged access token is used however, this optional identifier MUST NOT be provided, as the subject will be uniquely identified from the access token.
+
+    This approach simplifies API usage for API consumers using a three-legged access token to invoke the API by relying on the information that is associated with the access token and was identified during the authentication process.
+
+    ## Error handling:
+
+    - If the subject cannot be identified from the access token and the optional `device` object is not included in the request, then the server will return an error with the `422 MISSING_IDENTIFIER` error code.
+
+    - If the subject can be identified from the access token and the optional `device` object is also included in the request, then the server will return an error with the `422 UNNECESSARY_IDENTIFIER` error code. This will be the case even if the same device is identified by these two methods, as the server is unable to make this comparison.
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: wip
+  x-camara-commonalities: wip
+
+externalDocs:
+  description: Product documentation at CAMARA
+  url: https://github.com/camaraproject/DeviceDataVolume
+
+servers:
+  - url: "{apiRoot}/device-data-volume/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+
+tags:
+  - name: Device Data Volume
+    description: Operations related to remaining device data volume of a user device
+
+paths:
+  /retrieve:
+    post:
+      tags:
+        - Device Data Volume
+      summary: "Execute device data volume retrieval for a user device"
+      description: Retrieve the estimated remaining data volume for a device.
+      operationId: retrieveDataVolume
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+      security:
+        - openId:
+            - device-data-volume:read
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RetrieveDataVolumeRequest"
+            examples:
+              Retrieve Request:
+                $ref: "#/components/examples/RetrieveRequest"
+              Retrieve Request With 2-legged Access Token:
+                $ref: "#/components/examples/RetrieveRequestWith2-leggedAccessToken"
+      responses:
+        "200":
+          description: Contains information about the remaining device data volume.
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetrieveDataVolumeResponse"
+              examples:
+                Successful Response:
+                  $ref: "#/components/examples/SuccessfulRetrieveResponse"
+                Successful Retrieve Response With Unknown Status Time:
+                  $ref: "#/components/examples/SuccessfulRetrieveResponseWithUnknownStatusTime"
+                Successful Response With Device Disambiguation:
+                  $ref: "#/components/examples/SuccessfulRetrieveResponseWithDeviceDisambiguation"
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+        "422":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic422"
+        "429":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+
+  /check:
+    post:
+      tags:
+        - Device Data Volume
+      summary: "Check if the remaining data allowance is above a specified threshold"
+      description: Check if the remaining data allowance for a specified device is above a specified threshold. If the remaining data allowance is above the threshold, then response property `thresholdExceeded` will be `true`.
+      operationId: checkDataVolume
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+      security:
+        - openId:
+            - device-data-volume:read
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckDataVolumeRequest"
+            examples:
+              Check Request:
+                $ref: "#/components/examples/CheckRequest"
+              Retrieve Request With 2-legged Access Token:
+                $ref: "#/components/examples/CheckRequestWith2-leggedAccessToken"
+      responses:
+        "200":
+          description: Boolean response indicating whether the remaining data allowance exceeds the specified threshold
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckDataVolumeResponse"
+              examples:
+                Successful Response:
+                  $ref: "#/components/examples/SuccessfulCheckResponse"
+                Successful Check Response With Unknown Status Time:
+                  $ref: "#/components/examples/SuccessfulCheckResponseWithUnknownStatusTime"
+                Successful Response With Device Disambiguation:
+                  $ref: "#/components/examples/SuccessfulCheckResponseWithDeviceDisambiguation"
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+        "422":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic422"
+        "429":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+
+components:
+  securitySchemes:
+    openId:
+      $ref: "../common/CAMARA_common.yaml#/components/securitySchemes/openId"
+
+  schemas:
+    LastStatusTime:
+      description: |
+        The last time that the device data volume status was confirmed to be correct by the API provider. It might not be possible to provide the current status because, for example, the device may not be connected to any mobile network.
+        It must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+      type: string
+      format: date-time
+      maxLength: 64
+      nullable: true
+      example: "2018-04-05T17:31:00Z"
+
+    DataAllowance:
+      description: The size of the data allowance, expressed as a quantity of data allowance units
+      type: object
+      required:
+        - value
+        - unit
+      properties:
+        value:
+          description: Quantity of the data allowance
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 1000
+          example: 500
+        unit:
+          description: The units used to express the data allowance, where "MB" is 10^6 bytes and "GB" is 10^9 bytes. Note that these definitions may be different to the definitions used by the mobile network operator for data allowances, but the API consumer will perform any required unit conversion.
+          type: string
+          enum:
+            - MB
+            - GB
+
+    CheckDataVolumeRequest:
+      description: |
+        The request format used to check if the current remaining data allowance is above a specified threshold.
+        The `device` property must not be provided when using a 3-legged access token, following the rules in the description above.
+      type: object
+      required:
+        - dataAllowanceThreshold
+      properties:
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Device"
+        dataAllowanceThreshold:
+          description: The data allowance threshold to check against
+          allOf:
+            - $ref: "#/components/schemas/DataAllowance"
+
+    CheckDataVolumeResponse:
+      description: The response format when checking if the remaining data allowance exceeds a specified threshold
+      type: object
+      required:
+        - lastStatusTime
+        - thresholdExceeded
+      properties:
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+        lastStatusTime:
+          $ref: "#/components/schemas/LastStatusTime"
+        thresholdExceeded:
+          type: boolean
+          description: |
+            Indicates whether the remaining data allowance exceeds the specified threshold
+            - `true`: The remaining data allowance is above the specified threshold
+            - `false`: The remaining data allowance is below the specified threshold
+
+    RetrieveDataVolumeRequest:
+      description: |
+        The request to retrieve the current remaining data volume for the requested device.
+        Device is not required when using a 3-legged access token, following the rules in the description.
+      type: object
+      properties:
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Device"
+
+    RetrieveDataVolumeResponse:
+      description: Represents the remaining data volume of the requested device.
+      type: object
+      required:
+        - lastStatusTime
+        - remainingDataAllowance
+      properties:
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+        lastStatusTime:
+          $ref: "#/components/schemas/LastStatusTime"
+        remainingDataAllowance:
+          description: The data allowance remaining
+          oneOf:
+            - $ref: "#/components/schemas/DataAllowance"
+            - type: string
+              description: Possible data allowance values not expressed as specific values
+              enum:
+                - Unlimited
+
+  examples:
+    RetrieveRequest:
+      description: Request remaining device data allowance using a 3-legged access token
+      value: {}
+    RetrieveRequestWith2-leggedAccessToken:
+      description: Request remaining device data allowance using a 2-legged access token
+      value:
+        device:
+          phoneNumber: "+123456789"
+    SuccessfulRetrieveResponse:
+      description: Successfully retrieve the remaining device data allowance with known status time
+      value:
+        lastStatusTime: "2024-02-20T10:41:38.657Z"
+        remainingDataAllowance: "Unlimited"
+    SuccessfulRetrieveResponseWithUnknownStatusTime:
+      description: Successfully retrieve the remaining device data allowance, but status time of that information is unknown
+      value:
+        lastStatusTime: null
+        remainingDataAllowance:
+          value: 1000
+          unit: "GB"
+    SuccessfulRetrieveResponseWithDeviceDisambiguation:
+      description: Successfully retrieve the remaining device data allowance, but device disambiguation is required
+      value:
+        device:
+          phoneNumber: "+123456789"
+        lastStatusTime: "2024-02-20T10:41:38.657Z"
+        remainingDataAllowance:
+          value: 200
+          unit: "MB"
+    CheckRequest:
+      description: Request remaining device data allowance check using a 3-legged access token
+      value:
+        dataAllowanceThreshold:
+          value: 500
+          unit: "MB"
+    CheckRequestWith2-leggedAccessToken:
+      description: Request remaining device data allowance check using a 2-legged access token
+      value:
+        device:
+          phoneNumber: "+123456789"
+        dataAllowanceThreshold:
+          value: 500
+          unit: "MB"
+    SuccessfulCheckResponse:
+      description: Successfully check the remaining device data allowance with known status time
+      value:
+        lastStatusTime: "2024-02-20T10:41:38.657Z"
+        thresholdExceeded: false
+    SuccessfulCheckResponseWithUnknownStatusTime:
+      description: Successfully check the remaining device data allowance, but status time of that information is unknown
+      value:
+        lastStatusTime: null
+        thresholdExceeded: false
+    SuccessfulCheckResponseWithDeviceDisambiguation:
+      description: Successfully check the remaining device data allowance, but device disambiguation is required
+      value:
+        device:
+          phoneNumber: "+123456789"
+        lastStatusTime: "2024-02-20T10:41:38.657Z"
+        thresholdExceeded: true

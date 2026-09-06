@@ -1,0 +1,394 @@
+---
+openapi: 3.0.3
+info:
+  title: Simple Edge Discovery
+  version: wip
+  x-camara-commonalities: 0.6
+  description: |
+    # Find the closest Edge Cloud Zone
+    ---
+    # Summary
+
+    The Simple Edge Discovery API returns the name of the closest operator Edge
+    Cloud Zone to a particular user device.
+
+    # Purpose
+    Network operators may host multiple Edge Cloud Zones in a
+    given territory. Connecting your application to a server on the closest
+    Edge Cloud Zone means packets travel the shortest distance between
+    endpoints, typically resulting in the lowest round-trip latency. Note, the
+    physical (GPS) location of a user device is not a reliable way to determine
+    the closest Edge Cloud Zone, due to the way operator networks are routed -
+    so the operator will calculate the Edge Cloud Zone with the
+    _shortest network path_ to the network-attached device identified in the API
+    request.
+
+    Once you have the name of the closest Edge Cloud Zone to the user device,
+    you may:
+
+    * connect the application client on the user device to your application
+    server instance on that Edge Cloud Zone. Note: the IP address of that
+    application server instance is not part of the API response, so you will need
+    to map the edge cloud zone name to the server endpoint IP address you received
+    when you deployed the server via the cloud provider's API.
+    * or, if you have no instance on that Edge Cloud Zone, you may wish to
+    deploy one there using the cloud provider's APIs.
+
+    Note: the provider of the Edge Cloud Zone may be an operator, or a cloud
+    provider working in partnership with the operator.
+
+    # Usage
+
+    The API may be called either by an application client hosted on a device
+    attached to the operator network (i.e. phone, tablet), or by a server.
+
+    There is a single API endpoint: `/retrieve-closest-edge-cloud-zone`.
+
+    To call this endpoint, the API consumer must first obtain a valid OAuth2 token
+    from the token endpoint, and pass it as an `Authorization` header in the API
+    request.
+
+    # Identifying the device
+
+    The API returns the closest Edge Cloud Zone to a given device, so that
+    device needs to be identifiable by the network. This can be achieved either
+    by passing one or more device identifiers in the request, or, from the
+    three-legged access token where implemented by the operator.
+
+    ## Passing device identifier(s) in the request
+    At least one of the following device identifiers must be provided, unless
+    using a 3-legged access token (see section below describing this):
+     - Phone number (i.e. MSISDN)
+     - Network Access Identifier assigned by the mobile network operator for the device
+     - IPv6 address
+     - IPv4 address
+
+
+    NOTE1: the network operator might support only a subset of these options.
+    The API invoker can provide multiple identifiers to be compatible across
+    different network operators. In this case the identifiers MUST belong to the
+    same device.
+
+    NOTE2: for this Commonalities release,  we are enforcing that the
+    `networkAccessIdentifier` is only part of the schema for future-proofing, and
+    CAMARA does not currently allow its use. After the CAMARA meta-release work
+    is concluded and the relevant issues are resolved, its use will need to be
+    explicitly documented in the guidelines.
+
+    # Responses
+
+    ## Success
+
+    A JSON object is returned containing an array with a single member object.
+    This contains identifiers for the closest Edge Cloud Zone. The HTTP status
+    code will be`200 OK`. An example response:
+
+    ```
+    [
+      {
+        "edgeCloudZoneId": "4gt555-6457-7890-d4he-1dc79f44gb66",
+        "edgeCloudZoneName": "example zone name",
+        "edgeCloudProvider": "example zone provider"
+      }
+    ]
+    ```
+    * `edgeCloudZoneId` is a UUID for the Edge Cloud Zone.
+    * `edgeCloudZoneName` is the common name of the closest Edge Cloud Zone to
+    the user device.
+    * `edgeCloudProvider` is the name of the operator or cloud provider of
+    the Edge Cloud Zone.
+
+    ## Errors
+
+    If the authentication token is not valid, a `401 UNAUTHENTICATED` error is
+    returned.
+
+    If the mobile subscription parameters contain a formatting error, a `400
+    INVALID_ARGUMENT` error is returned.
+
+    If the mobile subscription cannot be identified from the provided
+    parameters, a `404 NOT_FOUND` error is returned.
+
+    Any more general service failures will result in an error in the `5xx`range
+    with an explanation.
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how
+    an API consumer requests an access token. Please refer to Identity and Consent
+    Management (https://github.com/camaraproject/IdentityAndConsentManagement/)
+    for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the
+    onboarding process, happening between the API consumer and the API provider,
+    taking into account the declared purpose for accessing the API, whilst also
+    being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise
+    their rights through mechanisms such as opt-in and/or opt-out, the use of
+    three-legged access tokens is mandatory. This ensures that the API remains
+    in compliance with privacy regulations, upholding the principles of
+    transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    # Identifying the device from the access token
+
+    This API requires the API consumer to identify a device as the subject of
+    the API as follows:
+
+    - When the API is invoked using a two-legged access token, the subject will be
+    identified from the optional `device` object, which therefore MUST be provided.
+    - When a three-legged access token is used however, this optional identifier
+    MUST NOT be provided, as the subject will be uniquely identified from the access
+    token.
+
+    This approach simplifies API usage for API consumers using a three-legged access
+    token to invoke the API by relying on the information that is associated with the
+    access token and was identified during the authentication process.
+
+    ## Error handling:
+
+    - If the subject cannot be identified from the access token and the optional `device`
+    object is not included in the request, then the server will return an error with the
+    `422 MISSING_IDENTIFIER` error code.
+
+    - If the subject can be identified from the access token and the optional `device`
+    object is also included in the request, then the server will return an error with the
+    `422 UNNECESSARY_IDENTIFIER` error code. This will be the case even if the same device
+    is identified by these two methods, as the server is unable to make this comparison.
+
+    # Multi-SIM scenario handling
+
+    In scenarios where a main phone number is shared between multiple devices, each of which
+    has its own individual "secondary" phone number (e.g. connectivity plans that let you
+    share your airtime and data allowances with a smartwatch or eSIM-enabled tablet), the
+    phone number passed by the API consumer will be treated as the secondary phone number,
+    and hence the closest edge cloud zone returned will be that of the single device
+    associated with that phone number (e.g. smartphone, smartwatch, or eSIM-enabled tablet).
+
+    In such scenarios, the "primary" device is usually allocated the same main and
+    secondary phone numbers, and hence providing the main phone number to the API will
+    return the closest edge cloud zone of the primary device (usually the smartphone)
+    and not any associated devices.
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared
+    in this specification, at any nesting level. Unknown properties result in a
+    `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+    ---
+
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+externalDocs:
+  description: Product documentation at CAMARA.
+  url: https://github.com/camaraproject/EdgeCloud
+
+servers:
+  - url: "{apiRoot}/simple-edge-discovery/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+
+tags:
+  - name: Discovery
+    description: |
+      Find the closest Edge Cloud Zone to the user device.
+
+paths:
+  /retrieve-closest-edge-cloud-zone:
+    post:
+      security:
+        - openId:
+            - simple-edge-discovery:read
+      operationId: readClosestEdgeCloudZone
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+      requestBody:
+        description: Parameters to create a new session
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestBody"
+            examples:
+              Identify Device By 3-Legged Access Token:
+                $ref: '#/components/examples/IdentifyDeviceBy3LeggedToken'
+              Identify Device By Phone Number:
+                $ref: '#/components/examples/IdentifyDeviceByPhoneNumber'
+              Identify Device By IP Address:
+                $ref: '#/components/examples/IdentifyDeviceByIPAddress'
+              Identify Device By Multiple Identifiers:
+                $ref: '#/components/examples/IdentifyDeviceByMultipleIdentifiers'
+
+      responses:
+        "200":
+          $ref: "#/components/responses/200Success"
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+        "422":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic422"
+        "429":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+
+      tags:
+        - Discovery
+      summary: |
+        Returns the name of the Edge Cloud Zone closest to user device
+        identified in the request.
+      description: |
+        On receiving this request, the network will return the name
+        of the Edge Cloud Zone with the shortest network path to the end user
+        device identified in the request.
+
+components:
+  securitySchemes:
+    openId:
+      $ref: "../common/CAMARA_common.yaml#/components/securitySchemes/openId"
+
+  schemas:
+    EdgeCloudZone:
+      type: object
+      description: |
+        An Edge Cloud Zone, uniquely identified by a combination
+        of the value of the Edge Resource Name object and the value of the
+        Provider object (the name of the cloud provider or operator hosting that
+        edge cloud zone).
+      properties:
+        edgeCloudZoneId:
+          $ref: "#/components/schemas/EdgeCloudZoneId"
+        edgeCloudZoneName:
+          $ref: "#/components/schemas/EdgeCloudZoneName"
+        edgeCloudProvider:
+          $ref: "#/components/schemas/EdgeCloudProvider"
+      required:
+        - edgeCloudZoneId
+        - edgeCloudZoneName
+        - edgeCloudProvider
+
+    EdgeCloudZoneId:
+      description: |
+        Operator-issued UUID for the Edge Cloud Zone.
+      type: string
+      format: uuid
+      maxLength: 128
+      additionalProperties: false
+
+    EdgeCloudZoneName:
+      description: |
+        Edge Cloud Zone Name - the common name for the Edge Cloud Zone.
+      type: string
+      maxLength: 64
+      additionalProperties: false
+
+    EdgeCloudProvider:
+      description: |
+        The company name of the Edge Cloud Zone provider.
+      type: string
+      maxLength: 64
+
+    RequestBody:
+      description: Common request body to allow optional Device object to be passed
+      type: object
+      properties:
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Device"
+
+    DeviceResponseBody:
+      type: object
+      description: |
+        The optional device identifier to include in the response
+      properties:
+        device:
+          description: |
+            The device identifier that was used to fulfil the request.
+            If this property is not present then the device
+            identifier sent in the request was used.
+          allOf:
+            - $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+            - example: {"phoneNumber": "+123456789"}
+
+  responses:
+    200Success:
+      description: 200 OK
+      headers:
+        x-correlator:
+          $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            required:
+              - edgeCloudZoneId
+              - edgeCloudZoneName
+              - edgeCloudProvider
+            allOf:
+              - $ref: "#/components/schemas/EdgeCloudZone"
+              - $ref: "#/components/schemas/DeviceResponseBody"
+          examples:
+            Closest Edge Cloud details:
+              description: The details of the closest Edge Cloud Zone
+              value:
+                edgeCloudZoneId: "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
+                edgeCloudZoneName: "UK-SOUTH"
+                edgeCloudProvider: "Example Provider"
+            Closest Edge Cloud plus device identifier:
+              description: The details of the closest Edge Cloud Zone
+                and the device identifier used to fulfill the request
+              value:
+                edgeCloudZoneId: "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
+                edgeCloudZoneName: "UK-SOUTH"
+                edgeCloudProvider: "Example Provider"
+                device:
+                  phoneNumber: "+123456789"
+
+  examples:
+    IdentifyDeviceBy3LeggedToken:
+      description: Empty JSON when device is identified by access token
+      value:
+        {}
+
+    IdentifyDeviceByPhoneNumber:
+      description: Identifying device by phone number
+      value:
+        device:
+          phoneNumber: "+123456789"
+
+    IdentifyDeviceByIPAddress:
+      description: Identifying device by IP address
+      value:
+        device:
+          ipv4Address:
+            publicAddress: "84.125.93.10"
+            publicPort: 59765
+
+    IdentifyDeviceByMultipleIdentifiers:
+      description: Identifying device by multiple device identifiers
+      value:
+        device:
+          phoneNumber: "+123456789"
+          ipv4Address:
+            publicAddress: "84.125.93.10"
+            publicPort: 59765
+          networkAccessIdentifier: "123456789@domain.com"

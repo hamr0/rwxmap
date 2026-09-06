@@ -1,0 +1,236 @@
+openapi: 3.0.3
+info:
+  title: Connected Network Type
+  description: |
+    This API provides the customer with the ability to query to which Mobile Communication Technology it is connected to.
+
+    # Introduction
+
+    ## Connected Network Type
+
+    The API consumer is able to query the device's connected network type. The API provider can determine this in various ways. For example, the network type can be inferred from the specific radio cell to which the device is connected, as radio cells only support a single technology. It is important to note that the API does not query the device directly.
+
+    # Relevant terms and definitions
+
+    * **Device**: A device refers to any physical entity that can connect to a network and participate in network communication.
+
+        At least one identifier for the device (user equipment) out of four options must be provided: IPv4 address, IPv6 address, Phone number, or Network Access Identifier assigned by the mobile network operator for the device. Where more than one device identifier is provided, only one identifier will be selected by the implementation and this choice indicated to the API consumer in the session creation response.
+
+        Note: Network Access Identifier is defined for future use and will not be supported with this version of the API.
+
+    * **Connected Network Type** : This is an identifier for the mobile technology of the network that the device is connected to (e.g. 4G, 5G, etc). It is the same as is displayed on the device (e.g. on mobile phones) to the end user. When the device moves across different areas of the network, the technology may change. As each technology is different, network capabilities may differ and MUST be checked with the API provider.
+      - `2G`, if device is connected to a 2G network technology (alternative indicators such as "G" or "E" may be displayed on the device)
+      - `3G`, if device is connected to a 3G network technology (alternative indicators such as "H" or "H+" may be displayed on the device)
+      - `4G`, if device is connected to a 4G network technology (alternative indicators such as "LTE" or "LTE+" may be displayed on the device)
+      - `5G`, if device is connected to a 5G network technology (this includes both 5G-SA and 5G-NSA networks)
+      - `UNKNOWN` if the connection technology can not be determined by the API provider (for example, WiFi or satellite technology, or not connected to any network)
+
+    * **Last Status Time** : The time when the status of the Connected Network Type being reported by the API provider was last confirmed to be correct. An older status retrieved from historical data is more likely to now be incorrect. If the API provider has no information as to when the the Connected Network Type being reported was last confirmed correct, a `null` value will be returned.
+
+    # API Functionality
+
+    The API exposes following capabilities:
+
+    ## Connected Network Type
+
+    The endpoint `POST /retrieve` allows to get connected Network Type.
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    <!-- CAMARA:MANDATORY:identifying-device-from-access-token:BEGIN -->
+
+    # Identifying the device from the access token
+
+    This API requires the API consumer to identify a device as the subject of the API as follows:
+    - When the API is invoked using a two-legged access token, the subject will be identified from the optional `device` object, which therefore MUST be provided.
+    - When a three-legged access token is used however, this optional identifier MUST NOT be provided, as the subject will be uniquely identified from the access token.
+
+    This approach simplifies API usage for API consumers using a three-legged access token to invoke the API by relying on the information that is associated with the access token and was identified during the authentication process.
+
+    ## Error handling:
+
+    - If the subject cannot be identified from the access token and the optional `device` object is not included in the request, then the server will return an error with the `422 MISSING_IDENTIFIER` error code.
+
+    - If the subject can be identified from the access token and the optional `device` object is also included in the request, then the server will return an error with the `422 UNNECESSARY_IDENTIFIER` error code. This will be the case even if the same device is identified by these two methods, as the server is unable to make this comparison.
+    <!-- CAMARA:MANDATORY:identifying-device-from-access-token:END -->
+
+    # Multi-SIM scenario handling
+
+    In multi-SIM scenarios where more than one mobile device is associated with a phone number (e.g. a smartphone with an associated smartwatch), it might not be possible to uniquely identify from that phone number the device for which the connected network type should be returned. If the phone number is used as the device identifier when querying in a multi-SIM scenario, the API may:
+    - respond with an error, or
+    - return a common connected network type for the multi-SIM group as a whole, or
+    - return the connected network type for a single device in the multi-SIM group, which may not be the intended device.
+
+    Possible solutions in such a scenario include:
+    - Using the authorisation code flow to obtain an access token, which will automatically identify the intended device
+    - Identifying the intended device from a unique identifier for that device, such as its source IP address and port
+    - Check with the SIM provider whether a unique "secondary" phone number is already associated with each device, and use the secondary phone number to identify the intended device if available.
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: wip
+  x-camara-commonalities: wip
+
+externalDocs:
+  description: Product documentation at CAMARA
+  url: https://github.com/camaraproject/ConnectedNetworkType
+
+servers:
+  - url: "{apiRoot}/connected-network-type/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+
+tags:
+  - name: Connected Network Type
+    description: Operations to get the network type device is connected to
+
+paths:
+  /retrieve:
+    post:
+      tags:
+        - Connected Network Type
+      summary: "Get the connected network type"
+      description: Get the connected network type to which the user device is connected
+      operationId: getConnectedNetworkType
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+      security:
+        - openId:
+            - connected-network-type:read
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectedNetworkTypeRequest"
+        required: true
+      responses:
+        "200":
+          description: Contains connected network type
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectedNetworkTypeResponse"
+              examples:
+                Connected To 4G:
+                  value:
+                    lastStatusTime: "2024-02-20T10:41:38.657Z"
+                    connectedNetworkType: 4G
+                Connected To 4G With Device Disambiguation:
+                  value:
+                    device:
+                      phoneNumber: "+123456789"
+                    lastStatusTime: "2024-02-20T10:41:38.657Z"
+                    connectedNetworkType: 4G
+                Connected To 5G:
+                  value:
+                    lastStatusTime: "2024-02-20T10:41:38.657Z"
+                    connectedNetworkType: 5G
+                Connectivity Unknown:
+                  description: Device is not connected to its home mobile network. It may be connected to a different network (e.g. roaming or a WiFi network) or not connected at all.
+                  value:
+                    lastStatusTime: "2024-02-20T10:41:38.657Z"
+                    connectedNetworkType: UNKNOWN
+                Last Status Update Time Unknown:
+                  value:
+                    lastStatusTime: null
+                    connectedNetworkType: 4G
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+        "422":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic422"
+        "429":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+components:
+  securitySchemes:
+    openId:
+      $ref: "../common/CAMARA_common.yaml#/components/securitySchemes/openId"
+
+  schemas:
+    LastStatusTime:
+      description: |
+        The last time that the status of the `connectedNetworkType` being reported was confirmed to be correct by the API provider. The status should still be valid, but the API provider is not able to positively confirm this.
+
+        It must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+
+        If the API provider has no information as to when the reported `connectedNetworkType` was confirmed correct, a `null` value will be returned.
+      type: string
+      format: date-time
+      maxLength: 64
+      nullable: true
+      example: "2018-04-05T17:31:00Z"
+
+    ConnectedNetworkTypeResponse:
+      description: Definition of the data that can be returned in the response body
+      type: object
+      required:
+        - lastStatusTime
+        - connectedNetworkType
+      properties:
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+        lastStatusTime:
+          $ref: "#/components/schemas/LastStatusTime"
+        connectedNetworkType:
+          $ref: "#/components/schemas/ConnectedNetworkType"
+
+    ConnectedNetworkType:
+      description: |
+        * UNKNOWN: Used when connection [technology] can not be determined
+        * 2G: 2nd Generation Mobile Communication Technology
+        * 3G: 3rd Generation Mobile Communication Technology
+        * 4G: 4th Generation Mobile Communication Technology
+        * 5G: 5th Generation Mobile Communication Technology
+
+      type: string
+      enum:
+        - 2G
+        - 3G
+        - 4G
+        - 5G
+        - UNKNOWN
+
+    ConnectedNetworkTypeRequest:
+      description: Definition of data that can be included in the request body
+      type: object
+      properties:
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Device"

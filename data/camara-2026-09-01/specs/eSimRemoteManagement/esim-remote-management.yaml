@@ -1,0 +1,879 @@
+openapi: 3.0.3
+info:
+  title: eSIM Remote Management
+  description: |
+    Provide eSIM-based remote management capability, allowing users to remotely manage the status of profiles on the device's eUICC and complete remote operations such as downloading, activating, de-activating or deleting.
+
+    # Introduction
+
+    The eIM Platform API provides a comprehensive, secure, and standardized interface for device manufacturers (OEMs) and ecosystem partners to remotely manage eSIM profiles on connected devices. This API empowers you to offer seamless connectivity lifecycle management directly within your device ecosystem.
+
+    # API Functionality
+
+    The API provides the following functionality:
+      - Profile Download & Installation: Securely provision and download new eSIM profiles to devices, based on user subscription, geographic location, or specific business triggers.
+      - Profile Inventory Query: Retrieve a detailed list of all eSIM profiles currently stored on a device, including their status (e.g., enabled, disabled, pending download), associated ICCID/EID, and service provider information.
+      - Profile Lifecycle Management: Execute precise control over installed profiles:
+        - Activation/Enable: Switch a downloaded profile to the active state for live connectivity.
+        - Deactivation/Disable: Temporarily disable a profile without deleting it from the device.
+        - Deletion: Permanently remove an unused or obsolete profile from the device's eSIM chip, freeing up memory.
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+  version: wip
+  x-camara-commonalities: 0.8.0-rc.2
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+externalDocs:
+  description: Project documentation at CAMARA
+  url: https://github.com/camaraproject/eSimRemoteManagement
+servers:
+  - url: "{apiRoot}/esim-remote-management/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+tags:
+  - name: ESIM Remote Management
+    description: API operations for eSIM Remote Management
+paths:
+  /profile/result/query:
+    post:
+      security:
+        - openId:
+            - esim-remote-management:query
+      tags:
+        - ESIM Remote Management
+      summary: Query profile operation result
+      description: |
+        Query the result of an asynchronous profile operation (download, enable, disable, delete) using the task ID returned from a previous operation request.
+      parameters:
+        - $ref: '#/components/parameters/x-correlator'
+      operationId: profileResultQuery
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BaseCmpReqProfileResultQueryReq'
+        required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            x-correlator:
+              $ref: '#/components/headers/x-correlator'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseCmpRespProfileResultQueryResp'
+        '400':
+          $ref: '#/components/responses/Generic400'
+        '401':
+          $ref: '#/components/responses/Generic401'
+        '403':
+          $ref: '#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Generic404'
+        '500':
+          $ref: '#/components/responses/Generic500'
+        '503':
+          $ref: '#/components/responses/Generic503'
+  /profile/oper:
+    post:
+      security:
+        - openId:
+            - esim-remote-management:oper
+      tags:
+        - ESIM Remote Management
+      summary: Perform profile operation
+      description: |
+        Perform lifecycle operations on an eSIM profile including enable, disable, or delete. This is an asynchronous operation that returns a task ID for status tracking.
+      parameters:
+        - $ref: '#/components/parameters/x-correlator'
+      operationId: profileOperation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BaseCmpReqProfileOperReq'
+        required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            x-correlator:
+              $ref: '#/components/headers/x-correlator'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseCmpRespProfileOperResp'
+        '400':
+          $ref: '#/components/responses/Generic400'
+        '401':
+          $ref: '#/components/responses/Generic401'
+        '403':
+          $ref: '#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Generic404'
+        '500':
+          $ref: '#/components/responses/Generic500'
+        '503':
+          $ref: '#/components/responses/Generic503'
+  /profile/downloaded-list:
+    post:
+      security:
+        - openId:
+            - esim-remote-management:downloadedlist
+      tags:
+        - ESIM Remote Management
+      summary: Query downloaded profile list
+      description: |
+        Retrieve a list of all eSIM profiles currently downloaded on the device, including their status (enabled/disabled), ICCID, and other metadata.
+      parameters:
+        - $ref: '#/components/parameters/x-correlator'
+      operationId: profileList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BaseCmpReqEidProfileListReq'
+        required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            x-correlator:
+              $ref: '#/components/headers/x-correlator'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseCmpRespEidProfileListResp'
+        '400':
+          $ref: '#/components/responses/Generic400'
+        '401':
+          $ref: '#/components/responses/Generic401'
+        '403':
+          $ref: '#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Generic404'
+        '500':
+          $ref: '#/components/responses/Generic500'
+        '503':
+          $ref: '#/components/responses/Generic503'
+  /profile/download:
+    post:
+      security:
+        - openId:
+            - esim-remote-management:download
+      tags:
+        - ESIM Remote Management
+      summary: Download profile
+      description: |
+        Download and optionally install a new eSIM profile to the device. This is an asynchronous operation that returns a task ID for status tracking.
+      parameters:
+        - $ref: '#/components/parameters/x-correlator'
+      operationId: profileDownload
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BaseCmpReqProfileDownloadReq'
+        required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            x-correlator:
+              $ref: '#/components/headers/x-correlator'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseCmpRespProfileDownloadResp'
+        '400':
+          $ref: '#/components/responses/Generic400'
+        '401':
+          $ref: '#/components/responses/Generic401'
+        '403':
+          $ref: '#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Generic404'
+        '500':
+          $ref: '#/components/responses/Generic500'
+        '503':
+          $ref: '#/components/responses/Generic503'
+components:
+  securitySchemes:
+    openId:
+      type: openIdConnect
+      description: to support Consent Management
+      openIdConnectUrl: https://example.com/.well-known/openid-configuration
+  parameters:
+    x-correlator:
+      name: x-correlator
+      in: header
+      description: Correlation id for the different services
+      schema:
+        $ref: '#/components/schemas/XCorrelator'
+  headers:
+    x-correlator:
+      description: Correlation id for the different services
+      schema:
+        $ref: '#/components/schemas/XCorrelator'
+  schemas:
+    BaseCmpReqProfileResultQueryReq:
+      type: object
+      description: Request body for querying profile operation result
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          maxLength: 64
+          description: Request timestamp must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+        sequenceNum:
+          type: string
+          pattern: "^[a-zA-Z0-9_\\-]{1,64}$"
+          maxLength: 64
+          description: Sequence number for request tracking
+        clientId:
+          type: string
+          pattern: "^[a-zA-Z0-9_\\-]{1,128}$"
+          maxLength: 128
+          description: Client identifier
+        data:
+          $ref: '#/components/schemas/ProfileResultQueryReq'
+    ProfileResultQueryReq:
+      type: object
+      description: Data payload for profile result query request
+      properties:
+        taskId:
+          type: string
+          pattern: "^[a-zA-Z0-9\\-]{1,64}$"
+          maxLength: 64
+          description: Task identifier returned from asynchronous operation
+    BaseCmpRespProfileResultQueryResp:
+      type: object
+      description: Response body for profile result query
+      properties:
+        resultCode:
+          type: string
+          pattern: "^B[0-9]{6}$"
+          maxLength: 32
+          description: 'B100000 - success, other - fail'
+        resultDesc:
+          type: string
+          pattern: "^[\\s\\S]{0,256}$"
+          maxLength: 256
+          description: Result description message
+        sequenceNum:
+          type: string
+          pattern: "^[a-zA-Z0-9_\\-]{1,64}$"
+          maxLength: 64
+          description: Sequence number for response tracking
+        data:
+          $ref: '#/components/schemas/ProfileResultQueryResp'
+    ProfileResultQueryResp:
+      type: object
+      description: Data payload for profile result query response
+      properties:
+        taskId:
+          type: string
+          pattern: "^[a-zA-Z0-9\\-]{1,64}$"
+          maxLength: 64
+          description: Task identifier
+        imei:
+          type: string
+          pattern: "^[0-9]{15}$"
+          maxLength: 32
+          description: Device IMEI number
+        iccid:
+          type: string
+          pattern: "^[0-9]{19,20}$"
+          maxLength: 32
+          description: Card ICCID number
+        operResult:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2
+          description: 'Operation profile result: 0 - executing, 1 - Operation success, 2 - Operation fail'
+          enum: [0, 1, 2]
+        eId:
+          type: string
+          pattern: "^[A-Fa-f0-9]{32}$"
+          maxLength: 64
+          description: Device EID (eUICC Identifier)
+        resultMsg:
+          type: string
+          pattern: "^[\\s\\S]{0,512}$"
+          maxLength: 512
+          description: Detailed result message
+    BaseCmpReqProfileOperReq:
+      type: object
+      description: Request body for profile operation
+      properties:
+        protocol:
+          $ref: '#/components/schemas/Protocol'
+        sink:
+          type: string
+          pattern: "^https?://[a-zA-Z0-9\\-._~:/?#\\[\\]@!$&'()*+,;=]{1,256}$"
+          maxLength: 256
+          description: Callback address (sink address for notification reception)
+        types:
+          type: array
+          maxItems: 10
+          items:
+            type: string
+            pattern: "^[a-zA-Z0-9_\\-]{1,64}$"
+            maxLength: 64
+            description: Event type identifier
+          description: List of subscribed event types
+        config:
+          $ref: '#/components/schemas/ProfileOperReq'
+    ProfileOperReq:
+      type: object
+      description: Configuration for profile operation request
+      properties:
+        subscriptionDetail:
+          type: object
+          description: Subscription details for the profile operation
+          properties:
+            eId:
+              type: string
+              pattern: "^[A-Fa-f0-9]{32}$"
+              maxLength: 64
+              description: Device EID
+            imei:
+              type: string
+              pattern: "^[0-9]{15}$"
+              maxLength: 32
+              description: Device IMEI number
+            iccid:
+              type: string
+              pattern: "^[0-9]{19,20}$"
+              maxLength: 32
+              description: Card ICCID number
+            optType:
+              type: integer
+              format: int32
+              minimum: 1
+              maximum: 3
+              description: Operation type 1 Enable, 2 Disable, 3 Delete
+        initialEvent:
+          type: boolean
+          description: Whether to send initial event
+        subscriptionMaxEvents:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: Maximum number of subscription events
+        subscriptionExpireTime:
+          type: string
+          format: date-time
+          maxLength: 32
+          description: Request timestamp must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+    BaseCmpRespProfileOperResp:
+      type: object
+      description: Response body for profile operation
+      properties:
+        code:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 999999
+          description: Response code
+        message:
+          type: string
+          pattern: "^[\\s\\S]{0,256}$"
+          maxLength: 256
+          description: Response message
+        config:
+          $ref: '#/components/schemas/ProfileOperResp'
+    ProfileOperResp:
+      type: object
+      description: Configuration for profile operation response
+      properties:
+        subscriptionDetail:
+          type: object
+          description: Subscription details for the profile operation
+          properties:
+            eId:
+              type: string
+              pattern: "^[A-Fa-f0-9]{32}$"
+              maxLength: 64
+              description: Device EID
+            imei:
+              type: string
+              pattern: "^[0-9]{15}$"
+              maxLength: 32
+              description: Device IMEI number
+            iccid:
+              type: string
+              pattern: "^[0-9]{19,20}$"
+              maxLength: 32
+              description: Card ICCID number
+            optType:
+              type: integer
+              format: int32
+              minimum: 1
+              maximum: 3
+              description: Operation type 1 Enable, 2 Disable, 3 Delete
+        initialEvent:
+          type: boolean
+          description: Whether to send initial event
+        subscriptionMaxEvents:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: Maximum number of subscription events
+        subscriptionExpireTime:
+          type: string
+          format: date-time
+          maxLength: 32
+          description: Request timestamp must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+    BaseCmpReqEidProfileListReq:
+      type: object
+      description: Request body for querying profile list
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          maxLength: 64
+          description: Request timestamp must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+        sequenceNum:
+          type: string
+          pattern: "^[a-zA-Z0-9_\\-]{1,64}$"
+          maxLength: 64
+          description: Sequence number for request tracking
+        clientId:
+          type: string
+          pattern: "^[a-zA-Z0-9_\\-]{1,128}$"
+          maxLength: 128
+          description: Client identifier
+        data:
+          $ref: '#/components/schemas/EidProfileListReq'
+    EidProfileListReq:
+      type: object
+      description: Data payload for profile list request
+      properties:
+        eId:
+          type: string
+          pattern: "^[A-Fa-f0-9]{32}$"
+          maxLength: 64
+          description: Device EID to query profiles for
+    BaseCmpRespEidProfileListResp:
+      type: object
+      description: Response body for profile list query
+      properties:
+        resultCode:
+          type: string
+          pattern: "^B[0-9]{6}$"
+          maxLength: 32
+          description: 'B100000 - success, other - fail'
+        resultDesc:
+          type: string
+          pattern: "^[\\s\\S]{0,256}$"
+          maxLength: 256
+          description: Result description message
+        sequenceNum:
+          type: string
+          pattern: "^[a-zA-Z0-9_\\-]{1,64}$"
+          maxLength: 64
+          description: Sequence number for response tracking
+        data:
+          $ref: '#/components/schemas/EidProfileListResp'
+    EidProfileListResp:
+      type: object
+      description: Data payload for profile list response
+      properties:
+        imei:
+          type: string
+          pattern: "^[0-9]{15}$"
+          maxLength: 32
+          description: Device IMEI number
+        profiles:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ProfileInfo'
+          description: List of profiles on the device
+        eId:
+          type: string
+          pattern: "^[A-Fa-f0-9]{32}$"
+          maxLength: 64
+          description: Device EID
+    ProfileInfo:
+      type: object
+      description: Information about a single profile
+      properties:
+        iccid:
+          type: string
+          pattern: "^[0-9]{19,20}$"
+          maxLength: 32
+          description: Card ICCID number
+        enableStatus:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 1
+          description: 'Profile enable status: 0 - disabled, 1 - enabled'
+    BaseCmpReqProfileDownloadReq:
+      type: object
+      description: Request body for profile download
+      properties:
+        protocol:
+          $ref: '#/components/schemas/Protocol'
+        sink:
+          type: string
+          pattern: "^https?://[a-zA-Z0-9\\-._~:/?#\\[\\]@!$&'()*+,;=]{1,256}$"
+          maxLength: 256
+          description: Callback address (sink address for notification reception)
+        types:
+          type: array
+          maxItems: 10
+          items:
+            type: string
+            pattern: "^[a-zA-Z0-9_\\-]{1,64}$"
+            maxLength: 64
+            description: Event type identifier
+          description: List of subscribed event types
+        config:
+          $ref: '#/components/schemas/ProfileDownloadReq'
+    ProfileDownloadReq:
+      type: object
+      description: Configuration for profile download request
+      properties:
+        subscriptionDetail:
+          type: object
+          description: Subscription details for profile download
+          properties:
+            eId:
+              type: string
+              pattern: "^[A-Fa-f0-9]{32}$"
+              maxLength: 64
+              description: Device EID
+            imei:
+              type: string
+              pattern: "^[0-9]{15}$"
+              maxLength: 32
+              description: Device IMEI number
+            iccid:
+              type: string
+              pattern: "^[0-9]{19,20}$"
+              maxLength: 32
+              description: Card ICCID number
+            autoEnableType:
+              type: integer
+              format: int32
+              minimum: 1
+              maximum: 1
+              description: 'Download and activate option: 1 - Download and enable'
+        initialEvent:
+          type: boolean
+          description: Whether to send initial event
+        subscriptionMaxEvents:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: Maximum number of subscription events
+        subscriptionExpireTime:
+          type: string
+          format: date-time
+          maxLength: 32
+          description: Request timestamp must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+    BaseCmpRespProfileDownloadResp:
+      type: object
+      description: Response body for profile download
+      properties:
+        code:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 999999
+          description: Response code
+        message:
+          type: string
+          pattern: "^[\\s\\S]{0,256}$"
+          maxLength: 256
+          description: Response message
+        config:
+          $ref: '#/components/schemas/ProfileDownloadResp'
+    ProfileDownloadResp:
+      type: object
+      description: Configuration for profile download response
+      properties:
+        subscriptionDetail:
+          type: object
+          description: Subscription details for profile download
+          properties:
+            eId:
+              type: string
+              pattern: "^[A-Fa-f0-9]{32}$"
+              maxLength: 64
+              description: Device EID
+            imei:
+              type: string
+              pattern: "^[0-9]{15}$"
+              maxLength: 32
+              description: Device IMEI number
+            iccid:
+              type: string
+              pattern: "^[0-9]{19,20}$"
+              maxLength: 32
+              description: Card ICCID number
+            autoEnableType:
+              type: integer
+              format: int32
+              minimum: 1
+              maximum: 1
+              description: 'Download and activate option: 1 - Download and enable'
+        initialEvent:
+          type: boolean
+          description: Whether to send initial event
+        subscriptionMaxEvents:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: Maximum number of subscription events
+        subscriptionExpireTime:
+          type: string
+          format: date-time
+          maxLength: 32
+          description: Request timestamp must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+    XCorrelator:
+      type: string
+      maxLength: 256
+      description: Correlator string, UUID format recommended but any string matching the pattern can be used
+      pattern: "^[a-zA-Z0-9_\\-:;./<>{}]{0,256}$"
+      example: "b4333c46-49c0-4f62-80d7-f0ef930f1c46"
+    Protocol:
+      type: string
+      enum:
+        - HTTP
+      maxLength: 10
+      description: Identifier of a delivery protocol. Only HTTP is allowed for now
+      example: "HTTP"
+    ErrorInfo:
+      type: object
+      description: A structured error response providing details about a failed request, including the HTTP status code, an error code, and a human-readable message
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: integer
+          format: int32
+          minimum: 100
+          maximum: 599
+          description: HTTP response status code
+        code:
+          type: string
+          pattern: "^[A-Z_]{1,96}$"
+          maxLength: 96
+          description: A human-readable code to describe the error
+        message:
+          type: string
+          pattern: "^[\\s\\S]{0,256}$"
+          maxLength: 512
+          description: A human-readable description of what the event represents
+  responses:
+    Generic400:
+      description: Bad Request
+      headers:
+        x-correlator:
+          $ref: '#/components/headers/x-correlator'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ErrorInfo'
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 400
+                  code:
+                    enum:
+                      - INVALID_ARGUMENT
+                      - OUT_OF_RANGE
+          examples:
+            GENERIC_400_INVALID_ARGUMENT:
+              description: Invalid Argument. Generic Syntax Exception
+              value:
+                status: 400
+                code: INVALID_ARGUMENT
+                message: Client specified an invalid argument, request body or query param.
+            GENERIC_400_OUT_OF_RANGE:
+              description: Out of Range. Specific Syntax Exception used when a given field has a pre-defined range or a invalid filter criteria combination is requested
+              value:
+                status: 400
+                code: OUT_OF_RANGE
+                message: Client specified an invalid range.
+    Generic401:
+      description: Unauthorized
+      headers:
+        x-correlator:
+          $ref: '#/components/headers/x-correlator'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ErrorInfo'
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 401
+                  code:
+                    enum:
+                      - UNAUTHENTICATED
+          examples:
+            GENERIC_401_UNAUTHENTICATED:
+              description: Request cannot be authenticated and a new authentication is required
+              value:
+                status: 401
+                code: UNAUTHENTICATED
+                message: Request not authenticated due to missing, invalid, or expired credentials. A new authentication is required.
+    Generic403:
+      description: Forbidden
+      headers:
+        x-correlator:
+          $ref: '#/components/headers/x-correlator'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ErrorInfo'
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 403
+                  code:
+                    enum:
+                      - PERMISSION_DENIED
+                      - INVALID_TOKEN_CONTEXT
+          examples:
+            GENERIC_403_PERMISSION_DENIED:
+              description: Permission denied. OAuth2 token access does not have the required scope or when the user fails operational security
+              value:
+                status: 403
+                code: PERMISSION_DENIED
+                message: Client does not have sufficient permissions to perform this action.
+            GENERIC_403_INVALID_TOKEN_CONTEXT:
+              description: Reflect some inconsistency between information in some field of the API and the related OAuth2 Token
+              value:
+                status: 403
+                code: INVALID_TOKEN_CONTEXT
+                message: Request body is not consistent with access token.
+    Generic404:
+      description: Not found
+      headers:
+        x-correlator:
+          $ref: '#/components/headers/x-correlator'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ErrorInfo'
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 404
+                  code:
+                    enum:
+                      - NOT_FOUND
+                      - IDENTIFIER_NOT_FOUND
+          examples:
+            GENERIC_404_NOT_FOUND:
+              description: Resource is not found
+              value:
+                status: 404
+                code: NOT_FOUND
+                message: The specified resource is not found.
+            GENERIC_404_IDENTIFIER_NOT_FOUND:
+              description: Some identifier cannot be matched to a device
+              value:
+                status: 404
+                code: IDENTIFIER_NOT_FOUND
+                message: Device identifier not found.
+    Generic500:
+      description: Internal Server Error
+      headers:
+        x-correlator:
+          $ref: '#/components/headers/x-correlator'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ErrorInfo'
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 500
+                  code:
+                    enum:
+                      - INTERNAL
+          examples:
+            GENERIC_500_INTERNAL:
+              description: Problem in Server side. Regular Server Exception
+              value:
+                status: 500
+                code: INTERNAL
+                message: Unknown server error. Typically a server bug.
+    Generic503:
+      description: Service Unavailable
+      headers:
+        x-correlator:
+          $ref: '#/components/headers/x-correlator'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ErrorInfo'
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 503
+                  code:
+                    enum:
+                      - UNAVAILABLE
+          examples:
+            GENERIC_503_UNAVAILABLE:
+              description: Service is not available. Temporary situation usually related to maintenance process in the server side
+              value:
+                status: 503
+                code: UNAVAILABLE
+                message: Service Unavailable.

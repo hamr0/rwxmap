@@ -1,0 +1,896 @@
+openapi: 3.0.3
+info:
+  title: Network Slice Booking
+  description: |
+    The Network Slice Booking (NSB) API provides programmable interface for developers to reserve a slice resource of a selected area within a period, and manage device access control as needed.
+    For specific details, please refer to [Network Slice Booking API Design.md](https://github.com/camaraproject/NetworkSliceBooking/blob/main/documentation/API_documentation/Network_Slice_Booking_API_Design.md).
+
+    # Introduction
+
+    This API allows the API consumer to book the availability of a network slice, specifying the service time, service area, and quality of service (QoS) profile.
+    It checks whether the requested QoS profile can be guaranteed for the indicated time and area, and, if so, it reserves the network slice accordingly, and monitors that the slice delivers the QoS profile. The latter process is known as Service Level Agreement (SLA) monitoring.
+
+    The API consumer can also retrieve information about an existing slice or delete a slice.
+
+    # API functionality
+
+    The API provides the following functionality:
+    - Create a new network slice, specifying the service time, service area, and QoS profile.
+    - Retrieve information about an existing slice, including the service time, service area, and QoS profile.
+    - Delete an existing slice.
+
+    # Request Parameters Definition:
+    * **serviceTime**: is defined by a start time and an end time, which indicates the period during which the network slice will be reserved.
+    * **serviceArea**: can be defined as a circle or a polygon, allowing for flexible geographical coverage.
+    * **sliceQosProfile**: includes parameters such as maximum number of devices, downstream and upstream rate per device, and packet delay budget.
+    * **sliceId**: is a unique identifier for the network slice, which is returned when a slice is created and used to retrieve or delete the slice later.
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    Network Slice Booking API does not involve the input and output of user personal data. Therefore, the access to Network Slice Booking API is defined as `Client Credentials - 2-legged`. Please refer to [Identify and Consent Management](https://github.com/camaraproject/IdentityAndConsentManagement/) for the latest detailed specification of this authentication/authorization flow.
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+
+  version: wip
+  x-camara-commonalities: 0.8.0
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+externalDocs:
+  description: Project documentation at CAMARA
+  url: https://github.com/camaraproject/NetworkSliceBooking
+servers:
+  - url: "{apiRoot}/network-slice-booking/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+tags:
+  - name: Network Slice Booking
+    description: Manage Network Slice Booking
+paths:
+  /slices:
+    post:
+      tags:
+        - Network Slice Booking
+      summary: Creates a new network slice
+      description: |
+        Create a new network slice with the expected service time, service area, and QoS profile.
+
+        NOTES:
+        - If newtwork slice creation is successful, the API consumer will receive a response with code `201 - Created` and a slice ID.
+        - If requested service area is not supported, the API consumer will receive a response with code `422 - NETWORK_SLICE_BOOKING.SERVICEAREA_NOT_SUPPORTED`.
+        - If the left resources are not sufficient for the requested slice resources, the API consumer will receive a response with code `422 - NETWORK_SLICE_BOOKING.RESOURCES_INSUFFICIENT`.
+      operationId: createSlice
+      security:
+        - openId:
+            - network-slice-booking:slices:create
+      parameters:
+        - $ref: "#/components/parameters/x-correlator"
+      requestBody:
+        description: Parameters to create a new network slice
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SliceAttributes"
+            examples:
+              LOCATION_CIRCLE:
+                $ref: "#/components/examples/CREATE_CIRCLE"
+              LOCATION_POLYGON:
+                $ref: "#/components/examples/CREATE_POLYGON"
+        required: true
+      callbacks:
+        networkSliceBookingSinkCallback:
+          "{request.body#/sink}":
+            post:
+              tags:
+                - Network Slice Booking Callback
+              summary: Network slice booking callback
+              description: Callback for network slice booking events
+              operationId: postNetworkSliceBookingNotification
+              requestBody:
+                description: Network slice booking event notification
+                content:
+                  application/cloudevents+json:
+                    schema:
+                      $ref: "#/components/schemas/ApiNotificationEvent"
+                    examples:
+                      SLICE_CREATED_EVENT_CIRCLE:
+                        $ref: "#/components/examples/SLICE_CREATED_EVENT_CIRCLE"
+                      SLICE_CREATED_EVENT_POLYGON:
+                        $ref: "#/components/examples/SLICE_CREATED_EVENT_POLYGON"
+              responses:
+                "204":
+                  description: Successful notification
+                  headers:
+                    x-correlator:
+                      $ref: "#/components/headers/x-correlator"
+                "400":
+                  $ref: "#/components/responses/Generic400"
+                "401":
+                  $ref: "#/components/responses/Generic401"
+                "403":
+                  $ref: "#/components/responses/Generic403"
+                "410":
+                  $ref: "#/components/responses/Generic410"
+                "429":
+                  $ref: "#/components/responses/Generic429"
+              security:
+                - {}
+                - notificationsBearerAuth: []
+      responses:
+        "201":
+          description: Slice created successfully
+          headers:
+            x-correlator:
+              $ref: "#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SliceInfo"
+              examples:
+                RESPONSE_CIRCLE:
+                  $ref: "#/components/examples/RESPONSE_CIRCLE"
+                RESPONSE_POLYGON:
+                  $ref: "#/components/examples/RESPONSE_POLYGON"
+        "400":
+          $ref: "#/components/responses/Generic400"
+        "401":
+          $ref: "#/components/responses/Generic401"
+        "403":
+          $ref: "#/components/responses/Generic403"
+        "422":
+          $ref: "#/components/responses/NetworkSliceBooking422"
+        "429":
+          $ref: "#/components/responses/Generic429"
+
+  /slices/{sliceId}:
+    delete:
+      tags:
+        - Network Slice Booking
+      summary: Delete a network slice
+      description: |
+        Release slice resources related to sliceId.
+
+        NOTES:
+        - The deletion operation takes effect immediately, e.g. if the slice is deleted before the end of the service time, the service will end ahead of the scheduled time.
+        - If the slice is deleted, the API consumer will not be able to retrieve information about the slice.
+        - The deletion operation is idempotent, meaning that if the slice is already deleted, the API consumer will receive a response with code `204 - No Content`.
+      operationId: deleteSlice
+      security:
+        - openId:
+            - network-slice-booking:slices:delete
+      parameters:
+        - name: sliceId
+          in: path
+          description: Slice ID that was obtained from the createSlice operation
+          required: true
+          schema:
+            $ref: "#/components/schemas/SliceId"
+        - $ref: "#/components/parameters/x-correlator"
+      responses:
+        "204":
+          description: Slice deleted
+          headers:
+            x-correlator:
+              $ref: "#/components/headers/x-correlator"
+        "400":
+          $ref: "#/components/responses/Generic400"
+        "401":
+          $ref: "#/components/responses/Generic401"
+        "403":
+          $ref: "#/components/responses/Generic403"
+        "404":
+          $ref: "#/components/responses/Generic404"
+        "429":
+          $ref: "#/components/responses/Generic429"
+
+    get:
+      tags:
+        - Network Slice Booking
+      summary: Get network slcie booking information
+      description: |
+        Querying for network slcie booking resource information details.
+
+        NOTES:
+        - According to sliceId, the API consumer can retrieve information about an existing slice, including the service time, service area, and QoS profile.
+        - If the slice is deleted, the API consumer will receive a response with code `404 - Not Found`.
+      operationId: getSlice
+      security:
+        - openId:
+            - network-slice-booking:slices:get
+      parameters:
+        - name: sliceId
+          in: path
+          description: Slice ID that was obtained from the createSlice operation
+          required: true
+          schema:
+            $ref: "#/components/schemas/SliceId"
+        - $ref: "#/components/parameters/x-correlator"
+      responses:
+        "200":
+          description: Contains information about network slice booking
+          headers:
+            x-correlator:
+              $ref: "#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SliceInfo"
+              examples:
+                RESPONSE_CIRCLE:
+                  $ref: "#/components/examples/RESPONSE_CIRCLE"
+                RESPONSE_POLYGON:
+                  $ref: "#/components/examples/RESPONSE_POLYGON"
+
+        "400":
+          $ref: "#/components/responses/Generic400"
+        "401":
+          $ref: "#/components/responses/Generic401"
+        "403":
+          $ref: "#/components/responses/Generic403"
+        "404":
+          $ref: "#/components/responses/Generic404"
+        "429":
+          $ref: "#/components/responses/Generic429"
+
+components:
+  securitySchemes:
+    openId:
+      description: Bearer authentication for notifications
+      type: openIdConnect
+      openIdConnectUrl: https://example.com/.well-known/openid-configuration
+    notificationsBearerAuth:
+      description: Bearer authentication for notifications
+      type: http
+      scheme: bearer
+      bearerFormat: "{$request.body#sinkCredential.credentialType}"
+
+  parameters:
+    x-correlator:
+      name: x-correlator
+      in: header
+      description: Correlation id for the different services
+      schema:
+        $ref: "#/components/schemas/XCorrelator"
+
+  headers:
+    x-correlator:
+      description: Correlation id for the different services
+      schema:
+        $ref: "#/components/schemas/XCorrelator"
+
+  schemas:
+    XCorrelator:
+      description: Value for the x-correlator
+      type: string
+      pattern: ^[a-zA-Z0-9-_:;.\/<>{}]{0,256}$
+      maxLength: 256
+      example: "b4333c46-49c0-4f62-80d7-f0ef930f1c46"
+    SliceId:
+      description: Slice ID in UUID format
+      type: string
+      format: uuid
+      maxLength: 36
+    SliceInfo:
+      description: Slice related information.
+      allOf:
+        - $ref: "#/components/schemas/SliceAttributes"
+        - type: object
+          properties:
+            sliceId:
+              $ref: "#/components/schemas/SliceId"
+          required:
+            - sliceId
+
+    SliceAttributes:
+      description: Attributes defining the characteristics of the slice
+      type: object
+      properties:
+        serviceTime:
+          description: |
+            serviceTime is a period during which the network slice will be reserved.
+            It is defined by a start time and an end time.
+          allOf:
+            - $ref: "#/components/schemas/TimePeriod"
+        serviceArea:
+          description: |
+            serviceArea is a geographical area where the network slice will be reserved.
+            It can be defined as a circle or a polygon.
+          allOf:
+            - $ref: "../common/CAMARA_common.yaml#/components/schemas/Area"
+        sliceQosProfile:
+          description: |
+            sliceQosProfile is a set of quality of service parameters that define the requirements for the network slice.
+            It includes parameters such as maximum number of devices, downlink and uplink throughput per device, and latency requirements.
+          allOf:
+            - $ref: "#/components/schemas/SliceQosProfile"
+        sink:
+          type: string
+          format: uri
+          maxLength: 2048
+          description: The URL where the API response will be asynchronously delivered, using the HTTP protocol.
+          example: "https://endpoint.example.com/sink"
+        sinkCredential:
+          description: A sink credential provides authentication or authorization information necessary to enable delivery of events to a target.
+          allOf:
+            - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SinkCredential"
+      required:
+        - serviceTime
+        - serviceArea
+        - sliceQosProfile
+
+    SliceQosProfile:
+      description: |
+        Quality of service for the network slice.
+        It includes a set of predefined network slice performance characteristics.
+      type: object
+      properties:
+        maxNumOfDevices:
+          description: |
+            maxNumOfDevices is a maximum number of devices that can be connected to the slice
+          allOf:
+            - $ref: "#/components/schemas/NumberOfDevices"
+        downStreamRatePerDevice:
+          description: |
+            downStreamRatePerDevice is the maximum downstream rate allowed for each device connected to the slice.
+            It indicates the individual device capability required for the slice.
+          allOf:
+            - $ref: "#/components/schemas/Rate"
+        upStreamRatePerDevice:
+          description: |
+            upStreamRatePerDevice is the maximum upstream rate allowed for each device connected to the slice.
+            It indicates the individual device capability required for the slice.
+          allOf:
+            - $ref: "#/components/schemas/Rate"
+        downStreamDelayBudget:
+          description: |
+            downStreamDelayBudget is the maximum allowable downlink packet transmission latency (millisecond).
+            By limiting the delay, the network can provide an acceptable level of performance for various services, such as voice calls, video streaming, and data.
+          allOf:
+            - $ref: "#/components/schemas/Duration"
+        upStreamDelayBudget:
+          description: |
+            upStreamDelayBudget is the maximum allowable uplink packet transmission latency (millisecond).
+            By limiting the delay, the network can provide an acceptable level of performance for various services, such as voice calls, video streaming, and data.
+          allOf:
+            - $ref: "#/components/schemas/Duration"
+
+
+    Duration:
+      description: Specification of duration. It must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#appendix-A) for duration.
+      type: object
+      properties:
+        value:
+          description: Length of duration
+          type: integer
+          example: 12
+          format: int32
+          minimum: 1
+          maximum: 2147483647
+        unit:
+          $ref: "#/components/schemas/TimeUnitEnum"
+
+
+    TimeUnitEnum:
+      description: Units of time
+      type: string
+      enum:
+        - Days
+        - Hours
+        - Minutes
+        - Seconds
+        - Milliseconds
+        - Microseconds
+        - Nanoseconds
+
+
+    Rate:
+      description: Specification of rate
+      type: object
+      properties:
+        value:
+          description: Quantity of rate
+          type: integer
+          example: 10
+          format: int32
+          minimum: 0
+          maximum: 1024
+        unit:
+          $ref: "#/components/schemas/RateUnitEnum"
+
+    RateUnitEnum:
+      description: Units of rate
+      type: string
+      enum:
+        - bps
+        - kbps
+        - Mbps
+        - Gbps
+        - Tbps
+
+    NumberOfDevices:
+      type: integer
+      example: 5
+      description: Maximum number of devices that is allowed to be connected to the network at any point in time.
+
+      format: int32
+      minimum: 1
+      maximum: 20
+
+    TimePeriod:
+      type: object
+      description: A period of time defined by a start date and an optional end date. If `endDate` is not included, then the period has no ending date.
+      properties:
+        startDate:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DateTime"
+        endDate:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DateTime"
+      required:
+        - startDate
+
+    ApiEventType:
+      type: string
+      description: |
+        Enum of API-specific event type strings for this API project.
+        The reverse-DNS prefix `org.camaraproject.<api-name>` makes each value
+        globally unique, so two different API groups can independently define
+        identically-named event types without any collision risk.
+      enum:
+        - org.camaraproject.network-slice-booking.v0.status-changed
+    ApiNotificationEvent:
+      description: |
+        API-specific notification event group.
+        Extends the CloudEvent envelope and constrains `type` to the set of
+        event types defined by this API project.
+        Adding a new event type only requires updating ApiEventType and the
+        discriminator mapping below — the CloudEvent base never changes.
+      allOf:
+        - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/CloudEvent"
+        - type: object
+          properties:
+            type:
+              $ref: "#/components/schemas/ApiEventType"
+      discriminator:
+        propertyName: type
+        mapping:
+          org.camaraproject.network-slice-booking.v0.status-changed: "#/components/schemas/SliceCreatedEvent"
+    SliceCreatedEvent:
+      description: Event to notify about device assignment status change
+      allOf:
+        - $ref: "#/components/schemas/ApiNotificationEvent"
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Event details depending on the event type
+              allOf:
+                - $ref: "#/components/schemas/SliceInfo"
+          required:
+            - data
+
+  responses:
+    Generic400:
+      description: Bad Request
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 400
+                  code:
+                    enum:
+                      - INVALID_ARGUMENT
+                      - OUT_OF_RANGE
+          examples:
+            GENERIC_400_INVALID_ARGUMENT:
+              description: Invalid Argument. Generic Syntax Exception
+              value:
+                status: 400
+                code: INVALID_ARGUMENT
+                message: Client specified an invalid argument, request body or query param.
+            GENERIC_400_OUT_OF_RANGE:
+              description: Out of Range. Specific Syntax Exception used when a given field has a pre-defined range or a invalid filter criteria combination is requested
+              value:
+                status: 400
+                code: OUT_OF_RANGE
+                message: Client specified an invalid range.
+    Generic401:
+      description: Unauthorized
+      headers:
+        x-correlator:
+          $ref: '#/components/headers/x-correlator'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 401
+                  code:
+                    enum:
+                      - UNAUTHENTICATED
+          examples:
+            GENERIC_401_UNAUTHENTICATED:
+              description: Request cannot be authenticated and a new authentication is required
+              value:
+                status: 401
+                code: UNAUTHENTICATED
+                message: Request not authenticated due to missing, invalid, or expired credentials. A new authentication is required.
+
+    Generic403:
+      description: Forbidden
+      headers:
+        x-correlator:
+          $ref: '#/components/headers/x-correlator'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 403
+                  code:
+                    enum:
+                      - PERMISSION_DENIED
+          examples:
+            GENERIC_403_PERMISSION_DENIED:
+              description: Permission denied. OAuth2 token access does not have the required scope or when the user fails operational security
+              value:
+                status: 403
+                code: PERMISSION_DENIED
+                message: Client does not have sufficient permissions to perform this action.
+    Generic404:
+      description: Not found
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 404
+                  code:
+                    enum:
+                      - NOT_FOUND
+          examples:
+            GENERIC_404_NOT_FOUND:
+              description: Specified slice resource is not found based on the sliceId
+              value:
+                status: 404
+                code: NOT_FOUND
+                message: The specified resource is not found.
+    Generic410:
+      description: Gone
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 410
+                  code:
+                    enum:
+                      - GONE
+          examples:
+            GENERIC_410_GONE:
+              description: Use in notifications flow to allow API Consumer to indicate that its callback is no longer available
+              value:
+                status: 410
+                code: GONE
+                message: Access to the target resource is no longer available.
+    NetworkSliceBooking422:
+      description: Unprocessable Content
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 422
+                  code:
+                    enum:
+                      - NETWORK_SLICE_BOOKING.SERVICEAREA_NOT_SUPPORTED
+                      - NETWORK_SLICE_BOOKING.RESOURCES_INSUFFICIENT
+          examples:
+            NETWORK_SLICE_BOOKING_422_SERVICE_AREA_NOT_SUPPORTED:
+              description: Business logic exception use when the requested service area is not supported
+              value:
+                status: 422
+                code: NETWORK_SLICE_BOOKING.SERVICEAREA_NOT_SUPPORTED
+                message: The requested service area is not supported.
+            NETWORK_SLICE_BOOKING_422_RESOURCES_INSUFFICIENT:
+              description: Business logic exception use when the left resources are not sufficient for the requested slice resources
+              value:
+                status: 422
+                code: NETWORK_SLICE_BOOKING.RESOURCES_INSUFFICIENT
+                message: The left resources are not sufficient for the requested slice resources.
+    Generic429:
+      description: Quota Exceed or Too Many Requests
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 429
+                  code:
+                    enum:
+                      - QUOTA_EXCEEDED
+                      - TOO_MANY_REQUESTS
+          examples:
+            GENERIC_429_QUOTA_EXCEEDED:
+              description: Request is rejected due to exceeding a business quota limit
+              value:
+                status: 429
+                code: QUOTA_EXCEEDED
+                message: Out of resource quota.
+            GENERIC_429_TOO_MANY_REQUESTS:
+              description: Access to the API has been temporarily blocked due to rate or spike arrest limits being reached
+              value:
+                status: 429
+                code: TOO_MANY_REQUESTS
+                message: Rate limit reached.
+
+  examples:
+    CREATE_CIRCLE:
+      description: Create a circle service area slice
+      value:
+        serviceTime:
+          startDate: "2024-06-01T12:00:00Z"
+          endDate: "2024-06-02T12:00:00Z"
+        serviceArea:
+          areaType: CIRCLE
+          center:
+            latitude: 45.754114
+            longitude: 4.860374
+          radius: 800
+        sliceQosProfile:
+          maxNumOfDevices: 5
+          downStreamRatePerDevice:
+            value: 10
+            unit: bps
+          upStreamRatePerDevice:
+            value: 10
+            unit: bps
+          downStreamDelayBudget:
+            value: 12
+            unit: Milliseconds
+          upStreamDelayBudget:
+            value: 12
+            unit: Milliseconds
+        sink:
+          "https://endpoint.example.com/sink"
+        sinkCredential:
+          credentialType: ACCESSTOKEN
+          accessToken: "<access_token>"
+          accessTokenExpiresUtc: "2025-12-31T23:59:59Z"
+          accessTokenType: bearer
+    CREATE_POLYGON:
+      description: Create a polygon service area slice
+      value:
+        serviceTime:
+          startDate: "2024-06-01T12:00:00Z"
+          endDate: "2024-06-02T12:00:00Z"
+        serviceArea:
+          areaType: POLYGON
+          boundary:
+            - latitude: 45.754114
+              longitude: 4.860374
+            - latitude: 45.753845
+              longitude: 4.863185
+            - latitude: 45.753916
+              longitude: 4.866531
+            - latitude: 45.754116
+              longitude: 4.876353
+        sliceQosProfile:
+          maxNumOfDevices: 5
+          downStreamRatePerDevice:
+            value: 10
+            unit: bps
+          upStreamRatePerDevice:
+            value: 10
+            unit: bps
+          downStreamDelayBudget:
+            value: 12
+            unit: Milliseconds
+          upStreamDelayBudget:
+            value: 12
+            unit: Milliseconds
+        sink:
+          "https://endpoint.example.com/sink"
+        sinkCredential:
+          credentialType: ACCESSTOKEN
+          accessToken: "<access_token>"
+          accessTokenExpiresUtc: "2025-12-31T23:59:59Z"
+          accessTokenType: bearer
+    RESPONSE_CIRCLE:
+      description: Response example for a circle service area slice
+      value:
+        serviceTime:
+          startDate: "2024-06-01T12:00:00Z"
+          endDate: "2024-06-02T12:00:00Z"
+        serviceArea:
+          areaType: CIRCLE
+          center:
+            latitude: 45.754114
+            longitude: 4.860374
+          radius: 800
+        sliceQosProfile:
+          maxNumOfDevices: 5
+          downStreamRatePerDevice:
+            value: 10
+            unit: bps
+          upStreamRatePerDevice:
+            value: 10
+            unit: bps
+          downStreamDelayBudget:
+            value: 12
+            unit: Milliseconds
+          upStreamDelayBudget:
+            value: 12
+            unit: Milliseconds
+        sliceId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    RESPONSE_POLYGON:
+      description: Response example for a polygon service area slice
+      value:
+        serviceTime:
+          startDate: "2024-06-01T12:00:00Z"
+          endDate: "2024-06-02T12:00:00Z"
+        serviceArea:
+          areaType: POLYGON
+          boundary:
+            - latitude: 45.754114
+              longitude: 4.860374
+            - latitude: 45.753845
+              longitude: 4.863185
+            - latitude: 45.753916
+              longitude: 4.866531
+            - latitude: 45.754116
+              longitude: 4.876353
+        sliceQosProfile:
+          maxNumOfDevices: 5
+          downStreamRatePerDevice:
+            value: 10
+            unit: bps
+          upStreamRatePerDevice:
+            value: 10
+            unit: bps
+          downStreamDelayBudget:
+            value: 12
+            unit: Milliseconds
+          upStreamDelayBudget:
+            value: 12
+            unit: Milliseconds
+        sliceId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    SLICE_CREATED_EVENT_CIRCLE:
+      description: Event example for a slice created with circle service area
+      value:
+        id: "83a0d986-0866-4f38-b8c0-fc65bfcda452"
+        source: "https://notificationSendServer12.example.com"
+        specversion: "1.0"
+        type: "org.camaraproject.network-slice-booking.v0.status-changed"
+        datacontenttype: "application/json"
+        time: "2024-06-01T12:00:00Z"
+        data:
+          serviceTime:
+            startDate: "2024-06-01T12:00:00Z"
+            endDate: "2024-06-02T12:00:00Z"
+          serviceArea:
+            areaType: CIRCLE
+            center:
+              latitude: 45.754114
+              longitude: 4.860374
+            radius: 800
+          sliceQosProfile:
+            maxNumOfDevices: 5
+            downStreamRatePerDevice:
+              value: 10
+              unit: bps
+            upStreamRatePerDevice:
+              value: 10
+              unit: bps
+            downStreamDelayBudget:
+              value: 12
+              unit: Milliseconds
+            upStreamDelayBudget:
+              value: 12
+              unit: Milliseconds
+          sliceId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    SLICE_CREATED_EVENT_POLYGON:
+      description: Event example for a slice created with polygon service area
+      value:
+        id: "83a0d986-0866-4f38-b8c0-fc65bfcda452"
+        source: "https://notificationSendServer12.example.com"
+        specversion: "1.0"
+        type: "org.camaraproject.network-slice-booking.v0.status-changed"
+        datacontenttype: "application/json"
+        time: "2024-06-01T12:00:00Z"
+        data:
+          serviceTime:
+            startDate: "2024-06-01T12:00:00Z"
+            endDate: "2024-06-02T12:00:00Z"
+          serviceArea:
+            areaType: POLYGON
+            boundary:
+              - latitude: 45.754114
+                longitude: 4.860374
+              - latitude: 45.753845
+                longitude: 4.863185
+              - latitude: 45.753916
+                longitude: 4.866531
+              - latitude: 45.754116
+                longitude: 4.876353
+          sliceQosProfile:
+            maxNumOfDevices: 5
+            downStreamRatePerDevice:
+              value: 10
+              unit: bps
+            upStreamRatePerDevice:
+              value: 10
+              unit: bps
+            downStreamDelayBudget:
+              value: 12
+              unit: Milliseconds
+            upStreamDelayBudget:
+              value: 12
+              unit: Milliseconds
+          sliceId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"

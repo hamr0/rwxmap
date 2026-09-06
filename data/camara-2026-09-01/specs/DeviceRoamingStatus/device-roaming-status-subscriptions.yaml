@@ -1,0 +1,1047 @@
+openapi: 3.0.3
+info:
+  title: Device Roaming Status Subscriptions
+  description: |
+    This API provides the API consumer with the ability to subscribe to Roaming status events.
+
+    # Introduction
+
+    ## Roaming Status
+    API consumer is able to be notified whether the roaming status of a certain user device has changed.
+    This capability is provided via a subscription  request - in this case the roaming situation is not in the response but event notification is sent back to the event subscriber when roaming situation has changed.
+
+    # Relevant terms and definitions
+
+    * **Device**: A device refers to any physical entity that can connect to a network and participate in network communication.
+
+        At least one identifier for the device out of four options must be provided: IPv4 address, IPv6 address, Phone number, or Network Access Identifier assigned by the mobile network operator for the device. Where more than one device identifier is provided, only one identifier will be selected by the implementation and this choice indicated to the API consumer in the subscription creation response.
+
+        Note: Network Access Identifier is defined for future use and will not be supported with this version of the API.
+
+    # API Functionality
+
+    The API exposes following capability:
+
+    ## Device roaming status subscription
+
+    These endpoints allow to manage event subscription on roaming device status event.
+    The CAMARA subscription model is detailed in the CAMARA API design guideline document and follows CloudEvents specification.
+
+    When subscribing, it is mandatory to provide the event `type` you are subscribing to, as multiple subscription-types are managed by this API.
+
+    Following event ``type`` are managed for this API:
+      - ``org.camaraproject.device-roaming-status-subscriptions.v0.roaming-status`` - Event triggered when the device switch from roaming ON to roaming OFF and conversely
+
+      - ``org.camaraproject.device-roaming-status-subscriptions.v0.roaming-on`` - Event triggered when the device switch from roaming OFF to roaming ON
+
+      - ``org.camaraproject.device-roaming-status-subscriptions.v0.roaming-off``: Event triggered when the device switch from roaming ON to roaming OFF
+
+      - ``org.camaraproject.device-roaming-status-subscriptions.v0.roaming-change-country``: Event triggered when the device in roaming change country code
+
+    Note: Additionally, the following events could be sent, which do not require a dedicated subscription:
+      - `org.camaraproject.device-roaming-status-subscriptions.v0.subscription-started` is sent when the subscription starts.
+      - `org.camaraproject.device-roaming-status-subscriptions.v0.subscription-updated` is sent when the subscription is updated.
+      - `org.camaraproject.device-roaming-status-subscriptions.v0.subscription-ended` is sent when the subscription ends.
+
+    It is used in following cases:
+      - the subscription expire time (optionally set by the requester) has been reached
+      - the maximum number of subscription events (optionally set by the requester) has been reached
+      - the subscription was deleted by the requester
+      - the Access Token `sinkCredential` (optionally set by the requester) expiration time has been reached
+      - the API server has to stop sending notification prematurely
+
+    **Note on combined usage of ``initialEvent`` and ``subscriptionMaxEvents``**:
+
+    If an event is triggered following ``initialEvent`` set to true,
+    this event will be counted towards ``subscriptionMaxEvents`` (if provided).
+
+    **Clarification on ``initialEvent`` & ``event-type`` behaviour:**
+
+    Following table illustrate behaviour regarding event triggering depending on **initial** roaming state of the device:
+
+    | subscribed event-type | device roaming status at subscription time | event sent if ``initialEvent`` set to true |
+    | ----------------------| ------------- | --------------- |
+    | roaming-status  | Roaming On |   Yes |
+    | roaming-status  | Roaming Off | Yes |
+    | roaming-on  | Roaming On | Yes |
+    | roaming-on  | Roaming Off | No |
+    | roaming-off  | Roaming On | No |
+    | roaming-off  | Roaming Off | Yes |
+    | roaming-change-country  | Roaming Off | No(*) |
+    | roaming-change-country  | Roaming On | No(*) |
+
+    (*) Use of ``initialEvent`` has no impact on roaming-change-country event-type.
+
+    **Clarification on ``roaming-change-country`` event-type:**
+
+    ``roaming-change-country`` event is sent only when the device stays in roaming situation and change country.
+    Suppose a device from Germany & all event types subscribed:
+
+    - Device moves from Germany to France:
+        - triggered: roaming-status & roaming-on
+        - not triggered: roaming-change-country & roaming-off
+    - Device moves from France to Belgium:
+        - triggered: roaming-change-country
+        - not triggered: roaming-status,  roaming-on & roaming-off
+    - Device moves from Belgium back to Germany
+        - triggered: roaming-status & roaming-off
+        - not triggered: roaming-on & roaming-change-country
+
+
+    ### Notifications callback
+
+    This endpoint describes the event notification received on subscription listener side when the event occurred.
+    As for subscription, detailed description of the event notification is provided in the CAMARA API design guideline document.
+
+    _**WARNING**: This callback endpoint must be exposed on the consumer side as `POST /{$request.body#/sink}`.
+      Developers may provide a callback URL on which notifications regarding reachability-status can be received from the service provider.
+      If an event occurs the application will send events to the provided webhook - `sink`._
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    <!-- CAMARA:MANDATORY:identifying-device-from-access-token:BEGIN -->
+
+    # Identifying the device from the access token
+
+    This API requires the API consumer to identify a device as the subject of the API as follows:
+    - When the API is invoked using a two-legged access token, the subject will be identified from the optional `device` object, which therefore MUST be provided.
+    - When a three-legged access token is used however, this optional identifier MUST NOT be provided, as the subject will be uniquely identified from the access token.
+
+    This approach simplifies API usage for API consumers using a three-legged access token to invoke the API by relying on the information that is associated with the access token and was identified during the authentication process.
+
+    ## Error handling:
+
+    - If the subject cannot be identified from the access token and the optional `device` object is not included in the request, then the server will return an error with the `422 MISSING_IDENTIFIER` error code.
+
+    - If the subject can be identified from the access token and the optional `device` object is also included in the request, then the server will return an error with the `422 UNNECESSARY_IDENTIFIER` error code. This will be the case even if the same device is identified by these two methods, as the server is unable to make this comparison.
+    <!-- CAMARA:MANDATORY:identifying-device-from-access-token:END -->
+
+    # Multi-SIM scenario handling
+
+    In multi-SIM scenarios where more than one mobile device is associated with a phone number (e.g. a smartphone with an associated smartwatch), it might not be possible to uniquely identify from that phone number the device for which roaming status notifications should be provided. If the phone number is used as the device identifier when creating a subscription for a multi-SIM scenario, the API may:
+    - respond with an error, or
+    - provide roaming status update notifications for the multi-SIM group as a whole, or
+    - provide roaming status update notifications only for a single device in the multi-SIM group, which may not be the intended device.
+
+    Possible solutions in such a scenario include:
+    - Using the authorisation code flow to obtain an access token, which will automatically identify the intended device
+    - Identifying the intended device from a unique identifier for that device, such as its source IP address and port
+    - Check with the SIM provider whether a unique "secondary" phone number is already associated with each device, and use the secondary phone number to identify the intended device if available.
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: wip
+  x-camara-commonalities: wip
+
+externalDocs:
+  description: Product documentation at CAMARA
+  url: https://github.com/camaraproject/DeviceRoamingStatus
+
+servers:
+  - url: "{apiRoot}/device-roaming-status-subscriptions/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+
+tags:
+  - name: Device Roaming Status Subscription
+    description: Operation to manage event subscription on device roaming status event.
+
+paths:
+  /subscriptions:
+    post:
+      tags:
+        - Device Roaming Status Subscription
+      summary: "Create a device roaming status event subscription for a device"
+      description: Create a device roaming status event subscription for a device
+      operationId: createDeviceRoamingStatusSubscription
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+      security:
+        - openId:
+            - device-roaming-status-subscriptions:org.camaraproject.device-roaming-status-subscriptions.v0.roaming-status:create
+            - device-roaming-status-subscriptions:org.camaraproject.device-roaming-status-subscriptions.v0.roaming-on:create
+            - device-roaming-status-subscriptions:org.camaraproject.device-roaming-status-subscriptions.v0.roaming-off:create
+            - device-roaming-status-subscriptions:org.camaraproject.device-roaming-status-subscriptions.v0.roaming-change-country:create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubscriptionRequest"
+            examples:
+              Create Subscription:
+                $ref: "#/components/examples/CREATE_SUBSCRIPTION"
+      callbacks:
+        notifications:
+          "{$request.body#/sink}":
+            post:
+              summary: "notifications callback"
+              description: |
+                Important: this endpoint is to be implemented by the API consumer.
+                The Device status server will call this endpoint whenever any device roaming status related event occurs.
+              operationId: postNotification
+              parameters:
+                - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+              requestBody:
+                required: true
+                content:
+                  application/cloudevents+json:
+                    schema:
+                      $ref: "#/components/schemas/NotificationEvent"
+                    examples:
+                      roaming-status:
+                        $ref: "#/components/examples/ROAMING_STATUS"
+                      roaming-change-country:
+                        $ref: "#/components/examples/ROAMING_CHANGE_COUNTRY"
+                      roaming-on:
+                        $ref: "#/components/examples/ROAMING_ON"
+                      roaming-off:
+                        $ref: "#/components/examples/ROAMING_OFF"
+                      subscription-started:
+                        $ref: "#/components/examples/SUBSCRIPTION_STARTED"
+                      subscription-updated:
+                        $ref: "#/components/examples/SUBSCRIPTION_UPDATED"
+                      subscription-ended:
+                        $ref: "#/components/examples/SUBSCRIPTION_ENDED"
+              responses:
+                "204":
+                  description: Successful notification
+                  headers:
+                    x-correlator:
+                      $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+                "400":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+                "401":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+                "403":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+                "410":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic410"
+                "429":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+              security:
+                - {}
+                - notificationsBearerAuth: []
+
+      responses:
+        "201":
+          description: Created
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+              examples:
+                active-subscription:
+                  $ref: "#/components/examples/ACTIVE_SUBSCRIPTION"
+                active-subscription-with-device-disambiguation:
+                  $ref: "#/components/examples/ACTIVE_SUBSCRIPTION_WITH_DEVICE_DISAMBIGUATION"
+        "202":
+          description: Request accepted to be processed. It applies for async creation process.
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionAsync"
+        "400":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/CreateSubscriptionBadRequest400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/SubscriptionPermissionDenied403"
+        "409":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic409"
+        "422":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/CreateSubscriptionUnprocessableEntity422"
+        "429":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+
+    get:
+      tags:
+        - Device Roaming Status Subscription
+      summary: "Retrieve a list of device roaming status event subscription"
+      description: Retrieve a list of device roaming status event subscription(s)
+      operationId: retrieveDeviceRoamingStatusSubscriptionList
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/page"
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/perPage"
+      security:
+        - openId:
+            - device-roaming-status-subscriptions:read
+      responses:
+        "200":
+          description: List of event subscription details
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+            X-Total-Count:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-total-count"
+            X-Total-Pages:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-total-pages"
+            Link:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/link"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionList"
+              examples:
+                list-of-subscriptions:
+                  $ref: "#/components/examples/SUBSCRIPTION_LIST"
+                empty-list-of-subscriptions:
+                  $ref: "#/components/examples/EMPTY_SUBSCRIPTION_LIST"
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+
+  /subscriptions/{subscriptionId}:
+    get:
+      tags:
+        - Device Roaming Status Subscription
+      summary: "Retrieve a roaming status event subscription for a device"
+      description: retrieve device roaming status subscription information for a given subscription.
+      operationId: retrieveDeviceRoamingStatusSubscription
+      security:
+        - openId:
+            - device-roaming-status-subscriptions:read
+      parameters:
+        - $ref: "#/components/parameters/SubscriptionId"
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+      responses:
+        "200":
+          description: OK
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+              examples:
+                active-subscription:
+                  $ref: "#/components/examples/ACTIVE_SUBSCRIPTION"
+                active-subscription-with-device-disambiguation:
+                  $ref: "#/components/examples/ACTIVE_SUBSCRIPTION_WITH_DEVICE_DISAMBIGUATION"
+                subscription-activation-requested:
+                  $ref: "#/components/examples/SUBSCRIPTION_ACTIVATION_REQUESTED"
+                subscription-deleted:
+                  $ref: "#/components/examples/SUBSCRIPTION_DELETED"
+        "400":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/SubscriptionIdRequired400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+
+    delete:
+      tags:
+        - Device Roaming Status Subscription
+      summary: "Delete a device-roaming-status event subscription for a device"
+      operationId: deleteDeviceRoamingStatusSubscription
+      description: Delete a given device-roaming-status subscription by ID
+      security:
+        - openId:
+            - device-roaming-status-subscriptions:delete
+      parameters:
+        - $ref: "#/components/parameters/SubscriptionId"
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+      responses:
+        "204":
+          description: device-roaming-status subscription deleted
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+        "202":
+          description: Request accepted to be processed. It applies for async deletion process.
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionAsync"
+        "400":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/SubscriptionIdRequired400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+
+components:
+  securitySchemes:
+    openId:
+      $ref: "../common/CAMARA_common.yaml#/components/securitySchemes/openId"
+    notificationsBearerAuth:
+      $ref: "../common/CAMARA_event_common.yaml#/components/securitySchemes/notificationsBearerAuth"
+
+  parameters:
+    SubscriptionId:
+      name: subscriptionId
+      in: path
+      description: Subscription identifier that was obtained from the create event subscription operation
+      required: true
+      schema:
+        $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionId"
+
+  schemas:
+    CreateSubscriptionDetailLocal:
+      description: The detail of the requested event subscription.
+      type: object
+      properties:
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Device"
+
+    ConfigLocal:
+      description: Config schema allowing for device to be specified as part of subscription detail
+      allOf:
+        - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/Config"
+        - type: object
+          properties:
+            subscriptionDetail:
+              $ref: "#/components/schemas/CreateSubscriptionDetailLocal"
+
+    ApiEventType:
+      type: string
+      description: |
+        roaming-status         - Event triggered when the device switch from roaming ON to roaming OFF and conversely
+        roaming-on             - Event triggered when the device switch from roaming OFF to roaming ON
+        roaming-off            - Event triggered when the device switch from roaming ON to roaming OFF
+        roaming-change-country - Event triggered when the device in roaming change country code
+      enum:
+        - org.camaraproject.device-roaming-status-subscriptions.v0.roaming-status
+        - org.camaraproject.device-roaming-status-subscriptions.v0.roaming-on
+        - org.camaraproject.device-roaming-status-subscriptions.v0.roaming-off
+        - org.camaraproject.device-roaming-status-subscriptions.v0.roaming-change-country
+
+    ApiNotificationEvent:
+      description: |
+        API-specific notification event group.
+        Extends the CloudEvent envelope and constrains `type` to the set of
+        event types defined by this API project.
+        Adding a new event type only requires updating ApiEventType and the
+        discriminator mapping below — the CloudEvent base never changes.
+      allOf:
+        - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/CloudEvent"
+        - type: object
+          properties:
+            type:
+              $ref: "#/components/schemas/ApiEventType"
+      discriminator:
+        propertyName: "type"
+        mapping:
+          org.camaraproject.device-roaming-status-subscriptions.v0.roaming-status: "#/components/schemas/EventRoamingStatus"
+          org.camaraproject.device-roaming-status-subscriptions.v0.roaming-change-country: "#/components/schemas/EventRoamingChangeCountry"
+          org.camaraproject.device-roaming-status-subscriptions.v0.roaming-off: "#/components/schemas/EventRoamingOff"
+          org.camaraproject.device-roaming-status-subscriptions.v0.roaming-on: "#/components/schemas/EventRoamingOn"
+
+    NotificationEvent:
+      description: |
+        Union of all valid notification event groups at the callback endpoint.
+        This schema owns no discriminator — routing within each group is
+        handled by ApiNotificationEvent and SubscriptionLifecycleEvent
+        respectively. Its only responsibility is to enumerate which groups
+        are valid payloads for this API's notification callback.
+      oneOf:
+        - $ref: "#/components/schemas/ApiNotificationEvent"
+        - $ref: "#/components/schemas/SubscriptionLifecycleEvent"
+
+    Subscription:
+      description: Represents a event-type subscription.
+      type: object
+      required:
+        - sink
+        - protocol
+        - config
+        - types
+        - id
+      properties:
+        protocol:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/Protocol"
+        sink:
+          $ref: "#/components/schemas/Sink"
+        sinkCredential:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SinkCredential"
+        types:
+          description: |
+            Camara Event types eligible to be delivered by this subscription.
+            Note: for the Commonalities meta-release v0.4 we enforce to have only event type per subscription then for following meta-release use of array MUST be decided
+             at API project level.
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: "#/components/schemas/ApiEventType"
+        config:
+          $ref: '#/components/schemas/ConfigLocal'
+        id:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionId"
+        startsAt:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DateTime"
+        expiresAt:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DateTime"
+        status:
+          type: string
+          description: |-
+            Current status of the subscription - Management of Subscription State engine is not mandatory for now. Note not all statuses may be considered to be implemented. Details:
+              - `ACTIVATION_REQUESTED`: Subscription creation (POST) is triggered but subscription creation process is not finished yet.
+              - `ACTIVE`: Subscription creation process is completed. Subscription is fully operative.
+              - `INACTIVE`: Subscription is temporarily inactive, but its workflow logic is not deleted.
+              - `EXPIRED`: Subscription is ended (no longer active). This status applies when subscription is ended due to `SUBSCRIPTION_EXPIRED` or `ACCESS_TOKEN_EXPIRED` event.
+              - `DELETED`: Subscription is ended as deleted (no longer active). This status applies when subscription information is kept (i.e. subscription workflow is no longer active but its meta-information is kept).
+          enum:
+            - ACTIVATION_REQUESTED
+            - ACTIVE
+            - EXPIRED
+            - INACTIVE
+            - DELETED
+      discriminator:
+        propertyName: protocol
+        mapping:
+          HTTP: "#/components/schemas/HTTPSubscriptionResponse"
+          # Future protocol support (not yet used in CAMARA):
+          # MQTT3: "#/components/schemas/MQTTSubscriptionResponse"
+          # MQTT5: "#/components/schemas/MQTTSubscriptionResponse"
+          # AMQP: "#/components/schemas/AMQPSubscriptionResponse"
+          # NATS: "#/components/schemas/NATSSubscriptionResponse"
+          # KAFKA: "#/components/schemas/ApacheKafkaSubscriptionResponse"
+      example:
+        id: 550e8400-e29b-41d4-a716-446655440000
+        sink: https://endpoint.example.com/sink
+        protocol: HTTP
+        types:
+          - "org.camaraproject.device-roaming-status-subscriptions.v0.roaming-status"
+        config:
+          subscriptionDetail:
+            device:
+              phoneNumber: "+123456789"
+          subscriptionExpireTime: "2024-07-17T13:18:23.682Z"
+          subscriptionMaxEvents: 5
+          initialEvent: true
+        startsAt: "2024-07-03T21:12:02.871Z"
+        expiresAt: "2024-07-03T21:12:02.871Z"
+        status: ACTIVE
+
+    SubscriptionRequest:
+      description: The request for creating a event-type event subscription
+      type: object
+      required:
+        - sink
+        - protocol
+        - config
+        - types
+      properties:
+        protocol:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/Protocol"
+        sink:
+          $ref: "#/components/schemas/Sink"
+        sinkCredential:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SinkCredential"
+        types:
+          description: |
+            Camara Event types eligible to be delivered by this subscription.
+            Note: for the current Commonalities version (v0.5) only one event type per subscription is allowed, yet in the following releases use of array of event types SHALL be specified without changing this definition.
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: "#/components/schemas/ApiEventType"
+        config:
+          $ref: "#/components/schemas/ConfigLocal"
+      discriminator:
+        propertyName: protocol
+        mapping:
+          HTTP: "#/components/schemas/HTTPSubscriptionRequest"
+          # Future protocol support (not yet used in CAMARA):
+          # MQTT3: "#/components/schemas/MQTTSubscriptionRequest"
+          # MQTT5: "#/components/schemas/MQTTSubscriptionRequest"
+          # AMQP: "#/components/schemas/AMQPSubscriptionRequest"
+          # NATS: "#/components/schemas/NATSSubscriptionRequest"
+          # KAFKA: "#/components/schemas/ApacheKafkaSubscriptionRequest"
+
+    SubscriptionAsync:
+      description: Response for a event-type subscription request managed asynchronously (Creation or Deletion)
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionId"
+
+    SubscriptionList:
+      description: Response with subscriptions list
+      type: object
+      required:
+        - subscriptions
+        - pagination
+      properties:
+        subscriptions:
+          description: Subscriptions list
+          type: array
+          minItems: 0
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/Subscription"
+        pagination:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Pagination"
+
+    SubscriptionLifecycleEvent:
+      description: |
+        Subscription lifecycle event group, common to all CAMARA APIs that
+        support explicit subscriptions.
+        Extends the CloudEvent envelope and constrains `type` to the set of
+        lifecycle event types managed by Commonalities.
+      allOf:
+        - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/CloudEvent"
+        - type: object
+          properties:
+            type:
+              $ref: "#/components/schemas/SubscriptionLifecycleEventType"
+      discriminator:
+        propertyName: type
+        mapping:
+          org.camaraproject.device-roaming-status-subscriptions.v0.subscription-started: "#/components/schemas/EventSubscriptionStarted"
+          org.camaraproject.device-roaming-status-subscriptions.v0.subscription-updated: "#/components/schemas/EventSubscriptionUpdated"
+          org.camaraproject.device-roaming-status-subscriptions.v0.subscription-ended: "#/components/schemas/EventSubscriptionEnded"
+
+    SubscriptionLifecycleEventType:
+      type: string
+      description: |
+        Enum of subscription lifecycle event type strings.
+        These are managed by Commonalities and are identical across all CAMARA
+        APIs that support explicit subscriptions.
+        Kept as a separate named schema so the set of valid lifecycle type
+        strings can be referenced independently from the discriminated schema.
+      enum:
+        - org.camaraproject.device-roaming-status-subscriptions.v0.subscription-started
+        - org.camaraproject.device-roaming-status-subscriptions.v0.subscription-updated
+        - org.camaraproject.device-roaming-status-subscriptions.v0.subscription-ended
+
+    CountryCode:
+      description: The Mobile country code (MCC) as an geographic region identifier for the country and the dependent areas.
+      type: integer
+      format: int32
+      minimum: 100
+      maximum: 999
+
+    CountryName:
+      description: The ISO 3166 ALPHA-2 country-codes of mapped to mobile country code(MCC). If there is mapping of one MCC to multiple countries, then we have list of countries. If there is no mapping of MCC to any country, then an empty array [] shall be returned..
+      type: array
+      maxItems: 5
+      items:
+        description: The ISO 3166 ALPHA-2 country-code
+        type: string
+        maxLength: 2
+        pattern: ^[A-Z]{2}$
+
+    BasicDeviceEventData:
+      description: Event detail structure for basic device events
+      type: object
+      required:
+        - subscriptionId
+      properties:
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+        subscriptionId:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionId"
+
+    EventRoamingStatus:
+      description: event structure for roaming status change
+      allOf:
+        - $ref: "#/components/schemas/ApiNotificationEvent"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/RoamingStatus"
+
+    RoamingStatus:
+      description: Event detail structure for org.camaraproject.device-roaming-status-subscriptions.v0.roaming-status event
+      allOf:
+        - $ref: "#/components/schemas/BasicDeviceEventData"
+        - type: object
+          required:
+            - roaming
+          properties:
+            roaming:
+              type: boolean
+              description: Roaming status. True, if it is roaming.
+            countryCode:
+              $ref: "#/components/schemas/CountryCode"
+            countryName:
+              $ref: "#/components/schemas/CountryName"
+
+    EventRoamingOn:
+      description: event structure for roaming on change
+      allOf:
+        - $ref: "#/components/schemas/ApiNotificationEvent"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/BasicDeviceEventData"
+
+    EventRoamingOff:
+      description: event structure for roaming off change
+      allOf:
+        - $ref: "#/components/schemas/ApiNotificationEvent"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/BasicDeviceEventData"
+
+    EventRoamingChangeCountry:
+      description: event structure for roaming change country
+      allOf:
+        - $ref: "#/components/schemas/ApiNotificationEvent"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/RoamingChangeCountry"
+
+    RoamingChangeCountry:
+      description: Event detail structure for org.camaraproject.device-roaming-status-subscriptions.v0.roaming-on event
+      allOf:
+        - $ref: "#/components/schemas/BasicDeviceEventData"
+        - type: object
+          required:
+            - countryCode
+            - countryName
+          properties:
+            countryCode:
+              $ref: "#/components/schemas/CountryCode"
+            countryName:
+              $ref: "#/components/schemas/CountryName"
+
+    EventSubscriptionStarted:
+      description: event structure for event subscription started
+      allOf:
+        - $ref: "#/components/schemas/SubscriptionLifecycleEvent"
+        - type: object
+          properties:
+            data:
+              allOf:
+                - type: object
+                  properties:
+                    device:
+                      $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+                - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionStarted"
+
+    EventSubscriptionUpdated:
+      description: event structure for event subscription updated
+      allOf:
+        - $ref: "#/components/schemas/SubscriptionLifecycleEvent"
+        - type: object
+          properties:
+            data:
+              allOf:
+                - type: object
+                  properties:
+                    device:
+                      $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+                - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionUpdated"
+
+    EventSubscriptionEnded:
+      description: event structure for event subscription ended
+      allOf:
+        - $ref: "#/components/schemas/SubscriptionLifecycleEvent"
+        - type: object
+          properties:
+            data:
+              allOf:
+                - type: object
+                  properties:
+                    device:
+                      $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+                - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionEnded"
+
+    Sink:
+      description: The address to which events shall be delivered using the selected protocol.
+      type: string
+      format: uri
+      maxLength: 2048
+      pattern: ^https:\/\/.+$
+      example: "https://endpoint.example.com/sink"
+
+    HTTPSubscriptionRequest:
+      description: Subscription request for HTTP-based event delivery.
+      allOf:
+        - $ref: "#/components/schemas/SubscriptionRequest"
+        - type: object
+          properties:
+            protocolSettings:
+              $ref: "../common/CAMARA_event_common.yaml#/components/schemas/HTTPSettings"
+
+    HTTPSubscriptionResponse:
+      description: Subscription resource returned for HTTP-based event delivery.
+      allOf:
+        - $ref: "#/components/schemas/Subscription"
+        - type: object
+          properties:
+            protocolSettings:
+              $ref: "../common/CAMARA_event_common.yaml#/components/schemas/HTTPSettings"
+
+  examples:
+    ROAMING_STATUS:
+      description: Example roaming status notification
+      value:
+        id: "123654"
+        source: https://notificationSendServer12.supertelco.com
+        type: org.camaraproject.device-roaming-status-subscriptions.v0.roaming-status
+        specversion: "1.0"
+        datacontenttype: application/json
+        data:
+          device:
+            phoneNumber: "+123456789"
+          roaming: true
+          subscriptionId: qs15-h556-rt89-1298
+        time: "2023-01-17T13:18:23.682Z"
+
+    ROAMING_OFF:
+      description: Example roaming off notification
+      value:
+        id: "123655"
+        source: https://notificationSendServer12.supertelco.com
+        type: org.camaraproject.device-roaming-status-subscriptions.v0.roaming-off
+        specversion: "1.0"
+        datacontenttype: application/json
+        data:
+          device:
+            phoneNumber: "+123456789"
+          subscriptionId: qs15-h556-rt89-1298
+        time: "2023-01-18T13:18:23.682Z"
+
+    ROAMING_ON:
+      description: Example roaming on notification
+      value:
+        id: "123656"
+        source: https://notificationSendServer12.supertelco.com
+        type: org.camaraproject.device-roaming-status-subscriptions.v0.roaming-on
+        specversion: "1.0"
+        datacontenttype: application/json
+        data:
+          device:
+            phoneNumber: "+123456789"
+          subscriptionId: qs15-h556-rt89-1298
+        time: "2023-01-19T13:18:23.682Z"
+
+    ROAMING_CHANGE_COUNTRY:
+      description: Example roaming country change notification
+      value:
+        id: "123657"
+        source: https://notificationSendServer12.supertelco.com
+        type: org.camaraproject.device-roaming-status-subscriptions.v0.roaming-change-country
+        specversion: "1.0"
+        datacontenttype: application/json
+        data:
+          device:
+            phoneNumber: "+123456789"
+          countryCode: 214
+          countryName: ["ES"]
+          subscriptionId: qs15-h556-rt89-1298
+        time: "2023-01-19T13:18:23.682Z"
+
+    SUBSCRIPTION_ENDED:
+      description: The cloud event when a device roaming status subscription ends.
+      value:
+        id: "123658"
+        source: https://notificationSendServer12.supertelco.com
+        type: org.camaraproject.device-roaming-status-subscriptions.v0.subscription-ended
+        specversion: "1.0"
+        datacontenttype: application/json
+        data:
+          device:
+            phoneNumber: "+123456789"
+          terminationReason: SUBSCRIPTION_EXPIRED
+          subscriptionId: qs15-h556-rt89-1298
+        time: "2023-01-19T13:18:23.682Z"
+
+    SUBSCRIPTION_STARTED:
+      description: The cloud event when a device roaming status subscription was started.
+      value:
+        id: "124003"
+        source: https://notificationSendServer12.supertelco.com
+        type: org.camaraproject.device-roaming-status-subscriptions.v0.subscription-started
+        specversion: "1.0"
+        datacontenttype: application/json
+        data:
+          initiationReason: SUBSCRIPTION_CREATED
+          subscriptionId: qs15-h556-rt89-1298
+          device:
+            phoneNumber: "+123456789"
+        time: "2024-03-05T15:00:23.682Z"
+
+    SUBSCRIPTION_UPDATED:
+      description: The cloud event when a device roaming status subscription was updated.
+      value:
+        id: "124773"
+        source: https://notificationSendServer12.supertelco.com
+        type: org.camaraproject.device-roaming-status-subscriptions.v0.subscription-updated
+        specversion: "1.0"
+        datacontenttype: application/json
+        data:
+          updateReason: SUBSCRIPTION_ACTIVE
+          subscriptionId: qs15-h556-rt89-1298
+          device:
+            phoneNumber: "+123456789"
+        time: "2024-03-05T15:00:23.682Z"
+
+    ACTIVE_SUBSCRIPTION:
+      description: Example of the details of an active subscription
+      value:
+        id: 550e8400-e29b-41d4-a716-446655440000
+        sink: https://endpoint.example.com/sink
+        protocol: HTTP
+        types:
+          - "org.camaraproject.device-roaming-status-subscriptions.v0.roaming-on"
+        config:
+          subscriptionDetail: {}
+          subscriptionExpireTime: "2024-07-17T13:18:23.682Z"
+          subscriptionMaxEvents: 5
+          initialEvent: true
+        startsAt: "2024-07-03T21:12:02.871Z"
+        expiresAt: "2024-07-03T21:12:02.871Z"
+        status: ACTIVE
+
+    ACTIVE_SUBSCRIPTION_WITH_DEVICE_DISAMBIGUATION:
+      description: Example of the details of an active subscription including the device identifier
+      value:
+        id: 550e8400-e29b-41d4-a716-446655440000
+        sink: https://endpoint.example.com/sink
+        protocol: HTTP
+        types:
+          - "org.camaraproject.device-roaming-status-subscriptions.v0.roaming-on"
+        config:
+          subscriptionDetail:
+            device:
+              phoneNumber: "+123456789"
+          subscriptionExpireTime: "2024-07-17T13:18:23.682Z"
+          subscriptionMaxEvents: 5
+          initialEvent: true
+        startsAt: "2024-07-03T21:12:02.871Z"
+        expiresAt: "2024-07-03T21:12:02.871Z"
+        status: ACTIVE
+
+    SUBSCRIPTION_ACTIVATION_REQUESTED:
+      description: Example of the details of a subscription whose activation has been requested
+      value:
+        id: 550e8400-e29b-41d4-a716-446655440000
+        sink: https://endpoint.example.com/sink
+        protocol: HTTP
+        types:
+          - "org.camaraproject.device-roaming-status-subscriptions.v0.roaming-on"
+        config:
+          subscriptionDetail: {}
+          subscriptionExpireTime: "2024-07-17T13:18:23.682Z"
+          subscriptionMaxEvents: 5
+          initialEvent: true
+        startsAt: "2024-07-03T21:12:02.871Z"
+        expiresAt: "2024-07-03T21:12:02.871Z"
+        status: ACTIVATION_REQUESTED
+
+    SUBSCRIPTION_DELETED:
+      description: Example of the details of a subscription which has been deleted
+      value:
+        id: 550e8400-e29b-41d4-a716-446655440000
+        sink: https://endpoint.example.com/sink
+        protocol: HTTP
+        types:
+          - "org.camaraproject.device-roaming-status-subscriptions.v0.roaming-on"
+        config:
+          subscriptionDetail: {}
+          subscriptionExpireTime: "2024-07-17T13:18:23.682Z"
+          subscriptionMaxEvents: 5
+          initialEvent: true
+        startsAt: "2024-07-03T21:12:02.871Z"
+        expiresAt: "2024-07-03T21:12:02.871Z"
+        status: DELETED
+
+    CREATE_SUBSCRIPTION:
+      description: Example request body to create a subscription
+      value:
+        sink: "https://endpoint.example.com/sink"
+        sinkCredential:
+          credentialType: "ACCESSTOKEN"
+          accessToken: "xxx"
+          accessTokenExpiresUtc: "2024-02-17T16:23:45Z"
+          accessTokenType: "bearer"
+        protocol: HTTP
+        types:
+          - "org.camaraproject.device-roaming-status-subscriptions.v0.roaming-status"
+        config:
+          subscriptionDetail:
+            device:
+              phoneNumber: "+123456789"
+          subscriptionExpireTime: "2023-01-17T13:18:23.682Z"
+          subscriptionMaxEvents: 5
+          initialEvent: true
+
+    SUBSCRIPTION_LIST:
+      description: A list of API consumer subscriptions. If a 3-legged access token is used, the list is specific to the device associated with that token.
+      value:
+        subscriptions:
+          - id: 550e8400-e29b-41d4-a716-446655440000
+            sink: https://endpoint.example.com/sink
+            protocol: HTTP
+            types:
+              - "org.camaraproject.device-roaming-status-subscriptions.v0.roaming-on"
+            config:
+              subscriptionDetail: {}
+              subscriptionExpireTime: "2024-07-17T13:18:23.682Z"
+              subscriptionMaxEvents: 5
+              initialEvent: true
+            startsAt: "2024-07-03T21:12:02.871Z"
+            expiresAt: "2024-07-03T21:12:02.871Z"
+            status: ACTIVE
+        pagination:
+          page: 1
+          perPage: 1
+          totalCount: 1
+          totalPages: 1
+
+    EMPTY_SUBSCRIPTION_LIST:
+      description: The API consumer either has no subscriptions or, if a 3-legged access token is used, has none for the device associated with that token.
+      value:
+        subscriptions: []
+        pagination:
+          page: 1
+          perPage: 1
+          totalCount: 0
+          totalPages: 1

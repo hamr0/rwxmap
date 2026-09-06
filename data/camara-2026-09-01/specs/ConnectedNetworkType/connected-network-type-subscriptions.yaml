@@ -1,0 +1,897 @@
+openapi: 3.0.3
+info:
+  title: Connected Network Type Subscriptions
+  description: |
+    This API provides the API consumer with the ability to subscribe to notifications on changes to the connected network type of a device.
+
+    # Introduction
+
+    ## Connected Network Type Subscription
+    API consumers can subscribe to receive notifications when the connected network type of a device changes. These notifications are delivered through CloudEvents.
+
+    # Relevant terms and definitions
+
+    * **Device**: A device refers to any physical entity that can connect to a network and participate in network communication.
+
+        At least one identifier for the device out of four options must be provided: IPv4 address, IPv6 address, Phone number, or Network Access Identifier assigned by the mobile network operator for the device. Where more than one device identifier is provided, only one identifier will be selected by the implementation and this choice indicated to the API consumer in the session creation response.
+
+        Note: Network Access Identifier is defined for future use and will not be supported with this version of the API.
+
+    * **Connected Network Type**: This Type identifies the mobile technology of the network that the device is connected to (e.g. 4G, 5G, etc). It is the same as what is displayed on the device (e.g. on mobile phones). When the device moves across different areas of the network, the technology may change. As each technology is different, network capabilities may differ and MUST be checked with the API provider.
+       - `2G`: if device is connected to the 2G network technology (alternative indicators such as "G" or "E" may be displayed on the device)
+       - `3G`: if device is connected to the 3G network technology (alternative indicators such as "H" or "H+" may be displayed on the device)
+       - `4G`: if device is connected to the 4G network technology (alternative indicators such as "LTE" or "LTE+" may be displayed on the device)
+       - `5G`: if device is connected to the 5G network technology
+       - `UNKNOWN`: if connection technology can not be determined
+
+    # API Functionality
+
+    The API exposes following capabilities:
+
+    ## Connected Network Type Subscription Management
+
+    These endpoints allow you to manage subscriptions for receiving notifications on changes to the connected network type of a device.
+    The CAMARA subscription model is detailed in the CAMARA API design guideline document and follows CloudEvents specification.
+
+    It is mandatory in the subscription to provide the event `type` for which the client would like to subscribe.
+
+    Following event ``type`` are managed for this API:
+      - ``org.camaraproject.connected-network-type-subscriptions.v0.network-type-changed``: This event is triggered when the connected network type of the device changes.
+
+    Note: Additionally, the following events could be sent, which do not require a dedicated subscription:
+      - `org.camaraproject.connected-network-type-subscriptions.v0.subscription-started` is sent when the subscription starts.
+      - `org.camaraproject.connected-network-type-subscriptions.v0.subscription-updated` is sent when the subscription is updated.
+      - `org.camaraproject.connected-network-type-subscriptions.v0.subscription-ended` is sent when the subscription ends.
+
+    It is used in following cases:
+      - the subscription expire time (optionally set by the requester) has been reached
+      - the maximum number of subscription events (optionally set by the requester) has been reached
+      - the subscription was deleted by the requester
+      - the Access Token `sinkCredential` (optionally set by the requester) expiration time has been reached
+      - the API server has to stop sending notification prematurely
+
+    **Note on combined usage of ``initialEvent`` and ``subscriptionMaxEvents``**:
+
+    If an event is triggered following ``initialEvent`` set to true,
+    this event will be counted towards ``subscriptionMaxEvents`` (if provided).
+
+    **Clarification on ``initialEvent`` & ``event-type`` behaviour:**
+
+    When ``initialEvent`` is set to ``true`` in the subscription request, a notification has to be sent immediately to provide the connected network type of the device targeted.
+    Note: If the status can not be determined, or if the device is not connected, we send an initial event with ``connectedNetworkType`` valued to`UNKNOWN`.
+
+    ### Notifications callback
+
+    This endpoint describes the event notification received on subscription listener side when the event occurred.
+    As for subscription, detailed description of the event notification is provided in the CAMARA API design guideline document.
+
+    _**WARNING**: This callback endpoint must be exposed on the consumer side as `POST /{$request.body#/sink}`.
+      Developers may provide a callback URL on which notifications regarding connected network type can be received from the service provider.
+      If an event occurs the application will send events to the provided webhook - 'sink'._
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    <!-- CAMARA:MANDATORY:identifying-device-from-access-token:BEGIN -->
+
+    # Identifying the device from the access token
+
+    This API requires the API consumer to identify a device as the subject of the API as follows:
+    - When the API is invoked using a two-legged access token, the subject will be identified from the optional `device` object, which therefore MUST be provided.
+    - When a three-legged access token is used however, this optional identifier MUST NOT be provided, as the subject will be uniquely identified from the access token.
+
+    This approach simplifies API usage for API consumers using a three-legged access token to invoke the API by relying on the information that is associated with the access token and was identified during the authentication process.
+
+    ## Error handling:
+
+    - If the subject cannot be identified from the access token and the optional `device` object is not included in the request, then the server will return an error with the `422 MISSING_IDENTIFIER` error code.
+
+    - If the subject can be identified from the access token and the optional `device` object is also included in the request, then the server will return an error with the `422 UNNECESSARY_IDENTIFIER` error code. This will be the case even if the same device is identified by these two methods, as the server is unable to make this comparison.
+    <!-- CAMARA:MANDATORY:identifying-device-from-access-token:END -->
+
+    # Multi-SIM scenario handling
+
+    In multi-SIM scenarios where more than one mobile device is associated with a phone number (e.g. a smartphone with an associated smartwatch), it might not be possible to uniquely identify from that phone number the device for which connected network type notifications should be generated. If the phone number is used as the device identifier when creating a subscription in a multi-SIM scenario, the API may:
+    - respond with an error, or
+    - generate network type change notifications for the multi-SIM group as a whole, or
+    - generate network type change notifications for a single device in the multi-SIM group, which may not be the intended device.
+
+    Possible solutions in such a scenario include:
+    - Using the authorisation code flow to obtain an access token, which will automatically identify the intended device
+    - Identifying the intended device from a unique identifier for that device, such as its source IP address and port
+    - Check with the SIM provider whether a unique "secondary" phone number is already associated with each device, and use the secondary phone number to identify the intended device if available.
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: wip
+  x-camara-commonalities: wip
+
+externalDocs:
+  description: Product documentation at Camara
+  url: https://github.com/camaraproject/ConnectedNetworkType
+
+servers:
+  - url: "{apiRoot}/connected-network-type-subscriptions/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+
+tags:
+  - name: Connected Network Type Subscription
+    description: Operations to manage subscriptions for receiving notifications on changes to the connected network type of a device.
+
+paths:
+  /subscriptions:
+    post:
+      tags:
+        - Connected Network Type Subscription
+      summary: "Create a subscription for receiving notifications on changes to the connected network type of a device"
+      description: Create a subscription for receiving notifications on changes to the connected network type of a device.
+      operationId: createConnectedNetworkTypeSubscription
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+      security:
+        - openId:
+            - connected-network-type-subscriptions:org.camaraproject.connected-network-type-subscriptions.v0.network-type-changed:create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubscriptionRequest"
+            examples:
+              Create Subscription:
+                $ref: "#/components/examples/CREATE_SUBSCRIPTION"
+
+      callbacks:
+        notifications:
+          "{$request.body#/sink}":
+            post:
+              summary: "notifications callback"
+              description: |
+                Important: this endpoint is to be implemented by the API consumer.
+                The connectivity network type status server will call this endpoint whenever the connected network type of the device changes.
+              operationId: postNotification
+              parameters:
+                - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+              requestBody:
+                required: true
+                content:
+                  application/cloudevents+json:
+                    schema:
+                      $ref: "#/components/schemas/NotificationEvent"
+                    examples:
+                      network-type-changed:
+                        $ref: "#/components/examples/NETWORK_TYPE_CHANGED"
+                      subscription-started:
+                        $ref: "#/components/examples/SUBSCRIPTION_STARTED"
+                      subscription-updated:
+                        $ref: "#/components/examples/SUBSCRIPTION_UPDATED"
+                      subscription-ended:
+                        $ref: "#/components/examples/SUBSCRIPTION_ENDED"
+              responses:
+                "204":
+                  description: Successful notification
+                  headers:
+                    x-correlator:
+                      $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+                "400":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+                "401":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+                "403":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+                "410":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic410"
+                "429":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+              security:
+                - {}
+                - notificationsBearerAuth: []
+
+      responses:
+        "201":
+          description: Created (Successful creation of subscription)
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+              examples:
+                active-subscription:
+                  $ref: "#/components/examples/ACTIVE_SUBSCRIPTION"
+                active-subscription-with-device-identifier:
+                  $ref: "#/components/examples/ACTIVE_SUBSCRIPTION_WITH_DEVICE_IDENTIFIER"
+        "202":
+          description: Request accepted to be processed. It applies for async creation process.
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionAsync"
+        "400":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/CreateSubscriptionBadRequest400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/SubscriptionPermissionDenied403"
+        "409":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic409"
+        "422":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/CreateSubscriptionUnprocessableEntity422"
+        "429":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+
+    get:
+      tags:
+        - Connected Network Type Subscription
+      summary: "Retrieve a list of device connected network type event subscription"
+      description: Retrieve a list of device connected network type event subscription(s)
+      operationId: retrieveConnectedNetworkTypeSubscriptionList
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/page"
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/perPage"
+      security:
+        - openId:
+            - connected-network-type-subscriptions:read
+      responses:
+        "200":
+          description: List of event subscription details
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+            X-Total-Count:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-total-count"
+            X-Total-Pages:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-total-pages"
+            Link:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/link"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionList"
+              examples:
+                list-of-subscriptions:
+                  $ref: "#/components/examples/SUBSCRIPTION_LIST"
+                empty-list-of-subscriptions:
+                  $ref: "#/components/examples/EMPTY_SUBSCRIPTION_LIST"
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+
+  /subscriptions/{subscriptionId}:
+    get:
+      tags:
+        - Connected Network Type Subscription
+      summary: "Retrieve a device connected network type event subscription for a device"
+      description: retrieve ConnectedNetworkType subscription information for a given subscription ID.
+      operationId: retrieveConnectedNetworkTypeSubscription
+      security:
+        - openId:
+            - connected-network-type-subscriptions:read
+      parameters:
+        - $ref: "#/components/parameters/SubscriptionId"
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+      responses:
+        "200":
+          description: OK
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+              examples:
+                active-subscription:
+                  $ref: "#/components/examples/ACTIVE_SUBSCRIPTION"
+                active-subscription-with-device-identifier:
+                  $ref: "#/components/examples/ACTIVE_SUBSCRIPTION_WITH_DEVICE_IDENTIFIER"
+                subscription-activation-requested:
+                  $ref: "#/components/examples/SUBSCRIPTION_ACTIVATION_REQUESTED"
+                subscription-deleted:
+                  $ref: "#/components/examples/SUBSCRIPTION_DELETED"
+        "400":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/SubscriptionIdRequired400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+
+    delete:
+      tags:
+        - Connected Network Type Subscription
+      summary: "Delete connected network type event subscription for a device"
+      operationId: deleteConnectedNetworkTypeSubscription
+      description: delete a given ConnectedNetworkType subscription.
+      security:
+        - openId:
+            - connected-network-type-subscriptions:delete
+      parameters:
+        - $ref: "#/components/parameters/SubscriptionId"
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+      responses:
+        "204":
+          description: ConnectedNetworkType subscription deleted
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+        "202":
+          description: Request accepted to be processed. It applies for async deletion process.
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionAsync"
+        "400":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/SubscriptionIdRequired400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+
+components:
+  securitySchemes:
+    openId:
+      $ref: "../common/CAMARA_common.yaml#/components/securitySchemes/openId"
+    notificationsBearerAuth:
+      $ref: "../common/CAMARA_event_common.yaml#/components/securitySchemes/notificationsBearerAuth"
+
+  parameters:
+    SubscriptionId:
+      name: subscriptionId
+      in: path
+      description: Subscription identifier that was obtained from the create event subscription operation
+      required: true
+      schema:
+        $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionId"
+
+  schemas:
+    CreateSubscriptionDetailLocal:
+      description: The detail of the requested event subscription.
+      type: object
+      properties:
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Device"
+
+    ConfigLocal:
+      description: Config schema allowing for device to be specified as part of subscription detail
+      allOf:
+        - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/Config"
+        - type: object
+          properties:
+            subscriptionDetail:
+              $ref: "#/components/schemas/CreateSubscriptionDetailLocal"
+
+    ApiEventType:
+      type: string
+      description: |
+        network-type-changed - Event triggered when the connected network type of the device changes.
+      enum:
+        - org.camaraproject.connected-network-type-subscriptions.v0.network-type-changed
+
+    ApiNotificationEvent:
+      description: |
+        API-specific notification event group.
+        Extends the CloudEvent envelope and constrains `type` to the set of
+        event types defined by this API project.
+        Adding a new event type only requires updating ApiEventType and the
+        discriminator mapping below — the CloudEvent base never changes.
+      allOf:
+        - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/CloudEvent"
+        - type: object
+          properties:
+            type:
+              $ref: "#/components/schemas/ApiEventType"
+      discriminator:
+        propertyName: "type"
+        mapping:
+          org.camaraproject.connected-network-type-subscriptions.v0.network-type-changed: "#/components/schemas/EventNetworkTypeChange"
+
+    NotificationEvent:
+      description: |
+        Union of all valid notification event groups at the callback endpoint.
+        This schema owns no discriminator — routing within each group is
+        handled by ApiNotificationEvent and SubscriptionLifecycleEvent
+        respectively. Its only responsibility is to enumerate which groups
+        are valid payloads for this API's notification callback.
+      oneOf:
+        - $ref: "#/components/schemas/ApiNotificationEvent"
+        - $ref: "#/components/schemas/SubscriptionLifecycleEvent"
+
+    Subscription:
+      description: Represents a event-type subscription.
+      type: object
+      required:
+        - sink
+        - protocol
+        - config
+        - types
+        - id
+      properties:
+        protocol:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/Protocol"
+        sink:
+          $ref: "#/components/schemas/Sink"
+        sinkCredential:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SinkCredential"
+        types:
+          description: |
+            Camara Event types eligible to be delivered by this subscription.
+            Note: For the current Commonalities API design guidelines, only one event type per subscription is allowed
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: "#/components/schemas/ApiEventType"
+        config:
+          $ref: "#/components/schemas/ConfigLocal"
+        id:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionId"
+        startsAt:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DateTime"
+        expiresAt:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DateTime"
+        status:
+          type: string
+          description: |-
+            Current status of the subscription - Management of Subscription State engine is not mandatory for now. Note not all statuses may be considered to be implemented. Details:
+              - `ACTIVATION_REQUESTED`: Subscription creation (POST) is triggered but subscription creation process is not finished yet.
+              - `ACTIVE`: Subscription creation process is completed. Subscription is fully operative.
+              - `INACTIVE`: Subscription is temporarily inactive, but its workflow logic is not deleted.
+              - `EXPIRED`: Subscription is ended (no longer active). This status applies when subscription is ended due to `SUBSCRIPTION_EXPIRED` or `ACCESS_TOKEN_EXPIRED` event.
+              - `DELETED`: Subscription is ended as deleted (no longer active). This status applies when subscription information is kept (i.e. subscription workflow is no longer active but its meta-information is kept).
+          enum:
+            - ACTIVATION_REQUESTED
+            - ACTIVE
+            - EXPIRED
+            - INACTIVE
+            - DELETED
+      discriminator:
+        propertyName: protocol
+        mapping:
+          HTTP: '#/components/schemas/HTTPSubscriptionResponse'
+          # Future protocol support (not yet used in CAMARA):
+          # MQTT3: "#/components/schemas/MQTTSubscriptionResponse"
+          # MQTT5: "#/components/schemas/MQTTSubscriptionResponse"
+          # AMQP: "#/components/schemas/AMQPSubscriptionResponse"
+          # NATS: "#/components/schemas/NATSSubscriptionResponse"
+          # KAFKA: "#/components/schemas/ApacheKafkaSubscriptionResponse"
+      example:
+        id: 550e8400-e29b-41d4-a716-446655440000
+        sink: https://endpoint.example.com/sink
+        protocol: HTTP
+        types:
+          - "org.camaraproject.connected-network-type-subscriptions.v0.network-type-changed"
+        config:
+          subscriptionDetail:
+            device:
+              phoneNumber: "+123456789"
+          subscriptionExpireTime: "2024-07-17T13:18:23.682Z"
+          subscriptionMaxEvents: 5
+          initialEvent: true
+        startsAt: "2024-07-03T21:12:02.871Z"
+        expiresAt: "2024-07-03T21:12:02.871Z"
+        status: ACTIVE
+
+    SubscriptionRequest:
+      description: The request for creating a event-type event subscription
+      type: object
+      required:
+        - sink
+        - protocol
+        - config
+        - types
+      properties:
+        protocol:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/Protocol"
+        sink:
+          $ref: "#/components/schemas/Sink"
+        sinkCredential:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SinkCredential"
+        types:
+          description: |
+            Camara Event types eligible to be delivered by this subscription.
+            Note: As of now we enforce to have only event type per subscription.
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: "#/components/schemas/ApiEventType"
+        config:
+          $ref: "#/components/schemas/ConfigLocal"
+      discriminator:
+        propertyName: protocol
+        mapping:
+          HTTP: "#/components/schemas/HTTPSubscriptionRequest"
+          # Future protocol support (not yet used in CAMARA):
+          # MQTT3: "#/components/schemas/MQTTSubscriptionRequest"
+          # MQTT5: "#/components/schemas/MQTTSubscriptionRequest"
+          # AMQP: "#/components/schemas/AMQPSubscriptionRequest"
+          # NATS: "#/components/schemas/NATSSubscriptionRequest"
+          # KAFKA: "#/components/schemas/ApacheKafkaSubscriptionRequest"
+
+    SubscriptionAsync:
+      description: Response for a event-type subscription request managed asynchronously (Creation or Deletion)
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionId"
+
+    SubscriptionList:
+      description: Response with subscriptions list
+      type: object
+      required:
+        - subscriptions
+        - pagination
+      properties:
+        subscriptions:
+          description: Subscriptions list
+          type: array
+          minItems: 0
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/Subscription"
+        pagination:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Pagination"
+
+    SubscriptionLifecycleEvent:
+      description: |
+        Subscription lifecycle event group, common to all CAMARA APIs that
+        support explicit subscriptions.
+        Extends the CloudEvent envelope and constrains `type` to the set of
+        lifecycle event types managed by Commonalities.
+      allOf:
+        - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/CloudEvent"
+        - type: object
+          properties:
+            type:
+              $ref: "#/components/schemas/SubscriptionLifecycleEventType"
+      discriminator:
+        propertyName: type
+        mapping:
+          org.camaraproject.connected-network-type-subscriptions.v0.subscription-started: "#/components/schemas/EventSubscriptionStarted"
+          org.camaraproject.connected-network-type-subscriptions.v0.subscription-updated: "#/components/schemas/EventSubscriptionUpdated"
+          org.camaraproject.connected-network-type-subscriptions.v0.subscription-ended: "#/components/schemas/EventSubscriptionEnded"
+
+    SubscriptionLifecycleEventType:
+      type: string
+      description: |
+        Enum of subscription lifecycle event type strings.
+        These are managed by Commonalities and are identical across all CAMARA
+        APIs that support explicit subscriptions.
+        Kept as a separate named schema so the set of valid lifecycle type
+        strings can be referenced independently from the discriminated schema.
+      enum:
+        - org.camaraproject.connected-network-type-subscriptions.v0.subscription-started
+        - org.camaraproject.connected-network-type-subscriptions.v0.subscription-updated
+        - org.camaraproject.connected-network-type-subscriptions.v0.subscription-ended
+
+    ConnectedNetworkType:
+      type: string
+      description: Network Type is intended to provide insight to connected network's capabilities from standards perspective. Actual network capabilities may differ based on implementation and MUST be checked with the connected network provider.
+      enum:
+        - 2G
+        - 3G
+        - 4G
+        - 5G
+        - UNKNOWN
+
+    EventNetworkTypeChange:
+      description: event structure for network type change
+      allOf:
+        - $ref: "#/components/schemas/ApiNotificationEvent"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/EventNetworkTypeChangeData"
+
+    EventNetworkTypeChangeData:
+      description: Event detail structure for network type changed data events
+      type: object
+      required:
+        - connectedNetworkType
+        - subscriptionId
+      properties:
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+        connectedNetworkType:
+          $ref: "#/components/schemas/ConnectedNetworkType"
+        subscriptionId:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionId"
+
+    EventSubscriptionStarted:
+      description: event structure for event subscription started
+      allOf:
+        - $ref: "#/components/schemas/SubscriptionLifecycleEvent"
+        - type: object
+          properties:
+            data:
+              allOf:
+                - type: object
+                  properties:
+                    device:
+                      $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+                - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionStarted"
+
+    EventSubscriptionUpdated:
+      description: event structure for event subscription updated
+      allOf:
+        - $ref: "#/components/schemas/SubscriptionLifecycleEvent"
+        - type: object
+          properties:
+            data:
+              allOf:
+                - type: object
+                  properties:
+                    device:
+                      $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+                - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionUpdated"
+
+    EventSubscriptionEnded:
+      description: event structure for event subscription ended
+      allOf:
+        - $ref: "#/components/schemas/SubscriptionLifecycleEvent"
+        - type: object
+          properties:
+            data:
+              allOf:
+                - type: object
+                  properties:
+                    device:
+                      $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+                - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionEnded"
+
+    Sink:
+      description: The address to which events shall be delivered using the selected protocol.
+      type: string
+      format: uri
+      maxLength: 2048
+      pattern: ^https:\/\/.+$
+      example: "https://endpoint.example.com/sink"
+
+    HTTPSubscriptionRequest:
+      description: Subscription request for HTTP-based event delivery.
+      allOf:
+        - $ref: "#/components/schemas/SubscriptionRequest"
+        - type: object
+          properties:
+            protocolSettings:
+              $ref: "../common/CAMARA_event_common.yaml#/components/schemas/HTTPSettings"
+
+    HTTPSubscriptionResponse:
+      description: Subscription resource returned for HTTP-based event delivery.
+      allOf:
+        - $ref: "#/components/schemas/Subscription"
+        - type: object
+          properties:
+            protocolSettings:
+              $ref: "../common/CAMARA_event_common.yaml#/components/schemas/HTTPSettings"
+
+  examples:
+    NETWORK_TYPE_CHANGED:
+      description: The cloud event when a connected network type changed
+      value:
+        id: "123655"
+        source: https://notificationSendServer12.supertelco.com
+        type: "org.camaraproject.connected-network-type-subscriptions.v0.network-type-changed"
+        specversion: "1.0"
+        datacontenttype: application/json
+        data:
+          subscriptionId: "987654321"
+          device:
+            phoneNumber: "+123456789"
+          connectedNetworkType: 5G
+        time: "2023-03-22T05:40:23.682Z"
+
+    SUBSCRIPTION_ENDED:
+      description: The cloud event when a connected network type subscription ends
+      value:
+        id: "124003"
+        source: https://dataUsageServer.supertelco.com
+        type: "org.camaraproject.connected-network-type-subscriptions.v0.subscription-ended"
+        specversion: "1.0"
+        datacontenttype: application/json
+        data:
+          device:
+            phoneNumber: "+123456789"
+          terminationReason: SUBSCRIPTION_EXPIRED
+          subscriptionId: dv10-h556-rt89-1403
+          terminationDescription: Subscription expiry time has been reached
+        time: "2024-03-05T15:00:23.682Z"
+
+    SUBSCRIPTION_ACTIVATION_REQUESTED:
+      description: Subscription details for a subscription whose activation has been requested
+      value:
+        id: 550e8400-e29b-41d4-a716-446655440000
+        sink: https://endpoint.example.com/sink
+        protocol: HTTP
+        types:
+          - "org.camaraproject.connected-network-type-subscriptions.v0.network-type-changed"
+        config:
+          subscriptionDetail: {}
+          subscriptionExpireTime: "2024-07-17T13:18:23.682Z"
+          subscriptionMaxEvents: 5
+          initialEvent: true
+        startsAt: "2024-07-03T21:12:02.871Z"
+        expiresAt: "2024-07-03T21:12:02.871Z"
+        status: ACTIVATION_REQUESTED
+
+    SUBSCRIPTION_DELETED:
+      description: Subscription details for a subscription that has been deleted
+      value:
+        id: 550e8400-e29b-41d4-a716-446655440000
+        sink: https://endpoint.example.com/sink
+        protocol: HTTP
+        types:
+          - "org.camaraproject.connected-network-type-subscriptions.v0.network-type-changed"
+        config:
+          subscriptionDetail: {}
+          subscriptionExpireTime: "2024-07-17T13:18:23.682Z"
+          subscriptionMaxEvents: 5
+          initialEvent: true
+        startsAt: "2024-07-03T21:12:02.871Z"
+        expiresAt: "2024-07-03T21:12:02.871Z"
+        status: DELETED
+
+    SUBSCRIPTION_STARTED:
+      description: The cloud event when a connected network type subscription was started.
+      value:
+        id: "124003"
+        source: https://notificationSendServer12.supertelco.com
+        type: org.camaraproject.connected-network-type-subscriptions.v0.subscription-started
+        specversion: "1.0"
+        datacontenttype: application/json
+        data:
+          initiationReason: SUBSCRIPTION_CREATED
+          subscriptionId: qs15-h556-rt89-1298
+          device:
+            phoneNumber: "+123456789"
+        time: "2024-03-05T15:00:23.682Z"
+
+    SUBSCRIPTION_UPDATED:
+      description: The cloud event when a connected network type subscription was updated.
+      value:
+        id: "124773"
+        source: https://notificationSendServer12.supertelco.com
+        type: org.camaraproject.connected-network-type-subscriptions.v0.subscription-updated
+        specversion: "1.0"
+        datacontenttype: application/json
+        data:
+          updateReason: SUBSCRIPTION_ACTIVE
+          subscriptionId: qs15-h556-rt89-1298
+          device:
+            phoneNumber: "+123456789"
+        time: "2024-03-05T15:00:23.682Z"
+
+    ACTIVE_SUBSCRIPTION:
+      description: Subscription details for an active subscription
+      value:
+        id: 550e8400-e29b-41d4-a716-446655440000
+        sink: https://endpoint.example.com/sink
+        protocol: HTTP
+        types:
+          - "org.camaraproject.connected-network-type-subscriptions.v0.network-type-changed"
+        config:
+          subscriptionDetail: {}
+          subscriptionExpireTime: "2024-07-17T13:18:23.682Z"
+          subscriptionMaxEvents: 5
+          initialEvent: true
+        status: ACTIVE
+        startsAt: "2024-07-03T21:12:02.871Z"
+        expiresAt: "2024-07-03T21:12:02.871Z"
+
+    ACTIVE_SUBSCRIPTION_WITH_DEVICE_IDENTIFIER:
+      description: Subscription details for an active subscription when a device identifier is also returned
+      value:
+        id: 550e8400-e29b-41d4-a716-446655440000
+        sink: https://endpoint.example.com/sink
+        protocol: HTTP
+        types:
+          - "org.camaraproject.connected-network-type-subscriptions.v0.network-type-changed"
+        config:
+          subscriptionDetail:
+            device:
+              phoneNumber: "+123456789"
+          subscriptionExpireTime: "2024-07-17T13:18:23.682Z"
+          subscriptionMaxEvents: 5
+          initialEvent: true
+        status: ACTIVE
+        startsAt: "2024-07-03T21:12:02.871Z"
+        expiresAt: "2024-07-03T21:12:02.871Z"
+
+    CREATE_SUBSCRIPTION:
+      description: Subscription creation confirmation
+      value:
+        sink: "https://endpoint.example.com/sink"
+        sinkCredential:
+          credentialType: "ACCESSTOKEN"
+          accessToken: "xxx"
+          accessTokenExpiresUtc: "2024-02-17T16:23:45Z"
+          accessTokenType: "bearer"
+        protocol: HTTP
+        types:
+          - "org.camaraproject.connected-network-type-subscriptions.v0.network-type-changed"
+        config:
+          subscriptionDetail:
+            device:
+              phoneNumber: "+123456789"
+          subscriptionExpireTime: "2023-01-17T13:18:23.682Z"
+          subscriptionMaxEvents: 5
+          initialEvent: true
+
+    SUBSCRIPTION_LIST:
+      description: A list of API consumer subscriptions. If a 3-legged access token is used, the list is specific to the device associated with that token.
+      value:
+        subscriptions:
+          - id: 550e8400-e29b-41d4-a716-446655440000
+            sink: https://endpoint.example.com/sink
+            protocol: HTTP
+            types:
+              - "org.camaraproject.connected-network-type-subscriptions.v0.network-type-changed"
+            config:
+              subscriptionDetail: {}
+              subscriptionExpireTime: "2024-07-17T13:18:23.682Z"
+              subscriptionMaxEvents: 5
+              initialEvent: true
+            startsAt: "2024-07-03T21:12:02.871Z"
+            expiresAt: "2024-07-03T21:12:02.871Z"
+            status: ACTIVE
+        pagination:
+          page: 1
+          perPage: 1
+          totalCount: 1
+          totalPages: 1
+
+    EMPTY_SUBSCRIPTION_LIST:
+      description: The API consumer either has no subscriptions or, if a 3-legged access token is used, has none for the device associated with that token.
+      value:
+        subscriptions: []
+        pagination:
+          page: 1
+          perPage: 1
+          totalCount: 0
+          totalPages: 1

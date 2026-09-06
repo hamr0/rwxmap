@@ -1,0 +1,659 @@
+openapi: 3.0.3
+info:
+  title: Blockchain Public Address
+  description: |-
+    This API allows the API consumer to manage Blockchain Public Address associated with a mobile phone number.
+
+    # Relevant Definitions and concepts
+    - **Blockchain Public Address**: Unique string of code used by individuals that can be used to send, receive, and store digital assets (e.g. payments in cryptocurrencies, smart contracts, NFT (Non-Fungible Tokens), etc.) on a blockchain network
+    to receive or request payments in cryptocurrency.
+
+    # API Functionality
+    This API allows the API consumer to manage a Blockchain Public Address associated with a mobile phone number, i.e.: to retrieve the Blockchain Public Address(es) and to bind/unbind a Blockchain Public Address.
+
+    # Resources and Operations overview
+    This API provides three endpoints:
+     - **Endpoint to retrieve the Blockchain Public Address(es) associated with a mobile phone number sent as input**. The Blockchain Public Address is information made available by the user, in association to their mobile phone number. Then, this endpoint may be accessed in 2-legged or in 3-legged mode. Even in 3-legged mode, the mobile phone number included as input field does not need to belong to the `sub` (representing the User) for which the Access Token is issued. This will enable a user to ask for the Blockchain Public Address(es) of any mobile phone number, in order to perform a transaction with one of the available ones (send or request).
+     - **Endpoint to associate a mobile phone number with a Blockchain Public Address**. It does not matter if the mobile phone number is already bound to a Blockchain Public Address, as this operation adds a new Blockchain Public Address. This operation MUST be used with a 3-legged Access Token, and the indicated mobile phone number must belong to the `sub` (representing the User) in the Access Token; this is because only the user of the mobile phone number must be able to perform a bind. As a consequence, this operation will only work with mobile phone numbers of the Telco Operator exposing the API.
+     - **Endpoint to remove the association of a mobile phone number with a Blockchain Public Address**. This operation MUST be used with a 3-legged Access Token; this is because only the user of the mobile phone number must be able to perform an unbind. Note: Due to this, the API Server must validate that the `id` included in the request refers to a bind for a mobile phone number belonging to the `sub` (representing the User) in the Access Token. As a consequence, this operation will only work with mobile phone numbers of the Telco Operator exposing the API.
+
+    ## Enforcement of the Blockchain Public Address ownership in binding process
+
+    The enforcement of the Blockchain Public Address ownership in the binding process is optional, and it is not mandatory to use the `nonce` and `signature` fields. If the API consumer does not want to enforce this, it can simply omit these fields in the request body.
+
+    This enforcement is aimed to ensure that the Blockchain Public Address being bound to a mobile phone number is indeed owned by the user (i.e. person behind) of that mobile phone number.
+    The API consumer can request the user to sign a `nonce` off-chain, and then include the `nonce` and `signature` in the request body when binding the Blockchain Public Address. The API Server will then verify that the `signature` is valid for the given `nonce` and `blockchainPublicAddress`.
+
+    The E2E procedure is depicted in below picture:
+    ![Binding Enforcement - Off-Chain Signature](https://raw.githubusercontent.com/camaraproject/BlockchainPublicAddress/r2.2/documentation/API_documentation/resources/blockchain-public-address-binding-enforcement-off-chain-signature.png)
+
+    LEGEND:
+    - `API Server`, `Challenge Module` and `Binding Database` are functional components that represent the underlying Backend API Logic in the Telco Operator. How this CAMARA API is implemented by a Telco Operator is out of scope of this specification.
+
+    It comprises four steps:
+    - **(A) Obtain 3-Legged Access Token**: This is the regular process of obtaining a CAMARA 3-legged Access Token. CAMARA OIDC Authorization Code Flow is mentioned for illustrative purposes, other CAMARA 3-legged Access Token flows may be used. Check CAMARA Identity and Consent Management WG for details.
+    - **(B) Request a nonce from the API Server**: This is the feature provided by **_CAMARA Blockchain Public Address Validation Nonce API_**, allowing the API consumer to request a `nonce` associated to the `blockchainPublicAddress` to be signed by the user.
+    - **(C) Ask the user to sign the nonce off-chain**: The API consumer will use this `nonce` to ask the user to sign it off-chain. The user will sign the `nonce` using their private key. The API consumer will then obtain a `signature`, which is a cryptographic proof that the user owns the `blockchainPublicAddress`.
+    - **(D) Bind the Blockchain Public Address to the mobile phone number**: This step includes the `nonce` and `signature` in the request body. For signature validation, there are many options (e.g. https://ecrecover.org/, tools like `ethers.js` or `web3.js`); that is an implementation topic out of scope of this CAMARA API specification.
+
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification may not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+
+    # Further Info and Support
+
+    (FAQs will be added in a later version of the documentation)
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: wip
+  x-camara-commonalities: wip
+externalDocs:
+  description: Product documentation at Camara
+  url: https://github.com/camaraproject/BlockchainPublicAddress
+servers:
+  - url: "{apiRoot}/blockchain-public-address/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider
+tags:
+  - name: Blockchain Public Address
+    description: API operations to manage Blockchain Public Addresses
+paths:
+  /blockchain-public-addresses/retrieve-blockchains:
+    post:
+      tags:
+        - Blockchain Public Address
+      summary: Retrieves Blockchain Public Address associated with a mobile phone number.
+      description:
+        Retrieves Blockchain Public Address associated with a mobile phone number. This operation can be accessed in 3-legged and in 2-legged, notice that the mobile phone number used as input need not be related with the user or mobile phone number to which the Access
+        Token is associated; this is because the operation is intended to be used to manage Blockchain Public Address of any mobile phone number, in order to perform send or request crypto operations.
+      operationId: retrieveBlockchainPublicAddress
+      security:
+        - openId:
+            - blockchain-public-address:read
+      parameters:
+        - $ref: "#/components/parameters/x-correlator"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhoneNumber"
+        required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            x-correlator:
+              $ref: "#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                type: array
+                description: Array of Blockchain Public Addresses bound to the mobile phone number
+                items:
+                  $ref: "#/components/schemas/BlockchainPublicAddressResponse"
+              examples:
+                RetrieveBlockchainPublicAddressResponse200Example:
+                  value:
+                    - id: "90c626ce-5284-4a84-b85e-46e0ee3d0434"
+                      blockchainPublicAddress: "0x71C7656EC7ab88b098dafB451B2314C5f6d8932A"
+                      blockchainNetworkId: "evm:1"
+                      currency:
+                        - ETH
+                    - id: "5c179f50-db37-4d23-87e3-6f10c991899f"
+                      blockchainPublicAddress: "0x329CdCAAC31c934fe32322b111bE8fBd30b4FFA9"
+                      blockchainNetworkId: "evm:137"
+                      currency:
+                        - WETH
+        "400":
+          $ref: "#/components/responses/Generic400"
+        "401":
+          $ref: "#/components/responses/Generic401"
+        "403":
+          $ref: "#/components/responses/Generic403"
+        "404":
+          $ref: "#/components/responses/Generic404"
+        "429":
+          $ref: "#/components/responses/Generic429"
+  /blockchain-public-addresses:
+    post:
+      tags:
+        - Blockchain Public Address
+      summary: Binds Blockchain Public Address to a mobile phone number
+      description:
+        Binds Blockchain Public Address to a mobile phone number. If the mobile phone number is already bound to a Blockchain Public Address, this operation will add a new bound Blockchain Public Address to the mobile phone number. This operation is intended to be used
+        with a 3-legged Access Token, and the indicated mobile phone number must belong to the user identified by its `sub` in the Access Token; this is because only the user of the mobile phone number must be able to perform the bind.
+
+        Specifically for this functionality, when a binding operation indicates a `blockchainNetworkId` not allowed by Telco Operator exception `403 - BLOCKCHAIN_PUBLIC_ADDRESS.BLOCKCHAIN_NETWORK_IDENTIFIER_NOT_ALLOWED` will be generated.
+      operationId: bindBlockchainPublicAddress
+      security:
+        - openId:
+            - blockchain-public-address:create
+      parameters:
+        - $ref: "#/components/parameters/x-correlator"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BindBlockchainPublicAddressRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          headers:
+            x-correlator:
+              $ref: "#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BindBlockchainPublicAddressResponse"
+              examples:
+                BindBlockchainPublicAddressResponse201Example:
+                  value:
+                    id: "90c626ce-5284-4a84-b85e-46e0ee3d0434"
+        "400":
+          $ref: "#/components/responses/InvalidArgumentForBlockchain400"
+        "401":
+          $ref: "#/components/responses/Generic401"
+        "403":
+          $ref: "#/components/responses/PermissionDeniedForBlockchain403"
+        "404":
+          $ref: "#/components/responses/Generic404"
+        "409":
+          $ref: "#/components/responses/Generic409"
+        "422":
+          $ref: "#/components/responses/Generic422"
+        "429":
+          $ref: "#/components/responses/Generic429"
+  /blockchain-public-addresses/{id}:
+    delete:
+      tags:
+        - Blockchain Public Address
+      summary: Unbinds Blockchain Public Address association to a mobile phone number
+      description: |-
+        Unbinds Blockchain Public Address to a mobile phone number. This operation is intended to be used with a 3-legged Access Token; this is because only the user of the mobile phone number must be able to perform the unbind.
+        Note: Due to this, the API Server must validate that the `id` included in the request refers to a bind for a mobile phone number belonging to the user identified by its `sub` in the Access Token.
+      operationId: deleteBlockchainPublicAddress
+      security:
+        - openId:
+            - blockchain-public-address:delete
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/x-correlator"
+      responses:
+        "204":
+          description: No Content
+          headers:
+            x-correlator:
+              $ref: "#/components/headers/x-correlator"
+        "400":
+          $ref: "#/components/responses/Generic400"
+        "401":
+          $ref: "#/components/responses/Generic401"
+        "403":
+          $ref: "#/components/responses/Generic403"
+        "404":
+          $ref: "#/components/responses/Generic404"
+        "429":
+          $ref: "#/components/responses/Generic429"
+components:
+  securitySchemes:
+    openId:
+      type: openIdConnect
+      openIdConnectUrl: https://example.com/.well-known/openid-configuration
+  headers:
+    x-correlator:
+      description: Correlation id for the different services
+      schema:
+        $ref: "#/components/schemas/XCorrelator"
+  parameters:
+    x-correlator:
+      name: x-correlator
+      in: header
+      description: Correlation id for the different services
+      schema:
+        $ref: "#/components/schemas/XCorrelator"
+    Id:
+      name: id
+      in: path
+      description: Unique identifier given to the bind relationship of a mobile `phoneNumber` with a Blockchain Public Address.
+      required: true
+      schema:
+        type: string
+  schemas:
+    XCorrelator:
+      type: string
+      pattern: ^[a-zA-Z0-9-_:;.\/<>{}]{0,256}$
+      example: "b4333c46-49c0-4f62-80d7-f0ef930f1c46"
+    PhoneNumber:
+      type: object
+      description: Payload to retrieve the Blockchain Public Address(es) associated to a given Phone Number
+      required:
+        - phoneNumber
+      properties:
+        phoneNumber:
+          type: string
+          description: A public identifier addressing a telephone subscription. In mobile networks it corresponds to the MSISDN (Mobile Station International Subscriber Directory Number). In order to be globally unique it has to be formatted in international format, according to E.164 standard, prefixed with '+'.
+          pattern: '^\+[1-9][0-9]{4,14}$'
+    BindBlockchainPublicAddressRequest:
+      type: object
+      description: Payload to request the Bind of the Blockchain Public Address
+      required:
+        - phoneNumber
+        - blockchainPublicAddress
+        - blockchainNetworkId
+      properties:
+        phoneNumber:
+          type: string
+          description: Mobile phone number to which the Blockchain Public Address will be bound. A public identifier addressing a telephone subscription. In mobile networks it corresponds to the MSISDN (Mobile Station International Subscriber Directory Number). In order to be globally unique it has to be formatted in international format, according to E.164 standard, prefixed with '+'.
+          pattern: '^\+[1-9][0-9]{4,14}$'
+        blockchainPublicAddress:
+          type: string
+          description: User's Blockchain Public Address to bind to the mobile `phoneNumber`
+        blockchainNetworkId:
+          type: string
+          pattern: ^[a-zA-Z0-9]+:?[a-zA-Z0-9]+$
+          description: |-
+            Identifier (i.e. name/type) of the blockchain whose address value is provided within `blockchainPublicAddress`. The model proposed aims to provide an extensible way to list/identify every blockchain ecosystems.
+            Proposed format is: `<L1_Ecosystem>:<sub_id>`, where:
+
+            - `<L1_Ecosystem>`: Represents a Layer 1 Blockchain Ecosystem (e.g. ethereum, bitcoin,...)
+            - `<sub_id>`: Represents subsequents L2 and Testnet Blockchain Ecosystems, whenever they apply (e.g. bitcoin is a monolithic blockchain so as this concept does not apply)
+
+            So far, in the scope of v0.2 of this specification, the following `<L1_Ecosystem>` values are covered:
+            - `evm`: Representing a common L1 Layer concept for EVM-based networks. Within this Ecosystem, `<sub_id>` concept is required and matches the value of chainId as per [EVM ChainId](https://chainid.network/). For instance:
+              - `ethereum` blockchain would be identified by `evm:1` value (i.e. ethereum mainnet).
+              - `polygon` blockchain would be identified by `evm:137` value (i.e. polygon mainnet).
+              - `celo` blockchain would be identified by `evm:42220` value (i.e. celo mainnet).
+              - `aleph zero` blockchain would be identified by `evm:41455` value (i.e. aleph zero evm).
+            - `bitcoin`: Representing Bitcoin L1 blockchain. No `<sub_id>` concept applies for this L1 Ecosystem
+            - `solana`: Representing Solana L1 blockchain. No `<sub_id>` concept applies for this L1 Ecosystem
+            - `cardano`: Representing Cardano L1 blockchain. No `<sub_id>` concept applies for this L1 Ecosystem
+        currency:
+          type: array
+          description: List of currencies for the blockchain. Optional field (generally not needed), only indicated when there are business needs to set one or a list on currencies supported.
+          minItems: 0
+          items:
+            type: string
+        nonce:
+          type: string
+          description: |-
+            One-time challenge generated by means of endpoint `createBlockchainPublicAddressValidationNonce` of CAMARA API Blockchain Public Address Challenge.
+
+            It is used along with `signature` to perform optional enhanced enforcement to ensure blockChainPublicAddress can be associated to the phoneNumber as it belongs to the owner of the blockChainPublicAddress.
+        signature:
+          type: string
+          description: |-
+            Unique distinctive generated as a result of asking the user to sign the nonce off-chain.
+
+            It is used along with `nonce` to perform optional enhanced enforcement to ensure blockChainPublicAddress can be associated to the the phoneNumber as it belongs to the owner of the blockChainPublicAddress.
+      example:
+        phoneNumber: "+346789990012"
+        blockchainPublicAddress: "0x71C7656EC7ab88b098dafB451B2314C5f6d8932A"
+        blockchainNetworkId: "evm:1"
+        currency:
+          - ETH
+    BindBlockchainPublicAddressResponse:
+      type: object
+      description: Bind Blockchain Public Address response
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Unique identifier given to the bind relationship of a mobile `phoneNumber` with a Blockchain Public Address.
+    BlockchainPublicAddressResponse:
+      type: object
+      description: Blockchain Public Address response
+      required:
+        - id
+        - blockchainPublicAddress
+        - blockchainNetworkId
+      properties:
+        id:
+          type: string
+          description: Unique identifier given to the bind relationship of a mobile `phoneNumber` with a Blockchain Public Address.
+        blockchainPublicAddress:
+          type: string
+          description: User's Blockchain Public Address
+        blockchainNetworkId:
+          type: string
+          description: |-
+            Identifier (i.e. name/type) of the blockchain whose address value is provided within `blockchainPublicAddress`. The model proposed aims to provide an extensible way to list/identify every blockchain ecosystems.
+            Proposed format is: `<L1_Ecosystem>:<sub_id>`, where:
+            - `<L1_Ecosystem>`: Represents a Layer 1 Blockchain Ecosystem (e.g. ethereum, bitcoin,...)
+            - `<sub_id>`: Represents subsequents L2 and Testnet Blockchain Ecosystems, whenever they apply (e.g. bitcoin is a monolithic blockchain so as this concept does not apply)
+
+            So far, in the scope of v0.2 of this specification, the following `<L1_Ecosystem>` values are covered:
+            - `evm`: Representing a common L1 Layer concept for EVM-based networks. Within this Ecosystem, `<sub_id>` concept is required and matches the value of chainId as per [EVM ChainId](https://chainid.network/). For instance:
+              - `ethereum` blockchain would be identified by `evm:1` value (i.e. ethereum mainnet).
+              - `polygon` blockchain would be identified by `evm:137` value (i.e. polygon mainnet).
+              - `celo` blockchain would be identified by `evm:42220` value (i.e. celo mainnet).
+              - `aleph zero` blockchain would be identified by `evm:41455` value (i.e. aleph zero evm).
+            - `bitcoin`: Representing Bitcoin L1 blockchain. No `<sub_id>` concept applies for this L1 Ecosystem
+            - `solana`: Representing Solana L1 blockchain. No `<sub_id>` concept applies for this L1 Ecosystem
+            - `cardano`: Representing Cardano L1 blockchain. No `<sub_id>` concept applies for this L1 Ecosystem
+        currency:
+          type: array
+          description: List of currencies for the blockchain. Optional field (generally not needed), only indicated when there are business needs to set one or a list on currencies supported.
+          minItems: 0
+          items:
+            type: string
+    ErrorInfo:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        message:
+          type: string
+          description: A human-readable description of what the event represents
+        status:
+          type: integer
+          description: HTTP response status code
+        code:
+          type: string
+          description: A human-readable code to describe the error
+  responses:
+    InvalidArgumentForBlockchain400:
+      description: |
+        Problem with the client request.
+        In addition to regular scenario of INVALID_ARGUMENT, other exceptions may exist.
+         - Indicated blockchainNetworkId is not valid ("code": "BLOCKCHAIN_PUBLIC_ADDRESS.INVALID_BLOCKCHAIN_NETWORK_IDENTIFIER","message": "Indicated blockchainNetworkId is not valid")
+         - Indicated currency is not valid for the Blockchain ("code": "BLOCKCHAIN_PUBLIC_ADDRESS.INVALID_CURRENCY","message": "Indicated currency is not found")
+         - Currency indication is required ("code": "BLOCKCHAIN_PUBLIC_ADDRESS.CURRENCY_REQUIRED","message": "One currency is required")
+         - Indicated nonce is not valid ("code": "BLOCKCHAIN_PUBLIC_ADDRESS.INVALID_NONCE","message": "Indicated nonce is not valid")
+         - Indicated signature is not valid ("code": "BLOCKCHAIN_PUBLIC_ADDRESS.INVALID_SIGNATURE","message": "Indicated signature is not valid")
+         - Both nonce and signature are required together to perform enhanced validation ("code": "BLOCKCHAIN_PUBLIC_ADDRESS.BOTH_NONCE_SIGNATURE_REQUIRED","message": "Both nonce and signature are required for enhanced validation")
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 400
+                  code:
+                    enum:
+                      - INVALID_ARGUMENT
+                      - BLOCKCHAIN_PUBLIC_ADDRESS.INVALID_BLOCKCHAIN_NETWORK_IDENTIFIER
+                      - BLOCKCHAIN_PUBLIC_ADDRESS.INVALID_CURRENCY
+                      - BLOCKCHAIN_PUBLIC_ADDRESS.CURRENCY_REQUIRED
+                      - BLOCKCHAIN_PUBLIC_ADDRESS.INVALID_NONCE
+                      - BLOCKCHAIN_PUBLIC_ADDRESS.INVALID_SIGNATURE
+                      - BLOCKCHAIN_PUBLIC_ADDRESS.BOTH_NONCE_SIGNATURE_REQUIRED
+          examples:
+            GENERIC_400_INVALID_ARGUMENT:
+              description: Invalid Argument. Generic Syntax Exception
+              value:
+                status: 400
+                code: INVALID_ARGUMENT
+                message: Client specified an invalid argument, request body or query param.
+            GENERIC_400_INVALID_BLOCKCHAIN_NETWORK_ID:
+              description: blockchainNetworkId is not valid
+              value:
+                status: 400
+                code: BLOCKCHAIN_PUBLIC_ADDRESS.INVALID_BLOCKCHAIN_NETWORK_IDENTIFIER
+                message: Indicated blockchainNetworkId is not valid
+            GENERIC_400_INVALID_CURRENCY_FOR_BLOCKCHAIN:
+              description: Invalid currency
+              value:
+                status: 400
+                code: BLOCKCHAIN_PUBLIC_ADDRESS.INVALID_CURRENCY
+                message: Indicated currency is not found
+            GENERIC_400_REQUIRED_CURRENCY_FOR_BLOCKCHAIN:
+              description: Currency is required
+              value:
+                status: 400
+                code: BLOCKCHAIN_PUBLIC_ADDRESS.CURRENCY_REQUIRED
+                message: One currency is required
+            GENERIC_400_INVALID_NONCE:
+              description: Invalid nonce
+              value:
+                status: 400
+                code: BLOCKCHAIN_PUBLIC_ADDRESS.INVALID_NONCE
+                message: Indicated nonce is not valid
+            GENERIC_400_INVALID_SIGNATURE:
+              description: Invalid signature
+              value:
+                status: 400
+                code: BLOCKCHAIN_PUBLIC_ADDRESS.INVALID_SIGNATURE
+                message: Indicated signature is not valid
+            GENERIC_400_BOTH_NONCE_SIGNATURE_REQUIRED:
+              description: Both nonce and signature are required together
+              value:
+                status: 400
+                code: BLOCKCHAIN_PUBLIC_ADDRESS.BOTH_NONCE_SIGNATURE_REQUIRED
+                message: Both nonce and signature are required for enhanced validation
+    PermissionDeniedForBlockchain403:
+      description: |
+        Forbidden.
+        In addition to regular scenario of PERMISSION_DENIED, other exceptions may exist.
+         - Blockchain identifier not allowed by business rules ("code": "BLOCKCHAIN_PUBLIC_ADDRESS.BLOCKCHAIN_NETWORK_IDENTIFIER_NOT_ALLOWED","message": "Indicated blockchainNetworkId is not allowed by business rules")
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 403
+                  code:
+                    enum:
+                      - PERMISSION_DENIED
+                      - BLOCKCHAIN_PUBLIC_ADDRESS.BLOCKCHAIN_NETWORK_IDENTIFIER_NOT_ALLOWED
+          examples:
+            GENERIC_403_PERMISSION_DENIED:
+              description: Permission denied. OAuth2 token access does not have the required scope or when the user fails operational security
+              value:
+                status: 403
+                code: PERMISSION_DENIED
+                message: Client does not have sufficient permissions to perform this action.
+            GENERIC_403_NOT_ALLOWED_BLOCKCHAIN_NETWORK_ID:
+              description: blockchainNetworkId not allowed by business rules
+              value:
+                status: 403
+                code: BLOCKCHAIN_PUBLIC_ADDRESS.BLOCKCHAIN_NETWORK_IDENTIFIER_NOT_ALLOWED
+                message: Indicated blockchainNetworkId is not allowed by business rules
+    Generic400:
+      description: Problem with the client request
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 400
+                  code:
+                    enum:
+                      - INVALID_ARGUMENT
+          examples:
+            GENERIC_400_INVALID_ARGUMENT:
+              description: Invalid Argument. Generic Syntax Exception
+              value:
+                status: 400
+                code: INVALID_ARGUMENT
+                message: Client specified an invalid argument, request body or query param.
+    Generic401:
+      description: Unauthorized
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 401
+                  code:
+                    enum:
+                      - UNAUTHENTICATED
+          examples:
+            GENERIC_401_UNAUTHENTICATED:
+              description: Request cannot be authenticated and a new authentication is required
+              value:
+                status: 401
+                code: UNAUTHENTICATED
+                message: Request not authenticated due to missing, invalid, or expired credentials. A new authentication is required.
+    Generic403:
+      description: Forbidden
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 403
+                  code:
+                    enum:
+                      - PERMISSION_DENIED
+          examples:
+            GENERIC_403_PERMISSION_DENIED:
+              description: Permission denied. OAuth2 token access does not have the required scope or when the user fails operational security
+              value:
+                status: 403
+                code: PERMISSION_DENIED
+                message: Client does not have sufficient permissions to perform this action.
+    Generic404:
+      description: Not found
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 404
+                  code:
+                    enum:
+                      - NOT_FOUND
+          examples:
+            GENERIC_404_NOT_FOUND:
+              description: Resource is not found
+              value:
+                status: 404
+                code: NOT_FOUND
+                message: The specified resource is not found.
+    Generic409:
+      description: Conflict
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 409
+                  code:
+                    enum:
+                      - ALREADY_EXISTS
+          examples:
+            GENERIC_409_ALREADY_EXISTS:
+              description: Trying to create an existing resource
+              value:
+                status: 409
+                code: ALREADY_EXISTS
+                message: The resource that a client tried to create already exists.
+    Generic422:
+      description: |-
+        Unprocessable content.
+         - Enhanced Binding validation procedure by means of nonce and signature verification is not supported ("code": "BLOCKCHAIN_PUBLIC_ADDRESS.UNSUPPORTED_ENHANCED_VALIDATION","message": "Enhanced Binding validation procedure is not supported")
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 422
+                  code:
+                    enum:
+                      - BLOCKCHAIN_PUBLIC_ADDRESS.UNSUPPORTED_ENHANCED_VALIDATION
+          examples:
+            GENERIC_422_UNSUPPORTED_ENHANCED_VALIDATION:
+              description: Enhanced Binding validation procedure by means of nonce and signature verification is not supported
+              value:
+                status: 422
+                code: BLOCKCHAIN_PUBLIC_ADDRESS.UNSUPPORTED_ENHANCED_VALIDATION
+                message: Enhanced Binding validation procedure is not supported
+    Generic429:
+      description: Too Many Requests
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 429
+                  code:
+                    enum:
+                      - TOO_MANY_REQUESTS
+          examples:
+            GENERIC_429_TOO_MANY_REQUESTS:
+              description: Access to the API has been temporarily blocked due to rate or spike arrest limits being reached
+              value:
+                status: 429
+                code: TOO_MANY_REQUESTS
+                message: Rate limit reached.

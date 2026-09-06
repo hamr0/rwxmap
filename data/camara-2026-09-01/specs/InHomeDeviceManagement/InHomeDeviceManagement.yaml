@@ -1,0 +1,721 @@
+openapi: 3.0.3
+info:
+  title: In-Home Device Management API
+  version: 1.0.0
+  description: |
+    CAMARA-aligned OpenAPI specification for in-home device management over a fixed-line
+    network (modem). Enables application developers and industry consumers (B2B2X / B2B)
+    to discover, manage, and control devices connected to a household modem, and to monitor
+    the network health of those devices.
+
+    Core capabilities:
+    - **Device Management**: Retrieve, update, and delete records of devices connected to
+      the household fixed-line network.
+    - **Network Access Control**: Block/unblock devices, pause/unpause internet access,
+      and schedule time-based access windows (e.g. parental controls).
+    - **Network Health Monitoring**: Retrieve real-time network health attributes such as
+      RSSI, congestion state, PHY rate, radio band, interface type, and Wi-Fi compatibility.
+
+    Target consumers: App service providers (B2B2X), Industry consumers (B2B).
+servers:
+  - url: https://api.example.com
+    description: Production
+  - url: https://sandbox.api.example.com
+    description: Sandbox
+tags:
+  - name: Devices
+    description: In-home device discovery and lifecycle management
+  - name: Access Control
+    description: Network access control actions on connected devices
+  - name: Network Health
+    description: Device network health monitoring
+
+paths:
+
+  /v1/devices:
+    get:
+      tags:
+        - Devices
+      summary: Get all connected devices
+      description: |
+        Returns all devices currently connected to the specified household fixed-line
+        network (identified by SSID). Supports optional filtering by connection status.
+      operationId: listDevices
+      security:
+        - OAuth2:
+            - inhome.device.read
+      parameters:
+        - $ref: '#/components/parameters/Ssid'
+        - in: query
+          name: connectionStatus
+          required: false
+          description: Filter devices by connection status
+          schema:
+            $ref: '#/components/schemas/ConnectionStatus'
+      responses:
+        '200':
+          description: List of connected devices
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - devices
+                  - total
+                properties:
+                  devices:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Device'
+                  total:
+                    type: integer
+                    format: int32
+                    minimum: 0
+              example:
+                devices:
+                  - deviceId: DV-AX19BZ
+                    ssid: HomeNetwork_5G
+                    deviceName: Living Room TV
+                    deviceType: tv
+                    macAddress: '00:1B:44:11:3A:B7'
+                    ipAddress: 192.168.1.105
+                    connectionStatus: connected
+                    blocked: false
+                    paused: false
+                    infraDevice: modem
+                    interfaceType: wifi
+                total: 1
+        '400':
+          $ref: '#/components/responses/InvalidInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /v1/devices/{deviceId}:
+    get:
+      tags:
+        - Devices
+      summary: Get device details
+      description: Returns full details of a specific device connected to the household network.
+      operationId: getDevice
+      security:
+        - OAuth2:
+            - inhome.device.read
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+        - $ref: '#/components/parameters/Ssid'
+      responses:
+        '200':
+          description: Device details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+              example:
+                deviceId: DV-AX19BZ
+                ssid: HomeNetwork_5G
+                deviceName: Living Room TV
+                deviceType: tv
+                macAddress: '00:1B:44:11:3A:B7'
+                ipAddress: 192.168.1.105
+                connectionStatus: connected
+                blocked: false
+                paused: false
+                infraDevice: modem
+                interfaceType: wifi
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags:
+        - Devices
+      summary: Update device information
+      description: |
+        Update device information and apply network access controls.
+        Use this operation to:
+        - Rename a device (deviceName)
+        - Block or unblock network access (blocked: true/false)
+        - Pause or unpause internet access (paused: true/false), optionally with a duration
+      operationId: updateDevice
+      security:
+        - OAuth2:
+            - inhome.device.write
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceUpdateRequest'
+            examples:
+              blockDevice:
+                summary: Block a device from network access
+                value:
+                  ssid: HomeNetwork_5G
+                  blocked: true
+              unblockDevice:
+                summary: Unblock a device
+                value:
+                  ssid: HomeNetwork_5G
+                  blocked: false
+              pauseDevice:
+                summary: Pause internet access for 2 hours
+                value:
+                  ssid: HomeNetwork_5G
+                  paused: true
+                  pauseDurationMinutes: 120
+              unpauseDevice:
+                summary: Unpause internet access immediately
+                value:
+                  ssid: HomeNetwork_5G
+                  paused: false
+              renameDevice:
+                summary: Rename a device
+                value:
+                  ssid: HomeNetwork_5G
+                  deviceName: Kids Laptop
+      responses:
+        '200':
+          description: Device information updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '400':
+          $ref: '#/components/responses/InvalidInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+    delete:
+      tags:
+        - Devices
+      summary: Delete device record
+      description: |
+        Removes the device record from the household network. The device will no longer
+        appear in the device list. Any active access control rules for this device are
+        also removed.
+      operationId: deleteDevice
+      security:
+        - OAuth2:
+            - inhome.device.write
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+        - $ref: '#/components/parameters/Ssid'
+      responses:
+        '200':
+          description: Device record deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteDeviceResponse'
+              example:
+                deviceId: DV-AX19BZ
+                status: deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /v1/devices/{deviceId}/actions/{actionId}:
+    post:
+      tags:
+        - Access Control
+      summary: Perform action on device
+      description: |
+        Execute a specific network access action on a connected device.
+        Supported actions:
+        - schedule-access: Schedule internet access windows for a device (e.g. parental
+          controls). Defines allowed or blocked time windows with optional recurrence.
+      operationId: performDeviceAction
+      security:
+        - OAuth2:
+            - inhome.device.write
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+        - in: path
+          name: actionId
+          required: true
+          description: The action to perform on the device
+          schema:
+            type: string
+            enum:
+              - schedule-access
+          example: schedule-access
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceActionRequest'
+            example:
+              ssid: HomeNetwork_5G
+              scheduleAccess:
+                from: '2026-06-13T22:00:00Z'
+                to: '2026-06-14T07:00:00Z'
+                frequency: daily
+      responses:
+        '201':
+          description: Action accepted and applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceActionResponse'
+              example:
+                actionId: ACT-77001
+                deviceId: DV-AX19BZ
+                actionType: schedule-access
+                status: accepted
+                appliedAt: '2026-06-13T10:00:00Z'
+        '400':
+          $ref: '#/components/responses/InvalidInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /v1/devices/{deviceId}/network-health:
+    get:
+      tags:
+        - Network Health
+      summary: Get device network health
+      description: |
+        Provides real-time network health attributes of a specific device connected to
+        the fixed-line network (modem). Useful for:
+        - Self-diagnosis: customers can check if device slowness is due to network issues.
+        - Proactive alerts: monitoring solutions can detect congestion or poor signal strength.
+        - ISP recommendations: API consumers can suggest improvements based on health data.
+      operationId: getDeviceNetworkHealth
+      security:
+        - OAuth2:
+            - inhome.device.read
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+        - $ref: '#/components/parameters/Ssid'
+      responses:
+        '200':
+          description: Device network health details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceNetworkHealth'
+              example:
+                deviceId: DV-AX19BZ
+                ssid: HomeNetwork_5G
+                networkCongestion: green
+                rssiDbm: -65.0
+                maxPhyRateMbps: 433.3
+                radioFrequency: '5'
+                interfaceType: wifi
+                infraDevice: modem
+                lastNetworkSpeedMbps: 85.4
+                wifiCompatibility: wifi6
+                measuredAt: '2026-06-13T09:55:00Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: |
+        OAuth 2.0 authorization for app service providers (B2B2X) and industry consumers (B2B).
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.example.com/oauth2/authorize
+          tokenUrl: https://auth.example.com/oauth2/token
+          scopes:
+            inhome.device.read: Read in-home device information and network health
+            inhome.device.write: Update device info, apply access controls, and perform actions
+
+  parameters:
+    DeviceId:
+      in: path
+      name: deviceId
+      required: true
+      description: Unique identifier for the connected device (MAC address or ISP-assigned ID)
+      schema:
+        type: string
+      example: DV-AX19BZ
+    Ssid:
+      in: query
+      name: ssid
+      required: true
+      description: SSID of the household fixed-line network (modem)
+      schema:
+        type: string
+      example: HomeNetwork_5G
+
+  responses:
+    InvalidInput:
+      description: Input payload is invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: invalid-input
+            message: ssid is required
+            correlationId: c0f1be5a-19ce-4830-a3f4-3a6414f36547
+    Unauthorized:
+      description: Missing or invalid access token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: unauthorized
+            message: access token is missing or invalid
+            correlationId: 495d8f9c-d96a-4f56-85f7-96d794a87bfd
+    Forbidden:
+      description: Caller does not have the required scope or permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: forbidden
+            message: caller is not authorized to manage this device
+            correlationId: 6af1e7a8-3d98-4ea8-9f8f-17f223d50cb9
+    NotFound:
+      description: Requested device or resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: not-found
+            message: device not found
+            correlationId: 85af4137-faa1-4ff4-9673-a9d4d5adcdc1
+    Conflict:
+      description: Resource state conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: conflict
+            message: a schedule-access rule already exists for this device
+            correlationId: 80d492fa-ed19-4243-882b-326f0864bd6f
+    ServiceUnavailable:
+      description: Temporary service outage
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: service-unavailable
+            message: network health backend is temporarily unavailable
+            correlationId: 95ecf4ff-f9b2-4814-a8df-4b9ceb75bc91
+
+  schemas:
+
+    ConnectionStatus:
+      type: string
+      description: Current network connection state of the device
+      enum:
+        - connected
+        - disconnected
+        - blocked
+        - paused
+      example: connected
+
+    ScheduleAccess:
+      type: object
+      required:
+        - from
+        - to
+        - frequency
+      properties:
+        from:
+          type: string
+          format: date-time
+          description: Start of the restricted or allowed access window
+          example: '2026-06-13T22:00:00Z'
+        to:
+          type: string
+          format: date-time
+          description: End of the access window
+          example: '2026-06-14T07:00:00Z'
+        frequency:
+          type: string
+          description: Recurrence of the access schedule
+          enum:
+            - once
+            - daily
+            - weekdays
+            - weekends
+          example: daily
+
+    Device:
+      type: object
+      required:
+        - deviceId
+        - ssid
+        - deviceType
+        - connectionStatus
+      properties:
+        deviceId:
+          type: string
+          description: Unique device identifier (MAC address or ISP-assigned ID)
+          example: DV-AX19BZ
+        ssid:
+          type: string
+          description: SSID of the network the device is connected to
+          example: HomeNetwork_5G
+        deviceName:
+          type: string
+          description: Friendly display name for the device
+          example: Living Room TV
+        deviceType:
+          type: string
+          description: Category of the connected device
+          enum:
+            - laptop
+            - mobile
+            - printer
+            - tv
+            - iot
+            - desktop
+            - other
+          example: tv
+        macAddress:
+          type: string
+          description: MAC address of the device
+          pattern: '^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$'
+          example: '00:1B:44:11:3A:B7'
+        ipAddress:
+          type: string
+          description: Current IP address assigned to the device
+          example: 192.168.1.105
+        connectionStatus:
+          $ref: '#/components/schemas/ConnectionStatus'
+        blocked:
+          type: boolean
+          description: Whether network access is blocked for this device
+          default: false
+        paused:
+          type: boolean
+          description: Whether internet access is temporarily paused
+          default: false
+        pauseExpiresAt:
+          type: string
+          format: date-time
+          description: When a timed pause will automatically expire
+        scheduleAccess:
+          $ref: '#/components/schemas/ScheduleAccess'
+        infraDevice:
+          type: string
+          description: Network infrastructure device the endpoint is connected through
+          enum:
+            - modem
+            - booster
+            - pod
+          example: modem
+        interfaceType:
+          type: string
+          description: Physical connection type
+          enum:
+            - wifi
+            - ethernet
+          example: wifi
+
+    DeviceUpdateRequest:
+      type: object
+      required:
+        - ssid
+      properties:
+        ssid:
+          type: string
+          description: SSID of the household network
+          example: HomeNetwork_5G
+        deviceName:
+          type: string
+          description: Updated friendly name for the device
+          example: Kids Tablet
+        blocked:
+          type: boolean
+          description: Set to true to block network access; false to unblock.
+        paused:
+          type: boolean
+          description: Set to true to pause internet access; false to unpause.
+        pauseDurationMinutes:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1440
+          description: Duration in minutes for a timed pause. Required when paused is true.
+          example: 120
+
+    DeviceActionRequest:
+      type: object
+      required:
+        - ssid
+      properties:
+        ssid:
+          type: string
+          description: SSID of the household network
+          example: HomeNetwork_5G
+        scheduleAccess:
+          $ref: '#/components/schemas/ScheduleAccess'
+
+    DeviceActionResponse:
+      type: object
+      required:
+        - actionId
+        - deviceId
+        - actionType
+        - status
+      properties:
+        actionId:
+          type: string
+          description: Unique identifier for the performed action
+          example: ACT-77001
+        deviceId:
+          type: string
+          example: DV-AX19BZ
+        actionType:
+          type: string
+          enum:
+            - schedule-access
+          example: schedule-access
+        status:
+          type: string
+          enum:
+            - accepted
+            - applied
+          example: accepted
+        appliedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the action was accepted or applied
+
+    DeleteDeviceResponse:
+      type: object
+      required:
+        - deviceId
+        - status
+      properties:
+        deviceId:
+          type: string
+          example: DV-AX19BZ
+        status:
+          type: string
+          enum:
+            - deleted
+          example: deleted
+
+    DeviceNetworkHealth:
+      type: object
+      required:
+        - deviceId
+        - ssid
+        - networkCongestion
+      properties:
+        deviceId:
+          type: string
+          example: DV-AX19BZ
+        ssid:
+          type: string
+          example: HomeNetwork_5G
+        networkCongestion:
+          type: string
+          description: Current network congestion indicator
+          enum:
+            - green
+            - red
+          example: green
+        rssiDbm:
+          type: number
+          format: double
+          description: Received Signal Strength Indicator in dBm
+          example: -65.0
+        maxPhyRateMbps:
+          type: number
+          format: double
+          description: Maximum physical layer data rate in Mbps
+          example: 433.3
+        radioFrequency:
+          type: string
+          description: Wi-Fi radio frequency band (GHz)
+          enum:
+            - '2.4'
+            - '5'
+            - '6'
+          example: '5'
+        interfaceType:
+          type: string
+          description: Physical connection type
+          enum:
+            - wifi
+            - ethernet
+          example: wifi
+        infraDevice:
+          type: string
+          description: Network infrastructure device the endpoint is connected through
+          enum:
+            - modem
+            - booster
+            - pod
+          example: modem
+        lastNetworkSpeedMbps:
+          type: number
+          format: double
+          description: Last measured download speed in Mbps
+          example: 85.4
+        wifiCompatibility:
+          type: string
+          description: Wi-Fi generation supported by the device
+          enum:
+            - wifi4
+            - wifi5
+            - wifi6
+            - wifi7
+          example: wifi6
+        measuredAt:
+          type: string
+          format: date-time
+          description: Timestamp when health metrics were last collected
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+        - correlationId
+      properties:
+        code:
+          type: string
+          example: invalid-input
+        message:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
