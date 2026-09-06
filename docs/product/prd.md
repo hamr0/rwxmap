@@ -71,6 +71,16 @@ The two error directions are never collapsed into one accuracy number.
 Report both counts, every time, as justabit's `docs/logs/findings.md`
 already does for leak-direction and usability findings.
 
+**M0 result, 2026-09-06: the gate is not met.** The best of five arbiter
+shapes tried in M0 (E5) leaves 11 wrong loosenings over the 292. 7 of the
+11 are PUT or DELETE rows where the method default and the verb signal
+agree, so no verb library can reach them — this is the finding that
+produced §4.4 and §4.5. `terminateCall` comes out `x` from E2 onward;
+`updateSessionStatus` comes out `w` in all five shapes and fails. The
+gate itself is unchanged, and it now targets the floor-and-ceiling
+arbiter of §4.5, which reads the document text and which no shape tried
+in M0 yet implements.
+
 ## 3. Out of scope
 
 - A model/LLM tier. There is no tier 2 and no tier 3 in this design —
@@ -188,6 +198,108 @@ treat tool annotations as untrusted unless the server is trusted;
 rwxmap's map is advisory in the same sense. See
 `docs/logs/prior-art-2026-09-06.md`, H1.
 
+### 4.4 What the method actually promises (M0 finding, 2026-09-06)
+
+Method default vs hand-read ground truth, 292 CAMARA operations:
+
+| method | n | draft default | truth r | truth w | truth x | default too loose | default too tight |
+|---|---|---|---|---|---|---|---|
+| GET | 96 | r | 96 | 0 | 0 | 0 | 0 |
+| POST | 138 | x | 59 | 4 | 75 | 0 | 63 |
+| PATCH | 9 | x | 0 | 6 | 3 | 0 | 6 |
+| DELETE | 41 | w | 0 | 34 | 7 | 7 | 0 |
+| PUT | 8 | w | 0 | 7 | 1 | 1 | 0 |
+
+**The settled part.** RFC 9110 §9.2.1 makes safe a hard guarantee, and it
+held on all 96 of 96 GET operations in the test bed. For safe methods the
+method default is both a floor and a ceiling: nothing in the hand-read
+ground truth ever needed a class looser or tighter than `r` for a GET.
+
+**The contested part.** The -02 draft maps idempotent to `w`. RFC 9110
+§9.2.2 idempotence is a statement about repetition only — it says
+nothing about consequence. The test bed has 19 operations that are
+idempotent and consequential at once, and 17 of those 19 reach a third
+party. Terminating a live call is idempotent (calling it twice leaves the
+call terminated, same as calling it once) and it is also consequential:
+it drops a call a real person is on.
+
+The draft is inconsistent with itself here. The axis registry (anchor
+`action-class-values`) names `x` "a consequential, non-idempotent
+action," but then defines the class solely as "an operation whose
+repetition is not guaranteed to have the same effect as performing it
+once." Consequence is in the name and not in the test. Scored against
+the literal, idempotence-only reading, the method default leaks 3 times
+in 292, all DELETE. Scored against the consequence reading, it leaks 8.
+rwxmap adopts the consequence reading (see D16) because its consumers
+are agents and guards deciding whether an action needs a human in the
+loop, and because MCP already models the two properties as separate
+fields — `idempotentHint` and `destructiveHint` — rather than collapsing
+them into one.
+
+**The formulation, stated plainly.** The HTTP method gives a floor on
+the class and never a ceiling, except for safe methods, where the floor
+is also the ceiling. The -02 draft treats the floor as an answer, and
+that is the origin of every high-confidence wrong answer M0 found.
+
+### 4.5 Floor from the method, ceiling from the text (supersedes D3)
+
+What the method permits the text signal to do:
+
+| method | RFC 9110 guarantee | floor | text may move the class |
+|---|---|---|---|
+| GET, HEAD, OPTIONS | safe: no state-changing semantics | r | not at all; locked at r |
+| PUT, DELETE | idempotent: repetition is equivalent | w | up to x only |
+| POST, PATCH | neither safe nor idempotent; no guarantee | x by policy, not by fact | up or down |
+
+POST is the exception in both directions, and for one reason: RFC 9110
+gives no guarantee for POST at all, so its `x` default is a fail-closed
+policy choice, not a derived fact. Replacing a policy choice with
+evidence read from the document is an upgrade, not a loosening. A safe
+method's `r`, by contrast, is a derived fact — it is never revisited.
+
+The arbiter, restated as an ordered procedure:
+
+1. Take the floor from the method.
+2. Read the operation's `summary` and `description`, plus structural
+   markers present in the document: `callbacks`, a `sink` field in the
+   request body, a 409 response indicating a repeat is not equivalent.
+3. Evidence of consequence — reaching a third party, moving money,
+   acting on a live session, network path, or device, or an effect that
+   cannot be undone — raises the class to `x`.
+4. For POST and PATCH only, clear evidence that the operation is a pure
+   lookup, with no evidence of consequence, lowers the class to `r`.
+5. Anything unresolved keeps the floor.
+
+Never lower the class on a safe method, and never lower it below `w` for
+PUT or DELETE.
+
+**Confidence.** Every row carries the class plus a confidence, so a
+consumer can be configured to act only on high-confidence rows and refer
+the rest to a human. The exact formula is still M0's to find; the PRD's
+standing constraint holds regardless: the formula must be executable
+identically twice by two people.
+
+**The known weakness, stated honestly.** The text signal rests on prose
+humans wrote, and that prose is sometimes wrong by omission. The
+measured example: ModelAsAService `POST /answer` `queryAssistant` reads
+as a lookup, while the assistant it fronts may invoke tools that reach
+consumer-registered third-party URLs — a consequence the operation's own
+text never mentions. This is why lowering is confined to POST and PATCH,
+and is always reported at low confidence.
+
+Operation-level field coverage, measured 2026-09-06:
+
+| document | operations | has description | has callbacks |
+|---|---|---|---|
+| Stripe | 594 | 99% | 0% |
+| Slack | 174 | 100% | 0% |
+| CAMARA test bed | 292 | ~100% | 14% |
+
+Descriptions are close to universal and are the load-bearing text
+signal, whereas `callbacks` is a strong positive marker where it appears
+and is absent from most catalogues, so it can support a class but never
+a coverage claim.
+
 ## 5. The safety spine
 
 Output classes are `r < w < x`, per the -02 axis-registry ordering
@@ -250,6 +362,16 @@ Non-blocking; never silently assumed.
 - The GitHub remote is `hamr0/rwxmap`; visibility (public with a WIP
   marker, like the author's other repos, or private) is decided at the
   first push.
+- Whether the -02 draft's definition of `x` is amended to name
+  consequence in the test and not only in the label (§4.4). This is
+  rwxmap's first finding with a consequence for the draft text, and it
+  belongs to the justabit track to accept or reject.
+- Input adapters beyond OpenAPI. The arbiter is a function of a method,
+  a name, and a text; GraphQL (`query` vs `mutation`), gRPC/AIP custom
+  methods, AsyncAPI, and MCP tool lists can each feed those three
+  through a small adapter, with the method empty where the format has
+  none. Deferred until the output contract exists; the MCP tool-list
+  adapter is the strongest candidate to go first.
 
 ## 8. Notes carried from the outline, stated on purpose
 
@@ -319,11 +441,11 @@ starts, not yet exercised.
 |---|---|
 | D1 | Purpose: rwxmap is the author's own discovery tool first (maps r/w/x per operation for agents/guards/harnesses), a supporting but non-load-bearing PoC for -02's actionClass axis, and a stopgap map when a declared menu is absent or slow. |
 | D2 | Classes `r < w < x`; safety spine is tighter-on-unknown, never loosen without evidence; changes the outline's "omit on unknown" (right for a verifier consuming a signed menu) to "answer with the tightest class" (rwxmap's consumers need an answer for every operation) — same rule, different consumer. |
-| D3 | Two mechanical signals (HTTP method per RFC 9110; verb library lookup) and one arbiter: agree → that class, high confidence; disagree → tighter class, low confidence; verb unknown → method default, method-only confidence. No model/LLM tier. |
+| D3 | Two mechanical signals (HTTP method per RFC 9110; verb library lookup) and one arbiter: agree → that class, high confidence; disagree → tighter class, low confidence; verb unknown → method default, method-only confidence. No model/LLM tier. **Superseded by D17 (2026-09-06).** |
 | D4 | Direction is both: propose loosening (POST → r/w) and tightening (DELETE/PUT → x for destructive verbs). Whether tightening enters the -02 argument is open, pending M0's tighten-case count. |
 | D5 | Inputs: method, operationId, path, regex-only to start; OpenAPI shape rules added only in M2, only for a divergence class appearing more than once. |
 | D6 | Output: class, confidence, rule id, evidence, plus MCP's four tool-annotation hints mapped from class and method. |
-| D7 | Verb corpus: APIs.guru `openapi-directory` (CC0), priors not truth; no corpus size cited until queried live. |
+| D7 | Verb corpus: APIs.guru `openapi-directory` (CC0), priors not truth; no corpus size cited until queried live. **Demoted by D18 (2026-09-06).** |
 | D8 | Test bed: the 292-operation, SHA-pinned CAMARA set copied to `data/camara-2026-09-01/` (origin `justabit:ietf/v3/poc/spike-a/operations.csv`); known GET-template and 57/138-reader-judgement limits stay stated. |
 | D9 | Verb-signal strength varies by catalogue style (CAMARA rich, AIP `:verb` strong, Zalando verb-free weak); go/no-go is not "works everywhere." |
 | D10 | Prior art: openapi-mcp is method-only (the gap rwxmap fills); OpenAPI has no operation-level safety field (open issue #2649); unfetched sources are not evidence of absence. |
@@ -332,4 +454,7 @@ starts, not yet exercised.
 | D13 | Test bed lives in this repo at `data/camara-2026-09-01/`: a verbatim copy of `justabit:ietf/v3/poc/spike-a/` (operations.csv, disagreements.md, scripts, README) plus the 92 fetched CAMARA YAML specs under `specs/`, so experiments run against files in this tree, never against justabit. |
 | D14 | The r/w/x to MCP-hint mapping is written into §4.3 now as M3's starting table, marked untested. |
 | D15 | Module discipline: one module at a time, each works on its own before the next starts; M0 is many numbered experiments, each with a readout, and the winning arbiter shape is picked on the two error counts. |
-| — | Outline superseded: the outline's three-tier model (deterministic / model / silence) and "no default class, omit on unknown" framing are replaced by D2/D3 above — two mechanical signals, one arbiter, tighter-on-unknown, no model tier. |
+| D16 | `x` is read as consequence, not merely non-idempotence: an operation that reaches a third party, moves money, acts on a live session, network path or device, or cannot be undone is `x` even when repeating it is equivalent. This diverges from the -02 draft's literal definition of `x` and is M0's proposed correction to that text; see §4.4. Decided 2026-09-06. |
+| D17 | Supersedes D3. The HTTP method sets a floor and, for safe methods only, also the ceiling; the operation's own text sets the ceiling elsewhere. Three signals, not two: method, text (`summary`/`description`), and structural markers (`callbacks`, `sink`, 409). Lowering the class is confined to POST and PATCH, where RFC 9110 guarantees nothing; it is never permitted on a safe method and never below `w` on PUT or DELETE. See §4.5. Decided 2026-09-06. |
+| D18 | The verb-library plan (D7, M1) is demoted from the primary signal to one input to the text signal. M0 measured that a verb table alone cannot reach the gate: with both signals agreeing on 7 of the 11 remaining wrong loosenings, no table over paths and operationIds can see the consequence those rows carry. Decided 2026-09-06. |
+| — | Outline superseded: the outline's three-tier model (deterministic / model / silence) and "no default class, omit on unknown" framing are replaced by D2 and, as of 2026-09-06, by D17 below — a floor from the method, a ceiling from the operation's own text, tighter-on-unknown, no model tier. |
