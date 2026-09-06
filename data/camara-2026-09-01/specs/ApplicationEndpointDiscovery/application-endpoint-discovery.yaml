@@ -1,0 +1,510 @@
+---
+openapi: 3.0.3
+info:
+  title: Application Endpoint Discovery
+  version: wip
+  x-camara-commonalities: wip
+  description: |
+    The Application Endpoint Discovery API returns the optimal application
+    endpoint(s) that a given end-user's device can connect to.
+
+    # Introduction
+
+    Operators often host multiple Edge Cloud Zones across various territories.
+    Connecting an application directly to the optimal application instance
+    endpoint in an Edge Cloud Zone may minimize latency.
+
+    The Application Endpoint Discovery API extends beyond the capabilities of
+    the Simple Edge Discovery API by not only locating the optimal
+    Edge Cloud Zone but also providing the direct link to the specified
+    application's endpoint within that Edge Cloud Zone. This approach ensures
+    that developers can instantly integrate this endpoint into their
+    applications, improving user experience.
+
+    After identifying the optimal application endpoint(s) through the API,
+    API consumers can:
+    * Connect their application client directly to the chosen application
+    endpoint(s), enhancing the responsiveness of the service.
+    * If no suitable endpoints are available, the developer can use other APIs
+    to instantiate new instance and/or register new application endpoints.
+
+    The optimal endpoint(s) are calculated by the Edge Cloud Provider based on
+    the following factor: shortest network path to the network-attached
+    device identified in the API request. Future releases of this API might
+    add other factors to obtain them.
+
+    # Relevant terms and definitions
+
+    - `Application Profile:` A profile which represents an application's
+    networking demands (latency, jitter, bandwidth rates).
+    - `Application Provider:` The provider of the application that is deployed
+    on the Edge Cloud.
+    - `Application Endpoint:` An application server IP address or FQDN, and
+    port exposed by an application instance to allow connections from clients.
+    - `Application Instance:` An instantiation of an Application running on
+    an Edge Cloud Zone. It is assumed that for each application, a maximum of
+    one logical instance can run per Edge Cloud Zone.
+    - `Device:` End-user equipment able to connect to a mobile network (i.e.
+    smartphone, IoT sensor/actuator).
+    - `Edge Cloud Zone:` Availability Zone in an Edge Cloud. It is the lowest
+    level of abstraction exposed to an Application Provider who wants to
+    deploy an Application on Edge Cloud. Availability Zones exist within
+    a Region.
+
+    # API Functionality
+
+    The API can be called either by an application client hosted on a device
+    attached to the operator network (i.e. phone, tablet), or by a server.
+
+    There is a single API service endpoint:
+
+    - `POST /retrieve-optimal-app-endpoints`
+
+    ## Inputs
+
+    The endpoint request body is a JSON object with the following parameters:
+    - `device:` End-user equipment able to connect to a mobile network. The
+    developer can choose to provide the below specified device identifiers:
+      - `ipv4Address:` Public IP address (IPv4) of the user device, which can be
+      fetched via external IP discovery services.
+      - `ipv6Address:` Public IP address (IPv6) of the user device, which can be
+      fetched via external IP discovery services.
+      - `phoneNumber:` The device's phone number in international E.164 format.
+      - `networkAccessIdentifier:` A unique identifier provided by the network
+    operator (where supported).
+    - One of the following application identifiers:
+      - `appId:` A unique identifier for an application onboarded on the Edge
+    Cloud. It is used when the application has been onboarded using the Edge
+    Application Management API.
+      - `applicationEndpointsId:` A unique identifier for the registered
+    application endpoint(s). It is used when the application has not been onboarded
+    using the Edge Application Management API, and available endpoints have been
+    registered by the Edge Application Registration API. Every endpoint registered
+    under the same `applicationEndpointsId` identifier belongs to the same
+    application.
+
+    ## Outputs
+
+    If successful, a `200 OK ` response code is returned with a JSON object
+    containing the following data:
+
+    - `applicationEndpoints:` An array containing at least one Application Endpoint
+    object. Each Application Endpoint object includes the following parameters:
+      - `port:` TCP or UDP port number exposed by the application instance.
+      - One of the following parameters which define the endpoint:
+        - `ipv4addresses:` Array of IPv4 addresses exposed by the application
+        instance.
+        - `ipv6addresses:` Array of IPv6 addresses exposed by the application
+        instance.
+        - `fqdn:` Fully Qualified Domain Name exposed by the application instance.
+      - `applicationEndpointDescription:` Optionally, a string that describes the
+      application endpoint.
+      - `edgeCloudZone:` Optionally, object that identifies the Edge Cloud Zone
+      the application endpoint belongs to, including: `edgeCloudZoneId`,
+      `edgeCloudZoneName`, `edgeCloudZoneStatus`, `edgeCloudRegion`, and
+      `edgeCloudProvider`.
+    - One of the following application identifiers (the one provided on the request)
+      - `appId:` A unique identifier for an application onboarded on the Edge
+      Cloud. It is used when the application has been onboarded using the Edge
+      Application Management API.
+      - `applicationEndpointsId:` A unique identifier for the registered
+      application endpoint(s). It is used when the application has not been onboarded
+      using the Edge Application Management API, and available endpoints have been
+      registered by the Edge Application Registration API. Every endpoint
+      registered under the same `applicationEndpointsId` identifier belongs to
+      the same application.
+    - `applicationServerProviderName:` Optionally, the Application Provider
+    identifier
+    - `applicationProfileId:` Optionally, the Application Profile identifier
+    - `device`: End-user equipment identifier used to obtain the optimal application
+      endpoint. It is only included when multiple device identifiers come in the
+      request.
+
+    ## Errors
+
+    - If the API call contains a formatting or other any other syntatic error,
+    a `400 INVALID_ARGUMENT` error is returned.
+    - If the API call cannot be authenticated due to missing, invalid, or
+    expired credentials, a `401 UNAUTHENTICATED` error is returned.
+    - If the API call has a valid access token that does not have the
+    required scope, then a `403 PERMISSION_DENIED` error is returned.
+    - If the API call has a valid access token that does not identify
+    a single device, then a `404 IDENTIFIER_NOT_FOUND` error is returned.
+    - If the API call has an `appId` that does not identify a valid
+    application on the Edge Cloud, a `404 NOT_FOUND` error is returned.
+    - If the API call has an `applicationEndpointsId` that does not identify
+    any registered endpoint on the Edge Cloud, a `404 NOT_FOUND` error
+    is returned.
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+    <!-- CAMARA:MANDATORY:identifying-device-from-access-token:BEGIN -->
+    # Identifying the device from the access token
+
+    This API requires the API consumer to identify a device as the subject of the API as follows:
+    - When the API is invoked using a two-legged access token, the subject will be identified from the optional `device` object, which therefore MUST be provided.
+    - When a three-legged access token is used however, this optional identifier MUST NOT be provided, as the subject will be uniquely identified from the access token.
+
+    This approach simplifies API usage for API consumers using a three-legged access token to invoke the API by relying on the information that is associated with the access token and was identified during the authentication process.
+
+    ## Error handling:
+
+    - If the subject cannot be identified from the access token and the optional `device` object is not included in the request, then the server will return an error with the `422 MISSING_IDENTIFIER` error code.
+
+    - If the subject can be identified from the access token and the optional `device` object is also included in the request, then the server will return an error with the `422 UNNECESSARY_IDENTIFIER` error code. This will be the case even if the same device is identified by these two methods, as the server is unable to make this comparison.
+    <!-- CAMARA:MANDATORY:identifying-device-from-access-token:END -->
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+externalDocs:
+  description: Product documentation at CAMARA
+  url: https://github.com/camaraproject/ApplicationEndpointDiscovery
+servers:
+  - url: "{apiRoot}/application-endpoint-discovery/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+
+tags:
+  - name: Application Endpoint Discovery
+    description: |
+      Find the optimal Application Instance Endpoint(s) to the user device.
+paths:
+  /retrieve-optimal-app-endpoints:
+    post:
+      security:
+        - openId:
+            - application-endpoint-discovery:app-endpoints:read
+      operationId: getOptimalAppEndpoints
+      parameters:
+        - $ref: "#/components/parameters/x-correlator"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EndpointDiscoveryInfo"
+            examples:
+              Identify Device By 3-Legged Access Token and AppId:
+                $ref: '#/components/examples/IdentifyDeviceBy3LeggedTokenAppId'
+              Identify Device By Phone Number and AppId:
+                $ref: '#/components/examples/IdentifyDeviceByPhoneNumberAppId'
+              Identify Device By IP Address and ApplicationEndpointsId:
+                $ref: '#/components/examples/IdentifyDeviceByIPAddressAppEndpointsId'
+              Identify Device By Multiple Identifiers and AppId:
+                $ref: '#/components/examples/IdentifyDeviceByMultipleIdentifiersAppId'
+      responses:
+        "200":
+          description: |
+           Successful response, returning the optimal Application Instance
+           Endpoint(s) to the user device identified in the request body.
+          headers:
+            x-correlator:
+              $ref: "#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EndpointDiscoveryResult"
+        "400":
+          $ref: "#/components/responses/Generic400"
+        "401":
+          $ref: "#/components/responses/Generic401"
+        "403":
+          $ref: "#/components/responses/Generic403"
+        "404":
+          $ref: "#/components/responses/Generic404"
+        "422":
+          $ref: "#/components/responses/Generic422"
+        "429":
+          $ref: "#/components/responses/Generic429"
+      tags:
+        - Application Endpoint Discovery
+      summary: |
+        Returns the Endpoint(s) of the optimal Application Instance(s) to the user
+        device identified in the request.
+      description: |
+        On receiving this request, the network will return the endpoint(s)
+        of the Application Instance(s) with the shortest network path to the
+        end user device identified in the request.
+components:
+  securitySchemes:
+    openId:
+      $ref: "../common/CAMARA_common.yaml#/components/securitySchemes/openId"
+  headers:
+    x-correlator:
+      $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+  parameters:
+    x-correlator:
+      $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+  schemas:
+    EndpointDiscoveryInfo:
+      description: |
+        Element to retrieve the optimal application endpoint(s) for the
+        identified device.
+      type: object
+      anyOf:
+        - required: [applicationEndpointsId]
+        - required: [appId]
+      properties:
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Device"
+        applicationEndpointsId:
+          $ref: "#/components/schemas/ApplicationEndpointsId"
+        appId:
+          $ref: "#/components/schemas/AppId"
+
+    ApplicationEndpointsId:
+      description: |
+        A system-defined string identifier representing
+        one or more registered Application Endpoints that belong
+        to the same application.
+      type: string
+      format: uuid
+      maxLength: 36
+      example: "4d596ac1-7822-4927-a3c5-d72e1f922c94"
+
+    AppId:
+      type: string
+      format: uuid
+      maxLength: 36
+      description: |
+        A globally unique identifier associated with the application.
+        This GUID will have been previously provided by the Edge Cloud Zone
+        provider.
+      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+
+    EndpointDiscoveryResult:
+      description: |
+        Endpoint Discovery result including optimal application endpoint(s)
+        for the requested identified device.
+      type: object
+      required:
+        - applicationEndpoints
+      anyOf:
+        - required: [applicationEndpointsId]
+        - required: [appId]
+      properties:
+        applicationEndpoints:
+          description: Array of optimal Application Endpoints for the identified device.
+          type: array
+          maxItems: 50
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/ApplicationEndpoint"
+        appId:
+          $ref: "#/components/schemas/AppId"
+        applicationEndpointsId:
+          $ref: "#/components/schemas/ApplicationEndpointsId"
+        applicationServerProviderName:
+          type: string
+          maxLength: 256
+          pattern: ^[^\r\n]*$
+          description: Unique ID representing the Edge Application Provider
+        applicationProfileId:
+          $ref: "#/components/schemas/ApplicationProfileId"
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+
+    EdgeCloudZone:
+      type: object
+      description: |
+        An Edge Cloud Zone, uniquely identified by a
+        combination of the value of the Edge Cloud Zone Id object
+        and the value of the Edge Cloud Provider
+        object. This value is used to identify an Edge Cloud zone
+        between Edge Clouds from different Edge Cloud Providers.
+      required:
+        - edgeCloudZoneId
+        - edgeCloudZoneName
+        - edgeCloudProvider
+      properties:
+        edgeCloudZoneId:
+          $ref: "#/components/schemas/EdgeCloudZoneId"
+        edgeCloudZoneName:
+          $ref: "#/components/schemas/EdgeCloudZoneName"
+        edgeCloudZoneStatus:
+          $ref: "#/components/schemas/EdgeCloudZoneStatus"
+        edgeCloudProvider:
+          $ref: "#/components/schemas/EdgeCloudProvider"
+        edgeCloudRegion:
+          $ref: "#/components/schemas/EdgeCloudRegion"
+
+    EdgeCloudZoneId:
+      description: A unique identifier for the Edge Cloud Zone.
+      type: string
+      format: uuid
+      maxLength: 36
+      example: "123e4567-e89b-12d3-a456-426614174000"
+
+    EdgeCloudRegion:
+      description: |
+        The EdgeCloudProvider's name for the region where the Edge Cloud
+        Zone is located.
+      type: string
+      maxLength: 64
+      pattern: ^[A-Za-z0-9]([A-Za-z0-9-]{0,53}[A-Za-z0-9])?$
+      example: "us-west-1"
+
+    EdgeCloudZoneStatus:
+      description: Status of the Edge Cloud Zone (default is 'unknown')
+      type: string
+      enum:
+        - active
+        - inactive
+        - unknown
+      default: unknown
+
+    EdgeCloudProvider:
+      description: The provider of the Edge Cloud.
+      type: string
+      maxLength: 64
+      pattern: ^[A-Za-z0-9]([A-Za-z0-9-]{0,53}[A-Za-z0-9])?$
+      example: "ProviderA"
+
+    EdgeCloudZoneName:
+      description: The name of the Edge Cloud Zone.
+      type: string
+      maxLength: 64
+      pattern: ^[A-Za-z0-9]([A-Za-z0-9-]{0,53}[A-Za-z0-9])?$
+      example: "ZoneA"
+
+    ApplicationProfileId:
+      description: A unique identifier for the application profile.
+      type: string
+      format: uuid
+      maxLength: 36
+      example: "123e4567-e89b-12d3-a456-426614174000"
+
+    ApplicationEndpoint:
+      type: object
+      description: |
+        An application server IP address or FQDN with a port,
+        exposed by an application instance deployed on the Edge Cloud
+        provider.
+      required:
+        - port
+      anyOf:
+        - required: [fqdn]
+        - required: [ipv4Addresses]
+        - required: [ipv6Addresses]
+      properties:
+        fqdn:
+          $ref: "#/components/schemas/Fqdn"
+        ipv4Addresses:
+          description: Array of IPv4 addresses exposed by the application instance.
+          type: array
+          maxItems: 1
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/Ipv4Address"
+        ipv6Addresses:
+          description: Array of IPv6 addresses exposed by the application instance.
+          type: array
+          maxItems: 1
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/Ipv6Address"
+        port:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Port"
+        edgeCloudZone:
+          $ref: "#/components/schemas/EdgeCloudZone"
+        applicationEndpointDescription:
+          type: string
+          maxLength: 2048
+          pattern: ^[^\r\n]*$
+          description: Description of the application endpoint
+
+    Fqdn:
+      type: string
+      maxLength: 253
+      pattern: ^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)+$
+      description: Fully Qualified Domain Name.
+
+    Ipv4Address:
+      type: string
+      format: ipv4
+      maxLength: 15
+      description: |
+        A single IPv4 address specified in dotted-quad form like 1.2.3.4.
+      example: "198.51.100.1"
+
+    Ipv6Address:
+      type: string
+      format: ipv6
+      maxLength: 45
+      description: |
+        A single IPv6 address, following IETF 5952 format like
+        2001:db8:85a3:8d3:1319:8a2e:370:7344.
+      example: "2001:db8:85a3::8a2e:370:7334"
+
+  responses:
+    Generic400:
+      $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+    Generic401:
+      $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+    Generic403:
+      $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+    Generic404:
+      $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+    Generic422:
+      $ref: "../common/CAMARA_common.yaml#/components/responses/Generic422"
+    Generic429:
+      $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+
+  examples:
+    IdentifyDeviceBy3LeggedTokenAppId:
+      description: Empty JSON when device is identified by access token
+      value:
+        appId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+
+    IdentifyDeviceByPhoneNumberAppId:
+      description: Identifying device by phone number
+      value:
+        device:
+          phoneNumber: "+123456789"
+        appId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+
+    IdentifyDeviceByIPAddressAppEndpointsId:
+      description: Identifying device by IP address
+      value:
+        device:
+          ipv4Address:
+            publicAddress: "84.125.93.10"
+            publicPort: 59765
+        applicationEndpointsId: "4d596ac1-7822-4927-a3c5-d72e1f922c94"
+
+    IdentifyDeviceByMultipleIdentifiersAppId:
+      description: Identifying device by multiple device identifiers
+      value:
+        device:
+          phoneNumber: "+123456789"
+          ipv4Address:
+            publicAddress: "84.125.93.10"
+            publicPort: 59765
+          networkAccessIdentifier: "123456789@domain.com"
+        appId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"

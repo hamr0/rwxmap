@@ -1,0 +1,750 @@
+openapi: 3.0.3
+info:
+  title: Region Device Count
+  description: >-
+    Region Device Count API enables API consumers to obtain the number of devices within a certain geographical area during a specific time interval.
+
+    # Introduction
+
+    This API allows for the API Consumer to query device count in the specified area during a certain time interval.The query area can be a circle or a polygon composed of longitude and latitude points.
+    This functionality can be used for multiple use cases, some of the possible use cases for this API are:
+
+    - [Emergency Rescue](https://raw.githubusercontent.com/camaraproject/RegionDeviceCount/main/documentation/API_documentation/RDC_User_Story_Emergency_Rescue.md)
+
+    - [Outdoor Live Streaming](https://raw.githubusercontent.com/camaraproject/RegionDeviceCount/main/documentation/API_documentation/RDC_User_Story_Outdoor_Live_Streaming.md)
+
+    # Relevant terms and definitions
+
+    * **Device Count**: Refers to the total number of devices that appear within a given area and a specific time interval. A device will be counted as long as it appears at least once in the specified area during the time interval.
+
+    * **Notification URL and token**: Developers may provide a callback URL (`sink`) for receiving an async response. This is an optional parameter. If `sink` is included, it is RECOMMENDED for the client to provide as well the `sinkCredential` property to protect the notification endpoint. In the current version,`sinkCredential.credentialType` MUST be set to `ACCESSTOKEN` if provided.
+
+    # API Functionality
+
+    ## Request Parameters and Area Definition
+
+    When making a request, the API consumer needs to specify the area, start time, end time, and filter conditions in the request body. The area can be defined as a circle or a polygon. For a circular area, the center and radius must be provided; for a polygon area, a list of longitude and latitude points must be provided. If the start and end times are not provided, the API will return the current number of devices in the area.
+
+    ## Filter Condition Application
+
+    The filter condition is used for precise device filtering and currently includes two filtering criteria: `roamingStatus` and `deviceType`, with support for future expansion. The `IN` logic is applied for multiple filter items within a single filtering criterion, and the `AND` logic is used between multiple filtering criteria.
+
+
+    For example, "filter":{"roamingStatus": ["roaming"],"deviceType": ["human device","IoT device"]}" means the API will only return the number of human network devices and IoT devices in roaming mode. "filter":{"roamingStatus": ["non-roaming"]}" will return the number of all non-roaming devices. Note that at least one filtering criterion must be provided; otherwise, the request will be invalid.
+
+    ## Response Result Explanation
+
+    The API response returns a RegionDeviceCountResponse object containing the device count and status. The status values include `SUPPORTED_AREA` (the entire requested area is supported, and the device count for the entire area is returned, with 100% telecom coverage), `PART_OF_AREA_NOT_SUPPORTED` (part of the area is outside the telecom operator's coverage area, and only the device count within the coverage area is returned, with 50% <= telecom coverage < 100%), `AREA_NOT_SUPPORTED` (the entire requested area has no telecom coverage, and no data is returned, with telecom coverage < 50%), `DENSITY_BELOW_PRIVACY_THRESHOLD` (the number of connected devices in the area is below the local regulatory privacy threshold), and `TIME_INTERVAL_NO_DATA_FOUND` (no device count data is found within the requested time interval).
+
+    ## Callback Function
+
+    The standard behaviour of the API is synchronous, although for large area requests the API may behave asynchronously. An API invoker can enforce asynchronous behaviour by providing a callback URL (`sink`)
+    is in the request, in this case the API sends a callback to the callback URL provided with the result of the request. If `sink` is included, it is RECOMMENDED for the client to provide as well the `sinkCredential` property to protect the notification endpoint. In the current version,`sinkCredential.credentialType` MUST be set to `ACCESSTOKEN` if provided.
+
+    For requests with a combination of area, startTime and endTime properties involving an amount of processing that cannot be processed synchronously, the API returns the error response REGION_DEVICE_COUNT.UNSUPPORTED_SYNC_RESPONSE.
+
+    For requests with a combination of area, startTime and endTime properties too big for both synchronous and asynchronous processing, the API returns the error response REGION_DEVICE_COUNT.UNSUPPPORTED_REQUEST.
+
+
+    # Authorization and Authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+
+    Region Device Count API does not involve the input and output of user personal data.Therefore, the access to Region Device Count APII is defined as `Client Credentials - 2-legged`. Please refer to [Identify and Consent Management](https://github.com/camaraproject/IdentityAndConsentManagement/) for the latest detailed specification of this authentication/authorization flow.
+
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification may not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+
+  version: wip
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  x-camara-commonalities: 0.6
+externalDocs:
+  description: Project documentation at CAMARA
+  url: https://github.com/camaraproject/RegionDeviceCount
+servers:
+  - url: '{apiRoot}/region-device-count/vwip'
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root
+tags:
+  - name: Region Device Count
+    description: This API allows for the API Consumer to query device count in the specified area during a certain time interval.The query area can be a circle or a polygon composed of longitude and latitude points.
+paths:
+  /count:
+    post:
+      tags:
+        - Region Device Count
+      summary: API operation to get the device count in the specified area during a certain time interval.
+      description: |
+        Get the number of devices in the specified area during a certain time interval.
+        - The query area can be a circle or a polygon composed of longitude and latitude points.
+        - If the areaType is circle, the circleCenter and circleRadius must be provided; if the area is a polygon, the point list must be provided.
+        - If starttime and endtime are not passed in,this api should return the current number of devices in the area.
+        - If the device appears in the specified area at least once during the certain time interval, it should be counted.
+
+      operationId: count
+      parameters:
+        - $ref: '#/components/parameters/x-correlator'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegionDeviceCountRequestBody'
+            examples:
+              LOCATION_CIRCLE:
+                $ref: "#/components/examples/RETRIEVAL_CIRCLE"
+              LOCATION_POLYGON:
+                $ref: "#/components/examples/RETRIEVAL_POLYGON"
+        required: true
+      callbacks:
+        regionDeviceCountCallback:
+          '{$request.body#/sink}':
+            post:
+              tags:
+                - Region Device Count
+              summary: 'Region Device Count Callback'
+              description: |
+                Important: this endpoint is to be implemented by the API consumer.
+                The Region Device Count server will call this endpoint when the request result is ready.
+              operationId: postRegionDeviceCountNotification
+              parameters:
+                - $ref: '#/components/parameters/x-correlator'
+              requestBody:
+                description: Region device count result.
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/RegionDeviceCountResponse'
+                    examples:
+                      SUPPORTED_AREA:
+                        $ref: "#/components/examples/SUPPORTED_AREA"
+                      PART_OF_AREA_NOT_SUPPORTED:
+                        $ref: "#/components/examples/PART_OF_AREA_NOT_SUPPORTED"
+                      AREA_NOT_SUPPORTED:
+                        $ref: "#/components/examples/AREA_NOT_SUPPORTED"
+                      DENSITY_BELOW_PRIVACY_THRESHOLD:
+                        $ref: "#/components/examples/DENSITY_BELOW_PRIVACY_THRESHOLD"
+              responses:
+                '204':
+                  description: Successful notification
+                  headers:
+                    x-correlator:
+                      $ref: '#/components/headers/x-correlator'
+                '400':
+                  $ref: '#/components/responses/Generic400'
+                '401':
+                  $ref: '#/components/responses/Generic401'
+                '403':
+                  $ref: '#/components/responses/Generic403'
+                '410':
+                  $ref: '#/components/responses/Generic410'
+              security:
+                - {}
+                - notificationsBearerAuth: []
+      responses:
+        '200':
+          description: OK
+          headers:
+            x-correlator:
+              $ref: "#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegionDeviceCountResponse'
+              examples:
+                SUPPORTED_AREA:
+                  $ref: "#/components/examples/SUPPORTED_AREA"
+                PART_OF_AREA_NOT_SUPPORTED:
+                  $ref: "#/components/examples/PART_OF_AREA_NOT_SUPPORTED"
+                AREA_NOT_SUPPORTED:
+                  $ref: "#/components/examples/AREA_NOT_SUPPORTED"
+                DENSITY_BELOW_PRIVACY_THRESHOLD:
+                  $ref: "#/components/examples/DENSITY_BELOW_PRIVACY_THRESHOLD"
+        '400':
+          $ref: '#/components/responses/Generic400'
+        '401':
+          $ref: '#/components/responses/Generic401'
+        '403':
+          $ref: '#/components/responses/Generic403'
+        '429':
+          $ref: '#/components/responses/Generic429'
+      security:
+        - openId:
+            - region-device-count:count
+components:
+  securitySchemes:
+    openId:
+      type: openIdConnect
+      openIdConnectUrl: https://example.com/.well-known/openid-configuration
+    notificationsBearerAuth:
+      description: Bearer authentication for notifications
+      type: http
+      scheme: bearer
+      bearerFormat: "{$request.body#sinkCredential.credentialType}"
+  parameters:
+    x-correlator:
+      name: x-correlator
+      in: header
+      description: Correlation ID for cross-service tracking
+      schema:
+        $ref: "#/components/schemas/XCorrelator"
+  headers:
+    x-correlator:
+      description: Correlation id for the different services
+      schema:
+        $ref: "#/components/schemas/XCorrelator"
+  schemas:
+    XCorrelator:
+      type: string
+      pattern: ^[a-zA-Z0-9-_:;.\/<>{}]{0,256}$
+      example: "b4333c46-49c0-4f62-80d7-f0ef930f1c46"
+    RegionDeviceCountRequestBody:
+      type: object
+      description: Payload to get the count of devices in the specific region.
+      properties:
+        area:
+          $ref: "#/components/schemas/Area"
+        starttime:
+          type: string
+          format: date-time
+          description: Starting timestamp for counting the number of devices in the area. It must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+          nullable: true
+          example: "2023-07-03T14:27:08.312+02:00"
+        endtime:
+          type: string
+          format: date-time
+          description: Ending timestamp for counting the number of devices in the area. It must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+          nullable: true
+          example: "2023-07-04T14:27:08.312+02:00"
+        filter:
+          $ref: "#/components/schemas/Filter"
+        sink:
+          type: string
+          format: uri
+          description: The URL where the API response will be asynchronously delivered, using the HTTP protocol.
+          example: 'https://endpoint.example.com/sink'
+        sinkCredential:
+          description: A sink credential provides authentication or authorization information necessary to enable delivery of events to a target.
+          allOf:
+            - $ref: '#/components/schemas/SinkCredential'
+    Area:
+      type: object
+      properties:
+        areaType:
+          $ref: "#/components/schemas/AreaType"
+      required:
+        - areaType
+      discriminator:
+        propertyName: areaType
+        mapping:
+          CIRCLE: "#/components/schemas/Circle"
+          POLYGON: "#/components/schemas/Polygon"
+    AreaType:
+      type: string
+      description: |
+        Type of this area.
+        CIRCLE - The area is defined as a circle.
+        POLYGON - The area is defined as a polygon.
+      enum:
+        - CIRCLE
+        - POLYGON
+
+    Circle:
+      description: Circular area
+      allOf:
+        - $ref: "#/components/schemas/Area"
+        - type: object
+          required:
+            - center
+            - radius
+          properties:
+            center:
+              $ref: "#/components/schemas/Point"
+            radius:
+              type: number
+              description: Distance from the center in meters
+              minimum: 1
+
+    Polygon:
+      allOf:
+        - $ref: "#/components/schemas/Area"
+        - type: object
+          required:
+            - boundary
+          properties:
+            boundary:
+              $ref: "#/components/schemas/PointList"
+
+    PointList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Point"
+      minItems: 3
+      maxItems: 15
+
+    Point:
+      type: object
+      description: Coordinates (latitude, longitude) defining a location in a map
+      required:
+        - latitude
+        - longitude
+      properties:
+        latitude:
+          $ref: "#/components/schemas/Latitude"
+        longitude:
+          $ref: "#/components/schemas/Longitude"
+      example:
+        latitude: 50.735851
+        longitude: 7.10066
+
+    Latitude:
+      description: Latitude component of a location
+      type: number
+      format: double
+      minimum: -90
+      maximum: 90
+
+    Longitude:
+      description: Longitude component of location
+      type: number
+      format: double
+      minimum: -180
+      maximum: 180
+    Filter:
+      description: |
+        This parameter is used to filter devices. Currently, two filtering criteria are defined, `roamingStatus` and `deviceType`, which can be expanded in the future. `IN` logic is used used for multiple filtering items within a single filtering criterion, `AND` logic is used between multiple filtering criteria.
+        - If a filtering critera is not provided, it means that there is no need to filter this item.
+        - At least one of the criteria must be provided,a filter without any criteria is not allowed.
+        - If no filtering is required, this parameter does not need to be provided.
+        For example ,`"filter":{"roamingStatus": ["roaming"],"deviceType": ["human device","IoT device"]}` means the API need to return the count of human network devices and IoT devices that are in roaming mode.`"filter":{"roamingStatus": ["non-roaming"]}` means that the API need to return the count of all devices that are not in roaming mode.
+      type: object
+      properties:
+        roamingStatus:
+          description: Filter whether the device is in roaming mode,'roaming' represents the need to filter devices that are in roaming mode,'non-roaming' represents the need to filter devices that are not roaming.
+          type: array
+          items:
+            type: string
+            enum:
+              - 'roaming'
+              - 'non-roaming'
+          minItems: 1
+        deviceType:
+          description: Filtering by device type, 'human device' represents the need to filter for human network devices, 'IoT device' represents the need to filter for IoT devices, and 'other' represents the need to filter for other types of devices.
+          type: array
+          items:
+            type: string
+            enum:
+              - 'human device'
+              - 'IoT device'
+              - 'other'
+          minItems: 1
+      anyOf:
+        - required: ['roamingStatus']
+        - required: ['deviceType']
+    SinkCredential:
+      type: object
+      properties:
+        credentialType:
+          type: string
+          enum:
+            - PLAIN
+            - ACCESSTOKEN
+            - REFRESHTOKEN
+          description: |
+            The type of the credential.
+            Note: Type of the credential - MUST be set to ACCESSTOKEN for now
+      discriminator:
+        propertyName: credentialType
+        mapping:
+          PLAIN: '#/components/schemas/PlainCredential'
+          ACCESSTOKEN: '#/components/schemas/AccessTokenCredential'
+          REFRESHTOKEN: '#/components/schemas/RefreshTokenCredential'
+      required:
+        - credentialType
+    PlainCredential:
+      type: object
+      description: A plain credential as a combination of an identifier and a secret.
+      allOf:
+        - $ref: '#/components/schemas/SinkCredential'
+        - type: object
+          required:
+            - identifier
+            - secret
+          properties:
+            identifier:
+              description: The identifier might be an account or username.
+              type: string
+            secret:
+              description: The secret might be a password or passphrase.
+              type: string
+    AccessTokenCredential:
+      type: object
+      description: An access token credential.
+      allOf:
+        - $ref: '#/components/schemas/SinkCredential'
+        - type: object
+          properties:
+            accessToken:
+              description: REQUIRED. An access token is a previously acquired token granting access to the target resource.
+              type: string
+            accessTokenExpiresUtc:
+              type: string
+              format: date-time
+              description: |
+                REQUIRED. An absolute (UTC) timestamp at which the token shall be considered expired.
+                In the case of an ACCESS_TOKEN_EXPIRED termination reason, implementation should notify the client before the expiration date.
+                If the access token is a JWT and registered "exp" (Expiration Time) claim is present, the two expiry times should match.
+                It must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+                Recommended format is yyyy-MM-dd'T'HH:mm:ss.SSSZ (i.e. which allows 2023-07-03T14:27:08.312+02:00 or 2023-07-03T12:27:08.312Z)
+              example: "2023-07-03T12:27:08.312Z"
+            accessTokenType:
+              description: REQUIRED. Type of the access token (See [OAuth 2.0](https://tools.ietf.org/html/rfc6749#section-7.1)). For the current version of the API the type MUST be set to `Bearer`.
+              type: string
+              enum:
+                - bearer
+          required:
+            - accessToken
+            - accessTokenExpiresUtc
+            - accessTokenType
+    RefreshTokenCredential:
+      type: object
+      description: An access token credential with a refresh token.
+      allOf:
+        - $ref: '#/components/schemas/SinkCredential'
+        - type: object
+          properties:
+            accessToken:
+              description: REQUIRED. An access token is a previously acquired token granting access to the target resource.
+              type: string
+            accessTokenExpiresUtc:
+              type: string
+              format: date-time
+              description: |
+                REQUIRED. An absolute (UTC) timestamp at which the token shall be considered expired.
+                In the case of an ACCESS_TOKEN_EXPIRED termination reason, implementation should notify the client before the expiration date.
+                If the access token is a JWT and registered "exp" (Expiration Time) claim is present, the two expiry times should match.
+                It must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+                Recommended format is yyyy-MM-dd'T'HH:mm:ss.SSSZ (i.e. which allows 2023-07-03T14:27:08.312+02:00 or 2023-07-03T12:27:08.312Z)
+              example: "2023-07-03T12:27:08.312Z"
+            accessTokenType:
+              description: REQUIRED. Type of the access token (See [OAuth 2.0](https://tools.ietf.org/html/rfc6749#section-7.1)).
+              type: string
+              enum:
+                - bearer
+            refreshToken:
+              description: REQUIRED. An refresh token credential used to acquire access tokens.
+              type: string
+            refreshTokenEndpoint:
+              type: string
+              format: uri
+              description: REQUIRED. A URL at which the refresh token can be traded for an access token.
+      required:
+        - accessToken
+        - accessTokenExpiresUtc
+        - accessTokenType
+        - refreshToken
+        - refreshTokenEndpoint
+    RegionDeviceCountResponse:
+      type: object
+      description: RegionDeviceCount result
+      properties:
+        count:
+          $ref: '#/components/schemas/Count'
+        status:
+          $ref: '#/components/schemas/Status'
+    Count:
+      description: Device Count
+      type: number
+    Status:
+      description: |
+        SUPPORTED_AREA: The whole requested area is supported Region Device Count for the entire requested area is returned - Telco Coverage = 100 %
+
+        PART_OF_AREA_NOT_SUPPORTED: Part of the requested area is outside the MNOs coverage area, the area outside the coverage area are not returned - 100% >Telco Coverage >=50%
+
+        AREA_NOT_SUPPORTED:  The whole requested area is outside the MNO coverage area No data will be returned- Telco Coverage <50%
+
+        DENSITY_BELOW_PRIVACY_THRESHOLD:  The number of connected devices is below privacy threshold of local regulation
+
+        TIME_INTERVAL_NO_DATA_FOUND: Unable to find device count data within the requested time interval
+      type: string
+      enum:
+        - SUPPORTED_AREA
+        - PART_OF_AREA_NOT_SUPPORTED
+        - AREA_NOT_SUPPORTED
+        - DENSITY_BELOW_PRIVACY_THRESHOLD
+        - TIME_INTERVAL_NO_DATA_FOUND
+    ErrorInfo:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: integer
+          description: HTTP response status code
+        code:
+          type: string
+          description: A human-readable code to describe the error
+        message:
+          type: string
+          description: A human-readable description of what the event represents
+  responses:
+    Generic400:
+      description: Bad Request
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 400
+                  code:
+                    enum:
+                      - INVALID_ARGUMENT
+                      - REGION_DEVICE_COUNT.TIME_INVALID_ARGUMENT
+                      - REGION_DEVICE_COUNT.INVALID_END_DATE
+                      - REGION_DEVICE_COUNT.INVALID_CIRCLE_AREA
+                      - REGION_DEVICE_COUNT.INVALID_POLYGON_AREA
+                      - INVALID_CREDENTIAL
+                      - INVALID_TOKEN
+                      - REGION_DEVICE_COUNT.UNSUPPORTED_SYNC_RESPONSE
+                      - REGION_DEVICE_COUNT.UNSUPPPORTED_REQUEST
+          examples:
+            GENERIC_400_INVALID_ARGUMENT:
+              description: Invalid Argument. Generic Syntax Exception
+              value:
+                status: 400
+                code: INVALID_ARGUMENT
+                message: "Client specified an invalid argument, request body or query param."
+            GENERIC_400_TIME_INTERVAL_NOT_SATISFIABLE:
+              value:
+                status: 400
+                code: REGION_DEVICE_COUNT.TIME_INVALID_ARGUMENT
+                message: "starttime and endtime cannot be passed separately. Either both are passed or neither is passed."
+            GENERIC_400_INVALID_END_DATE:
+              value:
+                status: 400
+                code: REGION_DEVICE_COUNT.INVALID_END_DATE
+                message: "Indicated endTime is earlier than the startTime."
+            GENERIC_400_INVALID_CIRCLE_AREA:
+              value:
+                status: 400
+                code: REGION_DEVICE_COUNT.INVALID_CIRCLE_AREA
+                message: "Missing circle center or radius."
+            GENERIC_400_INVALID_POLYGON_AREA:
+              value:
+                status: 400
+                code: REGION_DEVICE_COUNT.INVALID_POLYGON_AREA
+                message: "The area is not a polygon shape or has an arbitrary complexity."
+            GENERIC_400_INVALID_CREDENTIAL:
+              value:
+                status: 400
+                code: INVALID_CREDENTIAL
+                message: "Only Access token is supported"
+            GENERIC_400_INVALID_TOKEN:
+              value:
+                status: 400
+                code: INVALID_TOKEN
+                message: "Only bearer token is supported"
+            GENERIC_400_UNSUPPORTED_SYNC_RESPONSE:
+              value:
+                status: 400
+                code: REGION_DEVICE_COUNT.UNSUPPORTED_SYNC_RESPONSE
+                message: "Indicated combination of area or time interval is too big for a sync response"
+            GENERIC_400_UNSUPPORTED_REQUEST:
+              value:
+                status: 400
+                code: REGION_DEVICE_COUNT.UNSUPPPORTED_REQUEST
+                message: "Indicated combination of area or time interval is too big"
+
+    Generic401:
+      description: Unauthorized
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 401
+                  code:
+                    enum:
+                      - UNAUTHENTICATED
+          examples:
+            GENERIC_401_UNAUTHENTICATED:
+              description: Request cannot be authenticated
+              value:
+                status: 401
+                code: UNAUTHENTICATED
+                message: Request not authenticated due to missing, invalid, or expired credentials.
+    Generic403:
+      description: Forbidden
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 403
+                  code:
+                    enum:
+                      - PERMISSION_DENIED
+                      - INVALID_TOKEN_CONTEXT
+          examples:
+            GENERIC_403_PERMISSION_DENIED:
+              description: Permission denied. OAuth2 token access does not have the required scope or when the user fails operational security
+              value:
+                status: 403
+                code: PERMISSION_DENIED
+                message: Client does not have sufficient permissions to perform this action.
+            GENERIC_403_INVALID_TOKEN_CONTEXT:
+              description: Reflect some inconsistency between information in some field of the API and the related OAuth2 Token
+              value:
+                status: 403
+                code: INVALID_TOKEN_CONTEXT
+                message: "{{field}} is not consistent with access token."
+    Generic410:
+      description: Gone
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 410
+                  code:
+                    enum:
+                      - GONE
+          examples:
+            GENERIC_410_GONE:
+              description: Use in notifications flow to allow API Consumer to indicate that its callback is no longer available
+              value:
+                status: 410
+                code: GONE
+                message: Access to the target resource is no longer available.
+    Generic429:
+      description: Either out of resource quota or reaching rate limiting
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 429
+                  code:
+                    enum:
+                      - QUOTA_EXCEEDED
+                      - TOO_MANY_REQUESTS
+          examples:
+            GENERIC_429_QUOTA_EXCEEDED:
+              description: Request is rejected due to exceeding a business quota limit
+              value:
+                status: 429
+                code: QUOTA_EXCEEDED
+                message: Out of resource quota.
+            GENERIC_429_TOO_MANY_REQUESTS:
+              description: Access to the API has been temporarily blocked due to rate or spike arrest limits being reached
+              value:
+                status: 429
+                code: TOO_MANY_REQUESTS
+                message: Rate limit reached.
+  examples:
+    RETRIEVAL_CIRCLE:
+      value:
+        area:
+          areaType: CIRCLE
+          center:
+            latitude: 45.754114
+            longitude: 4.860374
+          radius: 800
+        starttime: "2023-07-03T14:27:08.312+02:00"
+        endtime: "2023-07-04T14:27:08.312+02:00"
+        filter:
+          roamingStatus: ["roaming"]
+          deviceType: ["human device", "IoT device"]
+        sink: "https://endpoint.example.com/sink"
+        sinkCredential:
+          credentialType: ACCESSTOKEN
+          accessToken: "yJ2ZXIiOiIxLjAiLCJ0eXAiO..."
+          accessTokenExpiresUtc: "1717753038"
+          accessTokenType: "bearer"
+    RETRIEVAL_POLYGON:
+      value:
+        area:
+          areaType: POLYGON
+          boundary:
+            - latitude: 45.754114
+              longitude: 4.860374
+            - latitude: 45.753845
+              longitude: 4.863185
+            - latitude: 45.753916
+              longitude: 4.866531
+            - latitude: 45.754116
+              longitude: 4.876353
+        starttime: "2023-07-03T14:27:08.312+02:00"
+        endtime: "2023-07-04T14:27:08.312+02:00"
+        filter:
+          roamingStatus: ["non-roaming"]
+          deviceType: ["other"]
+        sink: "https://endpoint.example.com/sink"
+        sinkCredential:
+          credentialType: ACCESSTOKEN
+          accessToken: "yJ2ZXIiOiIxLjAiLCJ0eXAiO..."
+          accessTokenExpiresUtc: "1717753038"
+          accessTokenType: "bearer"
+    SUPPORTED_AREA:
+      value:
+        count: 100
+        status: SUPPORTED_AREA
+    PART_OF_AREA_NOT_SUPPORTED:
+      value:
+        count: 100
+        status: PART_OF_AREA_NOT_SUPPORTED
+    AREA_NOT_SUPPORTED:
+      value:
+        status: AREA_NOT_SUPPORTED
+    DENSITY_BELOW_PRIVACY_THRESHOLD:
+      value:
+        status: DENSITY_BELOW_PRIVACY_THRESHOLD

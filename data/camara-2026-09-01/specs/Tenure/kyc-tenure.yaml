@@ -1,0 +1,201 @@
+openapi: 3.0.3
+info:
+  title: KYC Tenure
+  description: |
+    # Summary
+
+    The CAMARA Know Your Customer (KYC) Tenure API allows for verification that a network subscriber has been a customer of the Communications Service Provider (CSP) for a specified minimum length of time so as to establish a level of trust for the associated network subscription identifier.
+
+    # API functionality
+
+    The API defines one service endpoint:
+
+    - `POST /check-tenure`
+
+      Takes the network subscription identifier (e.g. the mobile phone number for a mobile network subscriber) and the specified minimum tenure date to validate for the associated network subscription. This endpoint will respond with a confirmation of whether or not the network subscriber tenure is longer than the specified date timestamp, optionally supplemented with details of the subscription contract type.
+
+    To call this endpoint, the API consumer must first obtain a valid access token with the specified scope from the specified token endpoint, which is then passed to the endpoint via the `Authorization` header. For more details on access token processing, see below.
+
+    ## Inputs
+
+    The endpoint request body is a JSON object with the following parameters:
+    - `tenureDate`: The date from which continuous tenure of the identified network subscriber is required to be confirmed. This field is always required.
+    - `phoneNumber`: The network subscription identifier (i.e. the phone number of the subscriber). This field is only required if no network subscription identifier is associated with the access token.
+
+    Note: MNOs may implement a threshold for the tenureDate aligned with their respective regulations. In that case if the tenureDate value in the request body is over the operator's threshold  an error `400 OUT_OF_RANGE `is returned with an explicit message to explain the limitation.
+
+    ## Outputs
+
+    If successful, a JSON object is returned containing the following data:
+    - `tenureDateCheck`: `true` when the identified network subscription has had valid tenure since `tenureDate`, otherwise `false`
+    - `contractType`: The network subscription account type, if known
+
+    An example of a JSON response object is as follows:
+    ```
+    {
+        "tenureDateCheck": true,
+        "contractType": "PAYM"
+    }
+    ```
+
+    ## Errors
+
+    If the authentication token is missing, not a valid token, or is no longer valid, a `401 UNAUTHENTICATED` error is returned
+
+    If the API call contain a formatting or other error, a `400 INVALID_ARGUMENT` error is returned.
+
+    If the network subscription cannot be identified from the provided parameters (e.g. the subscription identifier is not associated with any customer of the CSP), a `404 IDENTIFIER_NOT_FOUND` error is returned.
+
+    If the API consumer has a valid access token that does not have the required scope to obtain tenure information for the specified network subscription, then a `403 PERMISSION_DENIED` error is returned.
+
+    # Identifying the phone number from the access token
+
+    This API requires the API consumer to identify a phone number as the subject of the API as follows:
+    - When the API is invoked using a two-legged access token, the subject will be identified from the optional `phoneNumber` field, which therefore MUST be provided.
+
+    - When a three-legged access token is used however, this optional identifier MUST NOT be provided, as the subject will be uniquely identified from the access token.
+
+    This approach simplifies API usage for API consumers using a three-legged access token to invoke the API by relying on the information that is associated with the access token and was identified during the authentication process.
+
+    ## Error handling:
+    - If the subject cannot be identified from the access token and the optional `phoneNumber` field is not included in the request, then the server will return an error with the `422 MISSING_IDENTIFIER` error code.
+
+    - If the subject can be identified from the access token and the optional `phoneNumber` field is also included in the request, then the server will return an error with the `422 UNNECESSARY_IDENTIFIER` error code. This will be the case even if the same phone number is identified by these two methods, as the server is unable to make this comparison.
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+  version: wip
+  x-camara-commonalities: wip
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+externalDocs:
+  description: Product documentation at CAMARA
+  url: https://github.com/camaraproject/Tenure
+
+servers:
+  - url: "{apiRoot}/kyc-tenure/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+
+tags:
+  - name: Check Subscriber Tenure
+    description: Check details about the length of tenure of the subscriber
+
+paths:
+  /check-tenure:
+    post:
+      tags:
+        - Check Subscriber Tenure
+      summary: The KYC Tenure service API
+      description: |
+        Verifies a specified length of tenure, based on a provided date, for a network subscriber to establish a level of trust for the network subscription identifier.
+
+      security:
+        - openId:
+            - kyc-tenure:check-tenure
+
+      operationId: checkTenure
+
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Tenure"
+
+      responses:
+        "200":
+          description: Respond with tenure information
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TenureInfo"
+
+        "400":
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+        "401":
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+        "403":
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+        "404":
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic404'
+        "422":
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic422'
+
+components:
+  securitySchemes:
+    openId:
+      $ref: "../common/CAMARA_common.yaml#/components/securitySchemes/openId"
+
+  schemas:
+    Tenure:
+      description: Specifies date from which continuous tenure of the identified mobile subscriber is required to be confirmed
+      type: object
+      properties:
+        phoneNumber:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/PhoneNumber"
+        tenureDate:
+          type: string
+          description: The date, in RFC 3339 / ISO 8601 compliant format "YYYY-MM-DD", from which continuous tenure of the identified network subscriber is required to be confirmed
+          format: date
+          minLength: 10
+          maxLength: 10
+          example: "2023-07-03"
+      required:
+        - tenureDate
+
+    TenureInfo:
+      type: object
+      description: Defines tenure information provided in API response body
+      properties:
+        tenureDateCheck:
+          description: |
+            `true` when the identified mobile subscription has had valid tenure since `tenureDate`, otherwise `false`
+          example: true
+          type: boolean
+        contractType:
+          description: |
+            If exists, populated with:
+            - `PAYG` - prepaid (pay-as-you-go) account
+            - `PAYM` - contract account
+            - `Business` - Business (enterprise) account
+
+            This attribute may be omitted from the response set if the information is not available
+          example: "PAYM"
+          type: string
+          enum: ["PAYG", "PAYM", "Business"]
+      required:
+        - tenureDateCheck

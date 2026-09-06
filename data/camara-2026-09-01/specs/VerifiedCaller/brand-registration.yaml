@@ -1,0 +1,1240 @@
+openapi: 3.0.3
+info:
+  title: Brand Registration
+  description: |
+    This API provides the ability to associate a calling party number with a human-readable string that is displayed to the callee on their device screen instead of the calling number.
+
+    # Introduction
+
+    Consumers of this API can associate calling party numbers with a human-readable string that is to be displayed to the callee on their device screen instead of the calling number. This allows the callee to recognize the caller even if the calling party number is not registered in the callee's device and increases the likelihood of the call being answered.
+
+    Brand Registration API could be useful in scenarios such as:
+    - Telesales
+    - Customer Support
+    - Outreach efforts of NGOs.
+    - Calls placed by authorities or government institutions for official matters.
+
+    # Relevant terms and definitions
+    * **phoneNumber** and **phoneNumberAlternate**: A pair of E.164 numbers representing the caller. Depending on the caller's networks access setup , only phoneNumber or both phoneNumber & phoneNumberAlternate may be used to uniquely identify the caller. The values typically correspond to parameters used in telecom signalling protocols, e.g. PAI and FROM headers in SIP.
+    * **status**: Status of the registration.
+    * **expiresAt**: The date in RFC 3339 / ISO 8601 compliant format when the brand registration is scheduled to expire. Registration status is moved to ``expired``.
+    * **createdAt**: Timestamp at which the Brand Registration has been created. It must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+    * **updatedAt**: Timestamp at which the Brand Registration has been last updated. It must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+    * **displayName**: A human-readable string that is to be displayed to the callee on their device screen instead of the calling number.
+    * **displayAsset**: A visual asset (e.g. a logo, image or video) that is to be displayed to the callee on their device screen instead of the calling number. Support of the visual asset depends on the service provider and callee's device. If the service provider does not support the parameter, it SHALL clearly document the limitation and SHOULD silently ignore the parameter if received.
+    * **customerId** : A string to represent the owner of the displayName, e.g. a commercial brand or an institution.
+    * **verifyCallerAction**: An instruction applied during actual call setup. Indicates the action to be taken by the service provider if the authenticity of the caller cannot be established using VerifiedCaller API capabilities.
+    * **quota**: Maximum number of branded calls allowed for the registration.
+    * **quotaThreshold**: Number of branded calls at which customer is notified that a quota threshold has been reached.
+    * **callPurpose**: Calls' Purpose classification of the registration.
+    * **Notification URL and token**:  The API consumer may provide a callback URL (`sink`) on which notifications about events related to given brand registration(eg. calls with brand information) can be received from the API provider. This is an optional parameter. The notification will be sent as a CloudEvent compliant message.
+    If `sink` is included, it is RECOMMENDED for the client to provide as well the `sinkCredential` property to protect the notification endpoint. In the current version, `sinkCredential.credentialType` MUST be set to `ACCESSTOKEN` if `sinkCredential` is provided or to `PRIVATE_KEY_JWT` if authentication information is pre-shared.
+
+    # API Functionality
+
+    The API exposes the following endpoints/operations:
+
+    - `/registrations` :
+      - **POST** operation creates a new registration and returns a registration identifier
+      - **GET** operation reads existing registrations from the brand registration service
+    - `/registrations/{registrationId}` :
+      - **PUT** operation updates an existing registration identified by the registrationId in the brand registration service
+      - **GET** operation reads an existing registration identified by the registrationId from the brand registration service
+      - **DEL** operation deletes an existing registration identified by the registrationId from the brand registration service
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+
+  version: wip
+
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  x-camara-commonalities: 0.7.0
+externalDocs:
+  description: Project documentation at Camara
+  url: https://github.com/camaraproject/VerifiedCaller
+servers:
+  - url: '{apiRoot}/brand-registration/vwip'
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+tags:
+  - name: Create Brand Registration
+    description: Create Brand Registration Information for a Calling Party
+  - name: Update Brand Registration
+    description: Update Existing Brand Registration Information for a Calling Party
+  - name: Read Brand Registration
+    description: Read Existing Brand Registration Information for a Calling Party
+  - name: Delete Brand Registration
+    description: Delete Existing Brand Registration Information for a Calling Party
+  - name: Call Branded Notifications Callback
+    description: Notifications callback invoked by the API provider when a call is successfully branded for a registration that opted in with `sink`.
+paths:
+  /registrations:
+    post:
+      tags:
+        - Create Brand Registration
+      summary: Register new brand information in the service platform
+      description: Register new brand information with optional call verification request.
+      operationId: createRegistration
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrUpdateRegistrationRequest'
+            examples:
+              INPUT_SINGLE_PHONE_NUMBER:
+                summary: Device identified by phoneNumber
+                description: Create a registration for a device, identified by a phone number
+                value:
+                  phoneNumber: "+123456789"
+                  expiresAt: "2023-07-03"
+                  terminatingCountryCode: 44
+                  displayName: "Company X Calling"
+                  customerId: "Customer1"
+                  verifyCallerAction: "DO_NOT_BRAND"
+                  callPurpose: "Survey"
+              INPUT_TWO_PHONE_NUMBERS:
+                summary: Device identified by phoneNumber & phoneNumberAlternate
+                description: Create a registration for a device, identified by a phone number & phone number alternate
+                value:
+                  phoneNumber: "+123456789"
+                  phoneNumberAlternate: "+123456790"
+                  expiresAt: "2023-07-03"
+                  terminatingCountryCode: 44
+                  displayName: "Company Y Calling"
+                  displayAsset: "https://ims.operator-name.com/brand-logo.bmp;purpose=icon"
+                  customerId: "Customer2"
+                  verifyCallerAction: "DO_NOT_BRAND"
+                  callPurpose: "Survey"
+              INPUT_WITH_NOTIFICATIONS_ACCESSTOKEN:
+                summary: Registration with notifications (ACCESSTOKEN credential)
+                description: |
+                  Create a registration and opt in for CloudEvent notifications.
+                  The API provider will call the `sink` URL with a bearer token when a call is branded.
+                value:
+                  phoneNumber: "+123456789"
+                  expiresAt: "2023-07-03"
+                  terminatingCountryCode: 44
+                  displayName: "Company X Calling"
+                  customerId: "Customer1"
+                  verifyCallerAction: "DO_NOT_BRAND"
+                  callPurpose: "Survey"
+                  sink: "https://endpoint.example.com/sink"
+                  sinkCredential:
+                    credentialType: "ACCESSTOKEN"
+                    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    accessTokenExpiresUtc: "2026-07-03T12:27:08.312Z"
+                    accessTokenType: "bearer"
+              INPUT_WITH_NOTIFICATIONS_PRIVATE_KEY_JWT:
+                summary: Registration with notifications (PRIVATE_KEY_JWT credential)
+                description: |
+                  Create a registration and opt in for CloudEvent notifications using PRIVATE_KEY_JWT.
+                  Authorization server details (token endpoint, client ID, JWKS URL) are shared out-of-band
+                  between the consumer and the API provider during onboarding.
+                value:
+                  phoneNumber: "+123456789"
+                  expiresAt: "2023-07-03"
+                  terminatingCountryCode: 44
+                  displayName: "Company X Calling"
+                  customerId: "Customer1"
+                  verifyCallerAction: "DO_NOT_BRAND"
+                  callPurpose: "Survey"
+                  sink: "https://endpoint.example.com/sink"
+                  sinkCredential:
+                    credentialType: "PRIVATE_KEY_JWT"
+
+      callbacks:
+        notifications:
+          "{$request.body#/sink}":
+            post:
+              tags:
+                - Call Branded Notifications Callback
+              summary: Call branded notifications callback
+              description: |
+                Important: this endpoint is to be implemented by the API consumer.
+                The API provider will call this endpoint whenever a call associated with
+                a brand registration that opted in with `sink` is successfully branded.
+              operationId: postCallBrandedNotification
+              parameters:
+                - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+              requestBody:
+                required: true
+                content:
+                  application/cloudevents+json:
+                    schema:
+                      $ref: '#/components/schemas/BrandRegistrationNotificationEvent'
+                    examples:
+                      CALL_BRANDED_EVENT:
+                        $ref: '#/components/examples/CALL_BRANDED_EVENT'
+                      BRAND_REGISTRATION_STATUS_EVENT:
+                        $ref: '#/components/examples/BRAND_REGISTRATION_STATUS_EVENT'
+                      QUOTA_EXHAUSTED_EVENT:
+                        $ref: '#/components/examples/QUOTA_EXHAUSTED_EVENT'
+                      QUOTA_THRESHOLD_REACHED_EVENT:
+                        $ref: '#/components/examples/QUOTA_THRESHOLD_REACHED_EVENT'
+
+              responses:
+                '204':
+                  description: Successful notification
+                  headers:
+                    x-correlator:
+                      $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+                '400':
+                  $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+                '401':
+                  $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+                '403':
+                  $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+                '410':
+                  $ref: '../common/CAMARA_common.yaml#/components/responses/Generic410'
+                '429':
+                  $ref: '../common/CAMARA_common.yaml#/components/responses/Generic429'
+              security:
+                - {}
+                - notificationsBearerAuth: []
+
+      responses:
+        '201':
+          $ref: '#/components/responses/SuccessfulRecord'
+        '400':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+        '401':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+        '403':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Create404'
+        '409':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic409'
+        '422':
+          $ref: '#/components/responses/CreateOrUpdateRegistrationUnprocessableEntity422'
+        '429':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic429'
+        '500':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic500'
+        '503':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic503'
+
+      security:
+        - openId:
+            - brand-registration:create
+    get:
+      tags:
+        - Read Brand Registration
+      summary: Read existing brand registrations from the service platform
+      description: |
+        Read existing brand registrations from the service platform.
+
+        ## Filtering
+
+        The following query parameters are RECOMMENDED filters for this
+        operation. They are all optional. API providers MAY implement any
+        subset of them based on their capabilities; the supported set for a
+        given provider is documented on that provider's Exposition Gateway
+        "Getting Started" page (filter support is not intended to be
+        discovered through HTTP error responses).
+
+        - `customerId` - filter by enterprise/brand owner identifier.
+        - `displayName` - filter by the display name registered for the brand.
+        - `status` - filter by registration status.
+        - `createdAt.lte` - filter by lower createdAt date-time.
+        - `createdAt.gte` - filter by greater createdAt date-time.
+        - `updatedAt.lte` - filter by lower updatedAt date-time.
+        - `updatedAt.gte` - filter by greater updatedAt date-time.
+        - `expiresAt` - filter by expiresAt date.
+        - `terminatingCountryCode` - filter by terminating country code.
+        - `callPurpose` - filter by call purpose.
+
+        When more than one filter is provided, results MUST match all of
+        them (logical AND).
+
+        Regardless of the filters supplied, an authenticated client only
+        ever receives registrations it owns; filters narrow the result set,
+        they never expose another tenant's data. In particular, `customerId`
+        is interpreted within the scope of the authenticated client.
+      operationId: readRegistrations
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/page"
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/perPage"
+        - $ref: '#/components/parameters/CustomerIdFilter'
+        - $ref: '#/components/parameters/DisplayNameFilter'
+        - $ref: '#/components/parameters/StatusFilter'
+        - $ref: '#/components/parameters/CreatedAtBeforeFilter'
+        - $ref: '#/components/parameters/CreatedAtAfterFilter'
+        - $ref: '#/components/parameters/UpdatedAtBeforeFilter'
+        - $ref: '#/components/parameters/UpdatedAtAfterFilter'
+        - $ref: '#/components/parameters/ExpiresAtFilter'
+        - $ref: '#/components/parameters/TerminatingCountryCodeFilter'
+        - $ref: '#/components/parameters/CallPurposeFilter'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessfulRecords'
+        '204':
+          $ref: '#/components/responses/204NoContent'
+        '206':
+          $ref: '#/components/responses/SuccessfulPartialRecords'
+        '400':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+        '401':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+        '403':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+        '404':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic404'
+        '429':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic429'
+        '500':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic500'
+        '503':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic503'
+
+      security:
+        - openId:
+            - brand-registration:read
+
+  /registrations/{registrationId}:
+    get:
+      tags:
+        - Read Brand Registration
+      summary: Read an existing brand registration from the service platform
+      description: Read an existing brand registration from the service platform
+      operationId: readRegistration
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+        - description: Unique identifier of an existing brand registration
+          in: path
+          name: registrationId
+          required: true
+          schema:
+            type: string
+            maxLength: 256
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessfulRecord'
+        '400':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+        '401':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+        '403':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+        '404':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic404'
+        '429':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic429'
+        '500':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic500'
+        '503':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic503'
+
+      security:
+        - openId:
+            - brand-registration:read
+    delete:
+      tags:
+        - Delete Brand Registration
+      summary: Delete an existing brand registration from the service platform
+      description: Delete an existing brand registration from the service platform
+      operationId: deleteRegistration
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+        - description: Unique identifier of an existing brand registration
+          in: path
+          name: registrationId
+          required: true
+          schema:
+            type: string
+            maxLength: 256
+      responses:
+        '204':
+          $ref: '#/components/responses/204NoContent'
+        '400':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+        '401':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+        '403':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+        '404':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic404'
+        '429':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic429'
+        '500':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic500'
+        '503':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic503'
+
+      security:
+        - openId:
+            - brand-registration:delete
+    put:
+      tags:
+        - Update Brand Registration
+      summary: Update an existing brand registration in the service platform
+      description: Update an existing brand registration
+      operationId: updateRegistration
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+        - description: Unique identifier of an existing brand registration
+          in: path
+          name: registrationId
+          required: true
+          schema:
+            type: string
+            maxLength: 256
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrUpdateRegistrationRequest'
+            examples:
+              INPUT_SINGLE_PHONE_NUMBER:
+                summary: Device identified by phoneNumber
+                description: Update registration for a device, identified by a phone number
+                value:
+                  phoneNumber: "+123456789"
+                  expiresAt: "2023-07-03"
+                  terminatingCountryCode: 44
+                  displayName: "Company X Calling"
+                  customerId: "Customer1"
+                  verifyCallerAction: "DO_NOT_BRAND"
+                  callPurpose: "Survey"
+              INPUT_TWO_PHONE_NUMBERS:
+                summary: Device identified by phoneNumber & phoneNumberAlternate
+                description: Update registration for a device, identified by a phone number & phone number alternate
+                value:
+                  phoneNumber: "+123456789"
+                  phoneNumberAlternate: "+123456790"
+                  expiresAt: "2023-07-03"
+                  terminatingCountryCode: 44
+                  displayName: "Company Y Calling"
+                  displayAsset: "https://ims.operator-name.com/brand-logo.bmp;purpose=icon"
+                  customerId: "Customer2"
+                  verifyCallerAction: "DO_NOT_BRAND"
+                  callPurpose: "Survey"
+
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessfulRecord'
+        '400':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+        '401':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+        '403':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Update404'
+        '409':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic409'
+        '422':
+          $ref: '#/components/responses/CreateOrUpdateRegistrationUnprocessableEntity422'
+        '429':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic429'
+        '500':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic500'
+        '503':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic503'
+
+      security:
+        - openId:
+            - brand-registration:update
+
+components:
+  securitySchemes:
+    openId:
+      description: OpenID Connect authentication
+      type: openIdConnect
+      openIdConnectUrl: https://example.com/.well-known/openid-configuration
+    notificationsBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: "{$request.body#/sinkCredential.credentialType}"
+      description: |
+        Bearer token for notification delivery. Token format is determined
+        by `sinkCredential.credentialType` in the subscription request.
+  parameters:
+    CustomerIdFilter:
+      name: customerId
+      in: query
+      required: false
+      description: |
+        Optional filter. Restrict results to registrations matching the given `customerId`.
+        Always interpreted within the scope of the authenticated client.
+      schema:
+        $ref: '#/components/schemas/CustomerId'
+    DisplayNameFilter:
+      name: displayName
+      in: query
+      required: false
+      description: Optional filter. Restrict results to registrations matching the given `displayName`.
+      schema:
+        $ref: '#/components/schemas/DisplayName'
+    StatusFilter:
+      name: status
+      in: query
+      required: false
+      description: Optional filter. Restrict results to registrations in the given `status`.
+      schema:
+        $ref: '#/components/schemas/Status'
+    CreatedAtBeforeFilter:
+      name: createdAt.lte
+      in: query
+      required: false
+      description: Optional filter. Restrict results to registrations for which creation date-time is lower or equal than the given createdAt date-time.
+      schema:
+        $ref: '#/components/schemas/CreatedAt'
+    CreatedAtAfterFilter:
+      name: createdAt.gte
+      in: query
+      required: false
+      description: Optional filter. Restrict results to registrations for which creation date-time is greater or equal than the given createdAt date-time.
+      schema:
+        $ref: '#/components/schemas/CreatedAt'
+    UpdatedAtBeforeFilter:
+      name: updatedAt.lte
+      in: query
+      required: false
+      description: Optional filter. Restrict results to registrations for which last update date-time is lower or equal than the given updatedAt date-time.
+      schema:
+        $ref: '#/components/schemas/UpdatedAt'
+    UpdatedAtAfterFilter:
+      name: updatedAt.gte
+      in: query
+      required: false
+      description: Optional filter. Restrict results to registrations for which last update date-time is greater or equal than the given updatedAt date-time.
+      schema:
+        $ref: '#/components/schemas/UpdatedAt'
+    ExpiresAtFilter:
+      name: expiresAt
+      in: query
+      required: false
+      description: Optional filter. Restrict results to registrations matching the given expiresAt date.
+      schema:
+        $ref: '#/components/schemas/ExpiresAt'
+    TerminatingCountryCodeFilter:
+      name: terminatingCountryCode
+      in: query
+      required: false
+      description: Optional filter. Restrict results to registrations matching the given `terminatingCountryCode`.
+      schema:
+        $ref: '#/components/schemas/TerminatingCountryCode'
+    CallPurposeFilter:
+      name: callPurpose
+      in: query
+      required: false
+      description: Optional filter. Restrict results to registrations matching the given call Purpose.
+      schema:
+        $ref: '#/components/schemas/CallPurpose'
+
+  headers:
+    X-Total-Count:
+      description: Total number of resources matching the query. Mirrors `pagination.totalCount` in the response body.
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        maximum: 100000
+    X-Total-Pages:
+      description: Total number of pages. Mirrors `pagination.totalPages` in the response body.
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        maximum: 1000
+  schemas:
+    PhoneNumber:
+      description: A public identifier addressing a telephone subscription. In mobile networks it corresponds to the MSISDN (Mobile Station International Subscriber Directory Number). In order to be globally unique it has to be formatted in international format, according to E.164 standard, prefixed with '+'.
+      type: string
+      pattern: '^\+[1-9][0-9]{4,14}$'
+      maxLength: 16
+      example: "+123456789"
+
+    RegistrationId:
+      type: string
+      format: uuid
+      maxLength: 256
+      description: Unique identifier of a registration created in the Branded Calling Platform as a result of the POST operation.
+      example: "9e765f76-8037-4e5f-ba5d-e0c87c09a320"
+
+    Status:
+      type: string
+      description: Status of the registration
+      enum: [pending, active, inactive, expired]
+      example: "pending"
+
+    ExpiresAt:
+      type: string
+      description: The date, in RFC 3339 / ISO 8601 compliant format "YYYY-MM-DD", from which the Brand Registration will expired.
+      format: date
+      example: "2023-07-03"
+      maxLength: 10
+
+    CreatedAt:
+      type: string
+      format: date-time
+      maxLength: 64
+      description: Timestamp at which the Brand Registration has been created. It must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+      example: "2018-04-05T17:31:00Z"
+
+    UpdatedAt:
+      type: string
+      format: date-time
+      maxLength: 64
+      description: Timestamp at which the Brand Registration has been last updated. It must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+      example: "2018-04-05T17:31:00Z"
+
+    CustomerId:
+      type: string
+      maxLength: 64
+      description: Unique customer identifier for a brand
+      example: "Customer1"
+
+    DisplayName:
+      type: string
+      maxLength: 32
+      description: Brand information that will be displayed for the calling party
+      example: "Company X Call Center"
+
+    DisplayAsset:
+      type: string
+      format: uri
+      description: >
+        Resource URI for a visual asset (e.g. a logo, image or video) that is to be displayed to the called party.
+        The URI MAY be in IMS-style and include semicolon-separated URI parameters in accordance
+        with SIP / RFC 3261 conventions (e.g. ';purpose=icon').
+        This URI is a logical identifier inside the service provider's network and is not guaranteed to be
+        resolvable by general-purpose HTTP clients.
+        Support of the DisplayAsset depends on the service provider and called party's device.
+      maxLength: 2048
+      example: "https://ims.operator-name.com/brand-logo.bmp;purpose=icon"
+
+    VerifyCallerAction:
+      type: string
+      description: >-
+        Indicates if Antispoofing feature is enabled for the A-party, if enabled what action to take in case antispoofing check fails. Absence of parameter means feature not enabled.
+      example: "DO_NOT_BRAND"
+      enum:
+        - "BLOCK_UNVERIFIED"
+        - "DO_NOT_BRAND"
+
+    TerminatingCountryCode:
+      type: integer
+      format: int32
+      minimum: 1
+      maximum: 999
+      description: Country Code of the called number in E.164 format
+      example: 44
+
+    CampaignName:
+      type: string
+      description: Logical name to group a set of calling party numbers under a brand for a specific purpose, e.g. special charging
+      example: "Company X New Year Sales"
+      maxLength: 64
+
+    Quota:
+      type: integer
+      format: int32
+      description: Maximum number of branded calls allowed for the registration
+      minimum: 1
+      maximum: 1000000000
+      example: 100000
+
+    CallPurpose:
+      type: string
+      description: Calls' Purpose classification of the registration. This list of purposes can be completed by the API provider with new purposes they wish to propose and make visible to the API consumer.
+      maxLength: 50
+      example: "Survey"
+      enum:
+        - "Customer-Service"
+        - "Survey"
+        - "Telemarketing"
+        - "Debt-Collection"
+        - "Charity"
+        - "Informational"
+        - "Do-Not-Originate"
+
+    QuotaThreshold:
+      type: integer
+      format: int32
+      description: Number of branded calls at which customer is notifed that the quota threshold has been reached.
+      minimum: 1
+      maximum: 1000000000
+      example: 100000
+
+    CreateOrUpdateRegistrationRequest:
+      type: object
+      description: "Request object to create or update (replace) a brand registration"
+      required:
+        - "phoneNumber"
+        - "displayName"
+        - "terminatingCountryCode"
+      properties:
+        phoneNumber:
+          $ref: '#/components/schemas/PhoneNumber'
+        phoneNumberAlternate:
+          $ref: '#/components/schemas/PhoneNumber'
+        expiresAt:
+          $ref: '#/components/schemas/ExpiresAt'
+        displayName:
+          $ref: '#/components/schemas/DisplayName'
+        displayAsset:
+          $ref: '#/components/schemas/DisplayAsset'
+        customerId:
+          $ref: '#/components/schemas/CustomerId'
+        verifyCallerAction:
+          $ref: '#/components/schemas/VerifyCallerAction'
+        terminatingCountryCode:
+          $ref: '#/components/schemas/TerminatingCountryCode'
+        campaignName:
+          $ref: '#/components/schemas/CampaignName'
+        callPurpose:
+          $ref: '#/components/schemas/CallPurpose'
+        sink:
+          type: string
+          format: uri
+          maxLength: 2048
+          pattern: ^https:\/\/.+$
+          description: |
+            The HTTPS URL where event notifications for this registration will be delivered.
+            Omit this field (and `sinkCredential`) to create the registration without event notifications.
+          example: "https://endpoint.example.com/sink"
+        sinkCredential:
+          $ref: '../common/CAMARA_event_common.yaml#/components/schemas/SinkCredential'
+
+    RegistrationRecord:
+      type: object
+      description: "Object to represent a single brand registration in the service platform"
+      required:
+        - "registrationId"
+        - "phoneNumber"
+        - "displayName"
+        - "terminatingCountryCode"
+      properties:
+        registrationId:
+          $ref: '#/components/schemas/RegistrationId'
+        phoneNumber:
+          $ref: '#/components/schemas/PhoneNumber'
+        phoneNumberAlternate:
+          $ref: '#/components/schemas/PhoneNumber'
+        status:
+          $ref: '#/components/schemas/Status'
+        createdAt:
+          $ref: '#/components/schemas/CreatedAt'
+        updatedAt:
+          $ref: '#/components/schemas/UpdatedAt'
+        expiresAt:
+          $ref: '#/components/schemas/ExpiresAt'
+        displayName:
+          $ref: '#/components/schemas/DisplayName'
+        displayAsset:
+          $ref: '#/components/schemas/DisplayAsset'
+        customerId:
+          $ref: '#/components/schemas/CustomerId'
+        verifyCallerAction:
+          $ref: '#/components/schemas/VerifyCallerAction'
+        terminatingCountryCode:
+          $ref: '#/components/schemas/TerminatingCountryCode'
+        campaignName:
+          $ref: '#/components/schemas/CampaignName'
+        quota:
+          $ref: '#/components/schemas/Quota'
+        quotaThreshold:
+          $ref: '#/components/schemas/QuotaThreshold'
+        callPurpose:
+          $ref: '#/components/schemas/CallPurpose'
+        sink:
+          type: string
+          format: uri
+          maxLength: 2048
+          description: |
+            The sink URL registered for event notifications on this registration, if any.
+            `sinkCredential` is deliberately not echoed in responses for security reasons.
+          example: "https://endpoint.example.com/sink"
+
+    RegistrationRecords:
+      type: object
+      description: Paginated response wrapping a list of brand registration records.
+      required:
+        - registrations
+        - pagination
+      properties:
+        registrations:
+          type: array
+          maxItems: 1000
+          description: An array of registration objects returned in this response
+          items:
+            $ref: '#/components/schemas/RegistrationRecord'
+        pagination:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Pagination"
+
+    BrandRegistrationEventType:
+      type: string
+      description: |
+        Enum of event type strings emitted by the Brand Registration API.
+        Follows the CAMARA reverse-DNS convention `org.camaraproject.<api-name>.<event-version>.<event-name>`.
+      enum:
+        - org.camaraproject.brand-registration.v0.call-branded
+        - org.camaraproject.brand-registration.v0.status-changed
+        - org.camaraproject.brand-registration.v0.quota-threshold-reached
+        - org.camaraproject.brand-registration.v0.quota-exhausted
+
+    BrandRegistrationNotificationEvent:
+      description: |
+        Notification event group for the Brand Registration API.
+        Extends the CloudEvent envelope and constrains `type` to the set of event types
+        defined by this API. Adding a new event type only requires updating
+        `BrandRegistrationEventType` and the discriminator mapping below — the CloudEvent
+        base never changes.
+      allOf:
+        - $ref: '../common/CAMARA_event_common.yaml#/components/schemas/CloudEvent'
+        - type: object
+          properties:
+            type:
+              $ref: '#/components/schemas/BrandRegistrationEventType'
+      discriminator:
+        propertyName: type
+        mapping:
+          org.camaraproject.brand-registration.v0.call-branded: '#/components/schemas/EventCallBranded'
+          org.camaraproject.brand-registration.v0.status-changed: '#/components/schemas/EventStatusChanged'
+          org.camaraproject.brand-registration.v0.quota-threshold-reached: '#/components/schemas/EventQuotathresholdReached'
+          org.camaraproject.brand-registration.v0.quota-exhausted: '#/components/schemas/EventQuotaExhausted'
+
+    EventCallBranded:
+      description: Event emitted when a call associated with a brand registration has been successfully branded.
+      allOf:
+        - $ref: '#/components/schemas/BrandRegistrationNotificationEvent'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CallBrandedEventData'
+
+    EventStatusChanged:
+      description: Event emitted when the status of a brand registration changes.
+      allOf:
+        - $ref: '#/components/schemas/BrandRegistrationNotificationEvent'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/StatusChangedEventData'
+
+    EventQuotathresholdReached:
+      description: Event emitted when the quota threshold of branded calls has been reached.
+      allOf:
+        - $ref: '#/components/schemas/BrandRegistrationNotificationEvent'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/QuotaThresholdReachedEventData'
+
+    EventQuotaExhausted:
+      description: Event emitted when the quota of branded calls has been exhausted.
+      allOf:
+        - $ref: '#/components/schemas/BrandRegistrationNotificationEvent'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/QuotatExhaustedEventData'
+
+    CallBrandedEventData:
+      type: object
+      description: |
+        Event payload describing a successfully branded call.
+        The CloudEvent envelope's `time` carries when the call was branded.
+      required:
+        - registrationId
+      properties:
+        registrationId:
+          $ref: '#/components/schemas/RegistrationId'
+        strategy:
+          type: string
+          enum:
+            - SMS
+            - BRAND_DISPLAY
+          description: Branding strategy applied to the call.
+          example: "BRAND_DISPLAY"
+        displayNameUsed:
+          $ref: '#/components/schemas/DisplayName'
+        preAnnouncementId:
+          type: string
+          format: uuid
+          maxLength: 256
+          description: |
+            Optional. The identifier of the originating pre-announcement, as returned
+            in the `AnnouncementInfo` response of `POST /pre-announce` (verified-caller API).
+            Present when pre-announcement was used to initiate the branded call.
+            Absent when the call was branded automatically without pre-announcement
+            (e.g. no `verifyCallerAction` was configured at registration).
+          example: "9e765f76-8037-4e5f-ba5d-e0c87c09a320"
+
+    StatusChangedEventData:
+      type: object
+      description: |
+        Event payload describing a Registration status changed.
+        The CloudEvent envelope's `time` carries when the status has been changed.
+      required:
+        - registrationId
+        - status
+      properties:
+        registrationId:
+          $ref: '#/components/schemas/RegistrationId'
+        status:
+          $ref: '#/components/schemas/Status'
+
+    QuotaThresholdReachedEventData:
+      type: object
+      description: |
+        Event payload describing a quota threshold of branded calls has been reached. The branded calls quota for the concerned registration will be reached soon.
+        The CloudEvent envelope's `time` carries when the status has been changed.
+      required:
+        - registrationId
+        - quotaThreshold
+      properties:
+        registrationId:
+          $ref: '#/components/schemas/RegistrationId'
+        quotaThreshold:
+          $ref: '#/components/schemas/QuotaThreshold'
+
+    QuotatExhaustedEventData:
+      type: object
+      description: |
+        Event payload describing a branded calls quota has been exhausted. The upcoming phone calls will no longer be branded.
+        The CloudEvent envelope's `time` carries when the status has been changed.
+      required:
+        - registrationId
+        - quota
+      properties:
+        registrationId:
+          $ref: '#/components/schemas/RegistrationId'
+        quota:
+          $ref: '#/components/schemas/Quota'
+
+  responses:
+    SuccessfulRecord:
+      description: Success response with a brand registration record
+      headers:
+        x-correlator:
+          $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegistrationRecord'
+          examples:
+            RECORD_SINGLE_PHONE_NUMBER:
+              summary: Device identified by phoneNumber
+              description: Registration for a device, identified by a phone number
+              value:
+                registrationId: "ea77c42f-fa5e-4612-cb43-d502ae794832"
+                phoneNumber: "+123456789"
+                status: "pending"
+                expiresAt: "2023-07-03"
+                terminatingCountryCode: 44
+                displayName: "Company X Calling"
+                customerId: "Customer1"
+                verifyCallerAction: "DO_NOT_BRAND"
+                quota: 100000
+                quotaThreshold: 95000
+                callPurpose: "Survey"
+            RECORD_TWO_PHONE_NUMBERS:
+              summary: Device identified by phoneNumber & phoneNumberAlternate
+              description: A registration for a device, identified by both a phone number and a phone number alternate
+              value:
+                registrationId: "ea77c42f-fa5e-4612-cb43-d502ae794832"
+                phoneNumber: "+123456789"
+                phoneNumberAlternate: "+123456790"
+                status: "pending"
+                expiresAt: "2023-07-03"
+                terminatingCountryCode: 44
+                displayName: "Company Y Calling"
+                displayAsset: "https://ims.operator-name.com/brand-logo.bmp;purpose=icon"
+                customerId: "Customer2"
+                verifyCallerAction: "DO_NOT_BRAND"
+                quota: 100000
+                quotaThreshold: 95000
+                callPurpose: "Survey"
+    SuccessfulRecords:
+      description: Success response with one or more brand registration records
+      headers:
+        x-correlator:
+          $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegistrationRecords'
+          examples:
+            TWO_RECORDS_FOUND:
+              summary: Two registration records available
+              description: Two registration records returned to the client
+              value:
+                registrations:
+                  - registrationId: "ea77c42f-fa5e-4612-cb43-d502ae794832"
+                    phoneNumber: "+123456789"
+                    status: "pending"
+                    expiresAt: "2023-07-03"
+                    terminatingCountryCode: 44
+                    displayName: "Company X Calling"
+                    displayAsset: "https://ims.operator-name.com/brand-logo.bmp;purpose=icon"
+                    customerId: "Customer1"
+                    verifyCallerAction: "DO_NOT_BRAND"
+                    quota: 100000
+                    quotaThreshold: 95000
+                    callPurpose: "Survey"
+                  - registrationId: "ea77c42f-fa5e-4612-cb43-d502ae794833"
+                    phoneNumber: "+123456790"
+                    phoneNumberAlternate: "+123456791"
+                    status: "pending"
+                    expiresAt: "2023-07-03"
+                    terminatingCountryCode: 44
+                    displayName: "Company Y Calling"
+                    customerId: "Customer2"
+                    verifyCallerAction: "BLOCK_UNVERIFIED"
+                    quota: 100000
+                    quotaThreshold: 95000
+                    callPurpose: "Survey"
+                pagination:
+                  page: 1
+                  perPage: 20
+                  totalCount: 2
+                  totalPages: 1
+    204NoContent:
+      description: Successful response with no content
+      headers:
+        x-correlator:
+          $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+    SuccessfulPartialRecords:
+      description: |
+        Success response with one or more brand registration records.
+        Used if the request expects a paginated response.
+      headers:
+        x-correlator:
+          $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+        X-Total-Count:
+          $ref: "#/components/headers/X-Total-Count"
+        X-Total-Pages:
+          $ref: "#/components/headers/X-Total-Pages"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegistrationRecords'
+          examples:
+            TWO_RECORDS_FOUND:
+              summary: Two registration records available
+              description: Two registration records returned to the client
+              value:
+                registrations:
+                  - registrationId: "ea77c42f-fa5e-4612-cb43-d502ae794832"
+                    phoneNumber: "+123456789"
+                    status: "pending"
+                    expiresAt: "2023-07-03"
+                    terminatingCountryCode: 44
+                    displayName: "Company X Calling"
+                    customerId: "Customer1"
+                    verifyCallerAction: "DO_NOT_BRAND"
+                  - registrationId: "ea77c42f-fa5e-4612-cb43-d502ae794833"
+                    phoneNumber: "+123456790"
+                    phoneNumberAlternate: "+123456791"
+                    status: "pending"
+                    expiresAt: "2023-07-03"
+                    terminatingCountryCode: 44
+                    displayName: "Company Y Calling"
+                    displayAsset: "https://ims.operator-name.com/brand-logo.bmp;purpose=icon"
+                    customerId: "Customer2"
+                    verifyCallerAction: "BLOCK_UNVERIFIED"
+                    quota: 100000
+                    quotaThreshold: 95000
+                    callPurpose: "Survey"
+                pagination:
+                  page: 1
+                  perPage: 20
+                  totalCount: 2
+                  totalPages: 1
+
+    Create404:
+      description: Not found
+      headers:
+        x-correlator:
+          $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 404
+                  code:
+                    enum:
+                      - NOT_FOUND
+                      - GENERIC_404_IDENTIFIER_NOT_FOUND
+          examples:
+            GENERIC_404_NOT_FOUND:
+              summary: Generic Not Found
+              description: Resource is not found
+              value:
+                status: 404
+                code: NOT_FOUND
+                message: "{{resource}} is not found"
+            DEVICE_NOT_FOUND:
+              summary: Device not found
+              description: The device is not known to the service provider
+              value:
+                status: 404
+                code: GENERIC_404_IDENTIFIER_NOT_FOUND
+                message: 'The device is not known to the service provider'
+    Update404:
+      description: Not found
+      headers:
+        x-correlator:
+          $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 404
+                  code:
+                    enum:
+                      - NOT_FOUND
+                      - BRAND_REGISTRATION.REGISTRATION_NOT_FOUND
+                      - GENERIC_404_IDENTIFIER_NOT_FOUND
+          examples:
+            GENERIC_404_NOT_FOUND:
+              summary: Generic Not Found
+              description: Resource is not found
+              value:
+                status: 404
+                code: NOT_FOUND
+                message: "{{resource}} is not found"
+            BRAND_REGISTRATION_404_REGISTRATION_NOT_FOUND:
+              summary: Registration not found
+              description: The brand registration service is not able to identify the registration
+              value:
+                status: 404
+                code: BRAND_REGISTRATION.REGISTRATION_NOT_FOUND
+                message: 'The brand registration service is not able to identify an existing registration'
+            DEVICE_NOT_FOUND:
+              summary: Device not found
+              description: The device is not known to the service provider
+              value:
+                status: 404
+                code: GENERIC_404_IDENTIFIER_NOT_FOUND
+                message: 'The device is not known to the service provider'
+    CreateOrUpdateRegistrationUnprocessableEntity422:
+      description: Unprocessable Content
+      headers:
+        x-correlator:
+          $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 422
+                  code:
+                    enum:
+                      - SERVICE_NOT_APPLICABLE
+          examples:
+            GENERIC_422_SERVICE_NOT_APPLICABLE:
+              summary: Service not applicable
+              description: Service not applicable for the provided identifier
+              value:
+                status: 422
+                code: SERVICE_NOT_APPLICABLE
+                message: The service is not available for the provided identifier.
+
+  examples:
+    CALL_BRANDED_EVENT:
+      summary: Call branded event
+      description: Notification emitted when a call associated with a brand registration has been successfully branded.
+      value:
+        id: "83a0cf3a-f3ae-4f3b-9d3b-1e19c6e7f8a0"
+        source: "https://service-provider.com/brand-registration/v0/registrations"
+        specversion: "1.0"
+        type: "org.camaraproject.brand-registration.v0.call-branded"
+        datacontenttype: "application/json"
+        time: "2026-04-22T14:30:00Z"
+        data:
+          registrationId: "ea77c42f-fa5e-4612-cb43-d502ae794832"
+          strategy: "BRAND_DISPLAY"
+          displayNameUsed: "Company X Calling"
+          preAnnouncementId: "9e765f76-8037-4e5f-ba5d-e0c87c09a320"
+
+    BRAND_REGISTRATION_STATUS_EVENT:
+      summary: Registration Status Changed event
+      description: Notification emitted when a brand registration status has changed.
+      value:
+        id: "83a0cf3a-f3ae-4f3b-9d3b-1e19c6e7f8a0"
+        source: "https://service-provider.com/brand-registration/v0/registrations"
+        specversion: "1.0"
+        type: "org.camaraproject.brand-registration.v0.status-changed"
+        datacontenttype: "application/json"
+        time: "2026-04-22T14:30:00Z"
+        data:
+          registrationId: "ea77c42f-fa5e-4612-cb43-d502ae794832"
+          status: "pending"
+
+    QUOTA_EXHAUSTED_EVENT:
+      summary: Branded calls quota exhausted event
+      description: Notification emitted when branded calls quota has been exhausted.
+      value:
+        id: "83a0cf3a-f3ae-4f3b-9d3b-1e19c6e7f8a0"
+        source: "https://service-provider.com/brand-registration/v0/registrations"
+        specversion: "1.0"
+        type: "org.camaraproject.brand-registration.v0.quota-exhausted"
+        datacontenttype: "application/json"
+        time: "2026-04-22T14:30:00Z"
+        data:
+          registrationId: "ea77c42f-fa5e-4612-cb43-d502ae794832"
+          quota: 100000
+
+    QUOTA_THRESHOLD_REACHED_EVENT:
+      summary: Quota threshold of branded calls reached event
+      description: Notification emitted when quota threshold of branded calls has been reached.
+      value:
+        id: "83a0cf3a-f3ae-4f3b-9d3b-1e19c6e7f8a0"
+        source: "https://service-provider.com/brand-registration/v0/registrations"
+        specversion: "1.0"
+        type: "org.camaraproject.brand-registration.v0.quota-threshold-reached"
+        datacontenttype: "application/json"
+        time: "2026-04-22T14:30:00Z"
+        data:
+          registrationId: "ea77c42f-fa5e-4612-cb43-d502ae794832"
+          quotaThreshold: 95000

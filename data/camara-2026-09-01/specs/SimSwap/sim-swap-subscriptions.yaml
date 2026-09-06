@@ -1,0 +1,791 @@
+openapi: 3.0.3
+info:
+  title: Sim Swap Subscriptions
+  description: |
+    This API provides the customer with the ability to subscribe to event related to a sim swap operation performed on an associated phone number.
+
+    # Introduction
+
+    This API empowers service providers and network operators with a seamless mechanism for managing and monitoring SIM card swaps, a process often used in legitimate device upgrades or replacements but also susceptible to abuse in fraudulent activities.
+
+    # Relevant terms and definitions
+
+    * **SIM swap**:
+    A SIM swap is a process in which a mobile phone user's current SIM card is deactivated or replaced with a new one. This is typically done by contacting the user's mobile service provider and requesting a new SIM card for various reasons, such as a lost or damaged SIM card, upgrading to a new phone, or changing phone numbers while keeping the same device.
+
+    # API Functionality
+
+    The API exposes following capabilities:
+      * **/subscriptions**: This endpoint has two operations, one that allows to retrieve the list of Sim Swap event subscriptions and another one to create new event subscriptions.
+      * **/subscriptions/{subscriptionId}**: This endpoint also has two operations, one that allows to retrieve a particular event subscription by id and another one to delete an event subscription also using the id.
+
+    ## Sim Swap notification subscription
+
+    Theses endpoints allow to manage notification subscription on Sim Swap event.
+    The CAMARA subscription model is detailed in the CAMARA API design guideline document and follows Cloudevents specification.
+
+    It is mandatory in the subscription to provide the event `types` subscribed are several are managed in this API.
+
+    Only one event ``types`` is managed for this API:
+      - ``org.camaraproject.sim-swap-subscriptions.v0.swapped`` - Event triggered when a sim swap occurs on the associated phoneNumber
+
+
+    Note: Additionally to these list, ``org.camaraproject.sim-swap-subscriptions.v0.subscription-ended`` notification `types` is sent when the subscription ends.
+    This notification does not require dedicated subscription.
+    It is used when:
+      - the subscription expiration time (optionally set by the requester) has been reached
+      - the maximum number of subscription events (optionally set by the requester) has been reached
+      - the subscription was deleted by the requester
+      - the API server has to stop sending notification prematurely
+      - the Access Token sinkCredential expiration time (set by the requester) has been reached
+
+    ### Notification callback
+
+    This endpoint describes the event notification received on subscription listener side when the event occurred. As for subscription, detailed description of the event notification is provided in the CAMARA API design guideline document.
+
+    **WARNING**: This callback endpoint must be exposed on the listener side as `POST /{$request.body#/sink}`
+      will be posted by the sim swap resource server to the webhook url provided by notification
+      listener.
+
+    ### Data Minimization
+
+      #### phoneNumber presence:
+      These rules apply for subscription:
+
+      - If 3-legged access token is used, the POST and GET{id} requests & responses must NOT provide the ``phoneNumber``. For GET (list) only subscription(s) for this exactly phone number is/are retrieved (implicit filtering).
+      - If 2-legged access token is used, for POST and GET{id}, the presence of ``phoneNumber`` in the request & response is mandatory. For GET (list) the device identifier (``phoneNumber``) could be used as filtering criteria.
+
+      #### sinkCredential presence:
+
+      ``sinkCredential`` is only present in POST request and not provided in POST or GET response.
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    # Identifying the device from the access token
+
+    This API requires the API consumer to identify a device as the subject of the API as follows:
+    - When the API is invoked using a two-legged access token, the subject will be identified from the optional `phoneNumber` identifier, which therefore MUST be provided.
+    - When a three-legged access token is used however, this optional `phoneNumber` identifier MUST NOT be provided, as the subject will be uniquely identified from the access token.
+
+    This approach simplifies API usage for API consumers using a three-legged access token to invoke the API by relying on the information that is associated with the access token and was identified during the authentication process.
+
+    ## Error handling:
+
+    - If the subject cannot be identified from the access token and the optional `phoneNumber` identifier is not included in the request, then the server will return an error with the `422 MISSING_IDENTIFIER` error code.
+
+    - If the subject can be identified from the access token and the optional `phoneNumber` identifier is also included in the request, then the server will return an error with the `422 UNNECESSARY_IDENTIFIER` error code. This will be the case even if the same device is identified by these two methods, as the server is unable to make this comparison.
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+    # Additional CAMARA error responses
+
+      The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+      Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+      As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+
+    # Further info and support
+
+    (FAQs will be added in a later version of the documentation)
+
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: wip
+  x-camara-commonalities: 0.6
+
+externalDocs:
+  description: Product documentation at CAMARA
+  url: https://github.com/camaraproject/SimSwap
+servers:
+  - url: '{apiRoot}/sim-swap-subscriptions/vwip'
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+tags:
+  - name: Sim Swap Subscription
+    description: Operation to manage event subscription on sim swap event (swapped)
+
+paths:
+  /subscriptions:
+    post:
+      tags:
+        - Sim Swap Subscription
+      summary: 'Create a sim swap event subscription for a phone number'
+      description: Create a sim swap event subscription for a phone number
+      operationId: createSimSwapSubscription
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+      security:
+        - openId:
+            - sim-swap-subscriptions:org.camaraproject.sim-swap-subscriptions.v0.swapped:create
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubscriptionRequest"
+            examples:
+              SUBSCRIPTION_REQUEST:
+                $ref: '#/components/examples/SUBSCRIPTION_REQUEST'
+              SUBSCRIPTION_REQUEST_3LEGS:
+                $ref: '#/components/examples/SUBSCRIPTION_REQUEST_3LEGS'
+        required: true
+      callbacks:
+        notifications:
+          "{$request.body#/sink}":
+            post:
+              summary: "notifications callback"
+              description: |
+                Important: this endpoint is to be implemented by the API consumer.
+                The sim swap server will call this endpoint whenever a swapped event occurs.
+              operationId: postNotification
+              parameters:
+                - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+              requestBody:
+                required: true
+                content:
+                  application/cloudevents+json:
+                    schema:
+                      $ref: "#/components/schemas/NotificationEvent"
+                    examples:
+                      SWAPPED:
+                        $ref: '#/components/examples/SWAPPED'
+                      SUBSCRIPTION_ENDS:
+                        $ref: '#/components/examples/SUBSCRIPTION_ENDS'
+              responses:
+                "204":
+                  description: Successful notification
+                  headers:
+                    x-correlator:
+                      $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+                "400":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+                "401":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+                "403":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+                "410":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic410"
+                "429":
+                  $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+              security:
+                - {}
+                - notificationsBearerAuth: []
+
+      responses:
+        "201":
+          description: Created
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+              examples:
+                SUBSCRIPTION_RESPONSE:
+                  $ref: '#/components/examples/SUBSCRIPTION_RESPONSE'
+                SUBSCRIPTION_RESPONSE_3LEGS:
+                  $ref: '#/components/examples/SUBSCRIPTION_RESPONSE_3LEGS'
+        "202":
+          description: Request accepted to be processed. It applies for async creation process.
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionAsync"
+        "400":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/CreateSubscriptionBadRequest400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/SubscriptionPermissionDenied403"
+        "409":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic409"
+        "422":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/CreateSubscriptionUnprocessableEntity422"
+        "429":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+    get:
+      tags:
+        - Sim Swap Subscription
+      summary: 'Retrieve a list of sim swap event subscription'
+      description: Retrieve a list of sim swap event subscription(s)
+      operationId: retrieveSubscriptionList
+      parameters:
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/page"
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/perPage"
+      security:
+        - openId:
+            - sim-swap-subscriptions:read
+      responses:
+        "200":
+          description: List of event subscription details
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+            X-Total-Count:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-total-count"
+            X-Total-Pages:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-total-pages"
+            Link:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/link"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionList"
+              examples:
+                SUBSCRIPTIONS:
+                  $ref: '#/components/examples/SUBSCRIPTIONS'
+                SUBSCRIPTIONS_3LEGS:
+                  $ref: '#/components/examples/SUBSCRIPTIONS_3LEGS'
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+  /subscriptions/{subscriptionId}:
+    get:
+      tags:
+        - Sim Swap Subscription
+      summary: 'Retrieve a sim swap event subscription for a phone number'
+      description: retrieve event subscription information for a given subscription.
+      operationId: retrieveSubscription
+      security:
+        - openId:
+            - sim-swap-subscriptions:read
+      parameters:
+        - $ref: "#/components/parameters/SubscriptionId"
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+      responses:
+        "200":
+          description: OK
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+              examples:
+                SUBSCRIPTION:
+                  $ref: '#/components/examples/SUBSCRIPTION_RESPONSE'
+                SUBSCRIPTION_3LEGS:
+                  $ref: '#/components/examples/SUBSCRIPTION_RESPONSE_3LEGS'
+        "400":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/SubscriptionIdRequired400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+    delete:
+      tags:
+        - Sim Swap Subscription
+      summary: 'Delete a sim swap event subscription'
+      operationId: deleteSubscription
+      description: delete a  given event subscription.
+      security:
+        - openId:
+            - sim-swap-subscriptions:delete
+      parameters:
+        - $ref: "#/components/parameters/SubscriptionId"
+        - $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+      responses:
+        "204":
+          description: Sim swap notification subscription deleted
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+        "202":
+          description: Request accepted to be processed. It applies for async deletion process.
+          headers:
+            x-correlator:
+              $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionAsync"
+        "400":
+          $ref: "../common/CAMARA_event_common.yaml#/components/responses/SubscriptionIdRequired400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+components:
+  securitySchemes:
+    openId:
+      $ref: "../common/CAMARA_common.yaml#/components/securitySchemes/openId"
+    notificationsBearerAuth:
+      $ref: "../common/CAMARA_event_common.yaml#/components/securitySchemes/notificationsBearerAuth"
+  parameters:
+    SubscriptionId:
+      name: subscriptionId
+      in: path
+      description: Subscription identifier that was obtained from the create event subscription operation
+      required: true
+      schema:
+        $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionId"
+  schemas:
+    CreateSubscriptionDetail:
+      description: The detail of the requested event subscription
+      type: object
+      properties:
+        phoneNumber:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/PhoneNumber"
+
+    Config:
+      description: |
+        Implementation-specific configuration parameters needed by the subscription manager for acquiring events.
+        In CAMARA we have predefined attributes like `subscriptionExpireTime` or `subscriptionMaxEvents` to limit subscription lifetime.
+        Event type attributes must be defined in `subscriptionDetail`
+      type: object
+      required:
+        - subscriptionDetail
+      properties:
+        subscriptionDetail:
+          $ref: "#/components/schemas/CreateSubscriptionDetail"
+        subscriptionExpireTime:
+          type: string
+          format: date-time
+          maxLength: 64
+          example: 2023-01-17T13:18:23.682Z
+          description: The subscription expiration time (in date-time format) requested by the API consumer. It must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+        subscriptionMaxEvents:
+          type: integer
+          format: int32
+          description: Identifies the maximum number of event reports to be generated (>=1) requested by the API consumer - Once this number is reached, the subscription ends.
+          minimum: 1
+          maximum: 1000000
+          example: 5
+
+    ApiEventType:
+      type: string
+      description: |
+        swapped - Event triggered when a sim swap occurs on the line
+      enum:
+        - org.camaraproject.sim-swap-subscriptions.v0.swapped
+
+    ApiNotificationEvent:
+      description: |
+        API-specific notification event group.
+        Extends the CloudEvent envelope and constrains `type` to the set of
+        event types defined by this API project.
+        Adding a new event type only requires updating ApiEventType and the
+        discriminator mapping below — the CloudEvent base never changes.
+      allOf:
+        - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/CloudEvent"
+        - type: object
+          properties:
+            type:
+              $ref: "#/components/schemas/ApiEventType"
+      discriminator:
+        propertyName: "type"
+        mapping:
+          org.camaraproject.sim-swap-subscriptions.v0.swapped: "#/components/schemas/EventSwapped"
+
+    NotificationEvent:
+      description: |
+        Union of all valid notification event groups at the callback endpoint.
+        This schema owns no discriminator — routing within each group is
+        handled by ApiNotificationEvent and SubscriptionLifecycleEvent
+        respectively. Its only responsibility is to enumerate which groups
+        are valid payloads for this API's notification callback.
+      oneOf:
+        - $ref: "#/components/schemas/ApiNotificationEvent"
+        - $ref: "#/components/schemas/SubscriptionLifecycleEvent"
+
+    Subscription:
+      description: Represents a event-type subscription.
+      type: object
+      required:
+        - sink
+        - protocol
+        - config
+        - types
+        - id
+      properties:
+        protocol:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/Protocol"
+        sink:
+          $ref: "#/components/schemas/Sink"
+        types:
+          description: |
+            Camara Event types eligible to be delivered by this subscription.
+            Note: For the current Commonalities API design guidelines, only one event type per subscription is allowed
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: "#/components/schemas/ApiEventType"
+        config:
+          $ref: "#/components/schemas/Config"
+        id:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionId"
+        startsAt:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DateTime"
+        expiresAt:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DateTime"
+        status:
+          type: string
+          description: |-
+            Current status of the subscription - Management of Subscription State engine is not mandatory for now. Note not all statuses may be considered to be implemented. Details:
+              - `ACTIVATION_REQUESTED`: Subscription creation (POST) is triggered but subscription creation process is not finished yet.
+              - `ACTIVE`: Subscription creation process is completed. Subscription is fully operative.
+              - `INACTIVE`: Subscription is temporarily inactive, but its workflow logic is not deleted.
+              - `EXPIRED`: Subscription is ended (no longer active). This status applies when subscription is ended due to `SUBSCRIPTION_EXPIRED` or `ACCESS_TOKEN_EXPIRED` event.
+              - `DELETED`: Subscription is ended as deleted (no longer active). This status applies when subscription information is kept (i.e. subscription workflow is no longer active but its meta-information is kept).
+          enum:
+            - ACTIVATION_REQUESTED
+            - ACTIVE
+            - EXPIRED
+            - INACTIVE
+            - DELETED
+      discriminator:
+        propertyName: protocol
+        mapping:
+          HTTP: '#/components/schemas/HTTPSubscriptionResponse'
+          # Future protocol support (not yet used in CAMARA):
+          # MQTT3: "#/components/schemas/MQTTSubscriptionResponse"
+          # MQTT5: "#/components/schemas/MQTTSubscriptionResponse"
+          # AMQP: "#/components/schemas/AMQPSubscriptionResponse"
+          # NATS: "#/components/schemas/NATSSubscriptionResponse"
+          # KAFKA: "#/components/schemas/ApacheKafkaSubscriptionResponse"
+      example:
+        id: 550e8400-e29b-41d4-a716-446655440000
+        sink: https://endpoint.example.com/sink
+        protocol: HTTP
+        types:
+          - "org.camaraproject.sim-swap-subscriptions.v0.swapped"
+        config:
+          subscriptionDetail:
+            phoneNumber: "+123456789"
+          subscriptionExpireTime: "2024-07-17T13:18:23.682Z"
+          subscriptionMaxEvents: 5
+        startsAt: "2024-07-03T21:12:02.871Z"
+        expiresAt: "2024-07-03T21:12:02.871Z"
+        status: ACTIVE
+
+    SubscriptionRequest:
+      description: The request for creating a event-type event subscription
+      type: object
+      required:
+        - sink
+        - protocol
+        - config
+        - types
+      properties:
+        protocol:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/Protocol"
+        sink:
+          $ref: "#/components/schemas/Sink"
+        sinkCredential:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SinkCredential"
+        types:
+          description: |
+            Camara Event types eligible to be delivered by this subscription.
+            Note: As of now we enforce to have only event type per subscription.
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: "#/components/schemas/ApiEventType"
+        config:
+          $ref: "#/components/schemas/Config"
+      discriminator:
+        propertyName: protocol
+        mapping:
+          HTTP: "#/components/schemas/HTTPSubscriptionRequest"
+          # Future protocol support (not yet used in CAMARA):
+          # MQTT3: "#/components/schemas/MQTTSubscriptionRequest"
+          # MQTT5: "#/components/schemas/MQTTSubscriptionRequest"
+          # AMQP: "#/components/schemas/AMQPSubscriptionRequest"
+          # NATS: "#/components/schemas/NATSSubscriptionRequest"
+          # KAFKA: "#/components/schemas/ApacheKafkaSubscriptionRequest"
+
+    SubscriptionAsync:
+      description: Response for a event-type subscription request managed asynchronously (Creation or Deletion)
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionId"
+
+    SubscriptionList:
+      description: Response with subscriptions list
+      type: object
+      required:
+        - subscriptions
+        - pagination
+      properties:
+        subscriptions:
+          description: Subscriptions list
+          type: array
+          minItems: 0
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/Subscription"
+        pagination:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Pagination"
+
+    SubscriptionLifecycleEvent:
+      description: |
+        Subscription lifecycle event group, common to all CAMARA APIs that
+        support explicit subscriptions.
+        Extends the CloudEvent envelope and constrains `type` to the set of
+        lifecycle event types managed by Commonalities.
+      allOf:
+        - $ref: "../common/CAMARA_event_common.yaml#/components/schemas/CloudEvent"
+        - type: object
+          properties:
+            type:
+              $ref: "#/components/schemas/SubscriptionLifecycleEventType"
+      discriminator:
+        propertyName: type
+        mapping:
+          org.camaraproject.sim-swap-subscriptions.v0.subscription-started: "#/components/schemas/EventSubscriptionStarted"
+          org.camaraproject.sim-swap-subscriptions.v0.subscription-updated: "#/components/schemas/EventSubscriptionUpdated"
+          org.camaraproject.sim-swap-subscriptions.v0.subscription-ended: "#/components/schemas/EventSubscriptionEnded"
+
+    SubscriptionLifecycleEventType:
+      type: string
+      description: |
+        Enum of subscription lifecycle event type strings.
+        These are managed by Commonalities and are identical across all CAMARA
+        APIs that support explicit subscriptions.
+        Kept as a separate named schema so the set of valid lifecycle type
+        strings can be referenced independently from the discriminated schema.
+      enum:
+        - org.camaraproject.sim-swap-subscriptions.v0.subscription-started
+        - org.camaraproject.sim-swap-subscriptions.v0.subscription-updated
+        - org.camaraproject.sim-swap-subscriptions.v0.subscription-ended
+
+    EventSwapped:
+      description: event structure for network type change
+      allOf:
+        - $ref: "#/components/schemas/ApiNotificationEvent"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/EventSwappedData"
+
+    EventSwappedData:
+      description: Event detail structure for sim swap data events
+      type: object
+      required:
+        - phoneNumber
+        - subscriptionId
+      properties:
+        phoneNumber:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/PhoneNumber"
+        subscriptionId:
+          $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionId"
+
+    EventSubscriptionStarted:
+      description: event structure for event subscription started
+      allOf:
+        - $ref: "#/components/schemas/SubscriptionLifecycleEvent"
+        - type: object
+          properties:
+            data:
+              $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionStarted"
+
+    EventSubscriptionUpdated:
+      description: event structure for event subscription updated
+      allOf:
+        - $ref: "#/components/schemas/SubscriptionLifecycleEvent"
+        - type: object
+          properties:
+            data:
+              $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionUpdated"
+
+    EventSubscriptionEnded:
+      description: event structure for event subscription ended
+      allOf:
+        - $ref: "#/components/schemas/SubscriptionLifecycleEvent"
+        - type: object
+          properties:
+            data:
+              $ref: "../common/CAMARA_event_common.yaml#/components/schemas/SubscriptionEnded"
+
+    Sink:
+      description: The address to which events shall be delivered using the selected protocol.
+      type: string
+      format: uri
+      maxLength: 2048
+      pattern: ^https:\/\/.+$
+      example: "https://endpoint.example.com/sink"
+
+    HTTPSubscriptionRequest:
+      description: Subscription request for HTTP-based event delivery.
+      allOf:
+        - $ref: "#/components/schemas/SubscriptionRequest"
+        - type: object
+          properties:
+            protocolSettings:
+              $ref: "../common/CAMARA_event_common.yaml#/components/schemas/HTTPSettings"
+
+    HTTPSubscriptionResponse:
+      description: Subscription resource returned for HTTP-based event delivery.
+      allOf:
+        - $ref: "#/components/schemas/Subscription"
+        - type: object
+          properties:
+            protocolSettings:
+              $ref: "../common/CAMARA_event_common.yaml#/components/schemas/HTTPSettings"
+
+  examples:
+    SWAPPED:
+      description: The cloud event when the line was sim swapped
+      value:
+        id: "123655"
+        source: supertelco.notificationSendServer12
+        type: org.camaraproject.sim-swap-subscriptions.v0.swapped
+        specversion: "1.0"
+        datacontenttype: application/json
+        data:
+          phoneNumber: "+123456788"
+          subscriptionId: 2ghy-55gg-7iup-yuo9
+        time: 2023-01-18T13:18:23.682Z
+
+    SUBSCRIPTION_ENDS:
+      description: The cloud event when a sim swap subscription ends
+      value:
+        id: "123658"
+        source: supertelco.notificationSendServer12
+        type: org.camaraproject.sim-swap-subscriptions.v0.subscription-ended
+        specversion: "1.0"
+        datacontenttype: application/json
+        data:
+          terminationReason: SUBSCRIPTION_EXPIRED
+          subscriptionId: 2ghy-55gg-7iup-yuo9
+          terminationDescription: subscription expire time reached
+        time: 2023-01-19T13:18:23.682Z
+
+    SUBSCRIPTION_REQUEST:
+      description: The cloud event for a subscription request created in 2-legs
+      value:
+        protocol: HTTP
+        sink: https://endpoint.example.com/sink
+        sinkCredential:
+          credentialType: ACCESSTOKEN
+          accessToken: "yJ2ZXIiOiIxLjAiLCJ0eXAiO..."
+          accessTokenExpiresUtc: "1717753038"
+          accessTokenType: "bearer"
+        types:
+          - org.camaraproject.sim-swap-subscriptions.v0.swapped
+        config:
+          subscriptionDetail:
+            phoneNumber: "+123456789"
+          subscriptionMaxEvents: 10
+          subscriptionExpireTime: '2025-01-17T13:18:23.682Z'
+    SUBSCRIPTION_REQUEST_3LEGS:
+      description: The cloud event for a subscription request created in 3-legs
+      value:
+        protocol: HTTP
+        sink: https://endpoint.example.com/sink
+        sinkCredential:
+          credentialType: ACCESSTOKEN
+          accessToken: "yJ2ZXIiOiIxLjAiLCJ0eXAiO..."
+          accessTokenExpiresUtc: "1717753038"
+          accessTokenType: "bearer"
+        types:
+          - org.camaraproject.sim-swap-subscriptions.v0.swapped
+        config:
+          subscriptionDetail: {}
+          subscriptionExpireTime: '2025-01-17T13:18:23.682Z'
+    SUBSCRIPTION_RESPONSE:
+      description: Subscription details for an active subscription
+      value:
+        protocol: HTTP
+        sink: https://endpoint.example.com/sink
+        types:
+          - org.camaraproject.sim-swap-subscriptions.v0.swapped
+        config:
+          subscriptionDetail:
+            phoneNumber: "+123456789"
+          subscriptionExpireTime: '2025-01-17T13:18:23.682Z'
+        id: '1119920371'
+        startsAt: '2024-06-07T16:10:15.302Z'
+        expiresAt: '2024-06-07T16:10:15.302Z'
+        status: ACTIVATION_REQUESTED
+    SUBSCRIPTION_RESPONSE_3LEGS:
+      description: Subscription details for an active subscription
+      value:
+        protocol: HTTP
+        sink: https://endpoint.example.com/sink
+        types:
+          - org.camaraproject.sim-swap-subscriptions.v0.swapped
+        config:
+          subscriptionDetail: {}
+          subscriptionExpireTime: '2025-01-17T13:18:23.682Z'
+        id: '1119920371'
+        startsAt: '2024-06-07T16:10:15.302Z'
+        expiresAt: '2024-06-07T16:10:15.302Z'
+        status: ACTIVATION_REQUESTED
+    SUBSCRIPTIONS:
+      description: A list of API consumer subscriptions.
+      value:
+        subscriptions:
+          - protocol: HTTP
+            sink: https://endpoint.example.com/sink
+            types:
+              - org.camaraproject.sim-swap-subscriptions.v0.swapped
+            config:
+              subscriptionDetail:
+                phoneNumber: "+123456789"
+              subscriptionExpireTime: '2025-01-17T13:18:23.682Z'
+            id: '1119920371'
+            startsAt: '2024-06-07T16:10:15.302Z'
+            expiresAt: '2024-06-07T16:10:15.302Z'
+            status: ACTIVATION_REQUESTED
+        pagination:
+          page: 1
+          perPage: 1
+          totalCount: 1
+          totalPages: 1
+    SUBSCRIPTIONS_3LEGS:
+      description: A list of API consumer subscriptions. If a 3-legged access token is used, the list is specific to the device associated with that token.
+      value:
+        subscriptions:
+          - protocol: HTTP
+            sink: https://endpoint.example.com/sink
+            types:
+              - org.camaraproject.sim-swap-subscriptions.v0.swapped
+            config:
+              subscriptionDetail: {}
+              subscriptionExpireTime: '2025-01-17T13:18:23.682Z'
+            id: '1119920371'
+            startsAt: '2024-06-07T16:10:15.302Z'
+            expiresAt: '2024-06-07T16:10:15.302Z'
+            status: ACTIVATION_REQUESTED
+        pagination:
+          page: 1
+          perPage: 1
+          totalCount: 1
+          totalPages: 1

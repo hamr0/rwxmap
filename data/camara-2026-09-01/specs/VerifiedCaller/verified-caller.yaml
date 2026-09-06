@@ -1,0 +1,317 @@
+openapi: 3.0.3
+info:
+  title: Verified Caller
+  description: |
+    This API provides the ability to verify the authenticity of a call from a calling party to a specific called party.
+
+    # Introduction
+
+    Consumers of Verified Caller API can initiate the verification of the authenticity of a call from a calling party to a specific called party. A relationship between the API consumer and the service provider has to be already established for a calling party. This can be achieved by using the brand-registration API, or another mechanism agreed upon by the API consumer and the service provider.
+
+    Verified Caller API could be useful in scenarios such as:
+    - Telesales
+    - Customer Support
+    - Outreach efforts of NGOs.
+    - Calls placed by authorities or government institutions for official matters.
+
+    # Relevant terms and definitions
+
+    * **callingParticipant** and **calledParticipant**: A pair of E.164 numbers representing the parties in a call.
+    * **registrationId** : A unique reference to the relationship between the API consumer and the service provider.
+    * **strategy**: Indicator of the requested method to be applied by the service provider to verify a call, as desired by the API consumer.
+    * **timeToLive**: The period for which the verification by the service provider remains valid. A call is not considered as verified if it is placed after expiry of verification. The service provider may choose to reject a request based on the requested timeToLive value, or apply a different value than requested by the API consumer. The service provider shall observe a timeToLive value for all accepted requests. In order to reduce the risk of a spoofed call, the service provider is advised to expire the verification right away once the call is placed.
+    * **dynamicDisplayName**: If strategy is 'BRAND_DISPLAY' and this parameter is provided, it overrides any pre-arranged display name presented to the callee, e.g. one set using the brand-registration API request.
+    * **callReason**: If strategy is 'BRAND_DISPLAY' and this parameter is provided, a call reason is presented to the callee in addition to the display name. An operator, interconnect or device MAY not support this parameter
+
+    # API Functionality
+    The API exposes the following endpoints/operations:
+    - `/pre-announce` :
+      - **POST** operation creates a new pre-announcement for a call
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+
+  version: wip
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  x-camara-commonalities: 0.6
+externalDocs:
+  description: Project documentation at Camara
+  url: https://github.com/camaraproject/VerifiedCaller
+servers:
+  - url: '{apiRoot}/verified-caller/vwip'
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+tags:
+  - name: Create Preannouncement
+    description: Create a call pre-announcement for a Calling and a Called Party
+paths:
+  /pre-announce:
+    post:
+      tags:
+        - Create Preannouncement
+      summary: Create a call pre-announcement in the service platform
+      description: Create a call pre-announcement for a Calling and a Called Party that will remain valid for a specified duration.
+      operationId: createPreAnnouncement
+      parameters:
+        - $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePreAnnouncementRequest'
+            examples:
+              USING_SMS:
+                summary: A short message is sent to the callee to verify authenticity of the caller
+                description: A short message is sent to the callee to verify authenticity of the caller
+                value:
+                  callingParticipant: "+123456789"
+                  calledParticipant: "+123456792"
+                  strategy: "SMS"
+                  timeToLive: 45
+                  registrationId: "d011cbff-cf79-4db3-a72b-8164aa894b37"
+              USING_REGISTERED_BRAND_DISPLAY:
+                summary: The pre-registered displayName is displayed
+                description: The displayName set in the registration phase is displayed to the callee to verify authenticity of the caller.
+                value:
+                  callingParticipant: "+123456791"
+                  calledParticipant: "+123456792"
+                  strategy: "BRAND_DISPLAY"
+                  timeToLive: 45
+                  registrationId: "d011cbff-cf79-4db3-a72b-8164aa894b37"
+              USING_DYNAMIC_BRAND_DISPLAY:
+                summary: A call specific displayName is displayed
+                description: A displayName set for the specific call is displayed to the callee to provide a more fine-tuned context.
+                value:
+                  callingParticipant: "+123456791"
+                  calledParticipant: "+123456792"
+                  strategy: "BRAND_DISPLAY"
+                  timeToLive: 45
+                  registrationId: "d011cbff-cf79-4db3-a72b-8164aa894b37"
+                  dynamicDisplayName: "Company X Re: Your Complaint"
+              USING_REGISTERED_BRAND_DISPLAY_WITH_CALL_REASON:
+                summary: The pre-registered displayName and a call specific reason is displayed
+                description: The displayName set in the registration phase is displayed to the callee to verify authenticity of the caller, while providing more context to the callee with a call specific reason.
+                value:
+                  callingParticipant: "+123456791"
+                  calledParticipant: "+123456792"
+                  strategy: "BRAND_DISPLAY"
+                  timeToLive: 45
+                  registrationId: "d011cbff-cf79-4db3-a72b-8164aa894b37"
+                  callReason: "Re: Your loan application"
+              USING_DYNAMIC_BRAND_DISPLAY_WITH_CALL_REASON:
+                summary: A displayName and call reason both set for the specific call are displayed.
+                description: |
+                              A displayName set for the specific call is displayed to the callee to verify authenticity of the caller, while providing even more context to the callee with a call specific reason.
+                              This usage leverages both display name and call reason to provide the most fine-tuned information to the callee.
+                value:
+                  callingParticipant: "+123456791"
+                  calledParticipant: "+123456792"
+                  strategy: "BRAND_DISPLAY"
+                  timeToLive: 45
+                  registrationId: "d011cbff-cf79-4db3-a72b-8164aa894b37"
+                  dynamicDisplayName: "Company X Complaint Desk"
+                  callReason: "Your support ticket 21/01/2026"
+      responses:
+        '201':
+          $ref: '#/components/responses/Create201'
+        '204':
+          $ref: '#/components/responses/Create204'
+        '400':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+        '401':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+        '403':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Create404'
+        '409':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic409'
+        '422':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic422'
+        '429':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic429'
+        '500':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic500'
+        '503':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic503'
+
+      security:
+        - openId:
+            - verified-caller:create
+
+components:
+  securitySchemes:
+    openId:
+      description: OpenID Connect authentication
+      type: openIdConnect
+      openIdConnectUrl: https://example.com/.well-known/openid-configuration
+
+  schemas:
+    PreAnnouncementId:
+      type: string
+      format: uuid
+      maxLength: 256
+      description: Unique identifier of a pre-announcement created as a result of the POST operation. Reserved for future use.
+      example: "9e765f76-8037-4e5f-ba5d-e0c87c09a320"
+
+    TimeToLive:
+      type: integer
+      format: int32
+      minimum: 1
+      maximum: 86400
+      description: This parameter specifies for how long the pre-announcement is valid, in units of seconds. Calls processed after the call pre-announcement expiry shall be treated as not announced. If not specified, the service provider applies a default value. The service provider may enforce an upper bound of their choosing while validating the request.
+      example: 60
+
+    RegistrationId:
+      type: string
+      format: uuid
+      maxLength: 256
+      description: Unique identifier of a relatonship created between the API consumer and the service platform.
+      example: "9e765f76-8037-4e5f-ba5d-e0c87c09a320"
+
+    DynamicDisplayName:
+      type: string
+      maxLength: 32
+      description: Brand information that will be displayed to the called party if strategy is 'BRAND_DISPLAY'. If provided, this value overrides a pre-configured display name, e.g. the displayName parameter provided in the brand-registration API request.
+      example: "Company X Call Center"
+
+    CallReason:
+      type: string
+      maxLength: 32
+      description: Call reason that will be displayed to the called party in addition to the display name if strategy is 'BRAND_DISPLAY'.
+      example: "Re: Your loan application"
+
+    Strategy:
+      type: string
+      maxLength: 32
+      description: The method to be applied to verify the authenticity of the calling party. Absence of this parameter lets the service provider choose a default strategy which the API consumer must beware.
+      enum:
+        - "SMS"
+        - "BRAND_DISPLAY"
+
+    CreatePreAnnouncementRequest:
+      type: object
+      description: "Request object to create a call pre-announcement"
+      required:
+        - "callingParticipant"
+        - "calledParticipant"
+      properties:
+        callingParticipant:
+          $ref: '../common/CAMARA_common.yaml#/components/schemas/PhoneNumber'
+        calledParticipant:
+          $ref: '../common/CAMARA_common.yaml#/components/schemas/PhoneNumber'
+        strategy:
+          $ref: '#/components/schemas/Strategy'
+        timeToLive:
+          $ref: '#/components/schemas/TimeToLive'
+        registrationId:
+          $ref: '#/components/schemas/RegistrationId'
+        dynamicDisplayName:
+          $ref: '#/components/schemas/DynamicDisplayName'
+        callReason:
+          $ref: '#/components/schemas/CallReason'
+
+    ExpiresAt:
+      type: string
+      format: date-time
+      maxLength: 64
+      description: |
+       Date when the validity of call verification will expire. The call must be placed up to this date for the service provider to verfiy it. The service provider may inlcude it especially if the API consumer did not specify a timeToLive in the request, or the service provider chose to apply a different value than requested.
+       It must follow [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) and must have time zone.
+       Recommended format is yyyy-MM-dd'T'HH:mm:ss.SSSZ (i.e. which allows 2023-07-03T14:27:08.312+02:00 or 2023-07-03T12:27:08.312Z)
+      example: "2023-07-03T12:27:08.312Z"
+
+    AnnouncementInfo:
+      type: object
+      description: "Object to represent the creation of a single pre-announcement in the service platform"
+      properties:
+        preAnnouncementId:
+          $ref: '#/components/schemas/PreAnnouncementId'
+        expiresAt:
+          $ref: '#/components/schemas/ExpiresAt'
+
+  responses:
+    Create201:
+      description: Successful creation of a pre-announcement
+      headers:
+        x-correlator:
+          $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AnnouncementInfo'
+          examples:
+            SUCCESSFUL_CREATION:
+              summary: Success response with optional parameters
+              description: Successful pre-announcement of a call. The service platform includes optional parameter(s) to inform the client.
+              value:
+                preAnnouncementId: "be5105dc-9b0e-437b-a03e-6e6ffb5e50c0"
+                expiresAt: "2023-07-03T12:27:08.312Z"
+
+    Create204:
+      description: Successful creation of a pre-announcement with no content
+      headers:
+        x-correlator:
+          $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+    Create404:
+      description: Not found
+      headers:
+        x-correlator:
+          $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 404
+                  code:
+                    enum:
+                      - NOT_FOUND
+                      - GENERIC_404_IDENTIFIER_NOT_FOUND
+          examples:
+            GENERIC_404_NOT_FOUND:
+              summary: Generic Not Found
+              description: Resource is not found
+              value:
+                status: 404
+                code: NOT_FOUND
+                message: "{{resource}} is not found"
+            DEVICE_NOT_FOUND:
+              summary: Device not found
+              description: Device is not found
+              value:
+                status: 404
+                code: GENERIC_404_IDENTIFIER_NOT_FOUND
+                message: "Call Participant {{number}} is not known to the service provider"

@@ -1,0 +1,827 @@
+openapi: 3.0.3
+info:
+  title: eSIM Profile Management API
+  description: |
+    Developer-friendly eSIM Profile Management API
+
+    # Introduction
+
+    eSIM (embedded SIM) technology allows remote provisioning and management of cellular connectivity without physical SIM card replacement. The CAMARA eSIM Profile Management API provides a unified interface for eSIM Profile lifecycle operations including download, enable, disable, delete, and fallback configuration.
+
+    The target of the eSIM Profile operations is typically the eUICC on the device (as opposed to the cellular network).
+
+    **Terminology Note**: In this API, "eSIM Profile" refers to downloadable connectivity configurations installed on eSIM hardware (eUICC). "eSIM" refers to the hardware itself.
+
+    **Key roles**
+
+    | **Role Name** | **Description** |
+    | ---- | ------- |
+    | API Consumer | The entity that consumes the eSIM Profile Management APIs |
+    | API Provider | The entity that provides the eSIM Profile Management APIs |
+    | Network Provider | The entity that provides the physical network resources and eSIM Profile platform |
+    | Device Owner | The entity that owns or manages the devices containing eSIM hardware |
+
+    ## Operation-Specific Identification
+
+    - **Download**: Requires EID (target device) and activationCode. ICCID is assigned during download and returned in response.
+    - **Enable/Disable/Delete**: Requires ICCID; EID may optionally be supplied to identify the target eUICC directly.
+    - **Set-Fallback**: Requires ICCID; EID may optionally be supplied to identify the target eUICC directly.
+    - **Status**: Accepts EID (all profiles on device), ICCID (specific profile), or both (specific profile, pairing asserted)
+
+    The ICCID identifies the target eSIM Profile; supplying the EID as well is always optional. It serves two purposes: as a routing hint, letting the provider act on the target device directly without first resolving which device holds the ICCID (a step IoT deployments often avoid to conserve device data and energy); and as a defensive assertion of the pairing. If the ICCID is not installed on the identified EID, the request is rejected with `422 ESIM_PROFILE_MANAGEMENT.IDENTIFIER_MISMATCH`. See the API documentation for details.
+
+    # Operation Lifecycle
+
+    1. **Download**: Install eSIM Profile to device in DISABLED state.
+    2. **Enable**: Enable downloaded eSIM Profile for connectivity (only one active per device)
+    3. **Disable**: Disable eSIM Profile (device loses connectivity, eSIM Profile remains installed)
+    4. **Delete**: Permanently remove eSIM Profile from device (irreversible)
+    5. **Set-Fallback**: Configure backup eSIM Profile for automatic failover
+
+    # States of eSIMs
+
+    eSIMs have two states: DISABLED and ENABLED.
+
+    - DISABLED: eSIM installed but not active
+    - ENABLED: eSIM active and providing connectivity
+    - Only one eSIM can be enabled per device (per eUICC on the device)
+    - Deletion permanently removes the eSIM
+
+    # Pre-requisites
+
+    Before using the eSIM Profile Management API, the API Consumer must establish a relationship with an API Provider. In particular:
+
+    - The API Consumer is responsible for choosing and contacting an API Provider that fulfils their requirements.
+    - Agreements must be in place between the API Consumer and API Provider covering service plans and connectivity options, geographic coverage areas, device compatibility requirements, and terms and conditions including pricing.
+    - The `activationCode` used in the `/download` operation is obtained from the API Provider and is therefore API Provider specific.
+    - The API Provider is responsible for telling the API Consumer the FQDN of their `esim-profile-management` API.
+
+    This preparation phase is **outside the scope** of the eSIM Profile Management API.
+
+    All operations act on the device over-the-air (download, enable, disable, delete, set-fallback). The target device must therefore be reachable, with working IP connectivity, when an operation runs. Download is the notable case. It may deliver the device's first eSIM Profile, so that initial connectivity has to come from another bearer, such as an existing profile, a bootstrap profile, or Wi-Fi. This API does not provide that connectivity. If the device is not reachable while an operation runs, the operation completes with a `FAILED` outcome rather than being rejected up front.
+
+    # Operation states
+
+    Operations that act on the device (download, enable, disable, delete, set-fallback) are asynchronous. A request is either rejected synchronously with a 4xx (no `operationId` issued), or accepted with `202`, an `operationId`, and `status: ACCEPTED`.
+
+    Once accepted, `status` moves from `ACCEPTED` to `COMPLETED`, which is terminal. The final result is carried in `result.outcome` (`SUCCESS` or `FAILED`), and a failure is described by `result.failureReason`. Which failures are detected before acceptance versus reported on the operation may evolve in future versions.
+
+    The API Consumer must poll GET /operations/{operationId} to observe completion. A `COMPLETED` operation is retrievable only for a provider-defined period, after which the endpoint returns `404`. Callbacks and event notifications are planned in future versions.
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: wip
+  x-camara-commonalities: 0.8.0
+
+servers:
+  - url: "{apiRoot}/esim-profile-management/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: "API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`"
+
+tags:
+  - name: eSIM Profile Operations
+    description: Lifecycle management operations for eSIM profiles
+
+paths:
+  /download:
+    post:
+      tags:
+        - eSIM Profile Operations
+      summary: Download eSIM Profile to device
+      description: |
+        Downloads and installs an eSIM Profile to a device. The eSIM Profile will be in DISABLED state after successful download and ready for enabling.
+
+        **eSIM Profile Identification**: Requires EID (target device) and activationCode. The ICCID will be assigned during the download process and returned in the response.
+
+        **State Transition**: None → DISABLED
+
+        **Required**: EID + activationCode
+      operationId: downloadEsimProfile
+      security:
+        - openId:
+            - iot-device-management:esim-profiles:download
+      parameters:
+        - $ref: '#/components/parameters/x-correlator'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DownloadEsimProfileRequest'
+            examples:
+              download_example:
+                summary: Download eSIM Profile to device
+                value:
+                  esimProfile:
+                    eid: "89049032000000000000000000000001"
+                  activationCode: "LPA:1$SM-DP+.EXAMPLE.COM$04386-AGYFT-A74Y8-3F815"
+      responses:
+        '202':
+          description: Download request accepted
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+            Location:
+              $ref: '#/components/headers/Location'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ESimProfileResponse'
+              examples:
+                download_accepted:
+                  value:
+                    operationId: "550e8400-e29b-41d4-a716-446655440000"
+                    operation: "download"
+                    status: "ACCEPTED"
+                    esimProfile:
+                      eid: "89049032000000000000000000000001"
+        '400':
+          $ref: '#/components/responses/Generic400'
+        '401':
+          $ref: '#/components/responses/Generic401'
+        '403':
+          $ref: '#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Generic404'
+        '422':
+          $ref: '#/components/responses/Generic422'
+
+  /enable:
+    post:
+      tags:
+        - eSIM Profile Operations
+      summary: Enable eSIM Profile
+      description: |
+        Enables an eSIM Profile for cellular connectivity provided valid connectivity services are configured in the eSIM Profile and the network. Only one eSIM Profile can be enabled per eUICC on the device - enabling automatically disables the currently active eSIM Profile.
+
+        **eSIM Profile Identification**: Uses ICCID to identify the profile.
+
+        **State Transition**: DISABLED → ENABLED
+        **Required**: ICCID
+      operationId: enableEsimProfile
+      security:
+        - openId:
+            - iot-device-management:esim-profiles:enable
+      parameters:
+        - $ref: '#/components/parameters/x-correlator'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnableEsimProfileRequest'
+            examples:
+              enable_profile:
+                summary: Enable eSIM Profile
+                value:
+                  esimProfile:
+                    iccid: "8901260123456789012"
+      responses:
+        '202':
+          description: Enable request accepted
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+            Location:
+              $ref: '#/components/headers/Location'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ESimProfileResponse'
+              examples:
+                enable_accepted:
+                  value:
+                    operationId: "550e8400-e29b-41d4-a716-446655440001"
+                    operation: "enable"
+                    status: "ACCEPTED"
+                    esimProfile:
+                      eid: "89049032000000000000000000000001"
+                      iccid: "8901260123456789012"
+        '400':
+          $ref: '#/components/responses/Generic400'
+        '401':
+          $ref: '#/components/responses/Generic401'
+        '403':
+          $ref: '#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Generic404'
+        '409':
+          $ref: '#/components/responses/Generic409'
+        '422':
+          $ref: '#/components/responses/Generic422'
+
+  /disable:
+    post:
+      tags:
+        - eSIM Profile Operations
+      summary: Disable eSIM Profile
+      description: |
+        Disables the currently enabled eSIM Profile. Device will lose cellular connectivity until another eSIM Profile is enabled. The eSIM Profile remains installed and can be re-enabled.
+
+        **State Transition**: ENABLED → DISABLED
+        **Required**: ICCID (identifies eSIM Profile and device)
+      operationId: disableEsimProfile
+      security:
+        - openId:
+            - iot-device-management:esim-profiles:disable
+      parameters:
+        - $ref: '#/components/parameters/x-correlator'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DisableEsimProfileRequest'
+            examples:
+              disable_profile:
+                summary: Disable eSIM Profile
+                value:
+                  esimProfile:
+                    iccid: "8901260123456789012"
+      responses:
+        '202':
+          description: Disable request accepted
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+            Location:
+              $ref: '#/components/headers/Location'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ESimProfileResponse'
+              examples:
+                disable_accepted:
+                  value:
+                    operationId: "550e8400-e29b-41d4-a716-446655440002"
+                    operation: "disable"
+                    status: "ACCEPTED"
+                    esimProfile:
+                      eid: "89049032000000000000000000000001"
+                      iccid: "8901260123456789012"
+        '400':
+          $ref: '#/components/responses/Generic400'
+        '401':
+          $ref: '#/components/responses/Generic401'
+        '403':
+          $ref: '#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Generic404'
+        '409':
+          $ref: '#/components/responses/Generic409'
+        '422':
+          $ref: '#/components/responses/Generic422'
+
+  /delete:
+    post:
+      tags:
+        - eSIM Profile Operations
+      summary: Delete eSIM Profile
+      description: |
+        Permanently removes an eSIM Profile from the device. This operation is irreversible and the profile cannot be recovered. The profile must be in DISABLED state before deletion.
+
+        **State Transition**: DISABLED → Deleted (removed)
+        **Required**: ICCID (identifies eSIM Profile and device)
+      operationId: deleteEsimProfile
+      security:
+        - openId:
+            - iot-device-management:esim-profiles:delete
+      parameters:
+        - $ref: '#/components/parameters/x-correlator'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteEsimProfileRequest'
+            examples:
+              delete_profile:
+                summary: Delete eSIM Profile
+                value:
+                  esimProfile:
+                    iccid: "8901260123456789012"
+      responses:
+        '202':
+          description: Delete request accepted
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+            Location:
+              $ref: '#/components/headers/Location'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ESimProfileResponse'
+              examples:
+                delete_accepted:
+                  value:
+                    operationId: "550e8400-e29b-41d4-a716-446655440003"
+                    operation: "delete"
+                    status: "ACCEPTED"
+                    esimProfile:
+                      eid: "89049032000000000000000000000001"
+                      iccid: "8901260123456789012"
+        '400':
+          $ref: '#/components/responses/Generic400'
+        '401':
+          $ref: '#/components/responses/Generic401'
+        '403':
+          $ref: '#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Generic404'
+        '409':
+          $ref: '#/components/responses/Generic409'
+        '422':
+          $ref: '#/components/responses/Generic422'
+
+  /set-fallback:
+    post:
+      tags:
+        - eSIM Profile Operations
+      summary: Set fallback eSIM Profile
+      description: |
+        Configures an eSIM Profile as fallback (backup) profile for automatic enabling if primary profiles fail. The eSIM Profile must be in DISABLED state.
+
+        **Identification**: The ICCID identifies the target eSIM Profile to designate as fallback. The EID, when supplied, identifies the eUICC on which to set the fallback. When both are provided and the ICCID is not installed on the identified eUICC, the request is rejected with `422 ESIM_PROFILE_MANAGEMENT.IDENTIFIER_MISMATCH`.
+
+        **State Transition**: No state change (sets attribute only)
+        **Required**: ICCID (target eSIM Profile). **Optional**: EID (target eUICC).
+      operationId: setFallbackEsimProfile
+      security:
+        - openId:
+            - iot-device-management:esim-profiles:set-fallback
+      parameters:
+        - $ref: '#/components/parameters/x-correlator'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetFallbackEsimProfileRequest'
+            examples:
+              set_fallback:
+                summary: Set eSIM Profile as fallback (ICCID only)
+                value:
+                  esimProfile:
+                    iccid: "8901260123456789013"
+              set_fallback_with_eid:
+                summary: Set eSIM Profile as fallback on a specific eUICC (EID + ICCID)
+                value:
+                  esimProfile:
+                    eid: "89049032000000000000000000000001"
+                    iccid: "8901260123456789013"
+      responses:
+        '202':
+          description: Set fallback request accepted
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+            Location:
+              $ref: '#/components/headers/Location'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ESimProfileResponse'
+              examples:
+                set_fallback_accepted:
+                  value:
+                    operationId: "550e8400-e29b-41d4-a716-446655440004"
+                    operation: "set-fallback"
+                    status: "ACCEPTED"
+                    esimProfile:
+                      eid: "89049032000000000000000000000001"
+                      iccid: "8901260123456789013"
+        '400':
+          $ref: '#/components/responses/Generic400'
+        '401':
+          $ref: '#/components/responses/Generic401'
+        '403':
+          $ref: '#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Generic404'
+        '409':
+          $ref: '#/components/responses/Generic409'
+        '422':
+          $ref: '#/components/responses/Generic422'
+
+  /retrieve-status:
+    post:
+      tags:
+        - eSIM Profile Operations
+      summary: Retrieve eSIM Profile status
+      description: |
+        Retrieves current status and state information for eSIM Profiles.
+
+        This operation uses POST despite being a read operation. Device identifiers (EID/ICCID) are passed in the request body rather than as URL parameters to prevent their exposure in server logs, proxy caches, and browser history.
+
+        **eSIM Profile Identification**: Accepts EID (all profiles on device), ICCID (specific profile), or both (specific profile, with the EID/ICCID pairing asserted)
+      operationId: getEsimProfileStatus
+      security:
+        - openId:
+            - iot-device-management:esim-profiles:retrieve-status
+      parameters:
+        - $ref: '#/components/parameters/x-correlator'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryEsimProfileStatusRequest'
+            examples:
+              query_by_eid:
+                summary: Query status by EID
+                value:
+                  esimProfile:
+                    eid: "89049032000000000000000000000001"
+              query_by_iccid:
+                summary: Query status by ICCID
+                value:
+                  esimProfile:
+                    iccid: "8901260123456789012"
+      responses:
+        '200':
+          description: eSIM Profile status retrieved successfully
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EsimProfileStatusResponse'
+              examples:
+                device_status:
+                  value:
+                    esimProfiles:
+                      - eid: "89049032000000000000000000000001"
+                        iccid: "8901260123456789012"
+                        state: "ENABLED"
+                        isFallback: false
+                      - eid: "89049032000000000000000000000001"
+                        iccid: "8901260123456789013"
+                        state: "DISABLED"
+                        isFallback: true
+        '400':
+          $ref: '#/components/responses/Generic400'
+        '401':
+          $ref: '#/components/responses/Generic401'
+        '403':
+          $ref: '#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Generic404'
+        '422':
+          $ref: '#/components/responses/Generic422'
+
+  /operations/{operationId}:
+    get:
+      tags:
+        - eSIM Profile Operations
+      summary: Retrieve operation information
+      description: |
+        Retrieves detailed information about an eSIM Profile operation including its `status` and, once `COMPLETED`, its `result`.
+
+        The API Consumer polls this endpoint to observe the transition from `ACCEPTED` to `COMPLETED`. A `COMPLETED` operation remains retrievable only for a provider-defined period, after which this endpoint returns `404`.
+
+        **Operation ID**: From any eSIM Profile operation response
+      operationId: retrieveOperation
+      security:
+        - openId:
+            - iot-device-management:esim-profiles:retrieve-operation
+      parameters:
+        - $ref: '#/components/parameters/x-correlator'
+        - name: operationId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 64
+            pattern: '^[a-zA-Z0-9-_:.]+$'
+          description: Operation identifier from original operation
+      responses:
+        '200':
+          description: Operation information retrieved successfully
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ESimProfileResponse'
+              examples:
+                operation_result:
+                  value:
+                    operationId: "550e8400-e29b-41d4-a716-446655440000"
+                    operation: "download"
+                    status: "COMPLETED"
+                    esimProfile:
+                      eid: "89049032000000000000000000000001"
+                      iccid: "8901260123456789012"
+                    result:
+                      completedAt: "2024-01-15T10:30:00Z"
+                      outcome: "SUCCESS"
+                      assignedIccid: "8901260123456789012"
+        '400':
+          $ref: '#/components/responses/Generic400'
+        '401':
+          $ref: '#/components/responses/Generic401'
+        '403':
+          $ref: '#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Generic404'
+
+components:
+  securitySchemes:
+    openId:
+      type: openIdConnect
+      openIdConnectUrl: https://example.com/.well-known/openid-configuration
+      description: OpenID Connect authentication
+
+  headers:
+    Location:
+      description: URL of the operation resource created to track this request, to be polled with GET /operations/{operationId}.
+      required: true
+      schema:
+        type: string
+        format: uri
+        maxLength: 256
+        example: "https://api.example.com/esim-profile-management/vwip/operations/550e8400-e29b-41d4-a716-446655440000"
+
+  parameters:
+    x-correlator:
+      $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+
+  schemas:
+
+    # eSIM Profile Identifier Schemas
+    ESimProfileEid:
+      type: string
+      maxLength: 32
+      pattern: '^[0-9]{32}$'
+      description: eUICC Identifier (EID) - 32 decimal digits per SGP.22 v3.1 specification
+      example: "89049032000000000000000000000001"
+
+    ESimProfileIccid:
+      type: string
+      maxLength: 20
+      pattern: '^[0-9]{19,20}$'
+      description: Integrated Circuit Card Identifier (ICCID) - eSIM Profile identifier per ITU-T E.118
+      example: "8901260123456789012"
+
+    # eSIM Profile Schema - Flexible identification
+    ESimProfile:
+      type: object
+      description: |
+        eSIM Profile container with flexible identification.
+        - EID: eUICC hardware identifier (device)
+        - ICCID: eSIM Profile identifier (network subscription)
+        Operation-specific requirements are enforced by derived schemas.
+      properties:
+        eid:
+          $ref: '#/components/schemas/ESimProfileEid'
+        iccid:
+          $ref: '#/components/schemas/ESimProfileIccid'
+
+    ESimProfileForDownload:
+      type: object
+      properties:
+        eid:
+          $ref: '#/components/schemas/ESimProfileEid'
+      required:
+        - eid
+      additionalProperties: false
+      description: eSIM Profile identification for download operations. Only the EID is accepted; the ICCID is assigned during download and returned in the response.
+
+    ESimProfileForOperation:
+      allOf:
+        - $ref: '#/components/schemas/ESimProfile'
+        - required: [iccid]
+      description: eSIM Profile identification for enable/disable/delete/set-fallback operations (requires only ICCID)
+
+    ESimProfileForStatus:
+      allOf:
+        - $ref: '#/components/schemas/ESimProfile'
+        - anyOf:
+            - required: [eid]
+            - required: [iccid]
+      description: eSIM Profile identification for status operations (requires EID, ICCID, or both)
+    # Request schemas using new eSIM Profile identification
+    DownloadEsimProfileRequest:
+      type: object
+      description: Request to download eSIM Profile
+      properties:
+        esimProfile:
+          $ref: '#/components/schemas/ESimProfileForDownload'
+        activationCode:
+          type: string
+          maxLength: 256
+          description: Profile activation code (LPA format)
+          example: "LPA:1$SM-DP+.EXAMPLE.COM$04386-AGYFT-A74Y8-3F815"
+      required:
+        - esimProfile
+        - activationCode
+
+    EnableEsimProfileRequest:
+      type: object
+      description: Request to enable eSIM Profile
+      properties:
+        esimProfile:
+          $ref: '#/components/schemas/ESimProfileForOperation'
+      required:
+        - esimProfile
+
+    DisableEsimProfileRequest:
+      type: object
+      description: Request to disable eSIM Profile
+      properties:
+        esimProfile:
+          $ref: '#/components/schemas/ESimProfileForOperation'
+      required:
+        - esimProfile
+
+    DeleteEsimProfileRequest:
+      type: object
+      description: Request to delete eSIM Profile
+      properties:
+        esimProfile:
+          $ref: '#/components/schemas/ESimProfileForOperation'
+      required:
+        - esimProfile
+
+    SetFallbackEsimProfileRequest:
+      type: object
+      description: Request to set eSIM Profile as fallback
+      properties:
+        esimProfile:
+          $ref: '#/components/schemas/ESimProfileForOperation'
+      required:
+        - esimProfile
+
+    QueryEsimProfileStatusRequest:
+      type: object
+      description: Request to query eSIM Profile status
+      properties:
+        esimProfile:
+          $ref: '#/components/schemas/ESimProfileForStatus'
+      required:
+        - esimProfile
+
+    ESimProfileOperationResult:
+      type: object
+      description: Result details for a completed or failed operation
+      properties:
+        completedAt:
+          type: string
+          format: date-time
+          maxLength: 64
+          description: Timestamp when the operation completed. Must follow RFC 3339.
+        outcome:
+          type: string
+          enum: [SUCCESS, FAILED]
+          description: Final outcome of the operation
+        failureReason:
+          type: string
+          maxLength: 256
+          description: Human-readable failure reason (present when outcome is FAILED)
+        assignedIccid:
+          allOf:
+            - $ref: '#/components/schemas/ESimProfileIccid'
+          description: ICCID assigned during download (present for successful download operations)
+      required:
+        - completedAt
+        - outcome
+
+    ESimProfileResponse:
+      type: object
+      description: Unified response for all eSIM Profile operations
+      properties:
+        operationId:
+          type: string
+          maxLength: 64
+          pattern: '^[a-zA-Z0-9-_:.]+$'
+          description: Unique identifier for tracking the operation
+        operation:
+          type: string
+          enum: [download, enable, disable, delete, set-fallback]
+          description: Type of operation performed
+        status:
+          type: string
+          enum: [ACCEPTED, COMPLETED]
+          description: |
+            Lifecycle status of the operation: `ACCEPTED` while in progress, `COMPLETED` once processing has finished. The outcome of a completed operation (success or failure) is carried in `result.outcome`.
+        esimProfile:
+          $ref: '#/components/schemas/ESimProfile'
+        result:
+          allOf:
+            - $ref: '#/components/schemas/ESimProfileOperationResult'
+          description: Outcome details of the operation. Absent while `status` is `ACCEPTED`; present and required once `status` is `COMPLETED`.
+      required:
+        - operationId
+        - operation
+        - status
+        - esimProfile
+
+    EsimProfileStatusResponse:
+      type: object
+      description: Response containing eSIM Profile status information
+      properties:
+        esimProfiles:
+          type: array
+          maxItems: 256
+          items:
+            type: object
+            description: Individual eSIM Profile status entry
+            properties:
+              eid:
+                $ref: '#/components/schemas/ESimProfileEid'
+              iccid:
+                $ref: '#/components/schemas/ESimProfileIccid'
+              state:
+                type: string
+                enum: [ENABLED, DISABLED]
+                description: Current state of the eSIM Profile
+              isFallback:
+                type: boolean
+                description: Whether this eSIM Profile is designated as fallback
+            required:
+              - eid
+              - iccid
+              - state
+              - isFallback
+          description: All eSIM Profiles available on the device
+      required:
+        - esimProfiles
+
+  responses:
+    Generic400:
+      $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+    Generic401:
+      $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+    Generic403:
+      $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+    Generic404:
+      $ref: '../common/CAMARA_common.yaml#/components/responses/Generic404'
+    Generic409:
+      $ref: '../common/CAMARA_common.yaml#/components/responses/Generic409'
+    Generic422:
+      description: Unprocessable Content
+      headers:
+        x-correlator:
+          $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../common/CAMARA_common.yaml#/components/schemas/ErrorInfo'
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 422
+                  code:
+                    enum:
+                      - SERVICE_NOT_APPLICABLE
+                      - ESIM_PROFILE_MANAGEMENT.IDENTIFIER_MISMATCH
+          examples:
+            GENERIC_422_SERVICE_NOT_APPLICABLE:
+              description: Service not applicable for the provided identifier
+              value:
+                status: 422
+                code: SERVICE_NOT_APPLICABLE
+                message: The service is not available for the provided identifier.
+            ESIM_PROFILE_MANAGEMENT_422_IDENTIFIER_MISMATCH:
+              description: The provided EID and ICCID are each individually valid, but the ICCID does not correspond to an eSIM Profile installed on the eUICC identified by the EID
+              value:
+                status: 422
+                code: ESIM_PROFILE_MANAGEMENT.IDENTIFIER_MISMATCH
+                message: The provided ICCID is not associated with the provided EID.

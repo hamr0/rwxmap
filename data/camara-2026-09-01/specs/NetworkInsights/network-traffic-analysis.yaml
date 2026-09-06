@@ -1,0 +1,446 @@
+openapi: 3.0.3
+info:
+  title: Network Traffic Analysis
+  description: |
+    Network Insight offers a unified analytical platform for specific networks, such as private networks and slices, focusing exclusively on aggregated network-level data rather than individual device information.
+    It empowers users to both evaluate the overall network health through a comprehensive, component-based scoring system and to analyze service traffic patterns with customizable granularity.
+    By providing a holistic view-from infrastructure health to user traffic trends-this API suite delivers the critical, real-time data needed for comprehensive network monitoring, strategic performance optimization, and effective early warning systems.
+
+    # Introduction
+    The Network Traffic Analysis API utilizes DPI collection technology to capture communication traffic between all services or terminals within the network.
+    By correlating service-specific data with devices and port resources, it aggregates and calculates the traffic flow for each service, thereby deriving service-based traffic distribution across the entire network.
+    This data helps identify high-traffic services and traffic load conditions during different time periods, facilitating the provision of appropriate bandwidth for critical services through slicing technology, ultimately enabling efficient utilization of network resources.
+
+    # API functionality
+    The API provides the following functionality:
+    - It allows users to directly query access traffic statistics for all services within a specified time period, including the number of accesses and the cumulative values of uplink and downlink traffic.
+    - Optional application filtering: Clients can provide an `app` query parameter to filter traffic data for a specific application. When provided, only records for that application are returned. When omitted, records for all applications are returned. Regardless of whether the filter is applied, every record in the response includes the `app` field to identify the application it belongs to.
+
+    # Request Parameters Definition:
+    * **networkId**: Unique identifier of the analyzed network (UUID format).
+    * **startDate**: Start date and time of the analysis period (RFC 3339 with timezone). For frequency=DAY, this is the start of the day (00:00:00). For frequency=HOUR, this is the start of the hour (HH:00:00).
+    * **endDate**: End date and time of the analysis period (RFC 3339 with timezone). For frequency=DAY, this is the start of the next day (00:00:00). For frequency=HOUR, this is the start of the next hour (HH+1:00:00).
+    * **frequency**: Analysis granularity (enumeration: 'DAY', 'HOUR').
+    * **app**: Optional filter to query traffic data for a specific application. When provided, only records for that application are returned. When omitted, records for all applications are returned. The `app` field is always present in each response record to identify the application.
+    * **page**: Requested page number (1-indexed). Defaults to 1.
+    * **perPage**: Number of items per page. Defaults to 20, maximum 100.
+
+    # Application identification
+
+    The `app` field in every response record identifies the application detected via DPI.
+    Application names are normalized by the platform (e.g., "whatsapp", "wechat", "netflix")
+    and serve as stable identifiers for client-side filtering and correlation.
+    API providers should document the list of possible application names and
+    any normalization rules applied. Clients should not depend on case sensitivity
+    or special character formatting; values are provided in lowercase with no
+    special characters.
+
+    # Privacy and Data Granularity
+
+    This API provides traffic analysis data derived from DPI (Deep Packet Inspection) technology.
+    All data exposed by this API is aggregated at network level and does not contain individual device,
+    user, or terminal identifiers. The data represents service-level traffic patterns only.
+
+    **DPI deployment and data collection are infrastructure-level activities:**
+    - The availability of traffic data through this API implies that DPI collection has been deployed
+      and authorized for the target network.
+    - This API itself does not initiate DPI collection, does not perform user-specific data processing,
+      and does not require additional user consent at query time.
+    - API providers are responsible for ensuring that DPI collection and data aggregation comply
+      with applicable local regulations.
+
+    **Data classification:**
+    - The `app` field in every record identifies an application service (e.g., "whatsapp", "netflix"),
+      not an individual user or device. It is a service-level identifier, not personally identifiable information (PII).
+    - All traffic counters (`accessCount`, `accessFlow`, etc.) are aggregated totals at the network level.
+    - No individual endpoint, subscriber, or device can be identified from any field in the response.
+
+    **Authentication:** This API uses two-legged access tokens (Client Credentials grant type)
+    for service-to-service authentication. No end-user personal data is processed by this API,
+    therefore no user consent or three-legged tokens are required.
+
+    # Error handling
+    - `404 NOT FOUND`: Returned when the specified `networkId` does not exist in the system.
+
+    Note: When the `networkId` exists but no traffic data is available for the requested period, the API returns `200 OK` with an empty `records` array. This is a successful response, not an error.
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+  version: wip
+  x-camara-commonalities: "0.7"
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+externalDocs:
+  description: Project documentation at CAMARA
+  url: https://github.com/camaraproject/NetworkInsights
+servers:
+  - url: "{apiRoot}/network-traffic-analysis/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+tags:
+  - name: Network Traffic Analysis
+    description: The API allows API consumers to query 5G traffic statistics information for aggregated network-level data.
+paths:
+  /traffic-analysis:
+    get:
+      tags:
+        - Network Traffic Analysis
+      summary: Get network traffic analysis
+      description: |
+        Query 5G traffic statistics information for aggregated network-level data.
+        If no data is available for the requested period, returns `200 OK` with an empty `records` array.
+      operationId: getTrafficAnalysis
+      security:
+        - openId:
+            - network-traffic-analysis:traffic-analysis:read
+      parameters:
+        - $ref: "#/components/parameters/x-correlator"
+        - name: networkId
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/NetworkId"
+          description: Unique identifier of the analyzed network (UUID format).
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            $ref: "../common/CAMARA_common.yaml#/components/schemas/DateTime"
+          description: Start date and time of the analysis period (RFC 3339 with timezone).
+          example: "2024-06-01T12:00:00Z"
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            $ref: "../common/CAMARA_common.yaml#/components/schemas/DateTime"
+          description: End date and time of the analysis period (RFC 3339 with timezone).
+          example: "2024-07-01T12:00:00Z"
+        - name: frequency
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/Frequency"
+          description: Analysis granularity (time interval for aggregation).
+          example: "DAY"
+        - name: app
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 128
+          description: |
+            Optional filter to query traffic data for a specific application.
+            When provided, only records for that application are returned.
+            When omitted, records for all applications are returned.
+            The `app` field is always present in each response record to identify the application.
+          example: "whatsapp"
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: "../common/CAMARA_common.yaml#/components/schemas/Page"
+          description: Requested page number (1-indexed). Defaults to 1.
+        - name: perPage
+          in: query
+          required: false
+          schema:
+            $ref: "../common/CAMARA_common.yaml#/components/schemas/PerPage"
+          description: Number of items per page. Defaults to 20, maximum 100.
+      responses:
+        "200":
+          description: Successful response with network traffic analysis data. Returns empty `records` array if no data available.
+          headers:
+            x-correlator:
+              $ref: '#/components/headers/x-correlator'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrafficAnalysisResponse'
+              examples:
+                Success:
+                  $ref: '#/components/examples/TrafficAnalysisSuccess'
+                EmptyResponse:
+                  description: Example response when no traffic data is available
+                  value:
+                    records: []
+                    pagination:
+                      page: 1
+                      perPage: 20
+                      totalCount: 0
+                      totalPages: 0
+        '400':
+          $ref: '#/components/responses/Generic400'
+        '401':
+          $ref: '#/components/responses/Generic401'
+        '403':
+          $ref: '#/components/responses/Generic403'
+        '404':
+          $ref: '#/components/responses/Generic404'
+
+components:
+  securitySchemes:
+    openId:
+      description: OpenID Connect authentication
+      type: openIdConnect
+      openIdConnectUrl: https://example.com/.well-known/openid-configuration
+
+  parameters:
+    x-correlator:
+      name: x-correlator
+      in: header
+      description: Correlation id for the different services
+      schema:
+        $ref: "../common/CAMARA_common.yaml#/components/schemas/XCorrelator"
+
+  headers:
+    x-correlator:
+      description: Correlation id for the different services
+      schema:
+        $ref: "../common/CAMARA_common.yaml#/components/schemas/XCorrelator"
+
+  schemas:
+    NetworkId:
+      description: Network ID in UUID format (unique identifier of the analyzed network)
+      type: string
+      format: uuid
+      maxLength: 36
+      example: "123e4567-e89b-12d3-a456-426614174000"
+
+    Frequency:
+      description: Analysis granularity (time interval for aggregation)
+      type: string
+      enum: ["DAY", "HOUR"]
+      example: "DAY"
+
+    TrafficAnalysisResponse:
+      type: object
+      description: |
+        Response schema for traffic analysis. Returns empty `records` array if no data available.
+
+        **Behavior of the `app` field in records:**
+        - Every traffic record contains the `app` field, identifying the application the data belongs to.
+        - The `app` query parameter acts as a filter: when provided, only records for that application are returned.
+        - When the `app` query parameter is omitted, records for all applications are returned.
+        - In both cases, the `records` array contains time-series data points (grouped by the selected frequency).
+      required:
+        - records
+        - pagination
+      properties:
+        records:
+          type: array
+          description: |
+            Array of traffic records for the current page. Empty array if no data available.
+            Each record represents a time slot (as defined by `frequency`) and includes the `app` field
+            to identify the application it belongs to.
+          minItems: 0
+          maxItems: 100
+          items:
+            type: object
+            description: A single traffic record containing application-level aggregated statistics for a specific time period.
+            required:
+              - app
+              - accessCount
+              - accessUpFlow
+              - accessDownFlow
+              - accessFlow
+              - startDate
+              - endDate
+              - accessDate
+            properties:
+              app:
+                type: string
+                description: |
+                  Application identifier recognized by the DPI system.
+                  This field is present in every record to identify the application the data belongs to.
+                  Names are normalized (lowercase, no special characters) for consistency.
+                  The set of possible values is provider-specific but should be documented and stable.
+                  See the "Application identification" section in the API description for normalization details.
+                example: "whatsapp"
+                maxLength: 128
+              ipv4Address:
+                type: string
+                description: Application server IPv4 address
+                example: "202.112.17.122"
+                format: ipv4
+                maxLength: 15
+              description:
+                type: string
+                description: Application description
+                example: "A free cross-platform app for messaging, calls, and media sharing."
+                maxLength: 512
+              accessCount:
+                type: integer
+                description: Total number of accesses to the application
+                format: int64
+                minimum: 0
+                maximum: 9007199254740991
+                example: 150
+              accessUpFlow:
+                type: integer
+                description: Total upstream traffic (bytes)
+                format: int64
+                minimum: 0
+                maximum: 9007199254740991
+                example: 102400
+              accessDownFlow:
+                type: integer
+                description: Total downstream traffic (bytes)
+                format: int64
+                minimum: 0
+                maximum: 9007199254740991
+                example: 204800
+              accessFlow:
+                type: integer
+                description: Total traffic (up + down, bytes)
+                format: int64
+                minimum: 0
+                maximum: 9007199254740991
+                example: 307200
+              startDate:
+                allOf:
+                  - $ref: "../common/CAMARA_common.yaml#/components/schemas/DateTime"
+                description: Start of the aggregation period for this record (inclusive). For frequency=DAY, this is the start of the day (00:00:00). For frequency=HOUR, this is the start of the hour (HH:00:00).
+              endDate:
+                allOf:
+                  - $ref: "../common/CAMARA_common.yaml#/components/schemas/DateTime"
+                description: End of the aggregation period for this record (exclusive). For frequency=DAY, this is the start of the next day (00:00:00). For frequency=HOUR, this is the start of the next hour (HH+1:00:00).
+              accessDate:
+                type: string
+                format: date
+                description: The calendar date of the record (YYYY-MM-DD). For frequency=HOUR, this is the date of the hour; multiple records with the same accessDate may exist for different hours.
+                example: "2024-06-07"
+                pattern: '^\d{4}-\d{2}-\d{2}$'
+                maxLength: 10
+        pagination:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Pagination"
+
+  responses:
+    Generic400:
+      description: Bad Request
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+          examples:
+            GENERIC_400_INVALID_ARGUMENT:
+              description: Invalid Argument. Generic Syntax Exception
+              value:
+                status: 400
+                code: INVALID_ARGUMENT
+                message: Client specified an invalid argument, request body or query param.
+            GENERIC_400_OUT_OF_RANGE:
+              description: Out of Range. Specific Syntax Exception used when a given field has a pre-defined range or a invalid filter criteria combination is requested
+              value:
+                status: 400
+                code: OUT_OF_RANGE
+                message: Client specified an invalid range.
+    Generic401:
+      description: Unauthorized
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+          examples:
+            GENERIC_401_UNAUTHENTICATED:
+              description: Request cannot be authenticated and a new authentication is required
+              value:
+                status: 401
+                code: UNAUTHENTICATED
+                message: Request not authenticated due to missing, invalid, or expired credentials. A new authentication is required.
+    Generic403:
+      description: Forbidden
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+          examples:
+            GENERIC_403_PERMISSION_DENIED:
+              description: Permission denied. OAuth2 token access does not have the required scope or when the user fails operational security
+              value:
+                status: 403
+                code: PERMISSION_DENIED
+                message: Client does not have sufficient permissions to perform this action.
+    Generic404:
+      description: Not found
+      headers:
+        x-correlator:
+          $ref: "#/components/headers/x-correlator"
+      content:
+        application/json:
+          schema:
+            $ref: "../common/CAMARA_common.yaml#/components/schemas/ErrorInfo"
+          examples:
+            GENERIC_404_NOT_FOUND:
+              description: Resource is not found
+              value:
+                status: 404
+                code: NOT_FOUND
+                message: The specified resource is not found.
+
+  examples:
+    TrafficAnalysisSuccess:
+      description: Successful traffic analysis response example
+      value:
+        records:
+          - app: "whatsapp"
+            ipv4Address: "202.112.17.122"
+            description: "A free cross-platform app for messaging, calls, and media sharing."
+            accessCount: 150
+            accessUpFlow: 102400
+            accessDownFlow: 204800
+            accessFlow: 307200
+            startDate: "2024-06-07T00:00:00Z"
+            endDate: "2024-06-07T23:59:59Z"
+            accessDate: "2024-06-07"
+          - app: "wechat"
+            ipv4Address: "202.112.17.123"
+            description: "A Chinese multi-purpose messaging, social media and mobile payment app."
+            accessCount: 200
+            accessUpFlow: 153600
+            accessDownFlow: 307200
+            accessFlow: 460800
+            startDate: "2024-06-07T00:00:00Z"
+            endDate: "2024-06-07T23:59:59Z"
+            accessDate: "2024-06-07"
+        pagination:
+          page: 1
+          perPage: 20
+          totalCount: 22
+          totalPages: 2

@@ -1,0 +1,485 @@
+---
+openapi: 3.0.3
+############################################################################
+#                                     API info                             #
+############################################################################
+info:
+  title: Optimal Edge Discovery
+  version: wip
+  x-camara-commonalities: wip
+  description: |
+    # Introduction
+    ---
+    The Optimal Edge Discovery API is designed to help users discover the
+    optimal edge cloud zones for their applications. This API allows users to
+    find the optimal regions and zones to deploy their edge cloud applications
+    based on the device's location, network characteristics and the application
+    profile.
+
+    ## Features
+    - Discover regions and zones to deploy edge cloud applications.
+
+    ## Usage
+    Users can utilize this API to enhance the performance and connectivity of
+    their applications by selecting the most suitable edge cloud zones and
+    application endpoints.
+
+    These APIs may be called either by an application client hosted on a device
+    attached to the operator network (i.e. phone, tablet) or by the application
+    server for following scenarios:
+
+    - **Edge Cloud Region Discovery**: To discover the regions where edge
+        cloud zones are available. Developers can use this information to
+        understand the geographical coverage of edge cloud services before
+        deciding where to deploy their applications or before using the more
+        specific optimal edge discovery functionality.
+        This can be achieved using the `/regions` API.
+
+    - **Edge Cloud Zone Discovery**:  To find the optimal edge cloud
+        zones to deploy application to minimize latency for users in a specific
+        region. This can be achieved using the
+        `/retrieve-optimal-edge-cloud-zones` API.
+
+    To call these endpoints, the API consumer must first obtain a valid OAuth2 token
+    from the token endpoint, and pass it as an `Authorization` header in the API
+    request.
+
+    # Identifying the device
+
+    The API returns the closest Edge Cloud Zone to a given device, so that
+    device needs to be identifiable by the network. This can be achieved either
+    by passing one or more device identifiers in the request, or, from the
+    three-legged access token where implemented by the operator.
+
+    ## Passing device identifier(s) in the request
+    At least one of the following device identifiers must be provided, unless
+    using a 3-legged access token (see next section):
+     - Phone number (i.e. MSISDN)
+     - Network Access Identifier assigned by the mobile network operator for the device
+     - IPv6 address
+     - IPv4 address
+
+
+    NOTE1: the network operator might support only a subset of these options.
+    The API invoker can provide multiple identifiers to be compatible across
+    different network operators. In this case the identifiers MUST belong to the
+    same device.
+
+    NOTE2: for this Commonalities release,  we are enforcing that the
+    `networkAccessIdentifier` is only part of the schema for future-proofing, and
+    CAMARA does not currently allow its use. After the CAMARA meta-release work
+    is concluded and the relevant issues are resolved, its use will need to be
+    explicitly documented in the guidelines.
+
+    <!-- CAMARA:MANDATORY:identifying-device-from-access-token:BEGIN -->
+    # Identifying the device from the access token
+
+    This API requires the API consumer to identify a device as the subject of the API as follows:
+    - When the API is invoked using a two-legged access token, the subject will be identified from the optional `device` object, which therefore MUST be provided.
+    - When a three-legged access token is used however, this optional identifier MUST NOT be provided, as the subject will be uniquely identified from the access token.
+
+    This approach simplifies API usage for API consumers using a three-legged access token to invoke the API by relying on the information that is associated with the access token and was identified during the authentication process.
+
+    ## Error handling:
+
+    - If the subject cannot be identified from the access token and the optional `device` object is not included in the request, then the server will return an error with the `422 MISSING_IDENTIFIER` error code.
+
+    - If the subject can be identified from the access token and the optional `device` object is also included in the request, then the server will return an error with the `422 UNNECESSARY_IDENTIFIER` error code. This will be the case even if the same device is identified by these two methods, as the server is unable to make this comparison.
+    <!-- CAMARA:MANDATORY:identifying-device-from-access-token:END -->
+
+    # Responses
+
+    ## Success
+
+    A JSON object is returned containing an array with a single member object.
+    This contains identifiers for the closest Edge Cloud Zone. The HTTP status
+    code will be`200 OK`. An example response:
+
+    ```
+      {
+    "edgeCloudZones": [
+      {
+        "edgeCloudZoneId": "7ab123-9087-6543-ef12-3dc45f67gh89",
+        "edgeCloudZoneName": "Example Zone Name",
+        "edgeCloudProvider": "Example Zone Provider",
+        "edgeCloudRegion": "us-west-1",
+        "edgeCloudZoneStatus": "active"
+      }
+    ],
+    "applicationProfileId": "2fa85f64-5717-4562-b3fc-2c963f66afa0",
+    "device": {
+      "phoneNumber": "+123456789"
+    }
+      }
+    ```
+    * `edgeCloudZoneId` is a UUID for the Edge Cloud Zone.
+    * `edgeCloudZoneName` is the common name of the closest Edge Cloud Zone to
+    the user device.
+    * `edgeCloudProvider` is the name of the operator or cloud provider of
+    the Edge Cloud Zone.
+    * `edgeCloudRegion` is the region of the closest Edge Cloud Zone to
+    the user device.
+    * `edgeCloudZoneStatus` is the operational status of the Edge Cloud Zone (`active` or `inactive`).
+    * `edgeCloudZones` is an ordered array of Edge Cloud Zones that match
+    the query parameters, ranked from best to worst suitability. All zones
+    in the list meet the application requirements; the first entry is the
+    most optimal choice for the given device and application profile.
+    * `applicationProfileId` is the reference ID associated with the
+    application profile. This is a UUID that identifies the application
+    profile for which the Edge Cloud Zones are being discovered.
+    * `device` is an object containing the device identifier used to
+    determine the user's location. This object will contain one of the
+    following identifiers:
+      - `phoneNumber`: The phone number of the device in E.164 format.
+      - `networkAccessIdentifier`: The network access identifier assigned by
+        the mobile network operator for the device.
+      - `ipv4Address`: The public IPv4 address and port of the device.
+      - `ipv6Address`: The public IPv6 address of the device.
+    The response will contain only one of these identifiers, depending on
+    which identifier was used to identify the device in the request.
+    If the device was identified from the access token, the `device` object
+    will not be present in the response, and the `applicationProfileId` will
+    be the only field returned.
+
+    ## Errors
+
+    If the authentication token is not valid, a `401 UNAUTHENTICATED` error is
+    returned.
+
+    If the mobile subscription parameters contain a formatting error, a `400
+    INVALID_ARGUMENT` error is returned.
+
+    If the mobile subscription cannot be identified from the provided
+    parameters, a `404 IDENTIFIER_NOT_FOUND` error is returned.
+
+    Any more general service failures will result in an error in the `5xx`range
+    with an explanation.
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+
+  license:
+    name: Apache 2.0
+    url: "https://www.apache.org/licenses/LICENSE-2.0.html"
+externalDocs:
+  description: Product documentation at CAMARA
+  url: https://github.com/camaraproject/OptimalEdgeDiscovery
+
+############################################################################
+#                                     Servers                              #
+############################################################################
+servers:
+  - url: "{apiRoot}/optimal-edge-discovery/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+############################################################################
+#                                     Tags                                 #
+############################################################################
+tags:
+  - name: Regions
+    description: |
+      Get all Region IDs and Names for edge cloud zones
+  - name: Discovery
+    description: |
+      Discover the regions and zones in the edge cloud
+      application, find optimal edge cloud zones for
+      your deployed applications, and optimal
+      Application Endpoints for your clients to connect to.
+############################################################################
+#                                     Paths                                #
+############################################################################
+paths:
+  /regions:
+    get:
+      summary: Fetch all Regions
+      operationId: getRegions
+      security:
+        - openId:
+            - "optimal-edge-discovery:regions:read"
+      parameters:
+        - $ref: "#/components/parameters/x-correlator"
+      responses:
+        '200':
+          description: Returns Edge Cloud Regions
+          headers:
+            x-correlator:
+              $ref: '#/components/headers/x-correlator'
+          content:
+            application/json:
+              schema:
+                title: GetEdgeCloudRegionsResponse
+                type: array
+                maxItems: 20
+                items:
+                  $ref: "#/components/schemas/EdgeCloudRegion"
+        "400":
+          $ref: "#/components/responses/Generic400"
+        "401":
+          $ref: "#/components/responses/Generic401"
+        "403":
+          $ref: "#/components/responses/Generic403"
+      tags:
+        - Regions
+      description: |
+        This is a helper API to get all the regions. The response identifies the
+        regions where edge cloud zones are available.
+  /retrieve-optimal-edge-cloud-zones:
+    post:
+      operationId: discoverOptimalEdge
+      security:
+        - openId:
+            - "optimal-edge-discovery:edge-zones:read"
+      parameters:
+        - $ref: "#/components/parameters/x-correlator"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OptimalEdgeDiscoveryInfo"
+            examples:
+              Identify Device By 3-Legged Access Token:
+                $ref: '#/components/examples/IdentifyDeviceBy3LeggedToken'
+              Identify Device By Phone Number:
+                $ref: '#/components/examples/IdentifyDeviceByPhoneNumber'
+              Identify Device By IP Address:
+                $ref: '#/components/examples/IdentifyDeviceByIPAddress'
+              Identify Device By Multiple Identifiers:
+                $ref: '#/components/examples/IdentifyDeviceByMultipleIdentifiers'
+
+      responses:
+        "200":
+          description: returns optimal edge cloud zone matching query
+            parameters
+          headers:
+            x-correlator:
+              $ref: "#/components/headers/x-correlator"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EdgeDiscoveryResponse"
+              examples:
+                OptimalZonesForDevice:
+                  summary: Ranked edge cloud zones for a device in the northeastern US
+                  value:
+                    edgeCloudZones:
+                      - edgeCloudZoneId: 4ab079b5-6248-4e4b-b0a7-a5dc15638de6
+                        edgeCloudZoneName: AWS Wavelength Zone - Verizon Boston
+                        edgeCloudProvider: Amazon Web Services
+                        edgeCloudRegion: us-east-1
+                        edgeCloudZoneStatus: active
+                      - edgeCloudZoneId: 7ab123cd-9087-6543-ef12-3dc45f67ab89
+                        edgeCloudZoneName: AWS Wavelength Zone - Verizon New York
+                        edgeCloudProvider: Amazon Web Services
+                        edgeCloudRegion: us-east-1
+                        edgeCloudZoneStatus: active
+                    applicationProfileId: 2fa85f64-5717-4562-b3fc-2c963f66afa0
+                    device:
+                      phoneNumber: '+12015550123'
+        "400":
+          $ref: "#/components/responses/Generic400"
+        "401":
+          $ref: "#/components/responses/Generic401"
+        "403":
+          $ref: "#/components/responses/Generic403"
+        "404":
+          $ref: "#/components/responses/Generic404"
+        "422":
+          $ref: "#/components/responses/Generic422"
+        "429":
+          $ref: "#/components/responses/Generic429"
+      tags:
+        - Discovery
+      summary: Discover optimal edge cloud zones for deployed applications
+      description: Returns a list of optimal edge cloud zones where you can register your deployed application. The `applicationProfileId` is required; optionally, device information and a preferred `edgeCloudRegion` may also be specified.
+
+components:
+  securitySchemes:
+    openId:
+      $ref: "../common/CAMARA_common.yaml#/components/securitySchemes/openId"
+  headers:
+    x-correlator:
+      $ref: "../common/CAMARA_common.yaml#/components/headers/x-correlator"
+  parameters:
+    x-correlator:
+      $ref: "../common/CAMARA_common.yaml#/components/parameters/x-correlator"
+  schemas:
+    EdgeDiscoveryResponse:
+      type: object
+      description: |
+        Response for the optimal edge discovery API. It contains a list of
+        edge cloud zones that match the query parameters.
+      properties:
+        edgeCloudZones:
+          type: array
+          maxItems: 20
+          minItems: 1
+          description: |
+            List of optimal edge cloud zones matching the query parameters,
+            ordered from best to worst suitability for the given device and
+            application profile. All zones in the list meet the application
+            requirements; the first entry is the most optimal.
+          items:
+            $ref: "#/components/schemas/EdgeCloudZone"
+        applicationProfileId:
+          $ref: "#/components/schemas/ApplicationProfileId"
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/DeviceResponse"
+
+    EdgeCloudZone:
+      type: object
+      description: Edge cloud zone information for the
+        given application profile and device information
+      properties:
+        edgeCloudZoneId:
+          $ref: "#/components/schemas/EdgeCloudZoneId"
+        edgeCloudZoneName:
+          $ref: "#/components/schemas/EdgeCloudZoneName"
+        edgeCloudZoneStatus:
+          $ref: "#/components/schemas/EdgeCloudZoneStatus"
+        edgeCloudProvider:
+          $ref: "#/components/schemas/EdgeCloudProvider"
+        edgeCloudRegion:
+          $ref: "#/components/schemas/EdgeCloudRegion"
+      required:
+        - edgeCloudZoneId
+        - edgeCloudZoneName
+        - edgeCloudProvider
+        - edgeCloudRegion
+        - edgeCloudZoneStatus
+
+    ApplicationProfileId:
+      type: string
+      format: uuid
+      maxLength: 36
+      description: reference id associated to application profile
+
+    EdgeCloudZoneId:
+      description: |
+        Operator-issued UUID for the Edge Cloud Zone.
+      type: string
+      format: uuid
+      maxLength: 36
+      additionalProperties: false
+
+    EdgeCloudZoneName:
+      description: |
+        The name of the operator or cloud provider of the Edge Cloud Zone.
+      type: string
+      maxLength: 64
+      pattern: ^[^\r\n]*$
+      additionalProperties: false
+
+    EdgeCloudProvider:
+      description: |
+        The company name of the Edge Cloud Zone provider.
+      type: string
+      maxLength: 64
+      pattern: ^[^\r\n]*$
+
+    EdgeCloudRegion:
+      description: An identifier for an edge cloud region.
+      type: string
+      maxLength: 64
+      pattern: ^[A-Za-z0-9-]+$
+      example: us-east-1
+
+    EdgeCloudZoneStatus:
+      description: |
+        Operational status of the Edge Cloud Zone. API providers must
+        always return an explicit status value.
+      type: string
+      enum:
+        - active
+        - inactive
+
+    OptimalEdgeDiscoveryInfo:
+      description: |
+        Resource to obtain the optimal edge cloud zone for a given application
+        profile and device information. The API returns the closest Edge Cloud
+        Zone to a given device, so the device needs to be identifiable by the
+        network. This can be achieved either by passing a device identifier in
+        the request header, or, from the 3-legged access token where implemented
+        by the operator.
+      type: object
+      properties:
+        device:
+          $ref: "../common/CAMARA_common.yaml#/components/schemas/Device"
+        applicationProfileId:
+          $ref: "#/components/schemas/ApplicationProfileId"
+        edgeCloudRegion:
+          $ref: "#/components/schemas/EdgeCloudRegion"
+      required:
+        - applicationProfileId
+
+  responses:
+    Generic400:
+      $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+    Generic401:
+      $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+    Generic403:
+      $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+    Generic404:
+      $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+    Generic422:
+      $ref: "../common/CAMARA_common.yaml#/components/responses/Generic422"
+    Generic429:
+      $ref: "../common/CAMARA_common.yaml#/components/responses/Generic429"
+
+  examples:
+    IdentifyDeviceBy3LeggedToken:
+      description: Empty JSON when device is identified by access token
+      value:
+        applicationProfileId: "2fa85f64-5717-4562-b3fc-2c963f66afa0"
+
+    IdentifyDeviceByPhoneNumber:
+      description: Identifying device by phone number
+      value:
+        applicationProfileId: "2fa85f64-5717-4562-b3fc-2c963f66afa0"
+        device:
+          phoneNumber: "+123456789"
+
+    IdentifyDeviceByIPAddress:
+      description: Identifying device by IP address
+      value:
+        applicationProfileId: "2fa85f64-5717-4562-b3fc-2c963f66afa0"
+        device:
+          ipv4Address:
+            publicAddress: "84.125.93.10"
+            publicPort: 59765
+
+    IdentifyDeviceByMultipleIdentifiers:
+      description: Identifying device by multiple device identifiers
+      value:
+        applicationProfileId: "2fa85f64-5717-4562-b3fc-2c963f66afa0"
+        device:
+          phoneNumber: "+123456789"
+          ipv4Address:
+            publicAddress: "84.125.93.10"
+            publicPort: 59765
+          networkAccessIdentifier: "123456789@domain.com"

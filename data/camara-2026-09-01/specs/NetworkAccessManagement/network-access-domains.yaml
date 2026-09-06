@@ -1,0 +1,816 @@
+openapi: 3.0.3
+
+info:
+  title: Home Devices - Network Access Domains
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: wip
+  x-camara-commonalities: 0.8.0-rc.2
+  description: |
+    Service enabling API for managing **Trust Domains** — declarative, LAN-like network segments — including the
+    connectivity and access policies applied to them and the registration and onboarding of subscriber and IoT
+    devices into those segments.
+
+    A Trust Domain lets an API consumer express *intent* — "these devices should share a private network with this
+    Wi-Fi/Thread configuration and these policies" — which the network operator translates into configuration on the
+    subscriber's network access equipment. The API also enumerates the subscriber's services and service sites so a
+    consumer can target the correct account and location.
+
+    # Introduction
+    A Trust Domain is a network access configuration where each configuration is for a logically separated Local
+    Area Network (LAN). API consumers can create, modify, or remove these networks which could be useful in
+    scenarios such as:
+
+    - A property owner wants to create a temporary network for the duration of a short-term booking or long-term rental.
+    - A property manager wants to replicate the network access details across multiple network access devices at one or
+      more locations such as common areas, offices, etc.
+    - A security/privacy-minded user wants to create one or more networks for their guests or Internet-of-Things (IoT)
+      network clients.
+    - An IoT platform wants to onboard a new device onto a subscriber's network and apply a specific connectivity
+      policy to it.
+
+    # Relevant Terms and Definitions
+    - **Trust Domain**: a declarative, intent-level grouping that defines which devices are permitted to communicate with each other as if they were on the same LAN and what high-level access policies apply to that group.
+    - **Access Detail**: one admittance configuration for a Trust Domain — an access type (Wi-Fi WPA Personal/Enterprise, Thread Structured/TLV) together with its security parameters. A Trust Domain has one or more.
+    - **Policy**: an optional, independently-applied constraint on a Trust Domain (e.g., maximum number of devices, up/downstream rate limit, egress allow-list).
+    - **Trust Domain Device**: a subscriber or IoT device (laptop, phone, IoT sensor, etc.) registered to a Trust Domain so that it may join the segment under that domain's access configuration and policies. **This is distinct from a Network Access Device** — it is end-user/subscriber equipment, not operator infrastructure.
+    - **Network Access Device**: network-operator-supplied access equipment (e.g., gateway, router, access point) that enforces Trust Domains and supports network segmentation technologies. Multiple devices that provide LAN connectivity for the same Trust Domain (e.g., mesh Wi-Fi, Thread personal area network) SHOULD be presented as a single device for implementations of this API. (Inventory and reboot of this equipment are handled by the companion *Network Access Devices* API.)
+    - **Bootstrapping / Provisioning Protocol**: the mechanism (DPP, Matter, WKSO) used to securely onboard a Trust Domain Device onto the network.
+    - **API Provider**: Provider that implements this API.
+    - **Network Operator**: Service provider that has operational control of supporting devices.
+    - **Service**: a logical commercial subscription or account relationship between a network operator and a subscriber (residential, commercial, public Wi-Fi, etc.).
+    - **Service Owner**: Customer of a network operator and resource owner with one or more devices that supports this
+    API across one or more service sites.
+    - **Service Site**: A distinct service owner location, as interpreted by the network operator, with one or more
+    devices.  A service site typically has a one-to-one relationship with the mailing address of the location.  Network
+    operators that support a single identity or interchangeable identities for multiple service sites at the same
+    mailing address (e.g., a residential and business account, an office and common area account, etc.) MUST provide
+    some distinction in the property address (e.g., attn: Home Office, attn: Common Area, etc.).  Multiple service
+    sites, for the same mailing address, but for unrelated service owner identities, do not have this requirement.
+    - **End-User**: The user connecting to a Trust Domain with a network client.
+    - **Network Client**: End-user equipment connecting to a Trust Domain (e.g., laptop, phone, IoT device, etc.).
+    - **API Consumer**: A first- or third-party software system using this API.
+
+    # API Functionality
+    This API allows API Consumers to manage Trust Domains, configure their access and policy, register subscriber/IoT
+    devices into them, and enumerate the services and service sites those resources belong to.
+
+    ## Trust Domains
+    A Trust Domain is created against a `serviceId` and carries one or more **access details** plus optional
+    **policies** and an optional **expiration**.
+
+    - **Access details** (`accessDetails`) describe how end-user devices may join the domain. Each entry is one access
+      type — Wi-Fi (WPA Personal/Enterprise) or Thread (Structured/TLV) — with its security parameters. A domain has at
+      least one entry, each access type SHOULD appear at most once, and on update the supplied list **replaces** the
+      previous list in full (there is no partial merge). All Network Access Devices configured with the domain apply
+      all of its access details.
+    - **Policies** (`policies`) are optional, independently-applied constraints: a maximum device count, maximum
+      up/downstream domain rate, and an egress allow-list (FQDN/CIDR). Omitting a policy means "no constraint" for that
+      category.
+    - **Expiration** lets a domain auto-expire. When a Trust Domain is no longer configured on any device it SHOULD be
+      auto-deleted (see *Comments for Network Operators*).
+
+    ## Devices in a Trust Domain
+    The `/trust-domains/{trustDomainId}/devices` endpoints register subscriber or IoT devices into a Trust Domain so
+    they receive its connectivity and policy. Registration is a general association mechanism: it underpins automated
+    ("zero-touch") onboarding when bootstrapping information is supplied, but it is equally valid to register a device
+    simply to grant it a connectivity policy.
+
+    - **Provisioning / bootstrapping** — a device may carry `bootstrappingInfo` describing one or more onboarding
+      protocols: **DPP** (Wi-Fi Alliance Device Provisioning Protocol), **Matter** (Connectivity Standards Alliance), or
+      **WKSO** (Well-Known SSID Onboarding — provisional/proof-of-concept). When several are supplied,
+      `protocolPreference` orders them and the provider selects the first protocol the domain's infrastructure also
+      supports.
+    - **Credentials** — a device may request a server-generated per-device credential (`GENERATE`), supply its own
+      (`ASSIGN`), or omit credentials entirely to use the Trust Domain's shared credential from `accessDetails`.
+    - **Lifecycle / status** — registration is distinct from connection. A device is registered once created, becomes
+      `associated` once it has completed onboarding on the infrastructure, and is reported `connected` while actively on
+      the network (`associated` and `connected` are read-only). `enabled` controls whether the device may authenticate;
+      `blocked` stops it forwarding data even when it is enabled and connected.
+
+    ## Services and Service Sites
+    A **Service** represents a subscriber's commercial relationship/account with the operator. Use `/services` to
+    enumerate the services accessible to the authenticated identity (for example, to obtain the `serviceId` to associate
+    with a Trust Domain). Location-specific services carry an embedded **Service Site** (a name, and optionally
+    geographic coordinates and/or postal-address detail); general services such as public Wi-Fi may have none. Service
+    Site information is exposed as part of a Service rather than through a standalone endpoint. The exact location and a
+    device's hardware address are regulated fields that may require additional scope, to help reconcile information when
+    the API client operator has an existing relationship with the service owner.
+
+    ## Discovering provider capabilities
+    Different operators support different access types, security modes, and limits. Call
+    `GET /trust-domains/capabilities` **before** creating a Trust Domain to discover what the target provider supports
+    (Wi-Fi/Thread variants, policy ranges, configuration limits). Capabilities describe what the *provider* offers, as
+    opposed to `accessDetails`, which is what an *API client* requests.
+
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:BEGIN -->
+    # Authorization and authentication
+
+    The "Camara Security and Interoperability Profile" provides details of how an API consumer requests an access token. Please refer to Identity and Consent Management (https://github.com/camaraproject/IdentityAndConsentManagement/) for the released version of the profile.
+
+    The specific authorization flows to be used will be agreed upon during the onboarding process, happening between the API consumer and the API provider, taking into account the declared purpose for accessing the API, whilst also being subject to the prevailing legal framework dictated by local legislation.
+
+    In cases where personal data is processed by the API and users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of three-legged access tokens is mandatory. This ensures that the API remains in compliance with privacy regulations, upholding the principles of transparency and user-centric privacy-by-design.
+    <!-- CAMARA:MANDATORY:authorization-and-authentication:END -->
+
+    # Scopes
+    Scopes are used to protect the service owner's information and privacy.  The general format is
+    `<API_name>-<Resource>-<Permission>`.  A resource may be further broken down into `<Resource_name>-<Field>` or
+    `<Resource_name>-<Role>` for granular permissions. Scopes also control output information as opposed to just
+    authorizing endpoints. Each endpoint definition will clearly state what scopes are needed for access and which are
+    needed to access additional information. Below are some general rules for scopes in this API.
+
+    - Regulated information, such as physical locations or hardware addresses of network devices, have special scopes.
+    Network operators are expected to follow any local regulations when sharing this information with an API client.
+    - Scopes have inheritance when one scope would otherwise require the inherited scope.
+    - Read scopes for one resource impacts the output of another resource when the requested resource has a relationship
+    with the first (e.g., listing networks on a device requires both device and network read scopes).
+    - Unless a `:read-all` (or `:admin`) variant is granted, a scope only grants access to resources created by the same
+    API client.
+
+    | Scope | Description |
+    |-------|-------------|
+    | **network-access-domains:trust-domains** | Manage the caller's own Trust Domains (create, modify, delete, view). |
+    | **network-access-domains:trust-domains:read-all** | Read all Trust Domains belonging to the subscriber, including those created by other clients (requires subscriber consent). |
+    | **network-access-domains:devices** | Register, manage, and deregister subscriber/IoT devices within Trust Domains created by the calling API client. |
+    | **network-access-domains:services:read** | List services accessible to the authenticated identity |
+
+    <!-- CAMARA:MANDATORY:request-body-strictness:BEGIN -->
+    # Request body strictness
+
+    This API rejects requests with JSON request bodies that contain properties not declared in this specification, at any nesting level. Unknown properties result in a `400 INVALID_ARGUMENT` response.
+    <!-- CAMARA:MANDATORY:request-body-strictness:END -->
+
+    # Comments for API Clients
+    The following notes help API clients use this API effectively.
+
+    ## Recommended flow
+    1. (Optional) Call `GET /trust-domains/capabilities` to confirm the access types, security modes, and limits the
+       provider supports.
+    2. (Optional) Call `GET /services` to find the `serviceId` (and service site) to associate with the Trust Domain.
+    3. `POST /trust-domains` with the desired access details and any policies.
+    4. `POST /trust-domains/{trustDomainId}/devices` for each subscriber/IoT device to onboard, or to attach to the
+       domain's policy, supplying `bootstrappingInfo` and/or `deviceCredential` as needed.
+    5. (Optional) Read the device resource to observe `associated` / `connected` status as onboarding completes.
+
+    ## Update semantics
+    - `accessDetails`, and a device's `bootstrappingInfo` / `deviceCredential`, use **full replacement** when included
+      in an update — supply the complete desired value, not a partial fragment.
+    - Trust Domain changes are automatically applied to every Network Access Device where the domain is configured.
+
+    ## Collection responses
+    List endpoints (`GET /trust-domains`, `GET /trust-domains/{trustDomainId}/devices`, and `GET /services`) return
+    `200 OK` with a JSON array. When no resources match, the response is `200 OK` with an empty array (`[]`); an empty
+    collection is never signalled with `404`.
+
+    # Comments for Network Operators
+    The following comments are for Network Operators implementing this API.
+
+    ## Auto-Deleting Trust Domains
+    When a Trust Domain is not configured on any device the network configuration and its identifier SHOULD be
+    auto-deleted.  API clients MUST not be expected to delete Trust Domains not configured on any device.
+
+    ## Mesh Systems
+    Mesh systems SHOULD be represented as a single device when implementing this API due to the undefined behavior of
+    LAN connectivity across multiple devices with the same Trust Domain.  The recommendation is to use the gateway
+    hardware address of the mesh system when exposing that field, though the hardware address of any node in the mesh
+    may be used.  If an end-user replaces the equipment, all existing Trust Domains SHOULD be synced to the new
+    device representing this mesh.  Alternatively, a synthetic hardware address may also be used if the specification
+    for the address type allows.
+
+    # Error handling
+    Client errors on create/update operations follow the CAMARA error model and fall into two classes:
+
+    - **`400`** (`INVALID_ARGUMENT`, `OUT_OF_RANGE`) — the request is malformed: it fails to parse, violates the
+      schema (wrong type, missing required field, failed pattern or range), or includes properties not declared in this
+      specification (see *Request body strictness*).
+    - **`422`** — the request is well-formed but cannot be processed for a semantic reason, per the CAMARA error model.
+
+    <!-- CAMARA:MANDATORY:additional-error-responses:BEGIN -->
+    # Additional CAMARA error responses
+
+    The list of error codes in this API specification is not exhaustive. Therefore the API specification MAY not document some non-mandatory error statuses as indicated in `CAMARA API Design Guide`.
+
+    Please refer to the `CAMARA_common.yaml` of the Commonalities Release associated to this API version for a complete list of error responses. The applicable Commonalities Release can be identified in the `API Readiness Checklist` document associated to this API version.
+
+    As a specific rule, error `501 - NOT_IMPLEMENTED` can be only a possible error response if it is explicitly documented in the API.
+    <!-- CAMARA:MANDATORY:additional-error-responses:END -->
+
+externalDocs:
+  description: Product documentation at CAMARA
+  url: https://github.com/camaraproject/NetworkAccessManagement
+
+servers:
+  - url: "{apiRoot}/network-access-domains/vwip"
+    variables:
+      apiRoot:
+        default: http://localhost:9091
+        description: API root, defined by the service provider, e.g. `api.example.com` or `api.example.com/somepath`
+
+tags:
+  - name: Services
+    description: Operations to list network services accessible to the authenticated identity
+  - name: Trust Domains
+    description: Operations to Create and Manage Trust Domains
+  - name: Trust Domain Devices
+    description: |
+      Operations to register and manage subscriber/IoT devices within Trust Domains.
+      These devices are distinct from Network Access Devices (operator-supplied equipment).
+
+paths:
+
+  /services:
+    get:
+      tags:
+        - Services
+      summary: Get all services accessible to the authenticated identity
+      security:
+        - openId:
+            - network-access-domains:services:read
+      operationId: getServices
+      description: |
+        Returns all services accessible to the calling identity. Services represent
+        a logical commercial relationship between a subscriber and a network operator,
+        typically corresponding to a unique service account or subscription.
+
+        This endpoint supports workflows where an API Consumer (e.g., AirBnB, Amazon)
+        has received subscriber authorization and must enumerate services to link with
+        Network Client Devices or Trust Domains.
+
+      parameters:
+        - $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+      responses:
+        "200":
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          description: Contains all services associated with the identity
+          content:
+            application/json:
+              schema:
+                $ref: "../modules/Services/Services.yaml#/components/schemas/ServiceList"
+              examples:
+                ServiceListResponse:
+                  $ref: "../modules/Services/Services.yaml#/components/examples/ServiceListResponse"
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "500":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic500"
+        "503":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic503"
+
+
+  /services/{serviceId}:
+    get:
+      tags:
+        - Services
+      summary: Get a service by ID
+      security:
+        - openId:
+            - network-access-domains:services:read
+      operationId: getService
+      description: |
+        Returns a specific service corresponding to the given `serviceId`.
+
+        This can be used to inspect service metadata prior to using it in other
+        API operations such as Trust Domain creation.
+
+        **Required Scopes:**
+        - `network-access-domains:services:read`
+
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema:
+            $ref: "../modules/Services/Services.yaml#/components/schemas/ServiceId"
+          description: |
+            The ID of the service to retrieve.
+
+            Must be a valid UUID as defined by RFC 4122 (versions 1-5) using only lowercase hexadecimal characters.
+        - $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+      responses:
+        "200":
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          description: Information about the service
+          content:
+            application/json:
+              schema:
+                $ref: "../modules/Services/Services.yaml#/components/schemas/Service"
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+        "500":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic500"
+        "503":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic503"
+
+  /trust-domains/capabilities:
+    get:
+      tags:
+        - Trust Domains
+      summary: Get Trust Domain capabilities
+      security:
+        - openId:
+            - network-access-domains:trust-domains
+      operationId: getTrustDomainCapabilities
+      description: |
+        Retrieves the set of Trust Domain configuration capabilities supported by the API provider.
+        Capabilities describe supported access types, policy constraints, and configuration limits.
+
+        This endpoint enables API clients to discover:
+        - Which access types are supported (Wi-Fi variants, Thread modes, etc.)
+        - What policy types are available
+        - Operational limits and constraints
+        - Advanced features and configuration options
+
+        Use this endpoint before creating Trust Domains to ensure your configuration
+        is supported by the target API provider/network operator.
+
+      parameters:
+        - $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+      responses:
+        "200":
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          description: Trust Domain capabilities supported by this API provider
+          content:
+            application/json:
+              schema:
+                $ref: "../modules/TrustDomains/TrustDomainCapabilities.yaml#/components/schemas/TrustDomainCapabilities"
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "500":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic500"
+        "503":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic503"
+
+  /trust-domains:
+    post:
+      tags:
+        - Trust Domains
+      summary: Create a new Trust Domain
+      security:
+        - openId:
+            - network-access-domains:trust-domains
+      description: |
+        Creates and returns the new Trust Domain.
+
+        A 409 ALREADY_EXISTS is returned if a Trust Domain with the same name already exists for the
+        referenced service.
+      operationId: createTrustDomain
+      parameters:
+        - $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+      requestBody:
+        description: Details of the Trust Domain to be created
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../modules/TrustDomains/TrustDomains.yaml#/components/schemas/TrustDomainCreate'
+            examples:
+              TrustDomainCreateWpa2Personal:
+                $ref: '../modules/TrustDomains/TrustDomains.yaml#/components/examples/TrustDomainCreateWpa2Personal'
+              TrustDomainCreateInferredSsid:
+                $ref: '../modules/TrustDomains/TrustDomains.yaml#/components/examples/TrustDomainCreateInferredSsid'
+              TrustDomainCreateThreadStructured:
+                $ref: '../modules/TrustDomains/TrustDomains.yaml#/components/examples/TrustDomainCreateThreadStructured'
+              TrustDomainCreateEphemeral:
+                $ref: '../modules/TrustDomains/TrustDomains.yaml#/components/examples/TrustDomainCreateEphemeral'
+              TrustDomainCreateQoSPolicies:
+                $ref: '../modules/TrustDomains/TrustDomains.yaml#/components/examples/TrustDomainCreateQoSPolicies'
+      responses:
+        '201':
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          description: Trust Domain created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../modules/TrustDomains/TrustDomains.yaml#/components/schemas/TrustDomain'
+              examples:
+                TrustDomainResponseBasic:
+                  $ref: '../modules/TrustDomains/TrustDomains.yaml#/components/examples/TrustDomainResponseBasic'
+                TrustDomainResponseWiFiThread:
+                  $ref: '../modules/TrustDomains/TrustDomains.yaml#/components/examples/TrustDomainResponseWiFiThread'
+        '400':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+        '401':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+        '403':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+        '409':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic409'
+        '500':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic500'
+        '503':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic503'
+
+    get:
+      tags:
+        - Trust Domains
+      summary: Retrieves all Trust Domains visible to the calling API client
+      security:
+        - openId:
+            - network-access-domains:trust-domains
+        - openId:
+            - network-access-domains:trust-domains:read-all
+      operationId: getTrustDomains
+      description: |
+        Retrieves all Trust Domains visible to the calling API client.
+
+        If the caller has `network-access-domains:trust-domains`, the response is limited to
+        Trust Domains created by the caller. If the caller has `network-access-domains:trust-domains:read-all`,
+        the response includes all Trust Domains associated with the subscriber.
+      parameters:
+        - $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+      responses:
+
+        "200":
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          description: Contains information about all trust domains
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "../modules/TrustDomains/TrustDomains.yaml#/components/schemas/TrustDomain"
+                maxItems: 100
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "500":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic500"
+        "503":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic503"
+
+  /trust-domains/{trustDomainId}:
+    parameters:
+      - $ref: '../modules/TrustDomains/TrustDomains.yaml#/components/parameters/trustDomainId'
+
+    get:
+      tags:
+        - Trust Domains
+      summary: Get a specific Trust Domain
+      security:
+        - openId:
+            - network-access-domains:trust-domains
+        - openId:
+            - network-access-domains:trust-domains:read-all
+      operationId: getTrustDomain
+      description: |
+        Retrieves the Trust Domain identified by the given ID. Visibility of this Trust Domain depends on the caller's scope and ownership:
+          - `trust-domains` restricts access to caller-owned Trust Domains.
+          - `trust-domains:read-all` allows retrieval of any Trust Domain associated with the subscriber.
+
+      parameters:
+        - $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+      responses:
+
+        "200":
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          description: Contains information about the specified trust domain
+          content:
+            application/json:
+              schema:
+                $ref: "../modules/TrustDomains/TrustDomains.yaml#/components/schemas/TrustDomain"
+              examples:
+                TrustDomainResponseBasic:
+                  $ref: '../modules/TrustDomains/TrustDomains.yaml#/components/examples/TrustDomainResponseBasic'
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+        "500":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic500"
+        "503":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic503"
+
+    patch:
+      tags:
+        - Trust Domains
+      summary: Update a specific Trust Domain
+      security:
+        - openId:
+            - network-access-domains:trust-domains
+      operationId: updateTrustDomain
+      description: |
+        Updates the Trust Domain identified by the given ID. Any changes are automatically applied to all network access devices where the Trust Domain is configured.
+
+      parameters:
+        - $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "../modules/TrustDomains/TrustDomains.yaml#/components/schemas/TrustDomainUpdate"
+        required: true
+      responses:
+        "200":
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          description: Contains information about the updated trust domain
+          content:
+            application/json:
+              schema:
+                $ref: "../modules/TrustDomains/TrustDomains.yaml#/components/schemas/TrustDomain"
+
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+        "500":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic500"
+        "503":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic503"
+
+    delete:
+      tags:
+        - Trust Domains
+      summary: Delete a specific Trust Domain
+      security:
+        - openId:
+            - network-access-domains:trust-domains
+      operationId: deleteTrustDomain
+      description: |
+        Deletes the Trust Domain identified by the given ID and removes its configuration from all network access devices where it is applied.
+
+      parameters:
+        - $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+      responses:
+        "204":
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          description: Trust Domain deleted successfully
+        "400":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic400"
+        "401":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic401"
+        "403":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic403"
+        "404":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic404"
+        "500":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic500"
+        "503":
+          $ref: "../common/CAMARA_common.yaml#/components/responses/Generic503"
+
+  /trust-domains/{trustDomainId}/devices:
+    parameters:
+      - $ref: '../modules/TrustDomains/TrustDomains.yaml#/components/parameters/trustDomainId'
+
+    post:
+      tags:
+        - Trust Domain Devices
+      summary: Register a new device to a Trust Domain
+      security:
+        - openId:
+            - network-access-domains:devices
+      description: |
+        Registers a subscriber or IoT device to the specified Trust Domain so that it may join the
+        segment under the domain's access configuration and policies. When `bootstrappingInfo` is
+        supplied it is used to onboard ("zero-touch") the device; when it is omitted, registration
+        simply associates the device with the domain (for example, to apply a connectivity policy).
+
+        A 409 ALREADY_EXISTS is returned if the device is already registered to the Trust Domain.
+      operationId: createTrustDomainDevice
+      parameters:
+        - $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+      requestBody:
+        description: Details of the device to register
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../modules/TrustDomainDevices/TrustDomainDevices.yaml#/components/schemas/TrustDomainDeviceCreate'
+            examples:
+              TrustDomainDeviceCreateIoT:
+                $ref: '../modules/TrustDomainDevices/TrustDomainDevices.yaml#/components/examples/TrustDomainDeviceCreateIoT'
+              TrustDomainDeviceCreateMinimal:
+                $ref: '../modules/TrustDomainDevices/TrustDomainDevices.yaml#/components/examples/TrustDomainDeviceCreateMinimal'
+              TrustDomainDeviceCreateMatter:
+                $ref: '../modules/TrustDomainDevices/TrustDomainDevices.yaml#/components/examples/TrustDomainDeviceCreateMatter'
+              TrustDomainDeviceCreateAssignCredential:
+                $ref: '../modules/TrustDomainDevices/TrustDomainDevices.yaml#/components/examples/TrustDomainDeviceCreateAssignCredential'
+      responses:
+        '201':
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          description: Device registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../modules/TrustDomainDevices/TrustDomainDevices.yaml#/components/schemas/TrustDomainDevice'
+              examples:
+                TrustDomainDeviceResponseBasic:
+                  $ref: '../modules/TrustDomainDevices/TrustDomainDevices.yaml#/components/examples/TrustDomainDeviceResponseBasic'
+        '400':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+        '401':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+        '403':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+        '404':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic404'
+        '409':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic409'
+        '500':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic500'
+        '503':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic503'
+
+    get:
+      tags:
+        - Trust Domain Devices
+      summary: List all devices registered to a Trust Domain
+      security:
+        - openId:
+            - network-access-domains:devices
+      operationId: getTrustDomainDevices
+      description: |
+        Retrieves all devices registered to the specified Trust Domain that the caller is authorized to view.
+      parameters:
+        - $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+      responses:
+        '200':
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          description: Contains the list of registered devices
+          content:
+            application/json:
+              schema:
+                $ref: '../modules/TrustDomainDevices/TrustDomainDevices.yaml#/components/schemas/TrustDomainDeviceList'
+              examples:
+                TrustDomainDeviceListResponse:
+                  $ref: '../modules/TrustDomainDevices/TrustDomainDevices.yaml#/components/examples/TrustDomainDeviceListResponse'
+        '400':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+        '401':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+        '403':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+        '404':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic404'
+        '500':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic500'
+        '503':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic503'
+
+  /trust-domains/{trustDomainId}/devices/{deviceId}:
+    parameters:
+      - $ref: '../modules/TrustDomains/TrustDomains.yaml#/components/parameters/trustDomainId'
+      - $ref: '../modules/TrustDomainDevices/TrustDomainDevices.yaml#/components/parameters/deviceId'
+
+    get:
+      tags:
+        - Trust Domain Devices
+      summary: Get a specific device in a Trust Domain
+      security:
+        - openId:
+            - network-access-domains:devices
+      operationId: getTrustDomainDevice
+      description: |
+        Retrieves the device identified by the given ID within the specified Trust Domain.
+      parameters:
+        - $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+      responses:
+        '200':
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          description: Contains information about the specified device
+          content:
+            application/json:
+              schema:
+                $ref: '../modules/TrustDomainDevices/TrustDomainDevices.yaml#/components/schemas/TrustDomainDevice'
+              examples:
+                TrustDomainDeviceResponseConnected:
+                  $ref: '../modules/TrustDomainDevices/TrustDomainDevices.yaml#/components/examples/TrustDomainDeviceResponseConnected'
+        '400':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+        '401':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+        '403':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+        '404':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic404'
+        '500':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic500'
+        '503':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic503'
+
+    patch:
+      tags:
+        - Trust Domain Devices
+      summary: Update a device in a Trust Domain
+      security:
+        - openId:
+            - network-access-domains:devices
+      operationId: updateTrustDomainDevice
+      description: |
+        Updates the device identified by the given ID within the specified Trust Domain.
+        Only the fields included in the request body will be updated. The `bootstrappingInfo`
+        and `deviceCredential` fields use full replacement semantics when included.
+      parameters:
+        - $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '../modules/TrustDomainDevices/TrustDomainDevices.yaml#/components/schemas/TrustDomainDeviceUpdate'
+        required: true
+      responses:
+        '200':
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          description: Device updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../modules/TrustDomainDevices/TrustDomainDevices.yaml#/components/schemas/TrustDomainDevice'
+        '400':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+        '401':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+        '403':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+        '404':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic404'
+        '500':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic500'
+        '503':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic503'
+
+    delete:
+      tags:
+        - Trust Domain Devices
+      summary: Remove a device from a Trust Domain
+      security:
+        - openId:
+            - network-access-domains:devices
+      operationId: deleteTrustDomainDevice
+      description: |
+        Deregisters and removes the device identified by the given ID from the specified Trust Domain.
+      parameters:
+        - $ref: '../common/CAMARA_common.yaml#/components/parameters/x-correlator'
+      responses:
+        '204':
+          headers:
+            x-correlator:
+              $ref: '../common/CAMARA_common.yaml#/components/headers/x-correlator'
+          description: Device removed successfully
+        '400':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic400'
+        '401':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic401'
+        '403':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic403'
+        '404':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic404'
+        '500':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic500'
+        '503':
+          $ref: '../common/CAMARA_common.yaml#/components/responses/Generic503'
+
+components:
+  securitySchemes:
+    openId:
+      $ref: '../modules/NAM_Common.yaml#/components/securitySchemes/openId'
