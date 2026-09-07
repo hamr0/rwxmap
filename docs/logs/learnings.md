@@ -1101,6 +1101,88 @@ party-phrase rule is the defect, not the flag. Second, the
 non-destructive 120 are untouched by this axis and remain the
 POST-floor problem. Neither signal is applied; recorded for M1.
 
+### E25 — ten passes on the false alarms: what a human sees in the summary (2026-09-07)
+
+(a) Why and how. The user, sorting the false-alarm dossiers by the
+summary column alone, could class most rows by eye and asked what the
+rules are doing wrong. A bounded loop of ten passes, one hypothesis
+each, logged before and after in poc/m0/exp-e25/LOG.md; tuning on
+CAMARA build/test and hold-out 1 only, the clean exam scored once at
+the end on the best variant (D24). No existing file changed; variant
+arbiter poc/m0/exp-e25/arbiter25.mjs, scorer run25.mjs,
+`--variant=base` reproduces E23 exactly.
+
+(b) Pass table, CAMARA test agree/over-tight/leaks then hold-out 1. P1
+summary-only word list 122/28/2, 131/74/2, drop. P2 summary + first
+sentence 123/28/1, 128/77/2, drop. P3 party word in a from/for/of
+phrase is scope, not target; raise only when the party word is the
+verb's object head: 123/29/0, 110/97/0, KEEP. P4 live-noun scan on
+summary only 123/28/1, 139/67/1, drop. P5 evidence-locality grading,
+confidence only: no change, drop. P6 any write lead verb lowers
+POST/PATCH x to w: 2 leaks on CAMARA build, drop. P7 same, restricted
+to modify verbs (poc/m0/exp-e25/modify-verbs.json, written from CAMARA
+build): 123/29/0, 122/85/0, KEEP. P8 extra POST read verbs
+ask/generate/verify: 124/26/2, drop; "Generate a nonce" is truth x and
+"Verify the OTP" is truth w, so generate and verify are not read verbs
+(second instance of E12's finding). P9 own-resource object heads
+derived from CAMARA build: 3 words, first one (assignment) leaks
+enterprise-team-organizations/add at high confidence, drop. P10
+measurement of confidence: a low-confidence row is 1.3 to 4.5 times
+more likely to be a false alarm than a correct call, a high-confidence
+row 6 to 16 times more likely to be correct.
+
+(c) Best variant P3+P7, pass2 on: CAMARA build 107 | 33 | 0 | 17 (was
+98 | 42 | 0 | 10); test 123 | 29 | 0 | 13 (was 120 | 32); hold-out 1
+122 | 85 | 0 | 0 (was 106 | 101); clean exam, scored once, 189 | 31 |
+0 | 4 (was 187 | 33). Both negative controls PASS. Zero wrong
+loosenings at every confidence on all four sets. Clean-exam rows
+changed versus E23: exactly two, both correct,
+patch_metadata_taxonomies_id_id and
+patch_metadata_taxonomies_id_id_nodes_id, "Update metadata taxonomy"
+and "... node", x to w, truth w. Reproduced by the orchestrator.
+
+(d) What we are doing wrong, from the loop. First, the arbiter has no
+way to say w about a POST or PATCH: the floor is x and the only exit
+was down to r via a read verb, so every "Update the queue", "Modify an
+account" is x by construction; 12 of hold-out 1's 101 false alarms and
+2 of the clean exam's, all high confidence; P7 fixes them with no
+leak. Second, the party rule reads scope as target ("delete an org
+secret for an organization" names the container the caller owns); P3
+removes 8 CAMARA and 4 hold-out false alarms and adds 7 correct
+lowerings. Third, the two judges read different text: the verb-led
+judge reads the summary, the word-list judge reads summary,
+description, operationId and path, and 45 of the remaining false
+alarms are one boilerplate word in a description the human never saw
+("access" in GitHub's personal-access-token sentence, "call" and
+"message" in Twilio's). Fourth, the description cannot simply be
+dropped: two hold-out 1 truth-x rows are held only by that boilerplate
+(issues/set-issue-field-values by "access", issues/remove-sub-issue by
+the substring collision "start"), so E23's zero on hold-out 1 partly
+rests on accidents; P1, P2 and P4 each leak when the description is
+narrowed. Fifth, confidence already separates most of what the user
+sorted by eye; the E24 dossier was sorted by the destructive flag, not
+by confidence, which shuffled signal and noise together.
+
+(e) What a human still sees that the rules cannot: whether the object
+is the caller's own paperwork or something another party relies on.
+Rows with the tool's own evidence: "Update AI agent" (head=agent
+party=agent), "Remove upload session" (nouns=session party=session,
+high), "Delete a token for stored payment details" (verbs=pay,
+party=token, high), "Create Box Skill cards on file" (create is
+consequential regardless of object), "Ask question" (verbs=send from
+the description), "Delete an override" (verbs=start, collision).
+Learning that distinction from words (P9) leaks on the first word
+learned. The distinction is not in the summary's words; it is in what
+the resource is, which is in the schema. M1's structural signal
+confirmed as the next thing.
+
+(f) Reading, once. Two mechanical defects (no w exit for POST/PATCH;
+scope read as target) account for the false alarms a rule can fix
+without a leak, about 16 of 101 on hold-out 1 and 2 of 33 on the clean
+exam. The rest are the own-versus-shared question, which words do not
+carry. Whether P3 and P7 are promoted into rules-verb.mjs and
+rules-union.mjs is a decision, not a finding.
+
 ### How the E19 union works, in plain words (2026-09-07)
 
 Written for the user at M0 close; the code is poc/m0/rules-union.mjs,
@@ -1155,7 +1237,7 @@ That is M1.
 
 ### Next
 
-M0 has run twenty-four shapes and two blind hold-outs. The clean exam
+M0 has run twenty-five shapes and two blind hold-outs. The clean exam
 (E23) now has 0 wrong loosenings of 220 at any confidence, so the gate
 is met on all three sets — CAMARA, the first hold-out, and the clean
 exam — with no low-confidence leak beside it. The miss was closed by
@@ -1172,4 +1254,7 @@ M0 should close with the numbers as they are;
 what the gate is met on and what it is not met on is now stated per
 set, which is the report the PRD asked for. The destructive flag
 (E24) is a second axis, not a class; its verb list is unmeasured
-against any hand label and that measurement is an M1 item.
+against any hand label and that measurement is an M1 item. E25's two
+kept variants (party word must be the verb's object head; a modify
+verb lowers POST/PATCH to w) are candidates, not yet promoted into the
+arbiter; that is the user's decision.
