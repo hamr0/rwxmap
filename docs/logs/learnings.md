@@ -1299,6 +1299,35 @@ sets; every structural rule must therefore be admitted per vendor or
 per set and may only raise on presence, never lower on absence, exactly
 as the PRD's M1 text states.
 
+### M1-C2 — scopes per method, CAMARA POST scope verb vs truth (2026-09-07)
+
+Scope presence per method in CAMARA (from docs/logs/m1/census-ops.csv):
+POST 132/138, GET 93/96, PUT 8/8, DELETE 40/41, PATCH 9/9. Hold-out 1
+and the clean exam: 0 scopes on every method. So scope is dominant
+(≥90% per method) in CAMARA only.
+
+On CAMARA POST, the last token of the first scope against the truth
+class:
+
+| scope verb | r | w | x |
+|---|---|---|---|
+| create | 0 | 0 | 37 |
+| read / retrieve / check / verify | 46 | 0 | 3 |
+| write | 0 | 1 | 10 |
+| (none) | 3 | 1 | 2 |
+
+The three `read`-scoped truth-x rows: postServiceCapability (`POST
+/retrieve`, body has `subscriptionRequest`), scheduleTransmission
+(carries both `:read` and `:write` scopes), queryAssistant (`POST
+/answer`, `answer:read`, body `assistantId|prompt`, nothing raising).
+Two of three are held by "never lower when a raiser is present";
+queryAssistant is not.
+
+What it taught: scope is the strongest single field seen so far, but
+only where it is dominant. The read-named-POST problem (57 of 138 in
+M0) is mostly answered by scope inside CAMARA. Outside CAMARA it does
+not exist. Fed into D30 rule 4.
+
 ### Next
 
 M0 closed 2026-09-07 as exploratory at the user's word (D29). Twenty-

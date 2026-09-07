@@ -193,6 +193,29 @@ measure the destructive verb list (D28) against a hand label on a
 sample of each set; report its two error directions separately like
 the class.
 
+**M1 go/no-go (D30, spec interview 2026-09-07).** Every operation gets a
+class and a confidence. Confidence accumulates across layers — method
+prior, scope where dominant, verb lean, noun lean, request-body shape —
+and above a threshold the class is assigned; below it the class is the
+safe floor and the row is tagged for human review. Go means all of:
+
+1. Zero leaks (wrong loosenings) among assigned rows, on every set.
+2. Rows sent to review plus over-tightened rows, together, land near 5%
+   of each of CAMARA and hold-out 1. M0's 11% over-tight on CAMARA is
+   not acceptable. The threshold is tuned on CAMARA and hold-out 1; the
+   clean exam is scored once and reported (D24).
+3. Every remaining false flag must be one a human reader also finds
+   confusing. M0's last false flags were plain words a reader resolved at
+   a glance; a list like that fails the gate even at a low count.
+4. A field is a primary signal in a set only if present on 90% or more
+   of that set's rows, per method. Below 90% it is secondary: weighed
+   only when present, never on absence (D2). By the census this makes
+   per-operation scopes primary for CAMARA only (M1-C2); PagerDuty's
+   `x-pd-requires-scope` and the rest are secondary.
+5. Verb and noun leans come from a broader corpus (APIs.guru, D7) as
+   method co-occurrence — which methods a verb or noun travels with —
+   with CAMARA usable as one signal among them. No hand lists.
+
 **M2 — Shape rules, only if justified.** For each divergence class from
 M0/M1 that appears more than once, add one deterministic OpenAPI-shape
 rule (request body present, response schema, status codes); re-run.
@@ -524,6 +547,10 @@ Non-blocking; never silently assumed.
   any token is issued. HTTP has no dry run; vendor test modes exist for
   some APIs only. Raised by the user 2026-09-07; a later module, not
   M1.
+- queryAssistant (`POST /answer`, scope `answer:read`, CAMARA) is truth
+  `x` with no raising field. A `read` scope allowed to lower would leak
+  it. Candidate third negative control for M1; the user has not yet
+  ruled.
 - Does the ordered r < w < x scale still hold once `destructive` is a
   separate axis? A grant of `x` currently implies `w`; with two axes a
   consumer may want "`x`, non-destructive only." The draft's scope
@@ -628,3 +655,4 @@ starts, not yet exercised.
 | D27 | "collaboration(s)" is added to the verb-led party list at the user's request (learnings E23). Scored once per D24: one row changes, delete_collaborations_id w to x, truth x, the last clean-exam wrong loosening; no other row on any set moves. Stated taint: the word was added after the clean exam exposed it, so the clean exam's result on that one row is no longer blind; the other 219 rows are unaffected. The fix does not generalise (membership, assignment, share are the same shape), so the structural schema signal stays M1's first item. Decided 2026-09-07. |
 | D28 | Two axes. r/w/x stays the blast-radius axis (D20: reaches beyond the caller, or not repeatable). A second, independent boolean, `destructive`, is derived from the method (DELETE) and the lead verb (`poc/m0/destructive.json`) and never from the class; it feeds MCP `destructiveHint`. Motivation: the user's case "read and reply, never delete" cannot be said with one ordered letter, because reply is `x` and `x` sits above `w`; and §4.3's untested mapping `destructiveHint = (class == x)` was measured wrong on 352 of 719 labelled rows (learnings E24). The proposal to move `x` to mean delete was rejected because pay, send, reply and add-a-stranger-to-admins would all become `w`. The destructive verb list is unmeasured against hand labels; measuring it is an M1 item. Decided 2026-09-07. |
 | D29 | M0 is closed as exploratory, 2026-09-07. What it delivered and what M1 keeps: 719 blind-read labels across three sets (CAMARA 292, hold-out 1 207, clean exam 220), the scoring harness with the two error directions counted apart, the negative controls, the per-set reporting rule (D22, D24), and the findings about what the method and prose can and cannot see (D16-D20, E20-E25). What it did not deliver: a shape to keep. The E19 union arbiter, both hand lists, pass 2 and the E25 variants are archived under `poc/m0/` unchanged and are not promoted; they are the measured ceiling of prose-only rules (about 30 over-tightenings per 200 operations at zero wrong loosenings), not the design. M1 starts fresh in `poc/m1/`, borrows plumbing by import only (spec loader, split, CSV parser, scorer), and is an informed POC, not a build. Decided 2026-09-07 at the user's word. |
+| D30 | M1 go/no-go set by spec interview: zero leaks among assigned rows; review plus over-tight near 5% per set on CAMARA and hold-out 1; remaining false flags must be humanly confusing; a field is primary only at ≥90% presence per method per set; leans from a broader corpus by method co-occurrence. See §4 M1. Decided 2026-09-07. |
