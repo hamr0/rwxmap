@@ -216,9 +216,9 @@ safe floor and the row is tagged for human review. Go means all of:
    method co-occurrence — which methods a verb or noun travels with —
    with CAMARA usable as one signal among them. No hand lists.
 
-Status 2026-09-07 after M1-C6: rule 1 met (0 leaks at T = 0.75 on every
-set); rule 3 met (8 over-tight, all stated confusions); rule 2 not met
-(review + over-tight 77/292, 173/207, 111/220). Own-vs-other admitted
+Status 2026-09-07 after M1-C7: rule 1 met (0 leaks at T = 0.75 on every
+set); rule 3 met (5 over-tight, all stated confusions); rule 2 not met
+(review + over-tight 74/292, 173/207, 111/220). Own-vs-other admitted
 nothing from the structural fields at the 0.9 bar (M1-C6); hold-out 1 is
 unchanged since C5. The remaining rows have no machine-facing evidence;
 prose as the last layer is the only untried input inside M1's shape.
@@ -561,11 +561,9 @@ Non-blocking; never silently assumed.
   separate axis? A grant of `x` currently implies `w`; with two axes a
   consumer may want "`x`, non-destructive only." The draft's scope
   grammar needs a word for that. Raised 2026-09-07.
-- Poll-then-callback reads: three CAMARA operations
-  (retrievePopulationDensity, retrieveConnectivity, count) are labelled
-  r but carry `callbacks`, which is x on 39 of 41 other rows. Is a read
-  whose result arrives by callback r or x? Raised by M1-C6; the user has
-  not ruled.
+- Closed 2026-09-07 (D32): a read whose result arrives by callback is
+  `r`; the caller named the sink, so it reaches no one else. Callbacks
+  raise only when the lead verb is not a read (M1-C7).
 - Which structural fields qualify for a rule, per set, by the user's
   criterion "present consistently or almost always"? Answered by the
   M1 census, pending 2026-09-07.
@@ -668,3 +666,4 @@ starts, not yet exercised.
 | D29 | M0 is closed as exploratory, 2026-09-07. What it delivered and what M1 keeps: 719 blind-read labels across three sets (CAMARA 292, hold-out 1 207, clean exam 220), the scoring harness with the two error directions counted apart, the negative controls, the per-set reporting rule (D22, D24), and the findings about what the method and prose can and cannot see (D16-D20, E20-E25). What it did not deliver: a shape to keep. The E19 union arbiter, both hand lists, pass 2 and the E25 variants are archived under `poc/m0/` unchanged and are not promoted; they are the measured ceiling of prose-only rules (about 30 over-tightenings per 200 operations at zero wrong loosenings), not the design. M1 starts fresh in `poc/m1/`, borrows plumbing by import only (spec loader, split, CSV parser, scorer), and is an informed POC, not a build. Decided 2026-09-07 at the user's word. |
 | D30 | M1 go/no-go set by spec interview: zero leaks among assigned rows; review plus over-tight near 5% per set on CAMARA and hold-out 1; remaining false flags must be humanly confusing; a field is primary only at ≥90% presence per method per set; leans from a broader corpus by method co-occurrence. See §4 M1. Decided 2026-09-07. |
 | D31 | Truth fix: CAMARA queryAssistant (ModelAsAService POST /answer) moves x -> r at the user's word, matching Box post_ai_ask (r) in the clean exam. One row; CAMARA becomes r 156, w 51, x 85. The old label carried a stated doubt. Decided 2026-09-07. |
+| D32 | Poll-then-callback reads are `r`. A callback raises to `x` only when the verb is not a read; "read" is decided mechanically (read-family scope token, or a corpus GET share >= 0.75 at >= 3 providers), never by a hand list. Three CAMARA rows (retrievePopulationDensity, retrieveConnectivity, count) keep their `r` label and move from over-tight to exact (M1-C7). Decided 2026-09-07 at the user's word. |

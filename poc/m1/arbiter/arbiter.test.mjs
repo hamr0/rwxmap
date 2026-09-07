@@ -23,6 +23,7 @@ import {
   layer5BodyEvidence,
   buildFlagTable,
   layer5FlagEvidence,
+  isReadVerbForRow,
   buildLayer6Table,
   pathParamKeysForRow,
   schemaPropKeysForRow,
@@ -802,4 +803,120 @@ test('negative control 2, re-checked under C6: updateSessionStatus still has no 
   assert.equal(result.class, 'w');
   assert.equal(result.status, 'review');
   assert.ok(result.evidence.some((e) => e === 'scope:write-agrees'));
+});
+
+// --- M1-C7: callbacks_present does not raise a read-led operation ----------
+
+function callbacksTable() {
+  // 9 x, 1 w across five repos, n=10, share=0.9 — clears the admission bar,
+  // same shape as the layer5FlagEvidence unit test above.
+  const rows = [
+    row({ repo: 'A', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'A', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'B', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'B', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'C', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'C', callbacks_present: 'true', gt_class: 'w' }),
+    row({ repo: 'D', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'D', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'E', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'E', callbacks_present: 'true', gt_class: 'x' }),
+  ];
+  return buildFlagTable(rows, 'callbacks_present');
+}
+
+test('M1-C7: retrievePopulationDensity-shaped row (read scope + callbacks) lands r', () => {
+  const table = callbacksTable();
+  const ctx = {
+    leanIndex: new Map(),
+    verbTable: new Map(),
+    flagTables: new Map([['callbacks_present', table]]),
+    admittedFlags: new Set(['callbacks_present']),
+  };
+  const r = row({
+    set: 'camara',
+    repo: 'F',
+    method: 'POST',
+    operationId: 'retrievePopulationDensity',
+    security_scopes: 'population-density:area:retrieve',
+    requestBody_present: 'true',
+    callbacks_present: 'true',
+    gt_class: 'r',
+  });
+  // Sanity: the read-family scope token alone is enough for isReadVerbForRow.
+  assert.equal(isReadVerbForRow(r, ctx.leanIndex), true);
+  const result = scoreRow(r, ctx, 0.5);
+  assert.equal(result.class, 'r');
+  assert.equal(result.status, 'assigned');
+  assert.ok(result.evidence.includes('flag:callbacks_present-suppressed:read-verb'));
+  assert.ok(!result.evidence.some((e) => e.startsWith('flag:callbacks_present->raise')));
+});
+
+test('M1-C7: createSubscription-shaped row (create scope + callbacks) still raises x', () => {
+  const table = callbacksTable();
+  const ctx = {
+    leanIndex: new Map(),
+    verbTable: new Map(),
+    flagTables: new Map([['callbacks_present', table]]),
+    admittedFlags: new Set(['callbacks_present']),
+  };
+  const r = row({
+    set: 'camara',
+    repo: 'F',
+    method: 'POST',
+    operationId: 'createSubscription',
+    security_scopes: 'subscriptions:events:create',
+    requestBody_present: 'true',
+    callbacks_present: 'true',
+    gt_class: 'x',
+  });
+  assert.equal(isReadVerbForRow(r, ctx.leanIndex), false);
+  const result = scoreRow(r, ctx, 0.5);
+  assert.equal(result.class, 'x');
+  assert.equal(result.status, 'assigned');
+  assert.ok(result.evidence.some((e) => e.startsWith('flag:callbacks_present->raise')));
+  assert.ok(!result.evidence.some((e) => e.includes('suppressed')));
+});
+
+test('M1-C7: a callbacks row with no read signal (empty scopes, unmeasured verb) still raises', () => {
+  const table = callbacksTable();
+  const ctx = {
+    // A lead verb present in the corpus lean but well under the read bar
+    // (low GET share, or too few providers) must not suppress the raise.
+    leanIndex: new Map([
+      ['dispatch', { providers: 2, perprov_get: 0, perprov_post: 5, perprov_put: 0, perprov_patch: 0, perprov_delete: 0, perprov_head: 0, perprov_options: 0 }],
+    ]),
+    verbTable: new Map(),
+    flagTables: new Map([['callbacks_present', table]]),
+    admittedFlags: new Set(['callbacks_present']),
+  };
+  const r = row({
+    set: 'camara',
+    repo: 'F',
+    method: 'POST',
+    operationId: 'dispatchEvent',
+    security_scopes: '',
+    requestBody_present: 'true',
+    callbacks_present: 'true',
+    gt_class: 'x',
+  });
+  assert.equal(isReadVerbForRow(r, ctx.leanIndex), false);
+  const result = scoreRow(r, ctx, 0.5);
+  assert.equal(result.class, 'x');
+  assert.equal(result.status, 'assigned');
+  assert.ok(result.evidence.some((e) => e.startsWith('flag:callbacks_present->raise')));
+});
+
+test('isReadVerbForRow: corpus-lean path alone (no scope) suppresses at providers>=3, GET share>=0.75; falls short below either bar', () => {
+  const leanIndex = new Map([
+    ['retrieve', { providers: 4, perprov_get: 80, perprov_post: 20, perprov_put: 0, perprov_patch: 0, perprov_delete: 0, perprov_head: 0, perprov_options: 0 }],
+    ['borderline', { providers: 2, perprov_get: 90, perprov_post: 10, perprov_put: 0, perprov_patch: 0, perprov_delete: 0, perprov_head: 0, perprov_options: 0 }],
+  ]);
+  const readRow = row({ method: 'POST', operationId: 'retrieveThing', security_scopes: '' });
+  assert.equal(isReadVerbForRow(readRow, leanIndex), true);
+  // providers=2 < 3: the GET-share bar alone is not enough.
+  const borderlineRow = row({ method: 'POST', operationId: 'borderlineThing', security_scopes: '' });
+  assert.equal(isReadVerbForRow(borderlineRow, leanIndex), false);
+  // No leanIndex at all and no read scope: false, never throws.
+  assert.equal(isReadVerbForRow(readRow, null), false);
 });

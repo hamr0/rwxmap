@@ -1591,6 +1591,33 @@ What it taught:
 4. The 0.9 bar found a wrong admission twice today (fix 3 in C5, layer 2b here). Keep it uniform; a layer without the bar is how leaks return.
 5. Adyen's money and idempotency fields cannot be admitted by this method because they exist in no tuning set. A vendor-specific field can only enter when a tuning set carries it (D30 rule 4).
 
+### M1-C7 — the poll-then-callback ruling: callbacks_present does not raise a read verb (2026-09-07)
+
+One rule change on top of C6 (D32, the user's ruling): the layer-5 `callbacks_present` raise no longer fires when the operation's lead verb is a read. "Read" is decided mechanically, no hand list — either (a) the row's own security_scopes carry a token in the existing read family (read, retrieve, check, verify, match, query, count, assess), or (b) the lead verb (after C5's method-word stripping) has, at lead position in `docs/logs/m1/corpus-leans.csv`, a per-provider GET share >= 0.75 with providers >= 3. Either path records `flag:callbacks_present-suppressed:read-verb`; the check only runs once the raise would otherwise have fired, so the marker never appears on a row that had no raise to suppress. Everything else in the C6 arbiter is untouched. Four tests added (44 total): the suppression firing on a read-scope + callbacks row, a create-scope + callbacks row still raising, a no-read-signal callbacks row still raising, and `isReadVerbForRow`'s own bar (providers >= 3 alone is not enough without the GET-share bar, and vice versa).
+
+Re-swept T x corpus-w-lean, re-chosen on CAMARA + hold-out 1 only, hold-out 2 scored once — outputs `c7-rows.csv`, `c7-false-flags.csv`, `c7-sweep.md` (the C6 admitted lists are untouched, so `c6-admitted.md` still applies and was not renamed):
+
+| T | CAMARA 292 | hold-out 1 207 | clean exam 220 |
+|---|---|---|---|
+| 0.5 | 229 / 63 / 2 / 3 | 62 / 145 / 9 / 1 | 110 / 110 / 0 / 1 |
+| 0.75 | 221 / 71 / 0 / 3 | 35 / 172 / 0 / 1 | 110 / 110 / 0 / 1 |
+| 1.0 | 217 / 75 / 0 / 3 | 35 / 172 / 0 / 1 | 110 / 110 / 0 / 1 |
+| 1.25 | 210 / 82 / 0 / 3 | 35 / 172 / 0 / 1 | 110 / 110 / 0 / 1 |
+| 2.0 | 186 / 106 / 0 / 3 | 35 / 172 / 0 / 1 | 108 / 112 / 0 / 1 |
+
+Chosen on CAMARA + hold-out 1 (unchanged from C6): corpus w-lean on, T = 0.75; review + over-tight 74/292 (25%) and 173/207 (84%), combined 247 (down from C6's 250). Clean exam once: 0 leaks, 1 over-tight, 110 review (50%) — hold-out 2 has no CAMARA-shaped poll-then-callback rows, so it does not move.
+
+Negative controls unchanged: terminateCall and updateSessionStatus at w, review, confidence 0 — still open, not this checkpoint's question. queryAssistant unchanged: assigned r, confidence 1.
+
+Five false flags remain, all over-tight, all unrelated to callbacks: cancelPayment (write scope on POST, share 1.0); createTrustDomain, CreateMessageFeedback, createAutomationActionTeamAssociation (create in the CAMARA verb table, 0.97-1.0); updateNotificationChannelSubscription (PUT, body prop config, 1.0).
+
+Rows that changed status or class versus c6-rows.csv: exactly three, all camara, all POST, all gt=r, all over-tight->exact — retrievePopulationDensity and retrieveConnectivity (x -> r, evidence now carries `scope:read->lower:r`, `corpus:retrieve->lower:r:shareGet=0.920`, `verbtable:retrieve->lower:r:shareR=1.000`, and the suppression marker) and count (x -> r, evidence `scope:count->lower:r` plus the suppression marker). No other row's class or status moved; the fix removed exactly the three false flags C6 named for this question and nothing else.
+
+What it taught:
+1. The rule is narrow by design: it only reaches rows that already carry independent read evidence strong enough to win the aggregate once the callbacks raise is out of the way (scope, corpus lean, or the CAMARA verb table). A callbacks-present row with no other read signal still raises, by construction (tested directly).
+2. The suppression is CAMARA-only in practice this pass — no hold-out-1 or hold-out-2 row both carries an admitted callbacks_present raise and clears either read test. The poll-then-callback shape measured here is a CAMARA idiom, not (yet) evidenced elsewhere.
+3. Recording the marker only after confirming the raise would have fired keeps the evidence trail honest — it never claims to have suppressed something that was never going to happen (e.g. a row excluded down below n>=5 by leave-one-repo-out).
+
 ### Next
 
 M0 closed 2026-09-07 as exploratory at the user's word (D29). Twenty-
@@ -1612,10 +1639,12 @@ generate and verify are not read verbs; the 11 arguable truth rows
 named in E24(g) want a second read; the destructive verb list is
 unmeasured.
 
-M1-C7, the user's call at the checkpoint: (a) prose as the last layer
-(D30: prose last) — words from summary and description admitted
-mechanically at the same 0.9 bar from CAMARA + hold-out 1,
+M1-C7 delivered the poll-then-callback ruling (D32): callbacks_present
+no longer raises a read-led operation, mechanically decided (read-family
+scope token, or a corpus-lean GET share). The three CAMARA rows land r.
+Still owed at the next checkpoint, the user's call: (a) prose as the
+last layer (D30: prose last) — words from summary and description
+admitted mechanically at the same 0.9 bar from CAMARA + hold-out 1,
 leave-one-repo-out, raise-only, aimed at the PUT/DELETE and scope-less
 POST rows that have no machine-facing evidence; or (b) stop M1 here and
-write the findings. Also owed: the user's ruling on poll-then-callback
-reads (three CAMARA rows labelled r, raised by callbacks_present).
+write the findings.

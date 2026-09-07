@@ -7,6 +7,12 @@
 // corpus-w-lean over all three sets, picks on CAMARA + hold-out 1, scores
 // hold-out 2 once, and writes the four named c6 outputs. C4/C5's outputs
 // are untouched.
+//
+// M1-C7 (D32, user ruling 2026-09-07): one rule change on top of C6 — the
+// layer-5 callbacks_present raise no longer fires for a read-led operation
+// (arbiter.mjs's isReadVerbForRow). No admitted list changes, so
+// c6-admitted.md is left as-is (still accurate); only the rows/false-flags/
+// sweep are re-run and written under the c7 names below.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -33,9 +39,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '../../..');
 const CENSUS_PATH = path.join(REPO_ROOT, 'docs/logs/m1/census-ops.csv');
 const LEANS_PATH = path.join(REPO_ROOT, 'docs/logs/m1/corpus-leans.csv');
-const OUT_ROWS = path.join(REPO_ROOT, 'docs/logs/m1/c6-rows.csv');
-const OUT_FALSE_FLAGS = path.join(REPO_ROOT, 'docs/logs/m1/c6-false-flags.csv');
-const OUT_SWEEP = path.join(REPO_ROOT, 'docs/logs/m1/c6-sweep.md');
+const OUT_ROWS = path.join(REPO_ROOT, 'docs/logs/m1/c7-rows.csv');
+const OUT_FALSE_FLAGS = path.join(REPO_ROOT, 'docs/logs/m1/c7-false-flags.csv');
+const OUT_SWEEP = path.join(REPO_ROOT, 'docs/logs/m1/c7-sweep.md');
 const OUT_ADMITTED = path.join(REPO_ROOT, 'docs/logs/m1/c6-admitted.md');
 
 const THRESHOLDS = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
@@ -400,7 +406,9 @@ function main() {
 
   // --- write c6-sweep.md ---
   const smd = [];
-  smd.push('# M1-C6 arbiter — threshold sweep, both corpus-w-lean switch states');
+  smd.push('# M1-C7 arbiter — threshold sweep, both corpus-w-lean switch states');
+  smd.push('');
+  smd.push('One rule change on top of C6 (D32): the layer-5 callbacks_present raise does not fire for a read-led operation (arbiter.mjs isReadVerbForRow — read-family scope token, or lead verb GET share >= 0.75 with providers >= 3 in corpus-leans.csv). Admitted lists (layer 2b/5/6) are unchanged from C6; see c6-admitted.md.');
   smd.push('');
   smd.push(strippedLine);
   smd.push('');

@@ -45,6 +45,11 @@
 // whole. Admission itself (which names/facts qualify) is decided once from
 // the full CAMARA + hold-out-1 table in run.mjs, not per scored row.
 //
+// M1-C7 (D32, user ruling 2026-09-07): one rule change on top of C6 — the
+// callbacks_present raise in layer 5 does not fire for a read-led operation
+// (CAMARA's poll-then-callback reads). See isReadVerbForRow below for the
+// mechanical "read" test. Everything else in this file is unchanged from C6.
+//
 // run.mjs owns all CSV loading/parsing and wires real data into the
 // functions here; every function in this file takes plain JS
 // objects/arrays/Maps so it is testable with synthetic data.
@@ -522,11 +527,58 @@ export function buildFlagTable(rows, flagName) {
   return buildRepoCountTable(rows, (row) => (flagPresent(row, flagName) ? [flagName] : []));
 }
 
-export function layer5FlagEvidence(row, flagName, table, admitted, minN = 5, minShare = 0.9) {
+// M1-C7 (D32, user ruling 2026-09-07): a read-led operation is not raised by
+// callbacks_present (CAMARA's poll-then-callback reads). "Read" is decided
+// mechanically, no hand list — either of:
+//   (a) the row's own security_scopes carry a token in the existing
+//       READ_FAMILY (read, retrieve, check, verify, match, query, count,
+//       assess); or
+//   (b) the row's lead verb (post C5 method-word stripping) has, at lead
+//       position in docs/logs/m1/corpus-leans.csv, a per-provider GET share
+//       >= 0.75 with providers >= 3.
+// leanIndex may be omitted (defaults to no corpus check, i.e. only (a)
+// applies) so existing call sites that never passed one are unaffected.
+export function isReadVerbForRow(row, leanIndex = null) {
+  const scopesStr = row.security_scopes || '';
+  if (scopesStr !== '') {
+    const tokens = scopesStr
+      .split('|')
+      .filter((s) => s !== '')
+      .map((scope) => {
+        const idx = scope.lastIndexOf(':');
+        return (idx >= 0 ? scope.slice(idx + 1) : scope).toLowerCase();
+      });
+    if (tokens.some((t) => READ_FAMILY.has(t))) return true;
+  }
+  if (leanIndex) {
+    const leadVerbToken = leadVerbForRow(row);
+    const lean = leadVerbToken ? leanIndex.get(leadVerbToken) : null;
+    if (lean && lean.providers >= 3) {
+      const total =
+        lean.perprov_get +
+        lean.perprov_post +
+        lean.perprov_put +
+        lean.perprov_patch +
+        lean.perprov_delete +
+        lean.perprov_head +
+        lean.perprov_options;
+      if (total > 0 && lean.perprov_get / total >= 0.75) return true;
+    }
+  }
+  return false;
+}
+
+export function layer5FlagEvidence(row, flagName, table, admitted, minN = 5, minShare = 0.9, leanIndex = null) {
   if (!admitted || !flagPresent(row, flagName)) return [];
   const excludeRepo = rowExcludeRepo(row);
   const s = shareX(countsForKey(table, flagName, excludeRepo));
   if (!s || s.n < minN || s.share < minShare) return [];
+  // M1-C7: only checked once we know a raise would otherwise fire, so the
+  // suppression marker is never recorded for a row that would not have
+  // raised anyway.
+  if (flagName === 'callbacks_present' && isReadVerbForRow(row, leanIndex)) {
+    return [{ dir: 'none', target: null, weight: 0, evidence: 'flag:callbacks_present-suppressed:read-verb' }];
+  }
   return [
     {
       dir: 'raise',
@@ -671,7 +723,7 @@ export function scoreRow(row, ctx, threshold, switches = {}) {
   if (ctx.flagTables && ctx.admittedFlags) {
     for (const flagName of ctx.admittedFlags) {
       const table = ctx.flagTables.get(flagName);
-      if (table) evidence.push(...layer5FlagEvidence(row, flagName, table, true));
+      if (table) evidence.push(...layer5FlagEvidence(row, flagName, table, true, 5, 0.9, ctx.leanIndex));
     }
   }
 
