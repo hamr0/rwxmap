@@ -124,6 +124,12 @@ the clean exam: word lists alone 184 / 34 / 2, verb-led alone 197 / 20
 `docs/logs/m0/false-alarms-E23.csv` (33 rows). Pass 2 is
 confidence-only (D23) and does not reduce false alarms; it marks them.
 
+**M0 closed 2026-09-07 (D29).** M0 is closed as exploratory, not as a
+shape to keep. The numbers above are the measured ceiling of prose-only
+rules — about 30 over-tightenings per 200 operations at zero wrong
+loosenings — not a design to build on. M1 starts fresh with a new
+arbiter rather than patching this one.
+
 ## 3. Out of scope
 
 - A model/LLM tier. There is no tier 2 and no tier 3 in this design —
@@ -158,17 +164,34 @@ the two error counts, keep or discard) recorded in `docs/logs/learnings.md` befo
 next one starts, so the shape that wins is chosen on evidence, not on the
 last thing tried.
 
-**M1 — Structural signal, then verb library from the corpus.** First, a
-structural signal for relationship objects whose other end is a person
-(e.g. Box's collaboration schema field `accessible_by`), motivated by
-the remaining clean-exam leak (`delete_collaborations_id`, E21).
-Measure the destructive verb list (D28) against a hand label on a
+**M1 — The informed arbiter (fresh POC).** A new arbiter in `poc/m1/`,
+nothing imported from `poc/m0/` except plumbing (spec loader, split,
+CSV parser, scorer). Shape under test, each step its own numbered
+experiment with both error directions counted apart:
+
+1. The method sets a prior, not only a floor: GET locked `r`; PUT and
+   DELETE lean `w`; POST and PATCH lean nowhere.
+2. Machine-facing fields first, prose last: per-operation OAuth scopes,
+   `Idempotency-Key` parameters, `callbacks`, `202` responses,
+   request-body property names, and the resource schema's fields (a
+   field pointing at another party such as `accessible_by`, `owner`,
+   `assignee`, `recipient`), each admitted as a rule only if a census
+   shows it present consistently in the set it is applied to, and each
+   only ever raising on presence, never lowering on absence.
+3. Verb and noun leans derived from a large corpus (APIs.guru
+   `openapi-directory`, D7), not from the 719 labelled rows, used as
+   graded evidence.
+4. Weighted evidence decides the class and the distance from the
+   boundary is the confidence; lowering below the method prior is
+   allowed only when the lowering evidence is strong and no raising
+   evidence is present (fail-closed, D2).
+
+Riskiest assumption, tested first: that structural fields are present
+often enough and split the truth classes cleanly enough to carry a
+rule; a census over the 719 operations is the first artefact. Also
+measure the destructive verb list (D28) against a hand label on a
 sample of each set; report its two error directions separately like
-the class. Then pull APIs.guru's `openapi-directory` (CC0), extract
-verbs from paths and operationIds with their method co-occurrence,
-produce the library as data (priors, not truth — see D7), re-run M0's
-arbiter with it, re-read the divergence list. Riskiest assumption: that
-corpus priors raise coverage on CAMARA without adding a wrong loosening.
+the class.
 
 **M2 — Shape rules, only if justified.** For each divergence class from
 M0/M1 that appears more than once, add one deterministic OpenAPI-shape
@@ -370,6 +393,9 @@ Measured weaknesses, one line each:
   banner. Pass 2 marks these low, does not clear them. Recorded
   2026-09-07 (E22), not fixed; part of the M1 list trim.
 
+This section describes the archived M0 arbiter (D29). It is kept as
+the measured ceiling of prose-only rules.
+
 The two roads to `x` are not interchangeable. Over the 499 labelled
 operations, 43 of 153 `x` rows reach beyond the caller while remaining
 perfectly repeatable, and 20 DELETE rows are `x` despite being
@@ -502,6 +528,9 @@ Non-blocking; never silently assumed.
   separate axis? A grant of `x` currently implies `w`; with two axes a
   consumer may want "`x`, non-destructive only." The draft's scope
   grammar needs a word for that. Raised 2026-09-07.
+- Which structural fields qualify for a rule, per set, by the user's
+  criterion "present consistently or almost always"? Answered by the
+  M1 census, pending 2026-09-07.
 
 ## 8. Notes carried from the outline, stated on purpose
 
@@ -598,3 +627,4 @@ starts, not yet exercised.
 | D26 | The three irreversibility stems in the word-list lexicon (permanent, irreversibl, cannot be undone) are removed; they encoded "irreversible means x", which D20 rejected. Scored once per D24 (learnings E22): eight rows move from x to w, all with truth w (CAMARA test 3, hold-out 1 1, clean exam 4); no row moves the other way; wrong loosenings unchanged. Decided 2026-09-07. |
 | D27 | "collaboration(s)" is added to the verb-led party list at the user's request (learnings E23). Scored once per D24: one row changes, delete_collaborations_id w to x, truth x, the last clean-exam wrong loosening; no other row on any set moves. Stated taint: the word was added after the clean exam exposed it, so the clean exam's result on that one row is no longer blind; the other 219 rows are unaffected. The fix does not generalise (membership, assignment, share are the same shape), so the structural schema signal stays M1's first item. Decided 2026-09-07. |
 | D28 | Two axes. r/w/x stays the blast-radius axis (D20: reaches beyond the caller, or not repeatable). A second, independent boolean, `destructive`, is derived from the method (DELETE) and the lead verb (`poc/m0/destructive.json`) and never from the class; it feeds MCP `destructiveHint`. Motivation: the user's case "read and reply, never delete" cannot be said with one ordered letter, because reply is `x` and `x` sits above `w`; and §4.3's untested mapping `destructiveHint = (class == x)` was measured wrong on 352 of 719 labelled rows (learnings E24). The proposal to move `x` to mean delete was rejected because pay, send, reply and add-a-stranger-to-admins would all become `w`. The destructive verb list is unmeasured against hand labels; measuring it is an M1 item. Decided 2026-09-07. |
+| D29 | M0 is closed as exploratory, 2026-09-07. What it delivered and what M1 keeps: 719 blind-read labels across three sets (CAMARA 292, hold-out 1 207, clean exam 220), the scoring harness with the two error directions counted apart, the negative controls, the per-set reporting rule (D22, D24), and the findings about what the method and prose can and cannot see (D16-D20, E20-E25). What it did not deliver: a shape to keep. The E19 union arbiter, both hand lists, pass 2 and the E25 variants are archived under `poc/m0/` unchanged and are not promoted; they are the measured ceiling of prose-only rules (about 30 over-tightenings per 200 operations at zero wrong loosenings), not the design. M1 starts fresh in `poc/m1/`, borrows plumbing by import only (spec loader, split, CSV parser, scorer), and is an informed POC, not a build. Decided 2026-09-07 at the user's word. |

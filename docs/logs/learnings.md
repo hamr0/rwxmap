@@ -1237,24 +1237,21 @@ That is M1.
 
 ### Next
 
-M0 has run twenty-five shapes and two blind hold-outs. The clean exam
-(E23) now has 0 wrong loosenings of 220 at any confidence, so the gate
-is met on all three sets — CAMARA, the first hold-out, and the clean
-exam — with no low-confidence leak beside it. The miss was closed by
-adding "collaboration" to the party list after the clean exam had
-shown it, so the clean exam is no longer fully unseen by every list
-for that one word. The word fix does not generalise — a membership,
-an assignment, a share are the same shape and are not on the list —
-so the schema signal stays M1's first item. The other clean-exam miss,
-the barrier-segment member DELETE, was fixed in E21 when the
-four-token cap in objectHead was removed and its object head reached
-"member", a party word. One recorded defect waits: the party words
-that never raised correctly.
-M0 should close with the numbers as they are;
-what the gate is met on and what it is not met on is now stated per
-set, which is the report the PRD asked for. The destructive flag
-(E24) is a second axis, not a class; its verb list is unmeasured
-against any hand label and that measurement is an M1 item. E25's two
-kept variants (party word must be the verb's object head; a modify
-verb lowers POST/PATCH to w) are candidates, not yet promoted into the
-arbiter; that is the user's decision.
+M0 closed 2026-09-07 as exploratory at the user's word (D29). Twenty-
+five experiments, three blind-read sets, 719 labels. The result that
+stands is the ceiling: prose-only rules reach zero wrong loosenings on
+every set at roughly 30 over-tightenings per 200 operations, and the
+false alarms that remain are the own-versus-shared question, which
+words do not carry. The arbiter is archived under `poc/m0/` (see
+`poc/m0/ARCHIVED.md`), not promoted. M1 starts fresh in `poc/m1/` as
+an informed POC: method as prior, machine-facing spec fields first
+(scopes, idempotency key, callbacks, 202, request-body and
+resource-schema fields) admitted only where a census shows them
+consistently present, corpus-derived verb and noun leans as graded
+evidence, weighted class with a fail-closed lowering rule. The first
+M1 artefact is the census over the 719 operations; it will be E26 or
+the first M1 entry, whichever numbering the PRD settles. Facts still
+open, one sentence each: the party words that never raised correctly;
+generate and verify are not read verbs; the 11 arguable truth rows
+named in E24(g) want a second read; the destructive verb list is
+unmeasured.
