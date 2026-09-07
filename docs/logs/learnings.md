@@ -1235,6 +1235,70 @@ word. Both land on the floor, `w`. Truth is `x` because the
 collaboration is another person's access. Only the schema knows that.
 That is M1.
 
+## M1 — the informed arbiter (2026-09-07)
+
+### M1-C1 — field census over the 719 operations (2026-09-07)
+
+**(a) What.** Read-only census over every labelled operation (CAMARA
+292, hold-out 1 207, clean exam 220; 0 unresolved; six vendor specs
+SHA-matched) of the machine-facing OpenAPI fields M1 proposes to read:
+per-operation security and scopes, requestBody and its property names,
+response codes (202), callbacks, document webhooks, Idempotency-Key
+header parameter, party-id parameters, x- extensions, and the resource
+schema reachable from the path's GET. Files
+`docs/logs/m1/census-summary.md`, `docs/logs/m1/census-ops.csv`,
+script `poc/m1/census/`.
+
+**(b) Presence per set.** Count of ops with the field, CAMARA / hold-out
+1 / clean exam: security on the operation 285 of 292 / 94 of 207 / 27
+of 220; non-empty scopes 282 / 0 / 0; requestBody 152 / 121 / 103;
+requestBody with a party or money property name 54 / 27 / 28; 202
+response 47 / 5 / 2; callbacks on the operation 42 / 0 / 0; webhooks in
+the document 0 / 81 / 0; Idempotency-Key parameter 0 / 0 / 22 (all
+Adyen); party-id parameter 1 / 116 / 12; x- extensions 0 / 87 / 205;
+resource schema found 159 / 176 / 168; resource schema with a party
+field 55 / 71 / 63.
+
+**(c) Split by truth class** over all 719 (r 259, w 254, x 206):
+requestBody present r 26% / w 49% / x 89%; requestBody party-or-money
+property r 10% / w 5% / x 34%; 202 r 1% / w 9% / x 15%; callbacks r
+1% / w 0% / x 19% (CAMARA only: x 39 of 86, w 0 of 51); Idempotency-Key
+r 2% / w 0% / x 8% (clean exam: x 17 of 53, w 0 of 63); resource schema
+party field r 24% / w 37% / x 17%, i.e. it leans the wrong way as a
+raiser; party-id parameter on hold-out 1 w 46% / x 76%.
+
+**(d) Scopes.** Only CAMARA declares OAuth scopes per operation
+(96.6%). GitHub's spec has no securitySchemes at all; Box, PagerDuty,
+Adyen, Stripe, Twilio declare none per operation. But PagerDuty carries
+a per-operation scope in an extension, `x-pd-requires-scope` (78 of 93
+PagerDuty ops, values such as `tags.read`, `tags.write`), and GitHub's
+`x-github` carries category and app-enablement flags (81 of 81 GitHub
+ops), not permissions. So "scopes" is present in two of six vendors and
+under two different names.
+
+**(e) Request-body property names with a clean lean,** over all 719:
+sink 34 (x 30), sinkCredential 33 (x 28), StatusCallback 16 (x 14),
+protocol 14 (x 14), types 14 (x 14), amount 12 (x 10), merchantAccount
+18 (x 13), subscriptionRequest 9 (x 9); against device 37 (r 28),
+phoneNumber 28 (r 19), FriendlyName 31 (w 15 / x 16), name 16 (w 6 /
+x 7), description 11 (w 6 / x 5). A callback-shaped body (sink,
+StatusCallback, protocol, types) is nearly pure x; identity-shaped
+names (name, description, FriendlyName) do not separate w from x.
+
+**(f) Reading, once,** against the user's criterion "present
+consistently or almost always". Fields that pass per set: CAMARA scopes
+and security; clean-exam x- extensions (Box tags, PagerDuty scopes);
+resource schema in hold-out 1 (85%) and the clean exam (76%).
+requestBody is present on about half of all ops but on 89% of x ops, so
+its absence leans r/w and its presence with a callback- or money-shaped
+property is a strong raiser. Callbacks, 202 and Idempotency-Key are
+rare (6%, 8%, 3%) and, where present, nearly pure x with zero w rows,
+which is the right shape for a raise-only rule and the wrong shape for
+anything else. No field is present in 90%+ of ops across all three
+sets; every structural rule must therefore be admitted per vendor or
+per set and may only raise on presence, never lower on absence, exactly
+as the PRD's M1 text states.
+
 ### Next
 
 M0 closed 2026-09-07 as exploratory at the user's word (D29). Twenty-
