@@ -712,21 +712,92 @@ verb whose danger is stated far from it, and a status update on a live
 session. The two models fail in different places, which is the
 finding.
 
+### E19 — the union: both arbiters, tighter class wins, agreement is the confidence (2026-09-07)
+
+(a) What it is, composition only, no new vocabulary and no new rule.
+poc/m0/rules-union.mjs runs both existing arbiters over the same
+operation: the word-list model (arbiterLex with lexicon v2 and the
+hand read-verb list, i.e. E12b) and the verb-led model (arbiterVerb,
+E18). The class is the tighter of the two. Confidence comes from
+agreement: high when both returned the same class, low when they
+disagree. The rule id keeps both provenances as `U:<A>|<B>` and the
+evidence keeps both strings. Two descriptive fields are recorded per
+row: `agree`, and `raisedBy` (both / wordlist / verb / neither)
+measured against the method default. Pass 2 runs in grading mode only,
+per D23. Runner poc/m0/run-union.mjs, tests
+poc/m0/rules-union.test.mjs, suite 90 pass.
+
+(b) The measurement that motivated it. The two models' x-sets were
+compared directly: Jaccard 0.78 on CAMARA and 0.68 on the hold-out, and
+in both sets the rows NEITHER model raised contain zero true x. Their
+misses are disjoint — the word-list model missed
+enterprise-team-organizations/add and pulls/merge-async; the verb-led
+model missed issues/set-issue-field-values and
+issues/remove-sub-issue.
+
+(c) Results, columns half/repo | agree | over-tight | wrong loosenings
+| correct lowerings:
+CAMARA BUILD 98 | 42 | 0 | 10; CAMARA TEST 117 | 35 | 0 | 13; hold-out
+total 105 | 102 | 0 | 0 (twilio 58 | 36 | 0, stripe 25 | 7 | 0, github
+22 | 59 | 0).
+Both negative controls PASS. `pass2 class changes: 0` on every run,
+asserted by the runner and failing the run if it is ever non-zero —
+D23 is now enforced by code rather than claimed.
+For comparison on the same sets: E12b 110|30|0 and 122|30|0, hold-out
+114|91|2. E18 103|36|1 and 123|26|3, hold-out 142|63|2.
+
+(d) So the union is the first shape with zero wrong loosenings on both
+CAMARA halves AND on the blind hold-out, and both negative controls
+pass. It pays in noise: 77 over-tightenings across CAMARA against
+E12b's 60, and 102 of 207 on the hold-out against E12b's 91 and E18's
+63. Taking the tighter of two models is by construction at least as
+tight as either.
+
+(e) Agreement earns its keep as the confidence signal. On the
+hold-out, splitting the union's rows by confidence: high confidence 93
+correct against 49 over-tightenings; low confidence 12 correct against
+53. A consumer acting only on high-confidence rows sheds 53 of the 102
+over-tightenings and loses nothing to a wrong loosening, because there
+are none at either level. Under D22 the gate is met at high confidence
+and the low-confidence wrong-loosening rate is also zero, so both
+numbers are reported and both are zero.
+
+(f) A defect found and fixed during review, recorded because it nearly
+produced a false result. The first implementation clamped the
+combined class up to the method default. For POST that default is x,
+so every POST was forced to x, every correct lowering was destroyed
+(correct lowerings read 0 on halves where E12b alone had 22), and the
+resulting "zero wrong loosenings" was an artifact: nothing can leak on
+POST when every POST is already x. One row made it visible —
+CallForwardingSignal POST retrieveUnconditionalCallForwarding, where
+both arbiters returned r, agreed, and the union emitted x. The floor
+is not "never below the method default": per D17 and §4.5, safe
+methods are locked at r, PUT and DELETE never go below w, and POST and
+PATCH may be lowered to r because their x is a policy default, not an
+RFC 9110 fact. After the fix, wrong loosenings stayed 0 on every set
+and the correct lowerings returned.
+
+(g) A limit of the hold-out, stated because it caps what E19's
+hold-out numbers can show: the hold-out's ground truth contains 140 w
+and 67 x and no r at all, because the extraction selected no GET and
+every selected POST creates or acts. Correct lowerings on the hold-out
+are therefore 0 by construction, not by failure, and the usefulness
+half of the gate — a useful share of POSTs decided r — can only be
+measured on CAMARA until a hold-out with read operations exists.
+
 ### Next
 
-M0 has run eighteen shapes. Two models now exist and they fail
-differently. The word-list model (E12b, pass 1) has zero wrong
-loosenings on CAMARA and 91 over-tightenings on the hold-out. The
-verb-led model (E18) has 63 over-tightenings on the hold-out and four
-CAMARA wrong loosenings, all four in rows where the lead verb is not
-where the danger is. Neither is finished. The obvious next shape is
-the union: E18's verb table decides the base class, the danger-verb
-lexicon of E12b still raises on a hit anywhere, and the pass-2 checks
-of E17 grade the evidence without changing any class — measured on
-CAMARA first, then once on the hold-out. Before that is built, the
-three PRD decisions are still owed and are now well priced: the x
-definition, the DELETE/PUT default, and whether the gate's zero counts
-weak-evidence rows. Also on the M1 list: vendor extensions as
-structural markers, schema text for operations with no prose, six
-party words that never raised correctly, and a fourth vendor for a
-clean exam.
+M0 has run nineteen shapes. E19, the union of the word-list and
+verb-led models with agreement as the confidence, is the first to
+reach zero wrong loosenings on both CAMARA halves and on the blind
+hold-out with both negative controls passing, at a cost of 102
+over-tightenings of 207 on the hold-out, 53 of which sit at low
+confidence and can be filtered. D20 to D23 are decided and in the PRD.
+Three things are needed before M0 can be called done: a hold-out
+containing read operations, so the usefulness half of the gate can be
+measured off CAMARA; a fourth vendor nobody has read, since the
+lexicon, the verb table and the party list have all now seen both
+existing sets; and the party-list trim (six words that never once
+raised correctly, and `device` at 3 correct to 17 over-tightenings).
+M1's list is unchanged: vendor extensions as structural markers, and
+schema text for operations with no prose.

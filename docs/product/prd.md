@@ -90,6 +90,14 @@ over-tightenings, identical to "everything is `x`." The gate as written
 two on the hold-out; whether the gate counts low-confidence lowerings,
 and what DELETE/PUT default to, are open decisions listed in §7.
 
+**The gate, restated after D22.** The gate is zero wrong loosenings
+among high-confidence rows; the wrong-loosening rate among low-confidence
+rows is reported beside it, and the over-tightening count is reported
+separately, as before. The two negative controls are unchanged and must
+still come out `x`. Three numbers are reported every time and never
+combined: wrong loosenings at high confidence, wrong loosenings at low
+confidence, and over-tightenings.
+
 ## 3. Out of scope
 
 - A model/LLM tier. There is no tier 2 and no tier 3 in this design —
@@ -312,6 +320,12 @@ Measured weaknesses, one line each:
   structural evidence the extractor does not yet read.
 - 16 of 94 Twilio operations have no prose at all.
 
+The two roads to `x` are not interchangeable. Over the 499 labelled
+operations, 43 of 153 `x` rows reach beyond the caller while remaining
+perfectly repeatable, and 20 DELETE rows are `x` despite being
+idempotent, so an arbiter that tests only for non-idempotence cannot
+reach the gate.
+
 **Confidence.** Every row carries the class plus a confidence, so a
 consumer can be configured to act only on high-confidence rows and refer
 the rest to a human. The exact formula is still M0's to find; the PRD's
@@ -425,20 +439,9 @@ Non-blocking; never silently assumed.
   through a small adapter, with the method empty where the format has
   none. Deferred until the output contract exists; the MCP tool-list
   adapter is the strongest candidate to go first.
-- (open, prices measured 2026-09-07) The `x` definition — readers on all
-  499 operations classed permanent deletion of the caller's own resource
-  as `w` and any effect on another party as `x`, so "reach beyond the
-  caller" matches the ground truth and "cannot be undone" alone would
-  flip four CAMARA rows.
-- (open, prices measured 2026-09-07) DELETE/PUT default — `w` plus
-  lexicon (E12b) versus `x` with a declared menu as the only way down
-  (E13): on CAMARA the `x` default costs 17 more over-tightenings of 292
-  and buys no leak; on the hold-out it costs 49 more of 207 and buys the
-  two GitHub leaks.
-- (open, prices measured 2026-09-07) Whether the gate's zero applies to
-  all rows or to high-confidence rows only, with the low-confidence leak
-  rate reported (on CAMARA E12b makes it moot; on the hold-out both
-  leaks are method-floor rows, not lowerings).
+- The three questions opened on 2026-09-07 — the `x` definition, the
+  DELETE/PUT default, and the gate's treatment of low-confidence rows —
+  were decided the same day; see D20, D21 and D22.
 
 ## 8. Notes carried from the outline, stated on purpose
 
@@ -526,3 +529,7 @@ starts, not yet exercised.
 | D18 | The verb-library plan (D7, M1) is demoted from the primary signal to one input to the text signal. M0 measured that a verb table alone cannot reach the gate: with both signals agreeing on 7 of the 11 remaining wrong loosenings, no table over paths and operationIds can see the consequence those rows carry. Decided 2026-09-06. |
 | — | Outline superseded: the outline's three-tier model (deterministic / model / silence) and "no default class, omit on unknown" framing are replaced by D2 and, as of 2026-09-06, by D17 below — a floor from the method, a ceiling from the operation's own text, tighter-on-unknown, no model tier. |
 | D19 | Second test set: `data/holdout-2026-09-07/` (Twilio, Stripe, GitHub; 207 ops; SHA-pinned; blind-read ground truth) is kept as a hold-out for honest scoring; CAMARA remains the build bed. Any shape tuned on the hold-out loses that status and the fact is recorded in learnings. Decided 2026-09-07. (pending the user's confirmation) |
+| D20 | The test for `x` is either of two roads, not one: the operation reaches beyond the caller (a person, another party's resource, money, a live session, network path or device), OR repeating it is not equivalent to doing it once. Either alone is sufficient; neither alone is necessary. Measured over the 499 labelled operations: of 153 `x` rows, 35 are `x` only because they are not repeatable, 43 only because they reach beyond the caller, and 75 for both — so a test resting on non-idempotence alone would miss 43 of 153, and 20 DELETE rows are `x` while being perfectly idempotent. Irreversibility is explicitly NOT the test: 129 DELETE rows are `w` and nearly all are irreversible, and the readers classed "permanently delete … cannot be undone" of the caller's own resource as `w`. Refines D16. Decided 2026-09-07. |
+| D21 | DELETE, PUT and PATCH keep `w` as their default; the arbiter's rules raise from there. The alternative, defaulting to `x` with a declared menu as the only way down, was measured: on CAMARA it costs 17 more over-tightenings of 292 and removes no wrong loosening the rules had not already removed; on the blind hold-out it costs 49 more of 207 and collapses to the trivial "everything is `x`" (140 over-tightenings, agree 67 of 207). The floor stays `w` and the burden stays on evidence. Decided 2026-09-07. |
+| D22 | The go/no-go's zero applies to high-confidence rows; the wrong-loosening rate among low-confidence rows is reported alongside it, never folded into it, and never traded away. This follows the same rule as the two error directions: separate counts, never one number. It is now measurable because pass 2 (E17) grades evidence without changing any class. Decided 2026-09-07. |
+| D23 | Pass 2 grades evidence only; it never changes a class. Measured in E15 and E16: used as an un-raiser the same three checks created 8 wrong loosenings (3 from an over-generous artefact list, 5 on rows pass 1 had held for a fake reason); used only to mark evidence weak or strong they move nothing and let a consumer filter 53 of 78 hold-out over-tightenings without loosening anything. "This evidence is weak" is not evidence of safety. Decided 2026-09-07. |
