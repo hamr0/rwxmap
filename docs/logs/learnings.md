@@ -1484,6 +1484,80 @@ wait for; that is C6 or later, secondary per D30.
 queryAssistant (same ask-an-assistant shape) is labelled x. One of the
 two labels should move; the user rules.
 
+### M1-C5 — five mechanical fixes, truth fix for queryAssistant (2026-09-07)
+
+Truth fix first (user ruling 2026-09-07, D31): CAMARA queryAssistant
+(ModelAsAService POST /answer) x -> r; asking an assistant reads back an
+answer and reaches no one, the same shape Box post_ai_ask carries as r
+in the clean exam. CAMARA is now r 156, w 51, x 85. Edited in
+data/camara-2026-09-01/ground-truth.csv and docs/logs/m1/census-ops.csv;
+census run.mjs regenerates the CSV identically. Stale copies of the old
+label remain in operations.csv, operations_raw.csv,
+ground-truth-as-read.csv and camara-2026-09-01-op-test.csv (not read by
+any live script) and in M0 logs (history, left as is).
+
+Fixes in poc/m1/arbiter/ (26 tests, each fix with a test that fails
+without it): (1) write-family scope tokens {update, write, delete,
+modify, set} never lower on POST/PATCH, only agree on PUT/PATCH/DELETE;
+(2) conflicting scope hints cancel the lowering, a raise still raises;
+(3) a lead token equal to the row's own HTTP method is stripped only
+when followed by a separator (post_ai_ask -> ai, post-cardDetails ->
+card; deleteDevice keeps delete) — touches 0 CAMARA, 0 hold-out 1, 127
+clean-exam rows; the first literal reading stripped 94 CAMARA rows and
+was corrected before anything was logged; (4) unknown scope tokens give
+no evidence; the only x-hint tokens are {create, send, subscribe,
+register, invoke, call, dial, pay, transfer, notify}; (5) the corpus
+w-lean on PATCH/POST is a switch, run on and off.
+
+Sweep, corpus w-lean on (assigned / review / leaks / over-tight):
+
+| T | CAMARA 292 | hold-out 1 207 | clean exam 220 |
+|---|---|---|---|
+| 0.5 | 200 / 92 / 4 / 1 | 62 / 145 / 9 / 1 | 110 / 110 / 0 / 1 |
+| 0.75 | 192 / 100 / 2 / 1 | 35 / 172 / 0 / 1 | 110 / 110 / 0 / 1 |
+| 1.0 | 187 / 105 / 1 / 1 | 35 / 172 / 0 / 1 | 110 / 110 / 0 / 1 |
+| 1.25 | 179 / 113 / 0 / 1 | 35 / 172 / 0 / 1 | 110 / 110 / 0 / 1 |
+| 2.0 | 155 / 137 / 0 / 1 | 35 / 172 / 0 / 1 | 108 / 112 / 0 / 1 |
+
+Switch off is identical from T = 0.75 up; at 0.5 off is better on
+hold-out 1 (9 leaks -> 0). Chosen on CAMARA + hold-out 1: on, T = 1.25,
+the first zero-leak setting; review + over-tight 114/292 and 173/207.
+Clean exam scored once: 0 leaks, 1 over-tight, 110 review. Against D30:
+rule 1 met; rule 2 not met; rule 3 met for the first time — the three
+false flags are all create-led POSTs on own resources (createTrustDomain,
+CreateMessageFeedback, createAutomationActionTeamAssociation) raised by
+the CAMARA verb table's create -> x share of 0.97, a reasonable
+confusion, not a plain-word miss. Outputs docs/logs/m1/c5-rows.csv,
+c5-false-flags.csv, c5-sweep.md.
+
+Negative controls: terminateCall and updateSessionStatus still land w
+in review with confidence 0; their scopes agree with the method and
+nothing else speaks. queryAssistant (now r): read scope lowers at
+weight 1.0, under T, so it sits at x in review.
+
+What it taught:
+1. C4 -> C5 moved CAMARA over-tight 4 -> 1 and the clean exam 12 -> 1
+with zero leaks kept, at a lower threshold (2.0 -> 1.25). The five
+fixes were all mechanical and all visible in the C4 false-flag file;
+the gate's rule 3 is how they were found.
+2. What is left in review is now honest absence of evidence, not noise.
+Hold-out 1: 145 of its 172 review rows are PUT/DELETE with no evidence
+at all (121 truth w, 24 truth x). Clean exam: 33 POST truth-x rows with
+no evidence. These wait for the own-vs-other and body layers (secondary
+per D30), not for more verb work.
+3. T = 1.25 instead of 1.0 is held by a single row: postServiceCapability,
+read scope plus a subscriptionRequest body. At T = 1.0 CAMARA review
+drops 113 -> 105 with that one leak. A body raiser (subscriptionRequest,
+sink, StatusCallback, amount — all near-pure x in M1-C1) would hold it
+and let T fall.
+4. On POST the prior is a floor, not a lean, so a scope that "agrees"
+with x (create, 37 of 37 x in M1-C2) or a write-family scope (10 x to 1
+w) is evidence for x, not silence. C5 treats both as no evidence and
+leaves 15 CAMARA truth-x POSTs in review. C6 should let x-hint and
+write-family scopes on POST/PATCH count as a raise.
+5. The corpus w-lean is inert above T = 0.75: it never decides a row at
+the chosen setting. Keep the switch, do not build on it.
+
 ### Next
 
 M0 closed 2026-09-07 as exploratory at the user's word (D29). Twenty-
@@ -1505,8 +1579,9 @@ generate and verify are not read verbs; the 11 arguable truth rows
 named in E24(g) want a second read; the destructive verb list is
 unmeasured.
 
-M1-C5: same arbiter with the five mechanical fixes from C4 (write-family
-scopes never lower on POST; conflicting scope hints cancel; method-word
-lead tokens stripped; unknown scope tokens give no evidence; corpus
-w-lean on PATCH measured with and without) — re-sweep, both directions,
-clean exam once. Then the own-vs-other layer as C6.
+M1-C6: body raisers from the census (subscriptionRequest, sink,
+sinkCredential, StatusCallback, amount and the callback/money family),
+x-hint and write-family scopes on POST/PATCH counted as raises, then
+the own-vs-other layer for PUT/DELETE (path party id, body party field,
+schema party field paired with the method); re-sweep, both directions,
+clean exam once.

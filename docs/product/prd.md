@@ -216,6 +216,12 @@ safe floor and the row is tagged for human review. Go means all of:
    method co-occurrence — which methods a verb or noun travels with —
    with CAMARA usable as one signal among them. No hand lists.
 
+Status 2026-09-07 after M1-C5: rule 1 and rule 3 met at T = 1.25 (0
+leaks, 1 / 1 / 1 over-tight); rule 2 not met (review + over-tight
+114/292, 173/207, 112/220). What remains in review is absence of
+evidence on PUT/DELETE and on scope-less POST; the secondary layers
+(body raisers, own-vs-other) are next.
+
 **M2 — Shape rules, only if justified.** For each divergence class from
 M0/M1 that appears more than once, add one deterministic OpenAPI-shape
 rule (request body present, response schema, status codes); re-run.
@@ -547,10 +553,9 @@ Non-blocking; never silently assumed.
   any token is issued. HTTP has no dry run; vendor test modes exist for
   some APIs only. Raised by the user 2026-09-07; a later module, not
   M1.
-- queryAssistant (`POST /answer`, scope `answer:read`, CAMARA) is truth
-  `x` with no raising field. A `read` scope allowed to lower would leak
-  it. Candidate third negative control for M1; the user has not yet
-  ruled.
+- Closed 2026-09-07 (D31): queryAssistant is truth `r`; ask-an-assistant
+  reads back an answer and reaches no one. It is not a negative
+  control.
 - Does the ordered r < w < x scale still hold once `destructive` is a
   separate axis? A grant of `x` currently implies `w`; with two axes a
   consumer may want "`x`, non-destructive only." The draft's scope
@@ -656,3 +661,4 @@ starts, not yet exercised.
 | D28 | Two axes. r/w/x stays the blast-radius axis (D20: reaches beyond the caller, or not repeatable). A second, independent boolean, `destructive`, is derived from the method (DELETE) and the lead verb (`poc/m0/destructive.json`) and never from the class; it feeds MCP `destructiveHint`. Motivation: the user's case "read and reply, never delete" cannot be said with one ordered letter, because reply is `x` and `x` sits above `w`; and §4.3's untested mapping `destructiveHint = (class == x)` was measured wrong on 352 of 719 labelled rows (learnings E24). The proposal to move `x` to mean delete was rejected because pay, send, reply and add-a-stranger-to-admins would all become `w`. The destructive verb list is unmeasured against hand labels; measuring it is an M1 item. Decided 2026-09-07. |
 | D29 | M0 is closed as exploratory, 2026-09-07. What it delivered and what M1 keeps: 719 blind-read labels across three sets (CAMARA 292, hold-out 1 207, clean exam 220), the scoring harness with the two error directions counted apart, the negative controls, the per-set reporting rule (D22, D24), and the findings about what the method and prose can and cannot see (D16-D20, E20-E25). What it did not deliver: a shape to keep. The E19 union arbiter, both hand lists, pass 2 and the E25 variants are archived under `poc/m0/` unchanged and are not promoted; they are the measured ceiling of prose-only rules (about 30 over-tightenings per 200 operations at zero wrong loosenings), not the design. M1 starts fresh in `poc/m1/`, borrows plumbing by import only (spec loader, split, CSV parser, scorer), and is an informed POC, not a build. Decided 2026-09-07 at the user's word. |
 | D30 | M1 go/no-go set by spec interview: zero leaks among assigned rows; review plus over-tight near 5% per set on CAMARA and hold-out 1; remaining false flags must be humanly confusing; a field is primary only at ≥90% presence per method per set; leans from a broader corpus by method co-occurrence. See §4 M1. Decided 2026-09-07. |
+| D31 | Truth fix: CAMARA queryAssistant (ModelAsAService POST /answer) moves x -> r at the user's word, matching Box post_ai_ask (r) in the clean exam. One row; CAMARA becomes r 156, w 51, x 85. The old label carried a stated doubt. Decided 2026-09-07. |

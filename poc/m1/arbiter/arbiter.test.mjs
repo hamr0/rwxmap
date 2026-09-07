@@ -9,7 +9,9 @@ import {
   layer3CorpusEvidence,
   layer4VerbEvidence,
   leadVerbForRow,
+  leadVerbWasMethodStripped,
   splitLeadToken,
+  splitTokens,
 } from './arbiter.mjs';
 
 function row(overrides) {
@@ -77,7 +79,7 @@ test('a raise beats a numerically larger lower — result is the prior class, no
   assert.equal(result.confidence, 0.01); // confidence = R, not the lower weight
 });
 
-// --- 3. Two disagreeing scopes on the same row -> raise wins ---------------
+// --- 3. Two disagreeing scopes on the same row -> raise wins, lowering cancels
 //
 // CORRECTED RULE: layer 2 is now hint-vs-prior (r<w<x), so a raise can only
 // come from a hint strictly above the row's prior — impossible on a
@@ -85,17 +87,22 @@ test('a raise beats a numerically larger lower — result is the prior class, no
 // one scope hints r (below w -> lower) and another hints x (above w ->
 // raise); per the corrected aggregation rule, any raise sends the row to
 // class x outright (not merely "prior"), which is the whole point of the
-// fix: a PUT/DELETE row can now reach x.
+// fix: a PUT/DELETE row can now reach x. Per M1-C5 fix 2, the read's
+// lowering is also cancelled outright (not merely outweighed) because the
+// two scopes carry different known hints — 'invoke' is in the explicit
+// x-hint family (fix 4), so it is a real raise, not an unknown token.
 
-test('two scopes disagreeing (read-family + unknown-family) on a PUT row -> raise wins, lands at x', () => {
+test('two scopes disagreeing (read-family + explicit x-hint) on a PUT row -> raise wins, lowering is cancelled, lands at x', () => {
   const r = row({
     method: 'PUT',
-    security_scopes: 'svc:res:read|svc:res:frobnicate', // 'frobnicate' is unknown -> hint x
+    security_scopes: 'svc:res:read|svc:res:invoke', // 'invoke' is an explicit x-hint token
   });
   const evidence = layer2ScopeEvidence(r, 'w');
   // both items still emitted
   assert.equal(evidence.length, 2);
-  assert.ok(evidence.some((e) => e.dir === 'lower' && e.target === 'r'));
+  // fix 2: the lowering is cancelled (dir 'none'), not merely outweighed
+  assert.ok(!evidence.some((e) => e.dir === 'lower'));
+  assert.ok(evidence.some((e) => e.evidence === 'scope:read->lower:r-cancelled'));
   assert.ok(evidence.some((e) => e.dir === 'raise'));
   const result = scoreRow(r, emptyCtx, 0.5);
   assert.equal(result.class, 'x'); // raise always means "toward x" now, not "prior"
@@ -320,4 +327,157 @@ test('layer3CorpusEvidence yields nothing for PUT/DELETE rows (corpus layer does
   ]);
   assert.deepEqual(layer3CorpusEvidence('retrieve', 'PUT', leanIndex), []);
   assert.deepEqual(layer3CorpusEvidence('retrieve', 'DELETE', leanIndex), []);
+});
+
+// --- M1-C5 fix 1: write-hint scope tokens never lower on POST/PATCH --------
+//
+// Without the fix, a 'write' scope on a POST row (prior x) lowers toward w
+// at weight 0.6 — this is exactly the C4 defect (write scope on CAMARA POST
+// measured 10 x / 1 w in M1-C2) that wrongly loosened truth-x rows.
+
+test('fix 1: a write-hint scope on POST gives no evidence at all (never lowers)', () => {
+  const r = row({ method: 'POST', security_scopes: 'svc:res:write' });
+  const evidence = layer2ScopeEvidence(r, 'x');
+  assert.ok(!evidence.some((e) => e.dir === 'lower'));
+  assert.equal(evidence.length, 1);
+  assert.equal(evidence[0].dir, 'none');
+  assert.equal(evidence[0].evidence, 'scope:write-write-blocked');
+});
+
+test('fix 1: a write-hint scope on PATCH only agrees, it never lowers toward w', () => {
+  const r = row({ method: 'PATCH', security_scopes: 'svc:res:delete' });
+  const evidence = layer2ScopeEvidence(r, 'x');
+  assert.ok(!evidence.some((e) => e.dir === 'lower'));
+  assert.ok(evidence.some((e) => e.dir === 'agree' && e.evidence === 'scope:delete-agrees'));
+});
+
+// --- M1-C5 fix 2: conflicting scope hints cancel any lowering --------------
+//
+// scheduleTransmission's real shape (M1-C4 finding 3): a POST row carrying
+// both a read scope and a write scope. Without fix 2 (but with fix 1
+// blocking the write-hint from lowering), the read scope alone would still
+// lower the row toward r — wrongly, since the row also carries a
+// disagreeing write hint.
+
+test('fix 2: read+write scopes on POST cancel the read lowering (scheduleTransmission shape)', () => {
+  const r = row({ method: 'POST', security_scopes: 'ns:read|ns:write' });
+  const evidence = layer2ScopeEvidence(r, 'x');
+  assert.ok(!evidence.some((e) => e.dir === 'lower'));
+  assert.ok(evidence.some((e) => e.evidence === 'scope:read->lower:r-cancelled'));
+});
+
+// --- M1-C5 fix 3: method-word lead tokens stripped, separator-gated -------
+//
+// Corrected rule (post-escalation fix): Box's post_ai_ask and Adyen's
+// post-cardDetails keep "post" as the lead verb without the fix, which is a
+// raise-shaped token in the CAMARA verb table (M1-C4 finding 4: 8 of 12
+// clean-exam over-tights came from this) — so a method word followed by a
+// separator (_ - . or a digit) IS stripped. But a method word that is a
+// genuine camelCase-led verb (deleteDevice, getSession, updateDevice) is
+// NOT a redundant prefix and must keep its verb: the first implementation
+// stripped these too (strip-on-equality alone), which the coordinator
+// flagged as too literal a reading of the brief.
+
+test('fix 3: a method-word prefix followed by a separator is stripped (redundant prefix)', () => {
+  assert.equal(leadVerbForRow(row({ method: 'POST', operationId: 'post_ai_ask' })), 'ai');
+  assert.equal(leadVerbForRow(row({ method: 'POST', operationId: 'post-cardDetails' })), 'card');
+  assert.equal(leadVerbForRow(row({ method: 'DELETE', operationId: 'delete_files_id' })), 'files');
+  assert.equal(leadVerbWasMethodStripped(row({ method: 'POST', operationId: 'post_ai_ask' })), true);
+});
+
+test('fix 3: a method word continuing in camelCase is a real verb and is NOT stripped', () => {
+  assert.equal(leadVerbForRow(row({ method: 'DELETE', operationId: 'deleteDevice' })), 'delete');
+  assert.equal(leadVerbForRow(row({ method: 'GET', operationId: 'getSession' })), 'get');
+  assert.equal(leadVerbForRow(row({ method: 'PUT', operationId: 'updateDevice' })), 'update'); // not a method-word lead at all
+  assert.equal(leadVerbWasMethodStripped(row({ method: 'DELETE', operationId: 'deleteDevice' })), false);
+});
+
+test('fix 3: a lead token is NOT stripped when it does not equal the row\'s own method', () => {
+  // 'get' only strips on a GET row; on POST it is left alone (GET rows never
+  // reach the corpus/verb-table layers anyway, since they are locked at r).
+  assert.equal(leadVerbForRow(row({ method: 'POST', operationId: 'getWidgetStatus' })), 'get');
+  assert.equal(leadVerbWasMethodStripped(row({ method: 'POST', operationId: 'getWidgetStatus' })), false);
+});
+
+// --- M1-C5 fix 4: unknown scope tokens give no evidence --------------------
+//
+// Without the fix, an unrecognized token defaults to an x hint and raises
+// on any method whose prior is below x — this produced all 4 CAMARA
+// over-tights in C4 (deleteRebootRequest and friends, M1-C4 finding 5).
+
+test('fix 4: an unknown scope token gives no evidence and does not raise', () => {
+  const r = row({ method: 'PUT', security_scopes: 'ns:res:reboot' }); // 'reboot' is not in any hint family
+  const evidence = layer2ScopeEvidence(r, 'w');
+  assert.equal(evidence.length, 1);
+  assert.equal(evidence[0].dir, 'none');
+  assert.equal(evidence[0].evidence, 'scope:reboot-unknown');
+  const result = scoreRow(r, emptyCtx, 0.5);
+  assert.equal(result.status, 'review'); // no raise, no lower -> falls to review at the prior
+  assert.notEqual(result.class, 'x');
+});
+
+test('fix 4: an explicit x-hint scope token (from the minimal named set) still raises', () => {
+  const r = row({ method: 'PUT', security_scopes: 'ns:res:create' });
+  const evidence = layer2ScopeEvidence(r, 'w');
+  assert.ok(evidence.some((e) => e.dir === 'raise'));
+  const result = scoreRow(r, emptyCtx, 0.5);
+  assert.equal(result.class, 'x');
+  assert.equal(result.status, 'assigned');
+});
+
+// --- M1-C5 fix 5: corpus PATCH/POST w-lean is a named switch ---------------
+
+test('fix 5: the corpus PUT+PATCH-share w-lean fires when the switch is on, and not when it is off', () => {
+  const leanIndex = new Map([
+    [
+      'update',
+      {
+        providers: 20,
+        perprov_get: 2,
+        perprov_post: 3,
+        perprov_put: 8,
+        perprov_patch: 6,
+        perprov_delete: 1,
+        perprov_head: 0,
+        perprov_options: 0,
+      },
+    ],
+  ]);
+  const on = layer3CorpusEvidence('update', 'PATCH', leanIndex, true);
+  assert.equal(on.length, 1);
+  assert.equal(on[0].dir, 'lower');
+  assert.equal(on[0].target, 'w');
+
+  const off = layer3CorpusEvidence('update', 'PATCH', leanIndex, false);
+  assert.deepEqual(off, []);
+});
+
+test('fix 5: scoreRow defaults corpusWLean to on when switches is omitted', () => {
+  const leanIndex = new Map([
+    [
+      'update',
+      {
+        providers: 20,
+        perprov_get: 2,
+        perprov_post: 3,
+        perprov_put: 8,
+        perprov_patch: 6,
+        perprov_delete: 1,
+        perprov_head: 0,
+        perprov_options: 0,
+      },
+    ],
+  ]);
+  const r = row({ method: 'PATCH', operationId: 'updateWidget', security_scopes: '' });
+  const withDefault = scoreRow(r, { leanIndex, verbTable: new Map() }, 0.5);
+  const withExplicitOff = scoreRow(r, { leanIndex, verbTable: new Map() }, 0.5, { corpusWLean: false });
+  assert.ok(withDefault.evidence.some((e) => e.startsWith('corpus:update->lower:w')));
+  assert.ok(!withExplicitOff.evidence.some((e) => e.startsWith('corpus:update->lower:w')));
+});
+
+// --- Supporting unit coverage: splitTokens returns all tokens, not just the lead
+
+test('splitTokens returns every token, not just the first', () => {
+  assert.deepEqual(splitTokens('retrieveOptimalAppEndpoints'), ['retrieve', 'optimal', 'app', 'endpoints']);
+  assert.deepEqual(splitTokens('post-cardDetails'), ['post', 'card', 'details']);
 });

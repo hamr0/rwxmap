@@ -1,22 +1,26 @@
-// M1-C4: informed arbiter — loads the census + corpus-lean CSVs, sweeps the
-// aggregation threshold T, prints the sweep table, picks T on CAMARA+holdout1
-// only, scores holdout2 once at that T, and writes the three named outputs.
+// M1-C5: informed arbiter with the five mechanical fixes from C4 — loads
+// the census + corpus-lean CSVs, sweeps the aggregation threshold T for
+// both states of the corpus PATCH/POST w-lean switch (fix 5), prints both
+// sweep tables, picks (T, switch) on CAMARA+holdout1 only, scores holdout2
+// once at that setting, and writes the three named c5 outputs. C4's outputs
+// are untouched.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { parseCsv, toCsv } from '../../m0/csv.mjs';
-import { CLASS_ORDER, scoreRow, buildVerbTable } from './arbiter.mjs';
+import { CLASS_ORDER, scoreRow, buildVerbTable, leadVerbWasMethodStripped } from './arbiter.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '../../..');
 const CENSUS_PATH = path.join(REPO_ROOT, 'docs/logs/m1/census-ops.csv');
 const LEANS_PATH = path.join(REPO_ROOT, 'docs/logs/m1/corpus-leans.csv');
-const OUT_ROWS = path.join(REPO_ROOT, 'docs/logs/m1/c4-rows.csv');
-const OUT_FALSE_FLAGS = path.join(REPO_ROOT, 'docs/logs/m1/c4-false-flags.csv');
-const OUT_SWEEP = path.join(REPO_ROOT, 'docs/logs/m1/c4-sweep.md');
+const OUT_ROWS = path.join(REPO_ROOT, 'docs/logs/m1/c5-rows.csv');
+const OUT_FALSE_FLAGS = path.join(REPO_ROOT, 'docs/logs/m1/c5-false-flags.csv');
+const OUT_SWEEP = path.join(REPO_ROOT, 'docs/logs/m1/c5-sweep.md');
 
 const THRESHOLDS = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
 const SETS = ['camara', 'holdout1', 'holdout2'];
+const CORPUS_WLEAN_STATES = [true, false]; // fix 5: on, then off
 
 const NUMERIC_LEAN_COLS = [
   'providers',
@@ -51,14 +55,10 @@ function loadLeanIndex(leanRows) {
   return idx;
 }
 
-function classifyOne(row, ctx, T) {
-  return scoreRow(row, ctx, T);
-}
-
 // Build the full ctx once (leanIndex + verbTable), score every census row at
-// threshold T, and return the array of {row, result} pairs.
-function scoreAllAt(censusRows, ctx, T) {
-  return censusRows.map((row) => ({ row, result: classifyOne(row, ctx, T) }));
+// threshold T with the given switches, and return the array of {row, result}.
+function scoreAllAt(censusRows, ctx, T, switches) {
+  return censusRows.map((row) => ({ row, result: scoreRow(row, ctx, T, switches) }));
 }
 
 function summarize(scored, setName) {
@@ -82,6 +82,24 @@ function summarize(scored, setName) {
     }
   }
   return { set: setName, n, assigned, review, leaks, overTight, exact, reviewPlusOverTight: review + overTight };
+}
+
+function formatTable(rows, header) {
+  const colWidths = header.map((h) => h.length);
+  const tableRows = rows.map((r) => r.map((c) => String(c)));
+  for (const tr of tableRows) {
+    tr.forEach((cell, i) => {
+      colWidths[i] = Math.max(colWidths[i], cell.length);
+    });
+  }
+  function fmtRow(cells) {
+    return cells.map((c, i) => String(c).padEnd(colWidths[i])).join('  ');
+  }
+  const lines = [];
+  lines.push(fmtRow(header));
+  lines.push(colWidths.map((w) => '-'.repeat(w)).join('  '));
+  for (const tr of tableRows) lines.push(fmtRow(tr));
+  return lines.join('\n');
 }
 
 function main() {
@@ -108,72 +126,70 @@ function main() {
   const verbTable = buildVerbTable(camaraRows);
   const ctx = { leanIndex, verbTable };
 
-  // --- sweep ---
-  const sweepResults = []; // {T, summary}
-  const scoredByT = new Map();
-  for (const T of THRESHOLDS) {
-    const scored = scoreAllAt(censusRows, ctx, T);
-    scoredByT.set(T, scored);
-    for (const setName of SETS) {
-      sweepResults.push({ T, ...summarize(scored, setName) });
+  // --- fix 3: rows touched (method-word lead token stripped), per set ---
+  const strippedCounts = { camara: 0, holdout1: 0, holdout2: 0 };
+  for (const row of censusRows) {
+    if (leadVerbWasMethodStripped(row)) strippedCounts[row.set] += 1;
+  }
+  const strippedLine = `Fix 3 (method-word lead-token stripping) touched: camara ${strippedCounts.camara} of ${censusRows.filter((r) => r.set === 'camara').length}, holdout1 ${strippedCounts.holdout1} of ${censusRows.filter((r) => r.set === 'holdout1').length}, holdout2 ${strippedCounts.holdout2} of ${censusRows.filter((r) => r.set === 'holdout2').length}.`;
+  console.log(strippedLine);
+
+  // --- sweep, both switch states ---
+  const sweepResults = []; // {corpusWLean, T, ...summary}
+  const scoredByKey = new Map(); // `${corpusWLean}|${T}` -> scored
+  for (const corpusWLean of CORPUS_WLEAN_STATES) {
+    for (const T of THRESHOLDS) {
+      const scored = scoreAllAt(censusRows, ctx, T, { corpusWLean });
+      scoredByKey.set(`${corpusWLean}|${T}`, scored);
+      for (const setName of SETS) {
+        sweepResults.push({ corpusWLean, T, ...summarize(scored, setName) });
+      }
     }
   }
 
-  // --- print sweep table ---
+  // --- print sweep tables, one per switch state ---
   const header = ['T', 'set', 'n', 'assigned', 'review', 'leaks', 'over_tight', 'exact', 'review+overtight'];
-  const colWidths = header.map((h) => h.length);
-  const tableRows = sweepResults.map((r) => [
-    String(r.T),
-    r.set,
-    String(r.n),
-    String(r.assigned),
-    String(r.review),
-    String(r.leaks),
-    String(r.overTight),
-    String(r.exact),
-    String(r.reviewPlusOverTight),
-  ]);
-  for (const tr of tableRows) {
-    tr.forEach((cell, i) => {
-      colWidths[i] = Math.max(colWidths[i], cell.length);
-    });
+  const sweepTexts = {};
+  for (const corpusWLean of CORPUS_WLEAN_STATES) {
+    const rows = sweepResults
+      .filter((r) => r.corpusWLean === corpusWLean)
+      .map((r) => [r.T, r.set, r.n, r.assigned, r.review, r.leaks, r.overTight, r.exact, r.reviewPlusOverTight]);
+    const label = corpusWLean ? 'corpus w-lean ON' : 'corpus w-lean OFF';
+    const text = `${label}\n${formatTable(rows, header)}`;
+    sweepTexts[corpusWLean] = text;
+    console.log('\n' + text);
   }
-  function fmtRow(cells) {
-    return cells.map((c, i) => c.padEnd(colWidths[i])).join('  ');
-  }
-  const lines = [];
-  lines.push(fmtRow(header));
-  lines.push(colWidths.map((w) => '-'.repeat(w)).join('  '));
-  for (const tr of tableRows) lines.push(fmtRow(tr));
-  const sweepTableText = lines.join('\n');
-  console.log(sweepTableText);
 
-  // --- threshold selection: minimize (review+overtight) on camara+holdout1
-  // combined, subject to zero leaks on both camara and holdout1; smallest T
-  // wins ties. holdout2 is NOT used for selection. ---
-  let chosenT = null;
+  // --- selection: zero leaks on camara+holdout1 first, then minimize
+  // (review+overtight) combined; ties broken by smallest T, then by
+  // corpusWLean=true (ON) preferred over OFF. holdout2 is NOT used. ---
+  let chosen = null; // {corpusWLean, T}
   let bestScore = Infinity;
-  for (const T of THRESHOLDS) {
-    const byT = sweepResults.filter((r) => r.T === T);
-    const camara = byT.find((r) => r.set === 'camara');
-    const holdout1 = byT.find((r) => r.set === 'holdout1');
-    if (camara.leaks !== 0 || holdout1.leaks !== 0) continue;
-    const combined = camara.reviewPlusOverTight + holdout1.reviewPlusOverTight;
-    if (combined < bestScore) {
-      bestScore = combined;
-      chosenT = T;
+  for (const corpusWLean of CORPUS_WLEAN_STATES) {
+    for (const T of THRESHOLDS) {
+      const byKey = sweepResults.filter((r) => r.corpusWLean === corpusWLean && r.T === T);
+      const camara = byKey.find((r) => r.set === 'camara');
+      const holdout1 = byKey.find((r) => r.set === 'holdout1');
+      if (camara.leaks !== 0 || holdout1.leaks !== 0) continue;
+      const combined = camara.reviewPlusOverTight + holdout1.reviewPlusOverTight;
+      if (combined < bestScore) {
+        bestScore = combined;
+        chosen = { corpusWLean, T };
+      }
+      // ties: keep the first found, which iterates corpusWLean=true before
+      // false, and T ascending within each — so ON and smaller T win ties.
     }
   }
-  if (chosenT === null) {
+  if (chosen === null) {
     throw new Error(
-      'ESCALATE: no threshold in the sweep achieves zero leaks on both camara and holdout1 — cannot select T.'
+      'ESCALATE: no (corpusWLean, T) combination in the sweep achieves zero leaks on both camara and holdout1 — cannot select a setting.'
     );
   }
-  const selectionLine = `Chosen T = ${chosenT} — minimizes (review + over-tight) = ${bestScore} on camara+holdout1 combined, subject to zero leaks on both sets (smallest T on ties). holdout2 was NOT used for selection; it is reported at every T for transparency only.`;
+  const selectionLine = `Chosen corpusWLean = ${chosen.corpusWLean}, T = ${chosen.T} — minimizes (review + over-tight) = ${bestScore} on camara+holdout1 combined, subject to zero leaks on both sets (ties broken by corpusWLean=ON first, then smallest T). holdout2 was NOT used for selection; it is reported at every (switch, T) for transparency only.`;
   console.log('\n' + selectionLine);
 
-  // --- score once at chosen T for the row-level outputs ---
-  const finalScored = scoredByT.get(chosenT);
+  // --- score once at the chosen setting for the row-level outputs ---
+  const finalScored = scoredByKey.get(`${chosen.corpusWLean}|${chosen.T}`);
 
   const rowCols = ['set', 'repo', 'path', 'method', 'operationId', 'gt_class', 'pred', 'confidence', 'status', 'evidence'];
   const outRows = finalScored.map(({ row, result }) => ({
@@ -197,10 +213,7 @@ function main() {
   function findOutcome(operationId) {
     const hit = finalScored.find(({ row }) => row.operationId === operationId);
     if (!hit) return null;
-    return {
-      row: hit.row,
-      result: hit.result,
-    };
+    return { row: hit.row, result: hit.result };
   }
   const negControl1 = findOutcome('terminateCall');
   const negControl2 = findOutcome('updateSessionStatus');
@@ -212,30 +225,31 @@ function main() {
     return `${label}: method=${row.method} gt=${row.gt_class} prior=${result.prior} pred=${result.class} confidence=${result.confidence} status=${result.status} evidence=[${result.evidence.join(' ; ')}]`;
   }
   const negControlLines = [
-    describeOutcome('ClickToDial terminateCall (DELETE, gt=x)', negControl1),
-    describeOutcome('WebRTC updateSessionStatus (PUT, gt=x)', negControl2),
-    describeOutcome('ModelAsAService queryAssistant (POST, gt=x)', queryAssistant),
+    describeOutcome('ClickToDial terminateCall (DELETE, gt=x, negative control)', negControl1),
+    describeOutcome('WebRTC updateSessionStatus (PUT, gt=x, negative control)', negControl2),
+    describeOutcome('ModelAsAService queryAssistant (POST, gt=r as of the 2026-09-07 truth fix)', queryAssistant),
   ];
   console.log('\nNegative controls + queryAssistant:');
   for (const l of negControlLines) console.log('  ' + l);
 
-  // --- write c4-sweep.md ---
+  // --- write c5-sweep.md ---
   const md = [];
-  md.push('# M1-C4 arbiter — threshold sweep');
+  md.push('# M1-C5 arbiter — threshold sweep, both corpus-w-lean switch states');
   md.push('');
-  md.push('```');
-  md.push(sweepTableText);
-  md.push('```');
+  md.push(strippedLine);
   md.push('');
+  for (const corpusWLean of CORPUS_WLEAN_STATES) {
+    md.push('```');
+    md.push(sweepTexts[corpusWLean]);
+    md.push('```');
+    md.push('');
+  }
   md.push(`**${selectionLine}**`);
   md.push('');
-  md.push('## Negative controls and queryAssistant — actual computed outcomes');
+  md.push('## Negative controls and queryAssistant — actual computed outcomes, at the chosen setting');
   md.push('');
   for (const l of negControlLines) md.push('- ' + l);
   md.push('');
-  md.push(
-    'Under the corrected rules (raise always targets x, on any method; layer 2 is a class-hint compared against the row\'s prior, not a method-conditioned split), a PUT/DELETE row CAN reach x via a raise — this fixes the earlier arbiter\'s structural inability to ever assign x to PUT/DELETE. Neither negative control actually reaches x, however: both scope tokens ("delete", "write") land in the write-hint family, which equals the PUT/DELETE prior (w), so layer 2 only records agreement, not a raise or a lower. Layer 4 (the CAMARA verb table, leave-one-repo-out) also contributes no evidence for either: "terminate" has no other CAMARA rows sharing that lead verb (n=0), and "update" has n=13 with shareX ≈ 0.154 and shareW ≈ 0.846, neither meeting the 0.9 threshold. With zero evidence from any layer, both rows fall through to status=review at the prior (w) — NOT an assigned leak (a review-status row is not scored as a leak or an exact match), but also not a correct x. queryAssistant (POST, gt=x): its "read" scope lowers toward r with weight 1.0; at the chosen T that lowering is below threshold, so it also falls to review at the prior (x) rather than being wrongly lowered to r.'
-  );
   writeFileSync(OUT_SWEEP, md.join('\n') + '\n');
 
   console.log(`\nWrote ${OUT_ROWS}`);
