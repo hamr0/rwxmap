@@ -918,6 +918,58 @@ is a person. The signal is structural (Box's collaboration schema has
 an accessible_by user field). That is M1's first item, not an M0
 tuning. M0 closes here.
 
+### How the E19 union works, in plain words (2026-09-07)
+
+Written for the user at M0 close; the code is poc/m0/rules-union.mjs,
+rules-lex.mjs, rules-verb.mjs, rules-pass2.mjs.
+
+Here is the flow, one operation at a time. Think of two judges and a
+referee.
+
+**Step 1. The method sets the floor.** GET or HEAD is `r`, locked.
+Nothing can raise or lower it. PUT or DELETE starts at `w`. It can go
+up to `x`. It can never go below `w`. POST or PATCH starts at `x`.
+This one can go down, to `w` or `r`, but only if the text earns it.
+
+**Step 2. Judge A reads word lists.** It scans the summary and
+description for stems. Danger words like "revoke", "terminate", "pay"
+push toward `x`. Live nouns like "session", "call", "device" push
+toward `x`. A hand-checked list of read verbs like "get", "retrieve",
+"list" lets a POST drop to `r`.
+
+**Step 3. Judge B reads the sentence.** It takes the first verb.
+"Delete" is a write verb. "Get" is a read verb. "Send" or "pay" is a
+consequential verb, so `x`. Then it looks at what the verb acts on. It
+walks the words after the verb until it hits "by", "for", "of" and so
+on. The last word it kept is the object. If that object is a party
+word like "user" or "member", the class goes up to `x`. This is where
+the 4-word cap was, and is now gone.
+
+**Step 4. The referee picks the tighter answer.** Judge A says `w`,
+Judge B says `x`? Answer is `x`. Always the stricter one. Then the
+floor from step 1 is applied.
+
+**Step 5. Confidence.** Both judges agree: high. They disagree: low.
+Both just fell back to the method floor with no evidence:
+method-only.
+
+**Step 6. Pass 2, a second look.** It only looks at Judge A's word
+hits. If a danger word looks like a false hit, say "remove" inside
+"remove from list", it marks the row low confidence. It never changes
+the class. The runner checks that every time and prints the count,
+which must be 0.
+
+**What comes out.** One class, one confidence, both judges' rule ids
+and evidence, so a human can see why. Then the scorer compares to
+ground truth and counts two things apart: wrong loosenings and false
+alarms.
+
+**Why the leak still leaks.** "Remove collaboration." Judge A finds no
+stem. Judge B sees verb "remove", object "collaboration". Not a party
+word. Both land on the floor, `w`. Truth is `x` because the
+collaboration is another person's access. Only the schema knows that.
+That is M1.
+
 ### Next
 
 M0 has run twenty shapes and two blind hold-outs. On the clean exam
