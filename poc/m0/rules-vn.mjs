@@ -13,7 +13,7 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'TRACE']);
 // does not end in "ss" or "us" (the "us" exception keeps "status" as
 // "status" rather than mangling it to "statu" — see the E8 report for
 // why this exception is read into the spec's stated example).
-function singularise(word) {
+export function singularise(word) {
   if (!word) return word;
   if (word.endsWith('ies') && word.length > 4) return word.slice(0, -3) + 'y';
   if (word.length > 4 && word.endsWith('s') && !word.endsWith('ss') && !word.endsWith('us')) {

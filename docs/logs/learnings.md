@@ -621,22 +621,112 @@ leaks; used to grade the evidence it removes two thirds of the noise
 for free. rwxmap's safety spine says never loosen without evidence, and
 "this evidence is weak" is not evidence of safety.
 
+### E18 — verb-led: the lead verb sets the class, the verb's object may raise it (2026-09-07)
+
+(a) The change of model. Every shape from E9 to E17 asked "does a danger
+word appear anywhere in the text". E18 asks two different questions in
+order: what does the lead verb mean, and what is that verb acting on.
+Ordered procedure in poc/m0/rules-verb.mjs: V0 safe method → r; V1
+callbacks or sink → x; V2 lead verb in the `consequential` list → x; V3
+the head noun of the verb's object is a party word, or a from/for/of/to
+phrase attached to it names a party → x; V4 lead verb in the `read`
+list → r; V5 lead verb in the `write` list → the method floor; V6
+otherwise the method floor. Nothing ever goes below the method floor.
+Object head extraction is head-final: from "Delete a Call record from
+your account" the head is `record`, from "Terminate an active call" it
+is `call`, from "Delete a specific Trust Domain" it is `domain`. Tables
+are hand-written in poc/m0/verbs.json and poc/m0/parties.json, both
+carrying a provenance field saying they were written from ordinary
+English and then checked against the measured distribution over all 499
+labelled operations, so E18's scores are fitted for verb choice.
+`remove` and `removes` are deliberately in no verb list, because they
+measured 8 w and 10 x over 18 operations: "remove X from Y" usually
+takes something away from Y. Suite 80 pass. Runner poc/m0/run-verb.mjs,
+reports docs/logs/m0/divergence-E18-{build,test}.md and
+holdout-E18.csv.
+
+(b) The measurement that motivated it, over all 499 labelled
+operations, lead verb against truth:
+| lead verb | n | r | w | x |
+|---|---|---|---|---|
+| get | 56 | 55 | 0 | 1 |
+| retrieve | 43 | 42 | 0 | 1 |
+| delete | 110 | 0 | 99 | 11 |
+| create | 49 | 1 | 2 | 46 |
+| update | 27 | 0 | 22 | 5 |
+| remove | 18 | 0 | 8 | 10 |
+
+And the objects that separate a w delete from an x delete: delete
+stayed w on event, subscription, secret, item, session, recording,
+list, source, discount, configuration, domain, instance; delete became
+x on account, customer, access, token, installation, codespace,
+repository, network. The left column is the caller's own paperwork, the
+right column is something a person or another system relies on. Note
+`session` appears 3 times as a w delete and never as an x one, although
+it was on every live-noun list from E8 onward.
+
+(c) Results, columns half/repo | agree | over-tight | wrong loosenings:
+CAMARA BUILD 103 | 36 | 1; CAMARA TEST 123 | 26 | 3; hold-out twilio 69
+| 25 | 0, stripe 28 | 4 | 0, github 45 | 34 | 2, total 142 | 63 | 2.
+For comparison, E12b on the same sets: BUILD 110 | 30 | 0, TEST 122 |
+30 | 0, hold-out total 114 | 91 | 2.
+Negative controls: terminateCall PASS; updateSessionStatus FAIL.
+A variant with `--parties=anywhere` (a party word anywhere in the text
+raises, the pre-E18 behaviour) gives BUILD 91 | 49 | 0 and TEST 106 |
+46 | 0 with both controls passing — it trades every CAMARA leak for 33
+more over-tightenings, and is recorded only as the comparison it was
+built to be.
+
+(d) The four CAMARA wrong loosenings, each a different failure of the
+verb-led model: (1) WebRTC PUT updateSessionStatus, "Update the status
+of the media session" — the lead verb is `update` (write) and the
+object head is `status`; the operation answers or ends a live call,
+which the text only reveals three paragraphs later. (2)
+InHomeDeviceManagement DELETE deleteDevice, summary "Delete device
+record" — the head is `record`, a wrapper word, so the party word
+`device` sitting one token earlier never becomes the head. (3)
+ModelAsAService POST queryAssistant, "Get an answer from a QA
+assistant" — lead verb `get` lowers it to r; the danger ("may invoke
+tools automatically") is nowhere near the verb. (4) SponsoredData
+DELETE revokeSponsorship, summary "Revocation of Sponsorship" — the
+lead word is a noun, not a verb, so no verb rule fires and V6 keeps the
+floor. E12b caught (2) by its live-noun rule and (4) by the danger stem
+`revok`; the verb-led model has no equivalent.
+
+(e) Party-word accuracy at V3, correct raises against
+over-tightenings, over all 499: device 3/17, repository 2/12, user
+1/7, organization 0/6, session 0/4, account 1/4, slice 0/2, assistant
+0/2, person 0/2, permission 0/2, customer 1/2; and the words that
+earned their place: member 2/0, restriction 2/0, role 2/0, participant
+1/0, team 1/0, token 1/0, installation 1/0, codespace 1/0, stream 1/0,
+membership 2/1. The list is carrying six words that never once raised
+correctly.
+
+(f) Reading, one paragraph: the verb-led model roughly halves the
+noise on the blind hold-out (91 over-tightenings down to 63) at the
+same 2 wrong loosenings, and it removes the whole class of false
+alarms caused by scenery words, because a party word only counts when
+it is the object of the verb. It pays with four CAMARA rows that the
+word-list shapes caught: a noun-led summary, a wrapper-word object, a
+verb whose danger is stated far from it, and a status update on a live
+session. The two models fail in different places, which is the
+finding.
+
 ### Next
 
-M0 has run seventeen shapes. The recommended shape is pass 1 (E12b:
-method floor, hand-written tighten-only lexicon v2, hand read-verb
-list, structural markers) plus pass 2 as a confidence grader only
-(E17), never as an un-raiser (E15, E16). On the blind hold-out that
-shape leaves 2 wrong loosenings of 207 and 91 over-tightenings, of
-which 53 carry weak evidence and can be filtered by a consumer without
-loosening anything. Two hold-out leaks remain invisible to the tool
-(assign an enterprise team to an organisation; merge a pull request)
-and five more are only masked by a false positive, so the honest count
-of hold-out operations whose danger the tool can see is 200 of 207. The
-PRD decisions owed are unchanged: the x definition, the DELETE/PUT
-default, and whether the gate's zero counts low-confidence rows — E17
-makes the last one concrete, since it is now possible to report a
-strong-evidence gate and a weak-evidence rate separately. M1's list:
-vendor extensions as structural markers, schema text for operations
-with no prose, and a fourth vendor for a clean exam, the hold-out being
-spent for pass 2.
+M0 has run eighteen shapes. Two models now exist and they fail
+differently. The word-list model (E12b, pass 1) has zero wrong
+loosenings on CAMARA and 91 over-tightenings on the hold-out. The
+verb-led model (E18) has 63 over-tightenings on the hold-out and four
+CAMARA wrong loosenings, all four in rows where the lead verb is not
+where the danger is. Neither is finished. The obvious next shape is
+the union: E18's verb table decides the base class, the danger-verb
+lexicon of E12b still raises on a hit anywhere, and the pass-2 checks
+of E17 grade the evidence without changing any class — measured on
+CAMARA first, then once on the hold-out. Before that is built, the
+three PRD decisions are still owed and are now well priced: the x
+definition, the DELETE/PUT default, and whether the gate's zero counts
+weak-evidence rows. Also on the M1 list: vendor extensions as
+structural markers, schema text for operations with no prose, six
+party words that never raised correctly, and a fourth vendor for a
+clean exam.
