@@ -71,15 +71,24 @@ The two error directions are never collapsed into one accuracy number.
 Report both counts, every time, as justabit's `docs/logs/findings.md`
 already does for leak-direction and usability findings.
 
-**M0 result, 2026-09-06: the gate is not met.** The best of five arbiter
-shapes tried in M0 (E5) leaves 11 wrong loosenings over the 292. 7 of the
-11 are PUT or DELETE rows where the method default and the verb signal
-agree, so no verb library can reach them — this is the finding that
-produced §4.4 and §4.5. `terminateCall` comes out `x` from E2 onward;
-`updateSessionStatus` comes out `w` in all five shapes and fails. The
-gate itself is unchanged, and it now targets the floor-and-ceiling
-arbiter of §4.5, which reads the document text and which no shape tried
-in M0 yet implements.
+**M0 result, updated 2026-09-07.** Fourteen shapes were run
+(`docs/logs/learnings.md`). On the CAMARA test bed, split into a BUILD half
+(30 repos, 140 ops) and a TEST half (30 repos, 152 ops) from E7 on, the
+shape E12b (method floor; hand-written tighten-only danger lexicon over
+summary, description, operationId and path; hand read-verb list lowering
+POST/PATCH to `r` at low confidence; structural markers) has zero wrong
+loosenings on both halves, and both negative controls come out `x`. That
+score is fitted: the lexicon was written after the E1–E8 failures were
+seen. The honest score is the blind hold-out of 2026-09-07
+(`data/holdout-2026-09-07/`, 207 Twilio, Stripe and GitHub operations, no
+GET, read blind by five agents): E12b leaves 2 wrong loosenings of 207,
+both GitHub PUTs (assign an enterprise team to an organisation; merge a
+pull request), 0 of 126 on Twilio and Stripe, with 91 over-tightenings.
+Forcing DELETE/PUT/PATCH to `x` gives 0 wrong loosenings and 140
+over-tightenings, identical to "everything is `x`." The gate as written
+(zero wrong loosenings) is met on CAMARA by a fitted shape and missed by
+two on the hold-out; whether the gate counts low-confidence lowerings,
+and what DELETE/PUT default to, are open decisions listed in §7.
 
 ## 3. Out of scope
 
@@ -111,7 +120,7 @@ separates safe loosenings from unsafe ones on real data. M0 answers the
 go/no-go. M0 is exploratory — trying different arbiter shapes is in
 scope here and nowhere else in the module ladder. Expect many experiments
 in M0. Each one is a numbered POC with its own readout (what was tried,
-the two error counts, keep or discard) recorded in the M0 log before the
+the two error counts, keep or discard) recorded in `docs/logs/learnings.md` before the
 next one starts, so the shape that wins is chosen on evidence, not on the
 last thing tried.
 
@@ -273,6 +282,36 @@ The arbiter, restated as an ordered procedure:
 Never lower the class on a safe method, and never lower it below `w` for
 PUT or DELETE.
 
+**The shape as of 2026-09-07 (E12b)**
+
+The procedure above, restated as implemented, in order:
+
+- L0 safe method → `r`, high.
+- L1 callbacks or sink → `x`, high.
+- L2 any danger-verb stem in `summary`, `description`, `operationId` or
+  `path` → `x`, high (the lexicon is hand-written, tighten-only, 43
+  stems; `poc/m0/lexicon-v2.json`).
+- L3 any live-noun stem in the same text, unless the leading verb is a
+  read verb → `x` (high if the leading verb is a write verb, else low).
+- L4 POST or PATCH whose leading verb is on the hand read-verb list and
+  with no 409 response → `r`, low.
+- L5 otherwise the method floor, confidence method-only.
+
+Measured weaknesses, one line each:
+
+- Live nouns are vendor-specific and fire on boilerplate (GitHub's
+  "personal access tokens" sentence tightened 41 of 81 GitHub
+  operations).
+- Danger verbs transferred across three vendors but miss danger stated
+  without a listed word ("assign a team to an organisation").
+- Scanning beyond the operation's own text collapses to "everything x"
+  because file-level boilerplate carries the stems.
+- There is no path from POST to `w`, so vendors that update through POST
+  (Twilio) are over-tightened.
+- Vendor extensions such as `x-github.triggersNotification` are
+  structural evidence the extractor does not yet read.
+- 16 of 94 Twilio operations have no prose at all.
+
 **Confidence.** Every row carries the class plus a confidence, so a
 consumer can be configured to act only on high-confidence rows and refer
 the rest to a human. The exact formula is still M0's to find; the PRD's
@@ -294,11 +333,25 @@ Operation-level field coverage, measured 2026-09-06:
 | Stripe | 594 | 99% | 0% |
 | Slack | 174 | 100% | 0% |
 | CAMARA test bed | 292 | ~100% | 14% |
+| Twilio, Stripe, GitHub hold-out | 207 | 92% (16 Twilio ops have no prose) | 0% |
 
 Descriptions are close to universal and are the load-bearing text
 signal, whereas `callbacks` is a strong positive marker where it appears
 and is absent from most catalogues, so it can support a class but never
 a coverage claim.
+
+**Where the work is, by method (M0, 2026-09-07)**
+
+| bucket | ops | method default | truth says | error direction if left at default |
+|---|---|---|---|---|
+| GET | 96 | r | 96 r | none; closed |
+| POST | 138 | x | 59 r, 4 w, 75 x | 63 over-tightenings; never a leak |
+| DELETE, PUT, PATCH | 58 | w | 50 w, 8 x | 8 wrong loosenings |
+
+Two problems, not one. The security problem is small and lives entirely
+in DELETE, PUT and PATCH: `x` dressed as `w`. The usability problem is
+large and lives in POST: `r` dressed as `x`. The first fails the gate;
+the second only costs false alarms.
 
 ## 5. The safety spine
 
@@ -372,6 +425,20 @@ Non-blocking; never silently assumed.
   through a small adapter, with the method empty where the format has
   none. Deferred until the output contract exists; the MCP tool-list
   adapter is the strongest candidate to go first.
+- (open, prices measured 2026-09-07) The `x` definition — readers on all
+  499 operations classed permanent deletion of the caller's own resource
+  as `w` and any effect on another party as `x`, so "reach beyond the
+  caller" matches the ground truth and "cannot be undone" alone would
+  flip four CAMARA rows.
+- (open, prices measured 2026-09-07) DELETE/PUT default — `w` plus
+  lexicon (E12b) versus `x` with a declared menu as the only way down
+  (E13): on CAMARA the `x` default costs 17 more over-tightenings of 292
+  and buys no leak; on the hold-out it costs 49 more of 207 and buys the
+  two GitHub leaks.
+- (open, prices measured 2026-09-07) Whether the gate's zero applies to
+  all rows or to high-confidence rows only, with the low-confidence leak
+  rate reported (on CAMARA E12b makes it moot; on the hold-out both
+  leaks are method-floor rows, not lowerings).
 
 ## 8. Notes carried from the outline, stated on purpose
 
@@ -458,3 +525,4 @@ starts, not yet exercised.
 | D17 | Supersedes D3. The HTTP method sets a floor and, for safe methods only, also the ceiling; the operation's own text sets the ceiling elsewhere. Three signals, not two: method, text (`summary`/`description`), and structural markers (`callbacks`, `sink`, 409). Lowering the class is confined to POST and PATCH, where RFC 9110 guarantees nothing; it is never permitted on a safe method and never below `w` on PUT or DELETE. See §4.5. Decided 2026-09-06. |
 | D18 | The verb-library plan (D7, M1) is demoted from the primary signal to one input to the text signal. M0 measured that a verb table alone cannot reach the gate: with both signals agreeing on 7 of the 11 remaining wrong loosenings, no table over paths and operationIds can see the consequence those rows carry. Decided 2026-09-06. |
 | — | Outline superseded: the outline's three-tier model (deterministic / model / silence) and "no default class, omit on unknown" framing are replaced by D2 and, as of 2026-09-06, by D17 below — a floor from the method, a ceiling from the operation's own text, tighter-on-unknown, no model tier. |
+| D19 | Second test set: `data/holdout-2026-09-07/` (Twilio, Stripe, GitHub; 207 ops; SHA-pinned; blind-read ground truth) is kept as a hold-out for honest scoring; CAMARA remains the build bed. Any shape tuned on the hold-out loses that status and the fact is recorded in learnings. Decided 2026-09-07. (pending the user's confirmation) |

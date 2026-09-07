@@ -54,7 +54,7 @@ export const SEED = {
   initiate: 'x', submit: 'x', order: 'x', release: 'x',
 };
 
-// SEED_V2 — a definitional correction from M0 (see docs/logs/m0-2026-09-06.md,
+// SEED_V2 — a definitional correction from M0 (see docs/learnings.md,
 // E4), not a fit to the test bed. The -02 draft's definition of x includes
 // "creating a new resource on every call"; SEED had filed several
 // resource-minting verbs under w (idempotent write) instead. This table
