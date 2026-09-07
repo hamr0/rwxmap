@@ -98,6 +98,24 @@ still come out `x`. Three numbers are reported every time and never
 combined: wrong loosenings at high confidence, wrong loosenings at low
 confidence, and over-tightenings.
 
+**M0 result on the clean exam, 2026-09-07 (E20).** A second hold-out,
+`data/holdout2-2026-09-07/` (Box 99, PagerDuty 93, Adyen 28; 220
+operations; 94 GET; ground truth read blind by five agents with zero
+orchestrator rulings; r 104, w 63, x 53), was built after every list in
+the repo was written, so no lexicon, verb table or party list had seen
+it. The recommended shape E19 scores 181 agree, 37 over-tightenings, 2
+wrong loosenings and 4 correct lowerings of 10 possible. Both wrong
+loosenings are Box DELETEs of a relationship object owned by another
+person ("Remove collaboration"; "Delete shield information barrier
+segment member by ID"), stated in prose that names neither the person
+nor an effect; one sits at high confidence, so the gate as restated in
+D22 is met on CAMARA and on the first hold-out and NOT met on the clean
+exam. Reported per set, never combined: wrong loosenings at high
+confidence CAMARA 0, hold-out 1 0, hold-out 2 1; at low or method-only
+confidence 0, 0, 1; over-tightenings 77 of 292, 102 of 207, 37 of 220.
+Reference shapes on the clean exam: word lists alone 184 / 34 / 2,
+verb-led alone 197 / 20 / 3.
+
 ## 3. Out of scope
 
 - A model/LLM tier. There is no tier 2 and no tier 3 in this design —
@@ -319,6 +337,15 @@ Measured weaknesses, one line each:
 - Vendor extensions such as `x-github.triggersNotification` are
   structural evidence the extractor does not yet read.
 - 16 of 94 Twilio operations have no prose at all.
+- The verb-object rule caps the object phrase at four tokens after the
+  verb, so a party word beyond that is never seen: "Delete shield
+  information barrier segment member by ID" resolves to `segment`, not
+  `member`. Recorded 2026-09-07, not yet fixed.
+- Deleting a relationship object whose other end is a person (a
+  collaboration, a membership) is invisible to both the lexicon and the
+  verb-object rule when the prose names neither the person nor an
+  effect; the candidate signal is structural, in the resource's schema,
+  and is on M1's list.
 
 The two roads to `x` are not interchangeable. Over the 499 labelled
 operations, 43 of 153 `x` rows reach beyond the caller while remaining
@@ -533,3 +560,4 @@ starts, not yet exercised.
 | D21 | DELETE, PUT and PATCH keep `w` as their default; the arbiter's rules raise from there. The alternative, defaulting to `x` with a declared menu as the only way down, was measured: on CAMARA it costs 17 more over-tightenings of 292 and removes no wrong loosening the rules had not already removed; on the blind hold-out it costs 49 more of 207 and collapses to the trivial "everything is `x`" (140 over-tightenings, agree 67 of 207). The floor stays `w` and the burden stays on evidence. Decided 2026-09-07. |
 | D22 | The go/no-go's zero applies to high-confidence rows; the wrong-loosening rate among low-confidence rows is reported alongside it, never folded into it, and never traded away. This follows the same rule as the two error directions: separate counts, never one number. It is now measurable because pass 2 (E17) grades evidence without changing any class. Decided 2026-09-07. |
 | D23 | Pass 2 grades evidence only; it never changes a class. Measured in E15 and E16: used as an un-raiser the same three checks created 8 wrong loosenings (3 from an over-generous artefact list, 5 on rows pass 1 had held for a fake reason); used only to mark evidence weak or strong they move nothing and let a consumer filter 53 of 78 hold-out over-tightenings without loosening anything. "This evidence is weak" is not evidence of safety. Decided 2026-09-07. |
+| D24 | The clean exam `data/holdout2-2026-09-07/` (Box, PagerDuty, Adyen; 220 ops; 94 GET; SHA-pinned; blind-read; zero rulings) is the reference score for M0 and stays untouched by tuning: any change to a lexicon, verb table, party list or rule after 2026-09-07 is scored on it once and the fact recorded in learnings, and it is never used to choose between shapes. M0 closes with the gate met on CAMARA and hold-out 1 and not met on the clean exam by one high-confidence wrong loosening, stated per set. Decided 2026-09-07, pending the user's confirmation. |

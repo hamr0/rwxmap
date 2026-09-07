@@ -158,7 +158,7 @@ function countPass2ClassChanges(ops, ctx) {
 function main() {
   const outPrefix = process.argv[2];
   if (!outPrefix) {
-    console.error('usage: node poc/m0/run-union.mjs <out-prefix> [--pass2=on|off] [--label=<name>] [--holdout=<ground-truth.csv>]');
+    console.error('usage: node poc/m0/run-union.mjs <out-prefix> [--pass2=on|off] [--label=<name>] [--holdout=<ground-truth.csv>] [--ops=]');
     process.exit(1);
   }
   const flags = parseFlags(process.argv.slice(3));
@@ -175,7 +175,7 @@ function main() {
   console.log(`flags: pass2=${pass2On ? 'on' : 'off'}`);
   console.log(`E8 model regenerated: verbMap entries=${Object.keys(model.verbMap).length} (params ${JSON.stringify(model.params)})`);
 
-  const ops = flags.holdout ? loadHoldoutOps(readFileSync(HOLDOUT_OPS_CSV, 'utf8')) : loadOps();
+  const ops = flags.holdout ? loadHoldoutOps(readFileSync(flags.ops ?? HOLDOUT_OPS_CSV, 'utf8')) : loadOps();
 
   const changes = countPass2ClassChanges(ops, ctx);
   console.log(`pass2 class changes: ${changes}`);

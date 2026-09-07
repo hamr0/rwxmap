@@ -785,19 +785,98 @@ are therefore 0 by construction, not by failure, and the usefulness
 half of the gate — a useful share of POSTs decided r — can only be
 measured on CAMARA until a hold-out with read operations exists.
 
+### E20 — the clean exam: Box, PagerDuty, Adyen, with read operations (2026-09-07)
+
+(a) What it is. data/holdout2-2026-09-07/: 220 operations extracted by
+poc/m0/holdout2-extract.mjs from three public OpenAPI 3 JSON files
+pinned by SHA-256 in the README (Box 99, PagerDuty 93, Adyen 28),
+selection rule fixed before any text was read: sorted by path then
+method, every 3rd Box candidate, every 5th PagerDuty candidate, every
+Adyen candidate. GET is included this time: 94 of the 220. Every
+operation has a summary and a description. Ground truth read blind by
+five Sonnet agents, 44 rows each, round-robin over vendors and methods,
+same brief as the first hold-out plus one sentence naming file sharing,
+invitations, paging and payment capture or refund as third-party
+effects. Readers appended rows incrementally because a first attempt
+was killed by a rate limit before anything was written. As read: r 104
+(all 94 GET plus 10 POST lookups), w 63, x 53; 4 rows carry doubt, all
+classed to the tighter option; zero orchestrator rulings. No list in
+the repo had seen any of these operations: the lexicon, the verb table
+and the party list were all written before this set existed, so this
+is the one clean score in M0. Runners gained an `--ops=` flag so the
+hold-out mode can point at this set. Scored CSV
+docs/logs/m0/holdout2-E19.csv.
+
+(b) Results, scored once each, columns
+shape | agree | over-tight | wrong loosenings | correct lowerings, all
+of 220:
+E19 union (the shape that counts) 181 | 37 | 2 | 4.
+E12b word lists (reference) 184 | 34 | 2 | 4.
+E18 verb-led (reference) 197 | 20 | 3 | 6.
+Trivial baseline "GET is r, else x" 147 | 73 | 0.
+Because 94 rows are GET and locked r, the non-GET view is the
+informative one: E19 over the 126 non-GET rows is 87 agree, 37
+over-tight, 2 wrong loosenings; 10 of those rows are POST lookups the
+readers classed r, and E19 lowered 4 of them.
+
+(c) The two wrong loosenings, both Box DELETEs, both a relationship
+object that belongs to another person, and both invisible to every
+list: (1) delete_collaborations_id, summary "Remove collaboration",
+description "Deletes a single collaboration." — truth x because it
+removes another person's access to shared content; both arbiters
+returned the method floor, so confidence is method-only. (2)
+delete_shield_information_barrier_segment_members_id, summary "Delete
+shield information barrier segment member by ID" — truth x because it
+removes another person's barrier-segment membership; the word-list
+arbiter found no stem, the verb-led arbiter took `delete` as a write
+verb, and its object-head extraction, capped at four tokens after the
+verb, stopped at `segment` and never reached `member`, which is on the
+party list. Both arbiters agreed on w, so this row sits at HIGH
+confidence. Under D22 the gate is zero wrong loosenings at high
+confidence; on this set it is one. The gate is not met on the clean
+exam. Recorded defect, not fixed: the four-token cap in objectHead.
+
+(d) Confidence split on this set, rows | correct | over-tight | wrong
+loosenings: high 185 | 171 | 13 | 1; low 21 | 1 | 20 | 0; method-only 14
+| 9 | 4 | 1. Of the 37 over-tightenings, 20 sit at low confidence and
+13 at high.
+
+(e) Where the x rows came from, `raisedBy` against the method default,
+truly-x / over-tightening: both 1 / 2; wordlist only 1 / 15; verb only
+0 / 3; neither (the POST floor) 49 / 17. On this set the lexicon raised
+19 rows and was right once; the verb-led raise was right zero times of
+three. Nearly every true x here is a POST that the floor already had,
+and the raising rules mostly added noise. Over-tightenings by pair of
+rule ids: the word-list danger verb accounts for 18 of the 37 (its
+stems firing on Box and PagerDuty prose such as "remove", "cancel",
+"start", "notification"), the live-noun rule 8, the POST floor on rows
+the readers classed w 4, and the verb-led consequential or party rules
+7.
+
+(f) Reading, once. On a catalogue no list had seen, the union's danger
+record is 2 wrong loosenings in 220, the same two the word lists alone
+produce, and one of them at high confidence; the verb-led model alone
+adds a third (delete a group). The two misses share a shape the tool
+has no signal for: deleting a relationship object (a collaboration, a
+membership) whose other end is a person, with prose that names neither
+the person nor an effect. The noise record is better than on the first
+hold-out (37 of 220 against 102 of 207), largely because this
+catalogue's prose is terse. E18 alone would have been the best on this
+set by every count except leaks.
+
 ### Next
 
-M0 has run nineteen shapes. E19, the union of the word-list and
-verb-led models with agreement as the confidence, is the first to
-reach zero wrong loosenings on both CAMARA halves and on the blind
-hold-out with both negative controls passing, at a cost of 102
-over-tightenings of 207 on the hold-out, 53 of which sit at low
-confidence and can be filtered. D20 to D23 are decided and in the PRD.
-Three things are needed before M0 can be called done: a hold-out
-containing read operations, so the usefulness half of the gate can be
-measured off CAMARA; a fourth vendor nobody has read, since the
-lexicon, the verb table and the party list have all now seen both
-existing sets; and the party-list trim (six words that never once
-raised correctly, and `device` at 3 correct to 17 over-tightenings).
-M1's list is unchanged: vendor extensions as structural markers, and
-schema text for operations with no prose.
+M0 has run twenty shapes and two blind hold-outs. On the clean exam
+(E20) the recommended shape E19 leaves 2 wrong loosenings of 220, one
+of them at high confidence, so the gate as restated in D22 is not met
+there; on CAMARA and the first hold-out it is met. The two clean-exam
+misses are DELETEs of a relationship object owned by another person,
+stated in prose that names no person and no effect — a shape neither
+the lexicon nor the verb-object rule can see, and the M1 candidate
+signal for it is structural: the resource's schema (a collaboration
+has an accessible_by user; a membership has a user id) rather than the
+operation's prose. Two recorded defects wait: the four-token cap in
+objectHead, and the party words that never raised correctly. M0 should
+close with the numbers as they are; what the gate is met on and what
+it is not met on is now stated per set, which is the report the PRD
+asked for.

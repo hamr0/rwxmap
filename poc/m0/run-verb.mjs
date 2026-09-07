@@ -121,7 +121,7 @@ function trivialBaseline(rows, gtByKeyFn) {
 function main() {
   const outPrefix = process.argv[2];
   if (!outPrefix) {
-    console.error('usage: node poc/m0/run-verb.mjs <out-prefix> [--parties=object|anywhere] [--label=<name>] [--holdout=<ground-truth.csv>]');
+    console.error('usage: node poc/m0/run-verb.mjs <out-prefix> [--parties=object|anywhere] [--label=<name>] [--holdout=<ground-truth.csv>] [--ops=]');
     process.exit(1);
   }
   const flags = parseFlags(process.argv.slice(3));
@@ -134,7 +134,7 @@ function main() {
   console.log(`flags: parties=${partySource}`);
 
   if (flags.holdout) {
-    const HOLDOUT_CSV = path.join(HERE, '..', '..', 'data', 'holdout-2026-09-07', 'operations.csv');
+    const HOLDOUT_CSV = flags.ops ?? path.join(HERE, '..', '..', 'data', 'holdout-2026-09-07', 'operations.csv');
     const ops = loadHoldoutOps(readFileSync(HOLDOUT_CSV, 'utf8'));
     const gtRows = parseCsv(readFileSync(flags.holdout, 'utf8'));
     const gtByKey = new Map();
