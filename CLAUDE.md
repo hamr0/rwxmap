@@ -40,7 +40,11 @@ starts; never chain modules together on your own judgement. The main
 session orchestrates; every file edit goes through a delegated agent
 carrying an escalate-first brief, and the orchestrator reads every diff.
 Verify by exit code and by re-running — an agent's "done" is not
-evidence. The spec interview is prose, never choice boxes.
+evidence. The spec interview is prose, never choice boxes. Every
+experiment is appended to `docs/logs/learnings.md` before the next one
+starts, with its numbers and what it taught; a result that changes a
+feature or a decision goes into `docs/product/prd.md`, never only into
+the learnings file.
 
 ## Dev Rules
 

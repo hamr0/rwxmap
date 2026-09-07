@@ -1,0 +1,221 @@
+repo,path,method,operationId,class,confidence,rule_id,evidence,gt_class,agree,raised_by
+box,/ai/ask,POST,post_ai_ask,x,high,U:L2-danger-verb|V6-floor,A=verbs=send B=verb=ask head=question,r,true,neither
+box,/ai/text_gen,POST,post_ai_text_gen,x,high,U:L2-danger-verb|V6-floor,A=verbs=send B=verb=generate head=text,r,true,neither
+box,/ai_agents,POST,post_ai_agents,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+box,/ai_agents/{agent_id},PUT,put_ai_agents_id,x,low,U:L5-floor|V3-party-object,A=verb=update B=verb=update head=agent party=agent,w,false,verb
+box,/collaboration_whitelist_entries,POST,post_collaboration_whitelist_entries,x,high,U:L5-floor|V2-verb-consequential,A=verb=add B=verb=add,x,true,neither
+box,/collaboration_whitelist_exempt_targets,GET,get_collaboration_whitelist_exempt_targets,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/collaboration_whitelist_exempt_targets/{collaboration_whitelist_exempt_target_id},GET,get_collaboration_whitelist_exempt_targets_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/collaborations/{collaboration_id},DELETE,delete_collaborations_id,w,method-only,U:L5-floor|V6-floor,A=verb=remove B=verb=remove head=collaboration,x,true,neither
+box,/collections,GET,get_collections,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/comments,POST,post_comments,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+box,/comments/{comment_id},PUT,put_comments_id,x,low,U:L3-live-noun|V5-verb-write>P2-weak,A=nouns=message verb=update B=verb=update P2=own=comment,w,false,wordlist
+box,/enterprises/{enterprise_id}/device_pinners,GET,get_enterprises_id_device_pinners,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/file_requests/{file_request_id},GET,get_file_requests_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/file_version_legal_holds,GET,get_file_version_legal_holds,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/file_version_retentions/{file_version_retention_id},GET,get_file_version_retentions_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/files/upload_sessions/{upload_session_id},DELETE,delete_files_upload_sessions_id,x,high,U:L3-live-noun|V3-party-object,A=nouns=session verb=remove B=verb=remove head=session party=session,w,true,both
+box,/files/upload_sessions/{upload_session_id}/commit,POST,post_files_upload_sessions_id_commit,x,high,U:L3-live-noun|V3-party-object,A=nouns=session verb=commit B=verb=commit head=session party=session,x,true,neither
+box,/files/{file_id},DELETE,delete_files_id,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=permanent B=verb=delete,w,false,wordlist
+box,/files/{file_id},PUT,put_files_id,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+box,/files/{file_id}#remove_shared_link,PUT,put_files_id#remove_shared_link,w,method-only,U:L5-floor|V6-floor,A=verb=remove B=verb=remove head=link,w,true,neither
+box,/files/{file_id}/collaborations,GET,get_files_id_collaborations,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/files/{file_id}/content,POST,post_files_id_content,x,high,U:L5-floor|V5-verb-write,A=verb=upload B=verb=upload,x,true,neither
+box,/files/{file_id}/metadata/enterprise/securityClassification-6VMVochwUWo,DELETE,delete_files_id_metadata_enterprise_securityClassification-6VMVochwUWo,x,low,U:L3-live-noun|V6-floor,A=nouns=call verb=remove B=verb=remove head=classification,w,false,wordlist
+box,/files/{file_id}/metadata/enterprise/securityClassification-6VMVochwUWo,PUT,put_files_id_metadata_enterprise_securityClassification-6VMVochwUWo,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+box,/files/{file_id}/metadata/global/boxSkillsCards,POST,post_files_id_metadata_global_boxSkillsCards,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,w,true,neither
+box,/files/{file_id}/metadata/{scope}/{template_key},GET,get_files_id_metadata_id_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/files/{file_id}/tasks,GET,get_files_id_tasks,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/files/{file_id}/trash,GET,get_files_id_trash,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/files/{file_id}/versions/current,POST,post_files_id_versions_current,x,method-only,U:L5-floor|V6-floor,A=verb=promote B=verb=promote head=version,x,true,neither
+box,/files/{file_id}/versions/{file_version_id},PUT,put_files_id_versions_id,w,method-only,U:L5-floor|V6-floor,A=verb=restore B=verb=restore head=version,w,true,neither
+box,/files/{file_id}/watermark,PUT,put_files_id_watermark,w,method-only,U:L5-floor|V6-floor,A=verb=apply B=verb=apply head=watermark,w,true,neither
+box,/folder_locks/{folder_lock_id},DELETE,delete_folder_locks_id,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+box,/folders/{folder_id},DELETE,delete_folders_id,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=permanent B=verb=delete,w,false,wordlist
+box,/folders/{folder_id},PUT,put_folders_id,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+box,/folders/{folder_id}#remove_shared_link,PUT,put_folders_id#remove_shared_link,w,method-only,U:L5-floor|V6-floor,A=verb=remove B=verb=remove head=link,w,true,neither
+box,/folders/{folder_id}/collaborations,GET,get_folders_id_collaborations,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/folders/{folder_id}/metadata,GET,get_folders_id_metadata,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/folders/{folder_id}/metadata/enterprise/securityClassification-6VMVochwUWo,POST,post_folders_id_metadata_enterprise_securityClassification-6VMVochwUWo,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=call verb=add B=verb=add,w,true,neither
+box,/folders/{folder_id}/metadata/{scope}/{template_key},GET,get_folders_id_metadata_id_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/folders/{folder_id}/trash,DELETE,delete_folders_id_trash,x,low,U:L2-danger-verb|V6-floor,"A=verbs=cannot be undone,permanent B=verb=permanently head=folder",w,false,wordlist
+box,/folders/{folder_id}/watermark,GET,get_folders_id_watermark,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/group_memberships/{group_membership_id},DELETE,delete_group_memberships_id,x,high,U:L3-live-noun|V3-party-object,"A=nouns=membership,permission verb=remove B=verb=remove head=user party=user",x,true,both
+box,/groups,GET,get_groups,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/groups/{group_id},DELETE,delete_groups_id,x,low,U:L2-danger-verb|V6-floor,A=verbs=permanent B=verb=remove head=group,x,false,wordlist
+box,/groups/{group_id}/collaborations,GET,get_groups_id_collaborations,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/integration_mappings/slack,POST,post_integration_mappings_slack,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+box,/integration_mappings/teams,GET,get_integration_mappings_teams,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/integration_mappings/teams/{integration_mapping_id},PUT,put_integration_mappings_teams_id,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+box,/legal_hold_policies,GET,get_legal_hold_policies,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/legal_hold_policies/{legal_hold_policy_id},GET,get_legal_hold_policies_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/legal_hold_policy_assignments,POST,post_legal_hold_policy_assignments,x,method-only,U:L5-floor|V6-floor,A=verb=assign B=verb=assign head=policy,x,true,neither
+box,/legal_hold_policy_assignments/{legal_hold_policy_assignment_id}/file_versions_on_hold,GET,get_legal_hold_policy_assignments_id_file_versions_on_hold,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/metadata_cascade_policies,POST,post_metadata_cascade_policies,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+box,/metadata_cascade_policies/{metadata_cascade_policy_id}/apply,POST,post_metadata_cascade_policies_id_apply,x,method-only,U:L5-floor|V6-floor,A=verb=force B=verb=force head=policy,w,true,neither
+box,/metadata_taxonomies/{namespace},GET,get_metadata_taxonomies_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/metadata_taxonomies/{namespace}/{taxonomy_key},PATCH,patch_metadata_taxonomies_id_id,x,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+box,/metadata_taxonomies/{namespace}/{taxonomy_key}/levels:append,POST,post_metadata_taxonomies_id_id_levels:append,x,high,U:L5-floor|V2-verb-consequential,A=verb=add B=verb=add,x,true,neither
+box,/metadata_taxonomies/{namespace}/{taxonomy_key}/nodes,POST,post_metadata_taxonomies_id_id_nodes,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+box,/metadata_taxonomies/{namespace}/{taxonomy_key}/nodes/{node_id},PATCH,patch_metadata_taxonomies_id_id_nodes_id,x,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+box,/metadata_templates/enterprise/securityClassification-6VMVochwUWo/schema,GET,get_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/metadata_templates/global,GET,get_metadata_templates_global,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/metadata_templates/{namespace}/{template_key}/fields/{field_key}/options,GET,get_metadata_templates_id_id_fields_id_options,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/metadata_templates/{scope}/{template_key}/schema,PUT,put_metadata_templates_id_id_schema,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+box,/oauth2/token,POST,post_oauth2_token,x,high,U:L2-danger-verb|V3-party-object,A=verbs=send B=verb=request head=token party=token,x,true,neither
+box,/retention_policies,GET,get_retention_policies,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/retention_policies/{retention_policy_id},GET,get_retention_policies_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/retention_policy_assignments,POST,post_retention_policy_assignments,x,method-only,U:L5-floor|V6-floor,A=verb=assign B=verb=assign head=policy,x,true,neither
+box,/retention_policy_assignments/{retention_policy_assignment_id}/file_versions_under_retention,GET,get_retention_policy_assignments_id_file_versions_under_retention,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/shared_items,GET,get_shared_items,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/shared_items#web_links,GET,get_shared_items#web_links,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/shield_information_barrier_reports/{shield_information_barrier_report_id},GET,get_shield_information_barrier_reports_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/shield_information_barrier_segment_members/{shield_information_barrier_segment_member_id},DELETE,delete_shield_information_barrier_segment_members_id,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,x,true,neither
+box,/shield_information_barrier_segment_restrictions,POST,post_shield_information_barrier_segment_restrictions,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+box,/shield_information_barrier_segments,GET,get_shield_information_barrier_segments,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/shield_information_barrier_segments/{shield_information_barrier_segment_id},GET,get_shield_information_barrier_segments_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/shield_information_barriers,POST,post_shield_information_barriers,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+box,/sign_requests,GET,get_sign_requests,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/sign_requests/{sign_request_id}/cancel,POST,post_sign_requests_id_cancel,x,high,U:L2-danger-verb|V2-verb-consequential,A=verbs=cancel B=verb=cancel,x,true,neither
+box,/sign_templates/{template_id},GET,get_sign_templates_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/storage_policies/{storage_policy_id},GET,get_storage_policies_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/storage_policy_assignments/{storage_policy_assignment_id},DELETE,delete_storage_policy_assignments_id,x,low,U:L3-live-noun|V6-floor,A=nouns=call verb=unassign B=verb=unassign head=policy,w,false,wordlist
+box,/task_assignments,POST,post_task_assignments,x,method-only,U:L5-floor|V6-floor,A=verb=assign B=verb=assign head=task,x,true,neither
+box,/task_assignments/{task_assignment_id},PUT,put_task_assignments_id,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+box,/tasks/{task_id},GET,get_tasks_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/terms_of_service_user_statuses,GET,get_terms_of_service_user_statuses,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/terms_of_services,GET,get_terms_of_services,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/terms_of_services/{terms_of_service_id},PUT,put_terms_of_services_id,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+box,/users/me,GET,get_users_me,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/users/{user_id},GET,get_users_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/users/{user_id}/avatar,GET,get_users_id_avatar,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/users/{user_id}/email_aliases,POST,post_users_id_email_aliases,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+box,/users/{user_id}/memberships,GET,get_users_id_memberships,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/web_links/{web_link_id},GET,get_web_links_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/web_links/{web_link_id}#add_shared_link,PUT,put_web_links_id#add_shared_link,x,low,U:L5-floor|V2-verb-consequential,A=verb=add B=verb=add,w,false,verb
+box,/web_links/{web_link_id}#update_shared_link,PUT,put_web_links_id#update_shared_link,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+box,/webhooks,GET,get_webhooks,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/webhooks/{webhook_id},GET,get_webhooks_id,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+box,/workflows/{workflow_id}/start,POST,post_workflows_id_start,x,high,U:L2-danger-verb|V2-verb-consequential,"A=verbs=initiat,start,trigger B=verb=start",x,true,neither
+box,/zip_downloads/{zip_download_id}/status,GET,get_zip_downloads_id_status,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/abilities,GET,listAbilities,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/addons/{id},GET,getAddon,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/alert_grouping_settings/{id},GET,getAlertGroupingSetting,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/analytics/metrics/incidents/services,POST,getAnalyticsMetricsIncidentsService,r,high,U:L4-lookup|V4-verb-read,A=verb=get B=verb=get,r,true,neither
+pagerduty,/analytics/metrics/responders/all,POST,getAnalyticsMetricsRespondersAll,r,high,U:L4-lookup|V4-verb-read,A=verb=get B=verb=get,r,true,neither
+pagerduty,/analytics/raw/incidents/{id}/responses,GET,getAnalyticsIncidentResponsesById,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/automation_actions/actions,POST,createAutomationAction,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+pagerduty,/automation_actions/actions/{id}/services,GET,getAutomationActionsActionServiceAssociations,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/automation_actions/actions/{id}/teams,POST,createAutomationActionTeamAssociation,x,method-only,U:L5-floor|V6-floor,A=verb=associate B=verb=associate head=action,w,true,neither
+pagerduty,/automation_actions/runners,GET,getAutomationActionsRunners,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/automation_actions/runners/{id}/teams,GET,getAutomationActionsRunnerTeamAssociations,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/business_services,POST,createBusinessService,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+pagerduty,/business_services/priority_thresholds,PUT,putBusinessServicePriorityThresholds,w,high,U:L5-floor|V5-verb-write,A=verb=set B=verb=set,w,true,neither
+pagerduty,/business_services/{id}/account_subscription,POST,createBusinessServiceAccountSubscription,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+pagerduty,/change_events,GET,listChangeEvents,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/enrichment/event_enrichments,POST,createEventEnrichment,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=access verb=create B=verb=create,x,true,neither
+pagerduty,/enrichment/event_enrichments/{id},PUT,updateEventEnrichment,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=update B=verb=update,w,false,wordlist
+pagerduty,/enrichment/event_enrichments/{id}/rules,PUT,updateEventEnrichmentRules,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=update B=verb=update,w,false,wordlist
+pagerduty,/enrichment/integrations/servicenow/credentials/{credentials_id},GET,getServiceNowCredentials,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/enrichment/integrations/servicenow/{integration_id}/tables/{table_id},DELETE,deleteServiceNowTable,x,low,U:L3-live-noun|V6-floor,A=nouns=access verb=remove B=verb=remove head=table,w,false,wordlist
+pagerduty,/enrichment/schemas,GET,listEnrichmentSchemas,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/enrichment/schemas/{schema_id}/records,GET,listEnrichmentRecords,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/escalation_policies/{id},DELETE,deleteEscalationPolicy,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+pagerduty,/event_orchestrations,POST,postOrchestration,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+pagerduty,/event_orchestrations/services/{service_id}/cache_variables,GET,listCacheVarOnServiceOrch,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/event_orchestrations/services/{service_id}/cache_variables/{cache_variable_id}/data,DELETE,deleteExternalDataCacheVarDataOnServiceOrch,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+pagerduty,/event_orchestrations/{id},PUT,updateOrchestration,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+pagerduty,/event_orchestrations/{id}/cache_variables/{cache_variable_id},PUT,updateCacheVarOnGlobalOrch,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+pagerduty,/event_orchestrations/{id}/enablements/{feature_name},PUT,updateEventOrchestrationFeatureEnablements,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+pagerduty,/event_orchestrations/{id}/integrations/migration,POST,migrateOrchestrationIntegration,x,high,U:L2-danger-verb|V6-floor,"A=verbs=pay,sent B=verb=migrate head=integration",w,true,neither
+pagerduty,/event_orchestrations/{id}/router,PUT,updateOrchPathRouter,x,low,U:L2-danger-verb|V5-verb-write,"A=verbs=send,sent B=verb=update",w,false,wordlist
+pagerduty,/extensions,GET,listExtensions,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/extensions/{id}/enable,POST,enableExtension,x,high,U:L5-floor|V5-verb-write,A=verb=enable B=verb=enable,w,true,neither
+pagerduty,/incident_workflows/triggers,GET,listIncidentWorkflowTriggers,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/incident_workflows/triggers/{id}/services,POST,associateServiceToIncidentWorkflowTrigger,x,high,U:L2-danger-verb|V6-floor,A=verbs=trigger B=verb=associate head=trigger,w,true,neither
+pagerduty,/incident_workflows/{id}/instances,POST,createIncidentWorkflowInstance,x,high,U:L2-danger-verb|V2-verb-consequential,"A=verbs=execut,start,trigger B=verb=start",x,true,neither
+pagerduty,/incidents/custom_fields,POST,createCustomFieldsField,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+pagerduty,/incidents/custom_fields/{field_id}/field_options,POST,createCustomFieldsFieldOption,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+pagerduty,/incidents/types/{type_id_or_name},GET,getIncidentType,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/incidents/types/{type_id_or_name}/custom_fields/{field_id},GET,getIncidentTypeCustomField,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/incidents/types/{type_id_or_name}/custom_fields/{field_id}/field_options/{field_option_id},GET,getIncidentTypeCustomFieldFieldOptions,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/incidents/{id}/alerts,PUT,updateIncidentAlerts,w,method-only,U:L5-floor|V6-floor,A=verb=manage B=verb=manage head=alert,w,true,neither
+pagerduty,/incidents/{id}/custom_fields/values,GET,getIncidentFieldValues,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/incidents/{id}/notes,POST,createIncidentNote,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+pagerduty,/incidents/{id}/related_change_events,GET,listIncidentRelatedChangeEvents,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/incidents/{id}/status_updates,POST,createIncidentStatusUpdate,x,high,U:L2-danger-verb|V2-verb-consequential,"A=verbs=notif,sent B=verb=create",x,true,neither
+pagerduty,/ip_allow_lists,POST,createIpAllowList,x,high,U:L3-live-noun|V2-verb-consequential,"A=nouns=access,call verb=create B=verb=create",x,true,neither
+pagerduty,/license_allocations,GET,listLicenseAllocations,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/maintenance_windows,GET,listMaintenanceWindows,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/notifications,GET,listNotifications,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/paused_incident_reports/counts,GET,getPausedIncidentReportCounts,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/recommendations/event_orchestrations/services/{service_id}/rules/{recommendation_id}/dismiss,POST,dismissRecommendedRule,x,method-only,U:L5-floor|V6-floor,A=verb=dismiss B=verb=dismiss head=rule,w,true,neither
+pagerduty,/rulesets/{id},PUT,updateRuleset,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+pagerduty,/rulesets/{id}/rules/{rule_id},PUT,updateRulesetEventRule,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+pagerduty,/schedules/{id},GET,getSchedule,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/schedules/{id}/overrides/{override_id},DELETE,deleteScheduleOverride,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=start B=verb=delete,w,false,wordlist
+pagerduty,/service_dependencies/technical_services/{id},GET,getTechnicalServiceServiceDependencies,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/services/custom_fields/{field_id},DELETE,deleteServiceCustomField,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+pagerduty,/services/custom_fields/{field_id}/field_options/{field_option_id},DELETE,deleteServiceCustomFieldOption,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+pagerduty,/services/{id},PUT,updateService,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+pagerduty,/services/{id}/enablements,GET,listServiceFeatureEnablements,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/services/{id}/rules,GET,listServiceEventRules,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/services/{id}/rules/{rule_id},PUT,updateServiceEventRule,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+pagerduty,/sre_agent/memories/{id},DELETE,deleteSreMemory,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=permanent B=verb=delete,w,false,wordlist
+pagerduty,/standards/{id},PUT,updateStandard,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+pagerduty,/status_dashboards/{id}/service_impacts,GET,getStatusDashboardServiceImpactsById,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/status_pages/{id}/posts,POST,createStatusPagePost,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+pagerduty,/status_pages/{id}/posts/{post_id}/post_updates,POST,createStatusPagePostUpdate,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+pagerduty,/status_pages/{id}/posts/{post_id}/postmortem,GET,getPostmortem,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/status_pages/{id}/severities/{severity_id},GET,getStatusPageSeverity,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/status_pages/{id}/subscriptions/{subscription_id},DELETE,deleteStatusPageSubscription,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+pagerduty,/tags/{id},GET,getTag,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/teams/{id},GET,getTeam,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/teams/{id}/members,GET,listTeamUsers,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/teams/{id}/users/{user_id},PUT,updateTeamUser,x,low,U:L5-floor|V2-verb-consequential,A=verb=add B=verb=add,w,false,verb
+pagerduty,/templates/{id},GET,getTemplate,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/users/me,GET,getCurrentUser,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/users/{id}/contact_methods,GET,getUserContactMethods,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/users/{id}/license,GET,getUserLicense,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/users/{id}/notification_rules/{notification_rule_id},PUT,updateUserNotificationRule,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=notif B=verb=update,w,false,wordlist
+pagerduty,/users/{id}/oauth_delegations/{delegation_id},GET,getUserDelegation,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/users/{id}/oncall_handoff_notification_rules/{oncall_handoff_notification_rule_id},PUT,updateUserHandoffNotification,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=notif B=verb=update,w,false,wordlist
+pagerduty,/users/{id}/sessions/{type}/{session_id},GET,getUserSession,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/users/{id}/status_update_notification_rules/{status_update_notification_rule_id},PUT,updateUserStatusUpdateNotificationRule,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=notif B=verb=update,w,false,wordlist
+pagerduty,/v3/schedules/{id},PUT,updateScheduleV3,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+pagerduty,/v3/schedules/{id}/custom_shifts/{custom_shift_id},GET,getCustomShift,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/v3/schedules/{id}/overrides/{override_id},GET,getOverride,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/v3/schedules/{id}/rotations/{rotation_id},GET,getRotation,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/v3/schedules/{id}/rotations/{rotation_id}/events/{event_id},PUT,updateEvent,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+pagerduty,/webhook_subscriptions/oauth_clients,GET,listOauthClients,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/webhook_subscriptions/{id},DELETE,deleteWebhookSubscription,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+pagerduty,/workflows/integrations,GET,listWorkflowIntegrations,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+pagerduty,/workflows/integrations/{integration_id}/connections/{id},DELETE,deleteWorkflowIntegrationConnection,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+adyen,/applePay/sessions,POST,post-applePay-sessions,x,high,U:L2-danger-verb|V3-party-object,A=verbs=pay B=verb=get head=session party=session,x,true,neither
+adyen,/cancels,POST,post-cancels,x,high,U:L2-danger-verb|V2-verb-consequential,"A=verbs=cancel,pay B=verb=cancel",x,true,neither
+adyen,/cardDetails,POST,post-cardDetails,r,high,U:L4-lookup|V4-verb-read,A=verb=get B=verb=get,r,true,neither
+adyen,/donationCampaigns,POST,post-donationCampaigns,r,high,U:L4-lookup|V4-verb-read,A=verb=get B=verb=get,r,true,neither
+adyen,/donations,POST,post-donations,x,high,U:L2-danger-verb|V6-floor,A=verbs=pay B=verb=make head=donation,x,true,neither
+adyen,/forward,POST,post-forward,x,high,U:L2-danger-verb|V6-floor,A=verbs=pay B=verb=forward head=detail,x,true,neither
+adyen,/orders,POST,post-orders,x,high,U:L2-danger-verb|V2-verb-consequential,A=verbs=pay B=verb=create,x,true,neither
+adyen,/orders/cancel,POST,post-orders-cancel,x,high,U:L2-danger-verb|V2-verb-consequential,"A=verbs=cancel,pay,refund B=verb=cancel",x,true,neither
+adyen,/originKeys,POST,post-originKeys,x,high,U:L2-danger-verb|V2-verb-consequential,A=verbs=pay B=verb=create,r,true,neither
+adyen,/paymentLinks,POST,post-paymentLinks,x,high,U:L2-danger-verb|V2-verb-consequential,"A=verbs=pay,sent B=verb=create",x,true,neither
+adyen,/paymentLinks/{linkId},GET,get-paymentLinks-linkId,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+adyen,/paymentLinks/{linkId},PATCH,patch-paymentLinks-linkId,x,high,U:L2-danger-verb|V5-verb-write,"A=verbs=expir,pay B=verb=update",w,true,neither
+adyen,/paymentMethods,POST,post-paymentMethods,x,low,U:L2-danger-verb|V4-verb-read,A=verbs=pay B=verb=get,r,false,neither
+adyen,/paymentMethods/balance,POST,post-paymentMethods-balance,x,low,U:L2-danger-verb|V4-verb-read,A=verbs=pay B=verb=get,r,false,neither
+adyen,/payments,POST,post-payments,x,high,U:L2-danger-verb|V2-verb-consequential,"A=verbs=pay,send,start B=verb=start",x,true,neither
+adyen,/payments/details,POST,post-payments-details,x,high,U:L2-danger-verb|V2-verb-consequential,A=verbs=pay B=verb=submit,x,true,neither
+adyen,/payments/{paymentPspReference}/amountUpdates,POST,post-payments-paymentPspReference-amountUpdates,x,high,U:L2-danger-verb|V5-verb-write,A=verbs=pay B=verb=update,x,true,neither
+adyen,/payments/{paymentPspReference}/cancels,POST,post-payments-paymentPspReference-cancels,x,high,U:L2-danger-verb|V2-verb-consequential,"A=verbs=cancel,pay B=verb=cancel",x,true,neither
+adyen,/payments/{paymentPspReference}/captures,POST,post-payments-paymentPspReference-captures,x,high,U:L2-danger-verb|V6-floor,"A=verbs=cancel,notif,pay B=verb=capture head=payment",x,true,neither
+adyen,/payments/{paymentPspReference}/refunds,POST,post-payments-paymentPspReference-refunds,x,high,U:L2-danger-verb|V2-verb-consequential,"A=verbs=pay,refund B=verb=refund",x,true,neither
+adyen,/payments/{paymentPspReference}/reversals,POST,post-payments-paymentPspReference-reversals,x,high,U:L2-danger-verb|V2-verb-consequential,"A=verbs=cancel,pay,refund B=verb=refund",x,true,neither
+adyen,/paypal/updateOrder,POST,post-paypal-updateOrder,x,high,U:L2-danger-verb|V5-verb-write,"A=verbs=deliver,pay B=verb=update",x,true,neither
+adyen,/sessions,POST,post-sessions,x,high,U:L2-danger-verb|V2-verb-consequential,A=verbs=pay B=verb=create,x,true,neither
+adyen,/sessions/{sessionId},GET,get-sessions-sessionId,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+adyen,/storedPaymentMethods,GET,get-storedPaymentMethods,r,high,U:L0-safe-locked|V0-safe-locked,A=method=GET B=method=GET,r,true,neither
+adyen,/storedPaymentMethods,POST,post-storedPaymentMethods,x,high,U:L2-danger-verb|V2-verb-consequential,A=verbs=pay B=verb=create,x,true,neither
+adyen,/storedPaymentMethods/{storedPaymentMethodId},DELETE,delete-storedPaymentMethods-storedPaymentMethodId,x,high,U:L2-danger-verb|V3-party-object,A=verbs=pay B=verb=delete head=token party=token,w,true,both
+adyen,/validateShopperId,POST,post-validateShopperId,x,method-only,U:L5-floor|V6-floor,A=verb=validate B=verb=validate head=id,r,true,neither

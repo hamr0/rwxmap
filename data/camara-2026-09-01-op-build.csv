@@ -1,0 +1,141 @@
+repo,file,path,method,operationId,class,confidence,rule_id,evidence
+ApplicationEndpointDiscovery,application-endpoint-discovery.yaml,/retrieve-optimal-app-endpoints,POST,getOptimalAppEndpoints,r,low,L4-lookup,verb=return
+ApplicationProfiles,application-profiles.yaml,/application-profiles,POST,createApplicationProfile,x,low,L3-live-noun,nouns=network verb=create
+ApplicationProfiles,application-profiles.yaml,/application-profiles/{applicationProfileId},PATCH,updateApplicationProfile,x,low,L3-live-noun,nouns=network verb=update
+ApplicationProfiles,application-profiles.yaml,/application-profiles/{applicationProfileId},GET,readApplicationProfile,r,high,L0-safe-locked,method=GET
+ApplicationProfiles,application-profiles.yaml,/application-profiles/{applicationProfileId},DELETE,deleteApplicationProfile,w,method-only,L5-floor,verb=delete
+CallForwardingSignal,call-forwarding-signal.yaml,/unconditional-call-forwardings,POST,retrieveUnconditionalCallForwarding,r,low,L4-lookup,verb=retrieve
+CallForwardingSignal,call-forwarding-signal.yaml,/call-forwardings,POST,retrieveCallForwarding,r,low,L4-lookup,verb=retrieve
+CarrierBillingCheckOut,carrier-billing-refund.yaml,/payments/{paymentId}/refunds,POST,createRefund,x,high,L1-structural,"structural=callbacks,sink"
+CarrierBillingCheckOut,carrier-billing-refund.yaml,/payments/{paymentId}/refunds,GET,retrieveRefunds,r,high,L0-safe-locked,method=GET
+CarrierBillingCheckOut,carrier-billing-refund.yaml,/payments/{paymentId}/refunds/{refundId},GET,retrieveRefund,r,high,L0-safe-locked,method=GET
+CarrierBillingCheckOut,carrier-billing-refund.yaml,/payments/{paymentId}/refunds/remaining-amount,GET,retrievePaymentRemainingAmount,r,high,L0-safe-locked,method=GET
+CarrierBillingCheckOut,carrier-billing.yaml,/payments,POST,createPayment,x,high,L1-structural,"structural=callbacks,sink"
+CarrierBillingCheckOut,carrier-billing.yaml,/payments,GET,retrievePayments,r,high,L0-safe-locked,method=GET
+CarrierBillingCheckOut,carrier-billing.yaml,/payments/{paymentId},GET,retrievePayment,r,high,L0-safe-locked,method=GET
+CarrierBillingCheckOut,carrier-billing.yaml,/payments/prepare,POST,preparePayment,x,high,L1-structural,"structural=callbacks,sink"
+CarrierBillingCheckOut,carrier-billing.yaml,/payments/{paymentId}/validate,POST,validatePayment,x,high,L2-danger-verb,verbs=pay
+CarrierBillingCheckOut,carrier-billing.yaml,/payments/{paymentId}/confirm,POST,confirmPayment,x,high,L2-danger-verb,"verbs=pay,reserv"
+CarrierBillingCheckOut,carrier-billing.yaml,/payments/{paymentId}/cancel,POST,cancelPayment,x,high,L2-danger-verb,"verbs=cancel,pay,reserv"
+ConnectedNetworkType,connected-network-type-subscriptions.yaml,/subscriptions,POST,createConnectedNetworkTypeSubscription,x,high,L1-structural,"structural=callbacks,sink"
+ConnectedNetworkType,connected-network-type-subscriptions.yaml,/subscriptions,GET,retrieveConnectedNetworkTypeSubscriptionList,r,high,L0-safe-locked,method=GET
+ConnectedNetworkType,connected-network-type-subscriptions.yaml,/subscriptions/{subscriptionId},GET,retrieveConnectedNetworkTypeSubscription,r,high,L0-safe-locked,method=GET
+ConnectedNetworkType,connected-network-type-subscriptions.yaml,/subscriptions/{subscriptionId},DELETE,deleteConnectedNetworkTypeSubscription,x,low,L3-live-noun,nouns=network verb=delete
+ConnectedNetworkType,connected-network-type.yaml,/retrieve,POST,getConnectedNetworkType,r,low,L4-lookup,verb=get
+ConsentInfo,consent-info.yaml,/retrieve,POST,retrieveStatus,x,low,L3-live-noun,nouns=access verb=create
+CustomerInsights,customer-insights.yaml,/scoring/retrieve,POST,retrieveScoring,r,low,L4-lookup,verb=retrieve
+DeviceAuthenticity,device-authenticity.yaml,/check-status,POST,checkImeiStatus,r,low,L4-lookup,verb=check
+DeviceIdentifier,device-identifier.yaml,/retrieve-identifier,POST,retrieveIdentifier,r,low,L4-lookup,verb=get
+DeviceIdentifier,device-identifier.yaml,/retrieve-type,POST,retrieveType,r,low,L4-lookup,verb=get
+DeviceIdentifier,device-identifier.yaml,/retrieve-ppid,POST,retrievePpid,r,low,L4-lookup,verb=get
+DeviceIdentifier,device-identifier.yaml,/match-identifier,POST,matchIdentifier,r,low,L4-lookup,verb=check
+DeviceMediaStreamingRate,media-streaming-rate.yaml,/retrieve-maximum-downstream-media-rate,POST,retrieveMaximumDownstreamMediaRate,r,low,L4-lookup,verb=get
+DeviceRoamingStatus,device-roaming-status-subscriptions.yaml,/subscriptions,POST,createDeviceRoamingStatusSubscription,x,high,L1-structural,"structural=callbacks,sink"
+DeviceRoamingStatus,device-roaming-status-subscriptions.yaml,/subscriptions,GET,retrieveDeviceRoamingStatusSubscriptionList,r,high,L0-safe-locked,method=GET
+DeviceRoamingStatus,device-roaming-status-subscriptions.yaml,/subscriptions/{subscriptionId},GET,retrieveDeviceRoamingStatusSubscription,r,high,L0-safe-locked,method=GET
+DeviceRoamingStatus,device-roaming-status-subscriptions.yaml,/subscriptions/{subscriptionId},DELETE,deleteDeviceRoamingStatusSubscription,w,method-only,L5-floor,verb=delete
+DeviceRoamingStatus,device-roaming-status.yaml,/retrieve,POST,getRoamingStatus,r,low,L4-lookup,verb=get
+DeviceSwap,device-swap.yaml,/retrieve-date,POST,retrieveDeviceSwapDate,r,low,L4-lookup,verb=get
+DeviceSwap,device-swap.yaml,/check,POST,checkDeviceSwap,r,low,L4-lookup,verb=check
+EdgeApplicationManagement,edge-application-management.yaml,/apps,POST,submitApp,x,method-only,L5-floor,verb=submit
+EdgeApplicationManagement,edge-application-management.yaml,/apps,GET,getApps,r,high,L0-safe-locked,method=GET
+EdgeApplicationManagement,edge-application-management.yaml,/apps/{appId},GET,getApp,r,high,L0-safe-locked,method=GET
+EdgeApplicationManagement,edge-application-management.yaml,/apps/{appId},DELETE,deleteApp,w,method-only,L5-floor,verb=delete
+EdgeApplicationManagement,edge-application-management.yaml,/app-instances,POST,createAppInstance,x,high,L1-structural,structural=callbacks
+EdgeApplicationManagement,edge-application-management.yaml,/app-instances,GET,getAppInstances,r,high,L0-safe-locked,method=GET
+EdgeApplicationManagement,edge-application-management.yaml,/app-instances/{appInstanceId},GET,getAppInstance,r,high,L0-safe-locked,method=GET
+EdgeApplicationManagement,edge-application-management.yaml,/app-instances/{appInstanceId},DELETE,deleteAppInstance,x,high,L2-danger-verb,verbs=terminat
+EdgeApplicationManagement,edge-application-management.yaml,/deployments,POST,createAppDeployment,x,high,L1-structural,structural=callbacks
+EdgeApplicationManagement,edge-application-management.yaml,/deployments,GET,getAppDeployments,r,high,L0-safe-locked,method=GET
+EdgeApplicationManagement,edge-application-management.yaml,/deployments/{appDeploymentId},GET,getAppDeployment,r,high,L0-safe-locked,method=GET
+EdgeApplicationManagement,edge-application-management.yaml,/deployments/{appDeploymentId},DELETE,deleteAppDeployment,x,high,L2-danger-verb,verbs=terminat
+EdgeApplicationManagement,edge-application-management.yaml,/deployments/{appDeploymentId},PATCH,updateAppDeployment,x,method-only,L5-floor,verb=update
+EdgeApplicationManagement,edge-application-management.yaml,/edge-cloud-zones,GET,getEdgeCloudZones,r,high,L0-safe-locked,method=GET
+HighThroughputElasticNetworks,high_throughput_elastic_networks.yaml,/high-throughput-elastic-network/transmission/schedule,POST,scheduleTransmission,x,low,L3-live-noun,nouns=network verb=submit
+IoTDeviceManagement,esim-profile-management.yaml,/download,POST,downloadEsimProfile,x,high,L2-danger-verb,verbs=activat
+IoTDeviceManagement,esim-profile-management.yaml,/enable,POST,enableEsimProfile,x,low,L3-live-noun,"nouns=connectivity,network verb=enable"
+IoTDeviceManagement,esim-profile-management.yaml,/disable,POST,disableEsimProfile,x,low,L3-live-noun,nouns=connectivity verb=disable
+IoTDeviceManagement,esim-profile-management.yaml,/delete,POST,deleteEsimProfile,x,high,L2-danger-verb,"verbs=irreversibl,permanent"
+IoTDeviceManagement,esim-profile-management.yaml,/set-fallback,POST,setFallbackEsimProfile,x,method-only,L5-floor,verb=set
+IoTDeviceManagement,esim-profile-management.yaml,/retrieve-status,POST,getEsimProfileStatus,r,low,L4-lookup,verb=retrieve
+IoTDeviceManagement,esim-profile-management.yaml,/operations/{operationId},GET,retrieveOperation,r,high,L0-safe-locked,method=GET
+IoTSIMFraudPrevention,iot-sim-fraud-prevention-subscriptions.yaml,/subscriptions,POST,subscribeFraudPrevention,x,high,L1-structural,"structural=callbacks,sink"
+IoTSIMFraudPrevention,iot-sim-fraud-prevention-subscriptions.yaml,/subscriptions,GET,listSubscriptions,r,high,L0-safe-locked,method=GET
+IoTSIMFraudPrevention,iot-sim-fraud-prevention-subscriptions.yaml,/subscriptions/{subscriptionId},GET,getSubscription,r,high,L0-safe-locked,method=GET
+IoTSIMFraudPrevention,iot-sim-fraud-prevention-subscriptions.yaml,/subscriptions/{subscriptionId},DELETE,deleteSubscription,x,high,L2-danger-verb,"verbs=notif,sent"
+IoTSIMFraudPrevention,iot-sim-fraud-prevention.yaml,/bind,POST,bindDeviceImei,x,method-only,L5-floor,verb=bind
+IoTSIMFraudPrevention,iot-sim-fraud-prevention.yaml,/unbind,POST,unBindDeviceImei,x,method-only,L5-floor,verb=unbind
+IoTSIMFraudPrevention,iot-sim-fraud-prevention.yaml,/query,POST,query,x,method-only,L5-floor,verb=iot
+KnowYourCustomerAgeVerification,kyc-age-verification.yaml,/verify,POST,verifyAge,x,method-only,L5-floor,verb=verify
+KnowYourCustomerMatch,kyc-match.yaml,/match,POST,kycMatch,x,method-only,L5-floor,verb=matching
+MostFrequentLocation,most-frequent-location.yaml,/verify,POST,verifyFrequentLocation,x,method-only,L5-floor,verb=verify
+NetworkAccessManagement,network-access-devices.yaml,/network-access-devices,GET,getNetworkAccessDevices,r,high,L0-safe-locked,method=GET
+NetworkAccessManagement,network-access-devices.yaml,/network-access-devices/{networkAccessDeviceId},GET,getNetworkAccessDevice,r,high,L0-safe-locked,method=GET
+NetworkAccessManagement,network-access-devices.yaml,/reboot-requests,POST,createRebootRequest,x,high,L2-danger-verb,verbs=reboot
+NetworkAccessManagement,network-access-devices.yaml,/reboot-requests,GET,getRebootRequests,r,high,L0-safe-locked,method=GET
+NetworkAccessManagement,network-access-devices.yaml,/reboot-requests/{rebootRequestId},GET,getRebootRequest,r,high,L0-safe-locked,method=GET
+NetworkAccessManagement,network-access-devices.yaml,/reboot-requests/{rebootRequestId},PATCH,updateRebootRequest,x,high,L2-danger-verb,"verbs=cancel,execut,reboot"
+NetworkAccessManagement,network-access-devices.yaml,/reboot-requests/{rebootRequestId},DELETE,deleteRebootRequest,x,high,L2-danger-verb,"verbs=cancel,reboot"
+NetworkAccessManagement,network-access-domains.yaml,/services,GET,getServices,r,high,L0-safe-locked,method=GET
+NetworkAccessManagement,network-access-domains.yaml,/services/{serviceId},GET,getService,r,high,L0-safe-locked,method=GET
+NetworkAccessManagement,network-access-domains.yaml,/trust-domains/capabilities,GET,getTrustDomainCapabilities,r,high,L0-safe-locked,method=GET
+NetworkAccessManagement,network-access-domains.yaml,/trust-domains,POST,createTrustDomain,x,method-only,L5-floor,verb=create
+NetworkAccessManagement,network-access-domains.yaml,/trust-domains,GET,getTrustDomains,r,high,L0-safe-locked,method=GET
+NetworkAccessManagement,network-access-domains.yaml,/trust-domains/{trustDomainId},GET,getTrustDomain,r,high,L0-safe-locked,method=GET
+NetworkAccessManagement,network-access-domains.yaml,/trust-domains/{trustDomainId},PATCH,updateTrustDomain,x,low,L3-live-noun,"nouns=access,network verb=update"
+NetworkAccessManagement,network-access-domains.yaml,/trust-domains/{trustDomainId},DELETE,deleteTrustDomain,x,low,L3-live-noun,"nouns=access,network verb=delete"
+NetworkAccessManagement,network-access-domains.yaml,/trust-domains/{trustDomainId}/devices,POST,createTrustDomainDevice,x,low,L3-live-noun,"nouns=access,connectivity verb=register"
+NetworkAccessManagement,network-access-domains.yaml,/trust-domains/{trustDomainId}/devices,GET,getTrustDomainDevices,r,high,L0-safe-locked,method=GET
+NetworkAccessManagement,network-access-domains.yaml,/trust-domains/{trustDomainId}/devices/{deviceId},GET,getTrustDomainDevice,r,high,L0-safe-locked,method=GET
+NetworkAccessManagement,network-access-domains.yaml,/trust-domains/{trustDomainId}/devices/{deviceId},PATCH,updateTrustDomainDevice,x,method-only,L5-floor,verb=update
+NetworkAccessManagement,network-access-domains.yaml,/trust-domains/{trustDomainId}/devices/{deviceId},DELETE,deleteTrustDomainDevice,w,method-only,L5-floor,verb=remove
+NetworkSliceBooking,network-slice-assignment.yaml,/slices/{sliceId}/devices,POST,assignDevice,x,high,L1-structural,"structural=callbacks,sink"
+NetworkSliceBooking,network-slice-assignment.yaml,/slices/{sliceId}/devices,GET,getDevices,r,high,L0-safe-locked,method=GET
+NetworkSliceBooking,network-slice-assignment.yaml,/slices/{sliceId}/release,POST,releaseDevice,x,high,L2-danger-verb,"verbs=invok,releas"
+NetworkSliceBooking,network-slice-assignment.yaml,/retrieve-slices,POST,retrieveSlicesByDevice,r,low,L4-lookup,verb=retrieve
+NetworkSliceBooking,network-slice-booking.yaml,/slices,POST,createSlice,x,high,L1-structural,"structural=callbacks,sink"
+NetworkSliceBooking,network-slice-booking.yaml,/slices/{sliceId},DELETE,deleteSlice,x,high,L2-danger-verb,verbs=releas
+NetworkSliceBooking,network-slice-booking.yaml,/slices/{sliceId},GET,getSlice,r,high,L0-safe-locked,method=GET
+NumberVerification,number-verification.yaml,/verify,POST,phoneNumberVerify,x,low,L3-live-noun,"nouns=access,network verb=verify"
+NumberVerification,number-verification.yaml,/device-phone-number,GET,phoneNumberShare,r,high,L0-safe-locked,method=GET
+OptimalEdgeDiscovery,optimal-edge-discovery.yaml,/regions,GET,getRegions,r,high,L0-safe-locked,method=GET
+OptimalEdgeDiscovery,optimal-edge-discovery.yaml,/retrieve-optimal-edge-cloud-zones,POST,discoverOptimalEdge,x,method-only,L5-floor,verb=discover
+PredictiveConnectivityData,predictive-connectivity-data.yaml,/retrieve,POST,retrieveConnectivity,x,high,L1-structural,"structural=callbacks,sink"
+QualityOnDemand,qos-profiles.yaml,/retrieve-qos-profiles,POST,retrieveQosProfiles,x,high,L2-danger-verb,"verbs=send,sent,transfer"
+QualityOnDemand,qos-profiles.yaml,/qos-profiles/{name},GET,getQosProfile,r,high,L0-safe-locked,method=GET
+QualityOnDemand,qos-provisioning.yaml,/qos-assignments,POST,createQosAssignment,x,high,L1-structural,structural=callbacks
+QualityOnDemand,qos-provisioning.yaml,/qos-assignments/{assignmentId},GET,getQosAssignmentById,r,high,L0-safe-locked,method=GET
+QualityOnDemand,qos-provisioning.yaml,/qos-assignments/{assignmentId},DELETE,revokeQosAssignment,x,high,L2-danger-verb,"verbs=notif,revok"
+QualityOnDemand,qos-provisioning.yaml,/retrieve-qos-assignment,POST,getQosAssignmentByDevice,x,high,L2-danger-verb,"verbs=invok,send,sent,transfer"
+QualityOnDemand,quality-on-demand.yaml,/sessions,POST,createSession,x,high,L1-structural,structural=callbacks
+QualityOnDemand,quality-on-demand.yaml,/sessions/{sessionId},GET,getSession,r,high,L0-safe-locked,method=GET
+QualityOnDemand,quality-on-demand.yaml,/sessions/{sessionId},DELETE,deleteSession,x,high,L2-danger-verb,"verbs=notif,releas"
+QualityOnDemand,quality-on-demand.yaml,/sessions/{sessionId}/extend,POST,extendQosSessionDuration,x,high,L2-danger-verb,verbs=expir
+QualityOnDemand,quality-on-demand.yaml,/retrieve-sessions,POST,retrieveSessionsByDevice,x,high,L2-danger-verb,"verbs=send,sent,transfer"
+SessionInsights,session-insights.yaml,/sessions,POST,createSession,x,high,L1-structural,"structural=callbacks,sink"
+SessionInsights,session-insights.yaml,/sessions/{sessionId},GET,getSession,r,high,L0-safe-locked,method=GET
+SessionInsights,session-insights.yaml,/sessions/{sessionId},DELETE,deleteSession,x,high,L2-danger-verb,"verbs=notif,stop"
+SessionInsights,session-insights.yaml,/retrieve-sessions,POST,retrieveSessionsByDevice,r,low,L4-lookup,verb=retrieve
+SessionInsights,session-insights.yaml,/sessions/{sessionId}/metrics,POST,sendSessionMetrics,x,high,L2-danger-verb,"verbs=deliver,notif,send"
+SimpleEdgeDiscovery,simple-edge-discovery.yaml,/retrieve-closest-edge-cloud-zone,POST,readClosestEdgeCloudZone,r,low,L4-lookup,verb=return
+SubscriptionStatus,subscription-status.yaml,/retrieve-subscription-status,POST,retrieveSubscriptionStatus,r,low,L4-lookup,verb=retrieve
+TrafficInfluence,traffic-influence.yaml,/traffic-influences,GET,getAllTrafficInfluences,r,high,L0-safe-locked,method=GET
+TrafficInfluence,traffic-influence.yaml,/traffic-influences,POST,postTrafficInfluence,x,high,L1-structural,structural=callbacks
+TrafficInfluence,traffic-influence.yaml,/traffic-influence-devices,POST,postTrafficInfluenceDevice,x,high,L1-structural,structural=callbacks
+TrafficInfluence,traffic-influence.yaml,/traffic-influences/{trafficInfluenceID},GET,getTrafficInfluenceById,r,high,L0-safe-locked,method=GET
+TrafficInfluence,traffic-influence.yaml,/traffic-influences/{trafficInfluenceID},PATCH,patchTrafficInfluence,x,high,L1-structural,structural=callbacks
+TrafficInfluence,traffic-influence.yaml,/traffic-influences/{trafficInfluenceID},DELETE,deleteTrafficInfluence,x,high,L1-structural,structural=callbacks
+WebRTC,webrtc-call-handling.yaml,/sessions,POST,createSession,x,low,L3-live-noun,nouns=session verb=create
+WebRTC,webrtc-call-handling.yaml,/sessions/{mediaSessionId},GET,getSessionDetailsById,r,high,L0-safe-locked,method=GET
+WebRTC,webrtc-call-handling.yaml,/sessions/{mediaSessionId},DELETE,deleteSessionById,x,high,L2-danger-verb,"verbs=cancel,notif,terminat"
+WebRTC,webrtc-call-handling.yaml,/sessions/{mediaSessionId}/status,PUT,updateSessionStatus,x,high,L2-danger-verb,"verbs=notif,terminat"
+WebRTC,webrtc-events-subscriptions.yaml,/subscriptions,POST,createNotificationChannelSubscription,x,high,L1-structural,"structural=callbacks,sink"
+WebRTC,webrtc-events-subscriptions.yaml,/subscriptions,GET,retrieveNotificationChannelSubscriptionList,r,high,L0-safe-locked,method=GET
+WebRTC,webrtc-events-subscriptions.yaml,/subscriptions/{subscriptionId},GET,retrieveNotificationChannelSubscription,r,high,L0-safe-locked,method=GET
+WebRTC,webrtc-events-subscriptions.yaml,/subscriptions/{subscriptionId},PUT,updateNotificationChannelSubscription,w,method-only,L5-floor,verb=update
+WebRTC,webrtc-events-subscriptions.yaml,/subscriptions/{subscriptionId},DELETE,deleteNotificationChannelSubscription,x,high,L2-danger-verb,"verbs=notif,stop"
+WebRTC,webrtc-registration.yaml,/sessions,GET,getRegistrationsByDeviceId,r,high,L0-safe-locked,method=GET
+WebRTC,webrtc-registration.yaml,/sessions,POST,createRegistration,x,high,L2-danger-verb,"verbs=expir,terminat"
+WebRTC,webrtc-registration.yaml,/sessions/{registrationId},GET,getRegistrationById,r,high,L0-safe-locked,method=GET
+WebRTC,webrtc-registration.yaml,/sessions/{registrationId},PUT,updateRegistrationById,x,high,L2-danger-verb,verbs=expir
+WebRTC,webrtc-registration.yaml,/sessions/{registrationId},DELETE,deleteRegistrationById,x,low,L3-live-noun,"nouns=network,session verb=delete"

@@ -71,6 +71,65 @@ The two error directions are never collapsed into one accuracy number.
 Report both counts, every time, as justabit's `docs/logs/findings.md`
 already does for leak-direction and usability findings.
 
+**M0 result, updated 2026-09-07.** Fourteen shapes were run
+(`docs/logs/learnings.md`). On the CAMARA test bed, split into a BUILD half
+(30 repos, 140 ops) and a TEST half (30 repos, 152 ops) from E7 on, the
+shape E12b (method floor; hand-written tighten-only danger lexicon over
+summary, description, operationId and path; hand read-verb list lowering
+POST/PATCH to `r` at low confidence; structural markers) has zero wrong
+loosenings on both halves, and both negative controls come out `x`. That
+score is fitted: the lexicon was written after the E1–E8 failures were
+seen. The honest score is the blind hold-out of 2026-09-07
+(`data/holdout-2026-09-07/`, 207 Twilio, Stripe and GitHub operations, no
+GET, read blind by five agents): E12b leaves 2 wrong loosenings of 207,
+both GitHub PUTs (assign an enterprise team to an organisation; merge a
+pull request), 0 of 126 on Twilio and Stripe, with 91 over-tightenings.
+Forcing DELETE/PUT/PATCH to `x` gives 0 wrong loosenings and 140
+over-tightenings, identical to "everything is `x`." The gate as written
+(zero wrong loosenings) is met on CAMARA by a fitted shape and missed by
+two on the hold-out; whether the gate counts low-confidence lowerings,
+and what DELETE/PUT default to, are open decisions listed in §7.
+
+**The gate, restated after D22.** The gate is zero wrong loosenings
+among high-confidence rows; the wrong-loosening rate among low-confidence
+rows is reported beside it, and the over-tightening count is reported
+separately, as before. The two negative controls are unchanged and must
+still come out `x`. Three numbers are reported every time and never
+combined: wrong loosenings at high confidence, wrong loosenings at low
+confidence, and over-tightenings.
+
+**M0 result on the clean exam, 2026-09-07 (E23).** A second hold-out,
+`data/holdout2-2026-09-07/` (Box 99, PagerDuty 93, Adyen 28; 220
+operations; 94 GET; ground truth read blind by five agents with zero
+orchestrator rulings; r 104, w 63, x 53), was built after every list in
+the repo was written, so no lexicon, verb table or party list had seen
+it. With the four-token cap removed (D25), the irreversibility stems
+dropped (D26) and collaboration added to the party list (D27), the
+union shape scores, per set, pass 2 on: CAMARA 292
+(build 98 agree / 42 over-tight / 0 wrong loosenings / 10 correct
+lowerings; test 120 / 32 / 0 / 13), 0 wrong loosenings at high or low
+confidence; hold-out 1, 207 ops, 106 / 101 / 0 / 0, 0 at high or low;
+clean exam, 220 ops, 187 / 33 / 0 / 4, 0 at high confidence, 0 at low.
+The last clean-exam wrong loosening, `delete_collaborations_id`, a Box
+DELETE of a relationship object owned by another person ("Remove
+collaboration"), stated in prose that names neither the person nor an
+effect, was closed in E23 by a party-list word added after the clean
+exam exposed it (taint stated in D27). The gate as restated in D22 is
+met on all three sets at high and at low confidence. Reported per set,
+never combined: wrong loosenings at high confidence CAMARA 0, hold-out
+1 0, clean exam 0; at low or method-only confidence 0, 0, 0;
+over-tightenings 74 of 292, 101 of 207, 33 of 220. Reference shapes on
+the clean exam: word lists alone 184 / 34 / 2, verb-led alone 197 / 20
+/ 3. False-alarm dossier for the clean exam:
+`docs/logs/m0/false-alarms-E23.csv` (33 rows). Pass 2 is
+confidence-only (D23) and does not reduce false alarms; it marks them.
+
+**M0 closed 2026-09-07 (D29).** M0 is closed as exploratory, not as a
+shape to keep. The numbers above are the measured ceiling of prose-only
+rules — about 30 over-tightenings per 200 operations at zero wrong
+loosenings — not a design to build on. M1 starts fresh with a new
+arbiter rather than patching this one.
+
 ## 3. Out of scope
 
 - A model/LLM tier. There is no tier 2 and no tier 3 in this design —
@@ -101,16 +160,38 @@ separates safe loosenings from unsafe ones on real data. M0 answers the
 go/no-go. M0 is exploratory — trying different arbiter shapes is in
 scope here and nowhere else in the module ladder. Expect many experiments
 in M0. Each one is a numbered POC with its own readout (what was tried,
-the two error counts, keep or discard) recorded in the M0 log before the
+the two error counts, keep or discard) recorded in `docs/logs/learnings.md` before the
 next one starts, so the shape that wins is chosen on evidence, not on the
 last thing tried.
 
-**M1 — Verb library from the corpus.** Pull APIs.guru's
-`openapi-directory` (CC0), extract verbs from paths and operationIds with
-their method co-occurrence, produce the library as data (priors, not
-truth — see D7), re-run M0's arbiter with it, re-read the divergence
-list. Riskiest assumption: that corpus priors raise coverage on CAMARA
-without adding a wrong loosening.
+**M1 — The informed arbiter (fresh POC).** A new arbiter in `poc/m1/`,
+nothing imported from `poc/m0/` except plumbing (spec loader, split,
+CSV parser, scorer). Shape under test, each step its own numbered
+experiment with both error directions counted apart:
+
+1. The method sets a prior, not only a floor: GET locked `r`; PUT and
+   DELETE lean `w`; POST and PATCH lean nowhere.
+2. Machine-facing fields first, prose last: per-operation OAuth scopes,
+   `Idempotency-Key` parameters, `callbacks`, `202` responses,
+   request-body property names, and the resource schema's fields (a
+   field pointing at another party such as `accessible_by`, `owner`,
+   `assignee`, `recipient`), each admitted as a rule only if a census
+   shows it present consistently in the set it is applied to, and each
+   only ever raising on presence, never lowering on absence.
+3. Verb and noun leans derived from a large corpus (APIs.guru
+   `openapi-directory`, D7), not from the 719 labelled rows, used as
+   graded evidence.
+4. Weighted evidence decides the class and the distance from the
+   boundary is the confidence; lowering below the method prior is
+   allowed only when the lowering evidence is strong and no raising
+   evidence is present (fail-closed, D2).
+
+Riskiest assumption, tested first: that structural fields are present
+often enough and split the truth classes cleanly enough to carry a
+rule; a census over the 719 operations is the first artefact. Also
+measure the destructive verb list (D28) against a hand label on a
+sample of each set; report its two error directions separately like
+the class.
 
 **M2 — Shape rules, only if justified.** For each divergence class from
 M0/M1 that appears more than once, add one deterministic OpenAPI-shape
@@ -169,24 +250,198 @@ matched verb and the method), plus the four MCP tool-annotation fields
 mapped from the class and the method so any MCP client can consume the
 map unchanged.
 
-Starting mapping, untested; M3 verifies it against a real client and may
-change it.
+Per D28 the output carries two independent axes: class (`r`/`w`/`x`) and
+`destructive` (true/false); M3 verifies this mapping against a real
+client and may change it.
 
-| class | readOnlyHint | destructiveHint | note |
-|---|---|---|---|
-| r | true | false | a read; nothing changes |
-| w | false | false | changes state, not destructively |
-| x | false | true | consequential or destructive |
+| field | source | mapping |
+|---|---|---|
+| `readOnlyHint` | class | `r` → true; `w` and `x` → false |
+| `destructiveHint` | `destructive` flag | method DELETE or a destructive lead verb, independent of class |
 
 `idempotentHint` comes from the method, per RFC 9110 §9.2.2: true for
 GET, HEAD, OPTIONS, PUT, DELETE; false for POST and PATCH.
 `openWorldHint` stays MCP's default, true; rwxmap has no signal for it.
+
+E24 measured the earlier class-derived mapping (destructiveHint = class
+== x) wrong on 352 of 719 rows: 290 x rows that add rather than
+destroy, 62 w rows that delete the caller's own resource.
 
 MCP's own defaults (`readOnlyHint` false, `destructiveHint` true) are
 already fail-closed and match §5/D2. MCP's spec text says clients MUST
 treat tool annotations as untrusted unless the server is trusted;
 rwxmap's map is advisory in the same sense. See
 `docs/logs/prior-art-2026-09-06.md`, H1.
+
+### 4.4 What the method actually promises (M0 finding, 2026-09-06)
+
+Method default vs hand-read ground truth, 292 CAMARA operations:
+
+| method | n | draft default | truth r | truth w | truth x | default too loose | default too tight |
+|---|---|---|---|---|---|---|---|
+| GET | 96 | r | 96 | 0 | 0 | 0 | 0 |
+| POST | 138 | x | 59 | 4 | 75 | 0 | 63 |
+| PATCH | 9 | x | 0 | 6 | 3 | 0 | 6 |
+| DELETE | 41 | w | 0 | 34 | 7 | 7 | 0 |
+| PUT | 8 | w | 0 | 7 | 1 | 1 | 0 |
+
+**The settled part.** RFC 9110 §9.2.1 makes safe a hard guarantee, and it
+held on all 96 of 96 GET operations in the test bed. For safe methods the
+method default is both a floor and a ceiling: nothing in the hand-read
+ground truth ever needed a class looser or tighter than `r` for a GET.
+
+**The contested part.** The -02 draft maps idempotent to `w`. RFC 9110
+§9.2.2 idempotence is a statement about repetition only — it says
+nothing about consequence. The test bed has 19 operations that are
+idempotent and consequential at once, and 17 of those 19 reach a third
+party. Terminating a live call is idempotent (calling it twice leaves the
+call terminated, same as calling it once) and it is also consequential:
+it drops a call a real person is on.
+
+The draft is inconsistent with itself here. The axis registry (anchor
+`action-class-values`) names `x` "a consequential, non-idempotent
+action," but then defines the class solely as "an operation whose
+repetition is not guaranteed to have the same effect as performing it
+once." Consequence is in the name and not in the test. Scored against
+the literal, idempotence-only reading, the method default leaks 3 times
+in 292, all DELETE. Scored against the consequence reading, it leaks 8.
+rwxmap adopts the consequence reading (see D16) because its consumers
+are agents and guards deciding whether an action needs a human in the
+loop, and because MCP already models the two properties as separate
+fields — `idempotentHint` and `destructiveHint` — rather than collapsing
+them into one.
+
+**The formulation, stated plainly.** The HTTP method gives a floor on
+the class and never a ceiling, except for safe methods, where the floor
+is also the ceiling. The -02 draft treats the floor as an answer, and
+that is the origin of every high-confidence wrong answer M0 found.
+
+### 4.5 Floor from the method, ceiling from the text (supersedes D3)
+
+What the method permits the text signal to do:
+
+| method | RFC 9110 guarantee | floor | text may move the class |
+|---|---|---|---|
+| GET, HEAD, OPTIONS | safe: no state-changing semantics | r | not at all; locked at r |
+| PUT, DELETE | idempotent: repetition is equivalent | w | up to x only |
+| POST, PATCH | neither safe nor idempotent; no guarantee | x by policy, not by fact | up or down |
+
+POST is the exception in both directions, and for one reason: RFC 9110
+gives no guarantee for POST at all, so its `x` default is a fail-closed
+policy choice, not a derived fact. Replacing a policy choice with
+evidence read from the document is an upgrade, not a loosening. A safe
+method's `r`, by contrast, is a derived fact — it is never revisited.
+
+The arbiter, restated as an ordered procedure:
+
+1. Take the floor from the method.
+2. Read the operation's `summary` and `description`, plus structural
+   markers present in the document: `callbacks`, a `sink` field in the
+   request body, a 409 response indicating a repeat is not equivalent.
+3. Evidence of consequence — reaching a third party, moving money,
+   acting on a live session, network path, or device, or an effect that
+   cannot be undone — raises the class to `x`.
+4. For POST and PATCH only, clear evidence that the operation is a pure
+   lookup, with no evidence of consequence, lowers the class to `r`.
+5. Anything unresolved keeps the floor.
+
+Never lower the class on a safe method, and never lower it below `w` for
+PUT or DELETE.
+
+**The shape as of 2026-09-07 (E12b)**
+
+The procedure above, restated as implemented, in order:
+
+- L0 safe method → `r`, high.
+- L1 callbacks or sink → `x`, high.
+- L2 any danger-verb stem in `summary`, `description`, `operationId` or
+  `path` → `x`, high (the lexicon is hand-written, tighten-only, 43
+  stems; `poc/m0/lexicon-v2.json`).
+- L3 any live-noun stem in the same text, unless the leading verb is a
+  read verb → `x` (high if the leading verb is a write verb, else low).
+- L4 POST or PATCH whose leading verb is on the hand read-verb list and
+  with no 409 response → `r`, low.
+- L5 otherwise the method floor, confidence method-only.
+
+Measured weaknesses, one line each:
+
+- Live nouns are vendor-specific and fire on boilerplate (GitHub's
+  "personal access tokens" sentence tightened 41 of 81 GitHub
+  operations).
+- Danger verbs transferred across three vendors but miss danger stated
+  without a listed word ("assign a team to an organisation").
+- Scanning beyond the operation's own text collapses to "everything x"
+  because file-level boilerplate carries the stems.
+- There is no path from POST to `w`, so vendors that update through POST
+  (Twilio) are over-tightened.
+- Vendor extensions such as `x-github.triggersNotification` are
+  structural evidence the extractor does not yet read.
+- 16 of 94 Twilio operations have no prose at all.
+- The verb-object rule capped the object phrase at four tokens after the
+  verb, so a party word beyond that was never seen: "Delete shield
+  information barrier segment member by ID" resolved to `segment`, not
+  `member`. Recorded 2026-09-07, removed in E21 (D25).
+- Deleting a relationship object whose other end is a person is
+  invisible to both the lexicon and the verb-object rule when the prose
+  names neither the person nor an effect; collaboration is now on the
+  party list (E23), but the shape remains invisible for every other
+  relationship noun (membership, assignment, share, ...). The candidate
+  signal is structural, in the resource's schema, and stays on M1's
+  list.
+- The live-noun rule matches substrings: "call" fires on "called" and
+  "calling this endpoint", "access" on PagerDuty's "Early Access"
+  banner. Pass 2 marks these low, does not clear them. Recorded
+  2026-09-07 (E22), not fixed; part of the M1 list trim.
+
+This section describes the archived M0 arbiter (D29). It is kept as
+the measured ceiling of prose-only rules.
+
+The two roads to `x` are not interchangeable. Over the 499 labelled
+operations, 43 of 153 `x` rows reach beyond the caller while remaining
+perfectly repeatable, and 20 DELETE rows are `x` despite being
+idempotent, so an arbiter that tests only for non-idempotence cannot
+reach the gate.
+
+**Confidence.** Every row carries the class plus a confidence, so a
+consumer can be configured to act only on high-confidence rows and refer
+the rest to a human. The exact formula is still M0's to find; the PRD's
+standing constraint holds regardless: the formula must be executable
+identically twice by two people.
+
+**The known weakness, stated honestly.** The text signal rests on prose
+humans wrote, and that prose is sometimes wrong by omission. The
+measured example: ModelAsAService `POST /answer` `queryAssistant` reads
+as a lookup, while the assistant it fronts may invoke tools that reach
+consumer-registered third-party URLs — a consequence the operation's own
+text never mentions. This is why lowering is confined to POST and PATCH,
+and is always reported at low confidence.
+
+Operation-level field coverage, measured 2026-09-06:
+
+| document | operations | has description | has callbacks |
+|---|---|---|---|
+| Stripe | 594 | 99% | 0% |
+| Slack | 174 | 100% | 0% |
+| CAMARA test bed | 292 | ~100% | 14% |
+| Twilio, Stripe, GitHub hold-out | 207 | 92% (16 Twilio ops have no prose) | 0% |
+
+Descriptions are close to universal and are the load-bearing text
+signal, whereas `callbacks` is a strong positive marker where it appears
+and is absent from most catalogues, so it can support a class but never
+a coverage claim.
+
+**Where the work is, by method (M0, 2026-09-07)**
+
+| bucket | ops | method default | truth says | error direction if left at default |
+|---|---|---|---|---|
+| GET | 96 | r | 96 r | none; closed |
+| POST | 138 | x | 59 r, 4 w, 75 x | 63 over-tightenings; never a leak |
+| DELETE, PUT, PATCH | 58 | w | 50 w, 8 x | 8 wrong loosenings |
+
+Two problems, not one. The security problem is small and lives entirely
+in DELETE, PUT and PATCH: `x` dressed as `w`. The usability problem is
+large and lives in POST: `r` dressed as `x`. The first fails the gate;
+the second only costs false alarms.
 
 ## 5. The safety spine
 
@@ -250,6 +505,32 @@ Non-blocking; never silently assumed.
 - The GitHub remote is `hamr0/rwxmap`; visibility (public with a WIP
   marker, like the author's other repos, or private) is decided at the
   first push.
+- Whether the -02 draft's definition of `x` is amended to name
+  consequence in the test and not only in the label (§4.4). This is
+  rwxmap's first finding with a consequence for the draft text, and it
+  belongs to the justabit track to accept or reject.
+- Input adapters beyond OpenAPI. The arbiter is a function of a method,
+  a name, and a text; GraphQL (`query` vs `mutation`), gRPC/AIP custom
+  methods, AsyncAPI, and MCP tool lists can each feed those three
+  through a small adapter, with the method empty where the format has
+  none. Deferred until the output contract exists; the MCP tool-list
+  adapter is the strongest candidate to go first.
+- The three questions opened on 2026-09-07 — the `x` definition, the
+  DELETE/PUT default, and the gate's treatment of low-confidence rows —
+  were decided the same day; see D20, D21 and D22.
+- Preflight against a mock: run an agent against a mock server built
+  from the OpenAPI file (e.g. Prism), record which operations it
+  reaches for, look each up in the map, and show the x calls before
+  any token is issued. HTTP has no dry run; vendor test modes exist for
+  some APIs only. Raised by the user 2026-09-07; a later module, not
+  M1.
+- Does the ordered r < w < x scale still hold once `destructive` is a
+  separate axis? A grant of `x` currently implies `w`; with two axes a
+  consumer may want "`x`, non-destructive only." The draft's scope
+  grammar needs a word for that. Raised 2026-09-07.
+- Which structural fields qualify for a rule, per set, by the user's
+  criterion "present consistently or almost always"? Answered by the
+  M1 census, pending 2026-09-07.
 
 ## 8. Notes carried from the outline, stated on purpose
 
@@ -319,11 +600,11 @@ starts, not yet exercised.
 |---|---|
 | D1 | Purpose: rwxmap is the author's own discovery tool first (maps r/w/x per operation for agents/guards/harnesses), a supporting but non-load-bearing PoC for -02's actionClass axis, and a stopgap map when a declared menu is absent or slow. |
 | D2 | Classes `r < w < x`; safety spine is tighter-on-unknown, never loosen without evidence; changes the outline's "omit on unknown" (right for a verifier consuming a signed menu) to "answer with the tightest class" (rwxmap's consumers need an answer for every operation) — same rule, different consumer. |
-| D3 | Two mechanical signals (HTTP method per RFC 9110; verb library lookup) and one arbiter: agree → that class, high confidence; disagree → tighter class, low confidence; verb unknown → method default, method-only confidence. No model/LLM tier. |
+| D3 | Two mechanical signals (HTTP method per RFC 9110; verb library lookup) and one arbiter: agree → that class, high confidence; disagree → tighter class, low confidence; verb unknown → method default, method-only confidence. No model/LLM tier. **Superseded by D17 (2026-09-06).** |
 | D4 | Direction is both: propose loosening (POST → r/w) and tightening (DELETE/PUT → x for destructive verbs). Whether tightening enters the -02 argument is open, pending M0's tighten-case count. |
 | D5 | Inputs: method, operationId, path, regex-only to start; OpenAPI shape rules added only in M2, only for a divergence class appearing more than once. |
 | D6 | Output: class, confidence, rule id, evidence, plus MCP's four tool-annotation hints mapped from class and method. |
-| D7 | Verb corpus: APIs.guru `openapi-directory` (CC0), priors not truth; no corpus size cited until queried live. |
+| D7 | Verb corpus: APIs.guru `openapi-directory` (CC0), priors not truth; no corpus size cited until queried live. **Demoted by D18 (2026-09-06).** |
 | D8 | Test bed: the 292-operation, SHA-pinned CAMARA set copied to `data/camara-2026-09-01/` (origin `justabit:ietf/v3/poc/spike-a/operations.csv`); known GET-template and 57/138-reader-judgement limits stay stated. |
 | D9 | Verb-signal strength varies by catalogue style (CAMARA rich, AIP `:verb` strong, Zalando verb-free weak); go/no-go is not "works everywhere." |
 | D10 | Prior art: openapi-mcp is method-only (the gap rwxmap fills); OpenAPI has no operation-level safety field (open issue #2649); unfetched sources are not evidence of absence. |
@@ -332,4 +613,18 @@ starts, not yet exercised.
 | D13 | Test bed lives in this repo at `data/camara-2026-09-01/`: a verbatim copy of `justabit:ietf/v3/poc/spike-a/` (operations.csv, disagreements.md, scripts, README) plus the 92 fetched CAMARA YAML specs under `specs/`, so experiments run against files in this tree, never against justabit. |
 | D14 | The r/w/x to MCP-hint mapping is written into §4.3 now as M3's starting table, marked untested. |
 | D15 | Module discipline: one module at a time, each works on its own before the next starts; M0 is many numbered experiments, each with a readout, and the winning arbiter shape is picked on the two error counts. |
-| — | Outline superseded: the outline's three-tier model (deterministic / model / silence) and "no default class, omit on unknown" framing are replaced by D2/D3 above — two mechanical signals, one arbiter, tighter-on-unknown, no model tier. |
+| D16 | `x` is read as consequence, not merely non-idempotence: an operation that reaches a third party, moves money, acts on a live session, network path or device, or cannot be undone is `x` even when repeating it is equivalent. This diverges from the -02 draft's literal definition of `x` and is M0's proposed correction to that text; see §4.4. Decided 2026-09-06. |
+| D17 | Supersedes D3. The HTTP method sets a floor and, for safe methods only, also the ceiling; the operation's own text sets the ceiling elsewhere. Three signals, not two: method, text (`summary`/`description`), and structural markers (`callbacks`, `sink`, 409). Lowering the class is confined to POST and PATCH, where RFC 9110 guarantees nothing; it is never permitted on a safe method and never below `w` on PUT or DELETE. See §4.5. Decided 2026-09-06. |
+| D18 | The verb-library plan (D7, M1) is demoted from the primary signal to one input to the text signal. M0 measured that a verb table alone cannot reach the gate: with both signals agreeing on 7 of the 11 remaining wrong loosenings, no table over paths and operationIds can see the consequence those rows carry. Decided 2026-09-06. |
+| — | Outline superseded: the outline's three-tier model (deterministic / model / silence) and "no default class, omit on unknown" framing are replaced by D2 and, as of 2026-09-06, by D17 below — a floor from the method, a ceiling from the operation's own text, tighter-on-unknown, no model tier. |
+| D19 | Second test set: `data/holdout-2026-09-07/` (Twilio, Stripe, GitHub; 207 ops; SHA-pinned; blind-read ground truth) is kept as a hold-out for honest scoring; CAMARA remains the build bed. Any shape tuned on the hold-out loses that status and the fact is recorded in learnings. Decided 2026-09-07. Confirmed by the user 2026-09-07. |
+| D20 | The test for `x` is either of two roads, not one: the operation reaches beyond the caller (a person, another party's resource, money, a live session, network path or device), OR repeating it is not equivalent to doing it once. Either alone is sufficient; neither alone is necessary. Measured over the 499 labelled operations: of 153 `x` rows, 35 are `x` only because they are not repeatable, 43 only because they reach beyond the caller, and 75 for both — so a test resting on non-idempotence alone would miss 43 of 153, and 20 DELETE rows are `x` while being perfectly idempotent. Irreversibility is explicitly NOT the test: 129 DELETE rows are `w` and nearly all are irreversible, and the readers classed "permanently delete … cannot be undone" of the caller's own resource as `w`. Refines D16. Decided 2026-09-07. |
+| D21 | DELETE, PUT and PATCH keep `w` as their default; the arbiter's rules raise from there. The alternative, defaulting to `x` with a declared menu as the only way down, was measured: on CAMARA it costs 17 more over-tightenings of 292 and removes no wrong loosening the rules had not already removed; on the blind hold-out it costs 49 more of 207 and collapses to the trivial "everything is `x`" (140 over-tightenings, agree 67 of 207). The floor stays `w` and the burden stays on evidence. Decided 2026-09-07. |
+| D22 | The go/no-go's zero applies to high-confidence rows; the wrong-loosening rate among low-confidence rows is reported alongside it, never folded into it, and never traded away. This follows the same rule as the two error directions: separate counts, never one number. It is now measurable because pass 2 (E17) grades evidence without changing any class. Decided 2026-09-07. |
+| D23 | Pass 2 grades evidence only; it never changes a class. Measured in E15 and E16: used as an un-raiser the same three checks created 8 wrong loosenings (3 from an over-generous artefact list, 5 on rows pass 1 had held for a fake reason); used only to mark evidence weak or strong they move nothing and let a consumer filter 53 of 78 hold-out over-tightenings without loosening anything. "This evidence is weak" is not evidence of safety. Decided 2026-09-07. |
+| D24 | The clean exam `data/holdout2-2026-09-07/` (Box, PagerDuty, Adyen; 220 ops; 94 GET; SHA-pinned; blind-read; zero rulings) is the reference score for M0 and stays untouched by tuning: any change to a lexicon, verb table, party list or rule after 2026-09-07 is scored on it once and the fact recorded in learnings, and it is never used to choose between shapes. M0 closes with the gate (D22) met on all three sets at high and low confidence; the last clean-exam leak was closed by a post-exam list edit, recorded as taint in D27. Decided 2026-09-07. Confirmed by the user 2026-09-07. |
+| D25 | The four-token cap in the verb-led object-head extraction is removed (learnings E21). Scored once on the clean exam per D24: one class changed (delete_shield_information_barrier_segment_members_id, w to x, truth x), no other row moved on any set. Decided 2026-09-07. |
+| D26 | The three irreversibility stems in the word-list lexicon (permanent, irreversibl, cannot be undone) are removed; they encoded "irreversible means x", which D20 rejected. Scored once per D24 (learnings E22): eight rows move from x to w, all with truth w (CAMARA test 3, hold-out 1 1, clean exam 4); no row moves the other way; wrong loosenings unchanged. Decided 2026-09-07. |
+| D27 | "collaboration(s)" is added to the verb-led party list at the user's request (learnings E23). Scored once per D24: one row changes, delete_collaborations_id w to x, truth x, the last clean-exam wrong loosening; no other row on any set moves. Stated taint: the word was added after the clean exam exposed it, so the clean exam's result on that one row is no longer blind; the other 219 rows are unaffected. The fix does not generalise (membership, assignment, share are the same shape), so the structural schema signal stays M1's first item. Decided 2026-09-07. |
+| D28 | Two axes. r/w/x stays the blast-radius axis (D20: reaches beyond the caller, or not repeatable). A second, independent boolean, `destructive`, is derived from the method (DELETE) and the lead verb (`poc/m0/destructive.json`) and never from the class; it feeds MCP `destructiveHint`. Motivation: the user's case "read and reply, never delete" cannot be said with one ordered letter, because reply is `x` and `x` sits above `w`; and §4.3's untested mapping `destructiveHint = (class == x)` was measured wrong on 352 of 719 labelled rows (learnings E24). The proposal to move `x` to mean delete was rejected because pay, send, reply and add-a-stranger-to-admins would all become `w`. The destructive verb list is unmeasured against hand labels; measuring it is an M1 item. Decided 2026-09-07. |
+| D29 | M0 is closed as exploratory, 2026-09-07. What it delivered and what M1 keeps: 719 blind-read labels across three sets (CAMARA 292, hold-out 1 207, clean exam 220), the scoring harness with the two error directions counted apart, the negative controls, the per-set reporting rule (D22, D24), and the findings about what the method and prose can and cannot see (D16-D20, E20-E25). What it did not deliver: a shape to keep. The E19 union arbiter, both hand lists, pass 2 and the E25 variants are archived under `poc/m0/` unchanged and are not promoted; they are the measured ceiling of prose-only rules (about 30 over-tightenings per 200 operations at zero wrong loosenings), not the design. M1 starts fresh in `poc/m1/`, borrows plumbing by import only (spec loader, split, CSV parser, scorer), and is an informed POC, not a build. Decided 2026-09-07 at the user's word. |

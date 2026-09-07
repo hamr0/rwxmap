@@ -1,0 +1,38 @@
+repo,path,method,operationId,tool_class,gt_class,confidence,rule_id,evidence,summary
+adyen,/originKeys,POST,post-originKeys,x,r,high,U:L2-danger-verb|V2-verb-consequential,A=verbs=pay B=verb=create,Create originKey values for domains
+adyen,/paymentLinks/{linkId},PATCH,patch-paymentLinks-linkId,x,w,high,U:L2-danger-verb|V5-verb-write,"A=verbs=expir,pay B=verb=update",Update the status of a payment link
+adyen,/storedPaymentMethods/{storedPaymentMethodId},DELETE,delete-storedPaymentMethods-storedPaymentMethodId,x,w,high,U:L2-danger-verb|V3-party-object,A=verbs=pay B=verb=delete head=token party=token,Delete a token for stored payment details
+box,/ai/ask,POST,post_ai_ask,x,r,high,U:L2-danger-verb|V6-floor,A=verbs=send B=verb=ask head=question,Ask question
+box,/ai/text_gen,POST,post_ai_text_gen,x,r,high,U:L2-danger-verb|V6-floor,A=verbs=send B=verb=generate head=text,Generate text
+box,/files/upload_sessions/{upload_session_id},DELETE,delete_files_upload_sessions_id,x,w,high,U:L3-live-noun|V3-party-object,A=nouns=session verb=remove B=verb=remove head=session party=session,Remove upload session
+box,/files/{file_id}/metadata/global/boxSkillsCards,POST,post_files_id_metadata_global_boxSkillsCards,x,w,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,Create Box Skill cards on file
+box,/folders/{folder_id}/metadata/enterprise/securityClassification-6VMVochwUWo,POST,post_folders_id_metadata_enterprise_securityClassification-6VMVochwUWo,x,w,high,U:L3-live-noun|V2-verb-consequential,A=nouns=call verb=add B=verb=add,Add classification to folder
+box,/metadata_taxonomies/{namespace}/{taxonomy_key},PATCH,patch_metadata_taxonomies_id_id,x,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,Update metadata taxonomy
+box,/metadata_taxonomies/{namespace}/{taxonomy_key}/nodes/{node_id},PATCH,patch_metadata_taxonomies_id_id_nodes_id,x,w,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,Update metadata taxonomy node
+pagerduty,/event_orchestrations/{id}/integrations/migration,POST,migrateOrchestrationIntegration,x,w,high,U:L2-danger-verb|V6-floor,"A=verbs=pay,sent B=verb=migrate head=integration",Migrate an Integration from one Event Orchestration to another
+pagerduty,/extensions/{id}/enable,POST,enableExtension,x,w,high,U:L5-floor|V5-verb-write,A=verb=enable B=verb=enable,Enable an extension
+pagerduty,/incident_workflows/triggers/{id}/services,POST,associateServiceToIncidentWorkflowTrigger,x,w,high,U:L2-danger-verb|V6-floor,A=verbs=trigger B=verb=associate head=trigger,Associate a Trigger and Service
+adyen,/paymentMethods,POST,post-paymentMethods,x,r,low,U:L2-danger-verb|V4-verb-read,A=verbs=pay B=verb=get,Get a list of available payment methods
+adyen,/paymentMethods/balance,POST,post-paymentMethods-balance,x,r,low,U:L2-danger-verb|V4-verb-read,A=verbs=pay B=verb=get,Get the balance of a gift card
+box,/ai_agents/{agent_id},PUT,put_ai_agents_id,x,w,low,U:L5-floor|V3-party-object,A=verb=update B=verb=update head=agent party=agent,Update AI agent
+box,/comments/{comment_id},PUT,put_comments_id,x,w,low,U:L3-live-noun|V5-verb-write>P2-weak,A=nouns=message verb=update B=verb=update P2=own=comment,Update comment
+box,/files/{file_id},DELETE,delete_files_id,x,w,low,U:L2-danger-verb|V5-verb-write,A=verbs=permanent B=verb=delete,Delete file
+box,/files/{file_id}/metadata/enterprise/securityClassification-6VMVochwUWo,DELETE,delete_files_id_metadata_enterprise_securityClassification-6VMVochwUWo,x,w,low,U:L3-live-noun|V6-floor,A=nouns=call verb=remove B=verb=remove head=classification,Remove classification from file
+box,/folders/{folder_id},DELETE,delete_folders_id,x,w,low,U:L2-danger-verb|V5-verb-write,A=verbs=permanent B=verb=delete,Delete folder
+box,/folders/{folder_id}/trash,DELETE,delete_folders_id_trash,x,w,low,U:L2-danger-verb|V6-floor,"A=verbs=cannot be undone,permanent B=verb=permanently head=folder",Permanently remove folder
+box,/storage_policy_assignments/{storage_policy_assignment_id},DELETE,delete_storage_policy_assignments_id,x,w,low,U:L3-live-noun|V6-floor,A=nouns=call verb=unassign B=verb=unassign head=policy,Unassign storage policy
+box,/web_links/{web_link_id}#add_shared_link,PUT,put_web_links_id#add_shared_link,x,w,low,U:L5-floor|V2-verb-consequential,A=verb=add B=verb=add,Add shared link to web link
+pagerduty,/enrichment/event_enrichments/{id},PUT,updateEventEnrichment,x,w,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=update B=verb=update,Update an Event Enrichment
+pagerduty,/enrichment/event_enrichments/{id}/rules,PUT,updateEventEnrichmentRules,x,w,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=update B=verb=update,Update Event Enrichment rules
+pagerduty,/enrichment/integrations/servicenow/{integration_id}/tables/{table_id},DELETE,deleteServiceNowTable,x,w,low,U:L3-live-noun|V6-floor,A=nouns=access verb=remove B=verb=remove head=table,Remove a CMDB table
+pagerduty,/event_orchestrations/{id}/router,PUT,updateOrchPathRouter,x,w,low,U:L2-danger-verb|V5-verb-write,"A=verbs=send,sent B=verb=update",Update the Router for an Event Orchestration
+pagerduty,/schedules/{id}/overrides/{override_id},DELETE,deleteScheduleOverride,x,w,low,U:L2-danger-verb|V5-verb-write,A=verbs=start B=verb=delete,Delete an override
+pagerduty,/sre_agent/memories/{id},DELETE,deleteSreMemory,x,w,low,U:L2-danger-verb|V5-verb-write,A=verbs=permanent B=verb=delete,Delete an SRE Agent memory
+pagerduty,/teams/{id}/users/{user_id},PUT,updateTeamUser,x,w,low,U:L5-floor|V2-verb-consequential,A=verb=add B=verb=add,Add a user to a team
+pagerduty,/users/{id}/notification_rules/{notification_rule_id},PUT,updateUserNotificationRule,x,w,low,U:L2-danger-verb|V5-verb-write,A=verbs=notif B=verb=update,Update a user's notification rule
+pagerduty,/users/{id}/oncall_handoff_notification_rules/{oncall_handoff_notification_rule_id},PUT,updateUserHandoffNotification,x,w,low,U:L2-danger-verb|V5-verb-write,A=verbs=notif B=verb=update,Update a User's Handoff Notification Rule
+pagerduty,/users/{id}/status_update_notification_rules/{status_update_notification_rule_id},PUT,updateUserStatusUpdateNotificationRule,x,w,low,U:L2-danger-verb|V5-verb-write,A=verbs=notif B=verb=update,Update a user's status update notification rule
+adyen,/validateShopperId,POST,post-validateShopperId,x,r,method-only,U:L5-floor|V6-floor,A=verb=validate B=verb=validate head=id,Validates shopper Id
+box,/metadata_cascade_policies/{metadata_cascade_policy_id}/apply,POST,post_metadata_cascade_policies_id_apply,x,w,method-only,U:L5-floor|V6-floor,A=verb=force B=verb=force head=policy,Force-apply metadata cascade policy to folder
+pagerduty,/automation_actions/actions/{id}/teams,POST,createAutomationActionTeamAssociation,x,w,method-only,U:L5-floor|V6-floor,A=verb=associate B=verb=associate head=action,Associate an Automation Action with a team
+pagerduty,/recommendations/event_orchestrations/services/{service_id}/rules/{recommendation_id}/dismiss,POST,dismissRecommendedRule,x,w,method-only,U:L5-floor|V6-floor,A=verb=dismiss B=verb=dismiss head=rule,Dismiss a recommended rule

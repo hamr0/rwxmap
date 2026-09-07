@@ -1,0 +1,208 @@
+repo,path,method,operationId,class,confidence,rule_id,evidence,gt_class,agree,raised_by
+twilio,/2010-04-01/Accounts.json,POST,CreateAccount,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{Sid}.json,POST,UpdateAccount,x,high,U:L5-floor|V5-verb-write,A=verb=modify B=verb=modify,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Addresses.json,POST,CreateAddress,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Addresses/{Sid}.json,POST,UpdateAddress,x,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Addresses/{Sid}.json,DELETE,DeleteAddress,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Applications.json,POST,CreateApplication,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Applications/{Sid}.json,POST,UpdateApplication,x,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Applications/{Sid}.json,DELETE,DeleteApplication,x,low,U:L5-floor|V3-party-object,A=verb=delete B=verb=delete head=application party=application,w,false,verb
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls.json,POST,CreateCall,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=call verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{Sid}.json,POST,UpdateCall,x,high,U:L2-danger-verb|V2-verb-consequential,"A=verbs=initiat,terminat B=verb=initiate",x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{Sid}.json,DELETE,DeleteCall,x,low,U:L3-live-noun|V5-verb-write,A=nouns=call verb=delete B=verb=delete,w,false,wordlist
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Recordings.json,POST,CreateCallRecording,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=call verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Recordings/{Sid}.json,POST,UpdateCallRecording,x,high,U:L2-danger-verb|V6-floor,A=verbs=stop B=verb=change head=status,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Recordings/{Sid}.json,DELETE,DeleteCallRecording,x,low,U:L3-live-noun|V5-verb-write,A=nouns=call verb=delete B=verb=delete,w,false,wordlist
+twilio,/2010-04-01/Accounts/{AccountSid}/Conferences/{Sid}.json,POST,UpdateConference,x,high,U:L3-live-noun|V5-verb-write,A=nouns=conference verb=update B=verb=update,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Conferences/{ConferenceSid}/Recordings/{Sid}.json,POST,UpdateConferenceRecording,x,high,U:L2-danger-verb|V6-floor,A=verbs=stop B=verb=change head=status,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Conferences/{ConferenceSid}/Recordings/{Sid}.json,DELETE,DeleteConferenceRecording,x,low,U:L3-live-noun|V5-verb-write,A=nouns=conference verb=delete B=verb=delete,w,false,wordlist
+twilio,/2010-04-01/Accounts/{AccountSid}/ConnectApps/{Sid}.json,POST,UpdateConnectApp,x,high,U:L5-floor|V3-party-object,A=verb=update B=verb=update head=app party=app,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/ConnectApps/{Sid}.json,DELETE,DeleteConnectApp,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/{Sid}.json,POST,UpdateIncomingPhoneNumber,x,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/{Sid}.json,DELETE,DeleteIncomingPhoneNumber,x,low,U:L5-floor|V3-party-object,A=verb=delete B=verb=delete head=number party=number,w,false,verb
+twilio,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers.json,POST,CreateIncomingPhoneNumber,x,high,U:L5-floor|V2-verb-consequential,A=verb=purchase B=verb=purchase,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/{ResourceSid}/AssignedAddOns/{Sid}.json,DELETE,DeleteIncomingPhoneNumberAssignedAddOn,x,high,U:L3-live-noun|V3-party-object,A=nouns=installation verb=remove B=verb=remove head=assignment party=number,w,true,both
+twilio,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/{ResourceSid}/AssignedAddOns.json,POST,CreateIncomingPhoneNumberAssignedAddOn,x,high,U:L3-live-noun|V3-party-object,A=nouns=installation verb=assign B=verb=assign head=add party=number,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/Local.json,POST,CreateIncomingPhoneNumberLocal,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/Mobile.json,POST,CreateIncomingPhoneNumberMobile,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/TollFree.json,POST,CreateIncomingPhoneNumberTollFree,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Keys/{Sid}.json,POST,UpdateKey,x,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Keys/{Sid}.json,DELETE,DeleteKey,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Keys.json,POST,CreateNewKey,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Messages/{MessageSid}/Media/{Sid}.json,DELETE,DeleteMedia,x,low,U:L3-live-noun|V5-verb-write,"A=nouns=media,message verb=delete B=verb=delete",w,false,wordlist
+twilio,/2010-04-01/Accounts/{AccountSid}/Queues/{QueueSid}/Members/{CallSid}.json,POST,UpdateMember,x,high,U:L2-danger-verb|V3-party-object,A=verbs=execut B=verb=dequeue head=member party=member,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Messages.json,POST,CreateMessage,x,high,U:L2-danger-verb|V2-verb-consequential,A=verbs=send B=verb=send,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Messages/{Sid}.json,POST,UpdateMessage,x,high,U:L2-danger-verb|V5-verb-write,"A=verbs=cancel,sent B=verb=update",w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Messages/{Sid}.json,DELETE,DeleteMessage,x,low,U:L3-live-noun|V5-verb-write,A=nouns=message verb=delete B=verb=delete,w,false,wordlist
+twilio,/2010-04-01/Accounts/{AccountSid}/Messages/{MessageSid}/Feedback.json,POST,CreateMessageFeedback,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=message verb=create B=verb=create,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SigningKeys.json,POST,CreateNewSigningKey,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/OutgoingCallerIds/{Sid}.json,POST,UpdateOutgoingCallerId,x,high,U:L3-live-noun|V5-verb-write,A=nouns=call verb=update B=verb=update,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/OutgoingCallerIds/{Sid}.json,DELETE,DeleteOutgoingCallerId,x,high,U:L3-live-noun|V3-party-object,A=nouns=call verb=delete B=verb=delete head=id party=account,w,true,both
+twilio,/2010-04-01/Accounts/{AccountSid}/OutgoingCallerIds.json,POST,CreateValidationRequest,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Conferences/{ConferenceSid}/Participants/{CallSid}.json,POST,UpdateParticipant,x,high,U:L3-live-noun|V3-party-object,"A=nouns=call,conference,participant verb=update B=verb=update head=property party=participant",x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Conferences/{ConferenceSid}/Participants/{CallSid}.json,DELETE,DeleteParticipant,x,high,U:L2-danger-verb|V2-verb-consequential,A=verbs=kick B=verb=kick,x,true,both
+twilio,/2010-04-01/Accounts/{AccountSid}/Conferences/{ConferenceSid}/Participants.json,POST,CreateParticipant,x,high,U:L3-live-noun|V2-verb-consequential,"A=nouns=conference,participant verb=create B=verb=create",x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Payments.json,POST,CreatePayments,x,high,U:L2-danger-verb|V2-verb-consequential,"A=verbs=pay,start B=verb=create",x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Payments/{Sid}.json,POST,UpdatePayments,x,high,U:L2-danger-verb|V5-verb-write,A=verbs=pay B=verb=update,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Queues/{Sid}.json,POST,UpdateQueue,x,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Queues/{Sid}.json,DELETE,DeleteQueue,w,method-only,U:L5-floor|V6-floor,A=verb=remove B=verb=remove head=queue,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Queues.json,POST,CreateQueue,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Transcriptions.json,POST,CreateRealtimeTranscription,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=call verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Transcriptions/{Sid}.json,POST,UpdateRealtimeTranscription,x,high,U:L2-danger-verb|V3-party-object,A=verbs=stop B=verb=stop head=transcription party=transcription,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Recordings/{Sid}.json,DELETE,DeleteRecording,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Recordings/{ReferenceSid}/AddOnResults/{Sid}.json,DELETE,DeleteRecordingAddOnResult,x,low,U:L2-danger-verb|V5-verb-write,"A=verbs=pay,purg B=verb=delete",w,false,wordlist
+twilio,/2010-04-01/Accounts/{AccountSid}/Recordings/{ReferenceSid}/AddOnResults/{AddOnResultSid}/Payloads/{Sid}.json,DELETE,DeleteRecordingAddOnResultPayload,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=pay B=verb=delete,w,false,wordlist
+twilio,/2010-04-01/Accounts/{AccountSid}/Recordings/{RecordingSid}/Transcriptions/{Sid}.json,DELETE,DeleteRecordingTranscription,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SMS/ShortCodes/{Sid}.json,POST,UpdateShortCode,x,high,U:L3-live-noun|V5-verb-write,A=nouns=sms verb=update B=verb=update,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SigningKeys/{Sid}.json,POST,UpdateSigningKey,x,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SigningKeys/{Sid}.json,DELETE,DeleteSigningKey,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/Auth/Calls/CredentialListMappings.json,POST,CreateSipAuthCallsCredentialListMapping,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=call verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/Auth/Calls/CredentialListMappings/{Sid}.json,DELETE,DeleteSipAuthCallsCredentialListMapping,x,low,U:L3-live-noun|V5-verb-write,A=nouns=call verb=delete B=verb=delete,w,false,wordlist
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/Auth/Calls/IpAccessControlListMappings.json,POST,CreateSipAuthCallsIpAccessControlListMapping,x,high,U:L3-live-noun|V2-verb-consequential,"A=nouns=access,call verb=create B=verb=create",x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/Auth/Calls/IpAccessControlListMappings/{Sid}.json,DELETE,DeleteSipAuthCallsIpAccessControlListMapping,x,low,U:L3-live-noun|V5-verb-write,"A=nouns=access,call verb=delete B=verb=delete",w,false,wordlist
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/Auth/Registrations/CredentialListMappings.json,POST,CreateSipAuthRegistrationsCredentialListMapping,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/Auth/Registrations/CredentialListMappings/{Sid}.json,DELETE,DeleteSipAuthRegistrationsCredentialListMapping,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/CredentialLists/{CredentialListSid}/Credentials.json,POST,CreateSipCredential,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/CredentialLists/{CredentialListSid}/Credentials/{Sid}.json,POST,UpdateSipCredential,x,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/CredentialLists/{CredentialListSid}/Credentials/{Sid}.json,DELETE,DeleteSipCredential,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/CredentialLists.json,POST,CreateSipCredentialList,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/CredentialLists/{Sid}.json,POST,UpdateSipCredentialList,x,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/CredentialLists/{Sid}.json,DELETE,DeleteSipCredentialList,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/CredentialListMappings.json,POST,CreateSipCredentialListMapping,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/CredentialListMappings/{Sid}.json,DELETE,DeleteSipCredentialListMapping,x,low,U:L5-floor|V3-party-object,A=verb=delete B=verb=delete head=resource party=account,w,false,verb
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/Domains.json,POST,CreateSipDomain,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{Sid}.json,POST,UpdateSipDomain,x,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{Sid}.json,DELETE,DeleteSipDomain,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/IpAccessControlLists.json,POST,CreateSipIpAccessControlList,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/IpAccessControlLists/{Sid}.json,POST,UpdateSipIpAccessControlList,x,high,U:L5-floor|V5-verb-write,A=verb=rename B=verb=rename,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/IpAccessControlLists/{Sid}.json,DELETE,DeleteSipIpAccessControlList,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/IpAccessControlListMappings/{Sid}.json,DELETE,DeleteSipIpAccessControlListMapping,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/IpAccessControlListMappings.json,POST,CreateSipIpAccessControlListMapping,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/IpAccessControlLists/{IpAccessControlListSid}/IpAddresses.json,POST,CreateSipIpAddress,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/IpAccessControlLists/{IpAccessControlListSid}/IpAddresses/{Sid}.json,POST,UpdateSipIpAddress,x,high,U:L5-floor|V5-verb-write,A=verb=update B=verb=update,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/SIP/IpAccessControlLists/{IpAccessControlListSid}/IpAddresses/{Sid}.json,DELETE,DeleteSipIpAddress,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Siprec.json,POST,CreateSiprec,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=call verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Siprec/{Sid}.json,POST,UpdateSiprec,x,high,U:L2-danger-verb|V6-floor,A=verbs=stop B=verb=stop head=siprec,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Streams.json,POST,CreateStream,x,high,U:L3-live-noun|V2-verb-consequential,"A=nouns=call,stream verb=create B=verb=create",x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Streams/{Sid}.json,POST,UpdateStream,x,high,U:L2-danger-verb|V3-party-object,A=verbs=stop B=verb=stop head=stream party=stream,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Tokens.json,POST,CreateToken,x,high,U:L5-floor|V2-verb-consequential,A=verb=create B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Transcriptions/{Sid}.json,DELETE,DeleteTranscription,x,low,U:L5-floor|V3-party-object,A=verb=delete B=verb=delete head=transcription party=transcription,w,false,verb
+twilio,/2010-04-01/Accounts/{AccountSid}/Usage/Triggers/{Sid}.json,POST,UpdateUsageTrigger,x,high,U:L2-danger-verb|V5-verb-write,A=verbs=trigger B=verb=update,w,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Usage/Triggers/{Sid}.json,DELETE,DeleteUsageTrigger,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=trigger B=verb=delete,w,false,wordlist
+twilio,/2010-04-01/Accounts/{AccountSid}/Usage/Triggers.json,POST,CreateUsageTrigger,x,high,U:L2-danger-verb|V2-verb-consequential,A=verbs=trigger B=verb=create,x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/UserDefinedMessages.json,POST,CreateUserDefinedMessage,x,high,U:L3-live-noun|V2-verb-consequential,"A=nouns=call,message verb=create B=verb=create",x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/UserDefinedMessageSubscriptions.json,POST,CreateUserDefinedMessageSubscription,x,high,U:L3-live-noun|V2-verb-consequential,"A=nouns=call,message verb=subscribe B=verb=subscribe",x,true,neither
+twilio,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/UserDefinedMessageSubscriptions/{Sid}.json,DELETE,DeleteUserDefinedMessageSubscription,x,low,U:L3-live-noun|V5-verb-write,"A=nouns=call,message verb=delete B=verb=delete",w,false,wordlist
+stripe,/v1/accounts/{account},DELETE,DeleteAccountsAccount,x,high,U:L3-live-noun|V3-party-object,A=nouns=access verb=delete B=verb=delete head=account party=account,x,true,both
+stripe,/v1/accounts/{account}/bank_accounts/{id},DELETE,DeleteAccountsAccountBankAccountsId,x,low,U:L5-floor|V3-party-object,A=verb=delete B=verb=delete head=account party=account,w,false,verb
+stripe,/v1/accounts/{account}/external_accounts/{id},DELETE,DeleteAccountsAccountExternalAccountsId,x,low,U:L5-floor|V3-party-object,A=verb=delete B=verb=delete head=account party=account,w,false,verb
+stripe,/v1/accounts/{account}/people/{person},DELETE,DeleteAccountsAccountPeoplePerson,x,high,U:L2-danger-verb|V3-party-object,A=verbs=execut B=verb=delete head=person party=person,w,true,both
+stripe,/v1/accounts/{account}/persons/{person},DELETE,DeleteAccountsAccountPersonsPerson,x,high,U:L2-danger-verb|V3-party-object,A=verbs=execut B=verb=delete head=person party=person,w,true,both
+stripe,/v1/apple_pay/domains/{domain},DELETE,DeleteApplePayDomainsDomain,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=pay B=verb=delete,w,false,wordlist
+stripe,/v1/coupons/{coupon},DELETE,DeleteCouponsCoupon,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/customers/{customer},DELETE,DeleteCustomersCustomer,x,high,U:L2-danger-verb|V3-party-object,"A=verbs=cancel,cannot be undone,permanent B=verb=delete head=customer party=customer",x,true,both
+stripe,/v1/customers/{customer}/bank_accounts/{id},DELETE,DeleteCustomersCustomerBankAccountsId,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/customers/{customer}/cards/{id},DELETE,DeleteCustomersCustomerCardsId,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/customers/{customer}/discount,DELETE,DeleteCustomersCustomerDiscount,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/customers/{customer}/sources/{id},DELETE,DeleteCustomersCustomerSourcesId,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/customers/{customer}/subscriptions/{subscription_exposed_id},DELETE,DeleteCustomersCustomerSubscriptionsSubscriptionExposedId,x,high,U:L2-danger-verb|V2-verb-consequential,"A=verbs=cancel,charg,terminat B=verb=cancel",x,true,both
+stripe,/v1/customers/{customer}/subscriptions/{subscription_exposed_id}/discount,DELETE,DeleteCustomersCustomerSubscriptionsSubscriptionExposedIdDiscount,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/customers/{customer}/tax_ids/{id},DELETE,DeleteCustomersCustomerTaxIdsId,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/ephemeral_keys/{key},DELETE,DeleteEphemeralKeysKey,w,method-only,U:L5-floor|V6-floor,A=verb=immediately B=verb=immediately head=key,w,true,neither
+stripe,/v1/invoiceitems/{invoiceitem},DELETE,DeleteInvoiceitemsInvoiceitem,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/invoices/{invoice},DELETE,DeleteInvoicesInvoice,x,low,U:L2-danger-verb|V5-verb-write,"A=verbs=cannot be undone,permanent B=verb=delete",w,false,wordlist
+stripe,/v1/plans/{plan},DELETE,DeletePlansPlan,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/products/{id},DELETE,DeleteProductsId,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/products/{product}/features/{id},DELETE,DeleteProductsProductFeaturesId,w,method-only,U:L5-floor|V6-floor,A=verb=remove B=verb=remove head=feature,w,true,neither
+stripe,/v1/radar/value_list_items/{item},DELETE,DeleteRadarValueListItemsItem,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/radar/value_lists/{value_list},DELETE,DeleteRadarValueListsValueList,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/subscription_items/{item},DELETE,DeleteSubscriptionItemsItem,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=cancel B=verb=delete,w,false,wordlist
+stripe,/v1/subscriptions/{subscription_exposed_id},DELETE,DeleteSubscriptionsSubscriptionExposedId,x,high,U:L2-danger-verb|V2-verb-consequential,"A=verbs=cancel,charg,stop B=verb=cancel",x,true,both
+stripe,/v1/subscriptions/{subscription_exposed_id}/discount,DELETE,DeleteSubscriptionsSubscriptionExposedIdDiscount,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/tax_ids/{id},DELETE,DeleteTaxIdsId,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/terminal/configurations/{configuration},DELETE,DeleteTerminalConfigurationsConfiguration,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/terminal/locations/{location},DELETE,DeleteTerminalLocationsLocation,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/terminal/readers/{reader},DELETE,DeleteTerminalReadersReader,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/test_helpers/test_clocks/{test_clock},DELETE,DeleteTestHelpersTestClocksTestClock,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+stripe,/v1/webhook_endpoints/{webhook_endpoint},DELETE,DeleteWebhookEndpointsWebhookEndpoint,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+github,/app/installations/{installation_id},DELETE,apps/delete-installation,x,high,U:L2-danger-verb|V3-party-object,A=verbs=suspend B=verb=delete head=installation party=installation,x,true,both
+github,/applications/{client_id}/token,DELETE,apps/delete-token,x,high,U:L2-danger-verb|V3-party-object,A=verbs=revok B=verb=delete head=token party=token,x,true,both
+github,/enterprises/{enterprise}/code-security/configurations/{configuration_id},DELETE,code-security/delete-configuration-for-enterprise,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=delete B=verb=delete,w,false,wordlist
+github,/enterprises/{enterprise}/dependabot/repository-access/default-level,PUT,dependabot/set-repository-access-default-level-for-enterprise,x,low,U:L3-live-noun|V5-verb-write,"A=nouns=access,grant verb=set B=verb=set",w,false,wordlist
+github,/enterprises/{enterprise}/teams/{enterprise-team}/organizations/{org},PUT,enterprise-team-organizations/add,x,low,U:L5-floor|V2-verb-consequential,A=verb=add B=verb=add,x,false,verb
+github,/gists/{gist_id}/star,DELETE,gists/unstar,w,high,U:L5-floor|V5-verb-write,A=verb=unstar B=verb=unstar,w,true,neither
+github,/notifications/threads/{thread_id},DELETE,activity/mark-thread-as-done,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=notif B=verb=mark,w,false,wordlist
+github,/organizations/{org}/actions/cache/storage-limit,PUT,actions/set-actions-cache-storage-limit-for-organization,x,high,U:L3-live-noun|V3-party-object,A=nouns=access verb=set B=verb=set head=storage party=organization,w,true,both
+github,/orgs/{org}/actions/hosted-runners/images/custom/{image_definition_id}/versions/{version},DELETE,actions/delete-custom-image-version-from-org,x,high,U:L3-live-noun|V3-party-object,A=nouns=access verb=delete B=verb=delete head=version party=organization,w,true,both
+github,/orgs/{org}/actions/permissions,PUT,actions/set-github-actions-permissions-organization,x,high,U:L3-live-noun|V3-party-object,"A=nouns=access,permission verb=set B=verb=set head=permission party=permission",w,true,both
+github,/orgs/{org}/actions/permissions/repositories,PUT,actions/set-selected-repositories-enabled-github-actions-organization,x,low,U:L3-live-noun|V5-verb-write,"A=nouns=access,permission verb=set B=verb=set",w,false,wordlist
+github,/orgs/{org}/actions/permissions/self-hosted-runners,PUT,actions/set-self-hosted-runners-permissions-organization,x,high,U:L3-live-noun|V3-party-object,"A=nouns=access,permission verb=set B=verb=set head=setting party=organization",w,true,both
+github,/orgs/{org}/actions/permissions/workflow,PUT,actions/set-github-actions-default-workflow-permissions-organization,x,high,U:L3-live-noun|V3-party-object,"A=nouns=access,grant,permission verb=set B=verb=set head=permission party=permission",w,true,both
+github,/orgs/{org}/actions/runner-groups/{runner_group_id}/repositories/{repository_id},PUT,actions/add-repo-access-to-self-hosted-runner-group-in-org,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=access verb=add B=verb=add,w,true,both
+github,/orgs/{org}/actions/runners/{runner_id},DELETE,actions/delete-self-hosted-runner-from-org,x,high,U:L3-live-noun|V3-party-object,A=nouns=access verb=delete B=verb=delete head=runner party=organization,w,true,both
+github,/orgs/{org}/actions/secrets/{secret_name},DELETE,actions/delete-org-secret,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=delete B=verb=delete,w,false,wordlist
+github,/orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id},PUT,actions/add-selected-repo-to-org-secret,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=access verb=add B=verb=add,w,true,both
+github,/orgs/{org}/actions/variables/{name}/repositories/{repository_id},PUT,actions/add-selected-repo-to-org-variable,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=access verb=add B=verb=add,w,true,both
+github,/orgs/{org}/agents/secrets/{secret_name}/repositories/{repository_id},DELETE,agents/remove-selected-repo-from-org-secret,x,high,U:L3-live-noun|V3-party-object,A=nouns=access verb=remove B=verb=remove head=repository party=repository,w,true,both
+github,/orgs/{org}/agents/variables/{name}/repositories/{repository_id},DELETE,agents/remove-selected-repo-from-org-variable,x,high,U:L3-live-noun|V3-party-object,A=nouns=access verb=remove B=verb=remove head=repository party=repository,w,true,both
+github,/orgs/{org}/blocks/{username},DELETE,orgs/unblock-user,x,high,U:L2-danger-verb|V3-party-object,A=verbs=block B=verb=unblock head=user party=user,w,true,both
+github,/orgs/{org}/code-security/configurations/{configuration_id},DELETE,code-security/delete-configuration,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=delete B=verb=delete,w,false,wordlist
+github,/orgs/{org}/codespaces/secrets/{secret_name},DELETE,codespaces/delete-org-secret,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=delete B=verb=delete,w,false,wordlist
+github,/orgs/{org}/codespaces/secrets/{secret_name}/repositories/{repository_id},PUT,codespaces/add-selected-repo-to-org-secret,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=access verb=add B=verb=add,w,true,both
+github,/orgs/{org}/copilot-spaces/{space_number}/collaborators/{actor_type}/{actor_identifier},PUT,copilot-spaces/update-collaborator-for-org,x,high,U:L3-live-noun|V3-party-object,"A=nouns=access,grant,permission verb=set B=verb=set head=role party=role",x,true,both
+github,/orgs/{org}/copilot/billing/selected_users,DELETE,copilot/cancel-copilot-seat-assignment-for-users,x,high,U:L2-danger-verb|V3-party-object,"A=verbs=cancel,revok B=verb=remove head=user party=user",x,true,both
+github,/orgs/{org}/copilot/coding-agent/permissions/repositories/{repository_id},PUT,copilot/enable-copilot-coding-agent-for-repository-in-organization,x,high,U:L3-live-noun|V3-party-object,"A=nouns=access,call,permission verb=enable B=verb=enable head=repository party=repository",w,true,both
+github,/orgs/{org}/dependabot/secrets/{secret_name},PUT,dependabot/create-or-update-org-secret,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=access verb=create B=verb=create,w,true,both
+github,/orgs/{org}/hooks/{hook_id},DELETE,orgs/delete-webhook,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=delete B=verb=delete,w,false,wordlist
+github,/orgs/{org}/issue-fields/{issue_field_id},DELETE,orgs/delete-issue-field,x,high,U:L3-live-noun|V3-party-object,A=nouns=access verb=delete B=verb=delete head=field party=organization,w,true,both
+github,/orgs/{org}/members/{username}/codespaces/{codespace_name},DELETE,codespaces/delete-from-organization,x,high,U:L3-live-noun|V3-party-object,A=nouns=access verb=delete B=verb=delete head=codespace party=codespace,x,true,both
+github,/orgs/{org}/migrations/{migration_id}/repos/{repo_name}/lock,DELETE,migrations/unlock-repo-for-org,x,low,U:L5-floor|V3-party-object,A=verb=unlock B=verb=unlock head=repository party=repository,w,false,verb
+github,/orgs/{org}/organization-roles/users/{username},DELETE,orgs/revoke-all-org-roles-user,x,high,U:L2-danger-verb|V3-party-object,A=verbs=revok B=verb=remove head=role party=role,x,true,both
+github,/orgs/{org}/outside_collaborators/{username},PUT,orgs/convert-member-to-outside-collaborator,x,high,U:L3-live-noun|V3-party-object,"A=nouns=access,membership verb=convert B=verb=convert head=member party=member",x,true,both
+github,/orgs/{org}/projectsV2/{project_number}/items/{item_id},DELETE,projects/delete-item-for-org,x,low,U:L5-floor|V3-party-object,A=verb=delete B=verb=delete head=item party=organization,w,false,verb
+github,/orgs/{org}/public_members/{username},PUT,orgs/set-public-membership-for-authenticated-user,x,high,U:L2-danger-verb|V3-party-object,A=verbs=start B=verb=set head=membership party=membership,w,true,both
+github,/orgs/{org}/security-managers/teams/{team_slug},DELETE,orgs/remove-security-manager-team,x,high,U:L2-danger-verb|V3-party-object,A=verbs=start B=verb=remove head=team party=team,x,true,both
+github,/orgs/{org}/settings/immutable-releases/repositories/{repository_id},DELETE,orgs/disable-selected-repository-immutable-releases-organization,x,high,U:L2-danger-verb|V3-party-object,A=verbs=releas B=verb=disable head=repository party=repository,w,true,both
+github,/orgs/{org}/teams/{team_slug}/memberships/{username},DELETE,teams/remove-membership-for-user-in-org,x,high,U:L2-danger-verb|V3-party-object,A=verbs=start B=verb=remove head=membership party=membership,x,true,both
+github,/repos/{owner}/{repo},DELETE,repos/delete,x,high,U:L3-live-noun|V3-party-object,A=nouns=access verb=delete B=verb=delete head=repository party=repository,x,true,both
+github,/repos/{owner}/{repo}/actions/caches,DELETE,actions/delete-actions-cache-by-key,x,high,U:L3-live-noun|V3-party-object,A=nouns=access verb=delete B=verb=delete head=cache party=repository,w,true,both
+github,/repos/{owner}/{repo}/actions/permissions/access,PUT,actions/set-workflow-access-to-repository,x,high,U:L3-live-noun|V3-party-object,"A=nouns=access,permission verb=set B=verb=set head=level party=access",w,true,both
+github,/repos/{owner}/{repo}/actions/permissions/selected-actions,PUT,actions/set-allowed-actions-repository,x,high,U:L3-live-noun|V3-party-object,"A=nouns=access,permission verb=set B=verb=set head=action party=repository",w,true,both
+github,/repos/{owner}/{repo}/actions/runners/{runner_id}/labels,PUT,actions/set-custom-labels-for-self-hosted-runner-for-repo,x,high,U:L3-live-noun|V3-party-object,A=nouns=access verb=set B=verb=set head=label party=repository,w,true,both
+github,/repos/{owner}/{repo}/actions/secrets/{secret_name},DELETE,actions/delete-repo-secret,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=delete B=verb=delete,w,false,wordlist
+github,/repos/{owner}/{repo}/actions/workflows/{workflow_id}/enable,PUT,actions/enable-workflow,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=enable B=verb=enable,w,false,wordlist
+github,/repos/{owner}/{repo}/autolinks/{autolink_id},DELETE,repos/delete-autolink,x,low,U:L5-floor|V3-party-object,A=verb=delete B=verb=delete head=reference party=repository,w,false,verb
+github,/repos/{owner}/{repo}/branches/{branch}/protection,PUT,repos/update-branch-protection,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=start B=verb=update,w,false,wordlist
+github,/repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks,DELETE,repos/remove-status-check-protection,x,low,U:L2-danger-verb|V6-floor,A=verbs=start B=verb=remove head=protection,w,false,wordlist
+github,/repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps,DELETE,repos/remove-app-access-restrictions,x,high,U:L2-danger-verb|V3-party-object,A=verbs=start B=verb=remove head=restriction party=restriction,x,true,both
+github,/repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users,DELETE,repos/remove-user-access-restrictions,x,high,U:L2-danger-verb|V3-party-object,A=verbs=start B=verb=remove head=restriction party=restriction,x,true,both
+github,/repos/{owner}/{repo}/codespaces/secrets/{secret_name},DELETE,codespaces/delete-repo-secret,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=delete B=verb=delete,w,false,wordlist
+github,/repos/{owner}/{repo}/comments/{comment_id},DELETE,repos/delete-commit-comment,w,high,U:L5-floor|V5-verb-write,A=verb=delete B=verb=delete,w,true,neither
+github,/repos/{owner}/{repo}/dependabot/secrets/{secret_name},DELETE,dependabot/delete-repo-secret,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=delete B=verb=delete,w,false,wordlist
+github,/repos/{owner}/{repo}/environments/{environment_name},PUT,repos/create-or-update-environment,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=access verb=create B=verb=create,w,true,both
+github,/repos/{owner}/{repo}/environments/{environment_name}/secrets/{secret_name},DELETE,actions/delete-environment-secret,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=delete B=verb=delete,w,false,wordlist
+github,/repos/{owner}/{repo}/hooks/{hook_id},DELETE,repos/delete-webhook,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=delete B=verb=delete,w,false,wordlist
+github,/repos/{owner}/{repo}/import,PUT,migrations/start-import,x,high,U:L2-danger-verb|V2-verb-consequential,A=verbs=start B=verb=start,x,true,both
+github,/repos/{owner}/{repo}/interaction-limits/pulls/bypass-list,PUT,interactions/set-pull-request-bypass-list-for-repo,x,high,U:L3-live-noun|V2-verb-consequential,A=nouns=permission verb=add B=verb=add,w,true,both
+github,/repos/{owner}/{repo}/issues/comments/{comment_id}/pin,PUT,issues/pin-comment,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=start B=verb=pin,w,false,wordlist
+github,/repos/{owner}/{repo}/issues/{issue_number}/issue-field-values,PUT,issues/set-issue-field-values,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=set B=verb=set,x,false,wordlist
+github,/repos/{owner}/{repo}/issues/{issue_number}/labels/{name},DELETE,issues/remove-label,w,method-only,U:L5-floor|V6-floor,A=verb=remove B=verb=remove head=label,w,true,neither
+github,/repos/{owner}/{repo}/issues/{issue_number}/sub_issue,DELETE,issues/remove-sub-issue,x,low,U:L2-danger-verb|V6-floor,A=verbs=start B=verb=remove head=issue,x,false,wordlist
+github,/repos/{owner}/{repo}/notifications,PUT,activity/mark-repo-notifications-as-read,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=notif B=verb=mark,w,false,wordlist
+github,/repos/{owner}/{repo}/private-vulnerability-reporting,PUT,repos/enable-private-vulnerability-reporting,x,high,U:L3-live-noun|V3-party-object,A=nouns=access verb=enable B=verb=enable head=reporting party=repository,w,true,both
+github,/repos/{owner}/{repo}/pulls/{pull_number}/merge-async,PUT,pulls/merge-async,x,low,U:L5-floor|V2-verb-consequential,A=verb=merge B=verb=merge,x,false,verb
+github,/repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/dismissals,PUT,pulls/dismiss-review,x,low,U:L2-danger-verb|V6-floor,A=verbs=start B=verb=dismiss head=review,w,false,wordlist
+github,/repos/{owner}/{repo}/releases/{release_id}/reactions/{reaction_id},DELETE,reactions/delete-for-release,x,low,U:L2-danger-verb|V5-verb-write,A=verbs=releas B=verb=delete,w,false,wordlist
+github,/repos/{owner}/{repo}/subscription,DELETE,activity/delete-repo-subscription,x,low,U:L2-danger-verb|V5-verb-write,"A=verbs=notif,stop B=verb=delete",w,false,wordlist
+github,/repos/{owner}/{repo}/vulnerability-alerts,PUT,repos/enable-vulnerability-alerts,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=enable B=verb=enable,w,false,wordlist
+github,/teams/{team_id}/memberships/{username},DELETE,teams/remove-membership-for-user-legacy,x,high,U:L2-danger-verb|V3-party-object,A=verbs=start B=verb=remove head=membership party=membership,x,true,both
+github,/user/blocks/{username},DELETE,users/unblock,x,high,U:L2-danger-verb|V3-party-object,A=verbs=block B=verb=unblock head=user party=user,w,true,both
+github,/user/codespaces/secrets/{secret_name}/repositories,PUT,codespaces/set-repositories-for-secret-for-authenticated-user,x,high,U:L3-live-noun|V3-party-object,A=nouns=access verb=set B=verb=set head=repository party=repository,w,true,both
+github,/user/emails,DELETE,users/delete-email-for-authenticated-user,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=delete B=verb=delete,w,false,wordlist
+github,/user/installations/{installation_id}/repositories/{repository_id},DELETE,apps/remove-repo-from-installation-for-authenticated-user,x,high,U:L3-live-noun|V3-party-object,"A=nouns=access,installation verb=remove B=verb=remove head=repository party=repository",x,true,both
+github,/user/keys/{key_id},DELETE,users/delete-public-ssh-key-for-authenticated-user,x,low,U:L3-live-noun|V5-verb-write,A=nouns=access verb=delete B=verb=delete,w,false,wordlist
+github,/user/packages/{package_type}/{package_name}/versions/{package_version_id},DELETE,packages/delete-package-version-for-authenticated-user,x,low,U:L3-live-noun|V5-verb-write,"A=nouns=access,permission verb=delete B=verb=delete",w,false,wordlist
+github,/user/starred/{owner}/{repo},DELETE,activity/unstar-repo-for-authenticated-user,x,low,U:L5-floor|V3-party-object,A=verb=unstar B=verb=unstar head=repository party=repository,w,false,verb
+github,/users/{username}/copilot-spaces/{space_number},DELETE,copilot-spaces/delete-for-user,x,high,U:L2-danger-verb|V3-party-object,"A=verbs=cannot be undone,permanent B=verb=delete head=space party=user",w,true,both
+github,/users/{username}/copilot-spaces/{space_number}/resources/{space_resource_id},DELETE,copilot-spaces/delete-resource-for-user,x,high,U:L3-live-noun|V3-party-object,"A=nouns=access,permission verb=delete B=verb=delete head=resource party=user",w,true,both
+github,/users/{username}/projectsV2/{project_number}/items/{item_id},DELETE,projects/delete-item-for-user,x,low,U:L5-floor|V3-party-object,A=verb=delete B=verb=delete head=item party=user,w,false,verb
