@@ -1016,6 +1016,62 @@ one. The structural signal (the resource schema points at a user) is
 the version of this fix that does not need a new word per vendor. M1
 first item unchanged.
 
+### E24 — two axes: a destructive flag beside r/w/x, first grid (2026-09-07)
+
+(a) Why. The user argued w is also dangerous and proposed x =
+delete/remove, w = add/update, so a Gmail agent could be granted "read
+and reply, never delete". That is a different question from blast
+radius (MCP's destructiveHint asks exactly it: destructive versus
+additive), and one ordered letter cannot carry both; under that
+proposal pay, send, reply and add-a-stranger-to-admins all become w.
+Decision "two axes": r/w/x stays radius or non-repeatability (D20);
+destructive becomes a separate boolean derived from method and lead
+verb only, never from the class. This also exposes a defect in PRD
+§4.3's untested mapping destructiveHint = (class == x), which sends
+"delete my own file" (w) out as non-destructive.
+
+(b) POC. poc/m0/rules-destructive.mjs destructiveFlag(op): D1 method
+DELETE -> true; D2 lead verb (leadVerb from rules-vn.mjs) in
+poc/m0/destructive.json (23 stems: delete, remove, purge, wipe,
+destroy, erase, clear, drop, revoke, unassign, uninstall, detach,
+terminate, cancel, kill, reset, truncate, expire, disable, deactivate,
+suspend, ban, block; written before scoring, from MCP's definition,
+unmeasured) -> true; D3 else false. poc/m0/run-axes.mjs prints a 3x2
+grid per set by truth class and by tool class, a mapping check, and
+samples. 7 new tests, 97 pass total. No existing file changed.
+Clean-exam CSV docs/logs/m0/axes-E24.csv.
+
+(c) Grid by TRUTH class, cells destructive false | true. CAMARA build:
+r 76|0, w 7|17, x 36|4. CAMARA test: r 79|0, w 9|18, x 40|6. Hold-out
+1: r 0|0, w 45|95, x 49|18. Clean exam: r 104|0, w 43|20, x 45|8. Over
+all 719 labelled rows: truth-w and destructive 150 (own deletes);
+truth-x and non-destructive 170 (reach others by adding: create
+payment, create call, register endpoints, create comment, create
+subaccount, upload file version); truth-x and destructive 36; no r row
+is destructive.
+
+(d) Mapping check, destructiveHint = (tool class == x) versus the
+flag: tool x but flag false, CAMARA 62 + 62, hold-out 1 94, clean exam
+72 (Ask question, Generate text, Create comment, Create payment); tool
+w but flag true, CAMARA 1 + 8, hold-out 1 39, clean exam 14 (Delete
+file, Delete folder, Remove shared link, Delete escalation policy).
+The class-derived hint is wrong on 352 of 719 rows in one direction or
+the other.
+
+(e) Negative controls: terminateCall x and destructive true (D1);
+updateSessionStatus x and destructive false. The second is correct
+under MCP's definition (a status update breaks nothing) and shows the
+axes are independent.
+
+(f) Reading, once. The two questions really are different: the largest
+cells are exactly the two the single-letter schemes cannot separate,
+own deletes (w, destructive) and additive reach (x, non-destructive).
+The flag is cheap, the method gives most of it, and it fixes the §4.3
+mapping. What is not yet known is whether the verb list is right: no
+reader has labelled destructive, so its false positives (cancel,
+block, reset, expire as first verbs) and misses are unmeasured. That
+measurement, plus the mapping change in §4.3, go to the PRD as D28.
+
 ### How the E19 union works, in plain words (2026-09-07)
 
 Written for the user at M0 close; the code is poc/m0/rules-union.mjs,
@@ -1070,7 +1126,7 @@ That is M1.
 
 ### Next
 
-M0 has run twenty-three shapes and two blind hold-outs. The clean exam
+M0 has run twenty-four shapes and two blind hold-outs. The clean exam
 (E23) now has 0 wrong loosenings of 220 at any confidence, so the gate
 is met on all three sets — CAMARA, the first hold-out, and the clean
 exam — with no low-confidence leak beside it. The miss was closed by
@@ -1085,4 +1141,6 @@ four-token cap in objectHead was removed and its object head reached
 that never raised correctly.
 M0 should close with the numbers as they are;
 what the gate is met on and what it is not met on is now stated per
-set, which is the report the PRD asked for.
+set, which is the report the PRD asked for. The destructive flag
+(E24) is a second axis, not a class; its verb list is unmeasured
+against any hand label and that measurement is an M1 item.

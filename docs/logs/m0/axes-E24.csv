@@ -1,0 +1,221 @@
+repo,path,method,operationId,summary,tool_class,gt_class,confidence,destructive,d_rule,d_evidence
+box,/ai/ask,POST,post_ai_ask,Ask question,x,r,high,false,D3-not-destructive,method=POST verb=ask
+box,/ai/text_gen,POST,post_ai_text_gen,Generate text,x,r,high,false,D3-not-destructive,method=POST verb=generate
+box,/ai_agents,POST,post_ai_agents,Create AI agent,x,x,high,false,D3-not-destructive,method=POST verb=create
+box,/ai_agents/{agent_id},PUT,put_ai_agents_id,Update AI agent,x,w,low,false,D3-not-destructive,method=PUT verb=update
+box,/collaboration_whitelist_entries,POST,post_collaboration_whitelist_entries,Add domain to list of allowed collaboration domains,x,x,high,false,D3-not-destructive,method=POST verb=add
+box,/collaboration_whitelist_exempt_targets,GET,get_collaboration_whitelist_exempt_targets,List users exempt from collaboration domain restrictions,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/collaboration_whitelist_exempt_targets/{collaboration_whitelist_exempt_target_id},GET,get_collaboration_whitelist_exempt_targets_id,Get user exempt from collaboration domain restrictions,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/collaborations/{collaboration_id},DELETE,delete_collaborations_id,Remove collaboration,x,x,low,true,D1-method-delete,method=DELETE
+box,/collections,GET,get_collections,List all collections,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/comments,POST,post_comments,Create comment,x,x,high,false,D3-not-destructive,method=POST verb=create
+box,/comments/{comment_id},PUT,put_comments_id,Update comment,x,w,low,false,D3-not-destructive,method=PUT verb=update
+box,/enterprises/{enterprise_id}/device_pinners,GET,get_enterprises_id_device_pinners,List enterprise device pins,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/file_requests/{file_request_id},GET,get_file_requests_id,Get file request,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/file_version_legal_holds,GET,get_file_version_legal_holds,List file version legal holds,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/file_version_retentions/{file_version_retention_id},GET,get_file_version_retentions_id,Get retention on file,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/files/upload_sessions/{upload_session_id},DELETE,delete_files_upload_sessions_id,Remove upload session,x,w,high,true,D1-method-delete,method=DELETE
+box,/files/upload_sessions/{upload_session_id}/commit,POST,post_files_upload_sessions_id_commit,Commit upload session,x,x,high,false,D3-not-destructive,method=POST verb=commit
+box,/files/{file_id},DELETE,delete_files_id,Delete file,w,w,high,true,D1-method-delete,method=DELETE
+box,/files/{file_id},PUT,put_files_id,Update file,w,w,high,false,D3-not-destructive,method=PUT verb=update
+box,/files/{file_id}#remove_shared_link,PUT,put_files_id#remove_shared_link,Remove shared link from file,w,w,method-only,true,D2-verb-destructive,verb=remove
+box,/files/{file_id}/collaborations,GET,get_files_id_collaborations,List file collaborations,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/files/{file_id}/content,POST,post_files_id_content,Upload file version,x,x,high,false,D3-not-destructive,method=POST verb=upload
+box,/files/{file_id}/metadata/enterprise/securityClassification-6VMVochwUWo,DELETE,delete_files_id_metadata_enterprise_securityClassification-6VMVochwUWo,Remove classification from file,x,w,low,true,D1-method-delete,method=DELETE
+box,/files/{file_id}/metadata/enterprise/securityClassification-6VMVochwUWo,PUT,put_files_id_metadata_enterprise_securityClassification-6VMVochwUWo,Update classification on file,w,w,high,false,D3-not-destructive,method=PUT verb=update
+box,/files/{file_id}/metadata/global/boxSkillsCards,POST,post_files_id_metadata_global_boxSkillsCards,Create Box Skill cards on file,x,w,high,false,D3-not-destructive,method=POST verb=create
+box,/files/{file_id}/metadata/{scope}/{template_key},GET,get_files_id_metadata_id_id,Get metadata instance on file,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/files/{file_id}/tasks,GET,get_files_id_tasks,List tasks on file,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/files/{file_id}/trash,GET,get_files_id_trash,Get trashed file,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/files/{file_id}/versions/current,POST,post_files_id_versions_current,Promote file version,x,x,method-only,false,D3-not-destructive,method=POST verb=promote
+box,/files/{file_id}/versions/{file_version_id},PUT,put_files_id_versions_id,Restore file version,w,w,method-only,false,D3-not-destructive,method=PUT verb=restore
+box,/files/{file_id}/watermark,PUT,put_files_id_watermark,Apply watermark to file,w,w,method-only,false,D3-not-destructive,method=PUT verb=apply
+box,/folder_locks/{folder_lock_id},DELETE,delete_folder_locks_id,Delete folder lock,w,w,high,true,D1-method-delete,method=DELETE
+box,/folders/{folder_id},DELETE,delete_folders_id,Delete folder,w,w,high,true,D1-method-delete,method=DELETE
+box,/folders/{folder_id},PUT,put_folders_id,Update folder,w,w,high,false,D3-not-destructive,method=PUT verb=update
+box,/folders/{folder_id}#remove_shared_link,PUT,put_folders_id#remove_shared_link,Remove shared link from folder,w,w,method-only,true,D2-verb-destructive,verb=remove
+box,/folders/{folder_id}/collaborations,GET,get_folders_id_collaborations,List folder collaborations,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/folders/{folder_id}/metadata,GET,get_folders_id_metadata,List metadata instances on folder,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/folders/{folder_id}/metadata/enterprise/securityClassification-6VMVochwUWo,POST,post_folders_id_metadata_enterprise_securityClassification-6VMVochwUWo,Add classification to folder,x,w,high,false,D3-not-destructive,method=POST verb=add
+box,/folders/{folder_id}/metadata/{scope}/{template_key},GET,get_folders_id_metadata_id_id,Get metadata instance on folder,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/folders/{folder_id}/trash,DELETE,delete_folders_id_trash,Permanently remove folder,w,w,method-only,true,D1-method-delete,method=DELETE
+box,/folders/{folder_id}/watermark,GET,get_folders_id_watermark,Get watermark for folder,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/group_memberships/{group_membership_id},DELETE,delete_group_memberships_id,Remove user from group,x,x,high,true,D1-method-delete,method=DELETE
+box,/groups,GET,get_groups,List groups for enterprise,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/groups/{group_id},DELETE,delete_groups_id,Remove group,x,x,low,true,D1-method-delete,method=DELETE
+box,/groups/{group_id}/collaborations,GET,get_groups_id_collaborations,List group collaborations,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/integration_mappings/slack,POST,post_integration_mappings_slack,Create Slack integration mapping,x,x,high,false,D3-not-destructive,method=POST verb=create
+box,/integration_mappings/teams,GET,get_integration_mappings_teams,List Teams integration mappings,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/integration_mappings/teams/{integration_mapping_id},PUT,put_integration_mappings_teams_id,Update Teams integration mapping,w,w,high,false,D3-not-destructive,method=PUT verb=update
+box,/legal_hold_policies,GET,get_legal_hold_policies,List all legal hold policies,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/legal_hold_policies/{legal_hold_policy_id},GET,get_legal_hold_policies_id,Get legal hold policy,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/legal_hold_policy_assignments,POST,post_legal_hold_policy_assignments,Assign legal hold policy,x,x,method-only,false,D3-not-destructive,method=POST verb=assign
+box,/legal_hold_policy_assignments/{legal_hold_policy_assignment_id}/file_versions_on_hold,GET,get_legal_hold_policy_assignments_id_file_versions_on_hold,List previous file versions for legal hold policy assignment,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/metadata_cascade_policies,POST,post_metadata_cascade_policies,Create metadata cascade policy,x,x,high,false,D3-not-destructive,method=POST verb=create
+box,/metadata_cascade_policies/{metadata_cascade_policy_id}/apply,POST,post_metadata_cascade_policies_id_apply,Force-apply metadata cascade policy to folder,x,w,method-only,false,D3-not-destructive,method=POST verb=force
+box,/metadata_taxonomies/{namespace},GET,get_metadata_taxonomies_id,Get metadata taxonomies for namespace,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/metadata_taxonomies/{namespace}/{taxonomy_key},PATCH,patch_metadata_taxonomies_id_id,Update metadata taxonomy,x,w,high,false,D3-not-destructive,method=PATCH verb=update
+box,/metadata_taxonomies/{namespace}/{taxonomy_key}/levels:append,POST,post_metadata_taxonomies_id_id_levels:append,Add metadata taxonomy level,x,x,high,false,D3-not-destructive,method=POST verb=add
+box,/metadata_taxonomies/{namespace}/{taxonomy_key}/nodes,POST,post_metadata_taxonomies_id_id_nodes,Create metadata taxonomy node,x,x,high,false,D3-not-destructive,method=POST verb=create
+box,/metadata_taxonomies/{namespace}/{taxonomy_key}/nodes/{node_id},PATCH,patch_metadata_taxonomies_id_id_nodes_id,Update metadata taxonomy node,x,w,high,false,D3-not-destructive,method=PATCH verb=update
+box,/metadata_templates/enterprise/securityClassification-6VMVochwUWo/schema,GET,get_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema,List all classifications,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/metadata_templates/global,GET,get_metadata_templates_global,List all global metadata templates,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/metadata_templates/{namespace}/{template_key}/fields/{field_key}/options,GET,get_metadata_templates_id_id_fields_id_options,List metadata template's options for taxonomy field,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/metadata_templates/{scope}/{template_key}/schema,PUT,put_metadata_templates_id_id_schema,Update metadata template,w,w,high,false,D3-not-destructive,method=PUT verb=update
+box,/oauth2/token,POST,post_oauth2_token,Request access token,x,x,high,false,D3-not-destructive,method=POST verb=request
+box,/retention_policies,GET,get_retention_policies,List retention policies,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/retention_policies/{retention_policy_id},GET,get_retention_policies_id,Get retention policy,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/retention_policy_assignments,POST,post_retention_policy_assignments,Assign retention policy,x,x,method-only,false,D3-not-destructive,method=POST verb=assign
+box,/retention_policy_assignments/{retention_policy_assignment_id}/file_versions_under_retention,GET,get_retention_policy_assignments_id_file_versions_under_retention,Get file versions under retention,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/shared_items,GET,get_shared_items,Find file for shared link,r,r,high,false,D3-not-destructive,method=GET verb=find
+box,/shared_items#web_links,GET,get_shared_items#web_links,Find web link for shared link,r,r,high,false,D3-not-destructive,method=GET verb=find
+box,/shield_information_barrier_reports/{shield_information_barrier_report_id},GET,get_shield_information_barrier_reports_id,Get shield information barrier report by ID,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/shield_information_barrier_segment_members/{shield_information_barrier_segment_member_id},DELETE,delete_shield_information_barrier_segment_members_id,Delete shield information barrier segment member by ID,x,x,low,true,D1-method-delete,method=DELETE
+box,/shield_information_barrier_segment_restrictions,POST,post_shield_information_barrier_segment_restrictions,Create shield information barrier segment restriction,x,x,high,false,D3-not-destructive,method=POST verb=create
+box,/shield_information_barrier_segments,GET,get_shield_information_barrier_segments,List shield information barrier segments,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/shield_information_barrier_segments/{shield_information_barrier_segment_id},GET,get_shield_information_barrier_segments_id,Get shield information barrier segment with specified ID,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/shield_information_barriers,POST,post_shield_information_barriers,Create shield information barrier,x,x,high,false,D3-not-destructive,method=POST verb=create
+box,/sign_requests,GET,get_sign_requests,List Box Sign requests,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/sign_requests/{sign_request_id}/cancel,POST,post_sign_requests_id_cancel,Cancel Box Sign request,x,x,high,true,D2-verb-destructive,verb=cancel
+box,/sign_templates/{template_id},GET,get_sign_templates_id,Get Box Sign template by ID,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/storage_policies/{storage_policy_id},GET,get_storage_policies_id,Get storage policy,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/storage_policy_assignments/{storage_policy_assignment_id},DELETE,delete_storage_policy_assignments_id,Unassign storage policy,x,w,low,true,D1-method-delete,method=DELETE
+box,/task_assignments,POST,post_task_assignments,Assign task,x,x,method-only,false,D3-not-destructive,method=POST verb=assign
+box,/task_assignments/{task_assignment_id},PUT,put_task_assignments_id,Update task assignment,w,w,high,false,D3-not-destructive,method=PUT verb=update
+box,/tasks/{task_id},GET,get_tasks_id,Get task,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/terms_of_service_user_statuses,GET,get_terms_of_service_user_statuses,List terms of service user statuses,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/terms_of_services,GET,get_terms_of_services,List terms of services,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/terms_of_services/{terms_of_service_id},PUT,put_terms_of_services_id,Update terms of service,w,w,high,false,D3-not-destructive,method=PUT verb=update
+box,/users/me,GET,get_users_me,Get current user,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/users/{user_id},GET,get_users_id,Get user,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/users/{user_id}/avatar,GET,get_users_id_avatar,Get user avatar,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/users/{user_id}/email_aliases,POST,post_users_id_email_aliases,Create email alias,x,x,high,false,D3-not-destructive,method=POST verb=create
+box,/users/{user_id}/memberships,GET,get_users_id_memberships,List user's groups,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/web_links/{web_link_id},GET,get_web_links_id,Get web link,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/web_links/{web_link_id}#add_shared_link,PUT,put_web_links_id#add_shared_link,Add shared link to web link,x,w,low,false,D3-not-destructive,method=PUT verb=add
+box,/web_links/{web_link_id}#update_shared_link,PUT,put_web_links_id#update_shared_link,Update shared link on web link,w,w,high,false,D3-not-destructive,method=PUT verb=update
+box,/webhooks,GET,get_webhooks,List all webhooks,r,r,high,false,D3-not-destructive,method=GET verb=list
+box,/webhooks/{webhook_id},GET,get_webhooks_id,Get webhook,r,r,high,false,D3-not-destructive,method=GET verb=get
+box,/workflows/{workflow_id}/start,POST,post_workflows_id_start,Starts workflow based on request body,x,x,high,false,D3-not-destructive,method=POST verb=start
+box,/zip_downloads/{zip_download_id}/status,GET,get_zip_downloads_id_status,Get zip download status,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/abilities,GET,listAbilities,List abilities,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/addons/{id},GET,getAddon,Get an Add-on,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/alert_grouping_settings/{id},GET,getAlertGroupingSetting,Get an Alert Grouping Setting,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/analytics/metrics/incidents/services,POST,getAnalyticsMetricsIncidentsService,Get aggregated service data,r,r,high,false,D3-not-destructive,method=POST verb=get
+pagerduty,/analytics/metrics/responders/all,POST,getAnalyticsMetricsRespondersAll,Get aggregated metrics for all responders,r,r,high,false,D3-not-destructive,method=POST verb=get
+pagerduty,/analytics/raw/incidents/{id}/responses,GET,getAnalyticsIncidentResponsesById,Get raw responses from a single incident,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/automation_actions/actions,POST,createAutomationAction,Create an Automation Action,x,x,high,false,D3-not-destructive,method=POST verb=create
+pagerduty,/automation_actions/actions/{id}/services,GET,getAutomationActionsActionServiceAssociations,Get all service references associated with an Automation Action,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/automation_actions/actions/{id}/teams,POST,createAutomationActionTeamAssociation,Associate an Automation Action with a team,x,w,method-only,false,D3-not-destructive,method=POST verb=associate
+pagerduty,/automation_actions/runners,GET,getAutomationActionsRunners,List Automation Action runners,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/automation_actions/runners/{id}/teams,GET,getAutomationActionsRunnerTeamAssociations,Get all team references associated with a runner,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/business_services,POST,createBusinessService,Create a Business Service,x,x,high,false,D3-not-destructive,method=POST verb=create
+pagerduty,/business_services/priority_thresholds,PUT,putBusinessServicePriorityThresholds,Set the Account-level priority threshold for Business Service impact.,w,w,high,false,D3-not-destructive,method=PUT verb=set
+pagerduty,/business_services/{id}/account_subscription,POST,createBusinessServiceAccountSubscription,Create Business Service Account Subscription,x,x,high,false,D3-not-destructive,method=POST verb=create
+pagerduty,/change_events,GET,listChangeEvents,List Change Events,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/enrichment/event_enrichments,POST,createEventEnrichment,Create an Event Enrichment,x,x,high,false,D3-not-destructive,method=POST verb=create
+pagerduty,/enrichment/event_enrichments/{id},PUT,updateEventEnrichment,Update an Event Enrichment,x,w,low,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/enrichment/event_enrichments/{id}/rules,PUT,updateEventEnrichmentRules,Update Event Enrichment rules,x,w,low,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/enrichment/integrations/servicenow/credentials/{credentials_id},GET,getServiceNowCredentials,Get ServiceNow credentials,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/enrichment/integrations/servicenow/{integration_id}/tables/{table_id},DELETE,deleteServiceNowTable,Remove a CMDB table,x,w,low,true,D1-method-delete,method=DELETE
+pagerduty,/enrichment/schemas,GET,listEnrichmentSchemas,List enrichment schemas,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/enrichment/schemas/{schema_id}/records,GET,listEnrichmentRecords,List enrichment records,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/escalation_policies/{id},DELETE,deleteEscalationPolicy,Delete an escalation policy,w,w,high,true,D1-method-delete,method=DELETE
+pagerduty,/event_orchestrations,POST,postOrchestration,Create an Orchestration,x,x,high,false,D3-not-destructive,method=POST verb=create
+pagerduty,/event_orchestrations/services/{service_id}/cache_variables,GET,listCacheVarOnServiceOrch,List Cache Variables for a Service Event Orchestration,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/event_orchestrations/services/{service_id}/cache_variables/{cache_variable_id}/data,DELETE,deleteExternalDataCacheVarDataOnServiceOrch,Delete Data for an External Data Cache Variable on a Service Event Orchestration,w,w,high,true,D1-method-delete,method=DELETE
+pagerduty,/event_orchestrations/{id},PUT,updateOrchestration,Update an Orchestration,w,w,high,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/event_orchestrations/{id}/cache_variables/{cache_variable_id},PUT,updateCacheVarOnGlobalOrch,Update a Cache Variable for a Global Event Orchestration,w,w,high,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/event_orchestrations/{id}/enablements/{feature_name},PUT,updateEventOrchestrationFeatureEnablements,Update an Enablement for an Event Orchestration,w,w,high,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/event_orchestrations/{id}/integrations/migration,POST,migrateOrchestrationIntegration,Migrate an Integration from one Event Orchestration to another,x,w,high,false,D3-not-destructive,method=POST verb=migrate
+pagerduty,/event_orchestrations/{id}/router,PUT,updateOrchPathRouter,Update the Router for an Event Orchestration,x,w,low,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/extensions,GET,listExtensions,List extensions,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/extensions/{id}/enable,POST,enableExtension,Enable an extension,x,w,high,false,D3-not-destructive,method=POST verb=enable
+pagerduty,/incident_workflows/triggers,GET,listIncidentWorkflowTriggers,List Triggers,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/incident_workflows/triggers/{id}/services,POST,associateServiceToIncidentWorkflowTrigger,Associate a Trigger and Service,x,w,high,false,D3-not-destructive,method=POST verb=associate
+pagerduty,/incident_workflows/{id}/instances,POST,createIncidentWorkflowInstance,Start an Incident Workflow Instance,x,x,high,false,D3-not-destructive,method=POST verb=start
+pagerduty,/incidents/custom_fields,POST,createCustomFieldsField,Create a Field,x,x,high,false,D3-not-destructive,method=POST verb=create
+pagerduty,/incidents/custom_fields/{field_id}/field_options,POST,createCustomFieldsFieldOption,Create a Field Option,x,x,high,false,D3-not-destructive,method=POST verb=create
+pagerduty,/incidents/types/{type_id_or_name},GET,getIncidentType,Get an Incident Type,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/incidents/types/{type_id_or_name}/custom_fields/{field_id},GET,getIncidentTypeCustomField,Get an Incident Type Custom Field,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/incidents/types/{type_id_or_name}/custom_fields/{field_id}/field_options/{field_option_id},GET,getIncidentTypeCustomFieldFieldOptions,Get a Field Option on a Custom Field,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/incidents/{id}/alerts,PUT,updateIncidentAlerts,Manage alerts,w,w,method-only,false,D3-not-destructive,method=PUT verb=manage
+pagerduty,/incidents/{id}/custom_fields/values,GET,getIncidentFieldValues,Get Custom Field Values,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/incidents/{id}/notes,POST,createIncidentNote,Create a note on an incident,x,x,high,false,D3-not-destructive,method=POST verb=create
+pagerduty,/incidents/{id}/related_change_events,GET,listIncidentRelatedChangeEvents,List related Change Events for an Incident,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/incidents/{id}/status_updates,POST,createIncidentStatusUpdate,Create a status update on an incident,x,x,high,false,D3-not-destructive,method=POST verb=create
+pagerduty,/ip_allow_lists,POST,createIpAllowList,Create an IP allow list,x,x,high,false,D3-not-destructive,method=POST verb=create
+pagerduty,/license_allocations,GET,listLicenseAllocations,List License Allocations,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/maintenance_windows,GET,listMaintenanceWindows,List maintenance windows,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/notifications,GET,listNotifications,List notifications,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/paused_incident_reports/counts,GET,getPausedIncidentReportCounts,Get Paused Incident Reporting counts,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/recommendations/event_orchestrations/services/{service_id}/rules/{recommendation_id}/dismiss,POST,dismissRecommendedRule,Dismiss a recommended rule,x,w,method-only,false,D3-not-destructive,method=POST verb=dismiss
+pagerduty,/rulesets/{id},PUT,updateRuleset,Update a Ruleset,w,w,high,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/rulesets/{id}/rules/{rule_id},PUT,updateRulesetEventRule,Update an Event Rule,w,w,high,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/schedules/{id},GET,getSchedule,Get a schedule,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/schedules/{id}/overrides/{override_id},DELETE,deleteScheduleOverride,Delete an override,x,w,low,true,D1-method-delete,method=DELETE
+pagerduty,/service_dependencies/technical_services/{id},GET,getTechnicalServiceServiceDependencies,Get technical service dependencies,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/services/custom_fields/{field_id},DELETE,deleteServiceCustomField,Delete a Field,w,w,high,true,D1-method-delete,method=DELETE
+pagerduty,/services/custom_fields/{field_id}/field_options/{field_option_id},DELETE,deleteServiceCustomFieldOption,Delete a Field Option,w,w,high,true,D1-method-delete,method=DELETE
+pagerduty,/services/{id},PUT,updateService,Update a service,w,w,high,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/services/{id}/enablements,GET,listServiceFeatureEnablements,Get Enablements for a Service,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/services/{id}/rules,GET,listServiceEventRules,List Service's Event Rules,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/services/{id}/rules/{rule_id},PUT,updateServiceEventRule,Update an Event Rule on a Service,w,w,high,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/sre_agent/memories/{id},DELETE,deleteSreMemory,Delete an SRE Agent memory,w,w,high,true,D1-method-delete,method=DELETE
+pagerduty,/standards/{id},PUT,updateStandard,Update a standard,w,w,high,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/status_dashboards/{id}/service_impacts,GET,getStatusDashboardServiceImpactsById,Get impacted Business Services for a Status Dashboard by `id`.,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/status_pages/{id}/posts,POST,createStatusPagePost,Create a Status Page Post,x,x,high,false,D3-not-destructive,method=POST verb=create
+pagerduty,/status_pages/{id}/posts/{post_id}/post_updates,POST,createStatusPagePostUpdate,Create a Status Page Post Update,x,x,high,false,D3-not-destructive,method=POST verb=create
+pagerduty,/status_pages/{id}/posts/{post_id}/postmortem,GET,getPostmortem,Get a Post Postmortem,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/status_pages/{id}/severities/{severity_id},GET,getStatusPageSeverity,Get a Status Page Severity,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/status_pages/{id}/subscriptions/{subscription_id},DELETE,deleteStatusPageSubscription,Delete a Status Page Subscription,w,w,high,true,D1-method-delete,method=DELETE
+pagerduty,/tags/{id},GET,getTag,Get a tag,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/teams/{id},GET,getTeam,Get a team,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/teams/{id}/members,GET,listTeamUsers,List members of a team,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/teams/{id}/users/{user_id},PUT,updateTeamUser,Add a user to a team,x,w,low,false,D3-not-destructive,method=PUT verb=add
+pagerduty,/templates/{id},GET,getTemplate,Get a template,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/users/me,GET,getCurrentUser,Get the current user,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/users/{id}/contact_methods,GET,getUserContactMethods,List a user's contact methods,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/users/{id}/license,GET,getUserLicense,Get the License allocated to a User,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/users/{id}/notification_rules/{notification_rule_id},PUT,updateUserNotificationRule,Update a user's notification rule,x,w,low,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/users/{id}/oauth_delegations/{delegation_id},GET,getUserDelegation,Get a user's delegation,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/users/{id}/oncall_handoff_notification_rules/{oncall_handoff_notification_rule_id},PUT,updateUserHandoffNotification,Update a User's Handoff Notification Rule,x,w,low,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/users/{id}/sessions/{type}/{session_id},GET,getUserSession,Get a user's session,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/users/{id}/status_update_notification_rules/{status_update_notification_rule_id},PUT,updateUserStatusUpdateNotificationRule,Update a user's status update notification rule,x,w,low,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/v3/schedules/{id},PUT,updateScheduleV3,Update a schedule,w,w,high,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/v3/schedules/{id}/custom_shifts/{custom_shift_id},GET,getCustomShift,Get a custom shift,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/v3/schedules/{id}/overrides/{override_id},GET,getOverride,Get an override,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/v3/schedules/{id}/rotations/{rotation_id},GET,getRotation,Get a rotation,r,r,high,false,D3-not-destructive,method=GET verb=get
+pagerduty,/v3/schedules/{id}/rotations/{rotation_id}/events/{event_id},PUT,updateEvent,Update an event,w,w,high,false,D3-not-destructive,method=PUT verb=update
+pagerduty,/webhook_subscriptions/oauth_clients,GET,listOauthClients,List OAuth clients,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/webhook_subscriptions/{id},DELETE,deleteWebhookSubscription,Delete a webhook subscription,w,w,high,true,D1-method-delete,method=DELETE
+pagerduty,/workflows/integrations,GET,listWorkflowIntegrations,List Workflow Integrations,r,r,high,false,D3-not-destructive,method=GET verb=list
+pagerduty,/workflows/integrations/{integration_id}/connections/{id},DELETE,deleteWorkflowIntegrationConnection,Delete Workflow Integration Connection,w,w,high,true,D1-method-delete,method=DELETE
+adyen,/applePay/sessions,POST,post-applePay-sessions,Get an Apple Pay session,x,x,high,false,D3-not-destructive,method=POST verb=get
+adyen,/cancels,POST,post-cancels,Cancel an authorised payment,x,x,high,true,D2-verb-destructive,verb=cancel
+adyen,/cardDetails,POST,post-cardDetails,Get the brands and other details of a card,r,r,high,false,D3-not-destructive,method=POST verb=get
+adyen,/donationCampaigns,POST,post-donationCampaigns,Get a list of donation campaigns.,r,r,high,false,D3-not-destructive,method=POST verb=get
+adyen,/donations,POST,post-donations,Make a donation,x,x,high,false,D3-not-destructive,method=POST verb=make
+adyen,/forward,POST,post-forward,Forward stored payment details,x,x,high,false,D3-not-destructive,method=POST verb=forward
+adyen,/orders,POST,post-orders,Create an order,x,x,high,false,D3-not-destructive,method=POST verb=create
+adyen,/orders/cancel,POST,post-orders-cancel,Cancel an order,x,x,high,true,D2-verb-destructive,verb=cancel
+adyen,/originKeys,POST,post-originKeys,Create originKey values for domains,x,r,high,false,D3-not-destructive,method=POST verb=create
+adyen,/paymentLinks,POST,post-paymentLinks,Create a payment link,x,x,high,false,D3-not-destructive,method=POST verb=create
+adyen,/paymentLinks/{linkId},GET,get-paymentLinks-linkId,Get a payment link,r,r,high,false,D3-not-destructive,method=GET verb=get
+adyen,/paymentLinks/{linkId},PATCH,patch-paymentLinks-linkId,Update the status of a payment link,x,w,high,false,D3-not-destructive,method=PATCH verb=update
+adyen,/paymentMethods,POST,post-paymentMethods,Get a list of available payment methods,x,r,low,false,D3-not-destructive,method=POST verb=get
+adyen,/paymentMethods/balance,POST,post-paymentMethods-balance,Get the balance of a gift card,x,r,low,false,D3-not-destructive,method=POST verb=get
+adyen,/payments,POST,post-payments,Start a transaction,x,x,high,false,D3-not-destructive,method=POST verb=start
+adyen,/payments/details,POST,post-payments-details,Submit details for a payment,x,x,high,false,D3-not-destructive,method=POST verb=submit
+adyen,/payments/{paymentPspReference}/amountUpdates,POST,post-payments-paymentPspReference-amountUpdates,Update an authorised amount,x,x,high,false,D3-not-destructive,method=POST verb=update
+adyen,/payments/{paymentPspReference}/cancels,POST,post-payments-paymentPspReference-cancels,Cancel an authorised payment,x,x,high,true,D2-verb-destructive,verb=cancel
+adyen,/payments/{paymentPspReference}/captures,POST,post-payments-paymentPspReference-captures,Capture an authorised payment,x,x,high,false,D3-not-destructive,method=POST verb=capture
+adyen,/payments/{paymentPspReference}/refunds,POST,post-payments-paymentPspReference-refunds,Refund a captured payment,x,x,high,false,D3-not-destructive,method=POST verb=refund
+adyen,/payments/{paymentPspReference}/reversals,POST,post-payments-paymentPspReference-reversals,Refund or cancel a payment,x,x,high,false,D3-not-destructive,method=POST verb=refund
+adyen,/paypal/updateOrder,POST,post-paypal-updateOrder,Updates the order for PayPal Express Checkout,x,x,high,false,D3-not-destructive,method=POST verb=update
+adyen,/sessions,POST,post-sessions,Create a payment session,x,x,high,false,D3-not-destructive,method=POST verb=create
+adyen,/sessions/{sessionId},GET,get-sessions-sessionId,Get the result of a payment session,r,r,high,false,D3-not-destructive,method=GET verb=get
+adyen,/storedPaymentMethods,GET,get-storedPaymentMethods,Get tokens for stored payment details,r,r,high,false,D3-not-destructive,method=GET verb=get
+adyen,/storedPaymentMethods,POST,post-storedPaymentMethods,Create a token to store payment details,x,x,high,false,D3-not-destructive,method=POST verb=create
+adyen,/storedPaymentMethods/{storedPaymentMethodId},DELETE,delete-storedPaymentMethods-storedPaymentMethodId,Delete a token for stored payment details,x,w,high,true,D1-method-delete,method=DELETE
+adyen,/validateShopperId,POST,post-validateShopperId,Validates shopper Id,x,r,method-only,false,D3-not-destructive,method=POST verb=validate

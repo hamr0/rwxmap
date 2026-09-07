@@ -161,12 +161,14 @@ last thing tried.
 **M1 — Structural signal, then verb library from the corpus.** First, a
 structural signal for relationship objects whose other end is a person
 (e.g. Box's collaboration schema field `accessible_by`), motivated by
-the remaining clean-exam leak (`delete_collaborations_id`, E21). Then
-pull APIs.guru's `openapi-directory` (CC0), extract verbs from paths and
-operationIds with their method co-occurrence, produce the library as
-data (priors, not truth — see D7), re-run M0's arbiter with it, re-read
-the divergence list. Riskiest assumption: that corpus priors raise
-coverage on CAMARA without adding a wrong loosening.
+the remaining clean-exam leak (`delete_collaborations_id`, E21).
+Measure the destructive verb list (D28) against a hand label on a
+sample of each set; report its two error directions separately like
+the class. Then pull APIs.guru's `openapi-directory` (CC0), extract
+verbs from paths and operationIds with their method co-occurrence,
+produce the library as data (priors, not truth — see D7), re-run M0's
+arbiter with it, re-read the divergence list. Riskiest assumption: that
+corpus priors raise coverage on CAMARA without adding a wrong loosening.
 
 **M2 — Shape rules, only if justified.** For each divergence class from
 M0/M1 that appears more than once, add one deterministic OpenAPI-shape
@@ -225,18 +227,22 @@ matched verb and the method), plus the four MCP tool-annotation fields
 mapped from the class and the method so any MCP client can consume the
 map unchanged.
 
-Starting mapping, untested; M3 verifies it against a real client and may
-change it.
+Per D28 the output carries two independent axes: class (`r`/`w`/`x`) and
+`destructive` (true/false); M3 verifies this mapping against a real
+client and may change it.
 
-| class | readOnlyHint | destructiveHint | note |
-|---|---|---|---|
-| r | true | false | a read; nothing changes |
-| w | false | false | changes state, not destructively |
-| x | false | true | consequential or destructive |
+| field | source | mapping |
+|---|---|---|
+| `readOnlyHint` | class | `r` → true; `w` and `x` → false |
+| `destructiveHint` | `destructive` flag | method DELETE or a destructive lead verb, independent of class |
 
 `idempotentHint` comes from the method, per RFC 9110 §9.2.2: true for
 GET, HEAD, OPTIONS, PUT, DELETE; false for POST and PATCH.
 `openWorldHint` stays MCP's default, true; rwxmap has no signal for it.
+
+E24 measured the earlier class-derived mapping (destructiveHint = class
+== x) wrong on 352 of 719 rows: 290 x rows that add rather than
+destroy, 62 w rows that delete the caller's own resource.
 
 MCP's own defaults (`readOnlyHint` false, `destructiveHint` true) are
 already fail-closed and match §5/D2. MCP's spec text says clients MUST
@@ -492,6 +498,10 @@ Non-blocking; never silently assumed.
   any token is issued. HTTP has no dry run; vendor test modes exist for
   some APIs only. Raised by the user 2026-09-07; a later module, not
   M1.
+- Does the ordered r < w < x scale still hold once `destructive` is a
+  separate axis? A grant of `x` currently implies `w`; with two axes a
+  consumer may want "`x`, non-destructive only." The draft's scope
+  grammar needs a word for that. Raised 2026-09-07.
 
 ## 8. Notes carried from the outline, stated on purpose
 
@@ -587,3 +597,4 @@ starts, not yet exercised.
 | D25 | The four-token cap in the verb-led object-head extraction is removed (learnings E21). Scored once on the clean exam per D24: one class changed (delete_shield_information_barrier_segment_members_id, w to x, truth x), no other row moved on any set. Decided 2026-09-07. |
 | D26 | The three irreversibility stems in the word-list lexicon (permanent, irreversibl, cannot be undone) are removed; they encoded "irreversible means x", which D20 rejected. Scored once per D24 (learnings E22): eight rows move from x to w, all with truth w (CAMARA test 3, hold-out 1 1, clean exam 4); no row moves the other way; wrong loosenings unchanged. Decided 2026-09-07. |
 | D27 | "collaboration(s)" is added to the verb-led party list at the user's request (learnings E23). Scored once per D24: one row changes, delete_collaborations_id w to x, truth x, the last clean-exam wrong loosening; no other row on any set moves. Stated taint: the word was added after the clean exam exposed it, so the clean exam's result on that one row is no longer blind; the other 219 rows are unaffected. The fix does not generalise (membership, assignment, share are the same shape), so the structural schema signal stays M1's first item. Decided 2026-09-07. |
+| D28 | Two axes. r/w/x stays the blast-radius axis (D20: reaches beyond the caller, or not repeatable). A second, independent boolean, `destructive`, is derived from the method (DELETE) and the lead verb (`poc/m0/destructive.json`) and never from the class; it feeds MCP `destructiveHint`. Motivation: the user's case "read and reply, never delete" cannot be said with one ordered letter, because reply is `x` and `x` sits above `w`; and §4.3's untested mapping `destructiveHint = (class == x)` was measured wrong on 352 of 719 labelled rows (learnings E24). The proposal to move `x` to mean delete was rejected because pay, send, reply and add-a-stranger-to-admins would all become `w`. The destructive verb list is unmeasured against hand labels; measuring it is an M1 item. Decided 2026-09-07. |
