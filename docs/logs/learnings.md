@@ -1402,6 +1402,88 @@ verbs, and check/query are not either without more evidence.
 summary fallback; harmless at providers >= 3 but to be filtered in the
 arbiter pass.
 
+### M1-C4 — first weighted arbiter, primaries only (2026-09-07)
+
+Shape: poc/m1/arbiter/{arbiter.mjs,run.mjs,arbiter.test.mjs} (15 tests).
+Inputs are docs/logs/m1/census-ops.csv and corpus-leans.csv only. Layers:
+(1) method prior, GET locked r, PUT/DELETE start w, POST/PATCH start x;
+(2) scope last-token as a class hint relative to the prior (read family
+hint r, {update, write, delete, modify, set} hint w, all else hint x;
+below prior lowers with weight r 1.0 / w 0.6, equal agrees, above raises
+1.0); (3) corpus lead-verb lean routed through the prior (on POST/PATCH,
+GET share >= 0.75 lowers to r, PUT+PATCH share >= 0.5 lowers to w, weight
+share x min(1, providers/10)); (4) CAMARA lead-verb table,
+leave-one-repo-out on CAMARA, whole on the hold-outs (share >= 0.9 at n
+>= 3: r lowers 0.8, w lowers 0.6, x raises 0.8). Any raise blocks
+lowering and lands on x (first draft kept PUT/DELETE at w on a raise,
+which made zero leaks unreachable on CAMARA; the agent escalated, the
+rule was corrected). Below threshold T the row keeps the prior and is
+tagged review.
+
+Sweep (n / assigned / review / leaks among assigned / over-tight among
+assigned):
+
+| T | CAMARA 292 | hold-out 1 207 | clean exam 220 |
+|---|---|---|---|
+| 0.5 | 218 / 74 / 18 / 4 | 62 / 145 / 9 / 1 | 160 / 60 / 0 / 12 |
+| 0.75 | 201 / 91 / 4 / 4 | 35 / 172 / 0 / 1 | 160 / 60 / 0 / 12 |
+| 1.0 | 197 / 95 / 4 / 4 | 35 / 172 / 0 / 1 | 157 / 63 / 0 / 12 |
+| 1.5 | 185 / 107 / 2 / 4 | 35 / 172 / 0 / 1 | 157 / 63 / 0 / 12 |
+| 2.0 | 159 / 133 / 0 / 4 | 35 / 172 / 0 / 1 | 155 / 65 / 0 / 12 |
+
+T = 2.0 chosen on CAMARA + hold-out 1 (only T with zero leaks on both);
+clean exam scored once at T = 2.0: 0 leaks, 12 over-tight, 65 review.
+Against D30: rule 1 met at T = 2.0; rule 2 far from met (review +
+over-tight 137/292, 173/207, 77/220); rule 3 not met (see the false
+flags). Outputs docs/logs/m1/c4-rows.csv, c4-false-flags.csv,
+c4-sweep.md.
+
+Negative controls at T = 2.0: terminateCall (DELETE) and
+updateSessionStatus (PUT) both land at w, review, confidence 0: their
+scope tokens delete/write agree with the prior, nothing raises. Not
+leaks, not right. queryAssistant: read scope lowers to r at weight 1.0,
+below T, so it stays x in review.
+
+What it taught:
+1. Why T had to be 2.0: the leaks below it are almost all one shape. A
+`:write` or `:delete` scope on POST was given hint w (weight 0.6) and
+lowered truth-x rows: registerApplicationEndpoints, submitApp,
+activatePowerSaving, sendSessionMetrics, postTrafficInfluence,
+deleteEsimProfile, releaseDevice, releaseDevices,
+extendQosSessionDuration and more. M1-C2 had already measured write on
+CAMARA POST as 10 x to 1 w. The write-family scope must never lower on
+POST; it can only agree with PUT/PATCH/DELETE. This brief ignored its
+own census. Fix in C5.
+2. The corpus w-lean on PATCH (update, patch, configure at PUT+PATCH
+share 0.75-0.93) lowered three truth-x rows: updateDevice,
+updateRebootRequest, patchTrafficInfluence, plus configureAlerts on
+POST. A verb that rides PATCH in the wild says "update", not "own". The
+w-lowering from the corpus needs pairing with an own-resource signal or
+a higher bar; measure in C5.
+3. Read scope lowering leaks three rows at low T: postServiceCapability
+(body subscriptionRequest, the body layer is not in C4),
+scheduleTransmission (read and write scopes together; with fix 1 the
+write no longer lowers, so the read alone would lower it; two scopes
+with different hints must cancel), queryAssistant (the known gap).
+4. Method-word lead tokens are a defect: Box `post_...` and Adyen
+`post-...` operationIds put "post" into the CAMARA verb table, which
+raises; 8 of 12 clean-exam over-tights, all truth r (Adyen cardDetails,
+paymentMethods, originKeys, Box ai/ask, ai/text_gen). Method names must
+be stripped before the verb lookup.
+5. Unknown scope tokens that are nouns (reboot, trust-domains, devices
+in NetworkAccessManagement) raise to x and produce all 4 CAMARA
+over-tights, e.g. deleteRebootRequest truth w. An unknown token is
+absence of knowledge, not evidence; it should leave the prior in place
+(still fail-closed, the row goes to review).
+6. Hold-out 1 sits at 172 of 207 in review because it has no scopes and
+PUT/DELETE get no lowering. The method prior alone cannot assign
+PUT/DELETE: 18 of 113 hold-out-1 DELETEs and 6 of 32 PUTs are truth x.
+The own-vs-other layer (body, path party id, schema) is what those rows
+wait for; that is C6 or later, secondary per D30.
+7. Truth check surfaced: Box post_ai_ask is labelled r, CAMARA
+queryAssistant (same ask-an-assistant shape) is labelled x. One of the
+two labels should move; the user rules.
+
 ### Next
 
 M0 closed 2026-09-07 as exploratory at the user's word (D29). Twenty-
@@ -1423,7 +1505,8 @@ generate and verify are not read verbs; the 11 arguable truth rows
 named in E24(g) want a second read; the destructive verb list is
 unmeasured.
 
-M1-C4: the first weighted arbiter — method prior, CAMARA scope where
-dominant (M1-C2), corpus method lean routed through the prior (M1-C3),
-confidence threshold with a review tag; scored both directions on
-CAMARA and hold-out 1, clean exam once (D24, D30).
+M1-C5: same arbiter with the five mechanical fixes from C4 (write-family
+scopes never lower on POST; conflicting scope hints cancel; method-word
+lead tokens stripped; unknown scope tokens give no evidence; corpus
+w-lean on PATCH measured with and without) — re-sweep, both directions,
+clean exam once. Then the own-vs-other layer as C6.
