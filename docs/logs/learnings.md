@@ -918,6 +918,56 @@ is a person. The signal is structural (Box's collaboration schema has
 an accessible_by user field). That is M1's first item, not an M0
 tuning. M0 closes here.
 
+### E22 — irreversibility stems dropped per D20, scored once (2026-09-07)
+
+(a) Why. The user, reading docs/logs/m0/false-alarms-E21.csv, asked
+why Box "Delete file", "Delete folder", "Permanently remove folder"
+were flagged x when truth is w. Cause: poc/m0/lexicon-v2.json
+dangerVerbs carried three irreversibility stems, "permanent",
+"irreversibl", "cannot be undone", written before D20 decided that
+irreversibility is not the test for x (own-resource permanent deletes
+are w; 129 DELETE w rows are irreversible). The three stems were
+removed; nothing else in any list or rule changed; provenance
+sentence appended to the lexicon. node --test poc/m0/*.test.mjs: 90
+pass, no test asserted the stems.
+
+(b) Results, union shape, pass2 on, pass2 class changes 0 everywhere,
+both negative controls x, PASS. CAMARA build 98 | 42 | 0 | 10
+(unchanged); CAMARA test 120 | 32 | 0 | 13 (was 117 | 35); hold-out 1
+106 | 101 | 0 | 0 (was 105 | 102); clean exam 186 | 33 | 1 | 4 (was
+182 | 37), confidence high 187 / low 18 / method-only 15. Scored CSV
+docs/logs/m0/holdout2-E22.csv; dossier
+docs/logs/m0/false-alarms-E22.csv, 33 rows.
+
+(c) Every class change against E21, all x to w with truth w, i.e. all
+fixes; zero new over-tightenings, zero new wrong loosenings: CAMARA
+test ModelAsAService deleteKnowledgeBase, deleteDocument, deleteTool;
+hold-out 1 Stripe DeleteInvoicesInvoice; clean exam Box
+delete_files_id, delete_folders_id, delete_folders_id_trash,
+PagerDuty deleteSreMemory. Eight rows.
+
+(d) The remaining clean-exam wrong loosening is unchanged:
+delete_collaborations_id, low confidence, method floor from both
+arbiters.
+
+(e) Also observed in the same dossier, recorded not fixed: substring
+collisions in the live-noun rule, "call" matching "called" and
+"calling this endpoint" (Box classification and storage-policy rows),
+"access" matching PagerDuty's "Early Access" banner text
+(updateEventEnrichment, updateEventEnrichmentRules). Pass 2 marked
+all of them low confidence but did not clear them. Candidate for the
+party-list and live-noun trim already on M1's list.
+
+(f) Reading, once. A stem list written before a decision can quietly
+carry the decision's opposite. The three stems encoded "irreversible
+means x", which D20 rejected; removing them fixed eight rows across
+three sets and cost nothing. The user's question also settled a
+definitional point worth recording: x is radius (reaches beyond the
+caller) or non-repeatability, never severity or permanence; "delete"
+alone never makes x, its object can (party list, rules-verb.mjs
+parties.json), and the object words that fail are relationship nouns
+like collaboration, which is M1's schema signal.
+
 ### How the E19 union works, in plain words (2026-09-07)
 
 Written for the user at M0 close; the code is poc/m0/rules-union.mjs,
@@ -972,8 +1022,8 @@ That is M1.
 
 ### Next
 
-M0 has run twenty shapes and two blind hold-outs. On the clean exam
-(E21) the recommended shape E19 leaves 1 wrong loosening of 220, at
+M0 has run twenty-two shapes and two blind hold-outs. On the clean exam
+(E22) the recommended shape E19 leaves 1 wrong loosening of 220, at
 low confidence (delete_collaborations_id), so the gate as restated in
 D22 — zero wrong loosenings at high confidence — is met on all three
 sets: CAMARA, the first hold-out, and the clean exam. The one

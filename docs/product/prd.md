@@ -98,17 +98,17 @@ still come out `x`. Three numbers are reported every time and never
 combined: wrong loosenings at high confidence, wrong loosenings at low
 confidence, and over-tightenings.
 
-**M0 result on the clean exam, 2026-09-07 (E21).** A second hold-out,
+**M0 result on the clean exam, 2026-09-07 (E22).** A second hold-out,
 `data/holdout2-2026-09-07/` (Box 99, PagerDuty 93, Adyen 28; 220
 operations; 94 GET; ground truth read blind by five agents with zero
 orchestrator rulings; r 104, w 63, x 53), was built after every list in
 the repo was written, so no lexicon, verb table or party list had seen
-it. With the four-token cap removed from the verb-led object-head
-extraction (D25), the union shape scores, per set, pass 2 on: CAMARA 292
+it. With the four-token cap removed (D25) and the irreversibility stems
+dropped (D26), the union shape scores, per set, pass 2 on: CAMARA 292
 (build 98 agree / 42 over-tight / 0 wrong loosenings / 10 correct
-lowerings; test 117 / 35 / 0 / 13), 0 wrong loosenings at high or low
-confidence; hold-out 1, 207 ops, 105 / 102 / 0 / 0, 0 at high or low;
-clean exam, 220 ops, 182 / 37 / 1 / 4, 0 at high confidence, 1 at low.
+lowerings; test 120 / 32 / 0 / 13), 0 wrong loosenings at high or low
+confidence; hold-out 1, 207 ops, 106 / 101 / 0 / 0, 0 at high or low;
+clean exam, 220 ops, 186 / 33 / 1 / 4, 0 at high confidence, 1 at low.
 The one clean-exam wrong loosening is `delete_collaborations_id`, a Box
 DELETE of a relationship object owned by another person ("Remove
 collaboration"), stated in prose that names neither the person nor an
@@ -117,12 +117,11 @@ it removes another person's access. The gate as restated in D22 is met
 on all three sets at high confidence; the low-confidence leak is
 reported beside it, not hidden. Reported per set, never combined: wrong
 loosenings at high confidence CAMARA 0, hold-out 1 0, clean exam 0; at
-low or method-only confidence 0, 0, 1; over-tightenings 77 of 292, 102
-of 207, 37 of 220. Reference shapes on the clean exam: word lists alone
+low or method-only confidence 0, 0, 1; over-tightenings 74 of 292, 101
+of 207, 33 of 220. Reference shapes on the clean exam: word lists alone
 184 / 34 / 2, verb-led alone 197 / 20 / 3. False-alarm dossier for the
-clean exam: `docs/logs/m0/false-alarms-E21.csv` (37 rows; 13 high, 20
-low, 4 method-only). Pass 2 is confidence-only (D23) and does not reduce
-false alarms; it marks them.
+clean exam: `docs/logs/m0/false-alarms-E22.csv` (33 rows). Pass 2 is
+confidence-only (D23) and does not reduce false alarms; it marks them.
 
 ## 3. Out of scope
 
@@ -357,6 +356,10 @@ Measured weaknesses, one line each:
   verb-object rule when the prose names neither the person nor an
   effect; the candidate signal is structural, in the resource's schema,
   and is on M1's list.
+- The live-noun rule matches substrings: "call" fires on "called" and
+  "calling this endpoint", "access" on PagerDuty's "Early Access"
+  banner. Pass 2 marks these low, does not clear them. Recorded
+  2026-09-07 (E22), not fixed; part of the M1 list trim.
 
 The two roads to `x` are not interchangeable. Over the 499 labelled
 operations, 43 of 153 `x` rows reach beyond the caller while remaining
@@ -573,3 +576,4 @@ starts, not yet exercised.
 | D23 | Pass 2 grades evidence only; it never changes a class. Measured in E15 and E16: used as an un-raiser the same three checks created 8 wrong loosenings (3 from an over-generous artefact list, 5 on rows pass 1 had held for a fake reason); used only to mark evidence weak or strong they move nothing and let a consumer filter 53 of 78 hold-out over-tightenings without loosening anything. "This evidence is weak" is not evidence of safety. Decided 2026-09-07. |
 | D24 | The clean exam `data/holdout2-2026-09-07/` (Box, PagerDuty, Adyen; 220 ops; 94 GET; SHA-pinned; blind-read; zero rulings) is the reference score for M0 and stays untouched by tuning: any change to a lexicon, verb table, party list or rule after 2026-09-07 is scored on it once and the fact recorded in learnings, and it is never used to choose between shapes. M0 closes with the gate (D22, zero wrong loosenings at high confidence) met on all three sets, and one low-confidence wrong loosening on the clean exam reported beside it. Decided 2026-09-07. Confirmed by the user 2026-09-07. |
 | D25 | The four-token cap in the verb-led object-head extraction is removed (learnings E21). Scored once on the clean exam per D24: one class changed (delete_shield_information_barrier_segment_members_id, w to x, truth x), no other row moved on any set. Decided 2026-09-07. |
+| D26 | The three irreversibility stems in the word-list lexicon (permanent, irreversibl, cannot be undone) are removed; they encoded "irreversible means x", which D20 rejected. Scored once per D24 (learnings E22): eight rows move from x to w, all with truth w (CAMARA test 3, hold-out 1 1, clean exam 4); no row moves the other way; wrong loosenings unchanged. Decided 2026-09-07. |
