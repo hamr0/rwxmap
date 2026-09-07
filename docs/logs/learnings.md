@@ -1328,6 +1328,80 @@ only where it is dominant. The read-named-POST problem (57 of 138 in
 M0) is mostly answered by scope inside CAMARA. Outside CAMARA it does
 not exist. Fed into D30 rule 4.
 
+### M1-C3 — APIs.guru corpus leans by method co-occurrence (2026-09-07)
+
+Source: APIs.guru v2 index, 2529 entries, fetched live 2026-09-07 in 40s;
+2518 ok, 11 skipped over 8 MB, 0 failed, 0 parse failures. Six hold-out
+vendors excluded by provider prefix (twilio.com, stripe.com, github.com,
+box.com, pagerduty.com, adyen.com): 77 index keys and 10,315 operations
+removed. Counted: 2435 APIs, 71,829 operations, 667 providers. Top three
+by share: amazonaws.com 18.4%, azure.com 11.3%, googleapis.com 8.2%.
+Scripts poc/m1/corpus/{fetch,extract,leans}.mjs; full table in scratch,
+repo copy docs/logs/m1/corpus-leans.csv cut to providers >= 3 (3,688 rows
+of 17,429); readout docs/logs/m1/corpus-summary.md. The orchestrator
+re-ran leans.mjs and reproduced the row count and the create row.
+
+Counts are per (token, position) with position = lead (first operationId
+token), opid (any operationId token), path (any path-segment token),
+each method counted raw and once per provider so Azure's 653 APIs cannot
+dominate.
+
+Per-provider method shares at lead position for the verbs M1 cares about
+(G/PO/PU/PA/D, providers):
+
+| token | providers | GET | POST | PUT | PATCH | DELETE |
+|---|---|---|---|---|---|---|
+| get | 377 | 369 | 70 | 2 | 0 | 0 |
+| retrieve | 49 | 46 | 4 | 0 | 0 | 0 |
+| list | 136 | 131 | 16 | 3 | 0 | 2 |
+| search | 93 | 78 | 24 | 0 | 0 | 0 |
+| create | 213 | 11 | 209 | 19 | 1 | 0 |
+| delete | 217 | 4 | 29 | 2 | 0 | 205 |
+| update | 188 | 3 | 62 | 138 | 57 | 1 |
+| send | 49 | 6 | 45 | 5 | 0 | 1 |
+| verify | 30 | 7 | 23 | 4 | 0 | 0 |
+| validate | 28 | 11 | 20 | 0 | 0 | 0 |
+| generate | 43 | 16 | 34 | 0 | 0 | 0 |
+| check | 43 | 20 | 25 | 0 | 1 | 0 |
+| query | 22 | 13 | 12 | 1 | 1 | 1 |
+| cancel | 49 | 2 | 28 | 7 | 3 | 19 |
+| confirm | 15 | 2 | 11 | 1 | 1 | 1 |
+| submit | 18 | 0 | 16 | 2 | 1 | 0 |
+| subscribe | 11 | 1 | 9 | 2 | 0 | 0 |
+| reboot | 3 | 0 | 3 | 1 | 0 | 0 |
+| terminate | 3 | 0 | 2 | 1 | 0 | 0 |
+| pay | 1 | 0 | 1 | 0 | 0 | 0 |
+| ask | 0 | absent | | | | |
+| answer | 0 | absent | | | | |
+
+Tokens at 90%+ GET (26): retrieve, status, health, current, balance,
+latest, browse and thin ones. At 90%+ POST (31): post, register, publish,
+invite, execute, authenticate, detect, clone, approve, grant, refund,
+buy, install, launch, lookup, classify. Split with no method above 60%
+(257): update, set, cancel, check, change, export, stop, query, test,
+revoke, modify, replace, edit, accept, schedule, rename.
+
+What it taught:
+1. The corpus tells which method a verb rides, not what it does. create
+rides POST 95%, delete rides DELETE 97%, retrieve rides GET 92%. That is
+a prior in the direction of the method's class, no more.
+2. A POST lean is not an x lean. lookup, classify, detect, search-on-POST
+are read-shaped and ride POST. The next pass must route a verb's method
+lean through the method prior (GET locked r, POST no lean) and not map
+POST straight to x. Verb leans that separate r from x within POST must
+come from elsewhere: scope where dominant (M1-C2), body shape, and the
+CAMARA rows as one signal (D30 rule 5).
+3. ask and answer do not exist in the corpus, and pay, reboot, terminate
+are at or under 3 providers. The corpus cannot cover the user's "ask"
+case by itself. That is a stated gap for the arbiter pass, not a reason
+to hand-list.
+4. check, query, cancel, verify, validate, generate are split in the
+wild. The corpus agrees with E25: generate and verify are not read
+verbs, and check/query are not either without more evidence.
+5. Tokenizer leaks stopword-shaped lead tokens (a, are, see) from the
+summary fallback; harmless at providers >= 3 but to be filtered in the
+arbiter pass.
+
 ### Next
 
 M0 closed 2026-09-07 as exploratory at the user's word (D29). Twenty-
@@ -1348,3 +1422,8 @@ open, one sentence each: the party words that never raised correctly;
 generate and verify are not read verbs; the 11 arguable truth rows
 named in E24(g) want a second read; the destructive verb list is
 unmeasured.
+
+M1-C4: the first weighted arbiter — method prior, CAMARA scope where
+dominant (M1-C2), corpus method lean routed through the prior (M1-C3),
+confidence threshold with a review tag; scored both directions on
+CAMARA and hold-out 1, clean exam once (D24, D30).
