@@ -1558,6 +1558,39 @@ write-family scopes on POST/PATCH count as a raise.
 5. The corpus w-lean is inert above T = 0.75: it never decides a row at
 the chosen setting. Keep the switch, do not build on it.
 
+### M1-C6 — body raisers, scope raises on POST, own-vs-other measured (2026-09-07)
+
+Three layers added to poc/m1/arbiter/ (40 tests). Every list is derived from CAMARA + hold-out 1 rows in census-ops.csv at n >= 5 and truth-x share >= 0.9, leave-one-repo-out, never from the clean exam; the full admitted and rejected tables are in docs/logs/m1/c6-admitted.md.
+
+Layer 2b, scope on POST/PATCH as a raise, measured per method: write-family on POST n 16 share 0.938 admitted; write-family on PATCH n 5 share 0.200 not admitted; x-hint on POST n 39 share 1.000 admitted; x-hint on PATCH n 0. A first pooled measurement over POST+PATCH gave 0.762 and was wrongly admitted because the brief forgot the bar for this one layer; it raised four truth-w PATCH updates and was corrected before logging.
+
+Layer 5, body raisers admitted: protocol (14, 1.00), types (14, 1.00), subscriptionRequest (9, 1.00), devices (6, 1.00), PhoneNumber (5, 1.00), config (15, 0.93); flag callbacks_present (42, 0.929). Just under the bar: sink (34, 0.882), sinkCredential (33, 0.848), StatusCallback (16, 0.875). Rejected as expected: FriendlyName (31, 0.52), name (12, 0.50), description (6, 0.50), has202 (52, 0.56). Inadmissible: amount, merchantAccount, Idempotency-Key exist only in the clean exam (Adyen).
+
+Layer 6, own-vs-other on PUT/DELETE/PATCH (203 rows): nothing admitted. party_id_param 0.161, resource_schema_party_field 0.161; no path parameter, body property or schema property reaches 0.9. Twilio's AccountSid sits in every path, so "a party id is present" is not "another party".
+
+Sweep, corpus w-lean on (assigned / review / leaks / over-tight):
+
+| T | CAMARA 292 | hold-out 1 207 | clean exam 220 |
+|---|---|---|---|
+| 0.5 | 229 / 63 / 2 / 6 | 62 / 145 / 9 / 1 | 110 / 110 / 0 / 1 |
+| 0.75 | 221 / 71 / 0 / 6 | 35 / 172 / 0 / 1 | 110 / 110 / 0 / 1 |
+| 1.0 | 217 / 75 / 0 / 6 | 35 / 172 / 0 / 1 | 110 / 110 / 0 / 1 |
+| 1.25 | 211 / 81 / 0 / 6 | 35 / 172 / 0 / 1 | 110 / 110 / 0 / 1 |
+| 2.0 | 187 / 105 / 0 / 6 | 35 / 172 / 0 / 1 | 108 / 112 / 0 / 1 |
+
+Chosen on CAMARA + hold-out 1: on, T = 0.75; review + over-tight 77/292 (26%) and 173/207 (84%). Clean exam once: 0 leaks, 1 over-tight, 110 review (50%). Outputs c6-rows.csv, c6-false-flags.csv, c6-sweep.md, c6-admitted.md.
+
+Negative controls unchanged: terminateCall and updateSessionStatus at w, review, confidence 0. queryAssistant assigned r, confidence 1.
+
+The eight false flags, all over-tight: cancelPayment (write scope on POST, share 1.0); createTrustDomain, CreateMessageFeedback, createAutomationActionTeamAssociation (create in the CAMARA verb table, 0.97); retrievePopulationDensity, retrieveConnectivity, count (truth r, raised by callbacks_present at 0.951 — CAMARA's poll-then-callback reads); updateNotificationChannelSubscription (PUT, body prop config, 1.0).
+
+What it taught:
+1. CAMARA moved: extra asks 114 -> 77, threshold 1.25 -> 0.75, zero leaks kept. Scope raises on POST and the body raisers did it. Over-tight rose 1 -> 6; the six are stated above and are all rule-3 confusions, three of them a truth question (is a read delivered by callback r?) for the user.
+2. Hold-out 1 did not move at all (173 both passes) and the clean exam barely (112 -> 111). Everything in those sets waits on PUT/DELETE with no evidence (hold-out 1: 145 rows, 121 w, 24 x; clean exam: 56) and on scope-less POST (clean exam: 33 truth-x POSTs with no evidence).
+3. Own-vs-other is not in the structural fields at the 0.9 bar. This closes the M0 hope (E24, D28) that "the schema points at a person" could be a raiser as written. It also means the two negative controls cannot be reached by any machine-facing field admitted so far.
+4. The 0.9 bar found a wrong admission twice today (fix 3 in C5, layer 2b here). Keep it uniform; a layer without the bar is how leaks return.
+5. Adyen's money and idempotency fields cannot be admitted by this method because they exist in no tuning set. A vendor-specific field can only enter when a tuning set carries it (D30 rule 4).
+
 ### Next
 
 M0 closed 2026-09-07 as exploratory at the user's word (D29). Twenty-
@@ -1579,9 +1612,10 @@ generate and verify are not read verbs; the 11 arguable truth rows
 named in E24(g) want a second read; the destructive verb list is
 unmeasured.
 
-M1-C6: body raisers from the census (subscriptionRequest, sink,
-sinkCredential, StatusCallback, amount and the callback/money family),
-x-hint and write-family scopes on POST/PATCH counted as raises, then
-the own-vs-other layer for PUT/DELETE (path party id, body party field,
-schema party field paired with the method); re-sweep, both directions,
-clean exam once.
+M1-C7, the user's call at the checkpoint: (a) prose as the last layer
+(D30: prose last) — words from summary and description admitted
+mechanically at the same 0.9 bar from CAMARA + hold-out 1,
+leave-one-repo-out, raise-only, aimed at the PUT/DELETE and scope-less
+POST rows that have no machine-facing evidence; or (b) stop M1 here and
+write the findings. Also owed: the user's ruling on poll-then-callback
+reads (three CAMARA rows labelled r, raised by callbacks_present).

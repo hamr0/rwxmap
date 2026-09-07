@@ -23,6 +23,28 @@
 //   5. the corpus's PUT+PATCH-share w-lean on POST/PATCH is a switch
 //      (`switches.corpusWLean`, default true).
 //
+// M1-C6 three new evidence layers, every admitted list mechanically derived
+// from CAMARA + hold-out-1 rows in run.mjs (never hand-written) and passed
+// in via ctx:
+//   2b. on POST/PATCH, a scope hint that used to merely "agree" with the
+//       prior x now raises, per METHOD (POST and PATCH measured and gated
+//       separately, never pooled): a write-family or x-hint-family token
+//       raises at that method's measured CAMARA x share only when it
+//       clears n >= 5, share >= 0.9 (the same bar every other admitted
+//       list uses); otherwise it stays a plain agreement. PUT/DELETE
+//       unchanged.
+//   5.  requestBody property names and present-only flags (callbacks
+//       present, has202, an Idempotency-Key header) admitted at n >= 5,
+//       x share >= 0.9 over CAMARA + hold-out 1, raise at weight = share.
+//   6.  for PUT/DELETE/PATCH rows, structural own-vs-other facts (path
+//       param names, body prop names, resource-schema party field,
+//       party-id param, resource-schema prop names) admitted the same way,
+//       raise at weight = share.
+// Every table in layers 2b/5/6 is leave-one-repo-out for CAMARA and
+// hold-out-1 rows (rowExcludeRepo below); hold-out-2 rows use the table
+// whole. Admission itself (which names/facts qualify) is decided once from
+// the full CAMARA + hold-out-1 table in run.mjs, not per scored row.
+//
 // run.mjs owns all CSV loading/parsing and wires real data into the
 // functions here; every function in this file takes plain JS
 // objects/arrays/Maps so it is testable with synthetic data.
@@ -143,10 +165,21 @@ function scopeHint(token) {
   return 'unknown';
 }
 
-export function layer2ScopeEvidence(row, priorClass) {
+// M1-C6 layer 2b (revised): on POST and PATCH, a scope hint that merely
+// *agreed* with the prior x is upgraded to a raise — but only on the
+// specific method where the family's measured x share clears the same bar
+// every other admitted list uses (n >= 5, share >= 0.9), never a fixed
+// weight and never pooled across methods. `writeFamilyXShare` /
+// `xHintXShare` are that measured, leave-one-repo-out, per-method share
+// (null when the method's family did not clear the bar, in which case the
+// token gives no evidence there — same as the pre-2b/pre-revision
+// behavior). PUT/DELETE are unchanged: a write-hint token there only ever
+// agrees; an x-hint token there always raises (already above the prior).
+export function layer2ScopeEvidence(row, priorClass, writeFamilyXShare = null, xHintXShare = null) {
   const scopesStr = row.security_scopes || '';
   if (scopesStr === '') return [];
   const method = row.method;
+  const isPostPatch = method === 'POST' || method === 'PATCH';
   const tokens = scopesStr
     .split('|')
     .filter((s) => s !== '')
@@ -169,11 +202,23 @@ export function layer2ScopeEvidence(row, priorClass) {
       return;
     }
     if (hint === 'w') {
-      // fix 1: write-hint tokens never lower, on any method.
-      if (method === 'PUT' || method === 'PATCH' || method === 'DELETE') {
-        evidence.push({ dir: 'agree', target: 'w', weight: 0, evidence: `scope:${token}-agrees` });
+      // fix 1 (still holds): write-hint tokens never lower, on any method.
+      if (isPostPatch) {
+        // M1-C6 layer 2b: raises on POST/PATCH when the measured share is
+        // available; otherwise no evidence (matches the pre-C6 rule).
+        if (writeFamilyXShare != null) {
+          evidence.push({
+            dir: 'raise',
+            target: 'x',
+            weight: writeFamilyXShare,
+            evidence: `scope:${token}->raise:writeFamilyShare=${writeFamilyXShare.toFixed(3)}`,
+          });
+        } else {
+          evidence.push({ dir: 'none', target: null, weight: 0, evidence: `scope:${token}-write-no-table` });
+        }
       } else {
-        evidence.push({ dir: 'none', target: null, weight: 0, evidence: `scope:${token}-write-blocked` });
+        // PUT/DELETE: unchanged, only ever agrees.
+        evidence.push({ dir: 'agree', target: 'w', weight: 0, evidence: `scope:${token}-agrees` });
       }
       return;
     }
@@ -186,12 +231,79 @@ export function layer2ScopeEvidence(row, priorClass) {
         evidence.push({ dir: 'lower', target: hint, weight, evidence: `scope:${token}->lower:${hint}` });
       }
     } else if (hintIdx === priorIdx) {
-      evidence.push({ dir: 'agree', target: hint, weight: 0, evidence: `scope:${token}-agrees` });
+      // M1-C6 layer 2b (revised): an x-hint token can only equal the prior
+      // on POST/PATCH (prior is already x there) — upgrade agreement to a
+      // raise only when this method's measured x-hint share clears n >= 5,
+      // share >= 0.9; otherwise it stays a plain agreement (no evidence).
+      if (hint === 'x' && isPostPatch && xHintXShare != null) {
+        evidence.push({
+          dir: 'raise',
+          target: 'x',
+          weight: xHintXShare,
+          evidence: `scope:${token}->raise:xHintShare=${xHintXShare.toFixed(3)}`,
+        });
+      } else {
+        evidence.push({ dir: 'agree', target: hint, weight: 0, evidence: `scope:${token}-agrees` });
+      }
     } else {
       evidence.push({ dir: 'raise', target: 'x', weight: 1.0, evidence: `scope:${token}->raise` });
     }
   });
   return evidence;
+}
+
+// M1-C6 (revised): measured x share of a scope-hint family, on ONE method,
+// built as a per-repo table so the caller can leave-one-repo-out. A row
+// counts if its method matches, it has a resolved gt_class, and at least
+// one of its scope tokens has the given hint ('w' for the write family, 'x'
+// for the explicit x-hint family). Kept per-method — never pooled across
+// POST and PATCH — because the two measure differently (see run.mjs's own
+// count: write-family POST 0.94 admitted, PATCH not).
+export function buildScopeFamilyTable(rows, method, hintValue) {
+  const byRepo = new Map();
+  for (const row of rows) {
+    if (row.method !== method) continue;
+    const gt = row.gt_class;
+    if (gt !== 'r' && gt !== 'w' && gt !== 'x') continue;
+    const scopesStr = row.security_scopes || '';
+    if (scopesStr === '') continue;
+    const tokens = scopesStr
+      .split('|')
+      .filter((s) => s !== '')
+      .map((scope) => {
+        const idx = scope.lastIndexOf(':');
+        return (idx >= 0 ? scope.slice(idx + 1) : scope).toLowerCase();
+      });
+    if (!tokens.some((t) => scopeHint(t) === hintValue)) continue;
+    if (!byRepo.has(row.repo)) byRepo.set(row.repo, { r: 0, w: 0, x: 0 });
+    byRepo.get(row.repo)[gt] += 1;
+  }
+  return byRepo;
+}
+
+// Sum a buildScopeFamilyTable() map across all repos except excludeRepo, and
+// return {n, share} or null when there are no rows at all.
+export function shareExcludingRepo(byRepo, excludeRepo) {
+  const counts = { r: 0, w: 0, x: 0 };
+  for (const [repo, c] of byRepo) {
+    if (excludeRepo != null && repo === excludeRepo) continue;
+    counts.r += c.r;
+    counts.w += c.w;
+    counts.x += c.x;
+  }
+  const n = counts.r + counts.w + counts.x;
+  if (n === 0) return null;
+  return { n, share: counts.x / n };
+}
+
+// Gated lookup used by scoreRow: null unless the method's table clears
+// n >= 5, x share >= 0.9 (after excluding the row's own repo for CAMARA).
+export function gatedFamilyShareForRow(row, table, minN = 5, minShare = 0.9) {
+  if (!table) return null;
+  const excludeRepo = row.set === 'camara' ? row.repo : null;
+  const s = shareExcludingRepo(table, excludeRepo);
+  if (!s || s.n < minN || s.share < minShare) return null;
+  return s.share;
 }
 
 // --- Layer 3: corpus lean, routed through the prior ------------------------
@@ -318,6 +430,159 @@ export function layer4VerbEvidence(counts, leadVerbToken) {
   return [];
 }
 
+// --- Generic key -> repo -> {r,w,x} table (used by layers 5 and 6) ---------
+//
+// keysFn(row) returns the (deduplicated) list of keys this row contributes
+// to, e.g. its requestBody property names, or [] to contribute nothing.
+// Only rows with a resolved gt_class count.
+
+export function buildRepoCountTable(rows, keysFn) {
+  const table = new Map();
+  for (const row of rows) {
+    const gt = row.gt_class;
+    if (gt !== 'r' && gt !== 'w' && gt !== 'x') continue;
+    for (const key of keysFn(row)) {
+      if (!table.has(key)) table.set(key, new Map());
+      const byRepo = table.get(key);
+      if (!byRepo.has(row.repo)) byRepo.set(row.repo, { r: 0, w: 0, x: 0 });
+      byRepo.get(row.repo)[gt] += 1;
+    }
+  }
+  return table;
+}
+
+// Sum counts for `key` across all repos except excludeRepo (null/undefined =
+// no exclusion, the holdout2 case).
+export function countsForKey(table, key, excludeRepo) {
+  const byRepo = table.get(key);
+  if (!byRepo) return null;
+  const counts = { r: 0, w: 0, x: 0 };
+  for (const [repo, c] of byRepo) {
+    if (excludeRepo != null && repo === excludeRepo) continue;
+    counts.r += c.r;
+    counts.w += c.w;
+    counts.x += c.x;
+  }
+  return counts;
+}
+
+// {n, share} of truth-x within counts, or null when n === 0.
+export function shareX(counts) {
+  if (!counts) return null;
+  const n = counts.r + counts.w + counts.x;
+  if (n === 0) return null;
+  return { n, share: counts.x / n };
+}
+
+// A CAMARA or hold-out-1 row must never have its own repo's rows back it as
+// evidence; a hold-out-2 row (or anything else) uses the table whole.
+export function rowExcludeRepo(row) {
+  return row.set === 'camara' || row.set === 'holdout1' ? row.repo : null;
+}
+
+// --- Layer 5: body-shape raisers (requestBody property names + presence
+// flags), admitted mechanically from CAMARA + hold-out-1 rows -------------
+
+export function bodyPropKeysForRow(row) {
+  if (row.requestBody_present !== 'true') return [];
+  const raw = row.requestBody_props || '';
+  if (raw === '') return [];
+  return Array.from(new Set(raw.split('|').map((s) => s.trim()).filter((s) => s !== '')));
+}
+
+export function buildBodyPropTable(rows) {
+  return buildRepoCountTable(rows, bodyPropKeysForRow);
+}
+
+export function layer5BodyEvidence(row, table, admittedNames, minN = 5, minShare = 0.9) {
+  if (!admittedNames || admittedNames.size === 0) return [];
+  const excludeRepo = rowExcludeRepo(row);
+  const evidence = [];
+  for (const key of bodyPropKeysForRow(row)) {
+    if (!admittedNames.has(key)) continue;
+    const s = shareX(countsForKey(table, key, excludeRepo));
+    if (!s || s.n < minN || s.share < minShare) continue;
+    evidence.push({
+      dir: 'raise',
+      target: 'x',
+      weight: s.share,
+      evidence: `bodyprop:${key}->raise:n=${s.n}:share=${s.share.toFixed(3)}`,
+    });
+  }
+  return evidence;
+}
+
+// Present-only census flags admitted the same mechanical way (callbacks
+// present, has202, an Idempotency-Key header parameter).
+export function flagPresent(row, flagName) {
+  return row[flagName] === 'true';
+}
+
+export function buildFlagTable(rows, flagName) {
+  return buildRepoCountTable(rows, (row) => (flagPresent(row, flagName) ? [flagName] : []));
+}
+
+export function layer5FlagEvidence(row, flagName, table, admitted, minN = 5, minShare = 0.9) {
+  if (!admitted || !flagPresent(row, flagName)) return [];
+  const excludeRepo = rowExcludeRepo(row);
+  const s = shareX(countsForKey(table, flagName, excludeRepo));
+  if (!s || s.n < minN || s.share < minShare) return [];
+  return [
+    {
+      dir: 'raise',
+      target: 'x',
+      weight: s.share,
+      evidence: `flag:${flagName}->raise:n=${s.n}:share=${s.share.toFixed(3)}`,
+    },
+  ];
+}
+
+// --- Layer 6: own-vs-other structural facts for PUT/DELETE/PATCH ----------
+
+export function pathParamKeysForRow(row) {
+  const path = row.path || '';
+  const matches = path.match(/\{([^}]+)\}/g) || [];
+  return Array.from(new Set(matches.map((m) => m.slice(1, -1))));
+}
+
+export function schemaPropKeysForRow(row) {
+  const raw = row.resource_schema_props || '';
+  if (raw === '') return [];
+  return Array.from(new Set(raw.split('|').map((s) => s.trim()).filter((s) => s !== '')));
+}
+
+function isPutDeletePatch(row) {
+  return row.method === 'PUT' || row.method === 'DELETE' || row.method === 'PATCH';
+}
+
+// Build a layer-6 table restricted to PUT/DELETE/PATCH rows only.
+export function buildLayer6Table(rows, keysFn) {
+  return buildRepoCountTable(rows.filter(isPutDeletePatch), keysFn);
+}
+
+// categories: array of {name, keysFn, table, admittedSet}. Only rows whose
+// method is PUT/DELETE/PATCH ever produce evidence here.
+export function layer6Evidence(row, categories, minN = 5, minShare = 0.9) {
+  if (!isPutDeletePatch(row) || !categories) return [];
+  const excludeRepo = rowExcludeRepo(row);
+  const evidence = [];
+  for (const cat of categories) {
+    if (!cat.admittedSet || cat.admittedSet.size === 0) continue;
+    for (const key of cat.keysFn(row)) {
+      if (!cat.admittedSet.has(key)) continue;
+      const s = shareX(countsForKey(cat.table, key, excludeRepo));
+      if (!s || s.n < minN || s.share < minShare) continue;
+      evidence.push({
+        dir: 'raise',
+        target: 'x',
+        weight: s.share,
+        evidence: `${cat.name}:${key}->raise:n=${s.n}:share=${s.share.toFixed(3)}`,
+      });
+    }
+  }
+  return evidence;
+}
+
 // --- Aggregation ------------------------------------------------------------
 
 // Pools evidence from layers 2-4 into a final class/confidence/status,
@@ -353,7 +618,14 @@ export function aggregate(evidenceList, priorClass, threshold) {
 
 // --- Top-level row scoring ---------------------------------------------------
 //
-// ctx: { leanIndex: Map<token, leanRow>, verbTable: Map<token, Map<repo, counts>> }
+// ctx: {
+//   leanIndex: Map<token, leanRow>,
+//   verbTable: Map<token, Map<repo, counts>>,
+//   scopeFamilyTables: Map<'write:POST'|'write:PATCH'|'xhint:POST'|'xhint:PATCH', Map<repo, counts>> (M1-C6 layer 2b, revised),
+//   bodyPropTable: Map<propName, Map<repo, counts>>, admittedBodyProps: Set (layer 5),
+//   flagTables: Map<flagName, Map<repo, counts>>, admittedFlags: Set<flagName> (layer 5),
+//   layer6Categories: array of {name, keysFn, table, admittedSet} (layer 6),
+// }
 // row: must carry method, operationId, path, security_scopes, set, repo.
 // switches: { corpusWLean: boolean } — M1-C5 fix 5, default true.
 
@@ -375,11 +647,39 @@ export function scoreRow(row, ctx, threshold, switches = {}) {
   const corpusWLean = switches.corpusWLean !== false;
   const leadVerbToken = leadVerbForRow(row);
   const evidence = [];
-  evidence.push(...layer2ScopeEvidence(row, prior));
+
+  // Layer 2 + M1-C6 layer 2b (revised): write-family and x-hint-family
+  // shares are each measured per method (POST, PATCH separately), CAMARA-
+  // only, leave-one-repo-out, gated at n >= 5 / share >= 0.9.
+  let writeFamilyXShare = null;
+  let xHintXShare = null;
+  if ((method === 'POST' || method === 'PATCH') && ctx.scopeFamilyTables) {
+    writeFamilyXShare = gatedFamilyShareForRow(row, ctx.scopeFamilyTables.get(`write:${method}`));
+    xHintXShare = gatedFamilyShareForRow(row, ctx.scopeFamilyTables.get(`xhint:${method}`));
+  }
+  evidence.push(...layer2ScopeEvidence(row, prior, writeFamilyXShare, xHintXShare));
+
   evidence.push(...layer3CorpusEvidence(leadVerbToken, method, ctx.leanIndex || new Map(), corpusWLean));
   const excludeRepo = row.set === 'camara' ? row.repo : null;
   const counts = ctx.verbTable ? verbCountsFor(ctx.verbTable, leadVerbToken, excludeRepo) : null;
   evidence.push(...layer4VerbEvidence(counts, leadVerbToken));
+
+  // Layer 5: body-prop raisers + present-only flag raisers.
+  if (ctx.bodyPropTable && ctx.admittedBodyProps) {
+    evidence.push(...layer5BodyEvidence(row, ctx.bodyPropTable, ctx.admittedBodyProps));
+  }
+  if (ctx.flagTables && ctx.admittedFlags) {
+    for (const flagName of ctx.admittedFlags) {
+      const table = ctx.flagTables.get(flagName);
+      if (table) evidence.push(...layer5FlagEvidence(row, flagName, table, true));
+    }
+  }
+
+  // Layer 6: own-vs-other structural facts for PUT/DELETE/PATCH.
+  if (ctx.layer6Categories) {
+    evidence.push(...layer6Evidence(row, ctx.layer6Categories));
+  }
+
   const result = aggregate(evidence, prior, threshold);
   return { ...result, prior };
 }

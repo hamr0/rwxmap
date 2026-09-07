@@ -12,6 +12,22 @@ import {
   leadVerbWasMethodStripped,
   splitLeadToken,
   splitTokens,
+  buildScopeFamilyTable,
+  shareExcludingRepo,
+  gatedFamilyShareForRow,
+  buildRepoCountTable,
+  countsForKey,
+  shareX,
+  buildBodyPropTable,
+  bodyPropKeysForRow,
+  layer5BodyEvidence,
+  buildFlagTable,
+  layer5FlagEvidence,
+  buildLayer6Table,
+  pathParamKeysForRow,
+  schemaPropKeysForRow,
+  layer6Evidence,
+  rowExcludeRepo,
 } from './arbiter.mjs';
 
 function row(overrides) {
@@ -334,21 +350,28 @@ test('layer3CorpusEvidence yields nothing for PUT/DELETE rows (corpus layer does
 // Without the fix, a 'write' scope on a POST row (prior x) lowers toward w
 // at weight 0.6 — this is exactly the C4 defect (write scope on CAMARA POST
 // measured 10 x / 1 w in M1-C2) that wrongly loosened truth-x rows.
+//
+// M1-C6 layer 2b supersedes the "agrees"/"write-blocked" no-evidence outcome
+// on POST/PATCH with a raise once a measured write-family share is
+// available (see the layer 2b tests below); called with no third argument
+// (as here) writeFamilyXShare is null, which is the pre-2b fallback these
+// two tests still cover, and PATCH now shares POST's branch (both are
+// "isPostPatch") rather than PUT/DELETE's agree-only branch.
 
-test('fix 1: a write-hint scope on POST gives no evidence at all (never lowers)', () => {
+test('fix 1: a write-hint scope on POST gives no evidence at all (never lowers) when no write-family table is available', () => {
   const r = row({ method: 'POST', security_scopes: 'svc:res:write' });
   const evidence = layer2ScopeEvidence(r, 'x');
   assert.ok(!evidence.some((e) => e.dir === 'lower'));
   assert.equal(evidence.length, 1);
   assert.equal(evidence[0].dir, 'none');
-  assert.equal(evidence[0].evidence, 'scope:write-write-blocked');
+  assert.equal(evidence[0].evidence, 'scope:write-write-no-table');
 });
 
-test('fix 1: a write-hint scope on PATCH only agrees, it never lowers toward w', () => {
+test('fix 1 / C6 2b: a write-hint scope on PATCH never lowers toward w; with no write-family table it gives no evidence (PATCH now shares POST\'s branch)', () => {
   const r = row({ method: 'PATCH', security_scopes: 'svc:res:delete' });
   const evidence = layer2ScopeEvidence(r, 'x');
   assert.ok(!evidence.some((e) => e.dir === 'lower'));
-  assert.ok(evidence.some((e) => e.dir === 'agree' && e.evidence === 'scope:delete-agrees'));
+  assert.ok(evidence.some((e) => e.dir === 'none' && e.evidence === 'scope:delete-write-no-table'));
 });
 
 // --- M1-C5 fix 2: conflicting scope hints cancel any lowering --------------
@@ -480,4 +503,303 @@ test('fix 5: scoreRow defaults corpusWLean to on when switches is omitted', () =
 test('splitTokens returns every token, not just the first', () => {
   assert.deepEqual(splitTokens('retrieveOptimalAppEndpoints'), ['retrieve', 'optimal', 'app', 'endpoints']);
   assert.deepEqual(splitTokens('post-cardDetails'), ['post', 'card', 'details']);
+});
+
+// ============================================================================
+// M1-C6: three new evidence layers
+// ============================================================================
+
+// --- Layer 2b (revised, coordinator correction 2026-09-07): scope
+// agreement upgraded to a raise on POST/PATCH ONLY when that method's own
+// measured family share clears n >= 5, share >= 0.9 — write-family and
+// x-hint-family are measured and gated separately per method, never
+// pooled, and never a fixed weight. -----------------------------------
+
+test('layer 2b: an x-hint token raises on a method only when xHintXShare is supplied (admitted), and stays a plain agreement otherwise', () => {
+  const post = row({ method: 'POST', security_scopes: 'svc:res:create' });
+  const evAdmitted = layer2ScopeEvidence(post, 'x', null, 0.95);
+  assert.ok(evAdmitted.some((e) => e.dir === 'raise' && Math.abs(e.weight - 0.95) < 1e-9 && e.evidence === 'scope:create->raise:xHintShare=0.950'));
+
+  // Not admitted on this method (xHintXShare null) -> falls back to a plain
+  // agreement, exactly the pre-2b behavior.
+  const evNotAdmitted = layer2ScopeEvidence(post, 'x', null, null);
+  assert.ok(!evNotAdmitted.some((e) => e.dir === 'raise'));
+  assert.ok(evNotAdmitted.some((e) => e.dir === 'agree' && e.evidence === 'scope:create-agrees'));
+
+  const result = scoreRow(post, emptyCtx, 0.5); // emptyCtx has no scopeFamilyTables -> null shares -> no raise from 2b
+  assert.notEqual(result.status, 'assigned'); // no evidence anywhere in emptyCtx -> review
+});
+
+test('layer 2b: a write-family token raises only on a method whose measured writeFamilyXShare is supplied, and never on PUT/DELETE', () => {
+  const post = row({ method: 'POST', security_scopes: 'svc:res:write' });
+  const evAdmitted = layer2ScopeEvidence(post, 'x', 0.94, null); // POST admitted per the coordinator's own count
+  assert.ok(evAdmitted.some((e) => e.dir === 'raise' && Math.abs(e.weight - 0.94) < 1e-9));
+
+  const patch = row({ method: 'PATCH', security_scopes: 'svc:res:update' });
+  const evNotAdmitted = layer2ScopeEvidence(patch, 'x', null, null); // PATCH not admitted -> agrees
+  assert.ok(!evNotAdmitted.some((e) => e.dir === 'raise'));
+  assert.ok(evNotAdmitted.some((e) => e.dir === 'none' && e.evidence === 'scope:update-write-no-table'));
+
+  const put = row({ method: 'PUT', security_scopes: 'svc:res:write' });
+  const evPut = layer2ScopeEvidence(put, 'w', 0.94, null);
+  assert.ok(!evPut.some((e) => e.dir === 'raise'));
+  assert.ok(evPut.some((e) => e.dir === 'agree' && e.evidence === 'scope:write-agrees'));
+});
+
+test('buildScopeFamilyTable + shareExcludingRepo: per-method, leave-one-repo-out — the coordinator\'s own POST/PATCH split', () => {
+  const camaraRows = [
+    // POST write-family: 1 x -> full-table share would be 1.0, but this is
+    // deliberately tiny to prove the per-method split, not the real numbers.
+    row({ repo: 'RepoA', method: 'POST', operationId: 'registerX', gt_class: 'x', security_scopes: 'ns:res:write' }),
+    // PATCH write-family: 1 x, 2 w -> share 1/3, nowhere near 0.9.
+    row({ repo: 'RepoA', method: 'PATCH', operationId: 'updateX', gt_class: 'x', security_scopes: 'ns:res:update' }),
+    row({ repo: 'RepoB', method: 'PATCH', operationId: 'updateY', gt_class: 'w', security_scopes: 'ns:res:update' }),
+    row({ repo: 'RepoB', method: 'PATCH', operationId: 'updateZ', gt_class: 'w', security_scopes: 'ns:res:update' }),
+  ];
+  const postTable = buildScopeFamilyTable(camaraRows, 'POST', 'w');
+  const patchTable = buildScopeFamilyTable(camaraRows, 'PATCH', 'w');
+  // POST table only sees the one POST row -> not a PATCH row leaking in.
+  assert.equal(shareExcludingRepo(postTable, null).n, 1);
+  assert.equal(shareExcludingRepo(postTable, null).share, 1);
+  // PATCH table sees only the three PATCH rows.
+  const patchFull = shareExcludingRepo(patchTable, null);
+  assert.equal(patchFull.n, 3);
+  assert.equal(patchFull.share, 1 / 3);
+  // Leave-one-repo-out: excluding RepoB from the PATCH table leaves only
+  // RepoA's one truth-x PATCH row.
+  const patchExcludingB = shareExcludingRepo(patchTable, 'RepoB');
+  assert.equal(patchExcludingB.n, 1);
+  assert.equal(patchExcludingB.share, 1);
+});
+
+test('gatedFamilyShareForRow: gates at n>=5, share>=0.9, and applies leave-one-repo-out for a CAMARA row', () => {
+  const camaraRows = [];
+  for (let i = 0; i < 9; i++) {
+    camaraRows.push(row({ repo: `Repo${i}`, method: 'POST', operationId: `op${i}`, gt_class: 'x', security_scopes: 'ns:res:write' }));
+  }
+  camaraRows.push(row({ repo: 'RepoW', method: 'POST', operationId: 'opW', gt_class: 'w', security_scopes: 'ns:res:write' }));
+  const table = buildScopeFamilyTable(camaraRows, 'POST', 'w'); // n=10, share=0.9 exactly at the bar
+  const r = row({ set: 'camara', repo: 'RepoOutside', method: 'POST' });
+  const shareForOutsideRow = gatedFamilyShareForRow(r, table);
+  assert.equal(shareForOutsideRow, 0.9); // outside repo -> no exclusion effect, full table used
+
+  // A CAMARA row living in one of the table's own repos excludes itself —
+  // excluding Repo0 (a truth-x contributor) drops n to 9, share stays >= 0.9
+  // only if the remaining rows still clear it; here 8 x / 1 w = 0.889, so
+  // it now falls just short and must return null.
+  const rInRepo0 = row({ set: 'camara', repo: 'Repo0', method: 'POST' });
+  assert.equal(gatedFamilyShareForRow(rInRepo0, table), null);
+});
+
+// --- Layer 5: body-prop and flag raisers ------------------------------------
+
+test('bodyPropKeysForRow: splits requestBody_props on "|", empty when requestBody is absent', () => {
+  assert.deepEqual(bodyPropKeysForRow(row({ requestBody_present: 'true', requestBody_props: 'sink|sinkCredential' })), ['sink', 'sinkCredential']);
+  assert.deepEqual(bodyPropKeysForRow(row({ requestBody_present: 'false', requestBody_props: 'sink' })), []);
+  assert.deepEqual(bodyPropKeysForRow(row({ requestBody_present: 'true', requestBody_props: '' })), []);
+});
+
+test('layer5BodyEvidence: an admitted body-prop name at n>=5, share>=0.9 raises with weight = its share; a non-admitted name gives nothing', () => {
+  // 9 x, 1 w across five repos, n=10, share=0.9 — right at the admission bar.
+  const rows = [
+    row({ repo: 'A', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'x' }),
+    row({ repo: 'A', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'x' }),
+    row({ repo: 'B', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'x' }),
+    row({ repo: 'B', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'x' }),
+    row({ repo: 'C', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'x' }),
+    row({ repo: 'C', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'w' }),
+    row({ repo: 'D', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'x' }),
+    row({ repo: 'D', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'x' }),
+    row({ repo: 'E', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'x' }),
+    row({ repo: 'E', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'x' }),
+  ];
+  const table = buildBodyPropTable(rows);
+  const admitted = new Set(['sink']);
+  const r = row({ set: 'camara', repo: 'F', requestBody_present: 'true', requestBody_props: 'sink|other' });
+  const ev = layer5BodyEvidence(r, table, admitted);
+  assert.equal(ev.length, 1);
+  assert.equal(ev[0].dir, 'raise');
+  assert.equal(ev[0].weight, 9 / 10);
+  assert.ok(ev[0].evidence.startsWith('bodyprop:sink->raise'));
+
+  const notAdmitted = layer5BodyEvidence(r, table, new Set(['other']));
+  assert.deepEqual(notAdmitted, []);
+});
+
+test('layer5BodyEvidence: leave-one-repo-out — a CAMARA or hold-out-1 row never scores itself; a hold-out-2 row uses the whole table', () => {
+  const rows = [
+    row({ set: 'camara', repo: 'A', requestBody_present: 'true', requestBody_props: 'amount', gt_class: 'x' }),
+    row({ set: 'camara', repo: 'A', requestBody_present: 'true', requestBody_props: 'amount', gt_class: 'x' }),
+    row({ set: 'camara', repo: 'A', requestBody_present: 'true', requestBody_props: 'amount', gt_class: 'x' }),
+    row({ set: 'camara', repo: 'A', requestBody_present: 'true', requestBody_props: 'amount', gt_class: 'x' }),
+    row({ set: 'camara', repo: 'A', requestBody_present: 'true', requestBody_props: 'amount', gt_class: 'x' }),
+  ];
+  const table = buildBodyPropTable(rows);
+  const admitted = new Set(['amount']);
+  // A CAMARA row from RepoA: excluding RepoA leaves n=0 -> no evidence, even
+  // though the un-excluded table alone would satisfy n=5, share=1.0.
+  const camaraRow = row({ set: 'camara', repo: 'A', requestBody_present: 'true', requestBody_props: 'amount' });
+  assert.deepEqual(layer5BodyEvidence(camaraRow, table, admitted), []);
+  // A hold-out-2 row with the same prop: no exclusion, the full n=5 table fires.
+  const holdout2Row = row({ set: 'holdout2', repo: 'ZRepo', requestBody_present: 'true', requestBody_props: 'amount' });
+  const ev = layer5BodyEvidence(holdout2Row, table, admitted);
+  assert.equal(ev.length, 1);
+  assert.equal(ev[0].weight, 1.0);
+});
+
+test('layer5FlagEvidence: an admitted present-only flag raises with weight = its share; absence gives nothing', () => {
+  // 9 x, 1 w across five repos, n=10, share=0.9 — right at the admission bar.
+  const rows = [
+    row({ repo: 'A', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'A', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'B', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'B', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'C', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'C', callbacks_present: 'true', gt_class: 'w' }),
+    row({ repo: 'D', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'D', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'E', callbacks_present: 'true', gt_class: 'x' }),
+    row({ repo: 'E', callbacks_present: 'true', gt_class: 'x' }),
+  ];
+  const table = buildFlagTable(rows, 'callbacks_present');
+  const withFlag = row({ set: 'camara', repo: 'F', callbacks_present: 'true' });
+  const ev = layer5FlagEvidence(withFlag, 'callbacks_present', table, true);
+  assert.equal(ev.length, 1);
+  assert.equal(ev[0].weight, 9 / 10);
+  const withoutFlag = row({ set: 'camara', repo: 'F', callbacks_present: 'false' });
+  assert.deepEqual(layer5FlagEvidence(withoutFlag, 'callbacks_present', table, true), []);
+});
+
+// --- Layer 6: own-vs-other structural facts for PUT/DELETE/PATCH -----------
+
+test('pathParamKeysForRow and schemaPropKeysForRow parse their sources correctly', () => {
+  assert.deepEqual(pathParamKeysForRow(row({ path: '/calls/{callId}/status' })), ['callId']);
+  assert.deepEqual(pathParamKeysForRow(row({ path: '/a/{x}/b/{y}' })), ['x', 'y']);
+  assert.deepEqual(pathParamKeysForRow(row({ path: '/no-params' })), []);
+  assert.deepEqual(schemaPropKeysForRow(row({ resource_schema_props: 'foo|bar' })), ['foo', 'bar']);
+});
+
+test('layer6Evidence only applies to PUT/DELETE/PATCH rows, never GET/POST', () => {
+  const categories = [
+    { name: 'pathparam', keysFn: pathParamKeysForRow, table: buildLayer6Table([
+        row({ method: 'PUT', repo: 'A', path: '/x/{ownerId}', gt_class: 'x' }),
+        row({ method: 'PUT', repo: 'B', path: '/x/{ownerId}', gt_class: 'x' }),
+        row({ method: 'PUT', repo: 'C', path: '/x/{ownerId}', gt_class: 'x' }),
+        row({ method: 'PUT', repo: 'D', path: '/x/{ownerId}', gt_class: 'x' }),
+        row({ method: 'PUT', repo: 'E', path: '/x/{ownerId}', gt_class: 'x' }),
+      ], pathParamKeysForRow), admittedSet: new Set(['ownerId']) },
+    // (buildLayer6Table takes (rows, keysFn); the categories array's own
+    // keysFn above is the one layer6Evidence actually calls per scored row)
+  ];
+  const putRow = row({ set: 'camara', repo: 'F', method: 'PUT', path: '/x/{ownerId}' });
+  const ev = layer6Evidence(putRow, categories);
+  assert.equal(ev.length, 1);
+  assert.equal(ev[0].dir, 'raise');
+
+  const postRow = row({ set: 'camara', repo: 'F', method: 'POST', path: '/x/{ownerId}' });
+  assert.deepEqual(layer6Evidence(postRow, categories), []);
+  const getRow = row({ set: 'camara', repo: 'F', method: 'GET', path: '/x/{ownerId}' });
+  assert.deepEqual(layer6Evidence(getRow, categories), []);
+});
+
+test('layer6Evidence: an empty admittedSet (the honest "nothing qualified" outcome) never raises', () => {
+  const categories = [
+    { name: 'partyidparam', keysFn: (r) => (r.party_id_param === 'true' ? ['party_id_param'] : []), table: new Map(), admittedSet: new Set() },
+  ];
+  const r = row({ set: 'holdout1', repo: 'twilio', method: 'DELETE', party_id_param: 'true' });
+  assert.deepEqual(layer6Evidence(r, categories), []);
+});
+
+test('scoreRow wires layers 2b/5/6 through ctx and the raise wins the aggregate, regardless of threshold', () => {
+  const bodyPropTable = buildBodyPropTable([
+    row({ repo: 'A', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'x' }),
+    row({ repo: 'A', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'x' }),
+    row({ repo: 'B', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'x' }),
+    row({ repo: 'B', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'x' }),
+    row({ repo: 'C', requestBody_present: 'true', requestBody_props: 'sink', gt_class: 'x' }),
+  ]);
+  const ctx = { leanIndex: new Map(), verbTable: new Map(), bodyPropTable, admittedBodyProps: new Set(['sink']) };
+  const r = row({ set: 'camara', repo: 'D', method: 'POST', requestBody_present: 'true', requestBody_props: 'sink', security_scopes: '' });
+  const result = scoreRow(r, ctx, 2.0); // T well above any weight in play
+  assert.equal(result.class, 'x');
+  assert.equal(result.status, 'assigned');
+  assert.ok(result.evidence.some((e) => e.startsWith('bodyprop:sink->raise')));
+});
+
+// --- Negative controls, re-asserted under the C6 pipeline -------------------
+//
+// Neither terminateCall nor updateSessionStatus carries a requestBody, a
+// present-only flag, or a path-param/schema shape admitted by the real
+// census tables (traced in run.mjs's own report) — so wiring layers 5/6
+// into their ctx changes nothing about their outcome. Reported plainly, not
+// forced to 'x': both still fall to review at the method's prior.
+
+test('negative control 1, re-checked under C6: terminateCall still has no admitting evidence and falls to review at prior w', () => {
+  const r = {
+    set: 'camara',
+    repo: 'ClickToDial',
+    path: '/calls/{callId}',
+    method: 'DELETE',
+    operationId: 'terminateCall',
+    gt_class: 'x',
+    security_scopes: 'click-to-dial:calls:delete',
+    requestBody_present: 'false',
+    requestBody_props: '',
+    callbacks_present: 'false',
+    has202: 'false',
+    party_id_param: 'false',
+    resource_schema_party_field: 'false',
+    resource_schema_props: '',
+  };
+  // ctx carries C6 tables that do NOT admit anything matching this row's
+  // shape, to prove the layers being present is not itself sufficient.
+  const ctx = {
+    leanIndex: new Map(),
+    verbTable: new Map(),
+    scopeFamilyTables: new Map(),
+    bodyPropTable: new Map(),
+    admittedBodyProps: new Set(['sink']),
+    flagTables: new Map([['callbacks_present', new Map()]]),
+    admittedFlags: new Set(['callbacks_present']),
+    layer6Categories: [{ name: 'pathparam', keysFn: pathParamKeysForRow, table: new Map(), admittedSet: new Set(['ownerId']) }],
+  };
+  const result = scoreRow(r, ctx, 0.5);
+  assert.equal(result.prior, 'w');
+  assert.equal(result.class, 'w');
+  assert.equal(result.status, 'review');
+  assert.ok(result.evidence.some((e) => e === 'scope:delete-agrees'));
+});
+
+test('negative control 2, re-checked under C6: updateSessionStatus still has no admitting evidence and falls to review at prior w', () => {
+  const r = {
+    set: 'camara',
+    repo: 'WebRTC',
+    path: '/sessions/{mediaSessionId}/status',
+    method: 'PUT',
+    operationId: 'updateSessionStatus',
+    gt_class: 'x',
+    security_scopes: 'webrtc-call-handling:sessions:write',
+    requestBody_present: 'true',
+    requestBody_props: 'status',
+    callbacks_present: 'false',
+    has202: 'false',
+    party_id_param: 'false',
+    resource_schema_party_field: 'false',
+    resource_schema_props: '',
+  };
+  const ctx = {
+    leanIndex: new Map(),
+    verbTable: new Map(),
+    scopeFamilyTables: new Map(),
+    bodyPropTable: new Map(),
+    admittedBodyProps: new Set(['sink']), // 'status' is not admitted
+    flagTables: new Map(),
+    admittedFlags: new Set(),
+    layer6Categories: [],
+  };
+  const result = scoreRow(r, ctx, 0.5);
+  assert.equal(result.prior, 'w');
+  assert.equal(result.class, 'w');
+  assert.equal(result.status, 'review');
+  assert.ok(result.evidence.some((e) => e === 'scope:write-agrees'));
 });

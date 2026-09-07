@@ -216,11 +216,12 @@ safe floor and the row is tagged for human review. Go means all of:
    method co-occurrence — which methods a verb or noun travels with —
    with CAMARA usable as one signal among them. No hand lists.
 
-Status 2026-09-07 after M1-C5: rule 1 and rule 3 met at T = 1.25 (0
-leaks, 1 / 1 / 1 over-tight); rule 2 not met (review + over-tight
-114/292, 173/207, 112/220). What remains in review is absence of
-evidence on PUT/DELETE and on scope-less POST; the secondary layers
-(body raisers, own-vs-other) are next.
+Status 2026-09-07 after M1-C6: rule 1 met (0 leaks at T = 0.75 on every
+set); rule 3 met (8 over-tight, all stated confusions); rule 2 not met
+(review + over-tight 77/292, 173/207, 111/220). Own-vs-other admitted
+nothing from the structural fields at the 0.9 bar (M1-C6); hold-out 1 is
+unchanged since C5. The remaining rows have no machine-facing evidence;
+prose as the last layer is the only untried input inside M1's shape.
 
 **M2 — Shape rules, only if justified.** For each divergence class from
 M0/M1 that appears more than once, add one deterministic OpenAPI-shape
@@ -560,6 +561,11 @@ Non-blocking; never silently assumed.
   separate axis? A grant of `x` currently implies `w`; with two axes a
   consumer may want "`x`, non-destructive only." The draft's scope
   grammar needs a word for that. Raised 2026-09-07.
+- Poll-then-callback reads: three CAMARA operations
+  (retrievePopulationDensity, retrieveConnectivity, count) are labelled
+  r but carry `callbacks`, which is x on 39 of 41 other rows. Is a read
+  whose result arrives by callback r or x? Raised by M1-C6; the user has
+  not ruled.
 - Which structural fields qualify for a rule, per set, by the user's
   criterion "present consistently or almost always"? Answered by the
   M1 census, pending 2026-09-07.
