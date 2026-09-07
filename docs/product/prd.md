@@ -98,29 +98,30 @@ still come out `x`. Three numbers are reported every time and never
 combined: wrong loosenings at high confidence, wrong loosenings at low
 confidence, and over-tightenings.
 
-**M0 result on the clean exam, 2026-09-07 (E22).** A second hold-out,
+**M0 result on the clean exam, 2026-09-07 (E23).** A second hold-out,
 `data/holdout2-2026-09-07/` (Box 99, PagerDuty 93, Adyen 28; 220
 operations; 94 GET; ground truth read blind by five agents with zero
 orchestrator rulings; r 104, w 63, x 53), was built after every list in
 the repo was written, so no lexicon, verb table or party list had seen
-it. With the four-token cap removed (D25) and the irreversibility stems
-dropped (D26), the union shape scores, per set, pass 2 on: CAMARA 292
+it. With the four-token cap removed (D25), the irreversibility stems
+dropped (D26) and collaboration added to the party list (D27), the
+union shape scores, per set, pass 2 on: CAMARA 292
 (build 98 agree / 42 over-tight / 0 wrong loosenings / 10 correct
 lowerings; test 120 / 32 / 0 / 13), 0 wrong loosenings at high or low
 confidence; hold-out 1, 207 ops, 106 / 101 / 0 / 0, 0 at high or low;
-clean exam, 220 ops, 186 / 33 / 1 / 4, 0 at high confidence, 1 at low.
-The one clean-exam wrong loosening is `delete_collaborations_id`, a Box
+clean exam, 220 ops, 187 / 33 / 0 / 4, 0 at high confidence, 0 at low.
+The last clean-exam wrong loosening, `delete_collaborations_id`, a Box
 DELETE of a relationship object owned by another person ("Remove
 collaboration"), stated in prose that names neither the person nor an
-effect; both arbiters sit at the method floor, and truth is `x` because
-it removes another person's access. The gate as restated in D22 is met
-on all three sets at high confidence; the low-confidence leak is
-reported beside it, not hidden. Reported per set, never combined: wrong
-loosenings at high confidence CAMARA 0, hold-out 1 0, clean exam 0; at
-low or method-only confidence 0, 0, 1; over-tightenings 74 of 292, 101
-of 207, 33 of 220. Reference shapes on the clean exam: word lists alone
-184 / 34 / 2, verb-led alone 197 / 20 / 3. False-alarm dossier for the
-clean exam: `docs/logs/m0/false-alarms-E22.csv` (33 rows). Pass 2 is
+effect, was closed in E23 by a party-list word added after the clean
+exam exposed it (taint stated in D27). The gate as restated in D22 is
+met on all three sets at high and at low confidence. Reported per set,
+never combined: wrong loosenings at high confidence CAMARA 0, hold-out
+1 0, clean exam 0; at low or method-only confidence 0, 0, 0;
+over-tightenings 74 of 292, 101 of 207, 33 of 220. Reference shapes on
+the clean exam: word lists alone 184 / 34 / 2, verb-led alone 197 / 20
+/ 3. False-alarm dossier for the clean exam:
+`docs/logs/m0/false-alarms-E23.csv` (33 rows). Pass 2 is
 confidence-only (D23) and does not reduce false alarms; it marks them.
 
 ## 3. Out of scope
@@ -351,11 +352,13 @@ Measured weaknesses, one line each:
   verb, so a party word beyond that was never seen: "Delete shield
   information barrier segment member by ID" resolved to `segment`, not
   `member`. Recorded 2026-09-07, removed in E21 (D25).
-- Deleting a relationship object whose other end is a person (a
-  collaboration, a membership) is invisible to both the lexicon and the
-  verb-object rule when the prose names neither the person nor an
-  effect; the candidate signal is structural, in the resource's schema,
-  and is on M1's list.
+- Deleting a relationship object whose other end is a person is
+  invisible to both the lexicon and the verb-object rule when the prose
+  names neither the person nor an effect; collaboration is now on the
+  party list (E23), but the shape remains invisible for every other
+  relationship noun (membership, assignment, share, ...). The candidate
+  signal is structural, in the resource's schema, and stays on M1's
+  list.
 - The live-noun rule matches substrings: "call" fires on "called" and
   "calling this endpoint", "access" on PagerDuty's "Early Access"
   banner. Pass 2 marks these low, does not clear them. Recorded
@@ -483,6 +486,12 @@ Non-blocking; never silently assumed.
 - The three questions opened on 2026-09-07 — the `x` definition, the
   DELETE/PUT default, and the gate's treatment of low-confidence rows —
   were decided the same day; see D20, D21 and D22.
+- Preflight against a mock: run an agent against a mock server built
+  from the OpenAPI file (e.g. Prism), record which operations it
+  reaches for, look each up in the map, and show the x calls before
+  any token is issued. HTTP has no dry run; vendor test modes exist for
+  some APIs only. Raised by the user 2026-09-07; a later module, not
+  M1.
 
 ## 8. Notes carried from the outline, stated on purpose
 
@@ -574,6 +583,7 @@ starts, not yet exercised.
 | D21 | DELETE, PUT and PATCH keep `w` as their default; the arbiter's rules raise from there. The alternative, defaulting to `x` with a declared menu as the only way down, was measured: on CAMARA it costs 17 more over-tightenings of 292 and removes no wrong loosening the rules had not already removed; on the blind hold-out it costs 49 more of 207 and collapses to the trivial "everything is `x`" (140 over-tightenings, agree 67 of 207). The floor stays `w` and the burden stays on evidence. Decided 2026-09-07. |
 | D22 | The go/no-go's zero applies to high-confidence rows; the wrong-loosening rate among low-confidence rows is reported alongside it, never folded into it, and never traded away. This follows the same rule as the two error directions: separate counts, never one number. It is now measurable because pass 2 (E17) grades evidence without changing any class. Decided 2026-09-07. |
 | D23 | Pass 2 grades evidence only; it never changes a class. Measured in E15 and E16: used as an un-raiser the same three checks created 8 wrong loosenings (3 from an over-generous artefact list, 5 on rows pass 1 had held for a fake reason); used only to mark evidence weak or strong they move nothing and let a consumer filter 53 of 78 hold-out over-tightenings without loosening anything. "This evidence is weak" is not evidence of safety. Decided 2026-09-07. |
-| D24 | The clean exam `data/holdout2-2026-09-07/` (Box, PagerDuty, Adyen; 220 ops; 94 GET; SHA-pinned; blind-read; zero rulings) is the reference score for M0 and stays untouched by tuning: any change to a lexicon, verb table, party list or rule after 2026-09-07 is scored on it once and the fact recorded in learnings, and it is never used to choose between shapes. M0 closes with the gate (D22, zero wrong loosenings at high confidence) met on all three sets, and one low-confidence wrong loosening on the clean exam reported beside it. Decided 2026-09-07. Confirmed by the user 2026-09-07. |
+| D24 | The clean exam `data/holdout2-2026-09-07/` (Box, PagerDuty, Adyen; 220 ops; 94 GET; SHA-pinned; blind-read; zero rulings) is the reference score for M0 and stays untouched by tuning: any change to a lexicon, verb table, party list or rule after 2026-09-07 is scored on it once and the fact recorded in learnings, and it is never used to choose between shapes. M0 closes with the gate (D22) met on all three sets at high and low confidence; the last clean-exam leak was closed by a post-exam list edit, recorded as taint in D27. Decided 2026-09-07. Confirmed by the user 2026-09-07. |
 | D25 | The four-token cap in the verb-led object-head extraction is removed (learnings E21). Scored once on the clean exam per D24: one class changed (delete_shield_information_barrier_segment_members_id, w to x, truth x), no other row moved on any set. Decided 2026-09-07. |
 | D26 | The three irreversibility stems in the word-list lexicon (permanent, irreversibl, cannot be undone) are removed; they encoded "irreversible means x", which D20 rejected. Scored once per D24 (learnings E22): eight rows move from x to w, all with truth w (CAMARA test 3, hold-out 1 1, clean exam 4); no row moves the other way; wrong loosenings unchanged. Decided 2026-09-07. |
+| D27 | "collaboration(s)" is added to the verb-led party list at the user's request (learnings E23). Scored once per D24: one row changes, delete_collaborations_id w to x, truth x, the last clean-exam wrong loosening; no other row on any set moves. Stated taint: the word was added after the clean exam exposed it, so the clean exam's result on that one row is no longer blind; the other 219 rows are unaffected. The fix does not generalise (membership, assignment, share are the same shape), so the structural schema signal stays M1's first item. Decided 2026-09-07. |

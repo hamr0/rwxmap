@@ -968,6 +968,54 @@ alone never makes x, its object can (party list, rules-verb.mjs
 parties.json), and the object words that fail are relationship nouns
 like collaboration, which is M1's schema signal.
 
+### E23 — collaboration added to the party list, scored once (2026-09-07)
+
+(a) What changed. The user asked for "collaboration" on the verb-led
+party list. poc/m0/parties.json gained "collaboration",
+"collaborations" beside "collaborator(s)"; provenance sentence
+appended. Nothing else changed. node --test: 90 pass.
+
+(b) Results, union shape, pass2 on, pass2 class changes 0 everywhere,
+both negative controls x, PASS. CAMARA build 98 | 42 | 0 | 10
+(unchanged); CAMARA test 120 | 32 | 0 | 13 (unchanged); hold-out 1
+106 | 101 | 0 | 0 (unchanged); clean exam 187 | 33 | 0 | 4 (was 186 |
+33 | 1). Confidence, clean exam: high 187 (174 correct, 13 over-tight,
+0 leaks), low 19 (3 / 16 / 0), method-only 14 (10 / 4 / 0). Scored CSV
+docs/logs/m0/holdout2-E23.csv; dossier
+docs/logs/m0/false-alarms-E23.csv, 33 rows, same rows as E22.
+
+(c) Exactly one class changed on any set: delete_collaborations_id, w
+to x, truth x, the last clean-exam wrong loosening. Its confidence is
+low: only the verb-led arbiter raised it (party rule), the word-list
+arbiter found nothing, so the two disagree.
+
+(d) Every row on any set whose text contains "collaboration", all on
+the clean exam: post_collaboration_whitelist_entries x/x high;
+get_collaboration_whitelist_exempt_targets r/r;
+get_collaboration_whitelist_exempt_targets_id r/r;
+delete_collaborations_id x/x low; get_files_id_collaborations r/r;
+put_folders_id w/w high; get_folders_id_collaborations r/r;
+get_groups_id_collaborations r/r. The word raised one row and
+disturbed none; GETs are locked r; put_folders_id mentions
+collaborations in passing and the party rule did not fire because the
+word is not the verb's object head.
+
+(e) Taint, stated plainly. This word was added because the clean exam
+exposed it. Per D24 the clean exam is scored once per change and
+recorded, never used to choose between shapes; this is a list edit,
+not a shape choice, but the clean exam's zero for this one row is no
+longer a blind result. The other 219 rows are untouched by the edit.
+Hold-out 1 and CAMARA contain no operation mentioning collaboration,
+so they neither confirm nor refute the word.
+
+(f) Reading, once. A one-word fix closes the last leak, and it does
+not generalise: a membership, an assignment, a share, a grant to a
+group are the same shape, a relationship object whose other end is a
+person, and the list would need every noun any vendor ever coins for
+one. The structural signal (the resource schema points at a user) is
+the version of this fix that does not need a new word per vendor. M1
+first item unchanged.
+
 ### How the E19 union works, in plain words (2026-09-07)
 
 Written for the user at M0 close; the code is poc/m0/rules-union.mjs,
@@ -1022,21 +1070,19 @@ That is M1.
 
 ### Next
 
-M0 has run twenty-two shapes and two blind hold-outs. On the clean exam
-(E22) the recommended shape E19 leaves 1 wrong loosening of 220, at
-low confidence (delete_collaborations_id), so the gate as restated in
-D22 — zero wrong loosenings at high confidence — is met on all three
-sets: CAMARA, the first hold-out, and the clean exam. The one
-remaining clean-exam miss is delete_collaborations_id, "Remove
-collaboration" — a DELETE of a relationship object owned by another
-person, stated in prose that names no person and no effect, a shape
-neither the lexicon nor the verb-object rule can see; the M1 candidate
-signal for it is structural: the resource's schema (Box's
-collaboration schema has an accessible_by user field) rather than the
-operation's prose. The other clean-exam miss, the barrier-segment
-member DELETE, was fixed in E21 when the four-token cap in objectHead
-was removed and its object head reached "member", a party word. One
-recorded defect waits: the party words that never raised correctly.
+M0 has run twenty-three shapes and two blind hold-outs. The clean exam
+(E23) now has 0 wrong loosenings of 220 at any confidence, so the gate
+is met on all three sets — CAMARA, the first hold-out, and the clean
+exam — with no low-confidence leak beside it. The miss was closed by
+adding "collaboration" to the party list after the clean exam had
+shown it, so the clean exam is no longer fully unseen by every list
+for that one word. The word fix does not generalise — a membership,
+an assignment, a share are the same shape and are not on the list —
+so the schema signal stays M1's first item. The other clean-exam miss,
+the barrier-segment member DELETE, was fixed in E21 when the
+four-token cap in objectHead was removed and its object head reached
+"member", a party word. One recorded defect waits: the party words
+that never raised correctly.
 M0 should close with the numbers as they are;
 what the gate is met on and what it is not met on is now stated per
 set, which is the report the PRD asked for.
