@@ -1072,6 +1072,35 @@ reader has labelled destructive, so its false positives (cancel,
 block, reset, expire as first verbs) and misses are unmeasured. That
 measurement, plus the mapping change in §4.3, go to the PRD as D28.
 
+(g) All false alarms across the three sets, 208 rows (tool class
+tighter than truth), split by the destructive flag, dossier
+docs/logs/m0/false-alarms-by-destructive-E24.csv. Destructive: CAMARA
+26, hold-out 1 56, clean exam 6, total 88; all are truth w, and 87 of
+88 are method DELETE (the one exception is POST "Cancel a payment").
+Non-destructive: CAMARA 48, hold-out 1 45, clean exam 27, total 120;
+these are the POST/PUT/PATCH adds and updates the floor or a stem
+raised, and the destructive axis says nothing about them. Reading the
+88 destructive rows by hand: 77 are plainly the caller's own resource
+(event subscriptions 13, secrets and webhooks 11, recordings, records,
+media, transcriptions, caches, bookings, keys, reactions, project
+items, a stored card), raised by danger stems in surrounding prose
+("terminate", "purge", "release"), by the live noun "session", or by
+party words used as scope ("for the authenticated user", "from your
+account", "for an organization", "from a repository"). About 11 are
+arguable and worth a second read of the truth, not of the tool:
+"Unblock a user" (2, GitHub), "Delete a person" (2, Stripe Connect),
+"Remove a device from a Trust Domain", "Terminate an Application
+Instance" and "Deployment" (2), "Delete a QoS session", "Delete
+session", "Delete Registration Session" (CAMARA live sessions; D20
+names a live session as reaching beyond the caller, and the readers
+classed these w). Two signals fall out. First, a destructive row whose
+object is scoped to the caller ("your account", "the authenticated
+user") is strong evidence for w; today that phrase is what makes the
+party rule fire wrongly ("user" as head of a for-phrase), so the
+party-phrase rule is the defect, not the flag. Second, the
+non-destructive 120 are untouched by this axis and remain the
+POST-floor problem. Neither signal is applied; recorded for M1.
+
 ### How the E19 union works, in plain words (2026-09-07)
 
 Written for the user at M0 close; the code is poc/m0/rules-union.mjs,
