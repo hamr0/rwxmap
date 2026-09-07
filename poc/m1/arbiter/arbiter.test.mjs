@@ -29,6 +29,12 @@ import {
   schemaPropKeysForRow,
   layer6Evidence,
   rowExcludeRepo,
+  tokenizeProse,
+  highFrequencyWordTable,
+  wordKeysForRow,
+  buildWordTable,
+  layer7WordEvidence,
+  shareW,
 } from './arbiter.mjs';
 
 function row(overrides) {
@@ -919,4 +925,117 @@ test('isReadVerbForRow: corpus-lean path alone (no scope) suppresses at provider
   assert.equal(isReadVerbForRow(borderlineRow, leanIndex), false);
   // No leanIndex at all and no read scope: false, never throws.
   assert.equal(isReadVerbForRow(readRow, null), false);
+});
+
+// --- M1-C8, layer 7: prose words (D30, prose last) --------------------------
+
+test('tokenizeProse: lowercases, splits on non-letters, drops tokens under 3 chars', () => {
+  const tokens = tokenizeProse('Delete a Key', 'This removes the API key, id: 42.');
+  assert.deepEqual([...tokens].sort(), ['api', 'delete', 'key', 'removes', 'the', 'this']);
+});
+
+test('highFrequencyWordTable: drops a token present in more than the row-fraction bar, keeps one just under it', () => {
+  // 5 rows: "the" in all 5 (1.0 > 0.4, dropped), "rare" in 2 of 5 (0.4, not
+  // strictly greater than the bar, kept).
+  const rowsWithTokens = [
+    new Set(['the', 'rare', 'delete']),
+    new Set(['the', 'rare', 'update']),
+    new Set(['the', 'create']),
+    new Set(['the', 'send']),
+    new Set(['the', 'notify']),
+  ];
+  const dropped = highFrequencyWordTable(rowsWithTokens, 0.4);
+  assert.equal(dropped.get('the'), 5);
+  assert.equal(dropped.has('rare'), false);
+});
+
+function wordTableFromWords(specs) {
+  // specs: [{repo, words: [...], gt_class}]
+  return buildWordTable(specs.map((s) => row({ repo: s.repo, gt_class: s.gt_class, words: new Set(s.words) })));
+}
+
+test('layer7WordEvidence: an admitted word raises a silent DELETE (no other evidence) to x', () => {
+  const table = wordTableFromWords([
+    { repo: 'A', words: ['removed'], gt_class: 'x' },
+    { repo: 'B', words: ['removed'], gt_class: 'x' },
+    { repo: 'C', words: ['removed'], gt_class: 'x' },
+    { repo: 'D', words: ['removed'], gt_class: 'x' },
+    { repo: 'E', words: ['removed'], gt_class: 'x' },
+  ]);
+  const admitted = new Set(['removed']);
+  const ctx = { leanIndex: new Map(), verbTable: new Map(), wordTable: table, admittedWords: admitted };
+  const silentDelete = row({
+    set: 'holdout2',
+    repo: 'ZRepo',
+    method: 'DELETE',
+    operationId: 'deleteThing',
+    security_scopes: '',
+    words: new Set(['removed']),
+    gt_class: 'x',
+  });
+  // wordsOn OFF (default): no evidence from layer 7, falls to review at prior w.
+  const withoutWords = scoreRow(silentDelete, ctx, 0.5);
+  assert.equal(withoutWords.status, 'review');
+  assert.equal(withoutWords.class, 'w');
+  // wordsOn ON: the admitted word raises it to x, regardless of threshold.
+  const withWords = scoreRow(silentDelete, ctx, 2.0, { wordsOn: true });
+  assert.equal(withWords.class, 'x');
+  assert.equal(withWords.status, 'assigned');
+  assert.ok(withWords.evidence.some((e) => e.startsWith('word:removed->raise')));
+});
+
+test('layer7WordEvidence: leave-one-repo-out — a CAMARA or hold-out-1 row never scores itself; a hold-out-2 row uses the whole table', () => {
+  const table = wordTableFromWords([
+    { repo: 'A', words: ['dispatched'], gt_class: 'x' },
+    { repo: 'A', words: ['dispatched'], gt_class: 'x' },
+    { repo: 'A', words: ['dispatched'], gt_class: 'x' },
+    { repo: 'A', words: ['dispatched'], gt_class: 'x' },
+    { repo: 'A', words: ['dispatched'], gt_class: 'x' },
+  ]);
+  const admitted = new Set(['dispatched']);
+  // A CAMARA row from RepoA: excluding RepoA leaves n=0 -> no evidence, even
+  // though the un-excluded table alone would satisfy n=5, share=1.0.
+  const camaraRow = row({ set: 'camara', repo: 'A', words: new Set(['dispatched']) });
+  assert.deepEqual(layer7WordEvidence(camaraRow, table, admitted), []);
+  // A hold-out-2 row with the same word: no exclusion, the full n=5 table fires.
+  const holdout2Row = row({ set: 'holdout2', repo: 'ZRepo', words: new Set(['dispatched']) });
+  const ev = layer7WordEvidence(holdout2Row, table, admitted);
+  assert.equal(ev.length, 1);
+  assert.equal(ev[0].dir, 'raise');
+  assert.equal(ev[0].weight, 1.0);
+});
+
+test('layer7WordEvidence: a word under the bar (n>=5 but share<0.9, or n<5) gives nothing', () => {
+  const belowShareTable = wordTableFromWords([
+    { repo: 'A', words: ['maybe'], gt_class: 'x' },
+    { repo: 'B', words: ['maybe'], gt_class: 'x' },
+    { repo: 'C', words: ['maybe'], gt_class: 'x' },
+    { repo: 'D', words: ['maybe'], gt_class: 'w' },
+    { repo: 'E', words: ['maybe'], gt_class: 'w' },
+  ]); // n=5, share=0.6 < 0.9
+  const r = row({ set: 'holdout2', repo: 'ZRepo', words: new Set(['maybe']) });
+  assert.deepEqual(layer7WordEvidence(r, belowShareTable, new Set(['maybe'])), []);
+
+  const belowNTable = wordTableFromWords([
+    { repo: 'A', words: ['scarce'], gt_class: 'x' },
+    { repo: 'B', words: ['scarce'], gt_class: 'x' },
+  ]); // n=2 < 5
+  assert.deepEqual(
+    layer7WordEvidence(row({ set: 'holdout2', repo: 'ZRepo', words: new Set(['scarce']) }), belowNTable, new Set(['scarce'])),
+    [],
+  );
+
+  // Not in admittedWords at all, regardless of the table.
+  assert.deepEqual(layer7WordEvidence(r, belowShareTable, new Set(['other'])), []);
+});
+
+test('wordKeysForRow: reads row.words as an array; empty when absent', () => {
+  assert.deepEqual(wordKeysForRow(row({ words: new Set(['a', 'b']) })).sort(), ['a', 'b']);
+  assert.deepEqual(wordKeysForRow(row({})), []);
+});
+
+test('shareW: truth-w share of a counts object, mirroring shareX', () => {
+  assert.deepEqual(shareW({ r: 0, w: 3, x: 1 }), { n: 4, share: 0.75 });
+  assert.equal(shareW({ r: 0, w: 0, x: 0 }), null);
+  assert.equal(shareW(null), null);
 });

@@ -50,6 +50,16 @@
 // (CAMARA's poll-then-callback reads). See isReadVerbForRow below for the
 // mechanical "read" test. Everything else in this file is unchanged from C6.
 //
+// M1-C8 (D30, prose last): layer 7, summary/description words, admitted
+// mechanically the same way as layers 5/6 (n >= 5, x share >= 0.9 over
+// CAMARA + hold-out 1, leave-one-repo-out at score time via rowExcludeRepo),
+// raise-only, weight = share. A per-row word set is computed outside this
+// file (run-c8.mjs, since raw text is not a census column) and attached as
+// `row.words` (a Set<string> of surviving tokens, high-frequency tokens
+// already dropped); wordKeysForRow below just reads it, the same shape as
+// bodyPropKeysForRow/schemaPropKeysForRow. Gated behind switches.wordsOn
+// (default OFF) so run-c8.mjs can sweep it like every other switch.
+//
 // run.mjs owns all CSV loading/parsing and wires real data into the
 // functions here; every function in this file takes plain JS
 // objects/arrays/Maps so it is testable with synthetic data.
@@ -635,6 +645,78 @@ export function layer6Evidence(row, categories, minN = 5, minShare = 0.9) {
   return evidence;
 }
 
+// --- Layer 7: prose words (summary + description), admitted mechanically
+// from CAMARA + hold-out-1 rows, raise-only (D30: prose last) --------------
+
+const WORD_TOKEN_RE = /[a-z]+/g;
+
+// Lowercase, split on non-letters, drop tokens under 3 chars. Returns a
+// Set<string> (deduplicated within the row — presence, not count).
+export function tokenizeProse(summary, description) {
+  const text = `${summary || ''} ${description || ''}`.toLowerCase();
+  const matches = text.match(WORD_TOKEN_RE) || [];
+  const tokens = new Set();
+  for (const t of matches) {
+    if (t.length >= 3) tokens.add(t);
+  }
+  return tokens;
+}
+
+// Tokens present in more than `maxRowFraction` of `rowsWithTokens` (row
+// PRESENCE, not raw occurrence count — each row's token Set already counts
+// a repeated word once) — this replaces a hand-written stopword list.
+// Returns Map<token, rowCount>, dropped tokens only.
+export function highFrequencyWordTable(rowsWithTokens, maxRowFraction = 0.4) {
+  const counts = new Map();
+  for (const tokens of rowsWithTokens) {
+    for (const t of tokens) counts.set(t, (counts.get(t) || 0) + 1);
+  }
+  const total = rowsWithTokens.length;
+  const dropped = new Map();
+  for (const [t, c] of counts) {
+    if (total > 0 && c / total > maxRowFraction) dropped.set(t, c);
+  }
+  return dropped;
+}
+
+// {n, share} of truth-w within counts, or null when n === 0 — computed for
+// the layer-7 report (own-vs-other visibility) but never wired into scoring.
+export function shareW(counts) {
+  if (!counts) return null;
+  const n = counts.r + counts.w + counts.x;
+  if (n === 0) return null;
+  return { n, share: counts.w / n };
+}
+
+// row.words is a Set<string> of surviving tokens, attached by run-c8.mjs
+// (raw summary/description text is not a census column, so it cannot be
+// derived from the row alone the way bodyPropKeysForRow etc. can).
+export function wordKeysForRow(row) {
+  return row.words ? Array.from(row.words) : [];
+}
+
+export function buildWordTable(rows) {
+  return buildRepoCountTable(rows, wordKeysForRow);
+}
+
+export function layer7WordEvidence(row, table, admittedWords, minN = 5, minShare = 0.9) {
+  if (!admittedWords || admittedWords.size === 0) return [];
+  const excludeRepo = rowExcludeRepo(row);
+  const evidence = [];
+  for (const word of wordKeysForRow(row)) {
+    if (!admittedWords.has(word)) continue;
+    const s = shareX(countsForKey(table, word, excludeRepo));
+    if (!s || s.n < minN || s.share < minShare) continue;
+    evidence.push({
+      dir: 'raise',
+      target: 'x',
+      weight: s.share,
+      evidence: `word:${word}->raise:n=${s.n}:share=${s.share.toFixed(3)}`,
+    });
+  }
+  return evidence;
+}
+
 // --- Aggregation ------------------------------------------------------------
 
 // Pools evidence from layers 2-4 into a final class/confidence/status,
@@ -677,9 +759,11 @@ export function aggregate(evidenceList, priorClass, threshold) {
 //   bodyPropTable: Map<propName, Map<repo, counts>>, admittedBodyProps: Set (layer 5),
 //   flagTables: Map<flagName, Map<repo, counts>>, admittedFlags: Set<flagName> (layer 5),
 //   layer6Categories: array of {name, keysFn, table, admittedSet} (layer 6),
+//   wordTable: Map<word, Map<repo, counts>>, admittedWords: Set<word> (layer 7, M1-C8),
 // }
-// row: must carry method, operationId, path, security_scopes, set, repo.
-// switches: { corpusWLean: boolean } — M1-C5 fix 5, default true.
+// row: must carry method, operationId, path, security_scopes, set, repo; for
+// layer 7 also `words` (Set<string>, attached by run-c8.mjs).
+// switches: { corpusWLean: boolean (M1-C5 fix 5, default true), wordsOn: boolean (M1-C8, default false) }.
 
 export function scoreRow(row, ctx, threshold, switches = {}) {
   const method = row.method;
@@ -730,6 +814,12 @@ export function scoreRow(row, ctx, threshold, switches = {}) {
   // Layer 6: own-vs-other structural facts for PUT/DELETE/PATCH.
   if (ctx.layer6Categories) {
     evidence.push(...layer6Evidence(row, ctx.layer6Categories));
+  }
+
+  // Layer 7 (M1-C8, D30 prose last): summary/description word raisers,
+  // gated behind switches.wordsOn (default OFF).
+  if (switches.wordsOn === true && ctx.wordTable && ctx.admittedWords) {
+    evidence.push(...layer7WordEvidence(row, ctx.wordTable, ctx.admittedWords));
   }
 
   const result = aggregate(evidence, prior, threshold);

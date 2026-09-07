@@ -1618,6 +1618,19 @@ What it taught:
 2. The suppression is CAMARA-only in practice this pass — no hold-out-1 or hold-out-2 row both carries an admitted callbacks_present raise and clears either read test. The poll-then-callback shape measured here is a CAMARA idiom, not (yet) evidenced elsewhere.
 3. Recording the marker only after confirming the raise would have fired keeps the evidence trail honest — it never claims to have suppressed something that was never going to happen (e.g. a row excluded down below n>=5 by leave-one-repo-out).
 
+### M1-C8 — prose as the last layer, raise-only (2026-09-07)
+
+Text extracted for all 719 rows into docs/logs/m1/ops-text.csv (poc/m1/arbiter/extract-text.mjs): summary on 702, description on 698, neither on 16 (all Twilio). Hold-out text was read from each hold-out's operations.csv, which carries the same summary/description the spec does; the blind readers never saw those columns. Layer 7 (poc/m1/arbiter/arbiter.mjs, switch wordsOn; driver run-c8.mjs; 51 tests): tokens from summary + description, tokens in more than 40% of CAMARA + hold-out 1 rows dropped (only "the" and "for"), admitted at n >= 5 and truth-x share >= 0.9, leave-one-repo-out, raise-only.
+
+Admitted: assign (5, 1.00), intents (5, 1.00), removed (5, 1.00). Closest misses: create (68, 0.75), new (47, 0.81). Sweep unchanged on CAMARA and hold-out 1 at every T from 0.75 up (74/292 and 173/207 at T = 0.75, zero leaks); the three words never land on a CAMARA or hold-out 1 row that lacked other evidence. Clean exam once: 4 rows changed, three Box POSTs assigned x correctly (policy and task assignments), one new over-tight (PagerDuty deleteServiceNowTable, truth w, word "removed"). Six false flags total. Negative controls unchanged. Outputs c8-rows.csv, c8-false-flags.csv, c8-sweep.md, c8-admitted.md.
+
+Computed but not wired, the same table for truth-w share: secret (11, 1.00), secrets (10, 1.00), adds (6, 1.00), applied (6, 1.00), environment (6, 1.00), replaces (5, 1.00), updated (5, 1.00), deletes (37, 0.946), personal (42, 0.905), tokens (42, 0.905).
+
+What it taught:
+1. Prose as a raise-only layer at the bar is nearly empty: three words at the n = 5 floor, no movement on the tuning sets. The x-words are already caught by the machine fields.
+2. Prose does carry the own-vs-other signal the structural fields did not (M1-C6): "deletes" at 0.946 over 37 rows and "personal"/"tokens" at 0.905 say "own". Raise-only cannot use that; a judge that may assign w on the residual can.
+3. The user's reading of the review pile (2026-09-07): pass 1 should be the machine fields with the confidence sum, and the verb, noun and words should be a second pass that runs only on what pass 1 hands over, assigning in both directions at the bar, zero leaks on CAMARA + hold-out 1 as the wall. On the residual PUT/DELETE rows the lead verb alone gives delete about 120 w / 13 x, update 24 w / 1 x, and terminate/revoke/cancel/convert/merge/start 0 w / 8 x; the 13 delete-led x rows are separated by the noun (access, network, device, collaboration, membership, member). That is M1-C9.
+
 ### Next
 
 M0 closed 2026-09-07 as exploratory at the user's word (D29). Twenty-
@@ -1639,12 +1652,10 @@ generate and verify are not read verbs; the 11 arguable truth rows
 named in E24(g) want a second read; the destructive verb list is
 unmeasured.
 
-M1-C7 delivered the poll-then-callback ruling (D32): callbacks_present
-no longer raises a read-led operation, mechanically decided (read-family
-scope token, or a corpus-lean GET share). The three CAMARA rows land r.
-Still owed at the next checkpoint, the user's call: (a) prose as the
-last layer (D30: prose last) — words from summary and description
-admitted mechanically at the same 0.9 bar from CAMARA + hold-out 1,
-leave-one-repo-out, raise-only, aimed at the PUT/DELETE and scope-less
-POST rows that have no machine-facing evidence; or (b) stop M1 here and
-write the findings.
+M1-C9: the two-pass shape. Pass 1 = method prior, scope, body, callbacks
+with the confidence sum (as C7). Pass 2 = verb, noun and prose judge on
+the rows pass 1 hands over, assigning w or x in both directions; its
+lists are written by the orchestrator from reading the residual pile,
+then measured leave-one-repo-out on CAMARA + hold-out 1 with zero leaks
+as the wall, clean exam once. Also owed: whether a silent POST/PATCH is
+assigned x marked 'floor' instead of review (the user's call).
