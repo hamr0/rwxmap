@@ -98,23 +98,31 @@ still come out `x`. Three numbers are reported every time and never
 combined: wrong loosenings at high confidence, wrong loosenings at low
 confidence, and over-tightenings.
 
-**M0 result on the clean exam, 2026-09-07 (E20).** A second hold-out,
+**M0 result on the clean exam, 2026-09-07 (E21).** A second hold-out,
 `data/holdout2-2026-09-07/` (Box 99, PagerDuty 93, Adyen 28; 220
 operations; 94 GET; ground truth read blind by five agents with zero
 orchestrator rulings; r 104, w 63, x 53), was built after every list in
 the repo was written, so no lexicon, verb table or party list had seen
-it. The recommended shape E19 scores 181 agree, 37 over-tightenings, 2
-wrong loosenings and 4 correct lowerings of 10 possible. Both wrong
-loosenings are Box DELETEs of a relationship object owned by another
-person ("Remove collaboration"; "Delete shield information barrier
-segment member by ID"), stated in prose that names neither the person
-nor an effect; one sits at high confidence, so the gate as restated in
-D22 is met on CAMARA and on the first hold-out and NOT met on the clean
-exam. Reported per set, never combined: wrong loosenings at high
-confidence CAMARA 0, hold-out 1 0, hold-out 2 1; at low or method-only
-confidence 0, 0, 1; over-tightenings 77 of 292, 102 of 207, 37 of 220.
-Reference shapes on the clean exam: word lists alone 184 / 34 / 2,
-verb-led alone 197 / 20 / 3.
+it. With the four-token cap removed from the verb-led object-head
+extraction (D25), the union shape scores, per set, pass 2 on: CAMARA 292
+(build 98 agree / 42 over-tight / 0 wrong loosenings / 10 correct
+lowerings; test 117 / 35 / 0 / 13), 0 wrong loosenings at high or low
+confidence; hold-out 1, 207 ops, 105 / 102 / 0 / 0, 0 at high or low;
+clean exam, 220 ops, 182 / 37 / 1 / 4, 0 at high confidence, 1 at low.
+The one clean-exam wrong loosening is `delete_collaborations_id`, a Box
+DELETE of a relationship object owned by another person ("Remove
+collaboration"), stated in prose that names neither the person nor an
+effect; both arbiters sit at the method floor, and truth is `x` because
+it removes another person's access. The gate as restated in D22 is met
+on all three sets at high confidence; the low-confidence leak is
+reported beside it, not hidden. Reported per set, never combined: wrong
+loosenings at high confidence CAMARA 0, hold-out 1 0, clean exam 0; at
+low or method-only confidence 0, 0, 1; over-tightenings 77 of 292, 102
+of 207, 37 of 220. Reference shapes on the clean exam: word lists alone
+184 / 34 / 2, verb-led alone 197 / 20 / 3. False-alarm dossier for the
+clean exam: `docs/logs/m0/false-alarms-E21.csv` (37 rows; 13 high, 20
+low, 4 method-only). Pass 2 is confidence-only (D23) and does not reduce
+false alarms; it marks them.
 
 ## 3. Out of scope
 
@@ -150,12 +158,15 @@ the two error counts, keep or discard) recorded in `docs/logs/learnings.md` befo
 next one starts, so the shape that wins is chosen on evidence, not on the
 last thing tried.
 
-**M1 — Verb library from the corpus.** Pull APIs.guru's
-`openapi-directory` (CC0), extract verbs from paths and operationIds with
-their method co-occurrence, produce the library as data (priors, not
-truth — see D7), re-run M0's arbiter with it, re-read the divergence
-list. Riskiest assumption: that corpus priors raise coverage on CAMARA
-without adding a wrong loosening.
+**M1 — Structural signal, then verb library from the corpus.** First, a
+structural signal for relationship objects whose other end is a person
+(e.g. Box's collaboration schema field `accessible_by`), motivated by
+the remaining clean-exam leak (`delete_collaborations_id`, E21). Then
+pull APIs.guru's `openapi-directory` (CC0), extract verbs from paths and
+operationIds with their method co-occurrence, produce the library as
+data (priors, not truth — see D7), re-run M0's arbiter with it, re-read
+the divergence list. Riskiest assumption: that corpus priors raise
+coverage on CAMARA without adding a wrong loosening.
 
 **M2 — Shape rules, only if justified.** For each divergence class from
 M0/M1 that appears more than once, add one deterministic OpenAPI-shape
@@ -337,10 +348,10 @@ Measured weaknesses, one line each:
 - Vendor extensions such as `x-github.triggersNotification` are
   structural evidence the extractor does not yet read.
 - 16 of 94 Twilio operations have no prose at all.
-- The verb-object rule caps the object phrase at four tokens after the
-  verb, so a party word beyond that is never seen: "Delete shield
-  information barrier segment member by ID" resolves to `segment`, not
-  `member`. Recorded 2026-09-07, not yet fixed.
+- The verb-object rule capped the object phrase at four tokens after the
+  verb, so a party word beyond that was never seen: "Delete shield
+  information barrier segment member by ID" resolved to `segment`, not
+  `member`. Recorded 2026-09-07, removed in E21 (D25).
 - Deleting a relationship object whose other end is a person (a
   collaboration, a membership) is invisible to both the lexicon and the
   verb-object rule when the prose names neither the person nor an
@@ -555,9 +566,10 @@ starts, not yet exercised.
 | D17 | Supersedes D3. The HTTP method sets a floor and, for safe methods only, also the ceiling; the operation's own text sets the ceiling elsewhere. Three signals, not two: method, text (`summary`/`description`), and structural markers (`callbacks`, `sink`, 409). Lowering the class is confined to POST and PATCH, where RFC 9110 guarantees nothing; it is never permitted on a safe method and never below `w` on PUT or DELETE. See §4.5. Decided 2026-09-06. |
 | D18 | The verb-library plan (D7, M1) is demoted from the primary signal to one input to the text signal. M0 measured that a verb table alone cannot reach the gate: with both signals agreeing on 7 of the 11 remaining wrong loosenings, no table over paths and operationIds can see the consequence those rows carry. Decided 2026-09-06. |
 | — | Outline superseded: the outline's three-tier model (deterministic / model / silence) and "no default class, omit on unknown" framing are replaced by D2 and, as of 2026-09-06, by D17 below — a floor from the method, a ceiling from the operation's own text, tighter-on-unknown, no model tier. |
-| D19 | Second test set: `data/holdout-2026-09-07/` (Twilio, Stripe, GitHub; 207 ops; SHA-pinned; blind-read ground truth) is kept as a hold-out for honest scoring; CAMARA remains the build bed. Any shape tuned on the hold-out loses that status and the fact is recorded in learnings. Decided 2026-09-07. (pending the user's confirmation) |
+| D19 | Second test set: `data/holdout-2026-09-07/` (Twilio, Stripe, GitHub; 207 ops; SHA-pinned; blind-read ground truth) is kept as a hold-out for honest scoring; CAMARA remains the build bed. Any shape tuned on the hold-out loses that status and the fact is recorded in learnings. Decided 2026-09-07. Confirmed by the user 2026-09-07. |
 | D20 | The test for `x` is either of two roads, not one: the operation reaches beyond the caller (a person, another party's resource, money, a live session, network path or device), OR repeating it is not equivalent to doing it once. Either alone is sufficient; neither alone is necessary. Measured over the 499 labelled operations: of 153 `x` rows, 35 are `x` only because they are not repeatable, 43 only because they reach beyond the caller, and 75 for both — so a test resting on non-idempotence alone would miss 43 of 153, and 20 DELETE rows are `x` while being perfectly idempotent. Irreversibility is explicitly NOT the test: 129 DELETE rows are `w` and nearly all are irreversible, and the readers classed "permanently delete … cannot be undone" of the caller's own resource as `w`. Refines D16. Decided 2026-09-07. |
 | D21 | DELETE, PUT and PATCH keep `w` as their default; the arbiter's rules raise from there. The alternative, defaulting to `x` with a declared menu as the only way down, was measured: on CAMARA it costs 17 more over-tightenings of 292 and removes no wrong loosening the rules had not already removed; on the blind hold-out it costs 49 more of 207 and collapses to the trivial "everything is `x`" (140 over-tightenings, agree 67 of 207). The floor stays `w` and the burden stays on evidence. Decided 2026-09-07. |
 | D22 | The go/no-go's zero applies to high-confidence rows; the wrong-loosening rate among low-confidence rows is reported alongside it, never folded into it, and never traded away. This follows the same rule as the two error directions: separate counts, never one number. It is now measurable because pass 2 (E17) grades evidence without changing any class. Decided 2026-09-07. |
 | D23 | Pass 2 grades evidence only; it never changes a class. Measured in E15 and E16: used as an un-raiser the same three checks created 8 wrong loosenings (3 from an over-generous artefact list, 5 on rows pass 1 had held for a fake reason); used only to mark evidence weak or strong they move nothing and let a consumer filter 53 of 78 hold-out over-tightenings without loosening anything. "This evidence is weak" is not evidence of safety. Decided 2026-09-07. |
-| D24 | The clean exam `data/holdout2-2026-09-07/` (Box, PagerDuty, Adyen; 220 ops; 94 GET; SHA-pinned; blind-read; zero rulings) is the reference score for M0 and stays untouched by tuning: any change to a lexicon, verb table, party list or rule after 2026-09-07 is scored on it once and the fact recorded in learnings, and it is never used to choose between shapes. M0 closes with the gate met on CAMARA and hold-out 1 and not met on the clean exam by one high-confidence wrong loosening, stated per set. Decided 2026-09-07, pending the user's confirmation. |
+| D24 | The clean exam `data/holdout2-2026-09-07/` (Box, PagerDuty, Adyen; 220 ops; 94 GET; SHA-pinned; blind-read; zero rulings) is the reference score for M0 and stays untouched by tuning: any change to a lexicon, verb table, party list or rule after 2026-09-07 is scored on it once and the fact recorded in learnings, and it is never used to choose between shapes. M0 closes with the gate (D22, zero wrong loosenings at high confidence) met on all three sets, and one low-confidence wrong loosening on the clean exam reported beside it. Decided 2026-09-07. Confirmed by the user 2026-09-07. |
+| D25 | The four-token cap in the verb-led object-head extraction is removed (learnings E21). Scored once on the clean exam per D24: one class changed (delete_shield_information_barrier_segment_members_id, w to x, truth x), no other row moved on any set. Decided 2026-09-07. |

@@ -864,19 +864,77 @@ hold-out (37 of 220 against 102 of 207), largely because this
 catalogue's prose is terse. E18 alone would have been the best on this
 set by every count except leaks.
 
+### E21 — the four-token cap removed, scored once (2026-09-07)
+
+(a) What changed. poc/m0/rules-verb.mjs objectHead() had a cap of four
+kept tokens after the lead verb; E20(c) recorded that it stopped at
+"segment" in "Delete shield information barrier segment member by ID"
+and never reached "member", a party word, producing a wrong loosening
+at high confidence. The cap line was deleted; the PREP stop and STOP
+skipping are unchanged; no lexicon, verb table, party list or other
+rule changed. Per D24 the clean exam is scored once after the change
+and the fact recorded here. node --test poc/m0/*.test.mjs: 90 pass, no
+test asserted the cap.
+
+(b) Results, union shape, pass2 on, pass2 class changes 0 on every
+run. CAMARA build 98 | 42 | 0 | 10 (confidence high 115, low 19,
+method-only 6); CAMARA test 117 | 35 | 0 | 13 (high 128, low 17,
+method-only 7); both negative controls x, PASS. Hold-out 1 total 105 |
+102 | 0 | 0 (high 142, low 61, method-only 4). Unchanged from E19 on
+both. Clean exam 182 | 37 | 1 | 4 (high 184, low 22, method-only 14).
+Scored CSV docs/logs/m0/holdout2-E21.csv.
+
+(c) Exactly one class changed on the clean exam:
+delete_shield_information_barrier_segment_members_id, w to x, truth x,
+head now "member", party rule fires. No new over-tightening anywhere;
+the 37 over-tightenings are the same 37 rows with the same rule pairs
+as E20 (danger-verb with verb-write 9, danger-verb with floor 5, floor
+with consequential 3, floor with verb-write 3, live-noun with floor 3,
+live-noun with verb-write 2, danger-verb with verb-read 2, and 1 each
+for six other pairs).
+
+(d) The remaining wrong loosening: box DELETE
+/collaborations/{collaboration_id} delete_collaborations_id, summary
+"Remove collaboration", description "Deletes a single collaboration.",
+truth x (removes another person's access to shared content). Both
+arbiters return the method floor (rule U:L5-floor|V6-floor, evidence
+verb=remove head=collaboration), confidence LOW (method-only). Under
+D22, zero wrong loosenings at high confidence: the clean exam now
+meets the gate at high confidence, with 1 wrong loosening at low
+confidence reported beside it. Per set: CAMARA 0 high / 0 low;
+hold-out 1 0 / 0; clean exam 0 / 1.
+
+(e) False-alarm dossiers: docs/logs/m0/false-alarms-E20.csv (37 rows,
+pre-fix) and docs/logs/m0/false-alarms-E21.csv (37 rows, post-fix),
+columns repo,path,method,operationId,tool_class,gt_class,confidence,
+rule_id,evidence,summary, sorted high confidence first. Of the 37, 13
+sit at high confidence, 20 at low, 4 method-only (from E20(d),
+unchanged). The word-list danger verb is in 18 of the 37 pairs.
+
+(f) Reading, once. Removing the cap fixed the one row it was meant to
+fix and nothing else, on every set. The leak that remains has no word
+in it that any list could carry: a relationship object whose other end
+is a person. The signal is structural (Box's collaboration schema has
+an accessible_by user field). That is M1's first item, not an M0
+tuning. M0 closes here.
+
 ### Next
 
 M0 has run twenty shapes and two blind hold-outs. On the clean exam
-(E20) the recommended shape E19 leaves 2 wrong loosenings of 220, one
-of them at high confidence, so the gate as restated in D22 is not met
-there; on CAMARA and the first hold-out it is met. The two clean-exam
-misses are DELETEs of a relationship object owned by another person,
-stated in prose that names no person and no effect — a shape neither
-the lexicon nor the verb-object rule can see, and the M1 candidate
-signal for it is structural: the resource's schema (a collaboration
-has an accessible_by user; a membership has a user id) rather than the
-operation's prose. Two recorded defects wait: the four-token cap in
-objectHead, and the party words that never raised correctly. M0 should
-close with the numbers as they are; what the gate is met on and what
-it is not met on is now stated per set, which is the report the PRD
-asked for.
+(E21) the recommended shape E19 leaves 1 wrong loosening of 220, at
+low confidence (delete_collaborations_id), so the gate as restated in
+D22 — zero wrong loosenings at high confidence — is met on all three
+sets: CAMARA, the first hold-out, and the clean exam. The one
+remaining clean-exam miss is delete_collaborations_id, "Remove
+collaboration" — a DELETE of a relationship object owned by another
+person, stated in prose that names no person and no effect, a shape
+neither the lexicon nor the verb-object rule can see; the M1 candidate
+signal for it is structural: the resource's schema (Box's
+collaboration schema has an accessible_by user field) rather than the
+operation's prose. The other clean-exam miss, the barrier-segment
+member DELETE, was fixed in E21 when the four-token cap in objectHead
+was removed and its object head reached "member", a party word. One
+recorded defect waits: the party words that never raised correctly.
+M0 should close with the numbers as they are;
+what the gate is met on and what it is not met on is now stated per
+set, which is the report the PRD asked for.

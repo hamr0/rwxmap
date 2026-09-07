@@ -65,9 +65,8 @@ function leadText(op) {
 /**
  * The head noun of the lead verb's object: lowercase, alphabetic tokens,
  * drop the first token (the lead verb itself), then walk the rest
- * skipping STOP words and stopping at the first PREP word; keep at most 4
- * tokens; the head is the LAST token kept (English compounds are
- * head-final), singularised.
+ * skipping STOP words and stopping at the first PREP word; the head is
+ * the LAST token kept (English compounds are head-final), singularised.
  * @param {string} text
  * @returns {string|null}
  */
@@ -79,7 +78,6 @@ export function objectHead(text) {
     if (PREP.has(t)) break;
     if (STOP.has(t)) continue;
     kept.push(t);
-    if (kept.length >= 4) break;
   }
   if (kept.length === 0) return null;
   return singularise(kept[kept.length - 1]);
