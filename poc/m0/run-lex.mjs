@@ -15,6 +15,9 @@ import { halfOf } from './split.mjs';
 import { RANK, methodDefault } from './rules.mjs';
 import { loadLexicon, arbiterLex } from './rules-lex.mjs';
 import { learn } from './learn-vn.mjs';
+import { refine } from './rules-pass2.mjs';
+
+const PASS2_ELIGIBLE_RULES = new Set(['L2-danger-verb', 'L3-live-noun']);
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const GROUND_TRUTH_CSV = path.join(HERE, '..', '..', 'data', 'camara-2026-09-01', 'ground-truth.csv');
@@ -71,7 +74,7 @@ function parseFlags(argv) {
 
 const outPrefix = process.argv[2];
 if (!outPrefix) {
-  console.error('usage: node poc/m0/run-lex.mjs <out-prefix> [--lexicon=<file>] [--scope=op|block|file|all] [--nouns=all|path] [--readverbs=learned|hand] [--floor=method|x] [--label=<name>]');
+  console.error('usage: node poc/m0/run-lex.mjs <out-prefix> [--lexicon=<file>] [--scope=op|block|file|all] [--nouns=all|path] [--readverbs=learned|hand] [--floor=method|x] [--pass2=on|off] [--label=<name>]');
   process.exit(1);
 }
 const flags = parseFlags(process.argv.slice(3));
@@ -80,13 +83,14 @@ const scopeFlag = flags.scope ?? 'all';
 const nounSource = flags.nouns ?? 'all';
 const readVerbsOpt = flags.readverbs ?? 'learned';
 const nonSafeFloor = flags.floor ?? 'method';
+const pass2On = (flags.pass2 ?? 'off') === 'on';
 const label = flags.label ?? null;
 const arbiterOpts = { nounSource, readVerbs: readVerbsOpt, nonSafeFloor };
 const runScopes = scopeFlag === 'all' ? SCOPES : [scopeFlag];
 
 const model = learn({ verbMin: 2, verbP: 0.8, nounMin: 4, nounP: 0.5 });
 if (label) console.log(`=== ${label} ===`);
-console.log(`flags: lexicon=${lexiconFile} scope=${scopeFlag} nouns=${nounSource} readverbs=${readVerbsOpt} floor=${nonSafeFloor}`);
+console.log(`flags: lexicon=${lexiconFile} scope=${scopeFlag} nouns=${nounSource} readverbs=${readVerbsOpt} floor=${nonSafeFloor} pass2=${pass2On ? 'on' : 'off'}`);
 console.log(`E8 model regenerated: verbMap entries=${Object.keys(model.verbMap).length}, liveNouns entries=${model.liveNouns.length} (params ${JSON.stringify(model.params)})`);
 
 const lexicon = loadLexicon(path.join(HERE, lexiconFile));
@@ -110,7 +114,11 @@ for (const half of HALVES) {
 
 for (const scope of runScopes) {
   console.log(`\n=== scope: ${scope} ===`);
-  const rows = ops.map((op) => ({ op, result: arbiterLex(op, model, lexicon, scope, arbiterOpts) }));
+  const rows = ops.map((op) => {
+    const pass1 = arbiterLex(op, model, lexicon, scope, arbiterOpts);
+    const result = pass2On ? refine(op, pass1, lexicon) : pass1;
+    return { op, pass1, result };
+  });
 
   for (const half of HALVES) {
     const halfRows = rows.filter((r) => halfOf(r.op.repo) === half);
@@ -149,12 +157,40 @@ for (const scope of runScopes) {
     for (const { op, result, gt_class } of wrongRows) {
       console.log(`  WRONG-LOOSENING [${half}] ${op.repo} ${op.method} ${op.path} ${op.operationId} rule=${result.rule_id} class=${result.class} gt=${gt_class} evidence="${result.evidence}"`);
     }
+
+    if (pass2On) {
+      let examined = 0, byCollision = 0, byOwn = 0, byPlace = 0;
+      let unraisedCorrect = 0, unraisedWrong = 0;
+      const wrongUnraises = [];
+      for (const { op, pass1, result } of halfRows) {
+        if (!PASS2_ELIGIBLE_RULES.has(pass1.rule_id)) continue;
+        examined++;
+        const gt = gtByKey.get(joinKey(op));
+        if (result.rule_id.endsWith('>P2-collision')) {
+          byCollision++;
+          if (gt) { if (gt.gt_class === 'x') unraisedWrong++; else unraisedCorrect++; }
+          if (gt && gt.gt_class === 'x') wrongUnraises.push({ op, result, gt });
+        } else if (result.rule_id.endsWith('>P2-own')) {
+          byOwn++;
+          if (gt) { if (gt.gt_class === 'x') unraisedWrong++; else unraisedCorrect++; }
+          if (gt && gt.gt_class === 'x') wrongUnraises.push({ op, result, gt });
+        } else if (result.rule_id.endsWith('>P2-place')) {
+          byPlace++;
+        }
+      }
+      console.log(`  ${half} pass 2 summary: examined=${examined} un-raised-by-collision=${byCollision} un-raised-by-own=${byOwn} place-downgraded=${byPlace}`);
+      console.log(`  ${half} pass 2 un-raised rows: correct=${unraisedCorrect} WRONG=${unraisedWrong}`);
+      for (const { op, result, gt } of wrongUnraises) {
+        console.log(`  PASS2-WRONG-UNRAISE [${half}] ${op.repo} ${op.method} ${op.path} ${op.operationId} rule=${result.rule_id} evidence="${result.evidence}" gt_reason="${(gt.reason ?? '').slice(0, 160)}"`);
+      }
+    }
   }
 
   console.log('  negative controls:');
   for (const nc of NEGATIVE_CONTROLS) {
     const op = ops.find((o) => o.repo === nc.repo && o.method === nc.method && o.path === nc.path && o.operationId === nc.operationId);
-    const result = op ? arbiterLex(op, model, lexicon, scope, arbiterOpts) : null;
+    const pass1 = op ? arbiterLex(op, model, lexicon, scope, arbiterOpts) : null;
+    const result = op && pass2On ? refine(op, pass1, lexicon) : pass1;
     const pass = result && result.class === 'x' ? 'PASS' : 'FAIL';
     console.log(`    ${nc.repo} ${nc.method} ${nc.path} ${nc.operationId}: class=${result ? result.class : '(not found)'} — ${pass}`);
   }

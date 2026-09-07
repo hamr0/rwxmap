@@ -526,20 +526,117 @@ have no summary and no description at all, and were classed by the
 readers from request and response schemas, which the arbiter never
 reads.
 
+### E15 — a second pass that un-raises (2026-09-07)
+
+(a) Idea. Pass 1 (E12b) is unchanged. Pass 2 looks only at rows pass 1
+raised above the method floor by the lexicon (rule ids L2-danger-verb,
+L3-live-noun) and may un-raise them back to the floor, never below it,
+never touching L0/L1/L4/L5 rows. Three checks in order, each naming its
+evidence in the rule id: P2-collision (every fired stem occurs only
+inside a known compound such as "Apple Pay", "executive",
+"getting-started"), P2-own (the first sentence names a stored artefact
+or says "your"/"the authenticated user", and no other party is named
+anywhere), P2-place (no fired stem appears in the first sentence; class
+kept, confidence dropped to low). Code poc/m0/rules-pass2.mjs,
+poc/m0/rules-pass2.test.mjs, `--pass2=on` in run-lex.mjs and
+run-holdout.mjs. Suite 62 pass.
+
+(b) Results, pass 1 → pass 2, columns half/repo | agree | over-tight |
+wrong loosenings:
+CAMARA BUILD 110|30|0 → 112|28|**3**; CAMARA TEST 122|30|0 → 124|28|0;
+hold-out total 114|91|**2** → 138|62|**7**.
+Pass 2 examined 123 hold-out rows, un-raised 39 (25 by own, 14 by
+collision), downgraded 38 by place; 31 un-raises were correct and 8
+were wrong.
+
+(c) The eight wrong un-raises split into two causes, and only one of
+them is a defect. Three on Twilio and three on CAMARA were the artefact
+word list being too generous: it contained `resource`, which in REST
+names anything, plus `profile`, `reservation` and `configuration`.
+"Stop a Stream using either the SID of the Stream resource" was read as
+paperwork; it stops a live media stream on an in-progress call. That is
+E16.
+
+(d) The other five, all GitHub DELETEs (remove team membership ×2,
+remove app access restrictions, remove user access restrictions, remove
+sub-issue), are not a pass-2 defect. Pass 1 had raised each of them to x
+on the stem `start`, whose only occurrence in the operation's text is
+inside the documentation URL
+`.../getting-started-with-github/githubs-products`. That is not
+evidence of anything. Pass 2 identified the evidence as fake and
+un-raised, correctly by its own rule; the row is x for a reason the
+tool still cannot see ("Removes the ability of a user to push to this
+branch"). So pass 1's hold-out score of 2 wrong loosenings was partly
+luck: 5 of its GitHub rows were right by accident, and the number of
+hold-out operations whose danger the tool can actually see is 200 of
+207, not 205.
+
+### E16 — the artefact list, trimmed (2026-09-07)
+
+(a) Change, one file: ARTEFACT in poc/m0/rules-pass2.mjs is reduced to
+words that can only ever mean a stored copy of information — record,
+log, entry, draft, metadata, comment, reaction, label, autolink — and
+loses resource, profile, reservation, configuration, setting, template,
+feedback, secret, variable, cache, key, webhook. A word that can name a
+live object is not evidence that the target is a record. Three
+regression tests added (Stop a Stream stays x; "Delete a Call record
+from your account" still un-raises; "Create an Application Profile" no
+longer un-raises). Suite 65 pass.
+
+(b) Results: CAMARA BUILD 110|30|**0**, TEST 122|30|0 — all three E15
+CAMARA leaks gone, and pass 2 now changes nothing net on CAMARA.
+Hold-out with pass 2 on: 126|74|7; with pass 2 off: 114|91|2. All three
+Twilio wrong un-raises gone; the five GitHub `start`-collision rows
+remain, for the reason in E15(d).
+
+(c) Reading: as an un-raiser, pass 2 buys 17 fewer over-tightenings on
+the hold-out and pays 5 wrong loosenings, all of them rows pass 1 held
+for a fake reason. Under a zero-leak gate that is not a trade worth
+making.
+
+### E17 — the same second pass, confidence only (2026-09-07)
+
+(a) Change of role, not of code path: pass 2 never alters the class,
+only marks whether pass 1's evidence was strong or weak. A row whose
+only trigger sits in a documentation URL, in boilerplate, or outside
+the first sentence stays x and is marked weak. Measured on the hold-out
+over the 123 lexicon-raised rows, classes identical to pass 1 (2 wrong
+loosenings, unchanged):
+| | marked weak | still strong |
+|---|---|---|
+| false alarms | 53 | 25 |
+| true x | 18 | 27 |
+
+(b) So a consumer configured to act only on strong evidence sees 25
+false alarms instead of 78, a two-thirds cut, and loses nothing to a
+wrong loosening, because the 18 true-x rows marked weak are still x.
+The eighteen are listed in the run output; they include Stripe's
+"Delete a customer" (whose "immediately cancels any active
+subscriptions" sentence is the second one) and the five GitHub `start`
+rows.
+
+(c) Finding, stated once: the un-raise and the confidence mark are the
+same measurement used two ways. Used to change the class it creates
+leaks; used to grade the evidence it removes two thirds of the noise
+for free. rwxmap's safety spine says never loosen without evidence, and
+"this evidence is weak" is not evidence of safety.
+
 ### Next
 
-M0 has run fourteen shapes and one blind hold-out. The honest numbers
-are E14's: with lexicon v2 the method floor plus a tighten-only
-danger-verb list leaves zero wrong loosenings on 126 Twilio and Stripe
-operations and two on 81 GitHub operations, both PUTs whose danger is
-stated in words the list does not have (assign a team to an
-organisation; merge). Forcing DELETE/PUT/PATCH to x removes those two
-at the price of collapsing to "everything is x" (140 over-tightenings
-of 207). The live-noun rule is the weak part: it over-fires on vendor
-boilerplate (GitHub's "personal access tokens" sentence) and misses
-vendor-specific danger nouns. The decisions owed to the PRD are
-unchanged and now have prices: the x definition; the DELETE/PUT default
-(E13 on CAMARA costs 17 of 292, E13b on the hold-out costs 49 more than
-E12b and buys two leaks); the gate's treatment of low-confidence
-lowerings. Two extractor gaps go on the M1 list: vendor extensions as
-structural markers, and schema text for operations with no prose.
+M0 has run seventeen shapes. The recommended shape is pass 1 (E12b:
+method floor, hand-written tighten-only lexicon v2, hand read-verb
+list, structural markers) plus pass 2 as a confidence grader only
+(E17), never as an un-raiser (E15, E16). On the blind hold-out that
+shape leaves 2 wrong loosenings of 207 and 91 over-tightenings, of
+which 53 carry weak evidence and can be filtered by a consumer without
+loosening anything. Two hold-out leaks remain invisible to the tool
+(assign an enterprise team to an organisation; merge a pull request)
+and five more are only masked by a false positive, so the honest count
+of hold-out operations whose danger the tool can see is 200 of 207. The
+PRD decisions owed are unchanged: the x definition, the DELETE/PUT
+default, and whether the gate's zero counts low-confidence rows — E17
+makes the last one concrete, since it is now possible to report a
+strong-evidence gate and a weak-evidence rate separately. M1's list:
+vendor extensions as structural markers, schema text for operations
+with no prose, and a fourth vendor for a clean exam, the hold-out being
+spent for pass 2.
