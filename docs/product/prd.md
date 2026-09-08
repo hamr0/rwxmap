@@ -279,9 +279,22 @@ entries).
 | holdout2 | 220 | 194 | 0 | 26 (11.8%) |
 | holdout3 | 226 | 198 | 1 | 27 (11.9%) |
 | holdout4 | 210 | 182 | 0 | 28 (13.3%) |
+| holdout5 | 323 | 241 | 17 | 65 (20.1%) |
 
-Across all five sets: 1155 rows, 4 leaks (0.3%), 171 over-tight
-(14.8%).
+Across all five sets before hold-out 5: 1155 rows, 4 leaks (0.3%), 171
+over-tight (14.8%). Across all six sets including hold-out 5: 1478 rows,
+21 leaks (1.4%), 236 over-tight (16.0%).
+
+**Hold-out 5 fails the gate (D39).** All 17 leaks are Slack GET rows.
+Three root causes: c11 rule 1 locks GET/HEAD/OPTIONS to `r` before any
+text is read; the text rules read `summary` while Slack and Amazon
+(both Swagger 2.0) put their prose in `description` instead (290 of 323
+rows here have no summary); `naiveSingular`'s `es`-stripping rule
+destroys third-person verb stems written by Slack and Amazon
+(revokes->revok, exchanges->exchang), a phrasing the earlier twelve
+vendors mostly avoided. See learnings "M1-C13 hold-out 5 scored once"
+for the full numbers. The gate (D30) is not met, and M1 cannot close
+until it is met again on every set including this one.
 
 Clean-exam comparison (hold-out 4, n=210; D38):
 
@@ -783,3 +796,4 @@ starts, not yet exercised.
 | D36 | Shared-object nouns join the party-noun raise (message, channel, emoji, sticker, pin, guild, permission, overwrite, ban, webhook, reaction). Three vendors' readers drew the line at x. Decided 2026-09-08. |
 | D37 | Per-vendor extension keys are rejected as a signal. GitHub's `x-github.triggersNotification` was measured — true on 3 of 81 labelled GitHub rows, all truth x, absent on 78, true on 22 of ~1225 whole-spec operations, a zero-leak raise that would have closed 2 of the 4 remaining leaks — and still refused: a rule that names one vendor is per-API maintenance, not a rule. Signals must be commonalities that hold across vendors. Leaks stay at 4. Decided 2026-09-08 at the user's word. |
 | D38 | The benchmark reports against three dumb baselines (all-x, get-else-x, method-prior) and splits the five sets into tuned / reference / clean-exam, with the headline quoted from the clean exam only. One re-runnable command, `node poc/m1/arbiter/run-benchmark.mjs`. Decided 2026-09-08. |
+| D39 | Hold-out 5 (Slack, Notion, Amazon SP-API; 323 rows; `data/holdout5-2026-09-08`) scored once 2026-09-08; the M1 go/no-go gate (D30, zero leaks) FAILS on it with 17 leaks, all Slack GET rows. Three root causes: c11's rule 1 locks GET/HEAD/OPTIONS to `r` before any text is read; the text rules read `summary` while Swagger 2.0 vendors (Slack, Amazon) fill `description` instead; `naiveSingular`'s `es`-stripping rule destroys third-person verb stems (revokes->revok, exchanges->exchang). No fix applied in this pass. |

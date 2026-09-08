@@ -2027,3 +2027,87 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   model-generated, not a human expert reading; no row has been read
   twice by an independent reader, so none of these numbers has an
   error bar and the truth's own noise is unknown.
+
+### M1-C13 hold-out 5 scored once: the gate fails, 17 leaks, all GET (2026-09-08)
+
+- What it is: hold-out 5, `data/holdout5-2026-09-08/`, 323 operations —
+  slack (174), notion (24), amazon SP-API (125) — read blind by five
+  Sonnet agents, round-robin, input columns repo/path/method/operationId
+  only, no orchestrator rulings. Scored once against c11.mjs and the
+  three baselines in baselines.mjs.
+
+- Overall scores:
+
+  | classifier | exact | leaks | over-tight |
+  |---|---|---|---|
+  | c11 | 241 (74.6%) | 17 (5.3%) | 65 (20.1%) |
+  | all-x | 97 (30.0%) | 0 (0.0%) | 226 (70.0%) |
+  | get-else-x | 223 (69.0%) | 17 (5.3%) | 83 (25.7%) |
+  | method-prior | 230 (71.2%) | 22 (6.8%) | 71 (22.0%) |
+
+- c11 per vendor: slack n=174, 63.8% exact, 17 leaks, 26.4% over-tight;
+  notion n=24, 79.2% exact, 0 leaks, 20.8% over-tight; amazon n=125,
+  88.8% exact, 0 leaks, 11.2% over-tight.
+
+- Truth class counts: r=153, w=73, x=97; 16 rows marked doubt.
+
+- All 17 leaks are Slack GET rows: apps_permissions_request,
+  apps_permissions_users_request, apps_uninstall, auth_revoke,
+  dialog_open, files_remote_share, oauth_access, oauth_token,
+  oauth_v2_access, rtm_connect, views_open, views_publish, views_push,
+  views_update, workflows_stepCompleted, workflows_stepFailed,
+  workflows_updateStep.
+
+- Of 156 GET rows, 17 are not r; all 17 are Slack (notion 0 of 12,
+  amazon 0 of 64).
+
+- Double-read: two independent readers on the same 60 rows agreed on
+  57 (95.0%). The three disagreements were all w-vs-x: slack
+  reactions_add, amazon cancelFulfillmentOrder, amazon
+  cancelServiceJobByServiceJobId. Reader B's contamination check was
+  clean.
+
+- Field census on this set: slack 174/174 rows have an EMPTY summary
+  (0 empty description); amazon 116/125 empty summary (0 empty
+  description); notion 0 empty summary, 13 empty description.
+
+- Three root causes, stated separately, verified in the code and the
+  specs:
+
+  1. c11 rule 1 locks GET/HEAD/OPTIONS to `r` and returns immediately,
+     so no text is ever read for a GET.
+  2. The text rules read `row.summary` (judge.mjs summaryLeadVerb,
+     headNounForRow). Slack and Amazon are Swagger 2.0 and put their
+     prose in `description`; 290 of 323 rows in this set have no
+     summary at all, so those rules ran on an empty string.
+  3. judge.mjs `naiveSingular` strips `es` from any word ending in
+     `es`, which is a noun rule. Applied to third-person verbs it
+     destroys the stem: creates->creat, revokes->revok,
+     terminates->terminat, shares->shar, invites->invit,
+     approves->approv, schedules->schedul, exchanges->exchang. Verbs
+     whose stem ends in a consonant survive (cancels->cancel,
+     sends->send). Slack and Amazon write descriptions in the third
+     person; the earlier twelve vendors mostly write imperative
+     summaries, which never hit the `es` branch.
+
+  Slack's own text is clear on all 17 rows (e.g. oauth_access
+  "Exchanges a temporary OAuth verifier code for an access token.";
+  dialog_open "Open a dialog with a user"; rtm_connect "Starts a Real
+  Time Messaging session."; auth_revoke "Revokes a token."). The
+  failure is ours, not a vendor quirk.
+
+- get-else-x leaks on the identical 17 rows, because it shares c11's
+  rule 1 (GET locked to r with no text read).
+
+- What it taught: the `r` floor on GET was never earned — it was
+  assumed from the method and never tested against a vendor that
+  writes real prose on GET operations with side effects. Twelve
+  vendors agreeing that GET means r did not make it true; it only
+  meant none of the twelve vendors' GETs happened to have a
+  description-only side effect and a summary-shaped judge running on
+  an empty string. Two independent code defects (summary-vs-description
+  field choice, and the `es`-stripping stemmer) had been present all
+  along and never triggered because no earlier set combined
+  description-only prose with third-person verb phrasing on a GET.
+
+- No fix was applied in this pass.

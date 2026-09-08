@@ -183,6 +183,38 @@ extraction. Like data/holdout2-2026-09-07/, data/holdout3-2026-09-08/ and
 data/holdout4-2026-09-08/, this set includes GET operations, so it can
 measure correct lowerings and the usefulness half of the gate.
 
-## Ground truth
+## Ground truth (2026-09-08)
 
-NOT YET READ.
+Read blind by five Sonnet agents, round-robin over the operations.csv
+order (row i to group i mod 5). Input columns were repo, path, method,
+operationId only — no summary, no description, no other spec field.
+Readers used the brief at `docs/logs/m1/holdout5-reading-brief.md`.
+
+Class counts as read: total r=153, w=73, x=97. By vendor and class:
+- slack (n=174): r=64, w=49, x=61
+- notion (n=24): r=14, w=6, x=4
+- amazon (n=125): r=75, w=18, x=32
+
+By method and class:
+- GET (n=156): r=139, w=4, x=13
+- POST (n=143): r=13, w=52, x=78
+- PUT (n=10): r=1, w=5, x=4
+- PATCH (n=6): w=5, x=1
+- DELETE (n=8): w=7, x=1
+
+16 rows carry doubt.
+
+No orchestrator rulings; ground-truth.csv equals ground-truth-as-read.csv.
+
+### Double-read (reader-agreement measurement)
+
+60 rows were read a second time by an independent reader, blind to the
+first reader's labels, same input columns and brief. The two readers
+agreed on 57 of 60 (95.0%). The three disagreements were all w-vs-x:
+slack reactions_add, amazon cancelFulfillmentOrder, amazon
+cancelServiceJobByServiceJobId. Reader B's contamination check (whether
+the second reader had seen the first reader's labels) was clean.
+
+This is the project's first direct measurement of reader noise — every
+earlier set's ground truth carried no error bar because no row had ever
+been read twice.

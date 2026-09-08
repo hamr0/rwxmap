@@ -56,10 +56,10 @@ normative anywhere; not a standards track; not a conformance harness.
 
 ## Test bed
 
-1155 operations labelled by blind LLM reading — five Sonnet agents per
+1478 operations labelled by blind LLM reading — five Sonnet agents per
 hold-out, each working from a fixed reading brief, no human expert
-labels — the CAMARA catalogue (292 ops, 60 repositories) plus 12 vendor
-APIs — in five SHA-pinned sets under `data/`, each with a deterministic
+labels — the CAMARA catalogue (292 ops, 60 repositories) plus 15 vendor
+APIs — in six SHA-pinned sets under `data/`, each with a deterministic
 selection rule.
 
 The sets fall into three buckets:
@@ -69,10 +69,29 @@ The sets fall into three buckets:
   numbers here are upper bounds, not evidence of transfer.
 - **reference** (hold-out 2: Adyen, Box, PagerDuty) — never used to
   pick a rule, but scored repeatedly, so not blind either.
-- **clean-exam** (hold-out 4: Linode, Cloudflare, X) — scored once,
-  never fitted on. The headline below is quoted from this set only.
+- **clean-exam** (hold-out 5: Slack, Notion, Amazon SP-API) — scored
+  once, never fitted on. The headline below is quoted from this set
+  only. Hold-out 4 (Linode, Cloudflare, X) was the previous clean exam;
+  its numbers stay below, relabelled.
 
-Clean-exam result (hold-out 4, n=210):
+Clean-exam result (hold-out 5, n=323):
+
+| classifier | exact | leaks | over-tight |
+|---|---|---|---|
+| c11 | 241 (74.6%) | 17 (5.3%) | 65 (20.1%) |
+| method-prior | 230 (71.2%) | 22 (6.8%) | 71 (22.0%) |
+| get-else-x | 223 (69.0%) | 17 (5.3%) | 83 (25.7%) |
+
+**The tool leaks on 5.3% of hold-out 5, all on GET operations whose
+spec documents the side effect clearly in prose but which the
+classifier never reads** — c11 locks every GET to `r` before looking at
+any text, so a spec-documented action (e.g. Slack `oauth_access`, which
+"exchanges a temporary OAuth verifier code for an access token") is
+never checked. **The M1 go/no-go gate (zero leaks) FAILS on this set.**
+See `docs/product/prd.md` D39 and `docs/logs/learnings.md` "M1-C13"
+for the root causes and full numbers.
+
+Previous clean exam (hold-out 4, Linode/Cloudflare/X, n=210):
 
 | classifier | exact | leaks | over-tight |
 |---|---|---|---|
@@ -90,10 +109,12 @@ Two negative controls must come out `x`: ClickToDial `DELETE
 /sessions/{mediaSessionId}/status` `updateSessionStatus`. c11 gets both
 right; the plain method prior gets both wrong (`w`, should be `x`).
 
-**On the clean exam, c11 is not more accurate than the plain method
-prior.** What it buys over the method prior is leaks going to zero
-(from 3) and both negative controls correct, at a cost of 2.3 points
-of exactness and 3.8 points of extra review.
+**On hold-out 4, c11 was not more accurate than the plain method
+prior.** What it bought over the method prior there was leaks going to
+zero (from 3) and both negative controls correct, at a cost of 2.3
+points of exactness and 3.8 points of extra review. On hold-out 5 c11
+is more exact than method-prior (74.6% vs 71.2%) but no longer meets
+the zero-leak bar either shape needs.
 
 **How to re-run:** `node poc/m1/arbiter/run-benchmark.mjs`
 
@@ -102,9 +123,13 @@ of exactness and 3.8 points of extra review.
 - The truth is itself model-generated — blind LLM readers on a fixed
   brief — so the scores measure agreement with that reading process,
   not with a human expert or with any standard.
-- No row has been read twice by an independent reader, so the truth's
-  own noise is unmeasured and none of these numbers carries an error
-  bar.
+- No row on hold-out 1 through 4 has been read twice by an independent
+  reader, so their truth's own noise is unmeasured and their numbers
+  carry no error bar.
+- Hold-out 5's ground truth had 60 of its 323 rows read a second time
+  by an independent reader: 57/60 agreed (95.0%), so the error bar is
+  now stated rather than absent for that set — about 1 row in 20 of
+  its truth labels could plausibly flip under a second reading.
 - CAMARA's GET half was judged by template, not operation by
   operation.
 - The 57-of-138 read-named-POST figure (above) is a reader's
