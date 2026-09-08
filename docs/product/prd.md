@@ -259,21 +259,28 @@ entries).
    verify, check, query, read, fetch, list, search, match, count,
    lookup, assess, find, get. ("validate" was measured and leaks; it is
    out.)
-5. Else the row keeps its floor class and is marked floor. Floor is the
+5. No-text tighten (Rule A, user ruling 2026-09-08): a PUT, DELETE or
+   PATCH that reached this step with no summary and no description ->
+   x, marked no-text. The judge could not run; doctrine says no
+   evidence takes the tighter class. The mark lets a consumer tell
+   "could not read" from "found" and from "floor". Never touches POST
+   (already x) or GET (locked r).
+6. Else the row keeps its floor class and is marked floor. Floor is the
    "not known, tighter class" mark; a consumer can tell a found x from
    a default x.
 
 | set | n | exact | leaks | over-tight |
 |---|---|---|---|---|
 | camara | 292 | 262 | 1 | 29 (9.9%) |
-| holdout1 | 207 | 155 | 2 | 50 (24.2%) |
+| holdout1 | 207 | 151 | 2 | 54 (26.1%) |
 | holdout2 | 220 | 195 | 0 | 25 (11.4%) |
-| holdout3 | 226 | 194 | 11 | 21 (9.3%) |
+| holdout3 | 226 | 199 | 2 | 25 (11.1%) |
 
-Hold-out 3 (Discord, Sentry, Vercel, 2026-09-08) scored once, untuned:
-11 leaks, ten of them Discord PUT/DELETE rows with no summary or
-description; a no-text tighten rule (measured, not admitted) brings it
-to 2 with zero new leaks elsewhere. See learnings.
+Hold-out 3 (Discord, Sentry, Vercel, 2026-09-08) was scored once
+untuned at 11 leaks; Rule A, adopted on it, brings it to 2 (vercel
+deleteRedirects, discord update_guild_incident_actions), so hold-out 3
+is now a tuning set and hold-out 4 (Linode, Cloudflare, X;
+data/holdout4-2026-09-08) is the clean exam.
 
 Both negative controls x. Remaining leaks: camara deleteTrafficInfluence
 (no word signal), github issues/set-issue-field-values and
@@ -632,10 +639,10 @@ Non-blocking; never silently assumed.
   is re-labelled by the tool.
 - Over-tight rows are a usability cost invisible to humans at run
   time; how a consumer surfaces or overrides them is open.
-- No-text writes: a PUT/DELETE/PATCH with no summary and no description
-  sits at the w floor. Doctrine says no evidence means the tighter
-  class. Admit the no-text tighten rule (Rule A)? Needs a hold-out 4 as
-  the new clean exam if hold-out 3 is used to decide.
+- Closed 2026-09-08 (D35): the no-text tighten rule (Rule A) is
+  adopted — a PUT/DELETE/PATCH with no summary and no description ->
+  x, marked no-text. Hold-out 3 became a tuning set to decide it;
+  hold-out 4 is the new clean exam.
 
 ## 8. Notes carried from the outline, stated on purpose
 
@@ -738,3 +745,4 @@ starts, not yet exercised.
 | D32 | Poll-then-callback reads are `r`. A callback raises to `x` only when the verb is not a read; "read" is decided mechanically (read-family scope token, or a corpus GET share >= 0.75 at >= 3 providers), never by a hand list. Three CAMARA rows (retrievePopulationDensity, retrieveConnectivity, count) keep their `r` label and move from over-tight to exact (M1-C7). Decided 2026-09-07 at the user's word. |
 | D33 | M1's arbiter is two passes. Pass 1: the machine-facing fields (method prior, scope, body, callbacks, corpus lean, CAMARA verb table) with a confidence sum; assigns above the threshold. Pass 2: a verb-and-noun judge on the residual only, with orchestrator-written lists (live verbs, own verbs, party nouns) measured rule by rule and admitted only at zero leaks on CAMARA + hold-out 1; switches chosen by cost after zero leaks. The verb never gives `w` on POST. Set by the user's reading of the review pile 2026-09-07, measured M1-C9. Superseded by D34 (C11) on 2026-09-08. |
 | D34 | M1 arbiter shape is C11 — floor + raise-only from fixed hand lists. Decided 2026-09-08. See "M1 arbiter flow (C11, adopted 2026-09-08)" in §4. |
+| D35 | Rule A: a PUT/DELETE/PATCH with no summary and no description is x, marked no-text. Decided 2026-09-08. Hold-out 3 becomes a tuning set; hold-out 4 is the clean exam. |

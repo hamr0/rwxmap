@@ -20,13 +20,23 @@
 //   4. Read-verb lower — POST only. If the operationId lead verb is in
 //      READ_VERBS, the row is lowered from the x floor to 'r'. rule:
 //      'read-verb'.
-//   5. Floor — nothing above resolved the row. PUT/DELETE -> 'w',
+//   5. No-text floor (Rule A, user ruling 2026-09-08) — PUT/DELETE/PATCH
+//      only. If both row.summary and row.description are empty (after
+//      trim), the judge had nothing to read and there is no evidence to
+//      raise or lower on; doctrine says no evidence takes the tighter
+//      class. rule: 'no-text', floor: true — marked so a consumer can
+//      tell "no text to judge" apart from a found x (rule: 'live-verb' /
+//      'party-noun'). POST/PATCH's method prior is already x, so this
+//      only actually changes PUT/DELETE outcomes; it still runs on PATCH
+//      for evidence-trail completeness, same as step 3.
+//   6. Floor — nothing above resolved the row. PUT/DELETE -> 'w',
 //      POST/PATCH -> 'x' (arbiter.mjs's methodPrior). rule: 'floor'.
 //
 // Nothing here ever lowers a class except step 4 (POST read-verb), and
-// nothing raises except steps 2-3. `floor` on the returned result is true
-// exactly when rule is 'locked' or 'floor' — i.e. no verb/noun evidence
-// fired, the class came from the method prior alone.
+// nothing raises except steps 2-3 and 5. `floor` on the returned result is
+// true exactly when rule is 'locked', 'no-text' or 'floor' — i.e. no
+// verb/noun evidence fired, the class came from the method prior (or the
+// no-text doctrine) alone.
 import {
   methodPrior,
   leadVerbForRow,
@@ -103,6 +113,15 @@ export function classify(row) {
     }
   }
 
-  // 5. floor: nothing above resolved this row.
+  // 5. no-text floor (Rule A): PUT/DELETE/PATCH with nothing to read.
+  if (method === 'PUT' || method === 'DELETE' || method === 'PATCH') {
+    const hasSummary = (row.summary || '').trim() !== '';
+    const hasDescription = (row.description || '').trim() !== '';
+    if (!hasSummary && !hasDescription) {
+      return { class: 'x', rule: 'no-text', evidence: ['no-text'], floor: true };
+    }
+  }
+
+  // 6. floor: nothing above resolved this row.
   return { class: prior, rule: 'floor', evidence: extraEvidence, floor: true };
 }

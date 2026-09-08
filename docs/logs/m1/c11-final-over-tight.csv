@@ -49,6 +49,10 @@ holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Siprec/{S
 holdout1,stripe,DELETE,/v1/apple_pay/domains/{domain},DeleteApplePayDomainsDomain,w,x,live-verb,opid:pay,
 holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Usage/Triggers/{Sid}.json,UpdateUsageTrigger,w,x,live-verb,opid:trigger,Update an instance of a usage trigger
 holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Usage/Triggers/{Sid}.json,DeleteUsageTrigger,w,x,live-verb,opid:trigger,
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Addresses/{Sid}.json,DeleteAddress,w,x,no-text,no-text,
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Keys/{Sid}.json,DeleteKey,w,x,no-text,no-text,
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Recordings/{RecordingSid}/Transcriptions/{Sid}.json,DeleteRecordingTranscription,w,x,no-text,no-text,
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/SigningKeys/{Sid}.json,DeleteSigningKey,w,x,no-text,no-text,
 holdout1,github,PUT,/organizations/{org}/actions/cache/storage-limit,actions/set-actions-cache-storage-limit-for-organization,w,x,party-noun,opid:organization,Set GitHub Actions cache storage limit for an organization
 holdout1,github,PUT,/orgs/{org}/actions/permissions,actions/set-github-actions-permissions-organization,w,x,party-noun,opid:organization,Set GitHub Actions permissions for an organization
 holdout1,github,PUT,/orgs/{org}/actions/permissions/repositories,actions/set-selected-repositories-enabled-github-actions-organization,w,x,party-noun,opid:organization,Set selected repositories enabled for GitHub Actions in an organization
@@ -103,11 +107,7 @@ holdout2,box,PUT,/integration_mappings/teams/{integration_mapping_id},put_integr
 holdout2,box,DELETE,/storage_policy_assignments/{storage_policy_assignment_id},delete_storage_policy_assignments_id,w,x,party-noun,opid:assignment,Unassign storage policy
 holdout2,box,PUT,/task_assignments/{task_assignment_id},put_task_assignments_id,w,x,party-noun,summary:assignment,Update task assignment
 holdout2,pagerduty,PUT,/teams/{id}/users/{user_id},updateTeamUser,w,x,party-noun,summary:user,Add a user to a team
-holdout3,discord,PATCH,/applications/{application_id},update_application,w,x,floor,,
 holdout3,discord,POST,/applications/{application_id}/entitlements/{entitlement_id}/consume,consume_entitlement,w,x,floor,,
-holdout3,discord,PATCH,/guilds/{guild_id}/soundboard-sounds/{sound_id},update_guild_soundboard_sound,w,x,floor,,
-holdout3,discord,PATCH,/guilds/{guild_id}/templates/{code},update_guild_template,w,x,floor,,
-holdout3,discord,PATCH,/guilds/{guild_id}/widget,update_guild_widget_settings,w,x,floor,,
 holdout3,discord,POST,/partner-sdk/provisional-accounts/unmerge/bot,bot_partner_sdk_unmerge_provisional_account,w,x,floor,,
 holdout3,sentry,POST,/api/0/organizations/{organization_id_or_slug}/releases/,createOrganizationRelease,w,x,floor,,Create a New Release for an Organization
 holdout3,sentry,POST,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/user-feedback/,Submit User Feedback,w,x,floor,,
@@ -124,3 +124,11 @@ holdout3,vercel,PATCH,/v2/connect/connectors/{connector},updateConnector,w,x,flo
 holdout3,vercel,POST,/v8/artifacts,artifactQuery,r,x,floor,,Query information about an artifact
 holdout3,vercel,PATCH,/v9/projects/{idOrName}/domains/{domain},updateProjectDomain,w,x,floor,,Update a project domain
 holdout3,vercel,PATCH,/v2/deployments/{deploymentId}/check-runs/{checkRunId},updateDeploymentCheckRun,w,x,live-verb,opid:run,Update a check run
+holdout3,discord,PATCH,/applications/{application_id},update_application,w,x,no-text,no-text,
+holdout3,discord,DELETE,/applications/{application_id}/commands/{command_id},delete_application_command,w,x,no-text,no-text,
+holdout3,discord,PUT,/applications/{application_id}/guilds/{guild_id}/commands,bulk_set_guild_application_commands,w,x,no-text,no-text,
+holdout3,discord,PATCH,/guilds/{guild_id}/soundboard-sounds/{sound_id},update_guild_soundboard_sound,w,x,no-text,no-text,
+holdout3,discord,PATCH,/guilds/{guild_id}/templates/{code},update_guild_template,w,x,no-text,no-text,
+holdout3,discord,PATCH,/guilds/{guild_id}/widget,update_guild_widget_settings,w,x,no-text,no-text,
+holdout3,discord,DELETE,/lobbies/{lobby_id}/members/@me,leave_lobby,w,x,no-text,no-text,
+holdout3,discord,PUT,/users/@me/applications/{application_id}/role-connection,update_application_user_role_connection,w,x,no-text,no-text,

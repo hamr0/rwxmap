@@ -13,7 +13,7 @@
 // Asserts both negative controls (ClickToDial DELETE /calls/{callId}
 // terminateCall, WebRTC PUT /sessions/{mediaSessionId}/status
 // updateSessionStatus) come out 'x' — exits 1 otherwise.
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { parseCsv, toCsv } from '../../m0/csv.mjs';
@@ -27,12 +27,13 @@ const TEXT_PATH = path.join(REPO_ROOT, 'docs/logs/m1/ops-text.csv');
 const HOLDOUT3_DIR = path.join(REPO_ROOT, 'data/holdout3-2026-09-08');
 const HOLDOUT3_GT = path.join(HOLDOUT3_DIR, 'ground-truth.csv');
 const HOLDOUT3_OPS = path.join(HOLDOUT3_DIR, 'operations.csv');
+const DATA_DIR = path.join(REPO_ROOT, 'data');
 
 const OUT_MD = path.join(REPO_ROOT, 'docs/logs/m1/c11-final.md');
 const OUT_ROWS = path.join(REPO_ROOT, 'docs/logs/m1/c11-final-rows.csv');
 const OUT_OVER_TIGHT = path.join(REPO_ROOT, 'docs/logs/m1/c11-final-over-tight.csv');
 
-const RULES = ['locked', 'live-verb', 'party-noun', 'read-verb', 'floor'];
+const RULES = ['locked', 'live-verb', 'party-noun', 'read-verb', 'no-text', 'floor'];
 
 // --- helpers (mirrors run-c11.mjs/run-c11v.mjs's private helpers) ----------
 
@@ -97,14 +98,14 @@ function loadCensusRows() {
   return censusRows;
 }
 
-// --- load holdout3, if present: join ground-truth.csv (gt_class) onto
-// operations.csv (summary), key repo|path|method|operationId --------------
+// --- load a holdout dir: join ground-truth.csv (gt_class) onto
+// operations.csv (summary, description), key repo|path|method|operationId --
 
-function loadHoldout3() {
-  if (!existsSync(HOLDOUT3_GT) || !existsSync(HOLDOUT3_OPS)) return null;
+function loadHoldoutDir(dir, gtPath, opsPath, setName) {
+  if (!existsSync(gtPath) || !existsSync(opsPath)) return null;
 
-  const gtRows = parseCsv(readFileSync(HOLDOUT3_GT, 'utf8'));
-  const opsRows = parseCsv(readFileSync(HOLDOUT3_OPS, 'utf8'));
+  const gtRows = parseCsv(readFileSync(gtPath, 'utf8'));
+  const opsRows = parseCsv(readFileSync(opsPath, 'utf8'));
 
   const opsIndex = new Map();
   for (const o of opsRows) {
@@ -118,7 +119,7 @@ function loadHoldout3() {
     const o = opsIndex.get(key);
     if (!o) { joinMisses += 1; continue; }
     rows.push({
-      set: 'holdout3',
+      set: setName,
       repo: gt.repo,
       path: gt.path,
       method: gt.method,
@@ -129,9 +130,36 @@ function loadHoldout3() {
     });
   }
   if (joinMisses > 0) {
-    throw new Error(`ESCALATE: ${joinMisses} holdout3 ground-truth.csv rows had no matching row in operations.csv.`);
+    throw new Error(`ESCALATE: ${joinMisses} ${setName} ground-truth.csv rows had no matching row in operations.csv.`);
   }
   return rows;
+}
+
+function loadHoldout3() {
+  return loadHoldoutDir(HOLDOUT3_DIR, HOLDOUT3_GT, HOLDOUT3_OPS, 'holdout3');
+}
+
+// --- load holdout4: every data/holdout4-*/ directory carrying both
+// ground-truth.csv and operations.csv, all joined into set 'holdout4' -----
+
+function loadHoldout4() {
+  if (!existsSync(DATA_DIR)) return null;
+  const dirNames = readdirSync(DATA_DIR, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && d.name.startsWith('holdout4-'))
+    .map((d) => d.name)
+    .sort();
+  if (dirNames.length === 0) return null;
+
+  const rows = [];
+  for (const name of dirNames) {
+    const dir = path.join(DATA_DIR, name);
+    const gtPath = path.join(dir, 'ground-truth.csv');
+    const opsPath = path.join(dir, 'operations.csv');
+    const dirRows = loadHoldoutDir(dir, gtPath, opsPath, 'holdout4');
+    if (dirRows === null) continue;
+    rows.push(...dirRows);
+  }
+  return rows.length ? rows : null;
 }
 
 // --- score ------------------------------------------------------------------
@@ -201,9 +229,16 @@ function findControlRow(rows, opId) {
 function main() {
   const censusRows = loadCensusRows();
   const holdout3Rows = loadHoldout3();
+  const holdout4Rows = loadHoldout4();
 
-  const allRows = holdout3Rows ? [...censusRows, ...holdout3Rows] : censusRows;
-  const sets = holdout3Rows ? ['camara', 'holdout1', 'holdout2', 'holdout3'] : ['camara', 'holdout1', 'holdout2'];
+  const allRows = [
+    ...censusRows,
+    ...(holdout3Rows || []),
+    ...(holdout4Rows || []),
+  ];
+  const sets = ['camara', 'holdout1', 'holdout2'];
+  if (holdout3Rows) sets.push('holdout3');
+  if (holdout4Rows) sets.push('holdout4');
 
   const scored = scoreAll(allRows);
 
@@ -230,6 +265,7 @@ function main() {
   // --- stdout: per-set table ---
   console.log(fmtRows(summaryTable, summaryHeader));
   if (holdout3Rows === null) console.log('\nholdout3: not present');
+  if (holdout4Rows === null) console.log('holdout4: not present');
 
   // --- docs/logs/m1/c11-final.md ---
   const md = [];
@@ -240,6 +276,7 @@ function main() {
   md.push('holdout2) and, when present, holdout3 (data/holdout3-2026-09-08/).');
   md.push('');
   md.push(holdout3Rows === null ? 'holdout3: not present.' : `holdout3: present, ${holdout3Rows.length} rows.`);
+  md.push(holdout4Rows === null ? 'holdout4: not present.' : `holdout4: present, ${holdout4Rows.length} rows.`);
   md.push('');
   md.push('## Per-set summary');
   md.push('');

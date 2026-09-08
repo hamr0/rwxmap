@@ -1839,3 +1839,35 @@ The C11 floor + raise-only shape is adopted as the M1 arbiter, per the user's di
 What the seven-layer C4-C10 work taught that still stands: machine-facing fields (scope, body, callbacks, corpus lean, CAMARA verb table) lean but never reach the 0.9 admission bar; lowering below the method prior beyond a fixed read-verb list always leaks; both noun sources (summary head noun and operationId head noun) are needed, since they catch different rows.
 
 Retired: corpus lookup at score time, the CAMARA verb table, per-operation scopes, body/flag/structural layers, the prose-word layer, the weighted-aggregate confidence sum, and the two-pass judge shape (D33).
+
+### M1-C11 Rule A adopted (2026-09-08)
+
+- Rule A, adopted by the user's ruling: a PUT, DELETE or PATCH row that
+  reaches the floor step with no summary and no description -> x,
+  marked no-text. Implemented as step 5 of the C11 flow in
+  `poc/m1/arbiter/c11.mjs` (floor is now step 6).
+- 17 rows moved. Four Twilio DELETEs in hold-out 1, all truth w, now
+  over-tight: DeleteAddress, DeleteKey, DeleteRecordingTranscription,
+  DeleteSigningKey. Thirteen Discord rows in hold-out 3, nine of them
+  truth x.
+- Leaks per set, before Rule A -> after: camara 1 -> 1, holdout1 2 ->
+  2, holdout2 0 -> 0, holdout3 11 -> 2. Zero new leaks anywhere.
+- Tests: 115 pass. Module: `poc/m1/arbiter/c11.mjs`, step 5.
+- Two measurements the user asked about, both NOT admitted:
+  (a) "POST with lead verb update lowers to w when the noun is not a
+      party" leaks 6 Twilio rows (UpdateConference, UpdateStream,
+      UpdatePayments, UpdateCallRecording, UpdateConferenceRecording,
+      UpdateRealtimeTranscription), so Twilio's POST-as-update rows
+      stay at the x floor.
+  (b) The any-token live-verb source costs three over-tight rows
+      (DeleteApplePayDomainsDomain via "pay", UpdateUsageTrigger and
+      DeleteUsageTrigger via "trigger") against one leak it prevents
+      (updateRebootRequest) — kept as-is (first-token-only), not
+      switched to any-token.
+- (c) Shared-object nouns (channel, message, emoji, sticker, pin,
+  guild, permission, overwrite, ban, webhook, reaction) added to the
+  party list would take hold-out 3 to 1 leak, at +2/+6/+1/+3
+  over-tight (camara/holdout1/holdout2/holdout3), zero new leaks. Not
+  admitted: it is one vendor's reader line (Discord treats shared
+  objects as x, GitHub treats org settings as w) rather than a
+  transferable rule. Revisit after hold-out 4.
