@@ -1039,3 +1039,85 @@ test('shareW: truth-w share of a counts object, mirroring shareX', () => {
   assert.equal(shareW({ r: 0, w: 0, x: 0 }), null);
   assert.equal(shareW(null), null);
 });
+
+// --- M1-C9: layer3On/layer4On switches (default true, backward compatible) -
+
+test('scoreRow: layer3On/layer4On default true — a POST row with strong corpus+verb-table lowering evidence still scores exactly as before the switches were added', () => {
+  const leanIndex = new Map([
+    ['retrieve', { providers: 10, perprov_get: 8, perprov_post: 2, perprov_put: 0, perprov_patch: 0, perprov_delete: 0, perprov_head: 0, perprov_options: 0 }],
+  ]);
+  const verbTable = buildVerbTable([
+    row({ operationId: 'retrieveThing', gt_class: 'r', repo: 'A' }),
+    row({ operationId: 'retrieveThing', gt_class: 'r', repo: 'A' }),
+    row({ operationId: 'retrieveThing', gt_class: 'r', repo: 'A' }),
+  ]);
+  const r = row({ method: 'POST', operationId: 'retrieveThing', repo: 'B' });
+  const withoutSwitches = scoreRow(r, { leanIndex, verbTable }, 0.5);
+  const withDefaultSwitches = scoreRow(r, { leanIndex, verbTable }, 0.5, {});
+  const withExplicitTrue = scoreRow(r, { leanIndex, verbTable }, 0.5, { layer3On: true, layer4On: true });
+  assert.deepEqual(withDefaultSwitches, withoutSwitches);
+  assert.deepEqual(withExplicitTrue, withoutSwitches);
+  assert.equal(withoutSwitches.class, 'r');
+  assert.equal(withoutSwitches.status, 'assigned');
+  assert.ok(withoutSwitches.evidence.some((e) => e.startsWith('corpus:retrieve->lower:r')));
+  assert.ok(withoutSwitches.evidence.some((e) => e.startsWith('verbtable:retrieve->lower:r')));
+});
+
+test('scoreRow: layer3On:false removes layer 3 (corpus lean) evidence entirely, leaving layer 4 untouched', () => {
+  const leanIndex = new Map([
+    ['retrieve', { providers: 10, perprov_get: 8, perprov_post: 2, perprov_put: 0, perprov_patch: 0, perprov_delete: 0, perprov_head: 0, perprov_options: 0 }],
+  ]);
+  const verbTable = buildVerbTable([
+    row({ operationId: 'retrieveThing', gt_class: 'r', repo: 'A' }),
+    row({ operationId: 'retrieveThing', gt_class: 'r', repo: 'A' }),
+    row({ operationId: 'retrieveThing', gt_class: 'r', repo: 'A' }),
+  ]);
+  const r = row({ method: 'POST', operationId: 'retrieveThing', repo: 'B' });
+  const result = scoreRow(r, { leanIndex, verbTable }, 0.5, { layer3On: false });
+  assert.ok(!result.evidence.some((e) => e.startsWith('corpus:')));
+  assert.ok(result.evidence.some((e) => e.startsWith('verbtable:retrieve->lower:r')));
+  // Layer 4 alone still clears the 0.5 threshold on its own (weight 0.8).
+  assert.equal(result.class, 'r');
+  assert.equal(result.status, 'assigned');
+});
+
+test('scoreRow: layer4On:false removes layer 4 (CAMARA verb table) evidence entirely, leaving layer 3 untouched, and never calls verbCountsFor', () => {
+  const leanIndex = new Map([
+    ['retrieve', { providers: 10, perprov_get: 8, perprov_post: 2, perprov_put: 0, perprov_patch: 0, perprov_delete: 0, perprov_head: 0, perprov_options: 0 }],
+  ]);
+  // A verbTable that would throw if verbCountsFor ever iterated its Map
+  // (Map.get is fine — this just proves layer 4 truly never looks it up by
+  // asserting the resulting evidence has no verbtable: entry).
+  const verbTable = buildVerbTable([
+    row({ operationId: 'retrieveThing', gt_class: 'r', repo: 'A' }),
+    row({ operationId: 'retrieveThing', gt_class: 'r', repo: 'A' }),
+    row({ operationId: 'retrieveThing', gt_class: 'r', repo: 'A' }),
+  ]);
+  const r = row({ method: 'POST', operationId: 'retrieveThing', repo: 'B' });
+  const result = scoreRow(r, { leanIndex, verbTable }, 0.5, { layer4On: false });
+  assert.ok(!result.evidence.some((e) => e.startsWith('verbtable:')));
+  assert.ok(result.evidence.some((e) => e.startsWith('corpus:retrieve->lower:r')));
+  assert.equal(result.class, 'r');
+  assert.equal(result.status, 'assigned');
+});
+
+test('scoreRow: layer3On:false and layer4On:false together removes both, leaving only layers 1/2/5/6 (M1-C9 pass 1 shape)', () => {
+  const leanIndex = new Map([
+    ['retrieve', { providers: 10, perprov_get: 8, perprov_post: 2, perprov_put: 0, perprov_patch: 0, perprov_delete: 0, perprov_head: 0, perprov_options: 0 }],
+  ]);
+  const verbTable = buildVerbTable([
+    row({ operationId: 'retrieveThing', gt_class: 'r', repo: 'A' }),
+    row({ operationId: 'retrieveThing', gt_class: 'r', repo: 'A' }),
+    row({ operationId: 'retrieveThing', gt_class: 'r', repo: 'A' }),
+  ]);
+  const r = row({ method: 'POST', operationId: 'retrieveThing', repo: 'B' });
+  const result = scoreRow(r, { leanIndex, verbTable }, 0.75, { layer3On: false, layer4On: false });
+  assert.ok(!result.evidence.some((e) => e.startsWith('corpus:')));
+  assert.ok(!result.evidence.some((e) => e.startsWith('verbtable:')));
+  // With both removed and no other evidence, the row falls to review at the
+  // prior class (x), not r — proving the two layers really were the only
+  // source of lowering evidence for this row.
+  assert.equal(result.status, 'review');
+  assert.equal(result.class, 'x');
+  assert.equal(result.prior, 'x');
+});

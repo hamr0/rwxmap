@@ -60,6 +60,14 @@
 // bodyPropKeysForRow/schemaPropKeysForRow. Gated behind switches.wordsOn
 // (default OFF) so run-c8.mjs can sweep it like every other switch.
 //
+// M1-C9 (the two-pass shape): two new switches, `switches.layer3On` and
+// `switches.layer4On`, both defaulting to true so every existing caller
+// (run.mjs, run-c8.mjs, which never pass them) is unaffected. run-c9.mjs's
+// pass 1 calls scoreRow with both false, which removes layer 3 (corpus
+// lean) and layer 4 (CAMARA verb table) from the evidence sum entirely —
+// not merely gated off, they never push evidence or even look anything up.
+// Everything else in this file is unchanged.
+//
 // run.mjs owns all CSV loading/parsing and wires real data into the
 // functions here; every function in this file takes plain JS
 // objects/arrays/Maps so it is testable with synthetic data.
@@ -134,7 +142,11 @@ function rawLeadStringForRow(row) {
 // (deleteDevice, getSession, updateDevice keep their verb as the lead).
 // Returns { tokens, stripped }; tokens is never empty unless the raw
 // string tokenizes to nothing at all.
-function tokensForRow(row) {
+// M1-C9 correction (round 2): exported (was file-private) so judge.mjs can
+// reuse the exact C5 method-word-stripped token list for its
+// operationIdPartyToken check, rather than reimplementing the stripping
+// logic — same tokenization leadVerbForRow itself uses.
+export function tokensForRow(row) {
   const raw = rawLeadStringForRow(row);
   const tokens = splitTokens(raw);
   if (!tokens.length) return { tokens, stripped: false };
@@ -763,7 +775,8 @@ export function aggregate(evidenceList, priorClass, threshold) {
 // }
 // row: must carry method, operationId, path, security_scopes, set, repo; for
 // layer 7 also `words` (Set<string>, attached by run-c8.mjs).
-// switches: { corpusWLean: boolean (M1-C5 fix 5, default true), wordsOn: boolean (M1-C8, default false) }.
+// switches: { corpusWLean: boolean (M1-C5 fix 5, default true), wordsOn: boolean (M1-C8, default false),
+//   layer3On: boolean (M1-C9, default true), layer4On: boolean (M1-C9, default true) }.
 
 export function scoreRow(row, ctx, threshold, switches = {}) {
   const method = row.method;
@@ -781,6 +794,8 @@ export function scoreRow(row, ctx, threshold, switches = {}) {
     throw new Error(`scoreRow: unrecognized method "${method}"`);
   }
   const corpusWLean = switches.corpusWLean !== false;
+  const layer3On = switches.layer3On !== false;
+  const layer4On = switches.layer4On !== false;
   const leadVerbToken = leadVerbForRow(row);
   const evidence = [];
 
@@ -795,10 +810,17 @@ export function scoreRow(row, ctx, threshold, switches = {}) {
   }
   evidence.push(...layer2ScopeEvidence(row, prior, writeFamilyXShare, xHintXShare));
 
-  evidence.push(...layer3CorpusEvidence(leadVerbToken, method, ctx.leanIndex || new Map(), corpusWLean));
-  const excludeRepo = row.set === 'camara' ? row.repo : null;
-  const counts = ctx.verbTable ? verbCountsFor(ctx.verbTable, leadVerbToken, excludeRepo) : null;
-  evidence.push(...layer4VerbEvidence(counts, leadVerbToken));
+  // M1-C9: layer3On/layer4On (both default true) let a caller remove these
+  // two layers from the evidence sum entirely — not merely gate their
+  // output, skip the lookup itself (verbCountsFor is not even called).
+  if (layer3On) {
+    evidence.push(...layer3CorpusEvidence(leadVerbToken, method, ctx.leanIndex || new Map(), corpusWLean));
+  }
+  if (layer4On) {
+    const excludeRepo = row.set === 'camara' ? row.repo : null;
+    const counts = ctx.verbTable ? verbCountsFor(ctx.verbTable, leadVerbToken, excludeRepo) : null;
+    evidence.push(...layer4VerbEvidence(counts, leadVerbToken));
+  }
 
   // Layer 5: body-prop raisers + present-only flag raisers.
   if (ctx.bodyPropTable && ctx.admittedBodyProps) {

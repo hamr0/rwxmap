@@ -216,12 +216,13 @@ safe floor and the row is tagged for human review. Go means all of:
    method co-occurrence — which methods a verb or noun travels with —
    with CAMARA usable as one signal among them. No hand lists.
 
-Status 2026-09-07 after M1-C7: rule 1 met (0 leaks at T = 0.75 on every
-set); rule 3 met (5 over-tight, all stated confusions); rule 2 not met
-(review + over-tight 74/292, 173/207, 111/220). Own-vs-other admitted
-nothing from the structural fields at the 0.9 bar (M1-C6); hold-out 1 is
-unchanged since C5. The remaining rows have no machine-facing evidence;
-prose as the last layer is the only untried input inside M1's shape.
+Status 2026-09-08 after M1-C9 (two-pass shape, D33): zero leaks on
+every set; both negative controls x; review + over-tight at floor on
+20/292 (7%), 106/207 (51%), 47/220 (21%); rules 1 and 3 met, rule 2 met
+on CAMARA, not yet on the hold-outs, where 74 GitHub and 26 Box rows
+wait on a verb read from the summary (M1-C10). The floor (residual
+POST/PATCH assigned x, confidence 0) is measured both ways and awaits
+the user's ruling.
 
 **M2 — Shape rules, only if justified.** For each divergence class from
 M0/M1 that appears more than once, add one deterministic OpenAPI-shape
@@ -667,3 +668,4 @@ starts, not yet exercised.
 | D30 | M1 go/no-go set by spec interview: zero leaks among assigned rows; review plus over-tight near 5% per set on CAMARA and hold-out 1; remaining false flags must be humanly confusing; a field is primary only at ≥90% presence per method per set; leans from a broader corpus by method co-occurrence. See §4 M1. Decided 2026-09-07. |
 | D31 | Truth fix: CAMARA queryAssistant (ModelAsAService POST /answer) moves x -> r at the user's word, matching Box post_ai_ask (r) in the clean exam. One row; CAMARA becomes r 156, w 51, x 85. The old label carried a stated doubt. Decided 2026-09-07. |
 | D32 | Poll-then-callback reads are `r`. A callback raises to `x` only when the verb is not a read; "read" is decided mechanically (read-family scope token, or a corpus GET share >= 0.75 at >= 3 providers), never by a hand list. Three CAMARA rows (retrievePopulationDensity, retrieveConnectivity, count) keep their `r` label and move from over-tight to exact (M1-C7). Decided 2026-09-07 at the user's word. |
+| D33 | M1's arbiter is two passes. Pass 1: the machine-facing fields (method prior, scope, body, callbacks, corpus lean, CAMARA verb table) with a confidence sum; assigns above the threshold. Pass 2: a verb-and-noun judge on the residual only, with orchestrator-written lists (live verbs, own verbs, party nouns) measured rule by rule and admitted only at zero leaks on CAMARA + hold-out 1; switches chosen by cost after zero leaks. The verb never gives `w` on POST. Set by the user's reading of the review pile 2026-09-07, measured M1-C9. |

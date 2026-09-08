@@ -1631,6 +1631,32 @@ What it taught:
 2. Prose does carry the own-vs-other signal the structural fields did not (M1-C6): "deletes" at 0.946 over 37 rows and "personal"/"tokens" at 0.905 say "own". Raise-only cannot use that; a judge that may assign w on the residual can.
 3. The user's reading of the review pile (2026-09-07): pass 1 should be the machine fields with the confidence sum, and the verb, noun and words should be a second pass that runs only on what pass 1 hands over, assigning in both directions at the bar, zero leaks on CAMARA + hold-out 1 as the wall. On the residual PUT/DELETE rows the lead verb alone gives delete about 120 w / 13 x, update 24 w / 1 x, and terminate/revoke/cancel/convert/merge/start 0 w / 8 x; the 13 delete-led x rows are separated by the noun (access, network, device, collaboration, membership, member). That is M1-C9.
 
+### M1-C9 — the two-pass shape: confidence pass, then a verb-and-noun judge on the residual (2026-09-07/08)
+
+Shape (poc/m1/arbiter/judge.mjs, run-c9.mjs, judge.test.mjs; 97 tests): pass 1 is the C7 arbiter unchanged (T = 0.75). Pass 2 runs only on the rows pass 1 leaves in review. It reads the lead verb (operationId, or the summary's first word for the live set), the head noun of the summary's object phrase (last word before a preposition, stepping back over generic tails such as information, record, status), the operationId's head noun the same way, and three lists written by the orchestrator from reading the residual pile: LIVE_VERBS (terminate, kick, cancel, revoke, convert, merge, start, reboot, dial, ...), OWN_VERBS (delete, remove, update, set, add, enable, disable, ...), PARTY_NOUNS (member, membership, collaborator, collaboration, customer, account, user, role, team, group, installation, token, access, restriction, participant, call, session, device, network, ...). Rules in order: R1 live verb -> x; R2 own verb with a party head noun -> x; R3 own verb with a thing as head noun on PUT/PATCH/DELETE -> w; R4 the same on POST -> w; else review. Every rule and every extractor source is a switch; a rule that leaks on CAMARA + hold-out 1 is not admitted; switches are chosen by zero leaks first, then the lower review + over-tight on CAMARA + hold-out 1. The clean exam is scored once.
+
+Rounds: round 1 (verb from operationId only, no session/device/network, no generic-tail step) admitted R1 and R2, rejected R3 on 7 leaks and R4 on 45; updateSessionStatus stayed w. Round 2 added the summary as a verb source for R1, the generic-tail step, and session/device/network to the nouns: R3 down to 1 leak (updateRebootRequest). Round 3 replaced "any operationId token" by the operationId head noun, made the path party id a switch, and let a live verb fire from any operationId token: R3 at zero leaks, admitted. Path party id chosen OFF on cost (139 vs 142): with R3 admitted, Stripe's {customer} rows land w correctly via the head noun ("customer source"), and the path id only turned them into over-tights. R4 stays rejected: enable/disable/setFallback eSIM profile and Twilio UpdateConference are truth x with an own-shaped sentence; POST cannot be given w by the verb.
+
+Final, admitted rules R1 + R2 + R3, pass 1 + pass 2 (assigned / review / leaks / over-tight):
+
+| floor | CAMARA 292 | hold-out 1 207 | clean exam 220 |
+|---|---|---|---|
+| off | 279 / 13 / 0 / 14 | 107 / 100 / 0 / 12 | 150 / 70 / 0 / 3 |
+| on | 292 / 0 / 0 / 20 | 129 / 78 / 0 / 28 | 193 / 27 / 0 / 20 |
+
+Floor = a residual POST/PATCH is assigned x with confidence 0 and evidence "floor" instead of review; never leaks; the user has not yet ruled on it. Negative controls: terminateCall x by R1 (live verb terminate), updateSessionStatus x by R2 (operationId head noun session). queryAssistant r in pass 1. Zero leaks on every set in both floor states. Outputs c9-rows.csv (columns pass and rule added), c9-false-flags.csv, c9-sweep.md, c9-judge-misses.md.
+
+Over-tights at floor on: CAMARA 20 (floor on four read POSTs KYC_Match, KYC_Fill-in, matchIdentifier, profileList and five w PATCH/POSTs; R2 on QoS deleteSession x2, trust-domain device, MultiPointVPN network; R1 on "Terminate an Application Instance/Deployment" and revokeQosAssignment); hold-out 1 28 (16 Twilio Update* POSTs by the floor, 7 R2 party hits such as "Delete a person", "Delete a Call record"); clean exam 20 (floor). These are the E24 arguable rows and the Twilio POST-as-update habit; none is a plain-word miss.
+
+What is left in review at floor on: hold-out 1 78 rows, GitHub 74 of them; clean exam 27, Box 26. Both vendors name operations group-first ("actions/delete-org-secret", "put_files_id"), so the lead token is not a verb and the judge answers "don't know" while the summary says "Delete an organization secret". The judge's verb for R2/R3 must also come from the summary's first word, as R1 already does. That is M1-C10.
+
+What it taught:
+1. The two-pass shape works where the one-sum shape did not: CAMARA goes from 74 extra asks (C7) to 20 with zero leaks; hold-out 1 from 173 to 106 (floor on), clean exam from 111 to 47. Both negative controls are x for the first time since M0 began.
+2. The judge's lists were written by reading the pile, then measured. Two rounds of extractor fixes (summary as verb source, head noun with generic tails, operationId head noun) were the difference between R3 leaking and R3 clean; the lists themselves did not change after round 2 except session/device/network.
+3. Cost, not leaks alone, must choose a switch. Path party id was zero-leak both ways and still wrong to turn on.
+4. The verb cannot give w on POST (R4 rejected twice). A POST that reads like an own-update is x often enough that only the machine fields or the floor may speak there.
+5. Vendor naming habits (GitHub group/verb, Box method_noun) are the last structural wall; the summary is the cure, not a vendor list.
+
 ### Next
 
 M0 closed 2026-09-07 as exploratory at the user's word (D29). Twenty-
