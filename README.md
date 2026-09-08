@@ -56,9 +56,11 @@ normative anywhere; not a standards track; not a conformance harness.
 
 ## Test bed
 
-1155 hand-read operations — the CAMARA catalogue (292 ops, 60
-repositories) plus 12 vendor APIs — in five SHA-pinned sets under
-`data/`, each with a deterministic selection rule.
+1155 operations labelled by blind LLM reading — five Sonnet agents per
+hold-out, each working from a fixed reading brief, no human expert
+labels — the CAMARA catalogue (292 ops, 60 repositories) plus 12 vendor
+APIs — in five SHA-pinned sets under `data/`, each with a deterministic
+selection rule.
 
 The sets fall into three buckets:
 
@@ -97,8 +99,12 @@ of exactness and 3.8 points of extra review.
 
 **What these numbers do not say:**
 
-- Truth is one reader's judgement; no row has been read twice, so
-  there is no error bar.
+- The truth is itself model-generated — blind LLM readers on a fixed
+  brief — so the scores measure agreement with that reading process,
+  not with a human expert or with any standard.
+- No row has been read twice by an independent reader, so the truth's
+  own noise is unmeasured and none of these numbers carries an error
+  bar.
 - CAMARA's GET half was judged by template, not operation by
   operation.
 - The 57-of-138 read-named-POST figure (above) is a reader's

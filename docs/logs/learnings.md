@@ -2023,6 +2023,7 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   rows (20 of 210); 41.9% land on the floor with no evidence read at
   all, so further word-list work cannot move the exact rate much — the
   remaining headroom is in the floor pile.
-- Open weakness: no row has been read twice by a second reader, so
-  none of these numbers has an error bar and the truth's own noise is
-  unknown.
+- Open weakness: the readers are LLM readers and the truth is itself
+  model-generated, not a human expert reading; no row has been read
+  twice by an independent reader, so none of these numbers has an
+  error bar and the truth's own noise is unknown.
