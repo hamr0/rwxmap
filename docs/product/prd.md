@@ -283,6 +283,19 @@ entries).
 Across all five sets: 1155 rows, 4 leaks (0.3%), 171 over-tight
 (14.8%).
 
+Clean-exam comparison (hold-out 4, n=210; D38):
+
+| classifier | exact | leaks | over-tight |
+|---|---|---|---|
+| c11 | 182 (86.7%) | 0 (0.0%) | 28 (13.3%) |
+| method-prior | 187 (89.0%) | 3 (1.4%) | 20 (9.5%) |
+| get-else-x | 142 (67.6%) | 0 (0.0%) | 68 (32.4%) |
+
+On the clean exam c11 is not more exact than the plain method prior —
+what it buys over method-prior is zero leaks (vs 3) and both negative
+controls right (method-prior gets both wrong, w not x), at a cost of
+2.3 points of exactness and 3.8 points of extra review.
+
 Hold-out 3 (Discord, Sentry, Vercel, 2026-09-08) was scored once
 untuned at 11 leaks; Rule A, adopted on it, brings it to 2 (vercel
 deleteRedirects, discord update_guild_incident_actions), so hold-out 3
@@ -768,3 +781,5 @@ starts, not yet exercised.
 | D34 | M1 arbiter shape is C11 — floor + raise-only from fixed hand lists. Decided 2026-09-08. See "M1 arbiter flow (C11, adopted 2026-09-08)" in §4. |
 | D35 | Rule A: a PUT/DELETE/PATCH with no summary and no description is x, marked no-text. Decided 2026-09-08. Hold-out 3 becomes a tuning set; hold-out 4 is the clean exam. |
 | D36 | Shared-object nouns join the party-noun raise (message, channel, emoji, sticker, pin, guild, permission, overwrite, ban, webhook, reaction). Three vendors' readers drew the line at x. Decided 2026-09-08. |
+| D37 | Per-vendor extension keys are rejected as a signal. GitHub's `x-github.triggersNotification` was measured — true on 3 of 81 labelled GitHub rows, all truth x, absent on 78, true on 22 of ~1225 whole-spec operations, a zero-leak raise that would have closed 2 of the 4 remaining leaks — and still refused: a rule that names one vendor is per-API maintenance, not a rule. Signals must be commonalities that hold across vendors. Leaks stay at 4. Decided 2026-09-08 at the user's word. |
+| D38 | The benchmark reports against three dumb baselines (all-x, get-else-x, method-prior) and splits the five sets into tuned / reference / clean-exam, with the headline quoted from the clean exam only. One re-runnable command, `node poc/m1/arbiter/run-benchmark.mjs`. Decided 2026-09-08. |

@@ -13,21 +13,12 @@
 // Asserts both negative controls (ClickToDial DELETE /calls/{callId}
 // terminateCall, WebRTC PUT /sessions/{mediaSessionId}/status
 // updateSessionStatus) come out 'x' — exits 1 otherwise.
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { parseCsv, toCsv } from '../../m0/csv.mjs';
+import { toCsv } from '../../m0/csv.mjs';
 import { CLASS_ORDER } from './arbiter.mjs';
 import { classify } from './c11.mjs';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(__dirname, '../../..');
-const CENSUS_PATH = path.join(REPO_ROOT, 'docs/logs/m1/census-ops.csv');
-const TEXT_PATH = path.join(REPO_ROOT, 'docs/logs/m1/ops-text.csv');
-const HOLDOUT3_DIR = path.join(REPO_ROOT, 'data/holdout3-2026-09-08');
-const HOLDOUT3_GT = path.join(HOLDOUT3_DIR, 'ground-truth.csv');
-const HOLDOUT3_OPS = path.join(HOLDOUT3_DIR, 'operations.csv');
-const DATA_DIR = path.join(REPO_ROOT, 'data');
+import { REPO_ROOT, loadCensusRows, loadHoldout3, loadHoldout4 } from './load-sets.mjs';
 
 const OUT_MD = path.join(REPO_ROOT, 'docs/logs/m1/c11-final.md');
 const OUT_ROWS = path.join(REPO_ROOT, 'docs/logs/m1/c11-final-rows.csv');
@@ -66,100 +57,6 @@ function kindOf(predClass, gtClass) {
 function truncate(s, n) {
   const str = s || '';
   return str.length > n ? str.slice(0, n) + '...' : str;
-}
-
-// --- load census-ops.csv + ops-text.csv, exactly as run-c11.mjs does -------
-
-function loadCensusRows() {
-  const censusRows = parseCsv(readFileSync(CENSUS_PATH, 'utf8'));
-  const textRows = parseCsv(readFileSync(TEXT_PATH, 'utf8'));
-
-  const requiredCensusCols = ['set', 'repo', 'path', 'method', 'operationId', 'gt_class'];
-  const censusHeader = censusRows.length ? Object.keys(censusRows[0]) : [];
-  for (const col of requiredCensusCols) {
-    if (!censusHeader.includes(col)) throw new Error(`ESCALATE: census-ops.csv is missing required column "${col}"`);
-  }
-
-  const textIndex = new Map();
-  for (const t of textRows) {
-    textIndex.set([t.set, t.repo, t.path, t.method, t.operationId].join('|'), t);
-  }
-  let textJoinMisses = 0;
-  for (const row of censusRows) {
-    const key = [row.set, row.repo, row.path, row.method, row.operationId].join('|');
-    const t = textIndex.get(key);
-    if (!t) { textJoinMisses += 1; row.summary = ''; row.description = ''; continue; }
-    row.summary = t.summary || '';
-    row.description = t.description || '';
-  }
-  if (textJoinMisses > 0) {
-    throw new Error(`ESCALATE: ${textJoinMisses} census-ops.csv rows had no matching row in ops-text.csv — the two files are out of sync.`);
-  }
-  return censusRows;
-}
-
-// --- load a holdout dir: join ground-truth.csv (gt_class) onto
-// operations.csv (summary, description), key repo|path|method|operationId --
-
-function loadHoldoutDir(dir, gtPath, opsPath, setName) {
-  if (!existsSync(gtPath) || !existsSync(opsPath)) return null;
-
-  const gtRows = parseCsv(readFileSync(gtPath, 'utf8'));
-  const opsRows = parseCsv(readFileSync(opsPath, 'utf8'));
-
-  const opsIndex = new Map();
-  for (const o of opsRows) {
-    opsIndex.set([o.repo, o.path, o.method, o.operationId].join('|'), o);
-  }
-
-  const rows = [];
-  let joinMisses = 0;
-  for (const gt of gtRows) {
-    const key = [gt.repo, gt.path, gt.method, gt.operationId].join('|');
-    const o = opsIndex.get(key);
-    if (!o) { joinMisses += 1; continue; }
-    rows.push({
-      set: setName,
-      repo: gt.repo,
-      path: gt.path,
-      method: gt.method,
-      operationId: gt.operationId,
-      gt_class: gt.gt_class,
-      summary: o.summary || '',
-      description: o.description || '',
-    });
-  }
-  if (joinMisses > 0) {
-    throw new Error(`ESCALATE: ${joinMisses} ${setName} ground-truth.csv rows had no matching row in operations.csv.`);
-  }
-  return rows;
-}
-
-function loadHoldout3() {
-  return loadHoldoutDir(HOLDOUT3_DIR, HOLDOUT3_GT, HOLDOUT3_OPS, 'holdout3');
-}
-
-// --- load holdout4: every data/holdout4-*/ directory carrying both
-// ground-truth.csv and operations.csv, all joined into set 'holdout4' -----
-
-function loadHoldout4() {
-  if (!existsSync(DATA_DIR)) return null;
-  const dirNames = readdirSync(DATA_DIR, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && d.name.startsWith('holdout4-'))
-    .map((d) => d.name)
-    .sort();
-  if (dirNames.length === 0) return null;
-
-  const rows = [];
-  for (const name of dirNames) {
-    const dir = path.join(DATA_DIR, name);
-    const gtPath = path.join(dir, 'ground-truth.csv');
-    const opsPath = path.join(dir, 'operations.csv');
-    const dirRows = loadHoldoutDir(dir, gtPath, opsPath, 'holdout4');
-    if (dirRows === null) continue;
-    rows.push(...dirRows);
-  }
-  return rows.length ? rows : null;
 }
 
 // --- score ------------------------------------------------------------------

@@ -1954,3 +1954,75 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   needing either an owner-declared field (the GitHub flag) or a
   description read (Vercel's "new version" sentence), neither of which
   the operationId-plus-summary flow can see.
+
+### M1-C12 benchmark honesty pass: baselines, set buckets, evidence-vs-floor (2026-09-08)
+
+- What was added: `poc/m1/arbiter/baselines.mjs` (three dumb baselines:
+  all-x, get-else-x, method-prior), `poc/m1/arbiter/run-benchmark.mjs`
+  (the single re-runnable command), `poc/m1/arbiter/load-sets.mjs`
+  (loaders extracted from `run-c11-final.mjs`; that runner's three
+  output files verified byte-identical after the extraction). 122
+  tests pass. No classifier logic changed.
+- The corrected set buckets and why (D19/D24/D27/D35): tuned = camara +
+  holdout1 + holdout3, reference = holdout2, clean-exam = holdout4
+  only. An earlier draft of this pass had holdouts 2, 3, and 4 all
+  counted as "clean", which would have inflated the transfer number;
+  the PRD's own decisions corrected it — hold-out 3 was demoted to a
+  tuning set by D35 (Rule A was fitted on it), and hold-out 2 stays a
+  reference set, not a clean exam, by D24/D27 (scored repeatedly, not
+  blind, carries a recorded taint).
+- (b) Tuned / reference / clean-exam tables, verbatim from
+  `docs/logs/m1/benchmark.md`:
+
+  c11: tuned n=725 exact=604 leaks=4 over_tight=117 (83.3% / 0.6% /
+  16.1%); reference n=220 exact=194 leaks=0 over_tight=26 (88.2% / 0.0%
+  / 11.8%); clean-exam n=210 exact=182 leaks=0 over_tight=28 (86.7% /
+  0.0% / 13.3%); all n=1155 exact=980 leaks=4 over_tight=171 (84.8% /
+  0.3% / 14.8%).
+
+  all-x: tuned n=725 exact=220 leaks=0 over_tight=505 (30.3% / 0.0% /
+  69.7%); reference n=220 exact=53 leaks=0 over_tight=167 (24.1% / 0.0%
+  / 75.9%); clean-exam n=210 exact=40 leaks=0 over_tight=170 (19.0% /
+  0.0% / 81.0%); all n=1155 exact=313 leaks=0 over_tight=842 (27.1% /
+  0.0% / 72.9%).
+
+  get-else-x: tuned n=725 exact=418 leaks=0 over_tight=307 (57.7% /
+  0.0% / 42.3%); reference n=220 exact=147 leaks=0 over_tight=73 (66.8%
+  / 0.0% / 33.2%); clean-exam n=210 exact=142 leaks=0 over_tight=68
+  (67.6% / 0.0% / 32.4%); all n=1155 exact=707 leaks=0 over_tight=448
+  (61.2% / 0.0% / 38.8%).
+
+  method-prior: tuned n=725 exact=561 leaks=54 over_tight=110 (77.4% /
+  7.4% / 15.2%); reference n=220 exact=195 leaks=4 over_tight=21 (88.6%
+  / 1.8% / 9.5%); clean-exam n=210 exact=187 leaks=3 over_tight=20
+  (89.0% / 1.4% / 9.5%); all n=1155 exact=943 leaks=61 over_tight=151
+  (81.6% / 5.3% / 13.1%).
+
+- (d) Evidence-vs-floor tables, verbatim from
+  `docs/logs/m1/benchmark.md`:
+
+  Per set: camara locked=96 (32.9%) evidence=83 (28.4%) floor=113
+  (38.7%); holdout1 locked=0 (0.0%) evidence=61 (29.5%) floor=146
+  (70.5%); holdout2 locked=94 (42.7%) evidence=25 (11.4%) floor=101
+  (45.9%); holdout3 locked=102 (45.1%) evidence=36 (15.9%) floor=88
+  (38.9%); holdout4 locked=102 (48.6%) evidence=20 (9.5%) floor=88
+  (41.9%); all locked=394 (34.1%) evidence=225 (19.5%) floor=536
+  (46.4%).
+
+  Tuned / reference / clean-exam: tuned locked=198 (27.3%) evidence=180
+  (24.8%) floor=347 (47.9%); reference locked=94 (42.7%) evidence=25
+  (11.4%) floor=101 (45.9%); clean-exam locked=102 (48.6%) evidence=20
+  (9.5%) floor=88 (41.9%); all locked=394 (34.1%) evidence=225 (19.5%)
+  floor=536 (46.4%).
+
+- What it taught, flatly: on the clean exam the method-prior baseline
+  is MORE exact (89.0 vs 86.7) and asks for FEWER reviews (9.5% vs
+  13.3%) than the adopted arbiter; what the arbiter buys is 3 leaks ->
+  0, and both negative controls, which method-prior gets wrong (w,
+  should be x). Also: the word rules fire on only 9.5% of clean-exam
+  rows (20 of 210); 41.9% land on the floor with no evidence read at
+  all, so further word-list work cannot move the exact rate much — the
+  remaining headroom is in the floor pile.
+- Open weakness: no row has been read twice by a second reader, so
+  none of these numbers has an error bar and the truth's own noise is
+  unknown.

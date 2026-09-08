@@ -56,8 +56,55 @@ normative anywhere; not a standards track; not a conformance harness.
 
 ## Test bed
 
-292 operations across 60 CAMARA repositories, SHA-pinned, under
-`data/camara-2026-09-01/`.
+1155 hand-read operations — the CAMARA catalogue (292 ops, 60
+repositories) plus 12 vendor APIs — in five SHA-pinned sets under
+`data/`, each with a deterministic selection rule.
+
+The sets fall into three buckets:
+
+- **tuned** (camara, hold-out 1: GitHub, Stripe, Twilio; hold-out 3:
+  Discord, Sentry, Vercel) — the word lists were fitted on these rows;
+  numbers here are upper bounds, not evidence of transfer.
+- **reference** (hold-out 2: Adyen, Box, PagerDuty) — never used to
+  pick a rule, but scored repeatedly, so not blind either.
+- **clean-exam** (hold-out 4: Linode, Cloudflare, X) — scored once,
+  never fitted on. The headline below is quoted from this set only.
+
+Clean-exam result (hold-out 4, n=210):
+
+| classifier | exact | leaks | over-tight |
+|---|---|---|---|
+| c11 | 182 (86.7%) | 0 (0.0%) | 28 (13.3%) |
+| method-prior | 187 (89.0%) | 3 (1.4%) | 20 (9.5%) |
+| get-else-x | 142 (67.6%) | 0 (0.0%) | 68 (32.4%) |
+
+A leak is a wrong loosening — a robot takes an action it should not
+have. An over-tighten is a false flag — a human glances at a row that
+was fine. The two are never merged into one accuracy number: they cost
+different things and a reader needs both.
+
+Two negative controls must come out `x`: ClickToDial `DELETE
+/calls/{callId}` `terminateCall`, and WebRTC `PUT
+/sessions/{mediaSessionId}/status` `updateSessionStatus`. c11 gets both
+right; the plain method prior gets both wrong (`w`, should be `x`).
+
+**On the clean exam, c11 is not more accurate than the plain method
+prior.** What it buys over the method prior is leaks going to zero
+(from 3) and both negative controls correct, at a cost of 2.3 points
+of exactness and 3.8 points of extra review.
+
+**How to re-run:** `node poc/m1/arbiter/run-benchmark.mjs`
+
+**What these numbers do not say:**
+
+- Truth is one reader's judgement; no row has been read twice, so
+  there is no error bar.
+- CAMARA's GET half was judged by template, not operation by
+  operation.
+- The 57-of-138 read-named-POST figure (above) is a reader's
+  judgement, not a rule output.
+- Tuned-set numbers are upper bounds, not transfer.
+- This is a proof-of-concept, not a shipped tool.
 
 ## The bare ecosystem
 
