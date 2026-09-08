@@ -1694,4 +1694,128 @@ generate and verify are not read verbs; the 11 arguable truth rows
 named in E24(g) want a second read; the destructive verb list is
 unmeasured.
 
+### M1-C11 — floor + raise-only from fixed verb/noun lists (POC, user-directed simplification, 2026-09-08)
+
+Shape: floor = method prior (GET/HEAD/OPTIONS r, PUT/DELETE w, POST/PATCH x). Raise only: LIVE_VERBS hit on any operationId token or the summary lead word -> x; PARTY_NOUNS (+repository) hit on summary head noun or operationId head noun on PUT/DELETE/PATCH -> x. No corpus lookup, no CAMARA verb table, no scopes, no body/flag/structural layers, no weights. Two switches measured: readListOn (POST with lead verb in a 14-word hand READ_VERBS list lowers to r when nothing raised) and callerPhraseOn (a caller phrase in the summary skips the party-noun raise). Script poc/m1/arbiter/run-c11.mjs, outputs docs/logs/m1/c11-sweep.md and c11-rows.csv.
+
+Bare floor alone (no lists): leaks camara 8, holdout1 24, holdout2 4 — all PUT/DELETE truth-x; over-tight camara 70, holdout1 19, holdout2 21 — all POST/PATCH truth r/w.
+
+Results (combo, set, n, exact, leaks, over_tight, leak%, over-tight%):
+
+| combo | set | n | exact | leaks | over_tight | leak% | over-tight% |
+|---|---|---|---|---|---|---|---|
+| base | camara | 292 | 212 | 1 | 79 | 0.3 | 27.1 |
+| base | holdout1 | 207 | 149 | 2 | 56 | 1.0 | 27.1 |
+| base | holdout2 | 220 | 193 | 0 | 27 | 0.0 | 12.3 |
+| readList | camara | 292 | 252 | 3 | 37 | 1.0 | 12.7 |
+| readList | holdout1 | 207 | 149 | 2 | 56 | 1.0 | 27.1 |
+| readList | holdout2 | 220 | 194 | 0 | 26 | 0.0 | 11.8 |
+| callerPhrase | camara | 292 | 212 | 1 | 79 | 0.3 | 27.1 |
+| callerPhrase | holdout1 | 207 | 155 | 2 | 50 | 1.0 | 24.2 |
+| callerPhrase | holdout2 | 220 | 193 | 0 | 27 | 0.0 | 12.3 |
+| both | camara | 292 | 252 | 3 | 37 | 1.0 | 12.7 |
+| both | holdout1 | 207 | 155 | 2 | 50 | 1.0 | 24.2 |
+| both | holdout2 | 220 | 194 | 0 | 26 | 0.0 | 11.8 |
+
+The lists catch 33 of the 36 hidden-x PUT/DELETE rows. Missed: camara TrafficInfluence deleteTrafficInfluence (leak, no word signal), holdout1 github issues/set-issue-field-values and issues/remove-sub-issue (the two disputed truth rows from C10, pending the user's re-read). camara patchTrafficInfluence also ends at floor but PATCH floor is x so it is not a leak.
+
+readList leaks: exactly 2, both on the verb "validate" (camara validatePayment, validateCode). Dropping "validate" from READ_VERBS would give zero read-list leaks on all sets (not yet run).
+
+callerPhrase: flips 6 holdout1 rows x->w, all truth w, zero leaks. Costless.
+
+Party-noun over-tight: 48 rows, mostly GitHub "... for an organization" settings rows and Stripe/CAMARA "delete session/device/network" rows the readers labelled w.
+
+Comparison to C10 at zero leaks (floor on): C10 over-tight 7% / 51% / 21%; C11 both-switches 12.7% / 24.2% / 11.8% with 3 leaks (1 real, 2 disputed truth rows).
+
+What it taught: the method floor plus two hand lists does most of the work of the seven-layer arbiter; pass 1's corpus lowering only ever helped CAMARA's read-named POSTs, which a 13-word read list covers at the cost of one word ("validate").
+
+Decision pending the user: drop "validate", admit both switches, rule on the two GitHub truth rows and the TrafficInfluence leak.
+
+### M1-C11 variations V1–V8 (loop run, 2026-09-08)
+
+Following C11's decision, ran a variation sweep on the C11 floor + raise-only shape. scoreV generalises run-c11.mjs's scoreC11 (see poc/m1/arbiter/run-c11v.mjs). Admission judged on camara + holdout1 only; holdout2 scored and printed every run but never used to pick a shape (D24). Full numbers and row-level detail: docs/logs/m1/c11v-sweep.md.
+
+**V1 baseline** — C11 with "validate" dropped from READ_VERBS, readListOn and callerPhraseOn on:
+
+| set | n | exact | leaks | over_tight | leak% | over-tight% |
+|---|---|---|---|---|---|---|
+| camara | 292 | 253 | 1 | 38 | 0.3 | 13.0 |
+| holdout1 | 207 | 155 | 2 | 50 | 1.0 | 24.2 |
+| holdout2 | 220 | 193 | 0 | 27 | 0.0 | 12.3 |
+
+3 leaks: camara deleteTrafficInfluence (no word signal), holdout1 issues/set-issue-field-values and issues/remove-sub-issue (disputed truth rows, pending user).
+
+**Variations V3a–V8** (deltas vs V1, camara/holdout1):
+
+| variation | what it changes | leaks delta cam/ho1 | over_tight delta cam/ho1 | verdict |
+|---|---|---|---|---|
+| V3a | readVerbs += get | +0/+0 | -9/+0 | ADMIT — 0 leaks, -9 camara over-tight; all 11 changed rows truth r (CAMARA POST /retrieve getX rows, two PagerDuty analytics) |
+| V3b | summary lead word as read source | +1/+0 | -3/+0 | REJECT — leaks camara postServiceCapability "Retrieve tailored service capabilities" gt x |
+| V3c | readVerbs += get, readSummaryOn=true | +1/+0 | -11/+0 | REJECT (inherits V3b's leak) |
+| V4 | caller-shaped path skips party raise | +0/+1 | +0/-2 | REJECT — leaks holdout1 apps/remove-repo-from-installation-for-authenticated-user gt x |
+| V5 | any operationId token as party source | +0/+0 | +7/+11 | REJECT on cost — 0 leaks but +7/+11 over-tight |
+| V6a | partySource=summary only | +1/+2 | +0/-12 | REJECT — +1/+2 leaks, incl. WebRTC updateSessionStatus, a negative control |
+| V6b | partySource=opid only | +0/+5 | -1/-10 | REJECT — +5 leaks holdout1 |
+| V7 | PATCH own-verb lowers to w | +1/+0 | -4/+0 | REJECT — leaks camara patchTrafficInfluence gt x |
+| V8 | POST own-verb lowers to w | +32/+33 | -1/-17 | REJECT HARD — +32/+33 leaks |
+
+**V2: leave-one-word-out.** For every LIVE_VERBS/PARTY_NOUNS word, V1 rerun with that word dropped; leaks_added/over_tight_removed measured on camara+holdout1. Top of the table (word, source, hits, leaks_added, over_tight_removed):
+
+| word | source | hits | leaks_added | over_tight_removed |
+|---|---|---|---|---|
+| user | party | 11 | 2 | 7 |
+| cancel | live | 8 | 2 | 0 |
+| membership | party | 2 | 2 | 0 |
+| restriction | party | 2 | 2 | 0 |
+| repository | party | 12 | 1 | 8 |
+| organization | party | 6 | 1 | 5 |
+| account | party | 4 | 1 | 3 |
+| session | party | 5 | 1 | 3 |
+
+No word can be removed without adding a leak, except words whose only hits are POST rows already x on the floor (terminate, execute, person, pay, trigger, reboot) — those are kept anyway: dropping a live verb because it over-tightens two rows is fitting to pass. 24 words have zero hits on the three sets, kept at no cost: live:dial, live:hangup, live:end, live:reject, live:accept, live:approve, live:invite, live:transfer, live:notify, live:publish, live:run, live:launch, party:collaborator, party:sponsorship, party:participant, party:call, party:seat, party:invitation, party:people, party:contact, party:recipient, party:subscriber, party:tenant, party:partner.
+
+What it taught: both noun sources (summary head noun and operationId head noun) are needed — they catch different rows; every lowering beyond the read list leaks; the read list is the only lowering that survives. Best admitted config after V1-V8: V1 + get.
+
 M1 checkpoint, the user's calls: (1) the floor — a silent POST/PATCH assigned x and marked floor, or review; (2) the truth re-read of the rows the judge names (QoS deleteSession x2, deleteTrustDomainDevice, deleteAppInstance/Deployment, Delete a person x2, unblock user x2, DeleteCall record, issues/set-issue-field-values, issues/remove-sub-issue), the user's act; (3) stop M1 and write the M4 findings entry, or one more pass with the summary verb and repository measured jointly after the re-read.
+
+### M1-C11 variations V9–V10 (loop close, 2026-09-08)
+
+Closing the C11v loop: one more source for candidate live verbs (the APIs.guru corpus), then a final config. Full numbers and row-level detail: docs/logs/m1/c11-v9.md and docs/logs/m1/c11v-sweep.md.
+
+**V9: corpus-mined LIVE_VERBS candidates.** APIs.guru lead tokens, providers >= 10, not already on any list, ranked by POST share. Baseline for this run is V1+get: camara 292/262/1/29 (9.9%), holdout1 207/155/2/50 (24.2%), holdout2 220/195/0/25 (11.4%).
+
+Top 10 (register, login, resend, activate, complete, copy, import, logout, calculate, request): zero rows changed on any set.
+
+Top 20 (all that clear postShare >= 0.6): 0 leaks, +1 camara / +3 holdout1 / +4 holdout2 over-tight.
+
+Verdict REJECT: cost only. What it taught: corpus-mined verbs are POST-shaped, and POST is already x on the floor, so they cannot raise anything; the hidden x rows sit on PUT/DELETE and are caught by nouns, not verbs. In the floor+raise shape the corpus has no job on the raise lists. Its one remaining use is suggesting read verbs for the POST read list, unmeasured.
+
+**V10: final config** = V1 + get (readListOn, callerPhraseOn, "validate" out, "get" in, both noun sources, PARTY_NOUNS + repository).
+
+| set | n | exact | leaks | over_tight | leak% | over-tight% |
+|---|---|---|---|---|---|---|
+| camara | 292 | 262 | 1 | 29 | 0.3 | 9.9 |
+| holdout1 | 207 | 155 | 2 | 50 | 1.0 | 24.2 |
+| holdout2 | 220 | 195 | 0 | 25 | 0.0 | 11.4 |
+
+Both negative controls x: terminateCall via live-verb opid:terminate, updateSessionStatus via party-noun opid:session. Remaining leaks: camara deleteTrafficInfluence (no word signal; one row, not a rule) and the two disputed GitHub truth rows (pending user). Versus C10 seven-layer shape at zero leaks: 7% / 51% / 21%.
+
+**Loop summary, V1–V10:**
+
+| variation | change | verdict | reason |
+|---|---|---|---|
+| V1 | baseline (validate dropped, readListOn+callerPhraseOn) | baseline | 3 leaks (1 real, 2 disputed) |
+| V2 | leave-one-word-out sweep | INFORM | no word removable without adding a leak, except zero-hit or already-floor-x words; kept at no cost |
+| V3a | readVerbs += get | ADMIT | 0 leaks, -9 camara over-tight |
+| V3b | summary lead word as read source | REJECT | leaks camara postServiceCapability |
+| V3c | readVerbs += get, readSummaryOn=true | REJECT | inherits V3b's leak |
+| V4 | caller-shaped path skips party raise | REJECT | leaks holdout1 apps/remove-repo-from-installation-for-authenticated-user |
+| V5 | any operationId token as party source | REJECT | 0 leaks but +7/+11 over-tight, cost only |
+| V6a | partySource=summary only | REJECT | +1/+2 leaks, incl. WebRTC updateSessionStatus (negative control) |
+| V6b | partySource=opid only | REJECT | +5 leaks holdout1 |
+| V7 | PATCH own-verb lowers to w | REJECT | leaks camara patchTrafficInfluence |
+| V8 | POST own-verb lowers to w | REJECT HARD | +32/+33 leaks |
+| V9 | corpus-mined LIVE_VERBS candidates | REJECT | cost only, corpus verbs are POST-shaped and POST is already floor x |
+| V10 | final config = V1 + get | ADOPTED (POC) | near-zero leaks, over-tight 9.9%/24.2%/11.4% vs C10's 7%/51%/21% |
+
+Pending the user: ruling on the two GitHub truth rows; whether TrafficInfluence stays a reported leak; whether C11 replaces the C7-through-C10 shape as the M1 arbiter.

@@ -224,6 +224,13 @@ three hold-out 1 truth rows (M1-C10); with them re-read the
 hypothetical is 7% / 23% / 10% at zero leaks. Awaiting the user's
 rulings on the floor and the truth re-read.
 
+Status 2026-09-08, M1-C11 (user-directed, POC): floor = method prior,
+raise-only from two fixed hand lists (live verbs, party nouns), one
+lowering (POST read-verb list). At near-zero leaks: over-tight 9.9% /
+24.2% / 11.4% vs C10's 7% / 51% / 21%. Candidate replacement for the
+C7–C10 arbiter shape; decision pending user (see learnings M1-C11
+entries).
+
 **M2 — Shape rules, only if justified.** For each divergence class from
 M0/M1 that appears more than once, add one deterministic OpenAPI-shape
 rule (request body present, response schema, status codes); re-run.
