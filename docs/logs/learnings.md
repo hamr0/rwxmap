@@ -1650,6 +1650,22 @@ Over-tights at floor on: CAMARA 20 (floor on four read POSTs KYC_Match, KYC_Fill
 
 What is left in review at floor on: hold-out 1 78 rows, GitHub 74 of them; clean exam 27, Box 26. Both vendors name operations group-first ("actions/delete-org-secret", "put_files_id"), so the lead token is not a verb and the judge answers "don't know" while the summary says "Delete an organization secret". The judge's verb for R2/R3 must also come from the summary's first word, as R1 already does. That is M1-C10.
 
+### M1-C10 — the judge's verb from the summary; caller phrases; repository (2026-09-08)
+
+Three switches added to poc/m1/arbiter/judge.mjs, driver run-c10.mjs, outputs c10-rows.csv, c10-false-flags.csv, c10-sweep.md, c10-judge-misses.md; 104 tests. (1) summaryVerbOn: when the operationId lead token is not a known verb (GitHub "actions/delete-org-secret", Box "put_files_id"), R2/R3 take the summary's first word. (2) Caller phrases in the summary ("for the authenticated user", "your account", ...) suppress R2's party-noun branch; correctly wired, zero effect on this corpus because every such row also hits the operationId head noun "user". (3) repoNounOn: "repository" as a party noun (a GitHub repository is shared with collaborators).
+
+Measured by the cost rule with the zero-leak wall on CAMARA + hold-out 1: summaryVerbOn on gives R3 95 hits, 92 exact, 3 leaks on hold-out 1, so R3 is rejected under it and the state is strictly worse (cost 211 vs 139); chosen off. repoNounOn measured alone is a tie (139/139), chosen off; measured jointly with summaryVerbOn it would remove the repos/delete leak, which the driver's one-at-a-time order did not see. Final real configuration is therefore unchanged from C9: zero leaks everywhere; floor on: 292/0/0/20, 129/78/0/28, 193/27/0/20 (assigned / review / leaks / over-tight).
+
+The three rows that hold the summary verb back, all GitHub, all truth x, all read as own work by the judge: repos/delete "Delete a repository" (a shared object; the repository noun covers it), issues/set-issue-field-values "Set issue field values for an issue", issues/remove-sub-issue "Remove sub-issue". The last two are candidates for the user's truth re-read.
+
+Hypothetical, pending that re-read, not used for any decision: summaryVerbOn on with those three rows excluded from the leak count, floor on: CAMARA 292/0/0/20, hold-out 1 207/0/0/48, clean exam 219/1/0/22. That is every set fully assigned at zero leaks with extra asks 7%, 23%, 10%.
+
+What it taught:
+1. The judge's verb from the summary is the right cure for group-first naming (GitHub, Box): 92 of 95 hold-out 1 rows it reaches are exact. It is held back by three truth rows, not by the idea.
+2. Switches interact; the driver must measure a candidate pair jointly when one only pays off with the other (repository + summary verb). Recorded, not fixed here.
+3. The caller phrase is redundant with the operationId head noun on GitHub; it stays as a guard.
+4. With the summary verb and the re-read, M1's shape would meet D30 rule 2 on CAMARA and the clean exam and come within reach on hold-out 1; without them CAMARA alone meets it. Either way the shape is stable and the findings entry can be written.
+
 What it taught:
 1. The two-pass shape works where the one-sum shape did not: CAMARA goes from 74 extra asks (C7) to 20 with zero leaks; hold-out 1 from 173 to 106 (floor on), clean exam from 111 to 47. Both negative controls are x for the first time since M0 began.
 2. The judge's lists were written by reading the pile, then measured. Two rounds of extractor fixes (summary as verb source, head noun with generic tails, operationId head noun) were the difference between R3 leaking and R3 clean; the lists themselves did not change after round 2 except session/device/network.
@@ -1678,10 +1694,4 @@ generate and verify are not read verbs; the 11 arguable truth rows
 named in E24(g) want a second read; the destructive verb list is
 unmeasured.
 
-M1-C9: the two-pass shape. Pass 1 = method prior, scope, body, callbacks
-with the confidence sum (as C7). Pass 2 = verb, noun and prose judge on
-the rows pass 1 hands over, assigning w or x in both directions; its
-lists are written by the orchestrator from reading the residual pile,
-then measured leave-one-repo-out on CAMARA + hold-out 1 with zero leaks
-as the wall, clean exam once. Also owed: whether a silent POST/PATCH is
-assigned x marked 'floor' instead of review (the user's call).
+M1 checkpoint, the user's calls: (1) the floor — a silent POST/PATCH assigned x and marked floor, or review; (2) the truth re-read of the rows the judge names (QoS deleteSession x2, deleteTrustDomainDevice, deleteAppInstance/Deployment, Delete a person x2, unblock user x2, DeleteCall record, issues/set-issue-field-values, issues/remove-sub-issue), the user's act; (3) stop M1 and write the M4 findings entry, or one more pass with the summary verb and repository measured jointly after the re-read.

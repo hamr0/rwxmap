@@ -78,6 +78,17 @@ export const PARTY_NOUNS = new Set([
   'device', 'session', 'network', // added M1-C9 round 2, coordinator correction 4
 ]);
 
+// M1-C10b fix 2: "repository" is deliberately NOT in PARTY_NOUNS itself —
+// it is a measured addition, gated by the repoNounOn switch (default off)
+// and admitted/rejected the same way as any other rule/source (a GitHub
+// repository is shared with collaborators; deleting it reaches them).
+// Feeds both the headNoun check (nounIsParty) and the operationId-head-noun
+// check (opidHeadIsParty) identically.
+export function isPartyNoun(word, repoNounOn) {
+  if (PARTY_NOUNS.has(word)) return true;
+  return repoNounOn === true && word === 'repository';
+}
+
 // M1-C9 round 2, coordinator correction 3: a naive head-noun span sometimes
 // lands on a generic tail word (Update device INFORMATION, Delete device
 // RECORD) instead of the real object one word earlier. Checked on the raw
@@ -102,6 +113,20 @@ const PARTY_PATH_PARAMS = new Set([
 
 const STOP_TOKENS = new Set(['from', 'for', 'to', 'in', 'on', 'of', 'by', 'with', 'at', 'into']);
 const CALLER_PHRASE_RE = /for the authenticated user/i;
+
+// M1-C10b fix 1: the brief's rule (c) — "for the authenticated user" (or
+// equivalent caller phrasing) means "no party", not "someone else's
+// resource" — was only ever wired into pathPartyIdForRow (the PATH). It was
+// never checked against the SUMMARY, so R2's noun-party branch could still
+// fire x on a caller-shaped operation whose prose says exactly this.
+// Case-insensitive substring match; verbatim phrase list, do not add or
+// remove one without taking it back to the user first.
+const CALLER_PHRASES = ['for the authenticated user', 'authenticated user', 'your account', 'your ', 'yourself'];
+
+export function summaryHasCallerPhrase(summary) {
+  const s = (summary || '').toLowerCase();
+  return CALLER_PHRASES.some((p) => s.includes(p));
+}
 
 // --- (a) lead verb -----------------------------------------------------
 
@@ -137,6 +162,24 @@ export function leadVerbForJudge(row) {
 // verb, while its prose leads with one (or vice versa).
 export function summaryLeadVerb(row) {
   return naiveSingular(fallbackVerbFromSummary(row.summary));
+}
+
+// M1-C10: the verb source for R2/R3/R4 (summaryVerbOn switch, default OFF).
+// When the operationId lead token (leadVerbForJudge) is NOT a known verb
+// (not in OWN_VERBS or LIVE_VERBS), fall back to the summary's own first
+// word instead — lowercased, singularised, with a leading "to" dropped
+// (e.g. summary "To delete a widget" -> "delete"). If the operationId lead
+// IS a known verb, it is kept as-is; this function is only consulted when
+// it is not. '' when the summary has nothing usable after dropping "to".
+export function summaryVerbForR234(summary) {
+  const s = (summary || '').trim();
+  if (!s) return '';
+  let words = s.split(/\s+/);
+  if (words.length && /^to$/i.test(words[0])) words = words.slice(1);
+  if (!words.length) return '';
+  const m = words[0].match(/^[A-Za-z]+/);
+  if (!m) return '';
+  return naiveSingular(m[0].toLowerCase());
 }
 
 // M1-C9 round 3: R1's third verb source (liveTokenOn switch) — ANY
@@ -249,9 +292,11 @@ export function operationIdHeadNoun(row) {
 //
 // switches: { r1On, r2On, r3On (each default true), judgePostOwn (R4,
 // default false), pathPartyOn (round 3, default false), liveTokenOn (round
-// 3, default false), floorOn (default true) } — each rule/source is
-// independently toggleable; disabling one only removes that source's own
-// resolution, it never changes another rule's condition or reach.
+// 3, default false), summaryVerbOn (M1-C10, default false), repoNounOn
+// (M1-C10b fix 2, default false), floorOn (default true) } — each
+// rule/source is independently toggleable; disabling one only removes that
+// source's own resolution, it never changes another rule's condition or
+// reach.
 
 export function judgeRow(row, switches = {}) {
   const r1On = switches.r1On !== false;
@@ -260,9 +305,22 @@ export function judgeRow(row, switches = {}) {
   const judgePostOwn = switches.judgePostOwn === true;
   const pathPartyOn = switches.pathPartyOn === true;
   const liveTokenOn = switches.liveTokenOn === true;
+  const summaryVerbOn = switches.summaryVerbOn === true;
+  const repoNounOn = switches.repoNounOn === true;
   const floorOn = switches.floorOn !== false;
 
   const verb = leadVerbForJudge(row);
+  // M1-C10: R2/R3/R4's own verb source. leadVerbForJudge (verb, above) is
+  // kept when it is already a known verb; otherwise, gated by
+  // summaryVerbOn, fall back to the summary's own lead word
+  // (summaryVerbForR234). R1 is untouched — it keeps checking `verb` (the
+  // operationId source) plus its own summaryLeadVerb/liveToken sources.
+  let ownVerb = verb;
+  let ownVerbFromSummary = false;
+  if (summaryVerbOn && !OWN_VERBS.has(verb) && !LIVE_VERBS.has(verb)) {
+    const sv = summaryVerbForR234(row.summary);
+    if (sv) { ownVerb = sv; ownVerbFromSummary = true; }
+  }
   const headNoun = headNounForRow(row);
   const partyId = pathPartyOn ? pathPartyIdForRow(row) : { present: false, param: null };
   const method = row.method;
@@ -286,23 +344,33 @@ export function judgeRow(row, switches = {}) {
     }
   }
 
-  if (OWN_VERBS.has(verb)) {
-    const nounIsParty = PARTY_NOUNS.has(headNoun);
+  if (OWN_VERBS.has(ownVerb)) {
+    const rawNounIsParty = isPartyNoun(headNoun, repoNounOn);
+    // M1-C10b fix 1: a caller phrase in the SUMMARY suppresses the
+    // noun-party branch specifically (the row proceeds to R3/R4 instead) —
+    // it never touches the path-party or opidhead branches, which have
+    // their own, separate party-vs-caller logic.
+    const callerSuppressed = rawNounIsParty && summaryHasCallerPhrase(row.summary);
+    const nounIsParty = rawNounIsParty && !callerSuppressed;
     const opidHeadNoun = operationIdHeadNoun(row); // M1-C9 round 3, correction 1
-    const opidHeadIsParty = opidHeadNoun !== '' && PARTY_NOUNS.has(opidHeadNoun);
+    const opidHeadIsParty = opidHeadNoun !== '' && isPartyNoun(opidHeadNoun, repoNounOn);
     if (r2On && (nounIsParty || partyId.present || opidHeadIsParty)) {
       let evidence;
-      if (nounIsParty) evidence = `judge:party:${headNoun}`;
+      if (nounIsParty) evidence = ownVerbFromSummary ? `judge:party:summary:${headNoun}` : `judge:party:${headNoun}`;
       else if (partyId.present) evidence = `judge:party:${partyId.param}`;
       else evidence = `judge:party:opidhead:${opidHeadNoun}`;
       return { class: 'x', confidence: 1, status: 'assigned', evidence: [evidence], rule: 'R2' };
     }
     if (!nounIsParty && !partyId.present && !opidHeadIsParty) {
       if (r3On && (method === 'PUT' || method === 'PATCH' || method === 'DELETE')) {
-        return { class: 'w', confidence: 1, status: 'assigned', evidence: [`judge:own:${headNoun}`], rule: 'R3' };
+        const evidence = [ownVerbFromSummary ? `judge:own:summary:${headNoun}` : `judge:own:${headNoun}`];
+        if (callerSuppressed) evidence.push('judge:caller-phrase');
+        return { class: 'w', confidence: 1, status: 'assigned', evidence, rule: 'R3' };
       }
       if (judgePostOwn && method === 'POST') {
-        return { class: 'w', confidence: 1, status: 'assigned', evidence: [`judge:own:${headNoun}`], rule: 'R4' };
+        const evidence = [ownVerbFromSummary ? `judge:own:summary:${headNoun}` : `judge:own:${headNoun}`];
+        if (callerSuppressed) evidence.push('judge:caller-phrase');
+        return { class: 'w', confidence: 1, status: 'assigned', evidence, rule: 'R4' };
       }
     }
   }

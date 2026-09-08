@@ -325,3 +325,72 @@ test('a leaking rule turned off: disabling R2 on a party-noun row does not let R
 // CAMARA + hold-out 1 and disabling a leaking rule for the final score) is
 // data-driven over the full census and lives in run-c9.mjs, not here — it
 // is exercised by running run-c9.mjs, not by a judge.mjs unit test.
+
+// --- M1-C10: summaryVerbOn — R2/R3/R4's own-verb source falls back to the
+// summary's lead word only when the operationId lead is not already a
+// known verb -----------------------------------------------------------
+
+test('summaryVerbOn: operationId lead "actions/delete-org-secret" is not a known verb — falls back to the summary\'s "Delete" -> R3 w, evidence names the summary source', () => {
+  const r = row({ method: 'DELETE', operationId: 'actions/delete-org-secret', summary: 'Delete an organization secret', path: '/orgs/{org}/actions/secrets/{secret_name}' });
+  const result = judgeRow(r, { summaryVerbOn: true });
+  assert.equal(result.class, 'w');
+  assert.equal(result.rule, 'R3');
+  assert.deepEqual(result.evidence, ['judge:own:summary:secret']);
+});
+
+test('summaryVerbOn: operationId lead "files" (from put_files_id, PUT) is not a known verb — falls back to the summary\'s "Update" -> R3 w, evidence names the summary source', () => {
+  const r = row({ method: 'PUT', operationId: 'put_files_id', summary: 'Update file', path: '/files/{id}' });
+  const result = judgeRow(r, { summaryVerbOn: true });
+  assert.equal(result.class, 'w');
+  assert.equal(result.rule, 'R3');
+  assert.deepEqual(result.evidence, ['judge:own:summary:file']);
+});
+
+test('summaryVerbOn: operationId lead "delete" (deleteSubscription) is already a known verb — kept as-is even with a different-verb summary, evidence stays the opid form', () => {
+  const r = row({ method: 'DELETE', operationId: 'deleteSubscription', summary: 'Remove billing plan', path: '/subscriptions/{id}' });
+  const result = judgeRow(r, { summaryVerbOn: true });
+  assert.equal(result.class, 'w');
+  assert.equal(result.rule, 'R3');
+  assert.deepEqual(result.evidence, ['judge:own:plan']);
+});
+
+// --- M1-C10b fix 1: a caller phrase in the SUMMARY suppresses R2's
+// noun-party branch specifically — the path-party and opidhead branches are
+// unaffected -----------------------------------------------------------
+
+test('caller phrase in the summary suppresses R2\'s noun-party branch: "access" is a party noun but the summary says "for the authenticated user" — falls through to R3 instead, with judge:caller-phrase appended', () => {
+  // opid head noun is "setting" (not a party noun) so only the
+  // summary-derived headNoun ("access") could trigger R2 here — isolating
+  // the noun-party branch from the (unaffected) opidhead branch.
+  const r = row({ method: 'DELETE', operationId: 'deleteWidgetSettings', summary: 'Delete widget access for the authenticated user', path: '/widgets/{id}' });
+  const result = judgeRow(r);
+  assert.equal(result.class, 'w');
+  assert.equal(result.rule, 'R3');
+  assert.deepEqual(result.evidence, ['judge:own:access', 'judge:caller-phrase']);
+});
+
+test('caller phrase control: the same "access" party noun WITHOUT a caller phrase in the summary still fires R2 as before', () => {
+  const r = row({ method: 'DELETE', operationId: 'deleteWidgetSettings', summary: 'Delete widget access for a team', path: '/widgets/{id}' });
+  const result = judgeRow(r);
+  assert.equal(result.class, 'x');
+  assert.equal(result.rule, 'R2');
+  assert.deepEqual(result.evidence, ['judge:party:access']);
+});
+
+// --- M1-C10b fix 2: "repository" as a party noun, gated by repoNounOn ----
+
+test('repoNounOn off (default): "repository" is not a party noun — deleteRepository/"Delete a repository" falls through to R3', () => {
+  const r = row({ method: 'DELETE', operationId: 'deleteRepository', summary: 'Delete a repository', path: '/repos/{owner}/{repo}' });
+  const result = judgeRow(r, { repoNounOn: false });
+  assert.equal(result.class, 'w');
+  assert.equal(result.rule, 'R3');
+  assert.deepEqual(result.evidence, ['judge:own:repository']);
+});
+
+test('repoNounOn on: "repository" is now a party noun — the same row fires R2 instead', () => {
+  const r = row({ method: 'DELETE', operationId: 'deleteRepository', summary: 'Delete a repository', path: '/repos/{owner}/{repo}' });
+  const result = judgeRow(r, { repoNounOn: true });
+  assert.equal(result.class, 'x');
+  assert.equal(result.rule, 'R2');
+  assert.deepEqual(result.evidence, ['judge:party:repository']);
+});

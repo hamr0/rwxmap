@@ -216,13 +216,13 @@ safe floor and the row is tagged for human review. Go means all of:
    method co-occurrence — which methods a verb or noun travels with —
    with CAMARA usable as one signal among them. No hand lists.
 
-Status 2026-09-08 after M1-C9 (two-pass shape, D33): zero leaks on
+Status 2026-09-08 after M1-C10: shape stable (D33); zero leaks on
 every set; both negative controls x; review + over-tight at floor on
-20/292 (7%), 106/207 (51%), 47/220 (21%); rules 1 and 3 met, rule 2 met
-on CAMARA, not yet on the hold-outs, where 74 GitHub and 26 Box rows
-wait on a verb read from the summary (M1-C10). The floor (residual
-POST/PATCH assigned x, confidence 0) is measured both ways and awaits
-the user's ruling.
+20/292 (7%), 106/207 (51%), 47/220 (21%). Rule 2 met on CAMARA. The
+summary-verb source that would resolve GitHub and Box is held back by
+three hold-out 1 truth rows (M1-C10); with them re-read the
+hypothetical is 7% / 23% / 10% at zero leaks. Awaiting the user's
+rulings on the floor and the truth re-read.
 
 **M2 — Shape rules, only if justified.** For each divergence class from
 M0/M1 that appears more than once, add one deterministic OpenAPI-shape
@@ -568,6 +568,11 @@ Non-blocking; never silently assumed.
 - Which structural fields qualify for a rule, per set, by the user's
   criterion "present consistently or almost always"? Answered by the
   M1 census, pending 2026-09-07.
+- Truth re-read owed (raised by M1-C9/C10): the judge names the E24
+  arguable rows and three GitHub rows (repos/delete,
+  issues/set-issue-field-values, issues/remove-sub-issue) as the only
+  leaks that block the summary-verb source. The user re-reads; nothing
+  is re-labelled by the tool.
 
 ## 8. Notes carried from the outline, stated on purpose
 
