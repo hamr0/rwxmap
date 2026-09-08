@@ -132,3 +132,30 @@ holdout3,discord,PATCH,/guilds/{guild_id}/templates/{code},update_guild_template
 holdout3,discord,PATCH,/guilds/{guild_id}/widget,update_guild_widget_settings,w,x,no-text,no-text,
 holdout3,discord,DELETE,/lobbies/{lobby_id}/members/@me,leave_lobby,w,x,no-text,no-text,
 holdout3,discord,PUT,/users/@me/applications/{application_id}/role-connection,update_application_user_role_connection,w,x,no-text,no-text,
+holdout4,cloudflare,POST,/accounts/{account_id}/autorag/rags/{id}/search,autorag-config-search,r,x,floor,,Search
+holdout4,cloudflare,POST,/accounts/{account_id}/cloudforce-one/events/{event_id},post_EventUpdate,w,x,floor,,Updates an event
+holdout4,cloudflare,PATCH,/accounts/{account_id}/cloudforce-one/v2/collections/{collection_id}/columns/{column_id},patch_ColumnUpdate,w,x,floor,,Update column
+holdout4,cloudflare,POST,/accounts/{account_id}/dlp/patterns/validate,dlp-pattern-validate,r,x,floor,,Validate a DLP regex pattern
+holdout4,cloudflare,PATCH,/accounts/{account_id}/magic/advanced_tcp_protection/configs/prefixes/{prefix_id},updatePrefix,w,x,floor,,Update prefix.
+holdout4,cloudflare,PUT,/accounts/{account_id}/slurper/source/connectivity-precheck,slurper-check-source-connectivity,r,w,floor,,Check source connectivity
+holdout4,cloudflare,PATCH,/zones/{zone_id}/load_balancers/{load_balancer_id},load-balancers-patch-load-balancer,w,x,floor,,Patch Load Balancer
+holdout4,cloudflare,PATCH,/zones/{zone_id}/settings/{setting_id},zone-settings-edit-single-setting,w,x,floor,,Edit zone setting
+holdout4,linode,POST,/{apiVersion}/databases/mysql/instances/{instanceId}/resume,resume-databases-mysql-instance,w,x,floor,,Resume a MySQL Managed Database
+holdout4,linode,POST,/{apiVersion}/databases/postgresql/instances/{instanceId}/resume,resume-databases-postgre-sql-instance,w,x,floor,,Resume a PostgreSQL Managed Database
+holdout4,linode,POST,/{apiVersion}/linode/instances/{linodeId}/disks/{diskId}/resize,post-resize-disk,w,x,floor,,Resize a disk
+holdout4,linode,POST,/{apiVersion}/support/tickets/{ticketId}/close,post-close-ticket,w,x,floor,,Close a support ticket
+holdout4,x,POST,/2/media/metadata,createMediaMetadata,w,x,floor,,Create Media metadata
+holdout4,x,POST,/2/media/upload/{id}/append,appendMediaUpload,w,x,floor,,Append Media Upload
+holdout4,x,POST,/2/tweets/search/stream/rules,updateRules,w,x,floor,,Update stream rules
+holdout4,x,POST,/2/users/{id}/bookmarks,createUsersBookmark,w,x,floor,,Create Bookmark
+holdout4,x,POST,/2/users/{id}/dm/unblock,unblockUsersDms,w,x,floor,,Unblock Users Dms
+holdout4,linode,POST,/{apiVersion}/linode/instances/{linodeId}/backups/cancel,post-cancel-backups,w,x,live-verb,opid:cancel,Cancel backups
+holdout4,linode,POST,/{apiVersion}/object-storage/cancel,post-cancel-object-storage,w,x,live-verb,opid:cancel,Cancel Object Storage
+holdout4,linode,DELETE,/{apiVersion}/object-storage/keys/{keyId},delete-object-storage-key,w,x,live-verb,summary:revoke,Revoke an Object Storage access key
+holdout4,linode,DELETE,/{apiVersion}/profile/apps/{appId},delete-profile-app,w,x,live-verb,summary:revoke,Revoke app access
+holdout4,x,DELETE,/2/connections,deleteConnectionsByUuids,w,x,live-verb,summary:terminate,Terminate multiple connections
+holdout4,x,DELETE,/2/connections/{endpoint_id},deleteConnectionsByEndpoint,w,x,live-verb,summary:terminate,Terminate connections by endpoint
+holdout4,cloudflare,DELETE,/accounts/{account_id}/teamnet/virtual_networks/{virtual_network_id},tunnel-virtual-network-delete,w,x,party-noun,summary:network,Delete a virtual network
+holdout4,linode,DELETE,/{apiVersion}/managed/contacts/{contactId},delete-managed-contact,w,x,party-noun,summary:contact,Delete a managed contact
+holdout4,linode,PUT,/{apiVersion}/placement/groups/{groupId},put-placement-group,w,x,party-noun,summary:group,Update a placement group
+holdout4,x,DELETE,/2/users/{source_user_id}/following/{target_user_id},unfollowUser,w,x,party-noun,summary:user,Unfollow User

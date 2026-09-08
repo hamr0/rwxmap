@@ -944,3 +944,213 @@ holdout3,vercel,POST,/v8/certs,issueCert,x,x,floor,,Issue a new cert
 holdout3,vercel,GET,/v9/domains/{domain}/verification,getDomainVerificationRecord,r,r,locked,,Get Domain Verification Record
 holdout3,vercel,DELETE,/v9/projects/{idOrName}/custom-environments/{environmentSlugOrId},removeCustomEnvironment,w,w,floor,,Remove a custom environment
 holdout3,vercel,PATCH,/v9/projects/{idOrName}/domains/{domain},updateProjectDomain,w,x,floor,,Update a project domain
+holdout4,linode,GET,/{apiVersion}/account,get-account,r,r,locked,,Get your account
+holdout4,linode,GET,/{apiVersion}/account/betas,get-enrolled-beta-programs,r,r,locked,,List enrolled Beta programs
+holdout4,linode,POST,/{apiVersion}/account/child-accounts/{euuId}/token,post-child-account-token,x,x,floor,,Create a proxy user token
+holdout4,linode,POST,/{apiVersion}/account/entity-transfers/{token}/accept,post-accept-entity-transfer,x,x,live-verb,opid:accept,Accept an entity transfer
+holdout4,linode,GET,/{apiVersion}/account/invoices/{invoiceId}/items,get-invoice-items,r,r,locked,,List invoice items
+holdout4,linode,POST,/{apiVersion}/account/oauth-clients,post-client,x,x,floor,,Create an OAuth client
+holdout4,linode,PUT,/{apiVersion}/account/oauth-clients/{clientId}/thumbnail,put-client-thumbnail,w,w,floor,,Update the OAuth client's thumbnail
+holdout4,linode,GET,/{apiVersion}/account/payments,get-payments,r,r,locked,,List payments
+holdout4,linode,GET,/{apiVersion}/account/service-transfers,get-service-transfers,r,r,locked,,List service transfers
+holdout4,linode,PUT,/{apiVersion}/account/settings,put-account-settings,w,w,floor,,Update account settings
+holdout4,linode,GET,/{apiVersion}/account/users/{username},get-user,r,r,locked,,Get a user
+holdout4,linode,GET,/{apiVersion}/databases/engines,get-databases-engines,r,r,locked,,List Managed Databases engines
+holdout4,linode,DELETE,/{apiVersion}/databases/mysql/instances/{instanceId},delete-databases-mysql-instance,w,w,floor,,Delete a MySQL Managed Database
+holdout4,linode,POST,/{apiVersion}/databases/mysql/instances/{instanceId}/resume,resume-databases-mysql-instance,w,x,floor,,Resume a MySQL Managed Database
+holdout4,linode,DELETE,/{apiVersion}/databases/postgresql/instances/{instanceId},delete-databases-postgre-sql-instance,w,w,floor,,Delete a PostgreSQL Managed Database
+holdout4,linode,POST,/{apiVersion}/databases/postgresql/instances/{instanceId}/resume,resume-databases-postgre-sql-instance,w,x,floor,,Resume a PostgreSQL Managed Database
+holdout4,linode,POST,/{apiVersion}/domains,post-domain,x,x,floor,,Create a domain
+holdout4,linode,GET,/{apiVersion}/domains/{domainId}/records,get-domain-records,r,r,locked,,List domain records
+holdout4,linode,GET,/{apiVersion}/images,get-images,r,r,locked,,List images
+holdout4,linode,DELETE,/{apiVersion}/images/sharegroups/tokens/{tokenUuid},delete-sharegroup-token,x,x,party-noun,summary:token,Delete a token
+holdout4,linode,GET,/{apiVersion}/images/sharegroups/{sharegroupId},get-sharegroup,r,r,locked,,Get a share group
+holdout4,linode,GET,/{apiVersion}/images/sharegroups/{sharegroupId}/members,get-sharegroup-members,r,r,locked,,List members by share group
+holdout4,linode,DELETE,/{apiVersion}/images/{imageId},delete-image,w,w,floor,,Delete an image
+holdout4,linode,POST,/{apiVersion}/linode/instances,post-linode-instance,x,x,floor,,Create a Linode
+holdout4,linode,POST,/{apiVersion}/linode/instances/{linodeId}/backups/cancel,post-cancel-backups,w,x,live-verb,opid:cancel,Cancel backups
+holdout4,linode,GET,/{apiVersion}/linode/instances/{linodeId}/configs,get-linode-configs,r,r,locked,,List configuration profiles
+holdout4,linode,POST,/{apiVersion}/linode/instances/{linodeId}/configs/{configId}/interfaces,post-linode-config-interface,x,x,floor,,Add a configuration profile interface
+holdout4,linode,POST,/{apiVersion}/linode/instances/{linodeId}/disks,post-add-linode-disk,x,x,floor,,Create a disk
+holdout4,linode,POST,/{apiVersion}/linode/instances/{linodeId}/disks/{diskId}/resize,post-resize-disk,w,x,floor,,Resize a disk
+holdout4,linode,GET,/{apiVersion}/linode/instances/{linodeId}/interfaces/history,get-linode-interface-history,r,r,locked,,List a Linode's network interface history
+holdout4,linode,GET,/{apiVersion}/linode/instances/{linodeId}/interfaces/{interfaceId}/firewalls,get-linode-interface-firewalls,r,r,locked,,List Linode interface firewalls
+holdout4,linode,POST,/{apiVersion}/linode/instances/{linodeId}/migrate,post-migrate-linode-instance,x,x,live-verb,summary:launch,Launch a DC migration/pending host migration
+holdout4,linode,POST,/{apiVersion}/linode/instances/{linodeId}/rescue,post-rescue-linode-instance,x,x,floor,,Boot a Linode into rescue mode
+holdout4,linode,GET,/{apiVersion}/linode/instances/{linodeId}/transfer/{year}/{month},get-linode-transfer-by-year-month,r,r,locked,,Get monthly network transfer stats
+holdout4,linode,POST,/{apiVersion}/linode/stackscripts,post-add-stack-script,x,x,floor,,Create a StackScript
+holdout4,linode,GET,/{apiVersion}/lke/clusters,get-lke-clusters,r,r,locked,,List Kubernetes clusters
+holdout4,linode,DELETE,/{apiVersion}/lke/clusters/{clusterId}/control_plane_acl,delete-lke-cluster-acl,w,w,floor,,Delete the control plane access control list
+holdout4,linode,DELETE,/{apiVersion}/lke/clusters/{clusterId}/nodes/{nodeId},delete-lke-cluster-node,w,w,floor,,Delete a node
+holdout4,linode,GET,/{apiVersion}/lke/clusters/{clusterId}/pools/{poolId},get-lke-node-pool,r,r,locked,,Get a node pool
+holdout4,linode,GET,/{apiVersion}/lke/tiers/{tier}/versions,get-lke-tiers-versions,r,r,locked,,List LKE Kubernetes versions (any tier)
+holdout4,linode,POST,/{apiVersion}/longview/clients,post-longview-client,x,x,floor,,Create a Longview client
+holdout4,linode,GET,/{apiVersion}/longview/subscriptions,get-longview-subscriptions,r,r,locked,,List Longview subscriptions
+holdout4,linode,DELETE,/{apiVersion}/managed/contacts/{contactId},delete-managed-contact,w,x,party-noun,summary:contact,Delete a managed contact
+holdout4,linode,GET,/{apiVersion}/managed/credentials/{credentialId},get-managed-credential,r,r,locked,,Get a managed credential
+holdout4,linode,GET,/{apiVersion}/managed/linode-settings,get-managed-linode-settings,r,r,locked,,List managed Linode settings
+holdout4,linode,GET,/{apiVersion}/managed/services/{serviceId},get-managed-service,r,r,locked,,Get a managed service monitor
+holdout4,linode,GET,/{apiVersion}/monitor/alert-definitions,get-alert-definitions,r,r,locked,,List alert definitions
+holdout4,linode,POST,/{apiVersion}/monitor/services/{serviceType}/alert-definitions,post-alert-definition-for-service-type,x,x,floor,,Create an alert definition
+holdout4,linode,POST,/{apiVersion}/monitor/services/{serviceType}/metrics,post-read-metric,r,r,read-verb,opid:read,Get an entity's metrics
+holdout4,linode,PUT,/{apiVersion}/networking/firewalls/settings,put-firewall-settings,w,w,floor,,Update default firewalls
+holdout4,linode,GET,/{apiVersion}/networking/firewalls/{firewallId}/devices,get-firewall-devices,r,r,locked,,List firewall devices
+holdout4,linode,GET,/{apiVersion}/networking/firewalls/{firewallId}/rules,get-firewall-rules,r,r,locked,,List firewall rules
+holdout4,linode,GET,/{apiVersion}/networking/ips/{address},get-ip,r,r,locked,,Get an IP address
+holdout4,linode,POST,/{apiVersion}/networking/ipv6/ranges,post-ipv6-range,x,x,floor,,Create an IPv6 range
+holdout4,linode,POST,/{apiVersion}/nodebalancers,post-node-balancer,x,x,floor,,Create a NodeBalancer
+holdout4,linode,POST,/{apiVersion}/nodebalancers/{nodeBalancerId}/configs,post-node-balancer-config,x,x,floor,,Create a config
+holdout4,linode,DELETE,/{apiVersion}/nodebalancers/{nodeBalancerId}/configs/{configId}/nodes/{nodeId},delete-node-balancer-config-node,w,w,floor,,Delete a NodeBalancer's node
+holdout4,linode,GET,/{apiVersion}/nodebalancers/{nodeBalancerId}/stats,get-node-balancer-stats,r,r,locked,,Get NodeBalancer statistics
+holdout4,linode,DELETE,/{apiVersion}/object-storage/buckets/{regionId}/{bucket},delete-object-storage-bucket,w,w,floor,,Remove an Object Storage bucket
+holdout4,linode,PUT,/{apiVersion}/object-storage/buckets/{regionId}/{bucket}/object-acl,put-object-storage-bucket-acl,w,w,floor,,Update an object's ACL configuration
+holdout4,linode,POST,/{apiVersion}/object-storage/cancel,post-cancel-object-storage,w,x,live-verb,opid:cancel,Cancel Object Storage
+holdout4,linode,DELETE,/{apiVersion}/object-storage/keys/{keyId},delete-object-storage-key,w,x,live-verb,summary:revoke,Revoke an Object Storage access key
+holdout4,linode,GET,/{apiVersion}/object-storage/transfer,get-object-storage-transfer,r,r,locked,,Get Object Storage transfer data
+holdout4,linode,PUT,/{apiVersion}/placement/groups/{groupId},put-placement-group,w,x,party-noun,summary:group,Update a placement group
+holdout4,linode,DELETE,/{apiVersion}/profile/apps/{appId},delete-profile-app,w,x,live-verb,summary:revoke,Revoke app access
+holdout4,linode,GET,/{apiVersion}/profile/logins,get-profile-logins,r,r,locked,,List logins
+holdout4,linode,PUT,/{apiVersion}/profile/preferences,put-user-preferences,w,w,floor,,Update a user's preferences
+holdout4,linode,GET,/{apiVersion}/profile/sshkeys/{sshKeyId},get-ssh-key,r,r,locked,,Get an SSH key
+holdout4,linode,POST,/{apiVersion}/profile/tokens,post-personal-access-token,x,x,floor,,Create a personal access token
+holdout4,linode,GET,/{apiVersion}/regions/{regionId},get-region,r,r,locked,,Get a region
+holdout4,linode,POST,/{apiVersion}/support/tickets/{ticketId}/close,post-close-ticket,w,x,floor,,Close a support ticket
+holdout4,linode,GET,/{apiVersion}/tags/{tagLabel},get-tagged-objects,r,r,locked,,List tagged objects
+holdout4,linode,PUT,/{apiVersion}/volumes/{volumeId},put-volume,w,w,floor,,Update a volume
+holdout4,linode,POST,/{apiVersion}/vpcs,post-vpc,x,x,floor,,Create a VPC
+holdout4,linode,GET,/{apiVersion}/vpcs/{vpcId}/subnets,get-vpc-subnets,r,r,locked,,List VPC subnets
+holdout4,cloudflare,GET,/accounts,accounts-list-accounts,r,r,locked,,List Accounts
+holdout4,cloudflare,PUT,/accounts/{account_id}/access/ai-controls/mcp/servers/{id},mcp-portals-api-update-servers,w,w,floor,,Update an MCP Server
+holdout4,cloudflare,POST,/accounts/{account_id}/access/identity_providers,access-identity-providers-add-an-access-identity-provider,x,x,floor,,Add an Access identity provider
+holdout4,cloudflare,GET,/accounts/{account_id}/access/users,zero-trust-users-get-users,r,r,locked,,Get users
+holdout4,cloudflare,GET,/accounts/{account_id}/agent-memory/namespaces/{namespace_name},agent-memory-namespace-get,r,r,locked,,Get a namespace
+holdout4,cloudflare,DELETE,/accounts/{account_id}/ai-gateway/gateways/{gateway_id}/evaluations/{id},aig-config-delete-evaluations,w,w,floor,,Delete a Evaluation
+holdout4,cloudflare,DELETE,/accounts/{account_id}/ai-search/namespaces/{name}/instances/{id},ai-search-namespace-delete-instance,w,w,floor,,Delete an AI Search instance.
+holdout4,cloudflare,POST,/accounts/{account_id}/alerting/v3/destinations/webhooks,notification-webhooks-create-a-webhook,x,x,floor,,Create a webhook
+holdout4,cloudflare,POST,/accounts/{account_id}/autorag/rags/{id}/search,autorag-config-search,r,x,floor,,Search
+holdout4,cloudflare,GET,/accounts/{account_id}/brand-protection/recent-submissions,getAccountsAccountIdBrandProtectionRecentSubmissions,r,r,locked,,Read recent URL submissions
+holdout4,cloudflare,PUT,/accounts/{account_id}/builds/repos/connections,upsertRepoConnection,w,w,floor,,Create or update repository connection
+holdout4,cloudflare,POST,/accounts/{account_id}/challenges/widgets,accounts-turnstile-widget-create,x,x,floor,,Create a Turnstile Widget
+holdout4,cloudflare,DELETE,/accounts/{account_id}/cloudforce-one/events/dataset/{dataset_id}/indicators/{indicator_id}/relationships/{rel_uuid},delete_IndicatorRelationshipDelete,w,w,floor,,Delete a relationship
+holdout4,cloudflare,POST,/accounts/{account_id}/cloudforce-one/events/{event_id},post_EventUpdate,w,x,floor,,Updates an event
+holdout4,cloudflare,GET,/accounts/{account_id}/cloudforce-one/rules/structured/{id},cloudforce-one-get-email-rule,r,r,locked,,Get an email rule
+holdout4,cloudflare,PATCH,/accounts/{account_id}/cloudforce-one/v2/collections/{collection_id}/columns/{column_id},patch_ColumnUpdate,w,x,floor,,Update column
+holdout4,cloudflare,GET,/accounts/{account_id}/cni/interconnects/{icon},get_interconnect,r,r,locked,,Get information about an interconnect object
+holdout4,cloudflare,GET,/accounts/{account_id}/data-security/posture/exports/{id},GetExportJob,r,r,locked,,Get a single export job
+holdout4,cloudflare,GET,/accounts/{account_id}/devices/networks/{network_id},device-managed-networks-device-managed-network-details,r,r,locked,,Get device managed network details
+holdout4,cloudflare,POST,/accounts/{account_id}/devices/unrevoke,devices-unrevoke-devices,x,x,floor,,Unrevoke devices (deprecated)
+holdout4,cloudflare,PUT,/accounts/{account_id}/dlp/data_classes/{data_class_id},dlp-data-classes-update,w,w,floor,,Update the attributes of a single data class
+holdout4,cloudflare,POST,/accounts/{account_id}/dlp/patterns/validate,dlp-pattern-validate,r,x,floor,,Validate a DLP regex pattern
+holdout4,cloudflare,GET,/accounts/{account_id}/dns_firewall/{dns_firewall_id}/reverse_dns,dns-firewall-show-dns-firewall-cluster-reverse-dns,r,r,locked,,Show DNS Firewall Cluster Reverse DNS
+holdout4,cloudflare,DELETE,/accounts/{account_id}/email-security/settings/domains,email_security_delete_domains,w,w,floor,,Unprotect multiple email domains
+holdout4,cloudflare,POST,/accounts/{account_id}/email/sending/send_raw,email-sending-account-send-raw-message,x,x,live-verb,opid:send,Send a raw MIME email
+holdout4,cloudflare,PUT,/accounts/{account_id}/gateway/audit_ssh_settings,zero-trust-update-audit-ssh-settings,w,w,floor,,Update Zero Trust SSH settings
+holdout4,cloudflare,PUT,/accounts/{account_id}/gateway/rules/{rule_id},zero-trust-gateway-rules-update-zero-trust-gateway-rule,w,w,floor,,Update a Zero Trust Gateway rule
+holdout4,cloudflare,DELETE,/accounts/{account_id}/images/v2/sourcingkit/migrations/{migration_id},cloudflare-images-sourcingkit-delete-migration,w,w,floor,,Delete a sourcing kit migration
+holdout4,cloudflare,POST,/accounts/{account_id}/intel/sinkholes,sinkhole-config-create-sinkhole,x,x,floor,,Create a new sinkhole for your account
+holdout4,cloudflare,GET,/accounts/{account_id}/logpush/jobs/{job_id},get-accounts-account_id-logpush-jobs-job_id,r,r,locked,,Get Logpush job details
+holdout4,cloudflare,PATCH,/accounts/{account_id}/magic/advanced_tcp_protection/configs/prefixes/{prefix_id},updatePrefix,w,x,floor,,Update prefix.
+holdout4,cloudflare,PUT,/accounts/{account_id}/magic/cf_interconnects,magic-interconnects-update-multiple-interconnects,w,w,floor,,Update multiple interconnects
+holdout4,cloudflare,GET,/accounts/{account_id}/magic/connectors/{connector_id}/telemetry/snapshots/{snapshot_t},mconn-connector-telemetry-snapshots-get,r,r,locked,,Get Snapshot
+holdout4,cloudflare,PUT,/accounts/{account_id}/magic/sites/{site_id}/lans/{lan_id},magic-site-lans-update-lan,w,w,floor,,Update Site LAN
+holdout4,cloudflare,POST,/accounts/{account_id}/oauth_clients,oauth-clients-create,x,x,floor,,Create OAuth Client
+holdout4,cloudflare,POST,/accounts/{account_id}/pay-per-crawl/publisher/stripe,pay-per-crawl.publisherCreateStripeConfig,x,x,live-verb,opid:pay,Creates the stripe config for a publisher
+holdout4,cloudflare,GET,/accounts/{account_id}/queues/{queue_id}/consumers,queues-list-consumers,r,r,locked,,List Queue Consumers
+holdout4,cloudflare,PUT,/accounts/{account_id}/r2/buckets/{bucket_name}/lifecycle,r2-put-bucket-lifecycle-configuration,w,w,floor,,Put Object Lifecycle Rules
+holdout4,cloudflare,DELETE,/accounts/{account_id}/realtime/kit/{app_id}/presets/{preset_id},delete-presets-preset_id,w,w,floor,,Delete a preset
+holdout4,cloudflare,GET,/accounts/{account_id}/registrar/registrations/{domain_name}/registration-status,registrar-domain-registration-get-status,r,r,locked,,Get Registration Status
+holdout4,cloudflare,GET,/accounts/{account_id}/rum/site_info/zone_tag/list,web-analytics-list-zone-tags,r,r,locked,,List Web Analytics zone tags
+holdout4,cloudflare,GET,/accounts/{account_id}/secrets_store/stores/{store_id}/secrets/{secret_id},secrets-store-get-by-id,r,r,locked,,Get a secret by ID
+holdout4,cloudflare,PUT,/accounts/{account_id}/slurper/source/connectivity-precheck,slurper-check-source-connectivity,r,w,floor,,Check source connectivity
+holdout4,cloudflare,GET,/accounts/{account_id}/stream/webhook,stream-webhook-view-webhooks,r,r,locked,,View webhooks
+holdout4,cloudflare,DELETE,/accounts/{account_id}/teamnet/virtual_networks/{virtual_network_id},tunnel-virtual-network-delete,w,x,party-noun,summary:network,Delete a virtual network
+holdout4,cloudflare,POST,/accounts/{account_id}/vectorize/v2/indexes/{index_name}/metadata_index/create,vectorize-create-metadata-index,x,x,floor,,Create Metadata Index
+holdout4,cloudflare,GET,/accounts/{account_id}/workers/dispatch/namespaces/{dispatch_namespace}/scripts,namespace-worker-list-scripts,r,r,locked,,List Scripts in Namespace
+holdout4,cloudflare,GET,/accounts/{account_id}/workers/scripts/{script_name},worker-script-download-worker,r,r,locked,,Download Worker
+holdout4,cloudflare,GET,/accounts/{account_id}/workflows,wor-list-workflows,r,r,locked,,List all Workflows
+holdout4,cloudflare,GET,/api/v4/health,monolithHealthCheck,r,r,locked,,API health check
+holdout4,cloudflare,GET,/radar/annotations,radar-get-annotations,r,r,locked,,Get latest annotations
+holdout4,cloudflare,GET,/radar/attacks/layer7/summary/managed_rules,radar-get-attacks-layer7-summary-by-managed-rules,r,r,locked,,Get layer 7 attacks by managed rules summary
+holdout4,cloudflare,GET,/radar/ct/summary/{dimension},radar-get-ct-summary,r,r,locked,,Get certificate distribution by dimension
+holdout4,cloudflare,GET,/radar/email/security/summary/spam,radar-get-email-security-summary-by-spam,r,r,locked,,Get email spam classification summary
+holdout4,cloudflare,GET,/radar/http/timeseries_groups/post_quantum,radar-get-http-timeseries-group-by-post-quantum,r,r,locked,,Get HTTP requests by post-quantum support time series
+holdout4,cloudflare,GET,/radar/ranking/domain/{domain},radar-get-ranking-domain-details,r,r,locked,,Get domain rank details
+holdout4,cloudflare,GET,/user/load_balancers/monitors/{monitor_id},load-balancer-monitors-monitor-details,r,r,locked,,Monitor Details
+holdout4,cloudflare,PUT,/zones/{zone_identifier}/custom_pages/{identifier},custom-pages-for-a-zone-update-a-custom-page,w,w,floor,,Update a custom page
+holdout4,cloudflare,POST,/zones/{zone_id}/acm/custom_trust_store,custom-origin-trust-store-create,x,x,floor,,Upload Custom Origin Trust Store
+holdout4,cloudflare,PUT,/zones/{zone_id}/api_gateway/operations/{operation_id}/labels,api-shield-operations-put-labels-to-operation,w,w,floor,,Replace labels on a web or API operation
+holdout4,cloudflare,PUT,/zones/{zone_id}/certificate_authorities/hostname_associations,client-certificate-for-a-zone-put-hostname-associations,w,w,floor,,Replace Hostname Associations
+holdout4,cloudflare,GET,/zones/{zone_id}/dns_records/export,dns-records-for-a-zone-export-dns-records,r,r,locked,,Export DNS Records
+holdout4,cloudflare,GET,/zones/{zone_id}/email/sending/subdomains/{subdomain_id}/dns/status,email-sending-subdomains-get-sending-subdomain-dns-status,r,r,locked,,Get sending subdomain DNS status
+holdout4,cloudflare,GET,/zones/{zone_id}/firewall/waf/packages,waf-packages-list-waf-packages,r,r,locked,,List WAF packages
+holdout4,cloudflare,PATCH,/zones/{zone_id}/load_balancers/{load_balancer_id},load-balancers-patch-load-balancer,w,x,floor,,Patch Load Balancer
+holdout4,cloudflare,GET,/zones/{zone_id}/origin_tls_client_auth/settings,zone-level-authenticated-origin-pulls-get-enablement-setting-for-zone,r,r,locked,,Get Enablement Setting for Zone
+holdout4,cloudflare,GET,/zones/{zone_id}/rulesets/{ruleset_id}/versions,listZoneRulesetVersions,r,r,locked,,List a zone ruleset's versions
+holdout4,cloudflare,GET,/zones/{zone_id}/settings/auto_origin_tls_kex,ssl-detector-auto-origin-tls-kex-get-enrollment,r,r,locked,,Get Auto-Origin TLS KEX enrollment status for the given zone
+holdout4,cloudflare,PATCH,/zones/{zone_id}/settings/{setting_id},zone-settings-edit-single-setting,w,x,floor,,Edit zone setting
+holdout4,cloudflare,PATCH,/zones/{zone_id}/ssl/verification/{certificate_pack_id},ssl-verification-edit-ssl-certificate-pack-validation-method,x,x,floor,,Edit SSL Certificate Pack Validation Method
+holdout4,cloudflare,PUT,/zones/{zone_id}/waiting_rooms/{waiting_room_id}/rules,waiting-room-replace-waiting-room-rules,w,w,floor,,Replace Waiting Room Rules
+holdout4,x,GET,/2/account,getDeveloperAccount,r,r,locked,,Get developer account
+holdout4,x,GET,/2/account_activity/webhooks/{webhook_id}/subscriptions/all,validateAccountActivitySubscription,r,r,locked,,Validate Account Activity Subscription
+holdout4,x,DELETE,/2/account_activity/webhooks/{webhook_id}/subscriptions/{user_id}/all,deleteAccountActivitySubscription,w,w,floor,,Delete subscription
+holdout4,x,GET,/2/activity/subscriptions,getActivitySubscriptions,r,r,locked,,Get X activity subscriptions
+holdout4,x,PUT,/2/activity/subscriptions/{subscription_id},updateActivitySubscription,w,w,floor,,Update X activity subscription
+holdout4,x,GET,/2/bots,getBots,r,r,locked,,Get Bots
+holdout4,x,PUT,/2/bots/{id},updateBot,w,w,floor,,Update Bot
+holdout4,x,GET,/2/broadcasts,listBroadcasts,r,r,locked,,List broadcasts
+holdout4,x,DELETE,/2/broadcasts/scheduled/{id},deleteScheduledBroadcast,w,w,floor,,Delete a scheduled broadcast
+holdout4,x,POST,/2/broadcasts/scheduled/{id}/live,goLiveScheduledBroadcast,x,x,floor,,Go live on a scheduled broadcast
+holdout4,x,POST,/2/broadcasts/{id}/chat,sendBroadcastChat,x,x,live-verb,opid:send,Send a chat message to a live broadcast
+holdout4,x,DELETE,/2/broadcasts/{id}/chat/{message_id},deleteBroadcastChatMessage,x,w,floor,,Remove a chat message from a live broadcast
+holdout4,x,POST,/2/chat/conversations/group/initialize,initializeChatGroup,x,x,floor,,Initialize Chat Group
+holdout4,x,POST,/2/chat/conversations/{id}/keys,addConversationKeys,x,x,floor,,Add Conversation Keys
+holdout4,x,POST,/2/chat/conversations/{id}/messages/delete,deleteChatMessages,x,x,floor,,Delete Chat messages
+holdout4,x,POST,/2/chat/media/upload/initialize,chatMediaUploadInitialize,x,x,floor,,Initialize Chat Media Upload
+holdout4,x,GET,/2/chat/media/{id}/{media_hash_key},chatMediaDownload,r,r,locked,,Download Chat Media
+holdout4,x,GET,/2/compliance/jobs,getComplianceJobs,r,r,locked,,Get Compliance Jobs
+holdout4,x,GET,/2/compliance/jobs/{id},getComplianceJobsById,r,r,locked,,Get Compliance Job by ID
+holdout4,x,DELETE,/2/connections,deleteConnectionsByUuids,w,x,live-verb,summary:terminate,Terminate multiple connections
+holdout4,x,DELETE,/2/connections/{endpoint_id},deleteConnectionsByEndpoint,w,x,live-verb,summary:terminate,Terminate connections by endpoint
+holdout4,x,GET,/2/dm_conversations/with/{participant_id}/dm_events,getDirectMessagesEventsByParticipantId,r,r,locked,,Get Direct Messages Events by Participant ID
+holdout4,x,GET,/2/dm_conversations/{id}/dm_events,getDirectMessagesEventsByConversationId,r,r,locked,,Get Direct Messages Events by Conversation ID
+holdout4,x,GET,/2/dm_events/{event_id},getDirectMessagesEventsById,r,r,locked,,Get Direct Messages Events by ID
+holdout4,x,GET,/2/likes/sample10/stream,streamLikesSample10,r,r,locked,,Stream sampled Likes
+holdout4,x,GET,/2/lists/{id},getListsById,r,r,locked,,Get Lists by ID
+holdout4,x,GET,/2/lists/{id}/members,getListsMembers,r,r,locked,,Get Lists Members
+holdout4,x,GET,/2/lists/{id}/tweets,getListsPosts,r,r,locked,,Get Lists Posts
+holdout4,x,POST,/2/media/metadata,createMediaMetadata,w,x,floor,,Create Media metadata
+holdout4,x,GET,/2/media/upload,getMediaUploadStatus,r,r,locked,,Get Media upload status
+holdout4,x,POST,/2/media/upload/{id}/append,appendMediaUpload,w,x,floor,,Append Media Upload
+holdout4,x,GET,/2/news/search,searchNews,r,r,locked,,Search News
+holdout4,x,POST,/2/notes/evaluate,evaluateCommunityNotes,x,x,floor,,Evaluate Community Notes
+holdout4,x,DELETE,/2/notes/{id},deleteCommunityNotes,w,w,floor,,Delete a Community Note
+holdout4,x,GET,/2/spaces/by/creator_ids,getSpacesByCreatorIds,r,r,locked,,Get Spaces by Creator IDs
+holdout4,x,GET,/2/spaces/{id}/buyers,getSpacesBuyers,r,r,locked,,Get Space ticket buyers
+holdout4,x,GET,/2/tweets,getPostsByIds,r,r,locked,,Get Posts by IDs
+holdout4,x,GET,/2/tweets/compliance/stream,streamPostsCompliance,r,r,locked,,Stream Posts compliance data
+holdout4,x,GET,/2/tweets/firehose/stream,streamPostsFirehose,r,r,locked,,Stream all Posts
+holdout4,x,GET,/2/tweets/firehose/stream/lang/ko,streamPostsFirehoseKo,r,r,locked,,Stream Korean Posts
+holdout4,x,GET,/2/tweets/sample/stream,streamPostsSample,r,r,locked,,Stream sampled Posts
+holdout4,x,GET,/2/tweets/search/recent,searchPostsRecent,r,r,locked,,Search Posts Recent
+holdout4,x,POST,/2/tweets/search/stream/rules,updateRules,w,x,floor,,Update stream rules
+holdout4,x,DELETE,/2/tweets/search/webhooks/{webhook_id},deleteWebhooksStreamLink,w,w,floor,,Delete stream link
+holdout4,x,GET,/2/tweets/{id},getPostsById,r,r,locked,,Get Posts by ID
+holdout4,x,GET,/2/tweets/{id}/retweeted_by,getPostsRepostedBy,r,r,locked,,Get Posts Reposted by
+holdout4,x,GET,/2/usage/credits,getUsageCredits,r,r,locked,,Get usage credits
+holdout4,x,GET,/2/users/by,getUsersByUsernames,r,r,locked,,Get Users by Usernames
+holdout4,x,GET,/2/users/me,getUsersMe,r,r,locked,,Get Users Me
+holdout4,x,GET,/2/users/reposts_of_me,getUsersRepostsOfMe,r,r,locked,,Get Users Reposts of Me
+holdout4,x,GET,/2/users/{id}/affiliates,getUsersAffiliates,r,r,locked,,Get Users Affiliates
+holdout4,x,POST,/2/users/{id}/bookmarks,createUsersBookmark,w,x,floor,,Create Bookmark
+holdout4,x,GET,/2/users/{id}/bookmarks/folders/{folder_id},getUsersBookmarksByFolderId,r,r,locked,,Get Users Bookmarks by Folder ID
+holdout4,x,POST,/2/users/{id}/dm/unblock,unblockUsersDms,w,x,floor,,Unblock Users Dms
+holdout4,x,DELETE,/2/users/{id}/followed_lists/{list_id},unfollowList,w,w,floor,,Unfollow a List
+holdout4,x,POST,/2/users/{id}/following,followUser,x,x,floor,,Follow User
+holdout4,x,DELETE,/2/users/{id}/likes/{tweet_id},unlikePost,w,w,floor,,Unlike Post
+holdout4,x,GET,/2/users/{id}/muting,getUsersMuting,r,r,locked,,Get Users Muting
+holdout4,x,GET,/2/users/{id}/pinned_lists,getUsersPinnedLists,r,r,locked,,Get Users Pinned Lists
+holdout4,x,GET,/2/users/{id}/public_keys,getUsersPublicKey,r,r,locked,,Get public keys
+holdout4,x,DELETE,/2/users/{id}/retweets/{source_tweet_id},unrepostPost,w,w,floor,,Unrepost Post
+holdout4,x,DELETE,/2/users/{source_user_id}/following/{target_user_id},unfollowUser,w,x,party-noun,summary:user,Unfollow User
+holdout4,x,POST,/2/webhooks,createWebhooks,x,x,floor,,Create webhook
+holdout4,x,PUT,/2/webhooks/{webhook_id},validateWebhooks,x,w,floor,,Validate webhook

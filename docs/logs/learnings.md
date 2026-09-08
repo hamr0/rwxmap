@@ -1871,3 +1871,41 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   admitted: it is one vendor's reader line (Discord treats shared
   objects as x, GitHub treats org settings as w) rather than a
   transferable rule. Revisit after hold-out 4.
+
+### M1-C11 clean exam — hold-out 4 (Linode, Cloudflare, X), 2026-09-08
+
+- Hold-out 4: data/holdout4-2026-09-08/, 210 rows (linode 75, cloudflare
+  71, x 64; GET 102, POST 51, DELETE 29, PUT 23, PATCH 5), blind-read by
+  five agents, truth r 106 / w 64 / x 40, 16 doubt, zero no-text rows.
+  Scored once with C11 + Rule A, nothing changed after.
+- Combined table for all five sets (set, n, exact, leaks, over_tight,
+  exact%, leak%, over-tight%): camara 292 262 1 29 89.7 0.3 9.9;
+  holdout1 207 151 2 54 72.9 1.0 26.1; holdout2 220 195 0 25 88.6 0.0
+  11.4; holdout3 226 199 2 25 88.1 0.9 11.1; holdout4 210 181 2 27 86.2
+  1.0 12.9. Total 1155 rows, 7 leaks (0.6%), 160 over-tight (13.9%).
+  Both negative controls x.
+- Hold-out 4 leaks, both X rows with text and no list word: DELETE
+  /2/broadcasts/{id}/chat/{message_id} deleteBroadcastChatMessage
+  "Remove a chat message from a live broadcast" (removes another
+  participant's message; noun "message"); PUT /2/webhooks/{webhook_id}
+  validateWebhooks "Validate webhook" (fires a live CRC challenge at a
+  third-party endpoint; verb "validate", the same word that leaked the
+  read list on CAMARA).
+- Hold-out 4 over-tight by rule: floor POST 12, floor PATCH 4, floor PUT
+  1, live-verb 6 (cancel x2, revoke x2, terminate x2 — Linode cancel
+  backups/object storage, revoke a key/app access, X terminate
+  connections; readers called these own-resource w), party-noun 4
+  (contact, group, network, user: delete-managed-contact,
+  put-placement-group, tunnel-virtual-network-delete, unfollowUser).
+- What it taught: (1) transfer holds on a fourth unseen vendor set: 86%
+  exact, 1% leak, 13% over-tight with zero tuning; (2) the remaining
+  leak shape is stable across sets: a write on a shared object
+  (message, issue, channel) or a verb that fires a live check
+  (validate); (3) the live verbs cancel/revoke/terminate over-tighten
+  when the object is the caller's own, which is the price of the
+  raise-only shape and is what the evidence word is for; (4) more
+  vendor sets will not move the lists; the next gain is in output (rule
+  + evidence word shipped) and in an owner override, not in words.
+- Pending the user: the shared-object noun question (message/channel/
+  issue) now has evidence from three vendors (GitHub w, Discord x, X
+  x); the two GitHub truth rows; deleteTrafficInfluence.

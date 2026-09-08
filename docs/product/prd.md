@@ -275,6 +275,7 @@ entries).
 | holdout1 | 207 | 151 | 2 | 54 (26.1%) |
 | holdout2 | 220 | 195 | 0 | 25 (11.4%) |
 | holdout3 | 226 | 199 | 2 | 25 (11.1%) |
+| holdout4 | 210 | 181 | 2 | 27 (12.9%) |
 
 Hold-out 3 (Discord, Sentry, Vercel, 2026-09-08) was scored once
 untuned at 11 leaks; Rule A, adopted on it, brings it to 2 (vercel
@@ -282,11 +283,21 @@ deleteRedirects, discord update_guild_incident_actions), so hold-out 3
 is now a tuning set and hold-out 4 (Linode, Cloudflare, X;
 data/holdout4-2026-09-08) is the clean exam.
 
+Hold-out 4 (Linode, Cloudflare, X, 2026-09-08) is the clean exam,
+scored once after Rule A: 2 leaks (deleteBroadcastChatMessage,
+validateWebhooks), both writes on shared objects or live checks with no
+list word. Across all five sets: 1155 rows, 7 leaks (0.6%), 160
+over-tight (13.9%).
+
 Both negative controls x. Remaining leaks: camara deleteTrafficInfluence
 (no word signal), github issues/set-issue-field-values and
 issues/remove-sub-issue (truth disputed, pending user). List growth
 rule: lists change only by hand review; the corpus is not used at score
 time (measured in C11-V9: corpus-mined verbs changed nothing).
+
+M1 status 2026-09-08: C11 + Rule A measured on five sets; M1 closes
+pending the user's rulings on the shared-object noun line and the three
+disputed truth rows.
 
 **M2 — Shape rules, only if justified.** For each divergence class from
 M0/M1 that appears more than once, add one deterministic OpenAPI-shape

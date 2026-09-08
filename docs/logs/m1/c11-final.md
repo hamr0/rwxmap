@@ -5,7 +5,7 @@ the M1-C11v sweep — scored against census-ops.csv (camara, holdout1,
 holdout2) and, when present, holdout3 (data/holdout3-2026-09-08/).
 
 holdout3: present, 226 rows.
-holdout4: not present.
+holdout4: present, 210 rows.
 
 ## Per-set summary
 
@@ -15,6 +15,7 @@ holdout4: not present.
 | holdout1 | 207 | 151 | 2 | 54 | 72.9 | 1.0 | 26.1 |
 | holdout2 | 220 | 195 | 0 | 25 | 88.6 | 0.0 | 11.4 |
 | holdout3 | 226 | 199 | 2 | 25 | 88.1 | 0.9 | 11.1 |
+| holdout4 | 210 | 181 | 2 | 27 | 86.2 | 1.0 | 12.9 |
 
 ## Per-rule, per-set breakdown
 
@@ -24,26 +25,32 @@ holdout4: not present.
 | locked | holdout1 | 0 | 0 | 0 | 0 |
 | locked | holdout2 | 94 | 94 | 0 | 0 |
 | locked | holdout3 | 102 | 102 | 0 | 0 |
+| locked | holdout4 | 102 | 102 | 0 | 0 |
 | live-verb | camara | 19 | 12 | 0 | 7 |
 | live-verb | holdout1 | 11 | 8 | 0 | 3 |
 | live-verb | holdout2 | 12 | 11 | 0 | 1 |
 | live-verb | holdout3 | 4 | 3 | 0 | 1 |
+| live-verb | holdout4 | 11 | 5 | 0 | 6 |
 | party-noun | camara | 12 | 5 | 0 | 7 |
 | party-noun | holdout1 | 45 | 16 | 0 | 29 |
 | party-noun | holdout2 | 10 | 4 | 0 | 6 |
 | party-noun | holdout3 | 13 | 13 | 0 | 0 |
+| party-noun | holdout4 | 5 | 1 | 0 | 4 |
 | read-verb | camara | 50 | 50 | 0 | 0 |
 | read-verb | holdout1 | 0 | 0 | 0 | 0 |
 | read-verb | holdout2 | 2 | 2 | 0 | 0 |
 | read-verb | holdout3 | 0 | 0 | 0 | 0 |
+| read-verb | holdout4 | 1 | 1 | 0 | 0 |
 | no-text | camara | 0 | 0 | 0 | 0 |
 | no-text | holdout1 | 4 | 0 | 0 | 4 |
 | no-text | holdout2 | 0 | 0 | 0 | 0 |
 | no-text | holdout3 | 21 | 13 | 0 | 8 |
+| no-text | holdout4 | 0 | 0 | 0 | 0 |
 | floor | camara | 115 | 99 | 1 | 15 |
 | floor | holdout1 | 147 | 127 | 2 | 18 |
 | floor | holdout2 | 102 | 84 | 0 | 18 |
 | floor | holdout3 | 86 | 68 | 2 | 16 |
+| floor | holdout4 | 91 | 72 | 2 | 17 |
 
 ## Negative controls
 
@@ -56,7 +63,7 @@ Both must be x.
 
 PASS — both controls x.
 
-## Leaking rows — 5 rows
+## Leaking rows — 7 rows
 
 | set | repo | method | path | operationId | gt | pred | rule | evidence | summary |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -65,4 +72,6 @@ PASS — both controls x.
 | holdout1 | github | DELETE | /repos/{owner}/{repo}/issues/{issue_number}/sub_issue | issues/remove-sub-issue | x | w | floor |  | Remove sub-issue |
 | holdout3 | discord | PUT | /guilds/{guild_id}/incident-actions | update_guild_incident_actions | x | w | floor |  |  |
 | holdout3 | vercel | DELETE | /v1/bulk-redirects | deleteRedirects | x | w | floor |  | Delete project-level redirects. |
+| holdout4 | x | DELETE | /2/broadcasts/{id}/chat/{message_id} | deleteBroadcastChatMessage | x | w | floor |  | Remove a chat message from a live broadcast |
+| holdout4 | x | PUT | /2/webhooks/{webhook_id} | validateWebhooks | x | w | floor |  | Validate webhook |
 
