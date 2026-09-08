@@ -231,6 +231,56 @@ lowering (POST read-verb list). At near-zero leaks: over-tight 9.9% /
 C7–C10 arbiter shape; decision pending user (see learnings M1-C11
 entries).
 
+### M1 arbiter flow (C11, adopted 2026-09-08)
+
+1. Floor by method. GET, HEAD, OPTIONS -> r, locked, stop. PUT, DELETE
+   -> w. POST, PATCH -> x.
+2. Live-verb raise, any method: if any token of the operationId
+   (camelCase/_/-/. split, leading HTTP-method word stripped when
+   followed by a separator) or the summary's first word (singularised)
+   is in LIVE_VERBS -> x. LIVE_VERBS = terminate, kick, cancel, revoke,
+   convert, merge, start, dial, hangup, end, reject, accept, approve,
+   invite, transfer, pay, refund, send, notify, publish, submit,
+   trigger, execute, run, launch, reboot.
+3. Party-noun raise, PUT/DELETE/PATCH only: head noun of the summary's
+   object phrase (last word before a stop word, stepping back over
+   generic tails like information/record/status) or the operationId's
+   last noun (same step-back) in PARTY_NOUNS -> x. Skipped when the
+   summary contains a caller phrase ("for the authenticated user",
+   "authenticated user", "your account", "your ", "yourself").
+   PARTY_NOUNS = member, membership, collaborator, collaboration,
+   customer, account, user, role, team, group, installation, token,
+   access, restriction, sponsorship, participant, call, seat,
+   organization, invitation, assignment, person, people, contact,
+   recipient, subscriber, tenant, partner, device, session, network,
+   repository.
+4. Read-verb lowering, POST only, only when steps 2-3 did not fire:
+   operationId lead verb in READ_VERBS -> r. READ_VERBS = retrieve,
+   verify, check, query, read, fetch, list, search, match, count,
+   lookup, assess, find, get. ("validate" was measured and leaks; it is
+   out.)
+5. Else the row keeps its floor class and is marked floor. Floor is the
+   "not known, tighter class" mark; a consumer can tell a found x from
+   a default x.
+
+| set | n | exact | leaks | over-tight |
+|---|---|---|---|---|
+| camara | 292 | 262 | 1 | 29 (9.9%) |
+| holdout1 | 207 | 155 | 2 | 50 (24.2%) |
+| holdout2 | 220 | 195 | 0 | 25 (11.4%) |
+| holdout3 | 226 | 194 | 11 | 21 (9.3%) |
+
+Hold-out 3 (Discord, Sentry, Vercel, 2026-09-08) scored once, untuned:
+11 leaks, ten of them Discord PUT/DELETE rows with no summary or
+description; a no-text tighten rule (measured, not admitted) brings it
+to 2 with zero new leaks elsewhere. See learnings.
+
+Both negative controls x. Remaining leaks: camara deleteTrafficInfluence
+(no word signal), github issues/set-issue-field-values and
+issues/remove-sub-issue (truth disputed, pending user). List growth
+rule: lists change only by hand review; the corpus is not used at score
+time (measured in C11-V9: corpus-mined verbs changed nothing).
+
 **M2 — Shape rules, only if justified.** For each divergence class from
 M0/M1 that appears more than once, add one deterministic OpenAPI-shape
 rule (request body present, response schema, status codes); re-run.
@@ -580,6 +630,12 @@ Non-blocking; never silently assumed.
   issues/set-issue-field-values, issues/remove-sub-issue) as the only
   leaks that block the summary-verb source. The user re-reads; nothing
   is re-labelled by the tool.
+- Over-tight rows are a usability cost invisible to humans at run
+  time; how a consumer surfaces or overrides them is open.
+- No-text writes: a PUT/DELETE/PATCH with no summary and no description
+  sits at the w floor. Doctrine says no evidence means the tighter
+  class. Admit the no-text tighten rule (Rule A)? Needs a hold-out 4 as
+  the new clean exam if hold-out 3 is used to decide.
 
 ## 8. Notes carried from the outline, stated on purpose
 
@@ -680,4 +736,5 @@ starts, not yet exercised.
 | D30 | M1 go/no-go set by spec interview: zero leaks among assigned rows; review plus over-tight near 5% per set on CAMARA and hold-out 1; remaining false flags must be humanly confusing; a field is primary only at ≥90% presence per method per set; leans from a broader corpus by method co-occurrence. See §4 M1. Decided 2026-09-07. |
 | D31 | Truth fix: CAMARA queryAssistant (ModelAsAService POST /answer) moves x -> r at the user's word, matching Box post_ai_ask (r) in the clean exam. One row; CAMARA becomes r 156, w 51, x 85. The old label carried a stated doubt. Decided 2026-09-07. |
 | D32 | Poll-then-callback reads are `r`. A callback raises to `x` only when the verb is not a read; "read" is decided mechanically (read-family scope token, or a corpus GET share >= 0.75 at >= 3 providers), never by a hand list. Three CAMARA rows (retrievePopulationDensity, retrieveConnectivity, count) keep their `r` label and move from over-tight to exact (M1-C7). Decided 2026-09-07 at the user's word. |
-| D33 | M1's arbiter is two passes. Pass 1: the machine-facing fields (method prior, scope, body, callbacks, corpus lean, CAMARA verb table) with a confidence sum; assigns above the threshold. Pass 2: a verb-and-noun judge on the residual only, with orchestrator-written lists (live verbs, own verbs, party nouns) measured rule by rule and admitted only at zero leaks on CAMARA + hold-out 1; switches chosen by cost after zero leaks. The verb never gives `w` on POST. Set by the user's reading of the review pile 2026-09-07, measured M1-C9. |
+| D33 | M1's arbiter is two passes. Pass 1: the machine-facing fields (method prior, scope, body, callbacks, corpus lean, CAMARA verb table) with a confidence sum; assigns above the threshold. Pass 2: a verb-and-noun judge on the residual only, with orchestrator-written lists (live verbs, own verbs, party nouns) measured rule by rule and admitted only at zero leaks on CAMARA + hold-out 1; switches chosen by cost after zero leaks. The verb never gives `w` on POST. Set by the user's reading of the review pile 2026-09-07, measured M1-C9. Superseded by D34 (C11) on 2026-09-08. |
+| D34 | M1 arbiter shape is C11 — floor + raise-only from fixed hand lists. Decided 2026-09-08. See "M1 arbiter flow (C11, adopted 2026-09-08)" in §4. |

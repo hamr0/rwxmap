@@ -1819,3 +1819,23 @@ Both negative controls x: terminateCall via live-verb opid:terminate, updateSess
 | V10 | final config = V1 + get | ADOPTED (POC) | near-zero leaks, over-tight 9.9%/24.2%/11.4% vs C10's 7%/51%/21% |
 
 Pending the user: ruling on the two GitHub truth rows; whether TrafficInfluence stays a reported leak; whether C11 replaces the C7-through-C10 shape as the M1 arbiter.
+
+### M1-C11 adopted (2026-09-08)
+
+The C11 floor + raise-only shape is adopted as the M1 arbiter, per the user's direction. Module code is `poc/m1/arbiter/c11.mjs` (being written in parallel, may not exist yet — see c11.mjs).
+
+### M1-C11 on hold-out 3 — Discord, Sentry, Vercel (2026-09-08)
+
+- Hold-out 3: data/holdout3-2026-09-08/, 226 rows (discord 81, sentry 76, vercel 69; GET 102, POST 48, PUT 20, PATCH 19, DELETE 37), blind-read by five agents, truth r 104 / w 54 / x 68, 46 doubt rows (45 Discord no-text). Scored once with the adopted C11 (poc/m1/arbiter/c11.mjs via run-c11-final.mjs), lists untouched.
+- Combined results table (set, n, exact, leaks, over_tight, exact%, leak%, over-tight%): camara 292 262 1 29 89.7 0.3 9.9; holdout1 207 155 2 50 74.9 1.0 24.2; holdout2 220 195 0 25 88.6 0.0 11.4; holdout3 226 194 11 21 85.8 4.9 9.3. Both negative controls x.
+- The 11 hold-out 3 leaks, all PUT/DELETE at the w floor: discord set_guild_application_command_permissions, delete_channel, delete_message, delete_user_message_reaction, set_channel_permission_overwrite, deprecated_create_pin, unban_user_from_guild, delete_guild_emoji, update_guild_incident_actions, delete_guild_sticker; vercel deleteRedirects ("Delete project-level redirects", creates a new version per call). Ten of eleven are Discord rows with no summary text; the party-noun rule has only the operationId to read and its head nouns (channel, message, reaction, overwrite, pin, emoji, sticker, guild) are shared-resource nouns, not party nouns.
+- Two candidate fixes measured, NOT admitted (hold-out 3 is an exam; admitting on it would taint it):
+  Rule A, no-text tighten: PUT/DELETE/PATCH row at the floor with empty summary AND empty description -> x. Leaks: camara 1, holdout1 2, holdout2 0, holdout3 2 (from 11). Over-tight: 29, 54 (+4, Twilio no-text DELETEs all w), 25, 25 (+4). Rows changed: 0 / 4 / 0 / 13. Zero new leaks anywhere. This is the doctrine's own rule (no evidence -> tighter class) applied to text, not a word fit.
+  Rule B, party path param ({user_id}, {username}, {member}, {person}, {customer}, {participant}, {actor_identifier}) on PUT/DELETE at the floor -> x: holdout3 leaks 9 (from 11), holdout1 over-tight +6, no new leaks. Weak; A subsumes its useful part on this set.
+  No-text rows by set/method/truth: holdout1 DELETE 5 w, POST 3 w / 8 x; holdout3 DELETE 2 w / 10 x, PATCH 4 w / 5 x, PUT 2 w / 4 x, POST 3 w / 11 x, GET 34 r.
+- What it taught: (1) the lists transfer: 9.3% over-tight and 85.8% exact on three vendors never seen, with no tuning; (2) the leak surface is "no text at all", which the flow currently treats as w on PUT/DELETE, i.e. a silent loosening from "don't know"; (3) readers draw the shared-resource line differently per vendor (Discord guild objects x, GitHub org settings w), so a shared-object noun list would fit one reader's line, while Rule A fits the doctrine.
+- Pending the user: admit Rule A (and if so, hold-out 3 becomes a tuning set and a hold-out 4 is needed as the clean exam), or keep C11 frozen and report hold-out 3 as-is.
+
+What the seven-layer C4-C10 work taught that still stands: machine-facing fields (scope, body, callbacks, corpus lean, CAMARA verb table) lean but never reach the 0.9 admission bar; lowering below the method prior beyond a fixed read-verb list always leaks; both noun sources (summary head noun and operationId head noun) are needed, since they catch different rows.
+
+Retired: corpus lookup at score time, the CAMARA verb table, per-operation scopes, body/flag/structural layers, the prose-word layer, the weighted-aggregate confidence sum, and the two-pass judge shape (D33).

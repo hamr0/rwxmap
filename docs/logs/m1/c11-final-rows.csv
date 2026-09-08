@@ -1,0 +1,946 @@
+set,repo,method,path,operationId,gt_class,pred,rule,evidence,summary
+camara,ApplicationEndpointDiscovery,POST,/retrieve-optimal-app-endpoints,getOptimalAppEndpoints,r,r,read-verb,opid:get,Returns the Endpoint(s) of the optimal Application Instance(s) to the user device identified in the request.
+camara,ApplicationEndpointRegistration,POST,/application-endpoint-lists,registerApplicationEndpoints,x,x,floor,,Register endpoints of a deployed application
+camara,ApplicationEndpointRegistration,GET,/application-endpoint-lists,getAllRegisteredApplicationEndpoints,r,r,locked,,Get all registered edge application endpoint information
+camara,ApplicationEndpointRegistration,GET,/application-endpoint-lists/{applicationEndpointListId},getApplicationEndpointsById,r,r,locked,,Get registered edge application endpoint information
+camara,ApplicationEndpointRegistration,PUT,/application-endpoint-lists/{applicationEndpointListId},updateApplicationEndpoint,w,w,floor,,Update an application Endpoint
+camara,ApplicationEndpointRegistration,DELETE,/application-endpoint-lists/{applicationEndpointListId},deregisterApplicationEndpoint,w,w,floor,,Deregister an application Endpoint
+camara,ApplicationProfiles,POST,/application-profiles,createApplicationProfile,x,x,floor,,Create an Application Profile
+camara,ApplicationProfiles,PATCH,/application-profiles/{applicationProfileId},updateApplicationProfile,w,x,floor,,Update an Application Profile
+camara,ApplicationProfiles,GET,/application-profiles/{applicationProfileId},readApplicationProfile,r,r,locked,,Get an Application Profile
+camara,ApplicationProfiles,DELETE,/application-profiles/{applicationProfileId},deleteApplicationProfile,w,w,floor,,Delete an Application Profile
+camara,BlockchainPublicAddress,POST,/nonce,createBlockchainPublicAddressValidationNonce,x,x,floor,,Generates a one-time nonce associated to a specific Blockchain Public Address
+camara,BlockchainPublicAddress,POST,/blockchain-public-addresses/retrieve-blockchains,retrieveBlockchainPublicAddress,r,r,read-verb,opid:retrieve,Retrieves Blockchain Public Address associated with a mobile phone number.
+camara,BlockchainPublicAddress,POST,/blockchain-public-addresses,bindBlockchainPublicAddress,x,x,floor,,Binds Blockchain Public Address to a mobile phone number
+camara,BlockchainPublicAddress,DELETE,/blockchain-public-addresses/{id},deleteBlockchainPublicAddress,w,w,floor,,Unbinds Blockchain Public Address association to a mobile phone number
+camara,CallForwardingSignal,POST,/unconditional-call-forwardings,retrieveUnconditionalCallForwarding,r,r,read-verb,opid:retrieve,Retrieve the information about the status of the unconditional call forwarding service on a phone number (PhoneNumber)
+camara,CallForwardingSignal,POST,/call-forwardings,retrieveCallForwarding,r,r,read-verb,opid:retrieve,Retrieve the information about the type of call forwarding service active on a phone number (PhoneNumber)
+camara,CapabilitiesAndRuntimeRestrictions,POST,/retrieve,postServiceCapability,x,x,floor,,Retrieve tailored service capabilities based on consumer context
+camara,CarrierBillingCheckOut,POST,/payments/{paymentId}/refunds,createRefund,x,x,live-verb,opid:refund,Create a new Refund
+camara,CarrierBillingCheckOut,GET,/payments/{paymentId}/refunds,retrieveRefunds,r,r,locked,,Get a list of refunds
+camara,CarrierBillingCheckOut,GET,/payments/{paymentId}/refunds/{refundId},retrieveRefund,r,r,locked,,Get refund details
+camara,CarrierBillingCheckOut,GET,/payments/{paymentId}/refunds/remaining-amount,retrievePaymentRemainingAmount,r,r,locked,,Get remaining amount not refunded for a given payment
+camara,CarrierBillingCheckOut,POST,/payments,createPayment,x,x,floor,,Create a new Payment
+camara,CarrierBillingCheckOut,GET,/payments,retrievePayments,r,r,locked,,Get a list of payments
+camara,CarrierBillingCheckOut,GET,/payments/{paymentId},retrievePayment,r,r,locked,,Get payment details
+camara,CarrierBillingCheckOut,POST,/payments/prepare,preparePayment,x,x,floor,,Prepare (reserve) a payment
+camara,CarrierBillingCheckOut,POST,/payments/{paymentId}/validate,validatePayment,x,x,floor,,Validate a payment
+camara,CarrierBillingCheckOut,POST,/payments/{paymentId}/confirm,confirmPayment,x,x,floor,,Confirm a payment
+camara,CarrierBillingCheckOut,POST,/payments/{paymentId}/cancel,cancelPayment,w,x,live-verb,opid:cancel,Cancel a payment
+camara,ClickToDial,POST,/calls,createCall,x,x,floor,,Create a new Click to Dial call session
+camara,ClickToDial,GET,/calls/{callId},getCall,r,r,locked,,Get call details
+camara,ClickToDial,DELETE,/calls/{callId},terminateCall,x,x,live-verb,opid:terminate,Terminate an active call
+camara,ClickToDial,GET,/calls/{callId}/recording,getRecording,r,r,locked,,Get call recording
+camara,ConnectedNetworkType,POST,/subscriptions,createConnectedNetworkTypeSubscription,x,x,floor,,Create a subscription for receiving notifications on changes to the connected network type of a device
+camara,ConnectedNetworkType,GET,/subscriptions,retrieveConnectedNetworkTypeSubscriptionList,r,r,locked,,Retrieve a list of device connected network type event subscription
+camara,ConnectedNetworkType,GET,/subscriptions/{subscriptionId},retrieveConnectedNetworkTypeSubscription,r,r,locked,,Retrieve a device connected network type event subscription for a device
+camara,ConnectedNetworkType,DELETE,/subscriptions/{subscriptionId},deleteConnectedNetworkTypeSubscription,w,w,floor,,Delete connected network type event subscription for a device
+camara,ConnectedNetworkType,POST,/retrieve,getConnectedNetworkType,r,r,read-verb,opid:get,Get the connected network type
+camara,ConnectivityInsights,POST,/subscriptions,createSubscription,x,x,floor,,Create a Connectivity insights subscription for a device
+camara,ConnectivityInsights,GET,/subscriptions,getSubscriptionList,r,r,locked,,Retrieve a list of apiName event subscription
+camara,ConnectivityInsights,GET,/subscriptions/{subscriptionId},getSubscription,r,r,locked,,Operation to retrieve a subscription based on the provided ID
+camara,ConnectivityInsights,DELETE,/subscriptions/{subscriptionId},deleteSubscription,w,w,floor,,Operation to delete a subscription
+camara,ConnectivityInsights,POST,/check-network-quality,checkNetworkQuality,r,r,read-verb,opid:check,Check the network quality.
+camara,ConsentInfo,POST,/retrieve,retrieveStatus,r,r,read-verb,opid:retrieve,Create a request to retrieve the validity status of the data processing
+camara,ConsentManagement,POST,/consents,createConsent,x,x,floor,,Create User Consent
+camara,ConsentManagement,PATCH,/consents/{consentId},updateConsent,w,x,floor,,Update User Consent
+camara,ConsentManagement,POST,/consents/retrieve-info,retrieveConsentInfo,r,r,read-verb,opid:retrieve,Retrieve Consent Information
+camara,CustomerInsights,POST,/scoring/retrieve,retrieveScoring,r,r,read-verb,opid:retrieve,Retrieves Scoring information
+camara,DedicatedNetworks,GET,/accesses,listAccesses,r,r,locked,,"Get a paged list of accesses to dedicated networks, optionally filtered for a given device and/or for a given dedicated network"
+camara,DedicatedNetworks,POST,/accesses,createAccess,x,x,floor,,"Create an access to a dedicated network with given configuration, optionally including devices"
+camara,DedicatedNetworks,GET,/accesses/{accessId},readAccess,r,r,locked,,Read access information
+camara,DedicatedNetworks,DELETE,/accesses/{accessId},deleteAccess,x,x,party-noun,summary:access,Delete an access
+camara,DedicatedNetworks,GET,/accesses/{accessId}/devices,listDevices,r,r,locked,,"Read a paged list of devices with information included in the access, optionally filtered for a given device and/or for a given device status"
+camara,DedicatedNetworks,POST,/accesses/{accessId}/devices/add,addDevicesToAccess,x,x,floor,,Add devices to the access
+camara,DedicatedNetworks,POST,/accesses/{accessId}/devices/remove,removeDevicesFromAccess,x,x,floor,,Remove devices from the access
+camara,DedicatedNetworks,POST,/retrieve-service-areas,retrieveNetworkServiceAreas,r,r,read-verb,opid:retrieve,"Retrieve network service areas, filtered by additional search criteria"
+camara,DedicatedNetworks,GET,/areas/{areaId},readNetworkServiceArea,r,r,locked,,Read a network service area
+camara,DedicatedNetworks,GET,/profiles,readNetworkProfiles,r,r,locked,,Read dedicated network profiles
+camara,DedicatedNetworks,GET,/profiles/{profileId},readNetworkProfile,r,r,locked,,Read a dedicated network profile
+camara,DedicatedNetworks,GET,/networks,listNetworks,r,r,locked,,Get a paged list of dedicated networks
+camara,DedicatedNetworks,POST,/networks,createNetwork,x,x,floor,,Request to create a dedicated network
+camara,DedicatedNetworks,GET,/networks/{networkId},readNetwork,r,r,locked,,Get the current information about a dedicated network
+camara,DedicatedNetworks,DELETE,/networks/{networkId},deleteNetwork,x,x,party-noun,summary:network,Delete a dedicated network
+camara,DeviceAuthenticity,POST,/check-status,checkImeiStatus,r,r,read-verb,opid:check,Check the register status of a device using its IMEI
+camara,DeviceDataVolume,POST,/subscriptions,createDeviceDataVolumeSubscription,x,x,floor,,Create a device data volume event subscription
+camara,DeviceDataVolume,GET,/subscriptions,retrieveDeviceDataVolumeSubscriptionList,r,r,locked,,Retrieve a list of device data volume subscriptions
+camara,DeviceDataVolume,GET,/subscriptions/{subscriptionId},retrieveDeviceDataVolumeSubscription,r,r,locked,,Retrieve a device data volume event subscription
+camara,DeviceDataVolume,DELETE,/subscriptions/{subscriptionId},deleteDeviceDataVolumeSubscription,w,w,floor,,Delete a device data volume event subscription
+camara,DeviceDataVolume,POST,/retrieve,retrieveDataVolume,r,x,live-verb,summary:execute,Execute device data volume retrieval for a user device
+camara,DeviceDataVolume,POST,/check,checkDataVolume,r,r,read-verb,opid:check,Check if the remaining data allowance is above a specified threshold
+camara,DeviceIdentifier,POST,/retrieve-identifier,retrieveIdentifier,r,r,read-verb,opid:retrieve,Get details about the specific device being used by a given mobile subscriber
+camara,DeviceIdentifier,POST,/retrieve-type,retrieveType,r,r,read-verb,opid:retrieve,Get details about the type of device being used by a given mobile subscriber
+camara,DeviceIdentifier,POST,/retrieve-ppid,retrievePpid,r,r,read-verb,opid:retrieve,Get a pseudonymous identifier for device being used by a given mobile subscriber
+camara,DeviceIdentifier,POST,/match-identifier,matchIdentifier,r,r,read-verb,opid:match,Check if a provided device identifier matches the one associated with the subscription
+camara,DeviceLocation,POST,/subscriptions,createGeofencingSubscription,x,x,floor,,Create a geofencing subscription for a device
+camara,DeviceLocation,GET,/subscriptions,retrieveGeofencingSubscriptionList,r,r,locked,,Retrieve a list of geofencing event subscription
+camara,DeviceLocation,GET,/subscriptions/{subscriptionId},retrieveGeofencingSubscription,r,r,locked,,Operation to retrieve a subscription based on the provided ID
+camara,DeviceLocation,DELETE,/subscriptions/{subscriptionId},deleteGeofencingSubscription,w,w,floor,,Delete a Geofencing event subscription
+camara,DeviceLocation,POST,/retrieve,retrieveLocation,r,x,live-verb,summary:execute,Execute location retrieval for a user device
+camara,DeviceLocation,POST,/verify,verifyLocation,r,r,read-verb,opid:verify,Verify the location of a device
+camara,DeviceMediaStreamingRate,POST,/retrieve-maximum-downstream-media-rate,retrieveMaximumDownstreamMediaRate,r,r,read-verb,opid:retrieve,Get maximum downstream media streaming rate
+camara,DeviceReachabilityStatus,POST,/subscriptions,createDeviceReachabilityStatusSubscription,x,x,floor,,Create a device reachability status event subscription for a device
+camara,DeviceReachabilityStatus,GET,/subscriptions,retrieveDeviceReachabilityStatusSubscriptionList,r,r,locked,,Retrieve a list of device reachability status event subscription
+camara,DeviceReachabilityStatus,GET,/subscriptions/{subscriptionId},retrieveDeviceReachabilityStatusSubscription,r,r,locked,,Retrieve a device reachability status event subscription for a device
+camara,DeviceReachabilityStatus,DELETE,/subscriptions/{subscriptionId},deleteDeviceReachabilityStatusSubscription,w,w,floor,,Delete a device reachability status event subscription for a device
+camara,DeviceReachabilityStatus,POST,/retrieve,getReachabilityStatus,r,r,read-verb,opid:get,Get the current reachability status information
+camara,DeviceRoamingStatus,POST,/subscriptions,createDeviceRoamingStatusSubscription,x,x,floor,,Create a device roaming status event subscription for a device
+camara,DeviceRoamingStatus,GET,/subscriptions,retrieveDeviceRoamingStatusSubscriptionList,r,r,locked,,Retrieve a list of device roaming status event subscription
+camara,DeviceRoamingStatus,GET,/subscriptions/{subscriptionId},retrieveDeviceRoamingStatusSubscription,r,r,locked,,Retrieve a roaming status event subscription for a device
+camara,DeviceRoamingStatus,DELETE,/subscriptions/{subscriptionId},deleteDeviceRoamingStatusSubscription,w,w,floor,,Delete a device-roaming-status event subscription for a device
+camara,DeviceRoamingStatus,POST,/retrieve,getRoamingStatus,r,r,read-verb,opid:get,Get the current roaming status and the country information
+camara,DeviceStatus,POST,/subscriptions,createConnectedNetworkTypeSubscription,x,x,floor,,Create a subscription for receiving notifications on changes to the connected network type of a device
+camara,DeviceStatus,GET,/subscriptions,retrieveConnectedNetworkTypeSubscriptionList,r,r,locked,,Retrieve a list of device connected network type event subscription
+camara,DeviceStatus,GET,/subscriptions/{subscriptionId},retrieveConnectedNetworkTypeSubscription,r,r,locked,,Retrieve a device connected network type event subscription for a device
+camara,DeviceStatus,DELETE,/subscriptions/{subscriptionId},deleteConnectedNetworkTypeSubscription,w,w,floor,,Delete connected network type event subscription for a device
+camara,DeviceStatus,POST,/retrieve,getConnectedNetworkType,r,r,read-verb,opid:get,Get the connected network type
+camara,DeviceStatus,POST,/subscriptions,createDeviceReachabilityStatusSubscription,x,x,floor,,Create a device reachability status event subscription for a device
+camara,DeviceStatus,GET,/subscriptions,retrieveDeviceReachabilityStatusSubscriptionList,r,r,locked,,Retrieve a list of device reachability status event subscription
+camara,DeviceStatus,GET,/subscriptions/{subscriptionId},retrieveDeviceReachabilityStatusSubscription,r,r,locked,,Retrieve a device reachability status event subscription for a device
+camara,DeviceStatus,DELETE,/subscriptions/{subscriptionId},deleteDeviceReachabilityStatusSubscription,w,w,floor,,Delete a device reachability status event subscription for a device
+camara,DeviceStatus,POST,/retrieve,getReachabilityStatus,r,r,read-verb,opid:get,Get the current reachability status information
+camara,DeviceStatus,POST,/subscriptions,createDeviceRoamingStatusSubscription,x,x,floor,,Create a device roaming status event subscription for a device
+camara,DeviceStatus,GET,/subscriptions,retrieveDeviceRoamingStatusSubscriptionList,r,r,locked,,Retrieve a list of device roaming status event subscription
+camara,DeviceStatus,GET,/subscriptions/{subscriptionId},retrieveDeviceRoamingStatusSubscription,r,r,locked,,Retrieve a roaming status event subscription for a device
+camara,DeviceStatus,DELETE,/subscriptions/{subscriptionId},deleteDeviceRoamingStatusSubscription,w,w,floor,,Delete a device-roaming-status event subscription for a device
+camara,DeviceStatus,POST,/retrieve,getRoamingStatus,r,r,read-verb,opid:get,Get the current roaming status and the country information
+camara,DeviceSwap,POST,/retrieve-date,retrieveDeviceSwapDate,r,r,read-verb,opid:retrieve,Get last device swap date
+camara,DeviceSwap,POST,/check,checkDeviceSwap,r,r,read-verb,opid:check,Check last device swap date
+camara,DeviceVisitLocation,POST,/retrieve,retrieveDeviceVisitLocation,r,r,read-verb,opid:retrieve,Retrieves device visit location information
+camara,EdgeApplicationManagement,POST,/apps,submitApp,x,x,live-verb,opid:submit,Submit application metadata to the Edge Cloud Provider.
+camara,EdgeApplicationManagement,GET,/apps,getApps,r,r,locked,,Retrieve a list of existing Applications
+camara,EdgeApplicationManagement,GET,/apps/{appId},getApp,r,r,locked,,Retrieve the information of an Application
+camara,EdgeApplicationManagement,DELETE,/apps/{appId},deleteApp,w,w,floor,,Delete an Application from an Edge Cloud Provider
+camara,EdgeApplicationManagement,POST,/app-instances,createAppInstance,x,x,floor,,Instantiation of an Application
+camara,EdgeApplicationManagement,GET,/app-instances,getAppInstances,r,r,locked,,Retrieve the information of Application Instances for a given App
+camara,EdgeApplicationManagement,GET,/app-instances/{appInstanceId},getAppInstance,r,r,locked,,Retrieve the information of an Application Instance
+camara,EdgeApplicationManagement,DELETE,/app-instances/{appInstanceId},deleteAppInstance,w,x,live-verb,summary:terminate,Terminate an Application Instance
+camara,EdgeApplicationManagement,POST,/deployments,createAppDeployment,x,x,floor,,Deploy an Application
+camara,EdgeApplicationManagement,GET,/deployments,getAppDeployments,r,r,locked,,Retrieve a list of Application Deployment for a given App
+camara,EdgeApplicationManagement,GET,/deployments/{appDeploymentId},getAppDeployment,r,r,locked,,Retrieve the information of an Application Deployment
+camara,EdgeApplicationManagement,DELETE,/deployments/{appDeploymentId},deleteAppDeployment,w,x,live-verb,summary:terminate,Terminate an Application Deployment
+camara,EdgeApplicationManagement,PATCH,/deployments/{appDeploymentId},updateAppDeployment,w,x,floor,,Update an Application Deployment
+camara,EdgeApplicationManagement,GET,/edge-cloud-zones,getEdgeCloudZones,r,r,locked,,Retrieve a paginated list of the provider's Edge Cloud Zones
+camara,EnergyFootprintNotification,POST,/calculate-energy-consumption,calculateEnergyConsumption,x,x,floor,,Provides the overall Energy Consumption for the target Application instances in a certain period of time.
+camara,EnergyFootprintNotification,POST,/calculate-carbon-footprint,calculateCarbonFootprint,x,x,floor,,Retrieves the overall carbon footprint for the target Application instances in a certain period of time.
+camara,HighThroughputElasticNetworks,POST,/high-throughput-elastic-network/transmission/schedule,scheduleTransmission,x,x,live-verb,summary:submit,Submit high-throughput data transmission scheduling request
+camara,InHomeDeviceManagement,GET,/v1/devices,listDevices,r,r,locked,,Get all connected devices
+camara,InHomeDeviceManagement,GET,/v1/devices/{deviceId},getDevice,r,r,locked,,Get device details
+camara,InHomeDeviceManagement,PATCH,/v1/devices/{deviceId},updateDevice,x,x,party-noun,summary:device,Update device information
+camara,InHomeDeviceManagement,DELETE,/v1/devices/{deviceId},deleteDevice,x,x,party-noun,summary:device,Delete device record
+camara,InHomeDeviceManagement,POST,/v1/devices/{deviceId}/actions/{actionId},performDeviceAction,x,x,floor,,Perform action on device
+camara,InHomeDeviceManagement,GET,/v1/devices/{deviceId}/network-health,getDeviceNetworkHealth,r,r,locked,,Get device network health
+camara,IoTDeviceManagement,POST,/download,downloadEsimProfile,x,x,floor,,Download eSIM Profile to device
+camara,IoTDeviceManagement,POST,/enable,enableEsimProfile,x,x,floor,,Enable eSIM Profile
+camara,IoTDeviceManagement,POST,/disable,disableEsimProfile,x,x,floor,,Disable eSIM Profile
+camara,IoTDeviceManagement,POST,/delete,deleteEsimProfile,x,x,floor,,Delete eSIM Profile
+camara,IoTDeviceManagement,POST,/set-fallback,setFallbackEsimProfile,x,x,floor,,Set fallback eSIM Profile
+camara,IoTDeviceManagement,POST,/retrieve-status,getEsimProfileStatus,r,r,read-verb,opid:get,Retrieve eSIM Profile status
+camara,IoTDeviceManagement,GET,/operations/{operationId},retrieveOperation,r,r,locked,,Retrieve operation information
+camara,IoTNetworkOptimization,POST,/features/power-saving,activatePowerSaving,x,x,floor,,Activate or de-activate power-saving features for IoT devices
+camara,IoTNetworkOptimization,GET,/features/power-saving/transactions/{transactionId},getPowerSaving,r,r,locked,,Get status of a transaction for power-saving features
+camara,IoTSIMFraudPrevention,POST,/subscriptions,subscribeFraudPrevention,x,x,floor,,Subscribe to IMEI or area change events
+camara,IoTSIMFraudPrevention,GET,/subscriptions,listSubscriptions,r,r,locked,,List subscriptions
+camara,IoTSIMFraudPrevention,GET,/subscriptions/{subscriptionId},getSubscription,r,r,locked,,Get subscription details
+camara,IoTSIMFraudPrevention,DELETE,/subscriptions/{subscriptionId},deleteSubscription,w,w,floor,,Delete subscription
+camara,IoTSIMFraudPrevention,POST,/bind,bindDeviceImei,x,x,floor,,Bind device IMEI or area restrictions
+camara,IoTSIMFraudPrevention,POST,/unbind,unBindDeviceImei,x,x,floor,,Unbind device IMEI or area restrictions
+camara,IoTSIMFraudPrevention,POST,/query,query,r,r,read-verb,opid:query,IoT SIM Fraud Prevention Query
+camara,KnowYourCustomer,POST,/verify,verifyAge,r,r,read-verb,opid:verify,Verify Age Threshold
+camara,KnowYourCustomer,POST,/fill-in,KYC_Fill-in,r,x,floor,,Providing information related to a customer identity stored the account data bound to the customer's phone number.
+camara,KnowYourCustomer,POST,/match,KYC_Match,r,x,floor,,Matching a customer identity by checking a set of attributes related against the account data bound to their phone number.
+camara,KnowYourCustomerAgeVerification,POST,/verify,verifyAge,r,r,read-verb,opid:verify,Verify Age Threshold
+camara,KnowYourCustomerFill-in,POST,/fill-in,kycFillin,r,x,floor,,Providing information related to a customer identity stored the account data bound to the customer's phone number.
+camara,KnowYourCustomerMatch,POST,/match,kycMatch,r,x,floor,,Matching a customer identity by checking a set of attributes related against the account data bound to their phone number.
+camara,ModelAsAService,POST,/knowledge-bases,createKnowledgeBase,x,x,floor,,Create a new knowledge base
+camara,ModelAsAService,GET,/knowledge-bases,listKnowledgeBases,r,r,locked,,Get all knowledge bases
+camara,ModelAsAService,GET,/knowledge-bases/{knowledgeBaseId},getKnowledgeBase,r,r,locked,,Get a specific knowledge base
+camara,ModelAsAService,PUT,/knowledge-bases/{knowledgeBaseId},updateKnowledgeBase,w,w,floor,,Update a knowledge base
+camara,ModelAsAService,DELETE,/knowledge-bases/{knowledgeBaseId},deleteKnowledgeBase,w,w,floor,,Delete a knowledge base
+camara,ModelAsAService,POST,/knowledge-bases/{knowledgeBaseId}/documents,uploadDocument,x,x,floor,,Upload a document to a knowledge base
+camara,ModelAsAService,GET,/knowledge-bases/{knowledgeBaseId}/documents/{documentId},getDocument,r,r,locked,,Get a specific document
+camara,ModelAsAService,DELETE,/knowledge-bases/{knowledgeBaseId}/documents/{documentId},deleteDocument,w,w,floor,,Delete a document
+camara,ModelAsAService,POST,/knowledge-bases/{knowledgeBaseId}/tools,createTool,x,x,floor,,Register a new tool
+camara,ModelAsAService,GET,/knowledge-bases/{knowledgeBaseId}/tools,listTools,r,r,locked,,List all tools in a knowledge base
+camara,ModelAsAService,GET,/knowledge-bases/{knowledgeBaseId}/tools/{toolId},getTool,r,r,locked,,Get a specific tool
+camara,ModelAsAService,PUT,/knowledge-bases/{knowledgeBaseId}/tools/{toolId},updateTool,w,w,floor,,Update a tool
+camara,ModelAsAService,DELETE,/knowledge-bases/{knowledgeBaseId}/tools/{toolId},deleteTool,w,w,floor,,Delete a tool
+camara,ModelAsAService,POST,/knowledge-bases/{knowledgeBaseId}/tools/{toolId}/call,callTool,x,x,floor,,Invoke a tool
+camara,ModelAsAService,POST,/assistants,createAssistant,x,x,floor,,Create a new QA assistant
+camara,ModelAsAService,GET,/assistants,listAssistants,r,r,locked,,List all QA assistants
+camara,ModelAsAService,GET,/assistants/{assistantId},getAssistant,r,r,locked,,Get a specific QA assistant
+camara,ModelAsAService,PUT,/assistants/{assistantId},updateAssistant,w,w,floor,,Update a QA assistant
+camara,ModelAsAService,DELETE,/assistants/{assistantId},deleteAssistant,w,w,floor,,Delete a QA assistant
+camara,ModelAsAService,POST,/answer,queryAssistant,r,r,read-verb,opid:query,Get an answer from a QA assistant
+camara,MostFrequentLocation,POST,/verify,verifyFrequentLocation,r,r,read-verb,opid:verify,Verify the most frequent location of a device
+camara,MultiPointVPN,POST,/networks,createNetwork,x,x,floor,,To create a multipoint virtual private network
+camara,MultiPointVPN,PATCH,/networks/{serviceId},updateNetwork,w,x,party-noun,summary:network,To update a multipoint virtual private network
+camara,MultiPointVPN,GET,/networks/{serviceId},getNetwork,r,r,locked,,retrieve multipoint virtual private network details
+camara,MultiPointVPN,DELETE,/networks/{serviceId},deleteNetwork,w,x,party-noun,summary:network,Delete multipoint virtual private network
+camara,MultiPointVPN,POST,/assessment,assessConnectionFeasibility,r,r,read-verb,opid:assess,Assess Multipoint VPN connection feasibility
+camara,NetworkAccessManagement,GET,/network-access-devices,getNetworkAccessDevices,r,r,locked,,Get all Network Access Devices associated with the service owner
+camara,NetworkAccessManagement,GET,/network-access-devices/{networkAccessDeviceId},getNetworkAccessDevice,r,r,locked,,Get a specific Network Access Device
+camara,NetworkAccessManagement,POST,/reboot-requests,createRebootRequest,x,x,live-verb,opid:reboot,Create a new Reboot Request
+camara,NetworkAccessManagement,GET,/reboot-requests,getRebootRequests,r,r,locked,,Get all Reboot Requests created by the calling API client
+camara,NetworkAccessManagement,GET,/reboot-requests/{rebootRequestId},getRebootRequest,r,r,locked,,Get a specific Reboot Request
+camara,NetworkAccessManagement,PATCH,/reboot-requests/{rebootRequestId},updateRebootRequest,x,x,live-verb,opid:reboot,Update an existing Reboot Request
+camara,NetworkAccessManagement,DELETE,/reboot-requests/{rebootRequestId},deleteRebootRequest,w,x,live-verb,opid:reboot,Delete an existing Reboot Request
+camara,NetworkAccessManagement,GET,/services,getServices,r,r,locked,,Get all services accessible to the authenticated identity
+camara,NetworkAccessManagement,GET,/services/{serviceId},getService,r,r,locked,,Get a service by ID
+camara,NetworkAccessManagement,GET,/trust-domains/capabilities,getTrustDomainCapabilities,r,r,locked,,Get Trust Domain capabilities
+camara,NetworkAccessManagement,POST,/trust-domains,createTrustDomain,w,x,floor,,Create a new Trust Domain
+camara,NetworkAccessManagement,GET,/trust-domains,getTrustDomains,r,r,locked,,Retrieves all Trust Domains visible to the calling API client
+camara,NetworkAccessManagement,GET,/trust-domains/{trustDomainId},getTrustDomain,r,r,locked,,Get a specific Trust Domain
+camara,NetworkAccessManagement,PATCH,/trust-domains/{trustDomainId},updateTrustDomain,w,x,floor,,Update a specific Trust Domain
+camara,NetworkAccessManagement,DELETE,/trust-domains/{trustDomainId},deleteTrustDomain,w,w,floor,,Delete a specific Trust Domain
+camara,NetworkAccessManagement,POST,/trust-domains/{trustDomainId}/devices,createTrustDomainDevice,x,x,floor,,Register a new device to a Trust Domain
+camara,NetworkAccessManagement,GET,/trust-domains/{trustDomainId}/devices,getTrustDomainDevices,r,r,locked,,List all devices registered to a Trust Domain
+camara,NetworkAccessManagement,GET,/trust-domains/{trustDomainId}/devices/{deviceId},getTrustDomainDevice,r,r,locked,,Get a specific device in a Trust Domain
+camara,NetworkAccessManagement,PATCH,/trust-domains/{trustDomainId}/devices/{deviceId},updateTrustDomainDevice,w,x,party-noun,summary:device,Update a device in a Trust Domain
+camara,NetworkAccessManagement,DELETE,/trust-domains/{trustDomainId}/devices/{deviceId},deleteTrustDomainDevice,w,x,party-noun,summary:device,Remove a device from a Trust Domain
+camara,NetworkInsights,GET,/health-scores,getHealthScores,r,r,locked,,Query the latest network health score
+camara,NetworkInsights,GET,/traffic-analysis,getTrafficAnalysis,r,r,locked,,Get network traffic analysis
+camara,NetworkSliceBooking,POST,/slices/{sliceId}/devices,assignDevice,x,x,floor,,Assign a device to a network slice
+camara,NetworkSliceBooking,GET,/slices/{sliceId}/devices,getDevices,r,r,locked,,Get devices assigned to a network slice
+camara,NetworkSliceBooking,POST,/slices/{sliceId}/release,releaseDevice,x,x,floor,,Release a device from an existing network slice
+camara,NetworkSliceBooking,POST,/retrieve-slices,retrieveSlicesByDevice,r,r,read-verb,opid:retrieve,Retrieve all network slices by device
+camara,NetworkSliceBooking,POST,/slices,createSlice,x,x,floor,,Creates a new network slice
+camara,NetworkSliceBooking,DELETE,/slices/{sliceId},deleteSlice,w,w,floor,,Delete a network slice
+camara,NetworkSliceBooking,GET,/slices/{sliceId},getSlice,r,r,locked,,Get network slcie booking information
+camara,NumberRecycling,POST,/check,checkNumberRecycling,r,r,read-verb,opid:check,Check whether the subscriber of the phone number has changed.
+camara,NumberVerification,POST,/verify,phoneNumberVerify,r,x,floor,,Verifies if the received hashed/plain text phone number matches the phone number associated with the access token
+camara,NumberVerification,GET,/device-phone-number,phoneNumberShare,r,r,locked,,Returns the phone number associated with the access token
+camara,OTPValidation,POST,/send-code,sendCode,x,x,live-verb,opid:send,Sends a message including an OTP code to the given phone number
+camara,OTPValidation,POST,/validate-code,validateCode,w,x,floor,,Verifies the OTP received as input
+camara,OptimalEdgeDiscovery,GET,/regions,getRegions,r,r,locked,,Fetch all Regions
+camara,OptimalEdgeDiscovery,POST,/retrieve-optimal-edge-cloud-zones,discoverOptimalEdge,r,x,floor,,Discover optimal edge cloud zones for deployed applications
+camara,PopulationDensityData,POST,/retrieve,retrievePopulationDensity,r,r,read-verb,opid:retrieve,Retrieves population density information in a specified area
+camara,PredictiveConnectivityData,POST,/retrieve,retrieveConnectivity,r,r,read-verb,opid:retrieve,Obtain connectivity information in the specified area
+camara,QoSBooking,POST,/qos-bookings,createBooking,x,x,floor,,This operation reserves required QoS in advance up to a certain number of devices in certain serviceArea and time slot. The devices have to be attached with a subsequent operation.
+camara,QoSBooking,GET,/qos-bookings/{bookingId},getBookingById,r,r,locked,,Get the Booking information for a given QoS Booking identified by `bookingId`.
+camara,QoSBooking,DELETE,/qos-bookings/{bookingId},deleteBooking,w,w,floor,,This operation cancels an existing QoS Booking and release the associated resources.
+camara,QoSBooking,POST,/qos-bookings/{bookingId}/devices/assign,assignDevices,x,x,floor,,Assign one or more devices to an existing QoS Booking identified by `bookingId`
+camara,QoSBooking,GET,/qos-bookings/{bookingId}/devices,getDevicesByBookingId,r,r,locked,,Get the list of devices assigned to an existing QoS Booking
+camara,QoSBooking,POST,/qos-bookings/{bookingId}/devices/release,releaseDevices,x,x,floor,,Release one or more devices from the given QoS Booking
+camara,QoSBooking,POST,/qos-bookings/retrieve,retrieveBookingByDevice,r,r,read-verb,opid:retrieve,Retrieves all the bookings that corresponds to a device
+camara,QoSBooking,POST,/device-qos-bookings,createBooking,x,x,floor,,Sets a new booking of QoS for a device
+camara,QoSBooking,GET,/device-qos-bookings/{bookingId},getBookingById,r,r,locked,,Get QoS Booking information
+camara,QoSBooking,DELETE,/device-qos-bookings/{bookingId},deleteBooking,w,w,floor,,Deletes a QoS Booking
+camara,QoSBooking,POST,/retrieve-device-qos-bookings,retrieveBookingByDevice,r,r,read-verb,opid:retrieve,Gets the QoS Booking for a device
+camara,QualityOnDemand,POST,/retrieve-qos-profiles,retrieveQosProfiles,r,r,read-verb,opid:retrieve,Retrieve QoS profiles
+camara,QualityOnDemand,GET,/qos-profiles/{name},getQosProfile,r,r,locked,,Get QoS Profile for a given name
+camara,QualityOnDemand,POST,/qos-assignments,createQosAssignment,x,x,live-verb,summary:trigger,Triggers the provisioning process for the assignment of a QoS profile to a device
+camara,QualityOnDemand,GET,/qos-assignments/{assignmentId},getQosAssignmentById,r,r,locked,,Get the QoS profile assignment information identified by an assignment record ID
+camara,QualityOnDemand,DELETE,/qos-assignments/{assignmentId},revokeQosAssignment,w,x,live-verb,opid:revoke,Revokes a QoS profile assignment identified by an assignment record ID
+camara,QualityOnDemand,POST,/retrieve-qos-assignment,getQosAssignmentByDevice,r,r,read-verb,opid:get,Returns the assignment record details of the QoS profile assignment for a device
+camara,QualityOnDemand,POST,/sessions,createSession,x,x,floor,,Creates a new session
+camara,QualityOnDemand,GET,/sessions/{sessionId},getSession,r,r,locked,,Get QoS session information
+camara,QualityOnDemand,DELETE,/sessions/{sessionId},deleteSession,w,x,party-noun,summary:session,Delete a QoS session
+camara,QualityOnDemand,POST,/sessions/{sessionId}/extend,extendQosSessionDuration,x,x,floor,,Extend the duration of an active session
+camara,QualityOnDemand,POST,/retrieve-sessions,retrieveSessionsByDevice,r,r,read-verb,opid:retrieve,Get QoS session information for a device
+camara,RegionDeviceCount,POST,/count,count,r,r,read-verb,opid:count,API operation to get the device count in the specified area during a certain time interval.
+camara,SessionInsights,POST,/sessions,createSession,x,x,floor,,Create a Session Insights session
+camara,SessionInsights,GET,/sessions/{sessionId},getSession,r,r,locked,,Get session by sessionId
+camara,SessionInsights,DELETE,/sessions/{sessionId},deleteSession,w,x,party-noun,summary:session,Delete session
+camara,SessionInsights,POST,/retrieve-sessions,retrieveSessionsByDevice,r,r,read-verb,opid:retrieve,Retrieve Session Insights sessions by device
+camara,SessionInsights,POST,/sessions/{sessionId}/metrics,sendSessionMetrics,x,x,live-verb,opid:send,Send session metrics
+camara,SimSwap,POST,/subscriptions,createSimSwapSubscription,x,x,floor,,Create a sim swap event subscription for a phone number
+camara,SimSwap,GET,/subscriptions,retrieveSubscriptionList,r,r,locked,,Retrieve a list of sim swap event subscription
+camara,SimSwap,GET,/subscriptions/{subscriptionId},retrieveSubscription,r,r,locked,,Retrieve a sim swap event subscription for a phone number
+camara,SimSwap,DELETE,/subscriptions/{subscriptionId},deleteSubscription,w,w,floor,,Delete a sim swap event subscription
+camara,SimSwap,POST,/retrieve-date,retrieveSimSwapDate,r,r,read-verb,opid:retrieve,Retrieve SIM swap date
+camara,SimSwap,POST,/check,checkSimSwap,r,r,read-verb,opid:check,Check SIM swap
+camara,SimSwap,POST,/retrieve-age-band,retrieveSimSwapAgeBand,r,r,read-verb,opid:retrieve,Retrieve SIM swap age band
+camara,SimpleEdgeDiscovery,POST,/retrieve-closest-edge-cloud-zone,readClosestEdgeCloudZone,r,r,read-verb,opid:read,Returns the name of the Edge Cloud Zone closest to user device identified in the request.
+camara,SponsoredData,POST,/sponsorship,startSponsorship,x,x,live-verb,opid:start,Start Sponsorship Session Request
+camara,SponsoredData,GET,/sponsorship/{sponsorId}/{campaignId}/{sessionId}/session-status,getSessionStatus,r,r,locked,,Sponsorship Session Status Inquiry
+camara,SponsoredData,DELETE,/sponsorship/{sponsorId}/{campaignId}/{sessionId}/revoke,revokeSponsorship,x,x,live-verb,opid:revoke,Revocation of Sponsorship
+camara,SponsoredData,GET,/campaign/{sponsorId}/{campaignId}/campaign-status,getCampaignStatus,r,r,locked,,"Campaign Status Inquiry [active, paused, concluded], data volume balance."
+camara,SponsoredData,GET,/campaign/{sponsorId}/{campaignId}/active-sponsorships,getActiveSponsorships,r,r,locked,,Query of Active Sponsorships
+camara,SponsoredData,POST,/campaign/{sponsorId}/{campaignId}/alert-subscription,configureAlerts,x,x,floor,,Campaigns - Subscription to Alert y Notifications
+camara,SponsoredData,POST,/campaign/management,manageCampaign,w,x,floor,,Campaign Management
+camara,SubscriptionStatus,POST,/retrieve-subscription-status,retrieveSubscriptionStatus,r,r,read-verb,opid:retrieve,Retrieve subscription status of a phone number
+camara,Tenure,POST,/check-tenure,checkTenure,r,r,read-verb,opid:check,The KYC Tenure service API
+camara,TrafficInfluence,GET,/traffic-influences,getAllTrafficInfluences,r,r,locked,,Retries existing TrafficInfluence Resources
+camara,TrafficInfluence,POST,/traffic-influences,postTrafficInfluence,x,x,floor,,Creates a new TrafficInfluence resource influencing the traffic toward local instances of the Application for any user.
+camara,TrafficInfluence,POST,/traffic-influence-devices,postTrafficInfluenceDevice,x,x,floor,,Creates a new TrafficInfluence resource influencing the traffic toward local instances of the Application for a specific user.
+camara,TrafficInfluence,GET,/traffic-influences/{trafficInfluenceID},getTrafficInfluenceById,r,r,locked,,Reads a specific TrafficInfluence resource identified by the trafficInfluenceID value.
+camara,TrafficInfluence,PATCH,/traffic-influences/{trafficInfluenceID},patchTrafficInfluence,x,x,floor,,"updates a specific TrafficInfluence resource, identified by the trafficInfluenceID value. If used for a specific user, the Device parameter can not be modified."
+camara,TrafficInfluence,DELETE,/traffic-influences/{trafficInfluenceID},deleteTrafficInfluence,x,w,floor,,Delete an existing TrafficInfluence resource
+camara,VerifiedCaller,POST,/registrations,createRegistration,x,x,floor,,Register new brand information in the service platform
+camara,VerifiedCaller,GET,/registrations,readRegistrations,r,r,locked,,Read existing brand registrations from the service platform
+camara,VerifiedCaller,GET,/registrations/{registrationId},readRegistration,r,r,locked,,Read an existing brand registration from the service platform
+camara,VerifiedCaller,DELETE,/registrations/{registrationId},deleteRegistration,w,w,floor,,Delete an existing brand registration from the service platform
+camara,VerifiedCaller,PUT,/registrations/{registrationId},updateRegistration,w,w,floor,,Update an existing brand registration in the service platform
+camara,VerifiedCaller,POST,/pre-announce,createPreAnnouncement,x,x,floor,,Create a call pre-announcement in the service platform
+camara,WebRTC,POST,/sessions,createSession,x,x,floor,,Creates voice and/or video session
+camara,WebRTC,GET,/sessions/{mediaSessionId},getSessionDetailsById,r,r,locked,,Get the media session information
+camara,WebRTC,DELETE,/sessions/{mediaSessionId},deleteSessionById,x,x,live-verb,summary:cancel,Cancel or Terminate the media session
+camara,WebRTC,PUT,/sessions/{mediaSessionId}/status,updateSessionStatus,x,x,party-noun,opid:session,Update the status of the media session
+camara,WebRTC,POST,/subscriptions,createNotificationChannelSubscription,x,x,floor,,Create a webrtc-events event subscription
+camara,WebRTC,GET,/subscriptions,retrieveNotificationChannelSubscriptionList,r,r,locked,,Retrieve a list of webrtc-events event subscription
+camara,WebRTC,GET,/subscriptions/{subscriptionId},retrieveNotificationChannelSubscription,r,r,locked,,Retrieve a webrtc-events event subscription
+camara,WebRTC,PUT,/subscriptions/{subscriptionId},updateNotificationChannelSubscription,w,w,floor,,Update a webrtc-events event subscription
+camara,WebRTC,DELETE,/subscriptions/{subscriptionId},deleteNotificationChannelSubscription,w,w,floor,,Delete a webrtc-events event subscription
+camara,WebRTC,GET,/sessions,getRegistrationsByDeviceId,r,r,locked,,Retrieve all registrations for a device
+camara,WebRTC,POST,/sessions,createRegistration,x,x,floor,,Create a registration
+camara,WebRTC,GET,/sessions/{registrationId},getRegistrationById,r,r,locked,,Retrieve a device registration
+camara,WebRTC,PUT,/sessions/{registrationId},updateRegistrationById,w,w,floor,,Refresh network registration.
+camara,WebRTC,DELETE,/sessions/{registrationId},deleteRegistrationById,w,x,party-noun,summary:session,Delete Registration Session.
+camara,eSimRemoteManagement,POST,/profile/result/query,profileResultQuery,r,x,floor,,Query profile operation result
+camara,eSimRemoteManagement,POST,/profile/oper,profileOperation,x,x,floor,,Perform profile operation
+camara,eSimRemoteManagement,POST,/profile/downloaded-list,profileList,r,x,floor,,Query downloaded profile list
+camara,eSimRemoteManagement,POST,/profile/download,profileDownload,x,x,floor,,Download profile
+holdout1,twilio,POST,/2010-04-01/Accounts.json,CreateAccount,x,x,floor,,Create a new Twilio Subaccount from the account making the request
+holdout1,twilio,POST,/2010-04-01/Accounts/{Sid}.json,UpdateAccount,w,x,floor,,Modify the properties of a given Account
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Addresses.json,CreateAddress,x,x,floor,,
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Addresses/{Sid}.json,UpdateAddress,w,x,floor,,
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Addresses/{Sid}.json,DeleteAddress,w,w,floor,,
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Applications.json,CreateApplication,x,x,floor,,Create a new application within your account
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Applications/{Sid}.json,UpdateApplication,w,x,floor,,Updates the application's properties
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Applications/{Sid}.json,DeleteApplication,w,w,floor,,Delete the application by the specified application sid
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls.json,CreateCall,x,x,floor,,"Create a new outgoing call to phones, SIP-enabled endpoints or Twilio Client connections"
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{Sid}.json,UpdateCall,x,x,floor,,Initiates a call redirect or terminates a call
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Calls/{Sid}.json,DeleteCall,w,w,floor,caller-phrase,"Delete a Call record from your account. Once the record is deleted, it will no longer appear in the API and Account Portal logs."
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Recordings.json,CreateCallRecording,x,x,floor,,Create a recording for the call
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Recordings/{Sid}.json,UpdateCallRecording,x,x,floor,,"Changes the status of the recording to paused, stopped, or in-progress. Note: Pass `Twilio.CURRENT` instead of recording sid to reference current active recording."
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Recordings/{Sid}.json,DeleteCallRecording,w,w,floor,,Delete a recording from your account
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Conferences/{Sid}.json,UpdateConference,x,x,floor,,
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Conferences/{ConferenceSid}/Recordings/{Sid}.json,UpdateConferenceRecording,x,x,floor,,"Changes the status of the recording to paused, stopped, or in-progress. Note: To use `Twilio.CURRENT`, pass it as recording sid."
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Conferences/{ConferenceSid}/Recordings/{Sid}.json,DeleteConferenceRecording,w,w,floor,,Delete a recording from your account
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/ConnectApps/{Sid}.json,UpdateConnectApp,w,x,floor,,Update a connect-app with the specified parameters
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/ConnectApps/{Sid}.json,DeleteConnectApp,w,w,floor,,Delete an instance of a connect-app
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/{Sid}.json,UpdateIncomingPhoneNumber,w,x,floor,,Update an incoming-phone-number instance.
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/{Sid}.json,DeleteIncomingPhoneNumber,w,w,floor,,Delete a phone-numbers belonging to the account used to make the request.
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers.json,CreateIncomingPhoneNumber,x,x,floor,,Purchase a phone-number for the account.
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/{ResourceSid}/AssignedAddOns/{Sid}.json,DeleteIncomingPhoneNumberAssignedAddOn,w,x,party-noun,summary:assignment,Remove the assignment of an Add-on installation from the Number specified.
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/{ResourceSid}/AssignedAddOns.json,CreateIncomingPhoneNumberAssignedAddOn,x,x,floor,,Assign an Add-on installation to the Number specified.
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/Local.json,CreateIncomingPhoneNumberLocal,x,x,floor,,
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/Mobile.json,CreateIncomingPhoneNumberMobile,x,x,floor,,
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/TollFree.json,CreateIncomingPhoneNumberTollFree,x,x,floor,,
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Keys/{Sid}.json,UpdateKey,w,x,floor,,
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Keys/{Sid}.json,DeleteKey,w,w,floor,,
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Keys.json,CreateNewKey,x,x,floor,,
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Messages/{MessageSid}/Media/{Sid}.json,DeleteMedia,w,w,floor,,Delete the Media resource.
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Queues/{QueueSid}/Members/{CallSid}.json,UpdateMember,x,x,floor,,Dequeue a member from a queue and have the member's call begin executing the TwiML document at that URL
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Messages.json,CreateMessage,x,x,live-verb,summary:send,Send a message
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Messages/{Sid}.json,UpdateMessage,w,x,floor,,Update a Message resource (used to redact Message `body` text and to cancel not-yet-sent messages)
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Messages/{Sid}.json,DeleteMessage,w,w,floor,,Deletes a Message resource from your account
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Messages/{MessageSid}/Feedback.json,CreateMessageFeedback,w,x,floor,,Create Message Feedback to confirm a tracked user action was performed by the recipient of the associated Message
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SigningKeys.json,CreateNewSigningKey,x,x,floor,,Create a new Signing Key for the account making the request.
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/OutgoingCallerIds/{Sid}.json,UpdateOutgoingCallerId,w,x,floor,,Updates the caller-id
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/OutgoingCallerIds/{Sid}.json,DeleteOutgoingCallerId,w,w,floor,,Delete the caller-id specified from the account
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/OutgoingCallerIds.json,CreateValidationRequest,x,x,floor,,
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Conferences/{ConferenceSid}/Participants/{CallSid}.json,UpdateParticipant,x,x,floor,,Update the properties of the participant
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Conferences/{ConferenceSid}/Participants/{CallSid}.json,DeleteParticipant,x,x,live-verb,summary:kick,Kick a participant from a given conference
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Conferences/{ConferenceSid}/Participants.json,CreateParticipant,x,x,floor,,
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Payments.json,CreatePayments,x,x,floor,,create an instance of payments. This will start a new payments session
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Payments/{Sid}.json,UpdatePayments,x,x,floor,,update an instance of payments with different phases of payment flows.
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Queues/{Sid}.json,UpdateQueue,w,x,floor,,Update the queue with the new parameters
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Queues/{Sid}.json,DeleteQueue,w,w,floor,,Remove an empty queue
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Queues.json,CreateQueue,x,x,floor,,Create a queue
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Transcriptions.json,CreateRealtimeTranscription,x,x,floor,,Create a Transcription
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Transcriptions/{Sid}.json,UpdateRealtimeTranscription,x,x,floor,,Stop a Transcription using either the SID of the Transcription resource or the `name` used when creating the resource
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Recordings/{Sid}.json,DeleteRecording,w,w,floor,,Delete a recording from your account
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Recordings/{ReferenceSid}/AddOnResults/{Sid}.json,DeleteRecordingAddOnResult,w,w,floor,,Delete a result and purge all associated Payloads
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Recordings/{ReferenceSid}/AddOnResults/{AddOnResultSid}/Payloads/{Sid}.json,DeleteRecordingAddOnResultPayload,w,w,floor,,Delete a payload from the result along with all associated Data
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Recordings/{RecordingSid}/Transcriptions/{Sid}.json,DeleteRecordingTranscription,w,w,floor,,
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SMS/ShortCodes/{Sid}.json,UpdateShortCode,w,x,floor,,Update a short code with the following parameters
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SigningKeys/{Sid}.json,UpdateSigningKey,w,x,floor,,
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/SigningKeys/{Sid}.json,DeleteSigningKey,w,w,floor,,
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/Auth/Calls/CredentialListMappings.json,CreateSipAuthCallsCredentialListMapping,x,x,floor,,Create a new credential list mapping resource
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/Auth/Calls/CredentialListMappings/{Sid}.json,DeleteSipAuthCallsCredentialListMapping,w,w,floor,,Delete a credential list mapping from the requested domain
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/Auth/Calls/IpAccessControlListMappings.json,CreateSipAuthCallsIpAccessControlListMapping,x,x,floor,,Create a new IP Access Control List mapping
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/Auth/Calls/IpAccessControlListMappings/{Sid}.json,DeleteSipAuthCallsIpAccessControlListMapping,w,w,floor,,Delete an IP Access Control List mapping from the requested domain
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/Auth/Registrations/CredentialListMappings.json,CreateSipAuthRegistrationsCredentialListMapping,x,x,floor,,Create a new credential list mapping resource
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/Auth/Registrations/CredentialListMappings/{Sid}.json,DeleteSipAuthRegistrationsCredentialListMapping,w,w,floor,,Delete a credential list mapping from the requested domain
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/CredentialLists/{CredentialListSid}/Credentials.json,CreateSipCredential,x,x,floor,,Create a new credential resource.
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/CredentialLists/{CredentialListSid}/Credentials/{Sid}.json,UpdateSipCredential,w,x,floor,,Update a credential resource.
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/SIP/CredentialLists/{CredentialListSid}/Credentials/{Sid}.json,DeleteSipCredential,w,w,floor,,Delete a credential resource.
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/CredentialLists.json,CreateSipCredentialList,x,x,floor,,Create a Credential List
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/CredentialLists/{Sid}.json,UpdateSipCredentialList,w,x,floor,,Update a Credential List
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/SIP/CredentialLists/{Sid}.json,DeleteSipCredentialList,w,w,floor,,Delete a Credential List
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/CredentialListMappings.json,CreateSipCredentialListMapping,x,x,floor,,Create a CredentialListMapping resource for an account.
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/CredentialListMappings/{Sid}.json,DeleteSipCredentialListMapping,w,w,floor,,Delete a CredentialListMapping resource from an account.
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/Domains.json,CreateSipDomain,x,x,floor,,Create a new Domain
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{Sid}.json,UpdateSipDomain,w,x,floor,,Update the attributes of a domain
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{Sid}.json,DeleteSipDomain,w,w,floor,,Delete an instance of a Domain
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/IpAccessControlLists.json,CreateSipIpAccessControlList,x,x,floor,,Create a new IpAccessControlList resource
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/IpAccessControlLists/{Sid}.json,UpdateSipIpAccessControlList,w,x,floor,,Rename an IpAccessControlList
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/SIP/IpAccessControlLists/{Sid}.json,DeleteSipIpAccessControlList,w,w,floor,,Delete an IpAccessControlList from the requested account
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/IpAccessControlListMappings/{Sid}.json,DeleteSipIpAccessControlListMapping,w,w,floor,,Delete an IpAccessControlListMapping resource.
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/IpAccessControlListMappings.json,CreateSipIpAccessControlListMapping,x,x,floor,,Create a new IpAccessControlListMapping resource.
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/IpAccessControlLists/{IpAccessControlListSid}/IpAddresses.json,CreateSipIpAddress,x,x,floor,,Create a new IpAddress resource.
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/IpAccessControlLists/{IpAccessControlListSid}/IpAddresses/{Sid}.json,UpdateSipIpAddress,w,x,floor,,Update an IpAddress resource.
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/SIP/IpAccessControlLists/{IpAccessControlListSid}/IpAddresses/{Sid}.json,DeleteSipIpAddress,w,w,floor,,Delete an IpAddress resource.
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Siprec.json,CreateSiprec,x,x,floor,,Create a Siprec
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Siprec/{Sid}.json,UpdateSiprec,w,x,floor,,Stop a Siprec using either the SID of the Siprec resource or the `name` used when creating the resource
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Streams.json,CreateStream,x,x,floor,,Create a Stream
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Streams/{Sid}.json,UpdateStream,x,x,floor,,Stop a Stream using either the SID of the Stream resource or the `name` used when creating the resource
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Tokens.json,CreateToken,x,x,floor,,Create a new token for ICE servers
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Transcriptions/{Sid}.json,DeleteTranscription,w,w,floor,,Delete a transcription from the account used to make the request
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Usage/Triggers/{Sid}.json,UpdateUsageTrigger,w,x,live-verb,opid:trigger,Update an instance of a usage trigger
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Usage/Triggers/{Sid}.json,DeleteUsageTrigger,w,x,live-verb,opid:trigger,
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Usage/Triggers.json,CreateUsageTrigger,x,x,live-verb,opid:trigger,Create a new UsageTrigger
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/UserDefinedMessages.json,CreateUserDefinedMessage,x,x,floor,,Create a new User Defined Message for the given Call SID.
+holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/UserDefinedMessageSubscriptions.json,CreateUserDefinedMessageSubscription,x,x,floor,,Subscribe to User Defined Messages for a given Call SID.
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/UserDefinedMessageSubscriptions/{Sid}.json,DeleteUserDefinedMessageSubscription,w,w,floor,,Delete a specific User Defined Message Subscription.
+holdout1,stripe,DELETE,/v1/accounts/{account},DeleteAccountsAccount,x,x,party-noun,summary:account,Delete an account
+holdout1,stripe,DELETE,/v1/accounts/{account}/bank_accounts/{id},DeleteAccountsAccountBankAccountsId,w,x,party-noun,summary:account,Delete an external account
+holdout1,stripe,DELETE,/v1/accounts/{account}/external_accounts/{id},DeleteAccountsAccountExternalAccountsId,w,x,party-noun,summary:account,Delete an external account
+holdout1,stripe,DELETE,/v1/accounts/{account}/people/{person},DeleteAccountsAccountPeoplePerson,w,x,party-noun,summary:person,Delete a person
+holdout1,stripe,DELETE,/v1/accounts/{account}/persons/{person},DeleteAccountsAccountPersonsPerson,w,x,party-noun,summary:person,Delete a person
+holdout1,stripe,DELETE,/v1/apple_pay/domains/{domain},DeleteApplePayDomainsDomain,w,x,live-verb,opid:pay,
+holdout1,stripe,DELETE,/v1/coupons/{coupon},DeleteCouponsCoupon,w,w,floor,,Delete a coupon
+holdout1,stripe,DELETE,/v1/customers/{customer},DeleteCustomersCustomer,x,x,party-noun,summary:customer,Delete a customer
+holdout1,stripe,DELETE,/v1/customers/{customer}/bank_accounts/{id},DeleteCustomersCustomerBankAccountsId,w,x,party-noun,opid:account,Delete a customer source
+holdout1,stripe,DELETE,/v1/customers/{customer}/cards/{id},DeleteCustomersCustomerCardsId,w,w,floor,,Delete a customer source
+holdout1,stripe,DELETE,/v1/customers/{customer}/discount,DeleteCustomersCustomerDiscount,w,w,floor,,Delete a customer discount
+holdout1,stripe,DELETE,/v1/customers/{customer}/sources/{id},DeleteCustomersCustomerSourcesId,w,w,floor,,Delete a customer source
+holdout1,stripe,DELETE,/v1/customers/{customer}/subscriptions/{subscription_exposed_id},DeleteCustomersCustomerSubscriptionsSubscriptionExposedId,x,x,live-verb,summary:cancel,Cancel a subscription
+holdout1,stripe,DELETE,/v1/customers/{customer}/subscriptions/{subscription_exposed_id}/discount,DeleteCustomersCustomerSubscriptionsSubscriptionExposedIdDiscount,w,w,floor,,Delete a customer discount
+holdout1,stripe,DELETE,/v1/customers/{customer}/tax_ids/{id},DeleteCustomersCustomerTaxIdsId,w,w,floor,,Delete a Customer tax ID
+holdout1,stripe,DELETE,/v1/ephemeral_keys/{key},DeleteEphemeralKeysKey,w,w,floor,,Immediately invalidate an ephemeral key
+holdout1,stripe,DELETE,/v1/invoiceitems/{invoiceitem},DeleteInvoiceitemsInvoiceitem,w,w,floor,,Delete an invoice item
+holdout1,stripe,DELETE,/v1/invoices/{invoice},DeleteInvoicesInvoice,w,w,floor,,Delete a draft invoice
+holdout1,stripe,DELETE,/v1/plans/{plan},DeletePlansPlan,w,w,floor,,Delete a plan
+holdout1,stripe,DELETE,/v1/products/{id},DeleteProductsId,w,w,floor,,Delete a product
+holdout1,stripe,DELETE,/v1/products/{product}/features/{id},DeleteProductsProductFeaturesId,w,w,floor,,Remove a feature from a product
+holdout1,stripe,DELETE,/v1/radar/value_list_items/{item},DeleteRadarValueListItemsItem,w,w,floor,,Delete a value list item
+holdout1,stripe,DELETE,/v1/radar/value_lists/{value_list},DeleteRadarValueListsValueList,w,w,floor,,Delete a value list
+holdout1,stripe,DELETE,/v1/subscription_items/{item},DeleteSubscriptionItemsItem,w,w,floor,,Delete a subscription item
+holdout1,stripe,DELETE,/v1/subscriptions/{subscription_exposed_id},DeleteSubscriptionsSubscriptionExposedId,x,x,live-verb,summary:cancel,Cancel a subscription
+holdout1,stripe,DELETE,/v1/subscriptions/{subscription_exposed_id}/discount,DeleteSubscriptionsSubscriptionExposedIdDiscount,w,w,floor,,Delete a subscription discount
+holdout1,stripe,DELETE,/v1/tax_ids/{id},DeleteTaxIdsId,w,w,floor,,Delete a tax ID
+holdout1,stripe,DELETE,/v1/terminal/configurations/{configuration},DeleteTerminalConfigurationsConfiguration,w,w,floor,,Delete a Configuration
+holdout1,stripe,DELETE,/v1/terminal/locations/{location},DeleteTerminalLocationsLocation,w,w,floor,,Delete a Location
+holdout1,stripe,DELETE,/v1/terminal/readers/{reader},DeleteTerminalReadersReader,w,w,floor,,Delete a Reader
+holdout1,stripe,DELETE,/v1/test_helpers/test_clocks/{test_clock},DeleteTestHelpersTestClocksTestClock,w,w,floor,,Delete a test clock
+holdout1,stripe,DELETE,/v1/webhook_endpoints/{webhook_endpoint},DeleteWebhookEndpointsWebhookEndpoint,w,w,floor,,Delete a webhook endpoint
+holdout1,github,DELETE,/app/installations/{installation_id},apps/delete-installation,x,x,party-noun,summary:installation,Delete an installation for the authenticated app
+holdout1,github,DELETE,/applications/{client_id}/token,apps/delete-token,x,x,party-noun,summary:token,Delete an app token
+holdout1,github,DELETE,/enterprises/{enterprise}/code-security/configurations/{configuration_id},code-security/delete-configuration-for-enterprise,w,w,floor,,Delete a code security configuration for an enterprise
+holdout1,github,PUT,/enterprises/{enterprise}/dependabot/repository-access/default-level,dependabot/set-repository-access-default-level-for-enterprise,w,w,floor,,Set the default repository access level for Dependabot in an enterprise
+holdout1,github,PUT,/enterprises/{enterprise}/teams/{enterprise-team}/organizations/{org},enterprise-team-organizations/add,x,x,party-noun,summary:assignment,Add an organization assignment
+holdout1,github,DELETE,/gists/{gist_id}/star,gists/unstar,w,w,floor,,Unstar a gist
+holdout1,github,DELETE,/notifications/threads/{thread_id},activity/mark-thread-as-done,w,w,floor,,Mark a thread as done
+holdout1,github,PUT,/organizations/{org}/actions/cache/storage-limit,actions/set-actions-cache-storage-limit-for-organization,w,x,party-noun,opid:organization,Set GitHub Actions cache storage limit for an organization
+holdout1,github,DELETE,/orgs/{org}/actions/hosted-runners/images/custom/{image_definition_id}/versions/{version},actions/delete-custom-image-version-from-org,w,w,floor,,Delete an image version of custom image from the organization
+holdout1,github,PUT,/orgs/{org}/actions/permissions,actions/set-github-actions-permissions-organization,w,x,party-noun,opid:organization,Set GitHub Actions permissions for an organization
+holdout1,github,PUT,/orgs/{org}/actions/permissions/repositories,actions/set-selected-repositories-enabled-github-actions-organization,w,x,party-noun,opid:organization,Set selected repositories enabled for GitHub Actions in an organization
+holdout1,github,PUT,/orgs/{org}/actions/permissions/self-hosted-runners,actions/set-self-hosted-runners-permissions-organization,w,x,party-noun,opid:organization,Set self-hosted runners settings for an organization
+holdout1,github,PUT,/orgs/{org}/actions/permissions/workflow,actions/set-github-actions-default-workflow-permissions-organization,w,x,party-noun,opid:organization,Set default workflow permissions for an organization
+holdout1,github,PUT,/orgs/{org}/actions/runner-groups/{runner_group_id}/repositories/{repository_id},actions/add-repo-access-to-self-hosted-runner-group-in-org,w,x,party-noun,summary:access,Add repository access to a self-hosted runner group in an organization
+holdout1,github,DELETE,/orgs/{org}/actions/runners/{runner_id},actions/delete-self-hosted-runner-from-org,w,w,floor,,Delete a self-hosted runner from an organization
+holdout1,github,DELETE,/orgs/{org}/actions/secrets/{secret_name},actions/delete-org-secret,w,w,floor,,Delete an organization secret
+holdout1,github,PUT,/orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id},actions/add-selected-repo-to-org-secret,w,x,party-noun,summary:repository,Add selected repository to an organization secret
+holdout1,github,PUT,/orgs/{org}/actions/variables/{name}/repositories/{repository_id},actions/add-selected-repo-to-org-variable,w,x,party-noun,summary:repository,Add selected repository to an organization variable
+holdout1,github,DELETE,/orgs/{org}/agents/secrets/{secret_name}/repositories/{repository_id},agents/remove-selected-repo-from-org-secret,w,x,party-noun,summary:repository,Remove selected repository from an organization secret
+holdout1,github,DELETE,/orgs/{org}/agents/variables/{name}/repositories/{repository_id},agents/remove-selected-repo-from-org-variable,w,x,party-noun,summary:repository,Remove selected repository from an organization variable
+holdout1,github,DELETE,/orgs/{org}/blocks/{username},orgs/unblock-user,w,x,party-noun,summary:user,Unblock a user from an organization
+holdout1,github,DELETE,/orgs/{org}/code-security/configurations/{configuration_id},code-security/delete-configuration,w,w,floor,,Delete a code security configuration
+holdout1,github,DELETE,/orgs/{org}/codespaces/secrets/{secret_name},codespaces/delete-org-secret,w,w,floor,,Delete an organization secret
+holdout1,github,PUT,/orgs/{org}/codespaces/secrets/{secret_name}/repositories/{repository_id},codespaces/add-selected-repo-to-org-secret,w,x,party-noun,summary:repository,Add selected repository to an organization secret
+holdout1,github,PUT,/orgs/{org}/copilot-spaces/{space_number}/collaborators/{actor_type}/{actor_identifier},copilot-spaces/update-collaborator-for-org,x,x,party-noun,summary:role,Set a collaborator role for an organization Copilot Space
+holdout1,github,DELETE,/orgs/{org}/copilot/billing/selected_users,copilot/cancel-copilot-seat-assignment-for-users,x,x,party-noun,summary:user,Remove users from the Copilot subscription for an organization
+holdout1,github,PUT,/orgs/{org}/copilot/coding-agent/permissions/repositories/{repository_id},copilot/enable-copilot-coding-agent-for-repository-in-organization,w,x,party-noun,summary:repository,Enable a repository for Copilot cloud agent in an organization
+holdout1,github,PUT,/orgs/{org}/dependabot/secrets/{secret_name},dependabot/create-or-update-org-secret,w,w,floor,,Create or update an organization secret
+holdout1,github,DELETE,/orgs/{org}/hooks/{hook_id},orgs/delete-webhook,w,w,floor,,Delete an organization webhook
+holdout1,github,DELETE,/orgs/{org}/issue-fields/{issue_field_id},orgs/delete-issue-field,w,w,floor,,Delete issue field for an organization
+holdout1,github,DELETE,/orgs/{org}/members/{username}/codespaces/{codespace_name},codespaces/delete-from-organization,x,x,party-noun,opid:organization,Delete a codespace from the organization
+holdout1,github,DELETE,/orgs/{org}/migrations/{migration_id}/repos/{repo_name}/lock,migrations/unlock-repo-for-org,w,x,party-noun,summary:repository,Unlock an organization repository
+holdout1,github,DELETE,/orgs/{org}/organization-roles/users/{username},orgs/revoke-all-org-roles-user,x,x,party-noun,opid:user,Remove all organization roles for a user
+holdout1,github,PUT,/orgs/{org}/outside_collaborators/{username},orgs/convert-member-to-outside-collaborator,x,x,live-verb,summary:convert,Convert an organization member to outside collaborator
+holdout1,github,DELETE,/orgs/{org}/projectsV2/{project_number}/items/{item_id},projects/delete-item-for-org,w,w,floor,,Delete project item for organization
+holdout1,github,PUT,/orgs/{org}/public_members/{username},orgs/set-public-membership-for-authenticated-user,w,w,floor,caller-phrase,Set public organization membership for the authenticated user
+holdout1,github,DELETE,/orgs/{org}/security-managers/teams/{team_slug},orgs/remove-security-manager-team,x,x,party-noun,summary:team,Remove a security manager team
+holdout1,github,DELETE,/orgs/{org}/settings/immutable-releases/repositories/{repository_id},orgs/disable-selected-repository-immutable-releases-organization,w,x,party-noun,summary:repository,Disable a selected repository for immutable releases in an organization
+holdout1,github,DELETE,/orgs/{org}/teams/{team_slug}/memberships/{username},teams/remove-membership-for-user-in-org,x,x,party-noun,summary:membership,Remove team membership for a user
+holdout1,github,DELETE,/repos/{owner}/{repo},repos/delete,x,x,party-noun,summary:repository,Delete a repository
+holdout1,github,DELETE,/repos/{owner}/{repo}/actions/caches,actions/delete-actions-cache-by-key,w,w,floor,,Delete GitHub Actions caches for a repository (using a cache key)
+holdout1,github,PUT,/repos/{owner}/{repo}/actions/permissions/access,actions/set-workflow-access-to-repository,w,x,party-noun,opid:repository,Set the level of access for workflows outside of the repository
+holdout1,github,PUT,/repos/{owner}/{repo}/actions/permissions/selected-actions,actions/set-allowed-actions-repository,w,x,party-noun,opid:repository,Set allowed actions and reusable workflows for a repository
+holdout1,github,PUT,/repos/{owner}/{repo}/actions/runners/{runner_id}/labels,actions/set-custom-labels-for-self-hosted-runner-for-repo,w,w,floor,,Set custom labels for a self-hosted runner for a repository
+holdout1,github,DELETE,/repos/{owner}/{repo}/actions/secrets/{secret_name},actions/delete-repo-secret,w,w,floor,,Delete a repository secret
+holdout1,github,PUT,/repos/{owner}/{repo}/actions/workflows/{workflow_id}/enable,actions/enable-workflow,w,w,floor,,Enable a workflow
+holdout1,github,DELETE,/repos/{owner}/{repo}/autolinks/{autolink_id},repos/delete-autolink,w,w,floor,,Delete an autolink reference from a repository
+holdout1,github,PUT,/repos/{owner}/{repo}/branches/{branch}/protection,repos/update-branch-protection,w,w,floor,,Update branch protection
+holdout1,github,DELETE,/repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks,repos/remove-status-check-protection,w,w,floor,,Remove status check protection
+holdout1,github,DELETE,/repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps,repos/remove-app-access-restrictions,x,x,party-noun,summary:restriction,Remove app access restrictions
+holdout1,github,DELETE,/repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users,repos/remove-user-access-restrictions,x,x,party-noun,summary:restriction,Remove user access restrictions
+holdout1,github,DELETE,/repos/{owner}/{repo}/codespaces/secrets/{secret_name},codespaces/delete-repo-secret,w,w,floor,,Delete a repository secret
+holdout1,github,DELETE,/repos/{owner}/{repo}/comments/{comment_id},repos/delete-commit-comment,w,w,floor,,Delete a commit comment
+holdout1,github,DELETE,/repos/{owner}/{repo}/dependabot/secrets/{secret_name},dependabot/delete-repo-secret,w,w,floor,,Delete a repository secret
+holdout1,github,PUT,/repos/{owner}/{repo}/environments/{environment_name},repos/create-or-update-environment,w,w,floor,,Create or update an environment
+holdout1,github,DELETE,/repos/{owner}/{repo}/environments/{environment_name}/secrets/{secret_name},actions/delete-environment-secret,w,w,floor,,Delete an environment secret
+holdout1,github,DELETE,/repos/{owner}/{repo}/hooks/{hook_id},repos/delete-webhook,w,w,floor,,Delete a repository webhook
+holdout1,github,PUT,/repos/{owner}/{repo}/import,migrations/start-import,x,x,live-verb,summary:start,Start an import
+holdout1,github,PUT,/repos/{owner}/{repo}/interaction-limits/pulls/bypass-list,interactions/set-pull-request-bypass-list-for-repo,w,x,party-noun,summary:user,Add users to the pull request creation cap bypass list for a repository
+holdout1,github,PUT,/repos/{owner}/{repo}/issues/comments/{comment_id}/pin,issues/pin-comment,w,w,floor,,Pin an issue comment
+holdout1,github,PUT,/repos/{owner}/{repo}/issues/{issue_number}/issue-field-values,issues/set-issue-field-values,x,w,floor,,Set issue field values for an issue
+holdout1,github,DELETE,/repos/{owner}/{repo}/issues/{issue_number}/labels/{name},issues/remove-label,w,w,floor,,Remove a label from an issue
+holdout1,github,DELETE,/repos/{owner}/{repo}/issues/{issue_number}/sub_issue,issues/remove-sub-issue,x,w,floor,,Remove sub-issue
+holdout1,github,PUT,/repos/{owner}/{repo}/notifications,activity/mark-repo-notifications-as-read,w,w,floor,,Mark repository notifications as read
+holdout1,github,PUT,/repos/{owner}/{repo}/private-vulnerability-reporting,repos/enable-private-vulnerability-reporting,w,w,floor,,Enable private vulnerability reporting for a repository
+holdout1,github,PUT,/repos/{owner}/{repo}/pulls/{pull_number}/merge-async,pulls/merge-async,x,x,live-verb,summary:merge,Merge a pull request asynchronously
+holdout1,github,PUT,/repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/dismissals,pulls/dismiss-review,w,w,floor,,Dismiss a review for a pull request
+holdout1,github,DELETE,/repos/{owner}/{repo}/releases/{release_id}/reactions/{reaction_id},reactions/delete-for-release,w,w,floor,,Delete a release reaction
+holdout1,github,DELETE,/repos/{owner}/{repo}/subscription,activity/delete-repo-subscription,w,w,floor,,Delete a repository subscription
+holdout1,github,PUT,/repos/{owner}/{repo}/vulnerability-alerts,repos/enable-vulnerability-alerts,w,w,floor,,Enable vulnerability alerts
+holdout1,github,DELETE,/teams/{team_id}/memberships/{username},teams/remove-membership-for-user-legacy,x,x,party-noun,summary:membership,Remove team membership for a user (Legacy)
+holdout1,github,DELETE,/user/blocks/{username},users/unblock,w,x,party-noun,summary:user,Unblock a user
+holdout1,github,PUT,/user/codespaces/secrets/{secret_name}/repositories,codespaces/set-repositories-for-secret-for-authenticated-user,w,x,party-noun,opid:user,Set selected repositories for a user secret
+holdout1,github,DELETE,/user/emails,users/delete-email-for-authenticated-user,w,w,floor,caller-phrase,Delete an email address for the authenticated user
+holdout1,github,DELETE,/user/installations/{installation_id}/repositories/{repository_id},apps/remove-repo-from-installation-for-authenticated-user,x,x,party-noun,summary:repository,Remove a repository from an app installation
+holdout1,github,DELETE,/user/keys/{key_id},users/delete-public-ssh-key-for-authenticated-user,w,w,floor,caller-phrase,Delete a public SSH key for the authenticated user
+holdout1,github,DELETE,/user/packages/{package_type}/{package_name}/versions/{package_version_id},packages/delete-package-version-for-authenticated-user,w,w,floor,caller-phrase,Delete a package version for the authenticated user
+holdout1,github,DELETE,/user/starred/{owner}/{repo},activity/unstar-repo-for-authenticated-user,w,w,floor,caller-phrase,Unstar a repository for the authenticated user
+holdout1,github,DELETE,/users/{username}/copilot-spaces/{space_number},copilot-spaces/delete-for-user,w,x,party-noun,opid:user,Delete a Copilot Space for a user
+holdout1,github,DELETE,/users/{username}/copilot-spaces/{space_number}/resources/{space_resource_id},copilot-spaces/delete-resource-for-user,w,x,party-noun,opid:user,Delete a resource from a Copilot Space for a user
+holdout1,github,DELETE,/users/{username}/projectsV2/{project_number}/items/{item_id},projects/delete-item-for-user,w,x,party-noun,opid:user,Delete project item for user
+holdout2,box,POST,/ai/ask,post_ai_ask,r,x,floor,,Ask question
+holdout2,box,POST,/ai/text_gen,post_ai_text_gen,r,x,floor,,Generate text
+holdout2,box,POST,/ai_agents,post_ai_agents,x,x,floor,,Create AI agent
+holdout2,box,PUT,/ai_agents/{agent_id},put_ai_agents_id,w,w,floor,,Update AI agent
+holdout2,box,POST,/collaboration_whitelist_entries,post_collaboration_whitelist_entries,x,x,floor,,Add domain to list of allowed collaboration domains
+holdout2,box,GET,/collaboration_whitelist_exempt_targets,get_collaboration_whitelist_exempt_targets,r,r,locked,,List users exempt from collaboration domain restrictions
+holdout2,box,GET,/collaboration_whitelist_exempt_targets/{collaboration_whitelist_exempt_target_id},get_collaboration_whitelist_exempt_targets_id,r,r,locked,,Get user exempt from collaboration domain restrictions
+holdout2,box,DELETE,/collaborations/{collaboration_id},delete_collaborations_id,x,x,party-noun,summary:collaboration,Remove collaboration
+holdout2,box,GET,/collections,get_collections,r,r,locked,,List all collections
+holdout2,box,POST,/comments,post_comments,x,x,floor,,Create comment
+holdout2,box,PUT,/comments/{comment_id},put_comments_id,w,w,floor,,Update comment
+holdout2,box,GET,/enterprises/{enterprise_id}/device_pinners,get_enterprises_id_device_pinners,r,r,locked,,List enterprise device pins
+holdout2,box,GET,/file_requests/{file_request_id},get_file_requests_id,r,r,locked,,Get file request
+holdout2,box,GET,/file_version_legal_holds,get_file_version_legal_holds,r,r,locked,,List file version legal holds
+holdout2,box,GET,/file_version_retentions/{file_version_retention_id},get_file_version_retentions_id,r,r,locked,,Get retention on file
+holdout2,box,DELETE,/files/upload_sessions/{upload_session_id},delete_files_upload_sessions_id,w,x,party-noun,summary:session,Remove upload session
+holdout2,box,POST,/files/upload_sessions/{upload_session_id}/commit,post_files_upload_sessions_id_commit,x,x,floor,,Commit upload session
+holdout2,box,DELETE,/files/{file_id},delete_files_id,w,w,floor,,Delete file
+holdout2,box,PUT,/files/{file_id},put_files_id,w,w,floor,,Update file
+holdout2,box,PUT,/files/{file_id}#remove_shared_link,put_files_id#remove_shared_link,w,w,floor,,Remove shared link from file
+holdout2,box,GET,/files/{file_id}/collaborations,get_files_id_collaborations,r,r,locked,,List file collaborations
+holdout2,box,POST,/files/{file_id}/content,post_files_id_content,x,x,floor,,Upload file version
+holdout2,box,DELETE,/files/{file_id}/metadata/enterprise/securityClassification-6VMVochwUWo,delete_files_id_metadata_enterprise_securityClassification-6VMVochwUWo,w,w,floor,,Remove classification from file
+holdout2,box,PUT,/files/{file_id}/metadata/enterprise/securityClassification-6VMVochwUWo,put_files_id_metadata_enterprise_securityClassification-6VMVochwUWo,w,w,floor,,Update classification on file
+holdout2,box,POST,/files/{file_id}/metadata/global/boxSkillsCards,post_files_id_metadata_global_boxSkillsCards,w,x,floor,,Create Box Skill cards on file
+holdout2,box,GET,/files/{file_id}/metadata/{scope}/{template_key},get_files_id_metadata_id_id,r,r,locked,,Get metadata instance on file
+holdout2,box,GET,/files/{file_id}/tasks,get_files_id_tasks,r,r,locked,,List tasks on file
+holdout2,box,GET,/files/{file_id}/trash,get_files_id_trash,r,r,locked,,Get trashed file
+holdout2,box,POST,/files/{file_id}/versions/current,post_files_id_versions_current,x,x,floor,,Promote file version
+holdout2,box,PUT,/files/{file_id}/versions/{file_version_id},put_files_id_versions_id,w,w,floor,,Restore file version
+holdout2,box,PUT,/files/{file_id}/watermark,put_files_id_watermark,w,w,floor,,Apply watermark to file
+holdout2,box,DELETE,/folder_locks/{folder_lock_id},delete_folder_locks_id,w,w,floor,,Delete folder lock
+holdout2,box,DELETE,/folders/{folder_id},delete_folders_id,w,w,floor,,Delete folder
+holdout2,box,PUT,/folders/{folder_id},put_folders_id,w,w,floor,,Update folder
+holdout2,box,PUT,/folders/{folder_id}#remove_shared_link,put_folders_id#remove_shared_link,w,w,floor,,Remove shared link from folder
+holdout2,box,GET,/folders/{folder_id}/collaborations,get_folders_id_collaborations,r,r,locked,,List folder collaborations
+holdout2,box,GET,/folders/{folder_id}/metadata,get_folders_id_metadata,r,r,locked,,List metadata instances on folder
+holdout2,box,POST,/folders/{folder_id}/metadata/enterprise/securityClassification-6VMVochwUWo,post_folders_id_metadata_enterprise_securityClassification-6VMVochwUWo,w,x,floor,,Add classification to folder
+holdout2,box,GET,/folders/{folder_id}/metadata/{scope}/{template_key},get_folders_id_metadata_id_id,r,r,locked,,Get metadata instance on folder
+holdout2,box,DELETE,/folders/{folder_id}/trash,delete_folders_id_trash,w,w,floor,,Permanently remove folder
+holdout2,box,GET,/folders/{folder_id}/watermark,get_folders_id_watermark,r,r,locked,,Get watermark for folder
+holdout2,box,DELETE,/group_memberships/{group_membership_id},delete_group_memberships_id,x,x,party-noun,summary:user,Remove user from group
+holdout2,box,GET,/groups,get_groups,r,r,locked,,List groups for enterprise
+holdout2,box,DELETE,/groups/{group_id},delete_groups_id,x,x,party-noun,summary:group,Remove group
+holdout2,box,GET,/groups/{group_id}/collaborations,get_groups_id_collaborations,r,r,locked,,List group collaborations
+holdout2,box,POST,/integration_mappings/slack,post_integration_mappings_slack,x,x,floor,,Create Slack integration mapping
+holdout2,box,GET,/integration_mappings/teams,get_integration_mappings_teams,r,r,locked,,List Teams integration mappings
+holdout2,box,PUT,/integration_mappings/teams/{integration_mapping_id},put_integration_mappings_teams_id,w,x,party-noun,opid:team,Update Teams integration mapping
+holdout2,box,GET,/legal_hold_policies,get_legal_hold_policies,r,r,locked,,List all legal hold policies
+holdout2,box,GET,/legal_hold_policies/{legal_hold_policy_id},get_legal_hold_policies_id,r,r,locked,,Get legal hold policy
+holdout2,box,POST,/legal_hold_policy_assignments,post_legal_hold_policy_assignments,x,x,floor,,Assign legal hold policy
+holdout2,box,GET,/legal_hold_policy_assignments/{legal_hold_policy_assignment_id}/file_versions_on_hold,get_legal_hold_policy_assignments_id_file_versions_on_hold,r,r,locked,,List previous file versions for legal hold policy assignment
+holdout2,box,POST,/metadata_cascade_policies,post_metadata_cascade_policies,x,x,floor,,Create metadata cascade policy
+holdout2,box,POST,/metadata_cascade_policies/{metadata_cascade_policy_id}/apply,post_metadata_cascade_policies_id_apply,w,x,floor,,Force-apply metadata cascade policy to folder
+holdout2,box,GET,/metadata_taxonomies/{namespace},get_metadata_taxonomies_id,r,r,locked,,Get metadata taxonomies for namespace
+holdout2,box,PATCH,/metadata_taxonomies/{namespace}/{taxonomy_key},patch_metadata_taxonomies_id_id,w,x,floor,,Update metadata taxonomy
+holdout2,box,POST,/metadata_taxonomies/{namespace}/{taxonomy_key}/levels:append,post_metadata_taxonomies_id_id_levels:append,x,x,floor,,Add metadata taxonomy level
+holdout2,box,POST,/metadata_taxonomies/{namespace}/{taxonomy_key}/nodes,post_metadata_taxonomies_id_id_nodes,x,x,floor,,Create metadata taxonomy node
+holdout2,box,PATCH,/metadata_taxonomies/{namespace}/{taxonomy_key}/nodes/{node_id},patch_metadata_taxonomies_id_id_nodes_id,w,x,floor,,Update metadata taxonomy node
+holdout2,box,GET,/metadata_templates/enterprise/securityClassification-6VMVochwUWo/schema,get_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema,r,r,locked,,List all classifications
+holdout2,box,GET,/metadata_templates/global,get_metadata_templates_global,r,r,locked,,List all global metadata templates
+holdout2,box,GET,/metadata_templates/{namespace}/{template_key}/fields/{field_key}/options,get_metadata_templates_id_id_fields_id_options,r,r,locked,,List metadata template's options for taxonomy field
+holdout2,box,PUT,/metadata_templates/{scope}/{template_key}/schema,put_metadata_templates_id_id_schema,w,w,floor,,Update metadata template
+holdout2,box,POST,/oauth2/token,post_oauth2_token,x,x,floor,,Request access token
+holdout2,box,GET,/retention_policies,get_retention_policies,r,r,locked,,List retention policies
+holdout2,box,GET,/retention_policies/{retention_policy_id},get_retention_policies_id,r,r,locked,,Get retention policy
+holdout2,box,POST,/retention_policy_assignments,post_retention_policy_assignments,x,x,floor,,Assign retention policy
+holdout2,box,GET,/retention_policy_assignments/{retention_policy_assignment_id}/file_versions_under_retention,get_retention_policy_assignments_id_file_versions_under_retention,r,r,locked,,Get file versions under retention
+holdout2,box,GET,/shared_items,get_shared_items,r,r,locked,,Find file for shared link
+holdout2,box,GET,/shared_items#web_links,get_shared_items#web_links,r,r,locked,,Find web link for shared link
+holdout2,box,GET,/shield_information_barrier_reports/{shield_information_barrier_report_id},get_shield_information_barrier_reports_id,r,r,locked,,Get shield information barrier report by ID
+holdout2,box,DELETE,/shield_information_barrier_segment_members/{shield_information_barrier_segment_member_id},delete_shield_information_barrier_segment_members_id,x,x,party-noun,summary:member,Delete shield information barrier segment member by ID
+holdout2,box,POST,/shield_information_barrier_segment_restrictions,post_shield_information_barrier_segment_restrictions,x,x,floor,,Create shield information barrier segment restriction
+holdout2,box,GET,/shield_information_barrier_segments,get_shield_information_barrier_segments,r,r,locked,,List shield information barrier segments
+holdout2,box,GET,/shield_information_barrier_segments/{shield_information_barrier_segment_id},get_shield_information_barrier_segments_id,r,r,locked,,Get shield information barrier segment with specified ID
+holdout2,box,POST,/shield_information_barriers,post_shield_information_barriers,x,x,floor,,Create shield information barrier
+holdout2,box,GET,/sign_requests,get_sign_requests,r,r,locked,,List Box Sign requests
+holdout2,box,POST,/sign_requests/{sign_request_id}/cancel,post_sign_requests_id_cancel,x,x,live-verb,opid:cancel,Cancel Box Sign request
+holdout2,box,GET,/sign_templates/{template_id},get_sign_templates_id,r,r,locked,,Get Box Sign template by ID
+holdout2,box,GET,/storage_policies/{storage_policy_id},get_storage_policies_id,r,r,locked,,Get storage policy
+holdout2,box,DELETE,/storage_policy_assignments/{storage_policy_assignment_id},delete_storage_policy_assignments_id,w,x,party-noun,opid:assignment,Unassign storage policy
+holdout2,box,POST,/task_assignments,post_task_assignments,x,x,floor,,Assign task
+holdout2,box,PUT,/task_assignments/{task_assignment_id},put_task_assignments_id,w,x,party-noun,summary:assignment,Update task assignment
+holdout2,box,GET,/tasks/{task_id},get_tasks_id,r,r,locked,,Get task
+holdout2,box,GET,/terms_of_service_user_statuses,get_terms_of_service_user_statuses,r,r,locked,,List terms of service user statuses
+holdout2,box,GET,/terms_of_services,get_terms_of_services,r,r,locked,,List terms of services
+holdout2,box,PUT,/terms_of_services/{terms_of_service_id},put_terms_of_services_id,w,w,floor,,Update terms of service
+holdout2,box,GET,/users/me,get_users_me,r,r,locked,,Get current user
+holdout2,box,GET,/users/{user_id},get_users_id,r,r,locked,,Get user
+holdout2,box,GET,/users/{user_id}/avatar,get_users_id_avatar,r,r,locked,,Get user avatar
+holdout2,box,POST,/users/{user_id}/email_aliases,post_users_id_email_aliases,x,x,floor,,Create email alias
+holdout2,box,GET,/users/{user_id}/memberships,get_users_id_memberships,r,r,locked,,List user's groups
+holdout2,box,GET,/web_links/{web_link_id},get_web_links_id,r,r,locked,,Get web link
+holdout2,box,PUT,/web_links/{web_link_id}#add_shared_link,put_web_links_id#add_shared_link,w,w,floor,,Add shared link to web link
+holdout2,box,PUT,/web_links/{web_link_id}#update_shared_link,put_web_links_id#update_shared_link,w,w,floor,,Update shared link on web link
+holdout2,box,GET,/webhooks,get_webhooks,r,r,locked,,List all webhooks
+holdout2,box,GET,/webhooks/{webhook_id},get_webhooks_id,r,r,locked,,Get webhook
+holdout2,box,POST,/workflows/{workflow_id}/start,post_workflows_id_start,x,x,live-verb,opid:start,Starts workflow based on request body
+holdout2,box,GET,/zip_downloads/{zip_download_id}/status,get_zip_downloads_id_status,r,r,locked,,Get zip download status
+holdout2,pagerduty,GET,/abilities,listAbilities,r,r,locked,,List abilities
+holdout2,pagerduty,GET,/addons/{id},getAddon,r,r,locked,,Get an Add-on
+holdout2,pagerduty,GET,/alert_grouping_settings/{id},getAlertGroupingSetting,r,r,locked,,Get an Alert Grouping Setting
+holdout2,pagerduty,POST,/analytics/metrics/incidents/services,getAnalyticsMetricsIncidentsService,r,r,read-verb,opid:get,Get aggregated service data
+holdout2,pagerduty,POST,/analytics/metrics/responders/all,getAnalyticsMetricsRespondersAll,r,r,read-verb,opid:get,Get aggregated metrics for all responders
+holdout2,pagerduty,GET,/analytics/raw/incidents/{id}/responses,getAnalyticsIncidentResponsesById,r,r,locked,,Get raw responses from a single incident
+holdout2,pagerduty,POST,/automation_actions/actions,createAutomationAction,x,x,floor,,Create an Automation Action
+holdout2,pagerduty,GET,/automation_actions/actions/{id}/services,getAutomationActionsActionServiceAssociations,r,r,locked,,Get all service references associated with an Automation Action
+holdout2,pagerduty,POST,/automation_actions/actions/{id}/teams,createAutomationActionTeamAssociation,w,x,floor,,Associate an Automation Action with a team
+holdout2,pagerduty,GET,/automation_actions/runners,getAutomationActionsRunners,r,r,locked,,List Automation Action runners
+holdout2,pagerduty,GET,/automation_actions/runners/{id}/teams,getAutomationActionsRunnerTeamAssociations,r,r,locked,,Get all team references associated with a runner
+holdout2,pagerduty,POST,/business_services,createBusinessService,x,x,floor,,Create a Business Service
+holdout2,pagerduty,PUT,/business_services/priority_thresholds,putBusinessServicePriorityThresholds,w,w,floor,,Set the Account-level priority threshold for Business Service impact.
+holdout2,pagerduty,POST,/business_services/{id}/account_subscription,createBusinessServiceAccountSubscription,x,x,floor,,Create Business Service Account Subscription
+holdout2,pagerduty,GET,/change_events,listChangeEvents,r,r,locked,,List Change Events
+holdout2,pagerduty,POST,/enrichment/event_enrichments,createEventEnrichment,x,x,floor,,Create an Event Enrichment
+holdout2,pagerduty,PUT,/enrichment/event_enrichments/{id},updateEventEnrichment,w,w,floor,,Update an Event Enrichment
+holdout2,pagerduty,PUT,/enrichment/event_enrichments/{id}/rules,updateEventEnrichmentRules,w,w,floor,,Update Event Enrichment rules
+holdout2,pagerduty,GET,/enrichment/integrations/servicenow/credentials/{credentials_id},getServiceNowCredentials,r,r,locked,,Get ServiceNow credentials
+holdout2,pagerduty,DELETE,/enrichment/integrations/servicenow/{integration_id}/tables/{table_id},deleteServiceNowTable,w,w,floor,,Remove a CMDB table
+holdout2,pagerduty,GET,/enrichment/schemas,listEnrichmentSchemas,r,r,locked,,List enrichment schemas
+holdout2,pagerduty,GET,/enrichment/schemas/{schema_id}/records,listEnrichmentRecords,r,r,locked,,List enrichment records
+holdout2,pagerduty,DELETE,/escalation_policies/{id},deleteEscalationPolicy,w,w,floor,,Delete an escalation policy
+holdout2,pagerduty,POST,/event_orchestrations,postOrchestration,x,x,floor,,Create an Orchestration
+holdout2,pagerduty,GET,/event_orchestrations/services/{service_id}/cache_variables,listCacheVarOnServiceOrch,r,r,locked,,List Cache Variables for a Service Event Orchestration
+holdout2,pagerduty,DELETE,/event_orchestrations/services/{service_id}/cache_variables/{cache_variable_id}/data,deleteExternalDataCacheVarDataOnServiceOrch,w,w,floor,,Delete Data for an External Data Cache Variable on a Service Event Orchestration
+holdout2,pagerduty,PUT,/event_orchestrations/{id},updateOrchestration,w,w,floor,,Update an Orchestration
+holdout2,pagerduty,PUT,/event_orchestrations/{id}/cache_variables/{cache_variable_id},updateCacheVarOnGlobalOrch,w,w,floor,,Update a Cache Variable for a Global Event Orchestration
+holdout2,pagerduty,PUT,/event_orchestrations/{id}/enablements/{feature_name},updateEventOrchestrationFeatureEnablements,w,w,floor,,Update an Enablement for an Event Orchestration
+holdout2,pagerduty,POST,/event_orchestrations/{id}/integrations/migration,migrateOrchestrationIntegration,w,x,floor,,Migrate an Integration from one Event Orchestration to another
+holdout2,pagerduty,PUT,/event_orchestrations/{id}/router,updateOrchPathRouter,w,w,floor,,Update the Router for an Event Orchestration
+holdout2,pagerduty,GET,/extensions,listExtensions,r,r,locked,,List extensions
+holdout2,pagerduty,POST,/extensions/{id}/enable,enableExtension,w,x,floor,,Enable an extension
+holdout2,pagerduty,GET,/incident_workflows/triggers,listIncidentWorkflowTriggers,r,r,locked,,List Triggers
+holdout2,pagerduty,POST,/incident_workflows/triggers/{id}/services,associateServiceToIncidentWorkflowTrigger,w,x,live-verb,opid:trigger,Associate a Trigger and Service
+holdout2,pagerduty,POST,/incident_workflows/{id}/instances,createIncidentWorkflowInstance,x,x,live-verb,summary:start,Start an Incident Workflow Instance
+holdout2,pagerduty,POST,/incidents/custom_fields,createCustomFieldsField,x,x,floor,,Create a Field
+holdout2,pagerduty,POST,/incidents/custom_fields/{field_id}/field_options,createCustomFieldsFieldOption,x,x,floor,,Create a Field Option
+holdout2,pagerduty,GET,/incidents/types/{type_id_or_name},getIncidentType,r,r,locked,,Get an Incident Type
+holdout2,pagerduty,GET,/incidents/types/{type_id_or_name}/custom_fields/{field_id},getIncidentTypeCustomField,r,r,locked,,Get an Incident Type Custom Field
+holdout2,pagerduty,GET,/incidents/types/{type_id_or_name}/custom_fields/{field_id}/field_options/{field_option_id},getIncidentTypeCustomFieldFieldOptions,r,r,locked,,Get a Field Option on a Custom Field
+holdout2,pagerduty,PUT,/incidents/{id}/alerts,updateIncidentAlerts,w,w,floor,,Manage alerts
+holdout2,pagerduty,GET,/incidents/{id}/custom_fields/values,getIncidentFieldValues,r,r,locked,,Get Custom Field Values
+holdout2,pagerduty,POST,/incidents/{id}/notes,createIncidentNote,x,x,floor,,Create a note on an incident
+holdout2,pagerduty,GET,/incidents/{id}/related_change_events,listIncidentRelatedChangeEvents,r,r,locked,,List related Change Events for an Incident
+holdout2,pagerduty,POST,/incidents/{id}/status_updates,createIncidentStatusUpdate,x,x,floor,,Create a status update on an incident
+holdout2,pagerduty,POST,/ip_allow_lists,createIpAllowList,x,x,floor,,Create an IP allow list
+holdout2,pagerduty,GET,/license_allocations,listLicenseAllocations,r,r,locked,,List License Allocations
+holdout2,pagerduty,GET,/maintenance_windows,listMaintenanceWindows,r,r,locked,,List maintenance windows
+holdout2,pagerduty,GET,/notifications,listNotifications,r,r,locked,,List notifications
+holdout2,pagerduty,GET,/paused_incident_reports/counts,getPausedIncidentReportCounts,r,r,locked,,Get Paused Incident Reporting counts
+holdout2,pagerduty,POST,/recommendations/event_orchestrations/services/{service_id}/rules/{recommendation_id}/dismiss,dismissRecommendedRule,w,x,floor,,Dismiss a recommended rule
+holdout2,pagerduty,PUT,/rulesets/{id},updateRuleset,w,w,floor,,Update a Ruleset
+holdout2,pagerduty,PUT,/rulesets/{id}/rules/{rule_id},updateRulesetEventRule,w,w,floor,,Update an Event Rule
+holdout2,pagerduty,GET,/schedules/{id},getSchedule,r,r,locked,,Get a schedule
+holdout2,pagerduty,DELETE,/schedules/{id}/overrides/{override_id},deleteScheduleOverride,w,w,floor,,Delete an override
+holdout2,pagerduty,GET,/service_dependencies/technical_services/{id},getTechnicalServiceServiceDependencies,r,r,locked,,Get technical service dependencies
+holdout2,pagerduty,DELETE,/services/custom_fields/{field_id},deleteServiceCustomField,w,w,floor,,Delete a Field
+holdout2,pagerduty,DELETE,/services/custom_fields/{field_id}/field_options/{field_option_id},deleteServiceCustomFieldOption,w,w,floor,,Delete a Field Option
+holdout2,pagerduty,PUT,/services/{id},updateService,w,w,floor,,Update a service
+holdout2,pagerduty,GET,/services/{id}/enablements,listServiceFeatureEnablements,r,r,locked,,Get Enablements for a Service
+holdout2,pagerduty,GET,/services/{id}/rules,listServiceEventRules,r,r,locked,,List Service's Event Rules
+holdout2,pagerduty,PUT,/services/{id}/rules/{rule_id},updateServiceEventRule,w,w,floor,,Update an Event Rule on a Service
+holdout2,pagerduty,DELETE,/sre_agent/memories/{id},deleteSreMemory,w,w,floor,,Delete an SRE Agent memory
+holdout2,pagerduty,PUT,/standards/{id},updateStandard,w,w,floor,,Update a standard
+holdout2,pagerduty,GET,/status_dashboards/{id}/service_impacts,getStatusDashboardServiceImpactsById,r,r,locked,,Get impacted Business Services for a Status Dashboard by `id`.
+holdout2,pagerduty,POST,/status_pages/{id}/posts,createStatusPagePost,x,x,floor,,Create a Status Page Post
+holdout2,pagerduty,POST,/status_pages/{id}/posts/{post_id}/post_updates,createStatusPagePostUpdate,x,x,floor,,Create a Status Page Post Update
+holdout2,pagerduty,GET,/status_pages/{id}/posts/{post_id}/postmortem,getPostmortem,r,r,locked,,Get a Post Postmortem
+holdout2,pagerduty,GET,/status_pages/{id}/severities/{severity_id},getStatusPageSeverity,r,r,locked,,Get a Status Page Severity
+holdout2,pagerduty,DELETE,/status_pages/{id}/subscriptions/{subscription_id},deleteStatusPageSubscription,w,w,floor,,Delete a Status Page Subscription
+holdout2,pagerduty,GET,/tags/{id},getTag,r,r,locked,,Get a tag
+holdout2,pagerduty,GET,/teams/{id},getTeam,r,r,locked,,Get a team
+holdout2,pagerduty,GET,/teams/{id}/members,listTeamUsers,r,r,locked,,List members of a team
+holdout2,pagerduty,PUT,/teams/{id}/users/{user_id},updateTeamUser,w,x,party-noun,summary:user,Add a user to a team
+holdout2,pagerduty,GET,/templates/{id},getTemplate,r,r,locked,,Get a template
+holdout2,pagerduty,GET,/users/me,getCurrentUser,r,r,locked,,Get the current user
+holdout2,pagerduty,GET,/users/{id}/contact_methods,getUserContactMethods,r,r,locked,,List a user's contact methods
+holdout2,pagerduty,GET,/users/{id}/license,getUserLicense,r,r,locked,,Get the License allocated to a User
+holdout2,pagerduty,PUT,/users/{id}/notification_rules/{notification_rule_id},updateUserNotificationRule,w,w,floor,,Update a user's notification rule
+holdout2,pagerduty,GET,/users/{id}/oauth_delegations/{delegation_id},getUserDelegation,r,r,locked,,Get a user's delegation
+holdout2,pagerduty,PUT,/users/{id}/oncall_handoff_notification_rules/{oncall_handoff_notification_rule_id},updateUserHandoffNotification,w,w,floor,,Update a User's Handoff Notification Rule
+holdout2,pagerduty,GET,/users/{id}/sessions/{type}/{session_id},getUserSession,r,r,locked,,Get a user's session
+holdout2,pagerduty,PUT,/users/{id}/status_update_notification_rules/{status_update_notification_rule_id},updateUserStatusUpdateNotificationRule,w,w,floor,,Update a user's status update notification rule
+holdout2,pagerduty,PUT,/v3/schedules/{id},updateScheduleV3,w,w,floor,,Update a schedule
+holdout2,pagerduty,GET,/v3/schedules/{id}/custom_shifts/{custom_shift_id},getCustomShift,r,r,locked,,Get a custom shift
+holdout2,pagerduty,GET,/v3/schedules/{id}/overrides/{override_id},getOverride,r,r,locked,,Get an override
+holdout2,pagerduty,GET,/v3/schedules/{id}/rotations/{rotation_id},getRotation,r,r,locked,,Get a rotation
+holdout2,pagerduty,PUT,/v3/schedules/{id}/rotations/{rotation_id}/events/{event_id},updateEvent,w,w,floor,,Update an event
+holdout2,pagerduty,GET,/webhook_subscriptions/oauth_clients,listOauthClients,r,r,locked,,List OAuth clients
+holdout2,pagerduty,DELETE,/webhook_subscriptions/{id},deleteWebhookSubscription,w,w,floor,,Delete a webhook subscription
+holdout2,pagerduty,GET,/workflows/integrations,listWorkflowIntegrations,r,r,locked,,List Workflow Integrations
+holdout2,pagerduty,DELETE,/workflows/integrations/{integration_id}/connections/{id},deleteWorkflowIntegrationConnection,w,w,floor,,Delete Workflow Integration Connection
+holdout2,adyen,POST,/applePay/sessions,post-applePay-sessions,x,x,live-verb,opid:pay,Get an Apple Pay session
+holdout2,adyen,POST,/cancels,post-cancels,x,x,live-verb,summary:cancel,Cancel an authorised payment
+holdout2,adyen,POST,/cardDetails,post-cardDetails,r,x,floor,,Get the brands and other details of a card
+holdout2,adyen,POST,/donationCampaigns,post-donationCampaigns,r,x,floor,,Get a list of donation campaigns.
+holdout2,adyen,POST,/donations,post-donations,x,x,floor,,Make a donation
+holdout2,adyen,POST,/forward,post-forward,x,x,floor,,Forward stored payment details
+holdout2,adyen,POST,/orders,post-orders,x,x,floor,,Create an order
+holdout2,adyen,POST,/orders/cancel,post-orders-cancel,x,x,live-verb,opid:cancel,Cancel an order
+holdout2,adyen,POST,/originKeys,post-originKeys,r,x,floor,,Create originKey values for domains
+holdout2,adyen,POST,/paymentLinks,post-paymentLinks,x,x,floor,,Create a payment link
+holdout2,adyen,GET,/paymentLinks/{linkId},get-paymentLinks-linkId,r,r,locked,,Get a payment link
+holdout2,adyen,PATCH,/paymentLinks/{linkId},patch-paymentLinks-linkId,w,x,floor,,Update the status of a payment link
+holdout2,adyen,POST,/paymentMethods,post-paymentMethods,r,x,floor,,Get a list of available payment methods
+holdout2,adyen,POST,/paymentMethods/balance,post-paymentMethods-balance,r,x,floor,,Get the balance of a gift card
+holdout2,adyen,POST,/payments,post-payments,x,x,live-verb,summary:start,Start a transaction
+holdout2,adyen,POST,/payments/details,post-payments-details,x,x,live-verb,summary:submit,Submit details for a payment
+holdout2,adyen,POST,/payments/{paymentPspReference}/amountUpdates,post-payments-paymentPspReference-amountUpdates,x,x,floor,,Update an authorised amount
+holdout2,adyen,POST,/payments/{paymentPspReference}/cancels,post-payments-paymentPspReference-cancels,x,x,live-verb,summary:cancel,Cancel an authorised payment
+holdout2,adyen,POST,/payments/{paymentPspReference}/captures,post-payments-paymentPspReference-captures,x,x,floor,,Capture an authorised payment
+holdout2,adyen,POST,/payments/{paymentPspReference}/refunds,post-payments-paymentPspReference-refunds,x,x,live-verb,summary:refund,Refund a captured payment
+holdout2,adyen,POST,/payments/{paymentPspReference}/reversals,post-payments-paymentPspReference-reversals,x,x,live-verb,summary:refund,Refund or cancel a payment
+holdout2,adyen,POST,/paypal/updateOrder,post-paypal-updateOrder,x,x,floor,,Updates the order for PayPal Express Checkout
+holdout2,adyen,POST,/sessions,post-sessions,x,x,floor,,Create a payment session
+holdout2,adyen,GET,/sessions/{sessionId},get-sessions-sessionId,r,r,locked,,Get the result of a payment session
+holdout2,adyen,GET,/storedPaymentMethods,get-storedPaymentMethods,r,r,locked,,Get tokens for stored payment details
+holdout2,adyen,POST,/storedPaymentMethods,post-storedPaymentMethods,x,x,floor,,Create a token to store payment details
+holdout2,adyen,DELETE,/storedPaymentMethods/{storedPaymentMethodId},delete-storedPaymentMethods-storedPaymentMethodId,w,x,party-noun,summary:token,Delete a token for stored payment details
+holdout2,adyen,POST,/validateShopperId,post-validateShopperId,r,x,floor,,Validates shopper Id
+holdout3,discord,GET,/applications/@me,get_my_application,r,r,locked,,
+holdout3,discord,PATCH,/applications/{application_id},update_application,w,x,floor,,
+holdout3,discord,GET,/applications/{application_id}/commands,list_application_commands,r,r,locked,,
+holdout3,discord,DELETE,/applications/{application_id}/commands/{command_id},delete_application_command,w,w,floor,,
+holdout3,discord,GET,/applications/{application_id}/emojis,list_application_emojis,r,r,locked,,
+holdout3,discord,GET,/applications/{application_id}/emojis/{emoji_id},get_application_emoji,r,r,locked,,
+holdout3,discord,POST,/applications/{application_id}/entitlements,create_entitlement,x,x,floor,,
+holdout3,discord,POST,/applications/{application_id}/entitlements/{entitlement_id}/consume,consume_entitlement,w,x,floor,,
+holdout3,discord,PUT,/applications/{application_id}/guilds/{guild_id}/commands,bulk_set_guild_application_commands,w,w,floor,,
+holdout3,discord,GET,/applications/{application_id}/guilds/{guild_id}/commands/{command_id},get_guild_application_command,r,r,locked,,
+holdout3,discord,PUT,/applications/{application_id}/guilds/{guild_id}/commands/{command_id}/permissions,set_guild_application_command_permissions,x,w,floor,,
+holdout3,discord,DELETE,/channels/{channel_id},delete_channel,x,w,floor,,
+holdout3,discord,POST,/channels/{channel_id}/followers,follow_channel,x,x,floor,,
+holdout3,discord,GET,/channels/{channel_id}/messages,list_messages,r,r,locked,,
+holdout3,discord,GET,/channels/{channel_id}/messages/pins,list_pins,r,r,locked,,
+holdout3,discord,DELETE,/channels/{channel_id}/messages/{message_id},delete_message,x,w,floor,,
+holdout3,discord,POST,/channels/{channel_id}/messages/{message_id}/crosspost,crosspost_message,x,x,floor,,
+holdout3,discord,GET,/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name},list_message_reactions_by_emoji,r,r,locked,,
+holdout3,discord,DELETE,/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}/{user_id},delete_user_message_reaction,x,w,floor,,
+holdout3,discord,PUT,/channels/{channel_id}/permissions/{overwrite_id},set_channel_permission_overwrite,x,w,floor,,
+holdout3,discord,PUT,/channels/{channel_id}/pins/{message_id},deprecated_create_pin,x,w,floor,,
+holdout3,discord,DELETE,/channels/{channel_id}/recipients/{user_id},delete_group_dm_user,x,x,party-noun,opid:user,
+holdout3,discord,GET,/channels/{channel_id}/thread-members,list_thread_members,r,r,locked,,
+holdout3,discord,DELETE,/channels/{channel_id}/thread-members/{user_id},delete_thread_member,x,x,party-noun,opid:member,
+holdout3,discord,POST,/channels/{channel_id}/threads,create_thread,x,x,floor,,
+holdout3,discord,GET,/channels/{channel_id}/threads/search,thread_search,r,r,locked,,
+holdout3,discord,PUT,/channels/{channel_id}/voice-status,update_voice_channel_status,w,w,floor,,
+holdout3,discord,GET,/gateway,get_gateway,r,r,locked,,
+holdout3,discord,GET,/guilds/{guild_id},get_guild,r,r,locked,,
+holdout3,discord,GET,/guilds/{guild_id}/auto-moderation/rules,list_auto_moderation_rules,r,r,locked,,
+holdout3,discord,GET,/guilds/{guild_id}/auto-moderation/rules/{rule_id},get_auto_moderation_rule,r,r,locked,,
+holdout3,discord,DELETE,/guilds/{guild_id}/bans/{user_id},unban_user_from_guild,x,w,floor,,
+holdout3,discord,POST,/guilds/{guild_id}/bulk-ban,bulk_ban_users_from_guild,x,x,floor,,
+holdout3,discord,POST,/guilds/{guild_id}/channels,create_guild_channel,x,x,floor,,
+holdout3,discord,DELETE,/guilds/{guild_id}/emojis/{emoji_id},delete_guild_emoji,x,w,floor,,
+holdout3,discord,PUT,/guilds/{guild_id}/incident-actions,update_guild_incident_actions,x,w,floor,,
+holdout3,discord,GET,/guilds/{guild_id}/invites,list_guild_invites,r,r,locked,,
+holdout3,discord,GET,/guilds/{guild_id}/members/search,search_guild_members,r,r,locked,,
+holdout3,discord,PATCH,/guilds/{guild_id}/members/{user_id},update_guild_member,x,x,party-noun,opid:member,
+holdout3,discord,PUT,/guilds/{guild_id}/members/{user_id}/roles/{role_id},add_guild_member_role,x,x,party-noun,opid:role,
+holdout3,discord,GET,/guilds/{guild_id}/onboarding,get_guilds_onboarding,r,r,locked,,
+holdout3,discord,GET,/guilds/{guild_id}/prune,preview_prune_guild,r,r,locked,,
+holdout3,discord,GET,/guilds/{guild_id}/requests,get_guild_join_requests,r,r,locked,,
+holdout3,discord,PATCH,/guilds/{guild_id}/roles,bulk_update_guild_roles,x,x,floor,,
+holdout3,discord,DELETE,/guilds/{guild_id}/roles/{role_id},delete_guild_role,x,x,party-noun,opid:role,
+holdout3,discord,GET,/guilds/{guild_id}/scheduled-events,list_guild_scheduled_events,r,r,locked,,
+holdout3,discord,GET,/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id},get_guild_scheduled_event,r,r,locked,,
+holdout3,discord,DELETE,/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}/exceptions/{exception_id},delete_guild_scheduled_event_exception,w,w,floor,,
+holdout3,discord,GET,/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}/users/counts,count_guild_scheduled_event_users,r,r,locked,,
+holdout3,discord,POST,/guilds/{guild_id}/soundboard-sounds,create_guild_soundboard_sound,x,x,floor,,
+holdout3,discord,PATCH,/guilds/{guild_id}/soundboard-sounds/{sound_id},update_guild_soundboard_sound,w,x,floor,,
+holdout3,discord,DELETE,/guilds/{guild_id}/stickers/{sticker_id},delete_guild_sticker,x,w,floor,,
+holdout3,discord,GET,/guilds/{guild_id}/templates,list_guild_templates,r,r,locked,,
+holdout3,discord,PATCH,/guilds/{guild_id}/templates/{code},update_guild_template,w,x,floor,,
+holdout3,discord,GET,/guilds/{guild_id}/vanity-url,get_guild_vanity_url,r,r,locked,,
+holdout3,discord,GET,/guilds/{guild_id}/voice-states/{user_id},get_voice_state,r,r,locked,,
+holdout3,discord,GET,/guilds/{guild_id}/welcome-screen,get_guild_welcome_screen,r,r,locked,,
+holdout3,discord,PATCH,/guilds/{guild_id}/widget,update_guild_widget_settings,w,x,floor,,
+holdout3,discord,POST,/interactions/{interaction_id}/{interaction_token}/callback,create_interaction_response,x,x,floor,,
+holdout3,discord,GET,/invites/{code}/target-users,get_invite_target_users,r,r,locked,,
+holdout3,discord,POST,/lobbies,create_lobby,x,x,floor,,
+holdout3,discord,GET,/lobbies/{lobby_id},get_lobby,r,r,locked,,
+holdout3,discord,DELETE,/lobbies/{lobby_id}/members/@me,leave_lobby,w,w,floor,,
+holdout3,discord,DELETE,/lobbies/{lobby_id}/members/{user_id},delete_lobby_member,x,x,party-noun,opid:member,
+holdout3,discord,GET,/lobbies/{lobby_id}/messages,get_lobby_messages,r,r,locked,,
+holdout3,discord,GET,/oauth2/@me,get_my_oauth2_authorization,r,r,locked,,
+holdout3,discord,GET,/oauth2/userinfo,get_openid_connect_userinfo,r,r,locked,,
+holdout3,discord,POST,/partner-sdk/provisional-accounts/unmerge/bot,bot_partner_sdk_unmerge_provisional_account,w,x,floor,,
+holdout3,discord,GET,/skus/{sku_id}/subscriptions,get_sku_subscriptions,r,r,locked,,
+holdout3,discord,POST,/stage-instances,create_stage_instance,x,x,floor,,
+holdout3,discord,PATCH,/stage-instances/{channel_id},update_stage_instance,x,x,floor,,
+holdout3,discord,GET,/stickers/{sticker_id},get_sticker,r,r,locked,,
+holdout3,discord,GET,/users/@me/applications/{application_id}/entitlements,get_current_user_application_entitlements,r,r,locked,,
+holdout3,discord,PUT,/users/@me/applications/{application_id}/role-connection,update_application_user_role_connection,w,w,floor,,
+holdout3,discord,GET,/users/@me/guilds,list_my_guilds,r,r,locked,,
+holdout3,discord,GET,/users/{user_id},get_user,r,r,locked,,
+holdout3,discord,GET,/webhooks/{webhook_id},get_webhook,r,r,locked,,
+holdout3,discord,GET,/webhooks/{webhook_id}/{webhook_token},get_webhook_by_token,r,r,locked,,
+holdout3,discord,POST,/webhooks/{webhook_id}/{webhook_token}/github,execute_github_compatible_webhook,x,x,live-verb,opid:execute,
+holdout3,discord,PATCH,/webhooks/{webhook_id}/{webhook_token}/messages/@original,update_original_webhook_message,x,x,floor,,
+holdout3,discord,PATCH,/webhooks/{webhook_id}/{webhook_token}/messages/{message_id},update_webhook_message,x,x,floor,,
+holdout3,sentry,GET,/api/0/organizations/,listOrganizations,r,r,locked,,List Your Organizations
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/agents/conversations/,listOrganizationAIConversations,r,r,locked,,List an Organization's AI Conversations
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/dashboards/,listOrganizationDashboards,r,r,locked,,List an Organization's Custom Dashboards
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/dashboards/{dashboard_id}/,getOrganizationDashboard,r,r,locked,,Retrieve an Organization's Custom Dashboard
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/detectors/,listOrganizationDetectors,r,r,locked,,Fetch an Organization's Monitors
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/detectors/{detector_id}/,getOrganizationDetector,r,r,locked,,Fetch a Monitor
+holdout3,sentry,POST,/api/0/organizations/{organization_id_or_slug}/discover/saved/,createOrganizationDiscoverSavedQuery,x,x,floor,,Create a New Saved Query
+holdout3,sentry,PUT,/api/0/organizations/{organization_id_or_slug}/discover/saved/{query_id}/,updateOrganizationDiscoverSavedQuery,w,w,floor,,Edit an Organization's Discover Saved Query
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/events-timeseries/,listOrganizationEventsTimeseries,r,r,locked,,Query Explore Events in Timeseries Format
+holdout3,sentry,DELETE,/api/0/organizations/{organization_id_or_slug}/external-users/{external_user_id}/,deleteOrganizationExternalUser,x,x,party-noun,summary:user,Delete an External User
+holdout3,sentry,POST,/api/0/organizations/{organization_id_or_slug}/forwarding/,createOrganizationForwarding,x,x,floor,,Create a Data Forwarder for an Organization
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/group-search-views/,listOrganizationIssueViews,r,r,locked,,List Issue Views
+holdout3,sentry,DELETE,/api/0/organizations/{organization_id_or_slug}/integrations/{integration_id}/,deleteOrganizationIntegration,w,w,floor,,Delete an Integration for an Organization
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/issues/,listOrganizationIssues,r,r,locked,,List an Organization's Issues
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/,getOrganizationIssue,r,r,locked,,Retrieve an Issue
+holdout3,sentry,POST,/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/autofix/,startOrganizationIssueAutofix,x,x,live-verb,opid:start,Start Seer Issue Fix
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/external-issues/,listOrganizationIssueExternalIssues,r,r,locked,,Retrieve custom integration issue links for the given Sentry issue
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/integrations/{integration_id}/,Retrieve an Integration's Issue Config for an Issue,r,r,locked,,
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/tags/{key}/,getOrganizationIssueTag,r,r,locked,,Retrieve Tag Details
+holdout3,sentry,POST,/api/0/organizations/{organization_id_or_slug}/members/,addOrganizationMember,x,x,floor,,Add a Member to an Organization
+holdout3,sentry,PUT,/api/0/organizations/{organization_id_or_slug}/members/{member_id}/,updateOrganizationMember,x,x,party-noun,opid:member,Update an Organization Member's Roles
+holdout3,sentry,PUT,/api/0/organizations/{organization_id_or_slug}/members/{member_id}/teams/{team_id_or_slug}/,updateOrganizationMemberTeam,x,x,party-noun,summary:role,Update an Organization Member's Team Role
+holdout3,sentry,DELETE,/api/0/organizations/{organization_id_or_slug}/monitors/{monitor_id_or_slug}/,deleteOrganizationMonitor,w,w,floor,,Delete a Monitor or Monitor Environments
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/monitors/{monitor_id_or_slug}/checkins/,listOrganizationMonitorCheckins,r,r,locked,,Retrieve Check-Ins for a Monitor
+holdout3,sentry,DELETE,/api/0/organizations/{organization_id_or_slug}/notifications/actions/{action_id}/,deleteOrganizationNotificationsAction,w,w,floor,,Delete a Spike Protection Notification Action
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/preprodartifacts/snapshots/latest-base/,getOrganizationPreprodArtifactSnapshotLatestBase,r,r,locked,,Retrieve latest base Snapshot
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/preprodartifacts/snapshots/{snapshot_id}/images/{image_identifier}/,getOrganizationPreprodArtifactSnapshotImage,r,r,locked,,Retrieve Snapshot image detail
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/profiling/chunks/,listOrganizationProfilingChunks,r,r,locked,,Retrieve Profile Chunks for an Organization
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/projects/,listOrganizationProjects,r,r,locked,,List an Organization's Projects
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/relay_usage/,listOrganizationRelayUsage,r,r,locked,,List an Organization's trusted Relays
+holdout3,sentry,POST,/api/0/organizations/{organization_id_or_slug}/releases/,createOrganizationRelease,w,x,floor,,Create a New Release for an Organization
+holdout3,sentry,PUT,/api/0/organizations/{organization_id_or_slug}/releases/{version}/,updateOrganizationRelease,w,w,floor,,Update an Organization's Release
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/releases/{version}/deploys/,listOrganizationReleaseDeploys,r,r,locked,,List a Release's Deploys
+holdout3,sentry,POST,/api/0/organizations/{organization_id_or_slug}/releases/{version}/files/,uploadOrganizationReleaseFile,x,x,floor,,Upload a New Organization Release File
+holdout3,sentry,PUT,/api/0/organizations/{organization_id_or_slug}/releases/{version}/files/{file_id}/,updateOrganizationReleaseFile,w,w,floor,,Update an Organization Release File
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/replays/,listOrganizationReplays,r,r,locked,,List an Organization's Replays
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/repos/{repo_id}/commits/,listOrganizationRepoCommits,r,r,locked,,List a Repository's Commits
+holdout3,sentry,DELETE,/api/0/organizations/{organization_id_or_slug}/scim/v2/Groups/{team_id_or_slug},deleteOrganizationScimV2Group,x,x,party-noun,summary:team,Delete an Individual Team
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/scim/v2/Users,listOrganizationScimV2Users,r,r,locked,,List an Organization's SCIM Members
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/scim/v2/Users/{member_id},getOrganizationScimV2User,r,r,locked,,Query an Individual Organization Member
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/sentry-apps/,listOrganizationSentryApps,r,r,locked,,Retrieve the custom integrations created by an organization
+holdout3,sentry,DELETE,/api/0/organizations/{organization_id_or_slug}/spike-protections/,Disable Spike Protection,w,w,floor,,
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/stats_v2/,listOrganizationStatsV2,r,r,locked,,Retrieve Event Counts for an Organization (v2)
+holdout3,sentry,POST,/api/0/organizations/{organization_id_or_slug}/teams/,createOrganizationTeam,x,x,floor,,Create a New Team
+holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/trace-meta/{trace_id}/,getOrganizationTraceMeta,r,r,locked,,Retrieve Trace Metadata
+holdout3,sentry,DELETE,/api/0/organizations/{organization_id_or_slug}/workflows/,deleteOrganizationWorkflows,w,w,floor,,Bulk Delete Alerts
+holdout3,sentry,PUT,/api/0/organizations/{organization_id_or_slug}/workflows/,updateOrganizationWorkflows,w,w,floor,,Mutate an Organization's Alerts
+holdout3,sentry,PUT,/api/0/organizations/{organization_id_or_slug}/workflows/{workflow_id}/,updateOrganizationWorkflow,w,w,floor,,Update an Alert by ID
+holdout3,sentry,PUT,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/,updateProject,w,w,floor,,Update a Project
+holdout3,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/environments/{environment}/,getProjectEnvironment,r,r,locked,,Retrieve a Project Environment
+holdout3,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/events/{event_id}/,getProjectEvent,r,r,locked,,Retrieve an Event for a Project
+holdout3,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/events/{event_id}/source-map-debug/,getProjectEventSourceMapDebug,r,r,locked,,Get Debug Information Related to Source Maps for a Given Event
+holdout3,sentry,PUT,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/filters/{filter_id}/,updateProjectFilter,w,w,floor,,Update an Inbound Data Filter
+holdout3,sentry,DELETE,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/hooks/{hook_id}/,Remove a Service Hook,w,w,floor,,
+holdout3,sentry,DELETE,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/,Bulk Remove a List of Issues,w,w,floor,,
+holdout3,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/keys/,listProjectKeys,r,r,locked,,List a Project's Client Keys
+holdout3,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/keys/{key_id}/,getProjectKey,r,r,locked,,Retrieve a Client Key
+holdout3,sentry,DELETE,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/monitors/{monitor_id_or_slug}/,deleteProjectMonitor,w,w,floor,,Delete a Monitor or Monitor Environments for a Project
+holdout3,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/monitors/{monitor_id_or_slug}/checkins/,listProjectMonitorCheckins,r,r,locked,,Retrieve Check-Ins for a Monitor by Project
+holdout3,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/preprod/size-analysis/status-check-rules/,getProjectPreprodSizeAnalysisStatusCheckRules,r,r,locked,,Retrieve Size Analysis status check rules for a project
+holdout3,sentry,POST,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/preprod/snapshots/status-checks/skip/,createProjectPreprodSnapshotSkippedStatusCheck,x,x,floor,,Create a skipped Snapshot status check
+holdout3,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/profiling/profiles/{profile_id}/,getProjectProfilingProfile,r,r,locked,,Retrieve a Profile
+holdout3,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/releases/{version}/files/,listProjectReleaseFiles,r,r,locked,,List a Project's Release Files
+holdout3,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/releases/{version}/files/{file_id}/,getProjectReleaseFile,r,r,locked,,Retrieve a Project Release's File
+holdout3,sentry,POST,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/replays/jobs/delete/,createProjectReplayDeletionJob,x,x,floor,,Create Replay Batch Deletion Job
+holdout3,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/replays/{replay_id}/clicks/,listProjectReplayClicks,r,r,locked,,List Clicked Nodes
+holdout3,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/replays/{replay_id}/viewed-by/,listProjectReplayViewedBy,r,r,locked,,List Users Who Have Viewed a Replay
+holdout3,sentry,DELETE,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/symbol-sources/,deleteProjectSymbolSource,w,w,floor,,Delete a Symbol Source from a Project
+holdout3,sentry,PUT,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/symbol-sources/,updateProjectSymbolSource,w,w,floor,,Update a Project's Symbol Source
+holdout3,sentry,DELETE,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/teams/{team_id_or_slug}/,deleteProjectTeam,x,x,party-noun,summary:team,Delete a Team from a Project
+holdout3,sentry,POST,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/user-feedback/,Submit User Feedback,w,x,floor,,
+holdout3,sentry,POST,/api/0/sentry-app-installations/{uuid}/external-issues/,Create or update an External Issue,w,x,floor,,
+holdout3,sentry,GET,/api/0/sentry-apps/{sentry_app_id_or_slug}/,getSentryApp,r,r,locked,,Retrieve a custom integration by ID or slug.
+holdout3,sentry,GET,/api/0/teams/{organization_id_or_slug}/{team_id_or_slug}/,getTeam,r,r,locked,,Retrieve a Team
+holdout3,sentry,DELETE,/api/0/teams/{organization_id_or_slug}/{team_id_or_slug}/external-teams/{external_team_id}/,deleteTeamExternalTeam,x,x,party-noun,summary:team,Delete an External Team
+holdout3,sentry,GET,/api/0/teams/{organization_id_or_slug}/{team_id_or_slug}/projects/,listTeamProjects,r,r,locked,,List a Team's Projects
+holdout3,vercel,PATCH,/aliases/{id}/protection-bypass,patchUrlProtectionBypass,x,x,floor,,Update the protection bypass for a URL
+holdout3,vercel,POST,/speed-insights/toggle,createSpeedInsightsToggle,w,x,floor,,
+holdout3,vercel,POST,/v1/access-groups/{accessGroupIdOrName}/projects,createAccessGroupProject,x,x,floor,,Create an access group project
+holdout3,vercel,POST,/v1/access-groups/{idOrName},updateAccessGroup,x,x,floor,,Update an access group
+holdout3,vercel,POST,/v1/ai-gateway/rules,createAiGatewayRule,x,x,floor,,Create rule
+holdout3,vercel,DELETE,/v1/ai-gateway/virtual-model-configs/{vmcSlug},deleteAiGatewayVirtualModelConfigBySlug,w,w,floor,,Delete virtual model config
+holdout3,vercel,DELETE,/v1/bulk-redirects,deleteRedirects,x,w,floor,,Delete project-level redirects.
+holdout3,vercel,POST,/v1/bulk-redirects/versions,updateVersion,x,x,floor,,Promote a staging version to production or restore a previous production version.
+holdout3,vercel,GET,/v1/connect/connectors/{connector}/projects/{projectId},getConnectorProjectConnection,r,r,locked,,Get a connector project connection
+holdout3,vercel,GET,/v1/connect/networks/{networkId},readNetwork,r,r,locked,,Read a Secure Compute network
+holdout3,vercel,PATCH,/v1/deployments/{deploymentId}/checks/{checkId},updateCheck,w,x,floor,,Update a check
+holdout3,vercel,GET,/v1/drains,getDrains,r,r,locked,,Retrieve a list of all Drains
+holdout3,vercel,POST,/v1/edge-cache/dangerously-delete-by-src-images,dangerouslyDeleteBySrcImages,x,x,floor,,Dangerously delete by source image
+holdout3,vercel,PATCH,/v1/env,updateSharedEnvVariable,w,x,floor,,Updates one or more shared environment variables
+holdout3,vercel,POST,/v1/global-config,createEdgeConfig,x,x,floor,,Create a Global Config
+holdout3,vercel,POST,/v1/global-config/{edgeConfigId}/backups/{edgeConfigBackupVersionId}/restore,restoreEdgeConfigBackup,w,x,floor,,Restore Global Config backup
+holdout3,vercel,POST,/v1/global-config/{edgeConfigId}/schema,patchEdgeConfigSchema,w,x,floor,,Update Global Config schema
+holdout3,vercel,GET,/v1/installations/{integrationConfigurationId}/account,get-account-info,r,r,locked,,Get Account Information
+holdout3,vercel,POST,/v1/installations/{integrationConfigurationId}/billing/invoices/{invoiceId}/actions,update-invoice,x,x,floor,,Invoice Actions
+holdout3,vercel,GET,/v1/installations/{integrationConfigurationId}/resources,get-integration-resources,r,r,locked,,Get Integration Resources
+holdout3,vercel,PUT,/v1/installations/{integrationConfigurationId}/resources/{resourceId}/experimentation/global-config,replaceInstallationsByIntegrationConfigurationIdResourcesByResourceIdExperimentationGlobalConfig,w,w,floor,,Push data into a user-provided Global Config
+holdout3,vercel,GET,/v1/integrations/configuration/{id},getConfiguration,r,r,locked,,Retrieve an integration configuration
+holdout3,vercel,DELETE,/v1/integrations/log-drains/{id},deleteIntegrationLogDrain,w,w,floor,,Deletes the Integration log drain with the provided `id` (deprecated)
+holdout3,vercel,GET,/v1/kms/issuers/{issuerId},getKmsIssuer,r,r,locked,,Get an issuer
+holdout3,vercel,DELETE,/v1/kms/issuers/{issuerId}/policies/{kind}/{policyKey},deleteKmsIssuerPolicy,w,w,floor,,Delete an issuer policy
+holdout3,vercel,DELETE,/v1/log-drains/{id},deleteConfigurableLogDrain,w,w,floor,,Deletes a Configurable Log Drain (deprecated)
+holdout3,vercel,GET,/v1/microfrontends/{deploymentId}/config,getMicrofrontendsConfig,r,r,locked,,Get microfrontends config for a deployment
+holdout3,vercel,GET,/v1/observability/manage/configuration/projects,getObservabilityConfigurationProjects,r,r,locked,,Lists disabled Observability Plus projects
+holdout3,vercel,DELETE,/v1/projects/{idOrName}/env,batchRemoveProjectEnv,w,w,floor,,Batch remove environment variables
+holdout3,vercel,GET,/v1/projects/{idOrName}/rolling-release,getRollingRelease,r,r,locked,,Get the active rolling release information for a project
+holdout3,vercel,PATCH,/v1/projects/{idOrName}/rolling-release/config,updateRollingReleaseConfig,w,x,floor,,Update the rolling release settings for the project
+holdout3,vercel,DELETE,/v1/projects/{projectIdOrName}/feature-flags/flags/{flagIdOrSlug},deleteFlag,w,w,floor,,Delete a flag
+holdout3,vercel,DELETE,/v1/projects/{projectIdOrName}/feature-flags/sdk-keys/{hashKey},deleteSdkKey,w,w,floor,,Delete an SDK key
+holdout3,vercel,GET,/v1/projects/{projectIdOrName}/feature-flags/settings,getFlagSettings,r,r,locked,,Get project flag settings
+holdout3,vercel,POST,/v1/projects/{projectId}/rollback/{deploymentId},requestRollback,x,x,floor,,Point production traffic to a previous production deployment by ID
+holdout3,vercel,POST,/v1/projects/{projectId}/routes/generate,generateRoute,r,x,floor,,Generate a routing rule from natural language
+holdout3,vercel,GET,/v1/query/web-analytics/events/count,countEvents,r,r,locked,,Counts custom events
+holdout3,vercel,PATCH,/v1/registrar/domains/{domain}/auto-renew,updateDomainAutoRenew,w,x,floor,,Update auto-renew for a domain
+holdout3,vercel,GET,/v1/registrar/domains/{domain}/price,getDomainPrice,r,r,locked,,Get price data for a domain
+holdout3,vercel,GET,/v1/registrar/tlds/{tld},getTld,r,r,locked,,Get TLD
+holdout3,vercel,POST,/v1/security/firewall/bypass,addBypassIp,x,x,floor,,Create System Bypass Rule
+holdout3,vercel,GET,/v1/security/firewall/config/{configVersion},getFirewallConfig,r,r,locked,,Read Firewall Configuration
+holdout3,vercel,POST,/v1/teams/{teamId}/dsync-roles,postTeamDsyncRoles,x,x,floor,,Update Team Directory Sync Role Mappings
+holdout3,vercel,PATCH,/v1/teams/{teamId}/members/{uid},updateTeamMember,x,x,party-noun,summary:member,Update a Team Member
+holdout3,vercel,GET,/v1/vcr/repository,listRepositories,r,r,locked,,List repositories
+holdout3,vercel,DELETE,/v1/vcr/repository/{idOrName}/images/{imageId},deleteRepositoryImage,w,w,floor,,Delete a repository image
+holdout3,vercel,GET,/v1/vcr/repository/{idOrName}/tags/{tag},getRepositoryTag,r,r,locked,,Get a repository tag
+holdout3,vercel,POST,/v10/projects/{idOrName}/domains,addProjectDomain,x,x,floor,,Add a domain to a project
+holdout3,vercel,POST,/v13/deployments,createDeployment,x,x,floor,,Create a new deployment
+holdout3,vercel,PATCH,/v2/connect/connectors/{connector},updateConnector,w,x,floor,,Update a connector
+holdout3,vercel,PATCH,/v2/deployments/{deploymentId}/check-runs/{checkRunId},updateDeploymentCheckRun,w,x,live-verb,opid:run,Update a check run
+holdout3,vercel,GET,/v2/integrations/log-drains,getIntegrationLogDrains,r,r,locked,,Retrieves a list of Integration log drains (deprecated)
+holdout3,vercel,POST,/v2/projects/{projectIdOrName}/checks,createProjectCheck,x,x,floor,,Create a check
+holdout3,vercel,GET,/v2/sandboxes,listNamedSandboxes,r,r,locked,,List sandboxes
+holdout3,vercel,GET,/v2/sandboxes/sessions/{sessionId},getSession,r,r,locked,,Get a session
+holdout3,vercel,POST,/v2/sandboxes/sessions/{sessionId}/extend-timeout,extendSessionTimeout,x,x,floor,,Extend session timeout
+holdout3,vercel,POST,/v2/sandboxes/sessions/{sessionId}/stop,stopSession,x,x,floor,,Stop a session
+holdout3,vercel,PATCH,/v2/sandboxes/{name},updateSandbox,x,x,floor,,Update a sandbox
+holdout3,vercel,POST,/v2/teams/{teamId}/members,inviteUserToTeam,x,x,live-verb,opid:invite,Invite a user
+holdout3,vercel,PUT,/v2/{teamSlug}/{projectSlug}/{repositoryName}/blobs/uploads/{uuid},replaceByTeamSlugByProjectSlugByRepositoryNameBlobsUploadsByUuid,w,w,floor,,Complete a blob upload
+holdout3,vercel,GET,/v2/{teamSlug}/{projectSlug}/{repositoryName}/tags/list,getByTeamSlugByProjectSlugByRepositoryNameTagsList,r,r,locked,,List image tags
+holdout3,vercel,POST,/v3/sandboxes/{name}/fork,createSandboxesByNameForkV3,x,x,floor,,Fork a named sandbox
+holdout3,vercel,POST,/v4/sandboxes,createSandboxesV4,x,x,floor,,Create a named sandbox
+holdout3,vercel,DELETE,/v6/domains/{domain},deleteDomain,w,w,floor,,Remove a domain by name
+holdout3,vercel,POST,/v8/artifacts,artifactQuery,r,x,floor,,Query information about an artifact
+holdout3,vercel,POST,/v8/certs,issueCert,x,x,floor,,Issue a new cert
+holdout3,vercel,GET,/v9/domains/{domain}/verification,getDomainVerificationRecord,r,r,locked,,Get Domain Verification Record
+holdout3,vercel,DELETE,/v9/projects/{idOrName}/custom-environments/{environmentSlugOrId},removeCustomEnvironment,w,w,floor,,Remove a custom environment
+holdout3,vercel,PATCH,/v9/projects/{idOrName}/domains/{domain},updateProjectDomain,w,x,floor,,Update a project domain
