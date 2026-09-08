@@ -280,8 +280,8 @@ camara,WebRTC,PUT,/sessions/{mediaSessionId}/status,updateSessionStatus,x,x,part
 camara,WebRTC,POST,/subscriptions,createNotificationChannelSubscription,x,x,floor,,Create a webrtc-events event subscription
 camara,WebRTC,GET,/subscriptions,retrieveNotificationChannelSubscriptionList,r,r,locked,,Retrieve a list of webrtc-events event subscription
 camara,WebRTC,GET,/subscriptions/{subscriptionId},retrieveNotificationChannelSubscription,r,r,locked,,Retrieve a webrtc-events event subscription
-camara,WebRTC,PUT,/subscriptions/{subscriptionId},updateNotificationChannelSubscription,w,w,floor,,Update a webrtc-events event subscription
-camara,WebRTC,DELETE,/subscriptions/{subscriptionId},deleteNotificationChannelSubscription,w,w,floor,,Delete a webrtc-events event subscription
+camara,WebRTC,PUT,/subscriptions/{subscriptionId},updateNotificationChannelSubscription,w,x,party-noun,opid-token:channel,Update a webrtc-events event subscription
+camara,WebRTC,DELETE,/subscriptions/{subscriptionId},deleteNotificationChannelSubscription,w,x,party-noun,opid-token:channel,Delete a webrtc-events event subscription
 camara,WebRTC,GET,/sessions,getRegistrationsByDeviceId,r,r,locked,,Retrieve all registrations for a device
 camara,WebRTC,POST,/sessions,createRegistration,x,x,floor,,Create a registration
 camara,WebRTC,GET,/sessions/{registrationId},getRegistrationById,r,r,locked,,Retrieve a device registration
@@ -325,7 +325,7 @@ holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Messages/{MessageSid}/M
 holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Queues/{QueueSid}/Members/{CallSid}.json,UpdateMember,x,x,floor,,Dequeue a member from a queue and have the member's call begin executing the TwiML document at that URL
 holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Messages.json,CreateMessage,x,x,live-verb,summary:send,Send a message
 holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Messages/{Sid}.json,UpdateMessage,w,x,floor,,Update a Message resource (used to redact Message `body` text and to cancel not-yet-sent messages)
-holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Messages/{Sid}.json,DeleteMessage,w,w,floor,,Deletes a Message resource from your account
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Messages/{Sid}.json,DeleteMessage,w,w,floor,caller-phrase,Deletes a Message resource from your account
 holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Messages/{MessageSid}/Feedback.json,CreateMessageFeedback,w,x,floor,,Create Message Feedback to confirm a tracked user action was performed by the recipient of the associated Message
 holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SigningKeys.json,CreateNewSigningKey,x,x,floor,,Create a new Signing Key for the account making the request.
 holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/OutgoingCallerIds/{Sid}.json,UpdateOutgoingCallerId,w,x,floor,,Updates the caller-id
@@ -384,7 +384,7 @@ holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Usage/Triggers/{Sid}.js
 holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Usage/Triggers.json,CreateUsageTrigger,x,x,live-verb,opid:trigger,Create a new UsageTrigger
 holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/UserDefinedMessages.json,CreateUserDefinedMessage,x,x,floor,,Create a new User Defined Message for the given Call SID.
 holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/UserDefinedMessageSubscriptions.json,CreateUserDefinedMessageSubscription,x,x,floor,,Subscribe to User Defined Messages for a given Call SID.
-holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/UserDefinedMessageSubscriptions/{Sid}.json,DeleteUserDefinedMessageSubscription,w,w,floor,,Delete a specific User Defined Message Subscription.
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/UserDefinedMessageSubscriptions/{Sid}.json,DeleteUserDefinedMessageSubscription,w,x,party-noun,opid-token:message,Delete a specific User Defined Message Subscription.
 holdout1,stripe,DELETE,/v1/accounts/{account},DeleteAccountsAccount,x,x,party-noun,summary:account,Delete an account
 holdout1,stripe,DELETE,/v1/accounts/{account}/bank_accounts/{id},DeleteAccountsAccountBankAccountsId,w,x,party-noun,summary:account,Delete an external account
 holdout1,stripe,DELETE,/v1/accounts/{account}/external_accounts/{id},DeleteAccountsAccountExternalAccountsId,w,x,party-noun,summary:account,Delete an external account
@@ -416,7 +416,7 @@ holdout1,stripe,DELETE,/v1/terminal/configurations/{configuration},DeleteTermina
 holdout1,stripe,DELETE,/v1/terminal/locations/{location},DeleteTerminalLocationsLocation,w,w,floor,,Delete a Location
 holdout1,stripe,DELETE,/v1/terminal/readers/{reader},DeleteTerminalReadersReader,w,w,floor,,Delete a Reader
 holdout1,stripe,DELETE,/v1/test_helpers/test_clocks/{test_clock},DeleteTestHelpersTestClocksTestClock,w,w,floor,,Delete a test clock
-holdout1,stripe,DELETE,/v1/webhook_endpoints/{webhook_endpoint},DeleteWebhookEndpointsWebhookEndpoint,w,w,floor,,Delete a webhook endpoint
+holdout1,stripe,DELETE,/v1/webhook_endpoints/{webhook_endpoint},DeleteWebhookEndpointsWebhookEndpoint,w,x,party-noun,opid-token:webhook,Delete a webhook endpoint
 holdout1,github,DELETE,/app/installations/{installation_id},apps/delete-installation,x,x,party-noun,summary:installation,Delete an installation for the authenticated app
 holdout1,github,DELETE,/applications/{client_id}/token,apps/delete-token,x,x,party-noun,summary:token,Delete an app token
 holdout1,github,DELETE,/enterprises/{enterprise}/code-security/configurations/{configuration_id},code-security/delete-configuration-for-enterprise,w,w,floor,,Delete a code security configuration for an enterprise
@@ -426,10 +426,10 @@ holdout1,github,DELETE,/gists/{gist_id}/star,gists/unstar,w,w,floor,,Unstar a gi
 holdout1,github,DELETE,/notifications/threads/{thread_id},activity/mark-thread-as-done,w,w,floor,,Mark a thread as done
 holdout1,github,PUT,/organizations/{org}/actions/cache/storage-limit,actions/set-actions-cache-storage-limit-for-organization,w,x,party-noun,opid:organization,Set GitHub Actions cache storage limit for an organization
 holdout1,github,DELETE,/orgs/{org}/actions/hosted-runners/images/custom/{image_definition_id}/versions/{version},actions/delete-custom-image-version-from-org,w,w,floor,,Delete an image version of custom image from the organization
-holdout1,github,PUT,/orgs/{org}/actions/permissions,actions/set-github-actions-permissions-organization,w,x,party-noun,opid:organization,Set GitHub Actions permissions for an organization
+holdout1,github,PUT,/orgs/{org}/actions/permissions,actions/set-github-actions-permissions-organization,w,x,party-noun,summary:permission,Set GitHub Actions permissions for an organization
 holdout1,github,PUT,/orgs/{org}/actions/permissions/repositories,actions/set-selected-repositories-enabled-github-actions-organization,w,x,party-noun,opid:organization,Set selected repositories enabled for GitHub Actions in an organization
 holdout1,github,PUT,/orgs/{org}/actions/permissions/self-hosted-runners,actions/set-self-hosted-runners-permissions-organization,w,x,party-noun,opid:organization,Set self-hosted runners settings for an organization
-holdout1,github,PUT,/orgs/{org}/actions/permissions/workflow,actions/set-github-actions-default-workflow-permissions-organization,w,x,party-noun,opid:organization,Set default workflow permissions for an organization
+holdout1,github,PUT,/orgs/{org}/actions/permissions/workflow,actions/set-github-actions-default-workflow-permissions-organization,w,x,party-noun,summary:permission,Set default workflow permissions for an organization
 holdout1,github,PUT,/orgs/{org}/actions/runner-groups/{runner_group_id}/repositories/{repository_id},actions/add-repo-access-to-self-hosted-runner-group-in-org,w,x,party-noun,summary:access,Add repository access to a self-hosted runner group in an organization
 holdout1,github,DELETE,/orgs/{org}/actions/runners/{runner_id},actions/delete-self-hosted-runner-from-org,w,w,floor,,Delete a self-hosted runner from an organization
 holdout1,github,DELETE,/orgs/{org}/actions/secrets/{secret_name},actions/delete-org-secret,w,w,floor,,Delete an organization secret
@@ -445,7 +445,7 @@ holdout1,github,PUT,/orgs/{org}/copilot-spaces/{space_number}/collaborators/{act
 holdout1,github,DELETE,/orgs/{org}/copilot/billing/selected_users,copilot/cancel-copilot-seat-assignment-for-users,x,x,party-noun,summary:user,Remove users from the Copilot subscription for an organization
 holdout1,github,PUT,/orgs/{org}/copilot/coding-agent/permissions/repositories/{repository_id},copilot/enable-copilot-coding-agent-for-repository-in-organization,w,x,party-noun,summary:repository,Enable a repository for Copilot cloud agent in an organization
 holdout1,github,PUT,/orgs/{org}/dependabot/secrets/{secret_name},dependabot/create-or-update-org-secret,w,w,floor,,Create or update an organization secret
-holdout1,github,DELETE,/orgs/{org}/hooks/{hook_id},orgs/delete-webhook,w,w,floor,,Delete an organization webhook
+holdout1,github,DELETE,/orgs/{org}/hooks/{hook_id},orgs/delete-webhook,w,x,party-noun,summary:webhook,Delete an organization webhook
 holdout1,github,DELETE,/orgs/{org}/issue-fields/{issue_field_id},orgs/delete-issue-field,w,w,floor,,Delete issue field for an organization
 holdout1,github,DELETE,/orgs/{org}/members/{username}/codespaces/{codespace_name},codespaces/delete-from-organization,x,x,party-noun,opid:organization,Delete a codespace from the organization
 holdout1,github,DELETE,/orgs/{org}/migrations/{migration_id}/repos/{repo_name}/lock,migrations/unlock-repo-for-org,w,x,party-noun,summary:repository,Unlock an organization repository
@@ -473,7 +473,7 @@ holdout1,github,DELETE,/repos/{owner}/{repo}/comments/{comment_id},repos/delete-
 holdout1,github,DELETE,/repos/{owner}/{repo}/dependabot/secrets/{secret_name},dependabot/delete-repo-secret,w,w,floor,,Delete a repository secret
 holdout1,github,PUT,/repos/{owner}/{repo}/environments/{environment_name},repos/create-or-update-environment,w,w,floor,,Create or update an environment
 holdout1,github,DELETE,/repos/{owner}/{repo}/environments/{environment_name}/secrets/{secret_name},actions/delete-environment-secret,w,w,floor,,Delete an environment secret
-holdout1,github,DELETE,/repos/{owner}/{repo}/hooks/{hook_id},repos/delete-webhook,w,w,floor,,Delete a repository webhook
+holdout1,github,DELETE,/repos/{owner}/{repo}/hooks/{hook_id},repos/delete-webhook,w,x,party-noun,summary:webhook,Delete a repository webhook
 holdout1,github,PUT,/repos/{owner}/{repo}/import,migrations/start-import,x,x,live-verb,summary:start,Start an import
 holdout1,github,PUT,/repos/{owner}/{repo}/interaction-limits/pulls/bypass-list,interactions/set-pull-request-bypass-list-for-repo,w,x,party-noun,summary:user,Add users to the pull request creation cap bypass list for a repository
 holdout1,github,PUT,/repos/{owner}/{repo}/issues/comments/{comment_id}/pin,issues/pin-comment,w,w,floor,,Pin an issue comment
@@ -484,7 +484,7 @@ holdout1,github,PUT,/repos/{owner}/{repo}/notifications,activity/mark-repo-notif
 holdout1,github,PUT,/repos/{owner}/{repo}/private-vulnerability-reporting,repos/enable-private-vulnerability-reporting,w,w,floor,,Enable private vulnerability reporting for a repository
 holdout1,github,PUT,/repos/{owner}/{repo}/pulls/{pull_number}/merge-async,pulls/merge-async,x,x,live-verb,summary:merge,Merge a pull request asynchronously
 holdout1,github,PUT,/repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/dismissals,pulls/dismiss-review,w,w,floor,,Dismiss a review for a pull request
-holdout1,github,DELETE,/repos/{owner}/{repo}/releases/{release_id}/reactions/{reaction_id},reactions/delete-for-release,w,w,floor,,Delete a release reaction
+holdout1,github,DELETE,/repos/{owner}/{repo}/releases/{release_id}/reactions/{reaction_id},reactions/delete-for-release,w,x,party-noun,summary:reaction,Delete a release reaction
 holdout1,github,DELETE,/repos/{owner}/{repo}/subscription,activity/delete-repo-subscription,w,w,floor,,Delete a repository subscription
 holdout1,github,PUT,/repos/{owner}/{repo}/vulnerability-alerts,repos/enable-vulnerability-alerts,w,w,floor,,Enable vulnerability alerts
 holdout1,github,DELETE,/teams/{team_id}/memberships/{username},teams/remove-membership-for-user-legacy,x,x,party-noun,summary:membership,Remove team membership for a user (Legacy)
@@ -687,7 +687,7 @@ holdout2,pagerduty,GET,/v3/schedules/{id}/overrides/{override_id},getOverride,r,
 holdout2,pagerduty,GET,/v3/schedules/{id}/rotations/{rotation_id},getRotation,r,r,locked,,Get a rotation
 holdout2,pagerduty,PUT,/v3/schedules/{id}/rotations/{rotation_id}/events/{event_id},updateEvent,w,w,floor,,Update an event
 holdout2,pagerduty,GET,/webhook_subscriptions/oauth_clients,listOauthClients,r,r,locked,,List OAuth clients
-holdout2,pagerduty,DELETE,/webhook_subscriptions/{id},deleteWebhookSubscription,w,w,floor,,Delete a webhook subscription
+holdout2,pagerduty,DELETE,/webhook_subscriptions/{id},deleteWebhookSubscription,w,x,party-noun,opid-token:webhook,Delete a webhook subscription
 holdout2,pagerduty,GET,/workflows/integrations,listWorkflowIntegrations,r,r,locked,,List Workflow Integrations
 holdout2,pagerduty,DELETE,/workflows/integrations/{integration_id}/connections/{id},deleteWorkflowIntegrationConnection,w,w,floor,,Delete Workflow Integration Connection
 holdout2,adyen,POST,/applePay/sessions,post-applePay-sessions,x,x,live-verb,opid:pay,Get an Apple Pay session
@@ -726,34 +726,34 @@ holdout3,discord,GET,/applications/{application_id}/emojis,list_application_emoj
 holdout3,discord,GET,/applications/{application_id}/emojis/{emoji_id},get_application_emoji,r,r,locked,,
 holdout3,discord,POST,/applications/{application_id}/entitlements,create_entitlement,x,x,floor,,
 holdout3,discord,POST,/applications/{application_id}/entitlements/{entitlement_id}/consume,consume_entitlement,w,x,floor,,
-holdout3,discord,PUT,/applications/{application_id}/guilds/{guild_id}/commands,bulk_set_guild_application_commands,w,x,no-text,no-text,
+holdout3,discord,PUT,/applications/{application_id}/guilds/{guild_id}/commands,bulk_set_guild_application_commands,w,x,party-noun,opid-token:guild,
 holdout3,discord,GET,/applications/{application_id}/guilds/{guild_id}/commands/{command_id},get_guild_application_command,r,r,locked,,
-holdout3,discord,PUT,/applications/{application_id}/guilds/{guild_id}/commands/{command_id}/permissions,set_guild_application_command_permissions,x,x,no-text,no-text,
-holdout3,discord,DELETE,/channels/{channel_id},delete_channel,x,x,no-text,no-text,
+holdout3,discord,PUT,/applications/{application_id}/guilds/{guild_id}/commands/{command_id}/permissions,set_guild_application_command_permissions,x,x,party-noun,opid:permission,
+holdout3,discord,DELETE,/channels/{channel_id},delete_channel,x,x,party-noun,opid-token:channel,
 holdout3,discord,POST,/channels/{channel_id}/followers,follow_channel,x,x,floor,,
 holdout3,discord,GET,/channels/{channel_id}/messages,list_messages,r,r,locked,,
 holdout3,discord,GET,/channels/{channel_id}/messages/pins,list_pins,r,r,locked,,
-holdout3,discord,DELETE,/channels/{channel_id}/messages/{message_id},delete_message,x,x,no-text,no-text,
+holdout3,discord,DELETE,/channels/{channel_id}/messages/{message_id},delete_message,x,x,party-noun,opid-token:message,
 holdout3,discord,POST,/channels/{channel_id}/messages/{message_id}/crosspost,crosspost_message,x,x,floor,,
 holdout3,discord,GET,/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name},list_message_reactions_by_emoji,r,r,locked,,
-holdout3,discord,DELETE,/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}/{user_id},delete_user_message_reaction,x,x,no-text,no-text,
-holdout3,discord,PUT,/channels/{channel_id}/permissions/{overwrite_id},set_channel_permission_overwrite,x,x,no-text,no-text,
-holdout3,discord,PUT,/channels/{channel_id}/pins/{message_id},deprecated_create_pin,x,x,no-text,no-text,
+holdout3,discord,DELETE,/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}/{user_id},delete_user_message_reaction,x,x,party-noun,opid:reaction,
+holdout3,discord,PUT,/channels/{channel_id}/permissions/{overwrite_id},set_channel_permission_overwrite,x,x,party-noun,opid:overwrite,
+holdout3,discord,PUT,/channels/{channel_id}/pins/{message_id},deprecated_create_pin,x,x,party-noun,opid:pin,
 holdout3,discord,DELETE,/channels/{channel_id}/recipients/{user_id},delete_group_dm_user,x,x,party-noun,opid:user,
 holdout3,discord,GET,/channels/{channel_id}/thread-members,list_thread_members,r,r,locked,,
 holdout3,discord,DELETE,/channels/{channel_id}/thread-members/{user_id},delete_thread_member,x,x,party-noun,opid:member,
 holdout3,discord,POST,/channels/{channel_id}/threads,create_thread,x,x,floor,,
 holdout3,discord,GET,/channels/{channel_id}/threads/search,thread_search,r,r,locked,,
-holdout3,discord,PUT,/channels/{channel_id}/voice-status,update_voice_channel_status,w,w,floor,,
+holdout3,discord,PUT,/channels/{channel_id}/voice-status,update_voice_channel_status,w,x,party-noun,opid:channel,
 holdout3,discord,GET,/gateway,get_gateway,r,r,locked,,
 holdout3,discord,GET,/guilds/{guild_id},get_guild,r,r,locked,,
 holdout3,discord,GET,/guilds/{guild_id}/auto-moderation/rules,list_auto_moderation_rules,r,r,locked,,
 holdout3,discord,GET,/guilds/{guild_id}/auto-moderation/rules/{rule_id},get_auto_moderation_rule,r,r,locked,,
-holdout3,discord,DELETE,/guilds/{guild_id}/bans/{user_id},unban_user_from_guild,x,x,no-text,no-text,
+holdout3,discord,DELETE,/guilds/{guild_id}/bans/{user_id},unban_user_from_guild,x,x,party-noun,opid:guild,
 holdout3,discord,POST,/guilds/{guild_id}/bulk-ban,bulk_ban_users_from_guild,x,x,floor,,
 holdout3,discord,POST,/guilds/{guild_id}/channels,create_guild_channel,x,x,floor,,
-holdout3,discord,DELETE,/guilds/{guild_id}/emojis/{emoji_id},delete_guild_emoji,x,x,no-text,no-text,
-holdout3,discord,PUT,/guilds/{guild_id}/incident-actions,update_guild_incident_actions,x,w,floor,,
+holdout3,discord,DELETE,/guilds/{guild_id}/emojis/{emoji_id},delete_guild_emoji,x,x,party-noun,opid:emoji,
+holdout3,discord,PUT,/guilds/{guild_id}/incident-actions,update_guild_incident_actions,x,x,party-noun,opid-token:guild,
 holdout3,discord,GET,/guilds/{guild_id}/invites,list_guild_invites,r,r,locked,,
 holdout3,discord,GET,/guilds/{guild_id}/members/search,search_guild_members,r,r,locked,,
 holdout3,discord,PATCH,/guilds/{guild_id}/members/{user_id},update_guild_member,x,x,party-noun,opid:member,
@@ -761,21 +761,21 @@ holdout3,discord,PUT,/guilds/{guild_id}/members/{user_id}/roles/{role_id},add_gu
 holdout3,discord,GET,/guilds/{guild_id}/onboarding,get_guilds_onboarding,r,r,locked,,
 holdout3,discord,GET,/guilds/{guild_id}/prune,preview_prune_guild,r,r,locked,,
 holdout3,discord,GET,/guilds/{guild_id}/requests,get_guild_join_requests,r,r,locked,,
-holdout3,discord,PATCH,/guilds/{guild_id}/roles,bulk_update_guild_roles,x,x,no-text,no-text,
+holdout3,discord,PATCH,/guilds/{guild_id}/roles,bulk_update_guild_roles,x,x,party-noun,opid-token:guild,
 holdout3,discord,DELETE,/guilds/{guild_id}/roles/{role_id},delete_guild_role,x,x,party-noun,opid:role,
 holdout3,discord,GET,/guilds/{guild_id}/scheduled-events,list_guild_scheduled_events,r,r,locked,,
 holdout3,discord,GET,/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id},get_guild_scheduled_event,r,r,locked,,
-holdout3,discord,DELETE,/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}/exceptions/{exception_id},delete_guild_scheduled_event_exception,w,w,floor,,
+holdout3,discord,DELETE,/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}/exceptions/{exception_id},delete_guild_scheduled_event_exception,w,x,party-noun,opid-token:guild,
 holdout3,discord,GET,/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}/users/counts,count_guild_scheduled_event_users,r,r,locked,,
 holdout3,discord,POST,/guilds/{guild_id}/soundboard-sounds,create_guild_soundboard_sound,x,x,floor,,
-holdout3,discord,PATCH,/guilds/{guild_id}/soundboard-sounds/{sound_id},update_guild_soundboard_sound,w,x,no-text,no-text,
-holdout3,discord,DELETE,/guilds/{guild_id}/stickers/{sticker_id},delete_guild_sticker,x,x,no-text,no-text,
+holdout3,discord,PATCH,/guilds/{guild_id}/soundboard-sounds/{sound_id},update_guild_soundboard_sound,w,x,party-noun,opid-token:guild,
+holdout3,discord,DELETE,/guilds/{guild_id}/stickers/{sticker_id},delete_guild_sticker,x,x,party-noun,opid:sticker,
 holdout3,discord,GET,/guilds/{guild_id}/templates,list_guild_templates,r,r,locked,,
-holdout3,discord,PATCH,/guilds/{guild_id}/templates/{code},update_guild_template,w,x,no-text,no-text,
+holdout3,discord,PATCH,/guilds/{guild_id}/templates/{code},update_guild_template,w,x,party-noun,opid-token:guild,
 holdout3,discord,GET,/guilds/{guild_id}/vanity-url,get_guild_vanity_url,r,r,locked,,
 holdout3,discord,GET,/guilds/{guild_id}/voice-states/{user_id},get_voice_state,r,r,locked,,
 holdout3,discord,GET,/guilds/{guild_id}/welcome-screen,get_guild_welcome_screen,r,r,locked,,
-holdout3,discord,PATCH,/guilds/{guild_id}/widget,update_guild_widget_settings,w,x,no-text,no-text,
+holdout3,discord,PATCH,/guilds/{guild_id}/widget,update_guild_widget_settings,w,x,party-noun,opid-token:guild,
 holdout3,discord,POST,/interactions/{interaction_id}/{interaction_token}/callback,create_interaction_response,x,x,floor,,
 holdout3,discord,GET,/invites/{code}/target-users,get_invite_target_users,r,r,locked,,
 holdout3,discord,POST,/lobbies,create_lobby,x,x,floor,,
@@ -797,8 +797,8 @@ holdout3,discord,GET,/users/{user_id},get_user,r,r,locked,,
 holdout3,discord,GET,/webhooks/{webhook_id},get_webhook,r,r,locked,,
 holdout3,discord,GET,/webhooks/{webhook_id}/{webhook_token},get_webhook_by_token,r,r,locked,,
 holdout3,discord,POST,/webhooks/{webhook_id}/{webhook_token}/github,execute_github_compatible_webhook,x,x,live-verb,opid:execute,
-holdout3,discord,PATCH,/webhooks/{webhook_id}/{webhook_token}/messages/@original,update_original_webhook_message,x,x,no-text,no-text,
-holdout3,discord,PATCH,/webhooks/{webhook_id}/{webhook_token}/messages/{message_id},update_webhook_message,x,x,no-text,no-text,
+holdout3,discord,PATCH,/webhooks/{webhook_id}/{webhook_token}/messages/@original,update_original_webhook_message,x,x,party-noun,opid:message,
+holdout3,discord,PATCH,/webhooks/{webhook_id}/{webhook_token}/messages/{message_id},update_webhook_message,x,x,party-noun,opid:message,
 holdout3,sentry,GET,/api/0/organizations/,listOrganizations,r,r,locked,,List Your Organizations
 holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/agents/conversations/,listOrganizationAIConversations,r,r,locked,,List an Organization's AI Conversations
 holdout3,sentry,GET,/api/0/organizations/{organization_id_or_slug}/dashboards/,listOrganizationDashboards,r,r,locked,,List an Organization's Custom Dashboards
@@ -1101,7 +1101,7 @@ holdout4,x,GET,/2/broadcasts,listBroadcasts,r,r,locked,,List broadcasts
 holdout4,x,DELETE,/2/broadcasts/scheduled/{id},deleteScheduledBroadcast,w,w,floor,,Delete a scheduled broadcast
 holdout4,x,POST,/2/broadcasts/scheduled/{id}/live,goLiveScheduledBroadcast,x,x,floor,,Go live on a scheduled broadcast
 holdout4,x,POST,/2/broadcasts/{id}/chat,sendBroadcastChat,x,x,live-verb,opid:send,Send a chat message to a live broadcast
-holdout4,x,DELETE,/2/broadcasts/{id}/chat/{message_id},deleteBroadcastChatMessage,x,w,floor,,Remove a chat message from a live broadcast
+holdout4,x,DELETE,/2/broadcasts/{id}/chat/{message_id},deleteBroadcastChatMessage,x,x,party-noun,summary:message,Remove a chat message from a live broadcast
 holdout4,x,POST,/2/chat/conversations/group/initialize,initializeChatGroup,x,x,floor,,Initialize Chat Group
 holdout4,x,POST,/2/chat/conversations/{id}/keys,addConversationKeys,x,x,floor,,Add Conversation Keys
 holdout4,x,POST,/2/chat/conversations/{id}/messages/delete,deleteChatMessages,x,x,floor,,Delete Chat messages
@@ -1133,7 +1133,7 @@ holdout4,x,GET,/2/tweets/firehose/stream/lang/ko,streamPostsFirehoseKo,r,r,locke
 holdout4,x,GET,/2/tweets/sample/stream,streamPostsSample,r,r,locked,,Stream sampled Posts
 holdout4,x,GET,/2/tweets/search/recent,searchPostsRecent,r,r,locked,,Search Posts Recent
 holdout4,x,POST,/2/tweets/search/stream/rules,updateRules,w,x,floor,,Update stream rules
-holdout4,x,DELETE,/2/tweets/search/webhooks/{webhook_id},deleteWebhooksStreamLink,w,w,floor,,Delete stream link
+holdout4,x,DELETE,/2/tweets/search/webhooks/{webhook_id},deleteWebhooksStreamLink,w,x,party-noun,opid-token:webhook,Delete stream link
 holdout4,x,GET,/2/tweets/{id},getPostsById,r,r,locked,,Get Posts by ID
 holdout4,x,GET,/2/tweets/{id}/retweeted_by,getPostsRepostedBy,r,r,locked,,Get Posts Reposted by
 holdout4,x,GET,/2/usage/credits,getUsageCredits,r,r,locked,,Get usage credits
@@ -1153,4 +1153,4 @@ holdout4,x,GET,/2/users/{id}/public_keys,getUsersPublicKey,r,r,locked,,Get publi
 holdout4,x,DELETE,/2/users/{id}/retweets/{source_tweet_id},unrepostPost,w,w,floor,,Unrepost Post
 holdout4,x,DELETE,/2/users/{source_user_id}/following/{target_user_id},unfollowUser,w,x,party-noun,summary:user,Unfollow User
 holdout4,x,POST,/2/webhooks,createWebhooks,x,x,floor,,Create webhook
-holdout4,x,PUT,/2/webhooks/{webhook_id},validateWebhooks,x,w,floor,,Validate webhook
+holdout4,x,PUT,/2/webhooks/{webhook_id},validateWebhooks,x,x,party-noun,summary:webhook,Validate webhook

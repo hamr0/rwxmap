@@ -27,6 +27,8 @@ camara,NetworkAccessManagement,PATCH,/trust-domains/{trustDomainId}/devices/{dev
 camara,NetworkAccessManagement,DELETE,/trust-domains/{trustDomainId}/devices/{deviceId},deleteTrustDomainDevice,w,x,party-noun,summary:device,Remove a device from a Trust Domain
 camara,QualityOnDemand,DELETE,/sessions/{sessionId},deleteSession,w,x,party-noun,summary:session,Delete a QoS session
 camara,SessionInsights,DELETE,/sessions/{sessionId},deleteSession,w,x,party-noun,summary:session,Delete session
+camara,WebRTC,PUT,/subscriptions/{subscriptionId},updateNotificationChannelSubscription,w,x,party-noun,opid-token:channel,Update a webrtc-events event subscription
+camara,WebRTC,DELETE,/subscriptions/{subscriptionId},deleteNotificationChannelSubscription,w,x,party-noun,opid-token:channel,Delete a webrtc-events event subscription
 camara,WebRTC,DELETE,/sessions/{registrationId},deleteRegistrationById,w,x,party-noun,summary:session,Delete Registration Session.
 holdout1,twilio,POST,/2010-04-01/Accounts/{Sid}.json,UpdateAccount,w,x,floor,,Modify the properties of a given Account
 holdout1,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Addresses/{Sid}.json,UpdateAddress,w,x,floor,,
@@ -54,10 +56,10 @@ holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Keys/{Sid}.json,DeleteK
 holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Recordings/{RecordingSid}/Transcriptions/{Sid}.json,DeleteRecordingTranscription,w,x,no-text,no-text,
 holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/SigningKeys/{Sid}.json,DeleteSigningKey,w,x,no-text,no-text,
 holdout1,github,PUT,/organizations/{org}/actions/cache/storage-limit,actions/set-actions-cache-storage-limit-for-organization,w,x,party-noun,opid:organization,Set GitHub Actions cache storage limit for an organization
-holdout1,github,PUT,/orgs/{org}/actions/permissions,actions/set-github-actions-permissions-organization,w,x,party-noun,opid:organization,Set GitHub Actions permissions for an organization
+holdout1,github,PUT,/orgs/{org}/actions/permissions,actions/set-github-actions-permissions-organization,w,x,party-noun,summary:permission,Set GitHub Actions permissions for an organization
 holdout1,github,PUT,/orgs/{org}/actions/permissions/repositories,actions/set-selected-repositories-enabled-github-actions-organization,w,x,party-noun,opid:organization,Set selected repositories enabled for GitHub Actions in an organization
 holdout1,github,PUT,/orgs/{org}/actions/permissions/self-hosted-runners,actions/set-self-hosted-runners-permissions-organization,w,x,party-noun,opid:organization,Set self-hosted runners settings for an organization
-holdout1,github,PUT,/orgs/{org}/actions/permissions/workflow,actions/set-github-actions-default-workflow-permissions-organization,w,x,party-noun,opid:organization,Set default workflow permissions for an organization
+holdout1,github,PUT,/orgs/{org}/actions/permissions/workflow,actions/set-github-actions-default-workflow-permissions-organization,w,x,party-noun,summary:permission,Set default workflow permissions for an organization
 holdout1,github,PUT,/orgs/{org}/actions/runner-groups/{runner_group_id}/repositories/{repository_id},actions/add-repo-access-to-self-hosted-runner-group-in-org,w,x,party-noun,summary:access,Add repository access to a self-hosted runner group in an organization
 holdout1,github,PUT,/orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id},actions/add-selected-repo-to-org-secret,w,x,party-noun,summary:repository,Add selected repository to an organization secret
 holdout1,github,PUT,/orgs/{org}/actions/variables/{name}/repositories/{repository_id},actions/add-selected-repo-to-org-variable,w,x,party-noun,summary:repository,Add selected repository to an organization variable
@@ -66,11 +68,14 @@ holdout1,github,DELETE,/orgs/{org}/agents/variables/{name}/repositories/{reposit
 holdout1,github,DELETE,/orgs/{org}/blocks/{username},orgs/unblock-user,w,x,party-noun,summary:user,Unblock a user from an organization
 holdout1,github,PUT,/orgs/{org}/codespaces/secrets/{secret_name}/repositories/{repository_id},codespaces/add-selected-repo-to-org-secret,w,x,party-noun,summary:repository,Add selected repository to an organization secret
 holdout1,github,PUT,/orgs/{org}/copilot/coding-agent/permissions/repositories/{repository_id},copilot/enable-copilot-coding-agent-for-repository-in-organization,w,x,party-noun,summary:repository,Enable a repository for Copilot cloud agent in an organization
+holdout1,github,DELETE,/orgs/{org}/hooks/{hook_id},orgs/delete-webhook,w,x,party-noun,summary:webhook,Delete an organization webhook
 holdout1,github,DELETE,/orgs/{org}/migrations/{migration_id}/repos/{repo_name}/lock,migrations/unlock-repo-for-org,w,x,party-noun,summary:repository,Unlock an organization repository
 holdout1,github,DELETE,/orgs/{org}/settings/immutable-releases/repositories/{repository_id},orgs/disable-selected-repository-immutable-releases-organization,w,x,party-noun,summary:repository,Disable a selected repository for immutable releases in an organization
 holdout1,github,PUT,/repos/{owner}/{repo}/actions/permissions/access,actions/set-workflow-access-to-repository,w,x,party-noun,opid:repository,Set the level of access for workflows outside of the repository
 holdout1,github,PUT,/repos/{owner}/{repo}/actions/permissions/selected-actions,actions/set-allowed-actions-repository,w,x,party-noun,opid:repository,Set allowed actions and reusable workflows for a repository
+holdout1,github,DELETE,/repos/{owner}/{repo}/hooks/{hook_id},repos/delete-webhook,w,x,party-noun,summary:webhook,Delete a repository webhook
 holdout1,github,PUT,/repos/{owner}/{repo}/interaction-limits/pulls/bypass-list,interactions/set-pull-request-bypass-list-for-repo,w,x,party-noun,summary:user,Add users to the pull request creation cap bypass list for a repository
+holdout1,github,DELETE,/repos/{owner}/{repo}/releases/{release_id}/reactions/{reaction_id},reactions/delete-for-release,w,x,party-noun,summary:reaction,Delete a release reaction
 holdout1,github,DELETE,/user/blocks/{username},users/unblock,w,x,party-noun,summary:user,Unblock a user
 holdout1,github,PUT,/user/codespaces/secrets/{secret_name}/repositories,codespaces/set-repositories-for-secret-for-authenticated-user,w,x,party-noun,opid:user,Set selected repositories for a user secret
 holdout1,github,DELETE,/users/{username}/copilot-spaces/{space_number},copilot-spaces/delete-for-user,w,x,party-noun,opid:user,Delete a Copilot Space for a user
@@ -81,7 +86,9 @@ holdout1,stripe,DELETE,/v1/accounts/{account}/external_accounts/{id},DeleteAccou
 holdout1,stripe,DELETE,/v1/accounts/{account}/people/{person},DeleteAccountsAccountPeoplePerson,w,x,party-noun,summary:person,Delete a person
 holdout1,stripe,DELETE,/v1/accounts/{account}/persons/{person},DeleteAccountsAccountPersonsPerson,w,x,party-noun,summary:person,Delete a person
 holdout1,stripe,DELETE,/v1/customers/{customer}/bank_accounts/{id},DeleteCustomersCustomerBankAccountsId,w,x,party-noun,opid:account,Delete a customer source
+holdout1,stripe,DELETE,/v1/webhook_endpoints/{webhook_endpoint},DeleteWebhookEndpointsWebhookEndpoint,w,x,party-noun,opid-token:webhook,Delete a webhook endpoint
 holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers/{ResourceSid}/AssignedAddOns/{Sid}.json,DeleteIncomingPhoneNumberAssignedAddOn,w,x,party-noun,summary:assignment,Remove the assignment of an Add-on installation from the Number specified.
+holdout1,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/UserDefinedMessageSubscriptions/{Sid}.json,DeleteUserDefinedMessageSubscription,w,x,party-noun,opid-token:message,Delete a specific User Defined Message Subscription.
 holdout2,adyen,POST,/cardDetails,post-cardDetails,r,x,floor,,Get the brands and other details of a card
 holdout2,adyen,POST,/donationCampaigns,post-donationCampaigns,r,x,floor,,Get a list of donation campaigns.
 holdout2,adyen,POST,/originKeys,post-originKeys,r,x,floor,,Create originKey values for domains
@@ -107,6 +114,7 @@ holdout2,box,PUT,/integration_mappings/teams/{integration_mapping_id},put_integr
 holdout2,box,DELETE,/storage_policy_assignments/{storage_policy_assignment_id},delete_storage_policy_assignments_id,w,x,party-noun,opid:assignment,Unassign storage policy
 holdout2,box,PUT,/task_assignments/{task_assignment_id},put_task_assignments_id,w,x,party-noun,summary:assignment,Update task assignment
 holdout2,pagerduty,PUT,/teams/{id}/users/{user_id},updateTeamUser,w,x,party-noun,summary:user,Add a user to a team
+holdout2,pagerduty,DELETE,/webhook_subscriptions/{id},deleteWebhookSubscription,w,x,party-noun,opid-token:webhook,Delete a webhook subscription
 holdout3,discord,POST,/applications/{application_id}/entitlements/{entitlement_id}/consume,consume_entitlement,w,x,floor,,
 holdout3,discord,POST,/partner-sdk/provisional-accounts/unmerge/bot,bot_partner_sdk_unmerge_provisional_account,w,x,floor,,
 holdout3,sentry,POST,/api/0/organizations/{organization_id_or_slug}/releases/,createOrganizationRelease,w,x,floor,,Create a New Release for an Organization
@@ -126,12 +134,14 @@ holdout3,vercel,PATCH,/v9/projects/{idOrName}/domains/{domain},updateProjectDoma
 holdout3,vercel,PATCH,/v2/deployments/{deploymentId}/check-runs/{checkRunId},updateDeploymentCheckRun,w,x,live-verb,opid:run,Update a check run
 holdout3,discord,PATCH,/applications/{application_id},update_application,w,x,no-text,no-text,
 holdout3,discord,DELETE,/applications/{application_id}/commands/{command_id},delete_application_command,w,x,no-text,no-text,
-holdout3,discord,PUT,/applications/{application_id}/guilds/{guild_id}/commands,bulk_set_guild_application_commands,w,x,no-text,no-text,
-holdout3,discord,PATCH,/guilds/{guild_id}/soundboard-sounds/{sound_id},update_guild_soundboard_sound,w,x,no-text,no-text,
-holdout3,discord,PATCH,/guilds/{guild_id}/templates/{code},update_guild_template,w,x,no-text,no-text,
-holdout3,discord,PATCH,/guilds/{guild_id}/widget,update_guild_widget_settings,w,x,no-text,no-text,
 holdout3,discord,DELETE,/lobbies/{lobby_id}/members/@me,leave_lobby,w,x,no-text,no-text,
 holdout3,discord,PUT,/users/@me/applications/{application_id}/role-connection,update_application_user_role_connection,w,x,no-text,no-text,
+holdout3,discord,PUT,/applications/{application_id}/guilds/{guild_id}/commands,bulk_set_guild_application_commands,w,x,party-noun,opid-token:guild,
+holdout3,discord,PUT,/channels/{channel_id}/voice-status,update_voice_channel_status,w,x,party-noun,opid:channel,
+holdout3,discord,DELETE,/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}/exceptions/{exception_id},delete_guild_scheduled_event_exception,w,x,party-noun,opid-token:guild,
+holdout3,discord,PATCH,/guilds/{guild_id}/soundboard-sounds/{sound_id},update_guild_soundboard_sound,w,x,party-noun,opid-token:guild,
+holdout3,discord,PATCH,/guilds/{guild_id}/templates/{code},update_guild_template,w,x,party-noun,opid-token:guild,
+holdout3,discord,PATCH,/guilds/{guild_id}/widget,update_guild_widget_settings,w,x,party-noun,opid-token:guild,
 holdout4,cloudflare,POST,/accounts/{account_id}/autorag/rags/{id}/search,autorag-config-search,r,x,floor,,Search
 holdout4,cloudflare,POST,/accounts/{account_id}/cloudforce-one/events/{event_id},post_EventUpdate,w,x,floor,,Updates an event
 holdout4,cloudflare,PATCH,/accounts/{account_id}/cloudforce-one/v2/collections/{collection_id}/columns/{column_id},patch_ColumnUpdate,w,x,floor,,Update column
@@ -158,4 +168,5 @@ holdout4,x,DELETE,/2/connections/{endpoint_id},deleteConnectionsByEndpoint,w,x,l
 holdout4,cloudflare,DELETE,/accounts/{account_id}/teamnet/virtual_networks/{virtual_network_id},tunnel-virtual-network-delete,w,x,party-noun,summary:network,Delete a virtual network
 holdout4,linode,DELETE,/{apiVersion}/managed/contacts/{contactId},delete-managed-contact,w,x,party-noun,summary:contact,Delete a managed contact
 holdout4,linode,PUT,/{apiVersion}/placement/groups/{groupId},put-placement-group,w,x,party-noun,summary:group,Update a placement group
+holdout4,x,DELETE,/2/tweets/search/webhooks/{webhook_id},deleteWebhooksStreamLink,w,x,party-noun,opid-token:webhook,Delete stream link
 holdout4,x,DELETE,/2/users/{source_user_id}/following/{target_user_id},unfollowUser,w,x,party-noun,summary:user,Unfollow User

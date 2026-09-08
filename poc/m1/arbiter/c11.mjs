@@ -12,11 +12,15 @@
 //   3. Party-noun raise — PUT/DELETE/PATCH only (POST/PATCH's prior is
 //      already x, so this only actually changes PUT/DELETE; it still runs
 //      on PATCH for evidence-trail completeness). If the summary's head
-//      noun, or else the operationId's head noun, is in PARTY_NOUNS, the
-//      row is 'x' — unless the summary uses a caller phrase ("for the
-//      authenticated user", "your account", ...), which suppresses the
-//      raise and records 'caller-phrase' as evidence instead. rule:
-//      'party-noun'.
+//      noun, or else the operationId's head noun, is in PARTY_NOUNS OR
+//      SHARED_NOUNS (user ruling 2026-09-08: shared objects other members
+//      feel), the row is 'x'. Failing both of those, any operationId token
+//      (after C5 stripping, naive-singularised) that is in SHARED_NOUNS
+//      also counts as a hit, evidence 'opid-token:<word>'. Any of these
+//      hits is suppressed the same way — unless the summary uses a caller
+//      phrase ("for the authenticated user", "your account", ...), which
+//      suppresses the raise and records 'caller-phrase' as evidence
+//      instead. rule: 'party-noun'.
 //   4. Read-verb lower — POST only. If the operationId lead verb is in
 //      READ_VERBS, the row is lowered from the x floor to 'r'. rule:
 //      'read-verb'.
@@ -40,6 +44,7 @@
 import {
   methodPrior,
   leadVerbForRow,
+  tokensForRow,
 } from './arbiter.mjs';
 import {
   LIVE_VERBS as JUDGE_LIVE_VERBS,
@@ -49,10 +54,17 @@ import {
   operationIdAnyLiveToken,
   summaryLeadVerb,
   summaryHasCallerPhrase,
+  naiveSingular,
 } from './judge.mjs';
 
 export const LIVE_VERBS = new Set(JUDGE_LIVE_VERBS);
 export const PARTY_NOUNS = new Set([...JUDGE_PARTY_NOUNS, 'repository']);
+// user ruling 2026-09-08: shared objects other members feel; measured zero
+// new leaks on five sets.
+export const SHARED_NOUNS = new Set([
+  'message', 'channel', 'emoji', 'sticker', 'pin', 'guild', 'permission',
+  'overwrite', 'ban', 'webhook', 'reaction',
+]);
 export const READ_VERBS = new Set([
   'retrieve', 'verify', 'check', 'query', 'read', 'fetch', 'list', 'search',
   'match', 'count', 'lookup', 'assess', 'find', 'get',
@@ -93,8 +105,20 @@ export function classify(row) {
     const summaryNoun = headNounForRow(row);
     const opidNoun = operationIdHeadNoun(row);
     let hit = null;
-    if (isInSet(summaryNoun, PARTY_NOUNS)) hit = { source: 'summary', word: summaryNoun };
-    else if (isInSet(opidNoun, PARTY_NOUNS)) hit = { source: 'opid', word: opidNoun };
+    if (isInSet(summaryNoun, PARTY_NOUNS) || isInSet(summaryNoun, SHARED_NOUNS)) {
+      hit = { source: 'summary', word: summaryNoun };
+    } else if (isInSet(opidNoun, PARTY_NOUNS) || isInSet(opidNoun, SHARED_NOUNS)) {
+      hit = { source: 'opid', word: opidNoun };
+    } else {
+      const { tokens } = tokensForRow(row);
+      for (const t of tokens) {
+        const word = naiveSingular(t.toLowerCase());
+        if (SHARED_NOUNS.has(word)) {
+          hit = { source: 'opid-token', word };
+          break;
+        }
+      }
+    }
 
     if (hit) {
       if (summaryHasCallerPhrase(row.summary)) {

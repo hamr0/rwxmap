@@ -253,7 +253,10 @@ entries).
    access, restriction, sponsorship, participant, call, seat,
    organization, invitation, assignment, person, people, contact,
    recipient, subscriber, tenant, partner, device, session, network,
-   repository.
+   repository. Shared-object nouns (2026-09-08, user ruling): message,
+   channel, emoji, sticker, pin, guild, permission, overwrite, ban,
+   webhook, reaction, matched on either head noun or any operationId
+   token, raise the same way.
 4. Read-verb lowering, POST only, only when steps 2-3 did not fire:
    operationId lead verb in READ_VERBS -> r. READ_VERBS = retrieve,
    verify, check, query, read, fetch, list, search, match, count,
@@ -271,11 +274,14 @@ entries).
 
 | set | n | exact | leaks | over-tight |
 |---|---|---|---|---|
-| camara | 292 | 262 | 1 | 29 (9.9%) |
-| holdout1 | 207 | 151 | 2 | 54 (26.1%) |
-| holdout2 | 220 | 195 | 0 | 25 (11.4%) |
-| holdout3 | 226 | 199 | 2 | 25 (11.1%) |
-| holdout4 | 210 | 181 | 2 | 27 (12.9%) |
+| camara | 292 | 260 | 1 | 31 (10.6%) |
+| holdout1 | 207 | 146 | 2 | 59 (28.5%) |
+| holdout2 | 220 | 194 | 0 | 26 (11.8%) |
+| holdout3 | 226 | 198 | 1 | 27 (11.9%) |
+| holdout4 | 210 | 182 | 0 | 28 (13.3%) |
+
+Across all five sets: 1155 rows, 4 leaks (0.3%), 171 over-tight
+(14.8%).
 
 Hold-out 3 (Discord, Sentry, Vercel, 2026-09-08) was scored once
 untuned at 11 leaks; Rule A, adopted on it, brings it to 2 (vercel
@@ -286,14 +292,15 @@ data/holdout4-2026-09-08) is the clean exam.
 Hold-out 4 (Linode, Cloudflare, X, 2026-09-08) is the clean exam,
 scored once after Rule A: 2 leaks (deleteBroadcastChatMessage,
 validateWebhooks), both writes on shared objects or live checks with no
-list word. Across all five sets: 1155 rows, 7 leaks (0.6%), 160
-over-tight (13.9%).
+list word. The shared-object noun step (2026-09-08) fixed both, plus
+discord update_guild_incident_actions on hold-out 3.
 
-Both negative controls x. Remaining leaks: camara deleteTrafficInfluence
-(no word signal), github issues/set-issue-field-values and
-issues/remove-sub-issue (truth disputed, pending user). List growth
-rule: lists change only by hand review; the corpus is not used at score
-time (measured in C11-V9: corpus-mined verbs changed nothing).
+Both negative controls x. Remaining leaks (4, all floor w with text and
+no list word): camara deleteTrafficInfluence, github
+issues/set-issue-field-values and issues/remove-sub-issue (truth
+disputed, pending user), vercel deleteRedirects. List growth rule:
+lists change only by hand review; the corpus is not used at score time
+(measured in C11-V9: corpus-mined verbs changed nothing).
 
 M1 status 2026-09-08: C11 + Rule A measured on five sets; M1 closes
 pending the user's rulings on the shared-object noun line and the three
@@ -654,6 +661,9 @@ Non-blocking; never silently assumed.
   adopted — a PUT/DELETE/PATCH with no summary and no description ->
   x, marked no-text. Hold-out 3 became a tuning set to decide it;
   hold-out 4 is the new clean exam.
+- Owner-declared notify flags (e.g. x-github.triggersNotification:
+  true) as a raise-only step: zero leaks, tiny coverage; admit as an
+  exact vendor-key list?
 
 ## 8. Notes carried from the outline, stated on purpose
 
@@ -757,3 +767,4 @@ starts, not yet exercised.
 | D33 | M1's arbiter is two passes. Pass 1: the machine-facing fields (method prior, scope, body, callbacks, corpus lean, CAMARA verb table) with a confidence sum; assigns above the threshold. Pass 2: a verb-and-noun judge on the residual only, with orchestrator-written lists (live verbs, own verbs, party nouns) measured rule by rule and admitted only at zero leaks on CAMARA + hold-out 1; switches chosen by cost after zero leaks. The verb never gives `w` on POST. Set by the user's reading of the review pile 2026-09-07, measured M1-C9. Superseded by D34 (C11) on 2026-09-08. |
 | D34 | M1 arbiter shape is C11 — floor + raise-only from fixed hand lists. Decided 2026-09-08. See "M1 arbiter flow (C11, adopted 2026-09-08)" in §4. |
 | D35 | Rule A: a PUT/DELETE/PATCH with no summary and no description is x, marked no-text. Decided 2026-09-08. Hold-out 3 becomes a tuning set; hold-out 4 is the clean exam. |
+| D36 | Shared-object nouns join the party-noun raise (message, channel, emoji, sticker, pin, guild, permission, overwrite, ban, webhook, reaction). Three vendors' readers drew the line at x. Decided 2026-09-08. |

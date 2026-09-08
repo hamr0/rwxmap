@@ -103,3 +103,34 @@ test('POST with no text still floors to x via the ordinary POST prior, never no-
   assert.equal(r.rule, 'floor');
   assert.notEqual(r.rule, 'no-text');
 });
+
+test('DELETE delete_channel with empty summary and a non-empty description raises to x via shared-noun opid-token', () => {
+  const r = classify(row({
+    method: 'DELETE',
+    operationId: 'delete_channel',
+    summary: '',
+    description: 'Deletes a guild channel.',
+  }));
+  assert.equal(r.class, 'x');
+  assert.equal(r.rule, 'party-noun');
+  assert.equal(r.evidence.includes('opid-token:channel'), true);
+});
+
+test('DELETE deleteBroadcastChatMessage with a shared-noun summary raises to x via party-noun', () => {
+  const r = classify(row({
+    method: 'DELETE',
+    operationId: 'deleteBroadcastChatMessage',
+    summary: 'Remove a chat message from a live broadcast',
+  }));
+  assert.equal(r.class, 'x');
+  assert.equal(r.rule, 'party-noun');
+});
+
+test('POST with "message" in the operationId still floors to x (step 3 does not run on POST)', () => {
+  const r = classify(row({
+    method: 'POST',
+    operationId: 'sendChannelMessage',
+    summary: 'Send a message to a channel',
+  }));
+  assert.equal(r.class, 'x');
+});

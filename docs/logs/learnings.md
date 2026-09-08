@@ -1909,3 +1909,48 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
 - Pending the user: the shared-object noun question (message/channel/
   issue) now has evidence from three vendors (GitHub w, Discord x, X
   x); the two GitHub truth rows; deleteTrafficInfluence.
+
+### M1-C11 shared-object nouns admitted; GitHub triggersNotification measured (2026-09-08)
+
+- SHARED_NOUNS = message, channel, emoji, sticker, pin, guild,
+  permission, overwrite, ban, webhook, reaction, added to step 3
+  (party-noun) in c11.mjs, user ruling after three vendors' readers
+  (Discord, X, and hold-out 4) drew the shared-object line at x; GitHub
+  readers had drawn org-settings at w. Sources: summary head noun,
+  operationId head noun, and any operationId token. 33 rows changed,
+  all tightening or same class; 3 leaks fixed (discord
+  update_guild_incident_actions, x deleteBroadcastChatMessage, x
+  validateWebhooks); 11 new over-tight (CAMARA WebRTC
+  notification-channel subscription x2, Twilio
+  DeleteUserDefinedMessageSubscription, Stripe/GitHub/PagerDuty/X
+  webhook deletes, GitHub reactions/delete-for-release, Discord
+  voice-channel status and guild event/soundboard/template/widget
+  rows).
+- Results table (set n exact leaks over_tight exact% leak%
+  over-tight%): camara 292 260 1 31 89.0 0.3 10.6; holdout1 207 146 2
+  59 70.5 1.0 28.5; holdout2 220 194 0 26 88.2 0.0 11.8; holdout3 226
+  198 1 27 87.6 0.4 11.9; holdout4 210 182 0 28 86.7 0.0 13.3. Total
+  1155 rows, 4 leaks (0.3%), 171 over-tight (14.8%). Both controls x.
+  118 tests pass.
+- Remaining 4 leaks, all floor w with text and no list word: camara
+  deleteTrafficInfluence; github issues/set-issue-field-values and
+  issues/remove-sub-issue; vercel deleteRedirects ("Delete
+  project-level redirects", creates a new version each call).
+- Truth check on the two GitHub rows: the orchestrator's earlier
+  reading of w was wrong; the readers' reason is GitHub's own
+  `x-github.triggersNotification: true`, an external effect (notifies).
+  Truth x stands.
+- triggersNotification measured on the GitHub spec (SHA matches
+  hold-out 1's README): among the 81 labelled GitHub rows, flag true on
+  3 (all truth x: set-issue-field-values, remove-sub-issue,
+  pulls/merge-async), absent on 78 (w 62, x 16). Whole spec: true on 22
+  of ~1225 operations (POST 12, DELETE 4, PUT 4, PATCH 1), false once,
+  absent elsewhere. Verdict: zero-leak raise-only signal with tiny
+  coverage (3 of 19 GitHub x rows). Not admitted yet; it is the owner's
+  own declaration of an external effect, so an "owner-declared notify
+  flag raises to x" step is the candidate, generalised only as an
+  exact vendor key list, never a substring guess. Pending user.
+- What it taught: the leak surface after five sets is four rows, each
+  needing either an owner-declared field (the GitHub flag) or a
+  description read (Vercel's "new version" sentence), neither of which
+  the operationId-plus-summary flow can see.
