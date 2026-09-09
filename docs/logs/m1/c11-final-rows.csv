@@ -229,7 +229,7 @@ camara,QoSBooking,DELETE,/device-qos-bookings/{bookingId},deleteBooking,w,w,floo
 camara,QoSBooking,POST,/retrieve-device-qos-bookings,retrieveBookingByDevice,r,r,read-verb,opid:retrieve,Gets the QoS Booking for a device
 camara,QualityOnDemand,POST,/retrieve-qos-profiles,retrieveQosProfiles,r,r,read-verb,opid:retrieve,Retrieve QoS profiles
 camara,QualityOnDemand,GET,/qos-profiles/{name},getQosProfile,r,r,locked,,Get QoS Profile for a given name
-camara,QualityOnDemand,POST,/qos-assignments,createQosAssignment,x,x,live-verb,summary:trigger,Triggers the provisioning process for the assignment of a QoS profile to a device
+camara,QualityOnDemand,POST,/qos-assignments,createQosAssignment,x,x,live-verb,summary:triggers,Triggers the provisioning process for the assignment of a QoS profile to a device
 camara,QualityOnDemand,GET,/qos-assignments/{assignmentId},getQosAssignmentById,r,r,locked,,Get the QoS profile assignment information identified by an assignment record ID
 camara,QualityOnDemand,DELETE,/qos-assignments/{assignmentId},revokeQosAssignment,w,x,live-verb,opid:revoke,Revokes a QoS profile assignment identified by an assignment record ID
 camara,QualityOnDemand,POST,/retrieve-qos-assignment,getQosAssignmentByDevice,r,r,read-verb,opid:get,Returns the assignment record details of the QoS profile assignment for a device
@@ -691,7 +691,7 @@ holdout2,pagerduty,DELETE,/webhook_subscriptions/{id},deleteWebhookSubscription,
 holdout2,pagerduty,GET,/workflows/integrations,listWorkflowIntegrations,r,r,locked,,List Workflow Integrations
 holdout2,pagerduty,DELETE,/workflows/integrations/{integration_id}/connections/{id},deleteWorkflowIntegrationConnection,w,w,floor,,Delete Workflow Integration Connection
 holdout2,adyen,POST,/applePay/sessions,post-applePay-sessions,x,x,live-verb,opid:pay,Get an Apple Pay session
-holdout2,adyen,POST,/cancels,post-cancels,x,x,live-verb,summary:cancel,Cancel an authorised payment
+holdout2,adyen,POST,/cancels,post-cancels,x,x,live-verb,opid:cancels,Cancel an authorised payment
 holdout2,adyen,POST,/cardDetails,post-cardDetails,r,x,floor,,Get the brands and other details of a card
 holdout2,adyen,POST,/donationCampaigns,post-donationCampaigns,r,x,floor,,Get a list of donation campaigns.
 holdout2,adyen,POST,/donations,post-donations,x,x,floor,,Make a donation
@@ -707,9 +707,9 @@ holdout2,adyen,POST,/paymentMethods/balance,post-paymentMethods-balance,r,x,floo
 holdout2,adyen,POST,/payments,post-payments,x,x,live-verb,summary:start,Start a transaction
 holdout2,adyen,POST,/payments/details,post-payments-details,x,x,live-verb,summary:submit,Submit details for a payment
 holdout2,adyen,POST,/payments/{paymentPspReference}/amountUpdates,post-payments-paymentPspReference-amountUpdates,x,x,floor,,Update an authorised amount
-holdout2,adyen,POST,/payments/{paymentPspReference}/cancels,post-payments-paymentPspReference-cancels,x,x,live-verb,summary:cancel,Cancel an authorised payment
+holdout2,adyen,POST,/payments/{paymentPspReference}/cancels,post-payments-paymentPspReference-cancels,x,x,live-verb,opid:cancels,Cancel an authorised payment
 holdout2,adyen,POST,/payments/{paymentPspReference}/captures,post-payments-paymentPspReference-captures,x,x,floor,,Capture an authorised payment
-holdout2,adyen,POST,/payments/{paymentPspReference}/refunds,post-payments-paymentPspReference-refunds,x,x,live-verb,summary:refund,Refund a captured payment
+holdout2,adyen,POST,/payments/{paymentPspReference}/refunds,post-payments-paymentPspReference-refunds,x,x,live-verb,opid:refunds,Refund a captured payment
 holdout2,adyen,POST,/payments/{paymentPspReference}/reversals,post-payments-paymentPspReference-reversals,x,x,live-verb,summary:refund,Refund or cancel a payment
 holdout2,adyen,POST,/paypal/updateOrder,post-paypal-updateOrder,x,x,floor,,Updates the order for PayPal Express Checkout
 holdout2,adyen,POST,/sessions,post-sessions,x,x,floor,,Create a payment session
@@ -1043,7 +1043,7 @@ holdout4,cloudflare,PUT,/accounts/{account_id}/dlp/data_classes/{data_class_id},
 holdout4,cloudflare,POST,/accounts/{account_id}/dlp/patterns/validate,dlp-pattern-validate,r,x,floor,,Validate a DLP regex pattern
 holdout4,cloudflare,GET,/accounts/{account_id}/dns_firewall/{dns_firewall_id}/reverse_dns,dns-firewall-show-dns-firewall-cluster-reverse-dns,r,r,locked,,Show DNS Firewall Cluster Reverse DNS
 holdout4,cloudflare,DELETE,/accounts/{account_id}/email-security/settings/domains,email_security_delete_domains,w,w,floor,,Unprotect multiple email domains
-holdout4,cloudflare,POST,/accounts/{account_id}/email/sending/send_raw,email-sending-account-send-raw-message,x,x,live-verb,opid:send,Send a raw MIME email
+holdout4,cloudflare,POST,/accounts/{account_id}/email/sending/send_raw,email-sending-account-send-raw-message,x,x,live-verb,opid:sending,Send a raw MIME email
 holdout4,cloudflare,PUT,/accounts/{account_id}/gateway/audit_ssh_settings,zero-trust-update-audit-ssh-settings,w,w,floor,,Update Zero Trust SSH settings
 holdout4,cloudflare,PUT,/accounts/{account_id}/gateway/rules/{rule_id},zero-trust-gateway-rules-update-zero-trust-gateway-rule,w,w,floor,,Update a Zero Trust Gateway rule
 holdout4,cloudflare,DELETE,/accounts/{account_id}/images/v2/sourcingkit/migrations/{migration_id},cloudflare-images-sourcingkit-delete-migration,w,w,floor,,Delete a sourcing kit migration

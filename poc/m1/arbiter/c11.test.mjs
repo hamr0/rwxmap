@@ -126,6 +126,51 @@ test('DELETE deleteBroadcastChatMessage with a shared-noun summary raises to x v
   assert.equal(r.rule, 'party-noun');
 });
 
+// --- M1-C13 fix C (adopted 2026-09-08): stem matching is now the default
+// for LIVE_VERBS/READ_VERBS matching on both the opid and summary paths ---
+
+test('POST cancelsSubscription (inflected LIVE_VERBS entry "cancel" + "s") raises to x via live-verb, opid path', () => {
+  const r = classify(row({ method: 'POST', operationId: 'cancelsSubscription', summary: '' }));
+  assert.equal(r.class, 'x');
+  assert.equal(r.rule, 'live-verb');
+  assert.equal(r.evidence[0], 'opid:cancels');
+});
+
+test('DELETE with an inflected LIVE_VERBS hit ("canceled") only in the summary raises to x via live-verb, summary path', () => {
+  const r = classify(row({
+    method: 'DELETE',
+    operationId: 'doThing',
+    summary: 'Canceled the pending request',
+  }));
+  assert.equal(r.class, 'x');
+  assert.equal(r.rule, 'live-verb');
+  assert.equal(r.evidence[0], 'summary:canceled');
+});
+
+test('POST fetchingAccountBalance (inflected READ_VERBS entry "fetch" + "ing") is lowered to r via read-verb', () => {
+  const r = classify(row({ method: 'POST', operationId: 'fetchingAccountBalance', summary: '' }));
+  assert.equal(r.class, 'r');
+  assert.equal(r.rule, 'read-verb');
+  assert.equal(r.evidence[0], 'opid:fetching');
+});
+
+test('POST retrievingAccountBalance (inflected READ_VERBS entry "retrieve" + silent-e "-ing") is lowered to r via read-verb (M1-C13 fix D closes the silent-e gap noted here previously)', () => {
+  const r = classify(row({ method: 'POST', operationId: 'retrievingAccountBalance', summary: '' }));
+  assert.equal(r.class, 'r');
+  assert.equal(r.rule, 'read-verb');
+  assert.equal(r.evidence[0], 'opid:retrieving');
+});
+
+test('POST invokeSomething does not raise via live-verb: "invoke" is a real-list near-miss of LIVE_VERBS\'s "revoke", not the same word', () => {
+  const r = classify(row({ method: 'POST', operationId: 'invokeSomething', summary: '' }));
+  assert.notEqual(r.rule, 'live-verb');
+});
+
+test('DELETE spendCredits does not raise via live-verb: "spend" is a real-list near-miss of LIVE_VERBS\'s "send", not the same word', () => {
+  const r = classify(row({ method: 'DELETE', operationId: 'spendCredits', summary: 'Spend a credit balance' }));
+  assert.notEqual(r.rule, 'live-verb');
+});
+
 test('POST with "message" in the operationId still floors to x (step 3 does not run on POST)', () => {
   const r = classify(row({
     method: 'POST',

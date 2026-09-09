@@ -14,6 +14,8 @@ import {
   operationIdHeadNoun,
   operationIdAnyLiveToken,
   judgeRow,
+  stemMatches,
+  matchesAnyStem,
 } from './judge.mjs';
 
 function row(overrides) {
@@ -393,4 +395,174 @@ test('repoNounOn on: "repository" is now a party noun — the same row fires R2 
   assert.equal(result.class, 'x');
   assert.equal(result.rule, 'R2');
   assert.deepEqual(result.evidence, ['judge:party:repository']);
+});
+
+// --- M1-C13 fix C (adopted 2026-09-08): stemMatches/matchesAnyStem --------
+// The real fix: naiveSingular is a NOUN rule and mangles verb inflections
+// (creates -> creat). stemMatches accepts a verb's inflections as "the same
+// verb" as its stem, anchored at position 0 so a different prefix never
+// matches even when it happens to share one.
+
+test('stemMatches: invoke inflections all match stem "invok"', () => {
+  assert.equal(stemMatches('invoke', 'invok'), true);
+  assert.equal(stemMatches('invokes', 'invok'), true);
+  assert.equal(stemMatches('invoked', 'invok'), true);
+  assert.equal(stemMatches('invoking', 'invok'), true);
+  assert.equal(stemMatches('invok', 'invok'), true);
+});
+
+test('stemMatches: a different verb sharing a prefix must never match', () => {
+  assert.equal(stemMatches('revoke', 'invok'), false);
+  assert.equal(stemMatches('evoke', 'invok'), false);
+});
+
+test('stemMatches: address must never match stem "add"', () => {
+  assert.equal(stemMatches('address', 'add'), false);
+  assert.equal(stemMatches('addresses', 'add'), false);
+});
+
+test('stemMatches: spend must never match stem "send"', () => {
+  assert.equal(stemMatches('spend', 'send'), false);
+  assert.equal(stemMatches('spends', 'send'), false);
+});
+
+test('stemMatches: empty word or stem never matches', () => {
+  assert.equal(stemMatches('', 'invok'), false);
+  assert.equal(stemMatches('invoke', ''), false);
+});
+
+// --- M1-C13 fix D (2026-09-08): standard-spelling-change inflections ------
+// The literal suffix list above appends suffixes verbatim to the stem, so
+// it misses English spelling changes at the join: silent-e drop before
+// -ing, consonant+y -> ies/ied, and CVC doubled-consonant before -ing/-ed.
+// Each still anchors to a prefix DERIVED FROM THE STEM (never from the
+// candidate word), so a different word can never match.
+
+test('stemMatches: silent-e drop before -ing (stem ends in "e")', () => {
+  assert.equal(stemMatches('invoking', 'invoke'), true);
+  assert.equal(stemMatches('terminating', 'terminate'), true);
+  assert.equal(stemMatches('revoking', 'revoke'), true);
+  // -ed needs no separate handling: it is already covered by the literal
+  // 'd' suffix appended to the FULL stem (invoke + 'd' = invoked) — verify
+  // that stays true.
+  assert.equal(stemMatches('invoked', 'invoke'), true);
+  assert.equal(stemMatches('terminated', 'terminate'), true);
+});
+
+test('stemMatches: consonant+y -> ies/ied (stem ends in consonant + "y")', () => {
+  assert.equal(stemMatches('verifies', 'verify'), true);
+  assert.equal(stemMatches('verified', 'verify'), true);
+  // "verifys" is not real English, but it already matched before fix D —
+  // it is the plain literal 's' suffix appended to the stem itself
+  // (verify + s = verifys), pre-existing and out of scope here; fix D only
+  // ADDS the ies/ied forms, it never removes anything the literal list
+  // already accepted.
+  assert.equal(stemMatches('verifys', 'verify'), true);
+});
+
+test('stemMatches: CVC doubled-consonant before -ing/-ed', () => {
+  assert.equal(stemMatches('cancelling', 'cancel'), true);
+  assert.equal(stemMatches('cancelled', 'cancel'), true);
+  assert.equal(stemMatches('banning', 'ban'), true);
+  assert.equal(stemMatches('banned', 'ban'), true);
+  assert.equal(stemMatches('submitting', 'submit'), true);
+  assert.equal(stemMatches('submitted', 'submit'), true);
+});
+
+test('stemMatches: working cases from before fix D keep working', () => {
+  assert.equal(stemMatches('invokes', 'invoke'), true);
+  assert.equal(stemMatches('sends', 'send'), true);
+  assert.equal(stemMatches('sending', 'send'), true);
+  assert.equal(stemMatches('cancels', 'cancel'), true);
+  assert.equal(stemMatches('starts', 'start'), true);
+  assert.equal(stemMatches('starting', 'start'), true);
+});
+
+test('stemMatches: the three named near-misses still never match after fix D', () => {
+  assert.equal(stemMatches('revoke', 'invok'), false);
+  assert.equal(stemMatches('revoking', 'invok'), false);
+  assert.equal(stemMatches('address', 'add'), false);
+  assert.equal(stemMatches('addresses', 'add'), false);
+  assert.equal(stemMatches('spend', 'send'), false);
+  assert.equal(stemMatches('spends', 'send'), false);
+  assert.equal(stemMatches('spending', 'send'), false);
+});
+
+test('stemMatches: adversarial cases for fix D', () => {
+  // 'invoked' matches stem 'invok' via the pre-existing literal 'ed'
+  // suffix (invok + ed = invoked) — unaffected by fix D.
+  assert.equal(stemMatches('invoked', 'invok'), true);
+  // 'invok' also happens to satisfy the CVC pattern (o-k preceded by a
+  // consonant), so its doubled form 'invokk' + 'ing'/'ed' is ALSO accepted
+  // — that is not a real word, but it is harmless (nothing spells it that
+  // way) and does not open the door to a wrong word: 'invoking' (single k)
+  // is NOT the doubled form and only matches via the plain literal 'ing'
+  // suffix already appended to 'invok' itself (invok + ing = invoking),
+  // which predates fix D.
+  assert.equal(stemMatches('invoking', 'invok'), true);
+  assert.equal(stemMatches('invokking', 'invok'), true); // doubled form, harmless
+  // 'banner' must NOT match 'ban': doubled prefix is 'bann', and 'banner'
+  // does start with 'bann', but the remainder 'er' is neither 'ing' nor
+  // 'ed' — no accepted suffix, so it correctly fails.
+  assert.equal(stemMatches('banner', 'ban'), false);
+  // 'setting' vs 'set': 'set' is CVC (s-e-t, consonant-vowel-consonant) so
+  // the doubled form 'sett' + 'ing' = 'setting' IS accepted. This is
+  // deliberate and linguistically correct — "setting" (and "resetting") is
+  // the real English gerund of "set", not a false positive.
+  assert.equal(stemMatches('setting', 'set'), true);
+  // 'listing' vs 'list': already matched before fix D and is unaffected by
+  // it — 'list' is not CVC ('s' before the final 't' is a consonant, not a
+  // vowel), so this is the plain literal 'ing' suffix appended to the
+  // stem itself (list + ing = listing), never the doubled-consonant path.
+  assert.equal(stemMatches('listing', 'list'), true);
+  // 'sender' must NOT match 'send': 'send' is not CVC (the letter before
+  // the final consonant is 'n', a consonant, not a vowel), so no doubling
+  // applies, and the plain literal suffix list does not contain 'er'.
+  assert.equal(stemMatches('sender', 'send'), false);
+});
+
+// --- against the REAL LIVE_VERBS/READ_VERBS lists (c11.mjs's adopted use) --
+// c11.mjs's LIVE_VERBS is judge.mjs's LIVE_VERBS verbatim (new Set(...)), so
+// checking against judge.mjs's own LIVE_VERBS/OWN_VERBS exercises the exact
+// entries c11.mjs matches against.
+
+test('matchesAnyStem: LIVE_VERBS entry "terminate" matches -s/-ed/-ing forms (fix D closes the silent-e gap)', () => {
+  assert.equal(matchesAnyStem('terminate', LIVE_VERBS), true);
+  assert.equal(matchesAnyStem('terminates', LIVE_VERBS), true);
+  assert.equal(matchesAnyStem('terminated', LIVE_VERBS), true);
+  assert.equal(matchesAnyStem('terminating', LIVE_VERBS), true);
+});
+
+test('matchesAnyStem: LIVE_VERBS entry "revoke" matches -s/-ed/-ing forms (fix D closes the silent-e gap)', () => {
+  assert.equal(matchesAnyStem('revokes', LIVE_VERBS), true);
+  assert.equal(matchesAnyStem('revoked', LIVE_VERBS), true);
+  assert.equal(matchesAnyStem('revoking', LIVE_VERBS), true);
+});
+
+test('matchesAnyStem: LIVE_VERBS entry "cancel" matches doubled-consonant -ing/-ed forms (fix D)', () => {
+  assert.equal(matchesAnyStem('cancelling', LIVE_VERBS), true);
+  assert.equal(matchesAnyStem('cancelled', LIVE_VERBS), true);
+});
+
+test('matchesAnyStem: LIVE_VERBS entry "send" (no trailing e) matches -s/-ing forms; "invoke" and "spend" are real-list near-misses that never match', () => {
+  assert.equal(matchesAnyStem('sends', LIVE_VERBS), true);
+  assert.equal(matchesAnyStem('sending', LIVE_VERBS), true);
+  // "invoke" shares no stem in LIVE_VERBS with a matching prefix (it is
+  // close to "revoke" only by eye, not by prefix) — must not match.
+  assert.equal(matchesAnyStem('invoke', LIVE_VERBS), false);
+  // "spend" does not start with "send" — must not match despite LIVE_VERBS
+  // containing "send".
+  assert.equal(matchesAnyStem('spend', LIVE_VERBS), false);
+  assert.equal(matchesAnyStem('spending', LIVE_VERBS), false);
+});
+
+test('matchesAnyStem: READ_VERBS-shaped set (same entries/shape as c11.mjs\'s READ_VERBS) — "retrieve"/"check"/"fetch" match their -s/-ed/-ing forms; "verify" now also matches its -es/-ed y-change forms (fix D)', () => {
+  const READ_VERBS_LIKE = new Set(['retrieve', 'verify', 'check', 'fetch']);
+  assert.equal(matchesAnyStem('retrieves', READ_VERBS_LIKE), true);
+  assert.equal(matchesAnyStem('retrieved', READ_VERBS_LIKE), true);
+  assert.equal(matchesAnyStem('checks', READ_VERBS_LIKE), true);
+  assert.equal(matchesAnyStem('checking', READ_VERBS_LIKE), true);
+  assert.equal(matchesAnyStem('fetching', READ_VERBS_LIKE), true);
+  assert.equal(matchesAnyStem('verifies', READ_VERBS_LIKE), true);
+  assert.equal(matchesAnyStem('verified', READ_VERBS_LIKE), true);
 });

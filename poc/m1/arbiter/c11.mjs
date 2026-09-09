@@ -9,6 +9,22 @@
 //   2. Live-verb raise — any method. If any operationId token (after C5
 //      stripping) or the summary's own lead word is in LIVE_VERBS, the row
 //      is 'x'. rule: 'live-verb'.
+//      M1-C13 fix C, adopted 2026-09-08: matching against LIVE_VERBS (and,
+//      in step 4, READ_VERBS) goes through judge.mjs's stemMatches, not an
+//      exact Set.has — one list entry now covers a verb's inflections
+//      (invoke/invokes/invoked/invoking) so nobody hand-adds forms. This
+//      replaces both the opid path's previous zero normalization
+//      (operationIdAnyLiveToken did an exact match on the raw token) and the
+//      summary path's previous naiveSingular normalization
+//      (summaryLeadVerb), which mangled verbs (creates -> creat) and
+//      disagreed with the opid path's total lack of normalization. Both
+//      paths now go through the same matcher (stemMatches), so they agree
+//      on what a word is. Measured on all six sets (M1-C13): stemming alone
+//      changes no row's class versus the pre-stem behaviour — the word
+//      lists already only ever appeared in their bare/exact forms in the
+//      test beds, so this is headroom for future lists, not a fix landing
+//      today. Noun sets (PARTY_NOUNS/SHARED_NOUNS, step 3) are unaffected —
+//      naiveSingular stays there, unchanged.
 //   3. Party-noun raise — PUT/DELETE/PATCH only (POST/PATCH's prior is
 //      already x, so this only actually changes PUT/DELETE; it still runs
 //      on PATCH for evidence-trail completeness). If the summary's head
@@ -51,10 +67,10 @@ import {
   PARTY_NOUNS as JUDGE_PARTY_NOUNS,
   headNounForRow,
   operationIdHeadNoun,
-  operationIdAnyLiveToken,
-  summaryLeadVerb,
+  fallbackVerbFromSummary,
   summaryHasCallerPhrase,
   naiveSingular,
+  matchesAnyStem,
 } from './judge.mjs';
 
 export const LIVE_VERBS = new Set(JUDGE_LIVE_VERBS);
@@ -79,6 +95,18 @@ function isInSet(word, set) {
   return word !== '' && set.has(word);
 }
 
+// M1-C13 fix C, adopted: any operationId token (after C5 stripping) whose
+// stem matches a LIVE_VERBS entry. Returns the matching (lowercased) raw
+// token for the evidence trail, or null.
+function operationIdAnyLiveStemToken(row) {
+  const { tokens } = tokensForRow(row);
+  for (const t of tokens) {
+    const tok = t.toLowerCase();
+    if (matchesAnyStem(tok, LIVE_VERBS)) return tok;
+  }
+  return null;
+}
+
 export function classify(row) {
   const method = row.method;
 
@@ -90,13 +118,15 @@ export function classify(row) {
   const prior = methodPrior(method);
   const extraEvidence = [];
 
-  // 2. live-verb raise, any method.
-  const opidLiveTok = operationIdAnyLiveToken(row);
+  // 2. live-verb raise, any method. Both sources (opid, summary) go
+  // through stemMatches so they agree on what a word is (see the file
+  // header note on fix C).
+  const opidLiveTok = operationIdAnyLiveStemToken(row);
   if (opidLiveTok) {
     return { class: 'x', rule: 'live-verb', evidence: [`opid:${opidLiveTok}`], floor: false };
   }
-  const sLeadVerb = summaryLeadVerb(row);
-  if (isInSet(sLeadVerb, LIVE_VERBS)) {
+  const sLeadVerb = fallbackVerbFromSummary(row.summary);
+  if (matchesAnyStem(sLeadVerb, LIVE_VERBS)) {
     return { class: 'x', rule: 'live-verb', evidence: [`summary:${sLeadVerb}`], floor: false };
   }
 
@@ -129,10 +159,11 @@ export function classify(row) {
     }
   }
 
-  // 4. read-verb lower, POST only.
+  // 4. read-verb lower, POST only. Stem-matched (fix C, adopted) — was a
+  // bare exact match on leadVerbForRow's raw, unnormalized token.
   if (method === 'POST') {
     const verb = leadVerbForRow(row);
-    if (isInSet(verb, READ_VERBS)) {
+    if (matchesAnyStem(verb, READ_VERBS)) {
       return { class: 'r', rule: 'read-verb', evidence: [`opid:${verb}`, ...extraEvidence], floor: false };
     }
   }

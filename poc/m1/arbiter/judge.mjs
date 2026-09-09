@@ -123,9 +123,106 @@ const CALLER_PHRASE_RE = /for the authenticated user/i;
 // remove one without taking it back to the user first.
 const CALLER_PHRASES = ['for the authenticated user', 'authenticated user', 'your account', 'your ', 'yourself'];
 
-export function summaryHasCallerPhrase(summary) {
-  const s = (summary || '').toLowerCase();
+// M1-C14: the raw (text-source-agnostic) form of the caller-phrase check —
+// takes a text string directly instead of a row's summary field, so it can
+// be run against row.description too (see textForRow in c14.mjs).
+export function callerPhraseInText(text) {
+  const s = (text || '').toLowerCase();
   return CALLER_PHRASES.some((p) => s.includes(p));
+}
+
+// summaryHasCallerPhrase is now a thin wrapper — callerPhraseInText is the
+// sole writer of this logic (one writer per piece of state).
+export function summaryHasCallerPhrase(summary) {
+  return callerPhraseInText(summary);
+}
+
+// --- verb-correct stem matching (M1-C13 fix C, adopted 2026-09-08 as the
+// default) ------------------------------------------------------------------
+//
+// naiveSingular (below) is a NOUN-pluralisation rule; applied to third-person
+// verbs it mangles the stem (creates -> creat, revokes -> revok, terminates
+// -> terminat), so a mangled verb never matches its own base form in
+// LIVE_VERBS/READ_VERBS. stemMatches accepts a verb's inflections — bare,
+// silent-e, present-3sg, present-3sg after sibilant, past/participle after
+// silent-e drop, past/participle, gerund — as "the same verb" as `stem`,
+// anchored at position 0 via the startsWith check so a different prefix can
+// never match (stemMatches("revoke", "invok") is false because "revoke"
+// does not start with "invok" at all, regardless of suffix).
+const VERB_SUFFIXES = ['', 'e', 's', 'es', 'd', 'ed', 'ing'];
+
+const VOWELS = new Set(['a', 'e', 'i', 'o', 'u']);
+function isConsonant(ch) {
+  return typeof ch === 'string' && /^[a-z]$/.test(ch) && !VOWELS.has(ch);
+}
+
+// M1-C13 fix D (2026-09-08): three standard English spelling-change
+// inflections, on top of the literal suffix-append list above. Each is
+// still anchored to a prefix DERIVED FROM `stem` (never from `word`), so a
+// different word can never match — only which literal suffix set is
+// checked changes; the "must start with a stem-derived, stem-specific
+// prefix" invariant does not.
+//
+//   2. stem ends in 'e' (invoke, terminate): silent-e drops before -ing
+//      (invoke -> invok + ing = invoking). -ed does NOT need separate
+//      handling here — it is already covered by the existing literal 'd'
+//      suffix appended to the FULL stem (invoke + d = invoked matches via
+//      the block above already).
+//   3. stem ends in consonant + 'y' (verify): y -> ies / y -> ied
+//      (verify -> verif + ies/ied). Stems ending vowel + 'y' (play) don't
+//      take this path — 's'/'ing' already match the stem itself literally
+//      (play + s = plays), and plain "y+s" (verifys) is not real English so
+//      it is deliberately never accepted.
+//   4. stem ends in a single consonant preceded by a single vowel preceded
+//      by a consonant (CVC — cancel, ban, submit, set), excluding a final
+//      w/x/y (standard English doubling exclusions: fix -> fixing, not
+//      fixxing; play -> playing, not playying): the final consonant
+//      doubles before -ing/-ed (cancel -> cancelling/cancelled).
+export function stemMatches(word, stem) {
+  if (!word || !stem) return false;
+  if (word.startsWith(stem) && VERB_SUFFIXES.includes(word.slice(stem.length))) return true;
+
+  const last = stem[stem.length - 1];
+  const secondLast = stem[stem.length - 2];
+  const thirdLast = stem[stem.length - 3];
+
+  // 2. silent-e drop before -ing.
+  if (last === 'e') {
+    const base = stem.slice(0, -1);
+    if (word.startsWith(base) && word.slice(base.length) === 'ing') return true;
+  }
+
+  // 3. consonant + y -> ies / ied.
+  if (last === 'y' && isConsonant(secondLast)) {
+    const base = stem.slice(0, -1);
+    if (word.startsWith(base)) {
+      const rest = word.slice(base.length);
+      if (rest === 'ies' || rest === 'ied') return true;
+    }
+  }
+
+  // 4. CVC doubled-consonant -ing/-ed.
+  if (
+    isConsonant(last) && !['w', 'x', 'y'].includes(last) &&
+    VOWELS.has(secondLast) &&
+    (stem.length === 2 || isConsonant(thirdLast))
+  ) {
+    const doubled = stem + last;
+    if (word.startsWith(doubled)) {
+      const rest = word.slice(doubled.length);
+      if (rest === 'ing' || rest === 'ed') return true;
+    }
+  }
+
+  return false;
+}
+
+export function matchesAnyStem(word, stemSet) {
+  if (!word) return false;
+  for (const s of stemSet) {
+    if (stemMatches(word, s)) return true;
+  }
+  return false;
 }
 
 // --- (a) lead verb -----------------------------------------------------
@@ -220,8 +317,15 @@ export function naiveSingular(word) {
 // in the span and use that instead; if the span has only one word, keep
 // the generic word (this is a fallback, not a crash). Naive singularisation
 // is applied once, to whichever word is finally returned.
-export function headNounForRow(row) {
-  const summary = (row.summary || '').trim();
+// M1-C14: the raw (un-singularised) form of the head-noun extraction — takes
+// a text string directly instead of a row's summary field, so it can be run
+// against row.description too (see textForRow in c14.mjs), and returns the
+// lowercased head noun WITHOUT applying naiveSingular (so a stem matcher can
+// be used on it instead — naiveSingular is a noun-pluralisation rule that
+// mangles some words when the caller wants stem matching instead of exact
+// Set membership).
+export function headNounFromText(text) {
+  const summary = (text || '').trim();
   if (!summary) return '';
   const tokens = summary.match(/[A-Za-z']+|\(|,/g) || [];
   const rest = tokens.slice(1); // drop the assumed verb
@@ -234,9 +338,15 @@ export function headNounForRow(row) {
   if (!span.length) return '';
   const lastRaw = span[span.length - 1].toLowerCase();
   if (GENERIC_TAILS.has(lastRaw) && span.length >= 2) {
-    return naiveSingular(span[span.length - 2].toLowerCase());
+    return span[span.length - 2].toLowerCase();
   }
-  return naiveSingular(lastRaw);
+  return lastRaw;
+}
+
+// headNounFromText is now the sole writer of the extraction logic; this
+// keeps applying naiveSingular on top, unchanged for every existing caller.
+export function headNounForRow(row) {
+  return naiveSingular(headNounFromText(row.summary));
 }
 
 // --- (c) path party id ---------------------------------------------------
@@ -279,13 +389,23 @@ export function pathPartyIdForRow(row) {
 //   DeleteSipAuthCallsCredentialListMapping -> [sip, auth, calls,
 //     credential, list, mapping] -> "mapping".
 //   UpdateAccount -> [account] -> "account".
-export function operationIdHeadNoun(row) {
+// M1-C14: the raw (un-singularised) form — same extraction, WITHOUT applying
+// naiveSingular, so a stem matcher can be used on it instead (see
+// headNounFromText above for why).
+export function operationIdHeadNounRaw(row) {
   const { tokens } = tokensForRow(row);
   const rest = tokens.slice(1);
   if (!rest.length) return '';
   let i = rest.length - 1;
   while (i > 0 && OPID_TAIL_STEPBACK.has(rest[i].toLowerCase())) i -= 1;
-  return naiveSingular(rest[i].toLowerCase());
+  return rest[i].toLowerCase();
+}
+
+// operationIdHeadNounRaw is now the sole writer of the extraction logic;
+// this keeps applying naiveSingular on top, unchanged for every existing
+// caller.
+export function operationIdHeadNoun(row) {
+  return naiveSingular(operationIdHeadNounRaw(row));
 }
 
 // --- the R1-R5 cascade + floor --------------------------------------------

@@ -16,6 +16,9 @@ export const TEXT_PATH = path.join(REPO_ROOT, 'docs/logs/m1/ops-text.csv');
 export const HOLDOUT3_DIR = path.join(REPO_ROOT, 'data/holdout3-2026-09-08');
 export const HOLDOUT3_GT = path.join(HOLDOUT3_DIR, 'ground-truth.csv');
 export const HOLDOUT3_OPS = path.join(HOLDOUT3_DIR, 'operations.csv');
+export const HOLDOUT5_DIR = path.join(REPO_ROOT, 'data/holdout5-2026-09-08');
+export const HOLDOUT5_GT = path.join(HOLDOUT5_DIR, 'ground-truth.csv');
+export const HOLDOUT5_OPS = path.join(HOLDOUT5_DIR, 'operations.csv');
 export const DATA_DIR = path.join(REPO_ROOT, 'data');
 
 // --- load census-ops.csv + ops-text.csv, exactly as run-c11.mjs does -------
@@ -87,6 +90,13 @@ export function loadHoldoutDir(dir, gtPath, opsPath, setName) {
 
 export function loadHoldout3() {
   return loadHoldoutDir(HOLDOUT3_DIR, HOLDOUT3_GT, HOLDOUT3_OPS, 'holdout3');
+}
+
+// M1-C13: hold-out 5 (Slack, Amazon; 323 rows; scored once, 2026-09-08 —
+// c11 FAILED the zero-leak gate on it, 17 leaks, every one a Slack GET).
+// Same join shape as loadHoldout3.
+export function loadHoldout5() {
+  return loadHoldoutDir(HOLDOUT5_DIR, HOLDOUT5_GT, HOLDOUT5_OPS, 'holdout5');
 }
 
 // --- load holdout4: every data/holdout4-*/ directory carrying both
