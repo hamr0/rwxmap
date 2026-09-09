@@ -1,0 +1,201 @@
+row_id,provider,method,path,operationId,summary,description
+1001,figshare.com,PUT,/account/articles/{article_id}/versions/{version_id}/update_thumb,article_version_update_thumb,Update article version thumbnail,For a given public article version update the article thumbnail by choosing one of the associated files
+1002,figshare.com,PUT,/account/collections/{collection_id}/authors,private_collection_authors_replace,Replace collection authors,Associate new authors with the collection. This will remove all already associated authors and add these new ones
+1003,figshare.com,PUT,/account/projects/{project_id}/notes/{note_id},private_project_note_update,Update project note,
+1004,files.com,DELETE,/api_keys/{id},DeleteApiKeysId,Delete Api Key,Delete Api Key
+1005,files.com,DELETE,/as2_partners/{id},DeleteAs2PartnersId,Delete As2 Partner,Delete As2 Partner
+1006,files.com,DELETE,/bundle_notifications/{id},DeleteBundleNotificationsId,Delete Bundle Notification,Delete Bundle Notification
+1007,files.com,DELETE,/bundles/{id},DeleteBundlesId,Delete Bundle,Delete Bundle
+1008,files.com,DELETE,/clickwraps/{id},DeleteClickwrapsId,Delete Clickwrap,Delete Clickwrap
+1009,files.com,DELETE,/groups/{id},DeleteGroupsId,Delete Group,Delete Group
+1010,files.com,DELETE,/locks/{path},DeleteLocksPath,Delete Lock,Delete Lock
+1011,files.com,DELETE,/notifications/{id},DeleteNotificationsId,Delete Notification,Delete Notification
+1012,files.com,DELETE,/permissions/{id},DeletePermissionsId,Delete Permission,Delete Permission
+1013,files.com,DELETE,/sessions,DeleteSessions,Delete user session (log out),Delete user session (log out)
+1014,files.com,DELETE,/styles/{path},DeleteStylesPath,Delete Style,Delete Style
+1015,files.com,DELETE,/user_requests/{id},DeleteUserRequestsId,Delete User Request,Delete User Request
+1016,files.com,PATCH,/file_comments/{id},PatchFileCommentsId,Update File Comment,Update File Comment
+1017,files.com,PATCH,/form_field_sets/{id},PatchFormFieldSetsId,Update Form Field Set,Update Form Field Set
+1018,files.com,PATCH,/messages/{id},PatchMessagesId,Update Message,Update Message
+1019,files.com,PATCH,/projects/{id},PatchProjectsId,Update Project,Update Project
+1020,fire.com,DELETE,/v1/batches/{batchUuid},cancelBatchPayment,Cancel a batch,Cancels the Batch. You can only cancel a batch before it is submitted for approval (while it is in the OPEN state).
+1021,fire.com,DELETE,/v1/batches/{batchUuid}/banktransfers/{itemUuid},deleteBankTransferBatchPayment,Remove a Payment from the Batch (Bank Transfers),Removes a Payment from the Batch (Bank Transfers). You can only remove payments before the batch is submitted for approval (while it is in the OPEN state).
+1022,fire.com,DELETE,/v1/batches/{batchUuid}/internaltransfers/{itemUuid},deleteInternalTransferBatchPayment,Remove a Payment from the Batch (Internal Transfer),Removes a Payment from the Batch (Internal Transfer). You can only remove payments before the batch is submitted for approval (while it is in the OPEN state).
+1023,fire.com,PUT,/v1/batches/{batchUuid},submitBatch,Submit a batch for approval,"Submits the Batch (for approval in the case of a **BANK_TRANSFER**). If this is an **INTERNAL_TRANSFER** batch, the transfers are immediately queued for processing. If this is a **BANK_TRANSFER** batch, this will trigger requests for approval to the firework mobile apps of authorised users. Once those users approve the batch, it is queued for processing. You can only submit a batch while it is in the OPEN state."
+1024,flat.io,DELETE,/organizations/lti/credentials/{credentials},revokeLtiCredentials,Revoke LTI 1.x credentials,
+1025,flat.io,DELETE,/organizations/users/{user},removeOrganizationUser,Remove an account from Flat,"This operation removes an account from Flat and its data, including: * The music scores created by this user (documents, history, comments, collaboration information) * Education related data (assignments and classroom information)"
+1026,flat.io,DELETE,/scores/{score},deleteScore,Delete a score,"This method can be used by the owner/admin (`aclAdmin` rights) of a score as well as regular collaborators. When called by an owner/admin, it will schedule the deletion of the score, its revisions, and complete history. The score won't be accessible anymore after calling this method and the user's quota will directly be updated. When called by a regular collaborator (`aclRead` / `aclWrite`), the score will be unshared (i.e. removed from the account & own collections)."
+1027,flat.io,DELETE,/scores/{score}/collaborators/{collaborator},removeScoreCollaborator,Delete a collaborator,Remove the specified collaborator from the score
+1028,flat.io,DELETE,/scores/{score}/comments/{comment},deleteScoreComment,Delete a comment,
+1029,flat.io,DELETE,/scores/{score}/comments/{comment}/resolved,markScoreCommentUnresolved,Mark the comment as unresolved,
+1030,flat.io,DELETE,/scores/{score}/tracks/{track},deleteScoreTrack,Remove an audio or video track linked to the score,
+1031,flat.io,PUT,/classes/{class},updateClass,Update the class,Update the meta information of the class
+1032,flat.io,PUT,/classes/{class}/assignments/{assignment}/submissions,createSubmission,Create or edit a submission,"Use this method as a student to create, update and submit a submission related to an assignment. Students can only set `attachments` and `submit`. Teachers can use `PUT /classes/{class}/assignments/{assignment}/submissions/{submission}` to update a submission by id."
+1033,flat.io,PUT,/classes/{class}/assignments/{assignment}/submissions/{submission},editSubmission,Edit a submission,"Use this method as a teacher to update the different submission and give feedback. Teachers can only set `return`, `draftGrade` and `grade`"
+1034,flat.io,PUT,/classes/{class}/assignments/{assignment}/submissions/{submission}/comments/{comment},updateSubmissionComment,Update a feedback comment to a submission,
+1035,flat.io,PUT,/collections/{collection}/scores/{score},addScoreToCollection,Add a score to the collection,This operation will add a score to a collection. The default behavior will make the score available across multiple collections. You must have the capability `canAddScores` on the provided `collection` to perform the action.
+1036,flat.io,PUT,/scores/{score},editScore,Edit a score's metadata,"This API method allows you to change the metadata of a score document (e.g. its `title` or `privacy`), all the properties are optional. To edit the file itself, create a new revision using the appropriate method (`POST /v2/scores/{score}/revisions/{revision}`). When editing the `title`, `subtitle`, `composer`, `lyricist`, `arranger` or `licenseText`, the metadatas will be instantly be updated, and a real-time action will be pushed to update the document lazily. This pending document modification"
+1037,flat.io,PUT,/scores/{score}/comments/{comment},updateScoreComment,Update an existing comment,
+1038,flat.io,PUT,/scores/{score}/comments/{comment}/resolved,markScoreCommentResolved,Mark the comment as resolved,
+1039,flat.io,PUT,/scores/{score}/tracks/{track},updateScoreTrack,Update an audio or video track linked to a score,
+1040,formapi.io,DELETE,/combined_submissions/{combined_submission_id},expireCombinedSubmission,Expire a combined submission,
+1041,formapi.io,DELETE,/folders/{folder_id},deleteFolder,Delete a folder,
+1042,formapi.io,PUT,/data_requests/{data_request_id},updateDataRequest,Update a submission data request,
+1043,formapi.io,PUT,/templates/{template_id}/add_fields,addFieldsToTemplate,Add new fields to a Template,
+1044,frankiefinancial.io,DELETE,/entity/{entityId},DeleteEntity,Delete Entity,"Marks the entity as deleted in the system, and no further operations or general queries may be executed against it by the Customer. If another customer is presently relying on this data, it will still be available to them (but only in the partially anonymised form they originally had. An entity and its related data is only completely deleted from the database when either:   - a) There are no more references to it (i.e. it has been DELETEd by all Customers relying on the data), and 12 months have"
+1045,fulfillment.com,DELETE,/orders/{id},delete-orders-id,Cancel an Order,Request an order is canceled to prevent shipment.
+1046,fulfillment.com,PUT,/returns,put-returns,Inform us of an RMA,Inform FDC of an expected return.
+1047,fungenerators.com,DELETE,/riddle,,,Create a random Riddle entry.
+1048,fungenerators.com,PUT,/trivia,,,Create a random Trivia entry.
+1049,gambitcomm.local,DELETE,/mimic/agent/{agentNum}/from/delete/{IP}/{port},from_del,delete a source address that the agent will accept messages from.,"An empty ipaddress or 0.0.0.0 both imply any address. Similarly an empty port or 0 both imply any port. For agents with source-address-indexing enabled, messages which do not match any source address will be discarded with an ERROR message, similar to community string mismatches."
+1050,gambitcomm.local,DELETE,/mimic/agent/{agentNum}/protocol/msg/snmpv3/group/del/{groupName},protocol_snmpv3_group_del,Deletes the specified group entry.,Deletes the specified group entry.
+1051,gambitcomm.local,DELETE,/mimic/agent/{agentNum}/protocol/msg/snmpv3/view/del/{viewName},protocol_snmpv3_view_del,Deletes the specified view entry.,Deletes the specified view entry.
+1052,gambitcomm.local,PUT,/mimic/agent/{agentNum}/ipalias/stop/{IP}/{port},stop_ipalias,Stops an existing ipalias for the agent.,port defaults to 161 if not specified.
+1053,gambitcomm.local,PUT,/mimic/agent/{agentNum}/protocol/msg/dhcp/set/trace/{enableOrNot},protocol_dhcp_set_trace,Set the agent's DHCP traffic tracing,"1 to enable, 0 to disable"
+1054,gambitcomm.local,PUT,/mimic/agent/{agentNum}/protocol/msg/mqtt/client/runtime/abort,protocol_mqtt_client_runtime_abort,Abort agent's MQTT TCP session without sending DISCONNECT command,Abort a connection
+1055,gambitcomm.local,PUT,/mimic/agent/{agentNum}/protocol/msg/mqtt/client/runtime/disconnect,protocol_mqtt_client_runtime_disconnect,Disconnect agent's MQTT TCP session by sending DISCONNECT command,Graceful disconnect
+1056,gambitcomm.local,PUT,/mimic/agent/{agentNum}/protocol/msg/mqtt/client/set/keepalive/{aliveTime},protocol_mqtt_client_set_keepalive,Set the agent's MQTT TCP keepalive,Keep alive the TCP connection
+1057,gambitcomm.local,PUT,/mimic/agent/{agentNum}/protocol/msg/mqtt/client/set/on_disconnect/{action},protocol_mqtt_client_set_on_disconnect,Set the agent's MQTT disconnection action,Action to take when MQTT session is disconnected
+1058,gambitcomm.local,PUT,/mimic/agent/{agentNum}/protocol/msg/mqtt/client/set/password/{password},protocol_mqtt_client_set_password,Set the agent's MQTT client password,Client password
+1059,gambitcomm.local,PUT,/mimic/agent/{agentNum}/protocol/msg/mqtt/client/set/willmsg/{msg},protocol_mqtt_client_set_willmsg,Set the agent's MQTT client's will,Will message
+1060,gambitcomm.local,PUT,/mimic/agent/{agentNum}/protocol/msg/snmptcp/set/trace/{enableOrNot},protocol_snmptcp_set_trace,Set the agent's SNMPTCP traffic tracing,"1 to enable, 0 to disable"
+1061,gambitcomm.local,PUT,/mimic/agent/{agentNum}/protocol/msg/snmpv3/vacm/saveas/{filename},protocol_snmpv3_vacm_saveas,"Saves current group, access, view settings in the specified VACM config file.","Saves current group, access, view settings in the specified VACM config file."
+1062,gambitcomm.local,PUT,/mimic/agent/{agentNum}/protocol/msg/telnet/ipalias/enable/{ipaddress}/{port},protocol_telnet_ipalias_enable,Enable individual IP aliases on the agent and the simulator host,"By default, the MIMIC TELNET server listens on all the IP addresses (aliases) that are configured for an agent"
+1063,gambitcomm.local,PUT,/mimic/agent/{agentNum}/set/read/{read},set_read_community,read community string,read community string
+1064,gambitcomm.local,PUT,/mimic/store/unset/{var},store_unset,Deletes a variable which is currently defined.,This will cleanup persistent variables if needed
+1065,gamesparks.net,DELETE,/restv2/game/{apiKey}/admin/snapshots/{snapshotId},deleteSnapshotUsingDELETE_1,deleteSnapshot,
+1066,gamesparks.net,DELETE,/restv2/game/{apiKey}/admin/testHarness/scenarios/{scenarioName},deleteTestHarnessScenarioUsingDELETE,deleteTestHarnessScenario,
+1067,gamesparks.net,DELETE,/restv2/game/{apiKey}/manage/experiments/{id},deleteExperimentUsingDELETE,deleteExperiment,
+1068,gamesparks.net,DELETE,/restv2/game/{apiKey}/manage/queries/{shortCode},deleteQueryUsingDELETE,deleteQuery,
+1069,gamesparks.net,DELETE,/restv2/game/{apiKey}/manage/screens/{shortCode},deleteScreenUsingDELETE,deleteScreen,
+1070,gamesparks.net,DELETE,/restv2/game/{apiKey}/manage/snapshots/{snapshotId},deleteSnapshotUsingDELETE,deleteSnapshot,
+1071,gamesparks.net,DELETE,/restv2/game/{apiKey}/manage/snippets/{shortCode},deleteSnippetUsingDELETE,deleteSnippet,
+1072,gamesparks.net,PUT,/restv2/game/{apiKey}/admin/segmentQueryFilters/config,updateSegmentQueryFiltersConfigUsingPUT,updateSegmentQueryFiltersConfig,
+1073,gamesparks.net,PUT,/restv2/game/{apiKey}/manage/experiments/{id},updateExperimentUsingPUT,updateExperiment,
+1074,gamesparks.net,PUT,/restv2/game/{apiKey}/manage/queries/{shortCode},updateQueryUsingPUT,updateQuery,
+1075,gerermesaffaires.com,DELETE,/spaces/{id}/groups/{groupId}/persons/{memberId},,,Delete a person of a group
+1076,gerermesaffaires.com,DELETE,/spaces/{spaceId}/folders/{folderId}/bank-statements/{documentId},,,delete a bank statement
+1077,gerermesaffaires.com,DELETE,/spaces/{spaceId}/folders/{folderId}/expense-proofs/{documentId},,,delete an expense proof
+1078,gerermesaffaires.com,DELETE,/spaces/{spaceId}/folders/{folderId}/payslips/{documentId},,,delete a payslip
+1079,gerermesaffaires.com,DELETE,/spaces/{spaceId}/folders/{id}/portfolio/{portfolioId},,,delete a secondary portfolio of a customer contract
+1080,gerermesaffaires.com,DELETE,/spaces/{spaceId}/persons/{id}/invitation,,,delete the invitation of a person in a space
+1081,gerermesaffaires.com,PATCH,/business-groups,,,Modifies an object
+1082,gerermesaffaires.com,PATCH,/profile,,,modify infos of profile
+1083,gerermesaffaires.com,PATCH,/spaces/{id}/company-entities/{companyId},,,Modify a company entity
+1084,gerermesaffaires.com,PATCH,/spaces/{spaceId}/folders/{folderId}/payrolls/{documentId},,,modify a payroll
+1085,gerermesaffaires.com,PATCH,/spaces/{spaceId}/folders/{folderId}/social-declarations/{documentId},,,modify a social declaration
+1086,gerermesaffaires.com,PATCH,/spaces/{spaceId}/folders/{id}/bank,,,"Modify a Folder (except Name, Class, ModificationDate and ArchivalDate) and Bank data"
+1087,gerermesaffaires.com,PATCH,/spaces/{spaceId}/folders/{id}/documents/{documentId}/detach,,,Detach a doc of a folder
+1088,gerermesaffaires.com,PATCH,/spaces/{spaceId}/folders/{id}/insurance,,,"Modify a Folder (except Name, Class, ModificationDate and ArchivalDate) and Insurance data"
+1089,gerermesaffaires.com,PATCH,/spaces/{spaceId}/folders/{id}/professional-vehicle,,,"Modify a Folder (except Name, Class, ModificationDate and ArchivalDate) and Professional Vehicle data"
+1090,gerermesaffaires.com,PATCH,/spaces/{spaceId}/persons/{id}/guest-in-space,,,invite a person in a space
+1091,getgo.com,DELETE,/organizers/{organizerKey}/trainings/{trainingKey},cancelTraining,Delete Training,"Deletes a scheduled or completed training. For scheduled trainings, it deletes all scheduled sessions of the training. For completed trainings, the sessions remain in the database. No email is sent to organizers or registrants, but when participants attempt to start or join the training, they are directed to a page that states: Training Not Found: The training you are trying to join is no longer available."
+1092,getgo.com,DELETE,/organizers/{organizerKey}/trainings/{trainingKey}/registrants/{registrantKey},cancelRegistration,Cancel Registration,"This call cancels a registration in a scheduled training for a specific registrant. If the registrant has paid for the training, a cancellation cannot be completed with this method; it must be completed on the external admin site. No notification is sent to the registrant or the organizer by default. The registrant can re-register if needed."
+1093,getgo.com,DELETE,/organizers/{organizerKey}/webinars/{webinarKey}/coorganizers/{coorganizerKey},deleteCoorganizer,Delete co-organizer,Deletes an internal co-organizer specified by the coorganizerKey (memberKey).
+1094,getgo.com,PUT,/organizers/{organizerKey}/trainings/{trainingKey}/nameDescription,updateTrainingNameDescription,Update Training Name and Description,Request to update a scheduled training name and description.
+1095,getgo.com,PUT,/organizers/{organizerKey}/trainings/{trainingKey}/organizers,updateOrganisersForTraining,Update Training Organizers,Replaces the co-organizers for a specific training. The scheduling organizer cannot be unassigned. Organizers will be notified via email if the notifyOrganizers parameter is set to true. Replaced organizers are not notified. This method is only applicable to multi-user accounts with sharing enabled (co-organizers).
+1096,getgo.com,PUT,/organizers/{organizerKey}/trainings/{trainingKey}/registrationSettings,updateRegistrationSettingsForTraining,Update Training Registration Settings,An API request to automatically enable or disable web registrations and confirmation emails to registrants.
+1097,getgo.com,PUT,/organizers/{organizerKey}/trainings/{trainingKey}/times,updateTrainingTimes,Update Training Times,"A request to update a scheduled training's start and end times. If the request contains 'notifyTrainers = true' and 'notifyRegistrants = true', both organizers and registrants are notified. The response provides the number of notified trainers and registrants."
+1098,getgo.com,PUT,/organizers/{organizerKey}/webinars/{webinarKey},updateWebinar,Update webinar,"Updates a webinar. The call requires at least one of the parameters in the request body. The request completely replaces the existing session, series, or sequence and so must include the full definition of each as for the Create call. Set notifyParticipants=true to send update emails to registrants."
+1099,getpostman.com,DELETE,/apis/{apiId}/versions/{apiVersionId},deleteAnApiVersion,Delete an API Version,"This call deletes an existing API Version having the specified id.   Response contains an `version` object with `id` of the API Version which was deleted. > Requires <a href=""#authentication"">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+1100,getpostman.com,DELETE,/collections/{collection_uid},deleteCollection,Delete Collection,"This endpoint allows you to delete an existing collection. On successful deletion of the collection, the response returns the `id` and `uid`. > Requires <a href=""#authentication"">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+1101,getpostman.com,DELETE,/mocks/{mock_uid},deleteMock,Delete Mock,"This endpoint allows you to delete an existing mock using its `uid`. > Requires <a href=""#authentication"">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+1102,getpostman.com,DELETE,/mocks/{mock_uid}/unpublish,unpublishMock,Unpublish Mock,"This endpoint unpublishes the mock you have created using its `uid` > Requires <a href=""#authentication"">API Key</a> as `X-Api-Key ` request header or `apikey` URL query parameter."
+1103,getpostman.com,DELETE,/monitors/{monitor_uid},deleteMonitor,Delete Monitor,"This endpoint can be used to delete an existing monitor using its `uid`. > Requires <a href=""#authentication"">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+1104,getpostman.com,DELETE,/workspaces/{workspace_id},deleteWorkspace,Delete Workspace,"This endpoint allows you to delete an existing workspace. On successful deletion of the workspace, the response returns the `id`. > Requires <a href=""#authentication"">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+1105,getpostman.com,PUT,/apis/{apiId},updateAnApi,Update an API,"This call updates an existing API .   Request body should contain an `api` object which should have the fields to be updated. Only `name`, `summary` and `description` fields can be edited for an API. Response contains an `api` object with all the details related to the created API, namely, `id`, `name`, `summary`, `description` etc.  > Requires <a href=""#authentication"">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+1106,getpostman.com,PUT,/apis/{apiId}/versions/{apiVersionId},updateAnApiVersion,Update an API Version,"This call updates an existing API Version.   Request body should contain a `version` object with the fields which need to be updated. Only field which can be updated is `name`. Response contains a `version` object with all the details related to the created API Version, namely, `id`, `name`, `api` etc. > Requires <a href=""#authentication"">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+1107,getpostman.com,PUT,/apis/{apiId}/versions/{apiVersionId}/{entityType}/{entityId}/syncWithSchema,syncRelationsWithSchema,Sync relations with schema,"This call allows you to keep the relation in sync with the API schema. > Requires <a href=""#authentication"">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+1108,getpostman.com,PUT,/collections/{collection_uid},updateCollection,Update Collection,"This endpoint allows you to update an existing collection using the Postman Collection v2 format. For more information about the v2 schema, check the format [here](https://schema.getpostman.com/json/collection/v2.0.0/docs/index.html). On successful updation of the collection, the response returns the collection `name`, `id` and `uid`. > Requires <a href=""#authentication"">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter. Note: Please be careful when trying to update the c"
+1109,getpostman.com,PUT,/environments/{environment_uid},updateEnvironment,Update Environment,"This endpoint replaces an existing environment. A sample body is added to the request that conforms to the following JSON schema: ```json { 	""type"": ""object"", 	""properties"": { 		""environment"": { 			""type"": ""object"", 			""properties"": { 				""name"": { 					""type"": ""string"", 					""maxLength"": 254, 					""minLength"": 1 				}, 				""values"": { 					""type"": ""array"", 					""maxItems"": 100, 					""additionalItems"": false, 					""items"": { 						""type"": ""object"", 						""properties"": { 							""key"": { 								"""
+1110,getpostman.com,PUT,/monitors/{monitor_uid},updateMonitor,Update Monitor,This endpoint allows you to update a monitor using its `uid`. Only the monitor name and its schedule can be updated. Some example `cron` values are: | Frequency                  | Cron Pattern   | |-----------------------|----------------| | Every 5 minutes       | `*/5 * * * *`  | | Every 30 minutes     | `*/30 * * * *` | | Every Hour         | `0 */1 * * *`  | | Every 6 Hours      | `0 */6 * * *`  | | Every day at 5pm    | `0 17 * * *`   | | Every Monday at 12pm  | `0 12 * * MON` | | Every wee
+1111,getpostman.com,PUT,/workspaces/{workspace_id},updateWorkspace,Update Workspace,"This endpoint allows you to update a workspace and update it's association to entities like `collections`, `environments`, `mocks` and `monitors` using their `uid`. On successful updation of the workspace, the response returns the workspcae `name` and `id`. > Requires <a href=""#authentication"">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter. **Note** : The endpoint expects you to send the desired state of the workspace in terms of the associated entities so be careful w"
+1112,getsandbox.com,DELETE,/1/sandboxes/{sandboxName},deleteSandbox,deleteSandbox,
+1113,getsandbox.com,DELETE,/1/sandboxes/{sandboxName}/state,deleteSandboxState,deleteSandboxState,
+1114,getsandbox.com,PUT,/1/sandboxes/{sandboxName},updateSandbox,updateSandbox,
+1115,gettyimages.com,DELETE,/v3/asset-changes/change-sets/{change-set-id},,Confirm asset change notifications.,# Delete Asset Changes Confirm asset changes acknowledges receipt of asset changes (from the PUT asset-changes endpoint). ##  Quickstart You'll need an API key and an access token to use this resource. Use the change_set_id from the PUT asset-changes/change-sets endpoint to confirm receipt of notifications.
+1116,gettyimages.com,DELETE,/v3/boards/{board_id},,Delete a board,
+1117,gettyimages.com,DELETE,/v3/boards/{board_id}/assets,,Remove assets from a board,
+1118,gettyimages.com,DELETE,/v3/boards/{board_id}/assets/{asset_id},,Remove an asset from a board,
+1119,gettyimages.com,DELETE,/v3/boards/{board_id}/comments/{comment_id},,Delete a comment from a board,
+1120,gettyimages.com,PUT,/v3/asset-changes/change-sets,,Get asset change notifications.,"# Asset Changes Get notifications about new, updated or deleted assets for a specific channel. ##  Quickstart You'll need an API key and an access token to use this resource.  Maximum batch size is 2200. Change-sets must be confirmed before a new batch of notifications can be retrieved from this endpoint. Use the DELETE asset-changes/change-sets/{change-set-id} endpoint to confirm reciept of these notifications. Values returned for asset_type include Image, Film, and null. Values returned for as"
+1121,gettyimages.com,PUT,/v3/boards/{board_id},,Update a board,
+1122,gettyimages.com,PUT,/v3/boards/{board_id}/assets/{asset_id},,Add an asset to a board,
+1123,gettyimages.com,PUT,/v3/usage-batches/{id},,Report usage of assets via a batch format.,"# Report Usage Use this endpoint to report the usages of a set of assets. The count of assets submitted in a single batch to this endpoint is limited to 1000. Note that all asset Ids specified must be valid or the operation will fail causing no usages to be recorded. In this case, you will need to remove the invalid asset Ids from the query request and re-submit the query. ##  Quickstart You'll need an API key and a [Resource Owner Grant](http://developers.gettyimages.com/en/authorization-faq.ht"
+1124,gitea.io,DELETE,/admin/unadopted/{owner}/{repo},adminDeleteUnadoptedRepository,Delete unadopted files,
+1125,gitea.io,DELETE,/orgs/{org},orgDelete,Delete an organization,
+1126,gitea.io,DELETE,/repos/{owner}/{repo}/collaborators/{collaborator},repoDeleteCollaborator,Delete a collaborator from a repository,
+1127,gitea.io,DELETE,/repos/{owner}/{repo}/tags/{tag},repoDeleteTag,Delete a repository's tag by name,
+1128,gitea.io,DELETE,/repos/{owner}/{repo}/topics/{topic},repoDeleteTopic,Delete a topic from a repository,
+1129,gitea.io,DELETE,/teams/{id},orgDeleteTeam,Delete a team,
+1130,gitea.io,DELETE,/user/gpg_keys/{id},userCurrentDeleteGPGKey,Remove a GPG key,
+1131,gitea.io,PATCH,/admin/hooks/{id},adminEditHook,Update a hook,
+1132,gitea.io,PATCH,/repos/{owner}/{repo}/branch_protections/{name},repoEditBranchProtection,Edit a branch protections for a repository. Only fields that are set will be changed,
+1133,gitea.io,PATCH,/repos/{owner}/{repo}/hooks/git/{id},repoEditGitHook,Edit a Git hook in a repository,
+1134,gitea.io,PATCH,/repos/{owner}/{repo}/issues/comments/{id},issueEditComment,Edit a comment,
+1135,gitea.io,PATCH,/repos/{owner}/{repo}/releases/{id}/assets/{attachment_id},repoEditReleaseAttachment,Edit a release attachment,
+1136,gitea.io,PATCH,/user/settings,updateUserSettings,Update user settings,
+1137,gitea.io,PUT,/repos/{owner}/{repo}/notifications,notifyReadRepoList,"Mark notification threads as read, pinned or unread on a specific repo",
+1138,gitea.io,PUT,/repos/{owner}/{repo}/teams/{team},repoAddTeam,Add a team to a repository,
+1139,gitea.io,PUT,/repos/{owner}/{repo}/topics,repoUpdateTopics,Replace list of topics for a repository,
+1140,gitlab.com,DELETE,/v3/projects/{id}/members/{user_id},deleteV3ProjectsIdMembersUserId,Removes a user from a group or project.,Removes a user from a group or project.
+1141,gitlab.com,DELETE,/v3/projects/{id}/merge_requests/{merge_request_id}/award_emoji/{award_id},deleteV3ProjectsIdMergeRequestsMergeRequestIdAwardEmojiAwardId,Delete a +awardables+ award emoji,This feature was introduced in 8.9
+1142,gitlab.com,DELETE,/v3/projects/{id}/repository/branches/{branch},deleteV3ProjectsIdRepositoryBranchesBranch,Delete a branch,Delete a branch
+1143,gitlab.com,DELETE,/v3/projects/{id}/repository/files,deleteV3ProjectsIdRepositoryFiles,Delete an existing file in repository,Delete an existing file in repository
+1144,gitlab.com,DELETE,/v3/projects/{id}/services/{service_slug},deleteV3ProjectsIdServicesServiceSlug,Delete a service for project,Delete a service for project
+1145,gitlab.com,DELETE,/v3/todos,deleteV3Todos,Mark all todos as done,Mark all todos as done
+1146,gitlab.com,DELETE,/v3/users/{id}/keys/{key_id},deleteV3UsersIdKeysKeyId,Delete an existing SSH key from a specified user. Available only for admins.,Delete an existing SSH key from a specified user. Available only for admins.
+1147,gitlab.com,PUT,/v3/projects/{id}/members/{user_id},putV3ProjectsIdMembersUserId,Updates a member of a group or project.,Updates a member of a group or project.
+1148,gitlab.com,PUT,/v3/projects/{id}/merge_requests/{noteable_id}/notes/{note_id},putV3ProjectsIdMergeRequestsNoteableIdNotesNoteId,Update an existing +noteable+ note,Update an existing +noteable+ note
+1149,gitlab.com,PUT,/v3/projects/{id}/services/buildkite,putV3ProjectsIdServicesBuildkite,Set buildkite service for project,Set buildkite service for project
+1150,gitlab.com,PUT,/v3/projects/{id}/services/builds-email,putV3ProjectsIdServicesBuildsEmail,Set builds-email service for project,Set builds-email service for project
+1151,gitlab.com,PUT,/v3/projects/{id}/services/custom-issue-tracker,putV3ProjectsIdServicesCustomIssueTracker,Set custom-issue-tracker service for project,Set custom-issue-tracker service for project
+1152,gitlab.com,PUT,/v3/projects/{id}/services/mattermost,putV3ProjectsIdServicesMattermost,Set mattermost service for project,Set mattermost service for project
+1153,gitlab.com,PUT,/v3/projects/{id}/snippets/{noteable_id}/notes/{note_id},putV3ProjectsIdSnippetsNoteableIdNotesNoteId,Update an existing +noteable+ note,Update an existing +noteable+ note
+1154,gitlab.com,PUT,/v3/runners/{id},putV3RunnersId,Update runner's details,Update runner's details
+1155,gitlab.com,PUT,/v3/users/{id}/unblock,putV3UsersIdUnblock,Unblock a user. Available only for admins.,Unblock a user. Available only for admins.
+1156,google.com,DELETE,/v3/{name},travelpartner.accounts.accountLinks.delete,,Deletes an account link.
+1157,googleapis.com,DELETE,/accounts/{accountId}/alerts/{alertId},adsense.accounts.alerts.delete,,Dismiss (delete) the specified alert from the specified publisher AdSense account.
+1158,googleapis.com,DELETE,/androidpublisher/v3/applications/{packageName}/subscriptions/{productId}/basePlans/{basePlanId}/offers/{offerId},androidpublisher.monetization.subscriptions.basePlans.offers.delete,,Deletes a subscription offer. Can only be done for draft offers. This action is irreversible.
+1159,googleapis.com,DELETE,/games/v1configuration/leaderboards/{leaderboardId},gamesConfiguration.leaderboardConfigurations.delete,,Delete the leaderboard configuration with the given ID.
+1160,googleapis.com,DELETE,/projects/{project}/global/forwardingRules/{forwardingRule},compute.globalForwardingRules.delete,,Deletes the specified GlobalForwardingRule resource.
+1161,googleapis.com,DELETE,/sql/v1beta4/projects/{project}/instances/{instance}/databases/{database},sql.databases.delete,,Deletes a database from a Cloud SQL instance.
+1162,googleapis.com,DELETE,/tagmanager/v2/{path},tagmanager.accounts.user_permissions.delete,,"Removes a user from the account, revoking access to it and all of its containers."
+1163,googleapis.com,DELETE,/v1/{name}/data,apigee.organizations.environments.apis.revisions.debugsessions.deleteData,,Deletes the data from a debug session. This does not cancel the debug session or prevent further data from being collected if the session is still active in runtime pods.
+1164,googleapis.com,DELETE,/v1/jobs/{jobId},youtubereporting.jobs.delete,,Deletes a job.
+1165,googleapis.com,DELETE,/v1alpha2/{name},cloudbuild.projects.workerPools.delete,,Deletes a `WorkerPool`.
+1166,googleapis.com,DELETE,/v2/{name},connectors.projects.locations.connections.entityTypes.entities.delete,,Deletes an existing entity row matching the entity type and entity id specified in the request.
+1167,googleapis.com,PATCH,/admin/directory/v1/customer/{customerId}/schemas/{schemaKey},directory.schemas.patch,,Patches a schema.
+1168,googleapis.com,PATCH,/dns/v2/projects/{project}/locations/{location}/managedZones/{managedZone},dns.managedZones.patch,,Applies a partial update to an existing ManagedZone.
+1169,googleapis.com,PATCH,/projects/{project}/regions/{region}/disks/{disk},compute.regionDisks.update,,Update the specified disk with the data included in the request. Update is performed only on selected fields included as part of update-mask. Only the following fields can be modified: user_license.
+1170,googleapis.com,PATCH,/projects/{project}/zones/{zone}/disks/{disk},compute.disks.update,,Updates the specified disk with the data included in the request. The update is performed only on selected fields included as part of update-mask. Only the following fields can be modified: user_license.
+1171,googleapis.com,PATCH,/v2/{name},logging.projects.locations.buckets.views.patch,,"Updates a view on a log bucket. This method replaces the following fields in the existing view with values from the new view: filter. If an UNAVAILABLE error is returned, this indicates that system is not in a state where it can update the view. If this occurs, please try again in a few minutes."
+1172,googleapis.com,PUT,/v1b3/projects/{projectId}/jobs/{jobId},dataflow.projects.jobs.update,,"Updates the state of an existing Cloud Dataflow job. To update the state of an existing job, we recommend using `projects.locations.jobs.update` with a [regional endpoint] (https://cloud.google.com/dataflow/docs/concepts/regional-endpoints). Using `projects.jobs.update` is not recommended, as you can only update the state of jobs that are running in `us-central1`."
+1173,gsmtasks.com,DELETE,/documents/{id}/,documents_destroy,,
+1174,gsmtasks.com,DELETE,/emails/{id}/,emails_destroy,,
+1175,gsmtasks.com,DELETE,/metafields/{id}/,metafields_destroy,,
+1176,gsmtasks.com,DELETE,/time_location_features/{id}/,time_location_features_destroy,,
+1177,gsmtasks.com,DELETE,/users/{id}/on_duty/,users_on_duty_destroy,,
+1178,gsmtasks.com,PATCH,/billing/invoices/{id}/,billing_invoices_partial_update,,
+1179,gsmtasks.com,PATCH,/contact_addresses/{id}/,contact_addresses_partial_update,,
+1180,gsmtasks.com,PATCH,/formrules/{id}/,formrules_partial_update,,
+1181,gsmtasks.com,PATCH,/metafields/{id}/,metafields_partial_update,,
+1182,gsmtasks.com,PATCH,/recurrences/{id}/,recurrences_partial_update,,
+1183,gsmtasks.com,PATCH,/users/{id}/,users_partial_update,,
+1184,gsmtasks.com,PUT,/account_roles/{id}/,account_roles_update,,
+1185,gsmtasks.com,PUT,/accounts/{id}/stripe_create_setup_intent/,accounts_stripe_create_setup_intent_update,,Action to start a new setup intent.
+1186,gsmtasks.com,PUT,/accounts/{id}/stripe_detach_payment_method/,accounts_stripe_detach_payment_method_update,,"Detached payment method from the customer. The payment method itself will remain somewhere in stripe, but as its no longer linked to the customer, it might as well be deleted for us"
+1187,gsmtasks.com,PUT,/billing/customers/{id}/,billing_customers_update,,
+1188,gsmtasks.com,PUT,/emails/{id}/,emails_update,,
+1189,here.com,DELETE,/associations/v3/{trackingId}/sensors/{sensorRuleId},,Disassociates a device and a sensor rule,Deletes the association between the sensor rule `sensorRuleId` and the device `trackingId`.
+1190,here.com,DELETE,/locations/v4/{locationId},,Deletes a location,Deletes the location `locationId`. ***NOTE***: A location can not be deleted if the location is referred by any shipment or shipment plan.
+1191,here.com,DELETE,/metadata/v2/sensorRules/{sensorRuleId},,Deletes all metadata of a sensor rule,Delete all the metadata of the sensor rule identified by the `sensorRuleId`.
+1192,here.com,DELETE,/registry/v2/devices/{deviceOrExternalId},,Deactivates a device.,Deactivates a provisioned device. This operation will deactivate the device license (`deviceId` and `deviceSecret`). Deactivated devices cannot be claimed anymore. NOTE: The device must be unclaimed before it can be deactivated.
+1193,here.com,DELETE,/rules/v4/{ruleId},,Deletes a rule,Deletes a rule identified by the `ruleId`.
+1194,here.com,DELETE,/sensors/v3,,Deletes all sensor rules,"Deletes all sensor rules of a project. Note that one needs to supply an HTTP header `x-confirm` with the value `true` to force the deletion.  If the header is not provided, the request will fail."
+1195,here.com,DELETE,/traces/v2/{trackingId},,Deletes all the device traces and events,Deletes all the device `trackingId` traces. This will also trigger deletion of the entire event history of the device.
+1196,here.com,PATCH,/shipments/v4/plans/{shipmentPlanId},,Updates a shipment plan details,"Updates details of a shipment plan identified by the `shipmentPlanId`. This is a partial update, meaning that only the provided fields will be updated. If `ruleIds` field is specified, it will replace the existing rules currently associated with the shipment plan. ***Note***: `segments` cannot be edited through this API. Changing the order of the segments in a plan would cause shipments created from earlier versions of the plan diverge from a shipment instantiated from the new plan with differen"
+1197,here.com,PATCH,/shipments/v4/plans/{shipmentPlanId}/{segmentPlanId},,Updates a segment plan details,"Updates details of a segment plan identified by the `segmentPlanId`. This is a partial update, meaning that only the provided fields will be updated. ***Note***: Updating `origin` and `destination` is prohibited to prevent breaking the chain of locations."
+1198,here.com,PUT,/aliases/v2/{trackingId}/batch,,Creates multiple aliases for a device,Creates a set of aliases for a device identified by the `trackingId`.  An alias must be unique within a project.
+1199,here.com,PUT,/associations/v3/{trackingId}/rules/{ruleId},,Associates a device to a rule,"Associates the device with `trackingId` to the rule with `ruleId`. Whenever the device behaviour triggers the rule, an event is generated."
+1200,here.com,PUT,/associations/v3/devices/batchUpdate,,Updates rules associations for devices,Updates rules associated with devices.

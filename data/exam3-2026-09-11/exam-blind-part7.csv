@@ -1,0 +1,201 @@
+row_id,provider,method,path,operationId,summary,description
+1201,here.com,PUT,/c2c/v4/connectors/{connectorId},,Updates a connector info,Updates the connector `connectorId` info.
+1202,here.com,PUT,/largedata/v4/{dataId}/parts/{partNumber},,Uploads a part of a large data,"Uploads a part of large data. The part is identified with `dataId` and a part number. Part upload has the following limits: * The part numbers must start from 1, be no greater than 10000 and be consecutive. * The size of one uploaded data part must be between 1 byte and 1 MB. * Parts re-uploaded with the same `partNumber` are overridden. * Only `application/octet-stream` Content-Type is supported. Parts can be uploaded in any order, the `partNumber` determines their position in the total data. T"
+1203,here.com,PUT,/locations/v4/{locationId},,Updates a location details,"Updates the location `locationId` details. A location consists of latitude/longitude coordinate pair and/or geofenceId. A name, description, and address of the location may be provided. The old location definition will be replaced, meaning that full location body should be provided. After a successful update, the response provides the updated location details."
+1204,here.com,PUT,/notifications/v3/registration/{channelId},,Updates a notification channel,"Updates the `url`, `ruleId`, `eventSource`, `eventType` and `initialState` parameters of the notification channel `channelId`. If a property is not provided in the request body, its value will be updated to null. When updating a webhook channel, the `url` parameter must be provided. After a successful update, the response provides the updated notification channel details."
+1205,hetras-certification.net,PATCH,/api/hotel/v0/hotels/{hotelId}/rateplans/{rateplanCode}/rates,RatePlans_PatchRates,Partially update a rate of the specified rateplan for the defined time period.,"The hetras API is using this <a href=""https://developer.hetras.com/docs/patch"" onfocus=""this.blur()"" target=""_blank"">Patch Specification</a>             to partially update an existing resource. Currently this call only allows to set the base price for non-derived rateplans if the rateplan             is active and already loaded for the specified time period.             <br /><br />             A request example:<br /><pre>             [               {                 ""op"": ""replace"", ""path"":"
+1206,hetras-certification.net,PATCH,/api/hotel/v0/hotels/{hotelId}/rateplans/{rateplanCode}/rates/{businessDay},RatePlans_PatchRate,Partially update a rate of the specified rateplan for a defined business day.,"The hetras API is using this <a href=""https://developer.hetras.com/docs/patch"" onfocus=""this.blur()"" target=""_blank"">Patch Specification</a>             to partially update an existing resource. Currently this call only allows to set the base price for non-derived rateplans if the rateplan             is active and already loaded for the specified business day.             <br /><br />             A request example:<br /><pre>             [               {                 ""op"": ""replace"", ""path"""
+1207,hetras-certification.net,PATCH,/api/hotel/v0/hotels/{hotelId}/rooms/{roomNumber},Rooms_PatchRoom,Partially updates a room.,"The hetras API is using this <a href=""https://developer.hetras.com/docs/patch"" onfocus=""this.blur()"" target=""_blank"">Patch Specification</a>             to partially update an existing resource. Currently this call only allows to modify condition and housekeeping occupancy status of the room.             <br /><br />             A request example:<br /><pre>             [               {                 ""op"": ""replace"", ""path"": ""/status/condition"", ""value"": ""CleanNotInspected""               }, {"
+1208,hetras-certification.net,PUT,/api/hotel/v0/hotels/{hotelId}/rateplans/batch/$rates,RatePlans_BatchUpdateRates,Update a list of base rateplans for a given period and a given base price for single occupancy.,"Currently this call only allows to set the base price for non-derived rateplans if the rateplan             is active and already loaded for the specified time period.             <br /><br />             A request example:<br /><pre>             [               {                 ""rateplan"": ""STDN01"", ""from"": ""2018-01-01"", ""to"": ""2018-01-30"", ""base_price"": 120.00               }             ]             </pre><br />             For more details on how the API responds to errors please check our"
+1209,hetras-certification.net,PUT,/api/hotel/v0/hotels/{hotelId}/yieldable_rateplans/{rateplanCode}/$rates,YieldableRates_SavePrices,Saves Yieldable Rate Prices for existing Yieldable Rateplan.,"Saves Yieldable Rate Prices for existing Yieldable Rateplan. The rateplan has been created before and with this End Point we              create or update the rate prices. If the Yieldable rateplan prices exist it updates them with the new price if not it creates new price entries.<br />             For more details on how the API responds to errors please check our documentation on              <a href=""https://developer.hetras.com/docs/errors/"" onfocus=""this.blur()"">Error Handling</a>."
+1210,hetzner.cloud,DELETE,/certificates/{id},,Delete a Certificate,Deletes a Certificate.
+1211,hetzner.cloud,DELETE,/floating_ips/{id},,Delete a Floating IP,Deletes a Floating IP. If it is currently assigned to a Server it will automatically get unassigned.
+1212,hetzner.cloud,DELETE,/load_balancers/{id},,Delete a Load Balancer,Deletes a Load Balancer.
+1213,hetzner.cloud,DELETE,/networks/{id},,Delete a Network,"Deletes a network. If there are Servers attached they will be detached in the background. Note: if the network object changes during the request, the response will be a “conflict” error."
+1214,hetzner.cloud,DELETE,/placement_groups/{id},,Delete a PlacementGroup,Deletes a PlacementGroup.
+1215,hetzner.cloud,DELETE,/primary_ips/{id},,Delete a Primary IP,Deletes a Primary IP. The Primary IP may be assigned to a Server. In this case it is unassigned automatically. The Server must be powered off (status `off`) in order for this operation to succeed.
+1216,hetzner.cloud,DELETE,/ssh_keys/{id},,Delete an SSH key,Deletes an SSH key. It cannot be used anymore.
+1217,hetzner.cloud,PUT,/certificates/{id},,Update a Certificate,"Updates the Certificate properties. Note that when updating labels, the Certificate’s current set of labels will be replaced with the labels provided in the request body. So, for example, if you want to add a new label, you have to provide all existing labels plus the new label in the request body. Note: if the Certificate object changes during the request, the response will be a “conflict” error."
+1218,hetzner.cloud,PUT,/firewalls/{id},,Update a Firewall,"Updates the Firewall. Note that when updating labels, the Firewall's current set of labels will be replaced with the labels provided in the request body. So, for example, if you want to add a new label, you have to provide all existing labels plus the new label in the request body. Note: if the Firewall object changes during the request, the response will be a “conflict” error."
+1219,hetzner.cloud,PUT,/floating_ips/{id},,Update a Floating IP,"Updates the description or labels of a Floating IP. Also note that when updating labels, the Floating IP’s current set of labels will be replaced with the labels provided in the request body. So, for example, if you want to add a new label, you have to provide all existing labels plus the new label in the request body."
+1220,hetzner.cloud,PUT,/images/{id},,Update an Image,"Updates the Image. You may change the description, convert a Backup Image to a Snapshot Image or change the Image labels. Only Images of type `snapshot` and `backup` can be updated. Note that when updating labels, the current set of labels will be replaced with the labels provided in the request body. So, for example, if you want to add a new label, you have to provide all existing labels plus the new label in the request body."
+1221,hetzner.cloud,PUT,/load_balancers/{id},,Update a Load Balancer,"Updates a Load Balancer. You can update a Load Balancer’s name and a Load Balancer’s labels. Note that when updating labels, the Load Balancer’s current set of labels will be replaced with the labels provided in the request body. So, for example, if you want to add a new label, you have to provide all existing labels plus the new label in the request body. Note: if the Load Balancer object changes during the request, the response will be a “conflict” error."
+1222,hetzner.cloud,PUT,/networks/{id},,Update a Network,"Updates the network properties. Note that when updating labels, the network’s current set of labels will be replaced with the labels provided in the request body. So, for example, if you want to add a new label, you have to provide all existing labels plus the new label in the request body. Note: if the network object changes during the request, the response will be a “conflict” error."
+1223,hetzner.cloud,PUT,/placement_groups/{id},,Update a PlacementGroup,"Updates the PlacementGroup properties. Note that when updating labels, the PlacementGroup’s current set of labels will be replaced with the labels provided in the request body. So, for example, if you want to add a new label, you have to provide all existing labels plus the new label in the request body. Note: if the PlacementGroup object changes during the request, the response will be a “conflict” error."
+1224,hetzner.cloud,PUT,/servers/{id},,Update a Server,"Updates a Server. You can update a Server’s name and a Server’s labels. Please note that Server names must be unique per Project and valid hostnames as per RFC 1123 (i.e. may only contain letters, digits, periods, and dashes). Also note that when updating labels, the Server’s current set of labels will be replaced with the labels provided in the request body. So, for example, if you want to add a new label, you have to provide all existing labels plus the new label in the request body."
+1225,hetzner.cloud,PUT,/volumes/{id},,Update a Volume,"Updates the Volume properties. Note that when updating labels, the volume’s current set of labels will be replaced with the labels provided in the request body. So, for example, if you want to add a new label, you have to provide all existing labels plus the new label in the request body."
+1226,httpbin.org,DELETE,/anything,,Returns anything passed in request data.,
+1227,httpbin.org,DELETE,/delete,,The request's DELETE parameters.,
+1228,httpbin.org,DELETE,/redirect-to,,302/3XX Redirects to the given URL.,
+1229,httpbin.org,DELETE,/status/{codes},,Return status code or random status code if more than one are given,
+1230,httpbin.org,PATCH,/anything,,Returns anything passed in request data.,
+1231,httpbin.org,PATCH,/anything/{anything},,Returns anything passed in request data.,
+1232,httpbin.org,PATCH,/delay/{delay},,Returns a delayed response (max of 10 seconds).,
+1233,httpbin.org,PATCH,/patch,,The request's PATCH parameters.,
+1234,httpbin.org,PATCH,/status/{codes},,Return status code or random status code if more than one are given,
+1235,httpbin.org,PUT,/anything/{anything},,Returns anything passed in request data.,
+1236,httpbin.org,PUT,/delay/{delay},,Returns a delayed response (max of 10 seconds).,
+1237,httpbin.org,PUT,/redirect-to,,302/3XX Redirects to the given URL.,
+1238,httpbin.org,PUT,/status/{codes},,Return status code or random status code if more than one are given,
+1239,hubapi.com,DELETE,/automation/v4/actions/{appId}/{definitionId},delete-/automation/v4/actions/{appId}/{definitionId}_archive,Archive a custom action,"Archives a single custom workflow action with the specified ID. Workflows that currently use this custom action will stop attempting to execute the action, and all future executions will be marked as a failure."
+1240,hubapi.com,DELETE,/automation/v4/actions/{appId}/{definitionId}/functions/{functionType}/{functionId},delete-/automation/v4/actions/{appId}/{definitionId}/functions/{functionType}/{functionId}_archive,Delete a custom action function,Delete a function for a custom workflow action. This will remove the function itself as well as removing the association between the function and the custom action. This can't be undone.
+1241,hubapi.com,DELETE,/crm/v3/extensions/cards/{appId}/{cardId},delete-/crm/v3/extensions/cards/{appId}/{cardId}_archive,Delete a card,"Permanently deletes a card definition with the given ID. Once deleted, data fetch requests for this card will no longer be sent to your service. This can't be undone."
+1242,hubapi.com,DELETE,/files/v3/files/{fileId}/gdpr-delete,delete-/files/v3/files/{fileId}/gdpr-delete_archiveGDPR,GDPR delete,GDRP delete file
+1243,hubapi.com,DELETE,/files/v3/folders/{folderPath},delete-/files/v3/folders/{folderPath}_archiveByPath,Delete folder.,Delete folder by path.
+1244,hubapi.com,DELETE,/oauth/v1/refresh-tokens/{token},delete-/oauth/v1/refresh-tokens/{token}_archive,,
+1245,hubapi.com,DELETE,/webhooks/v3/{appId}/settings,delete-/webhooks/v3/{appId}/settings_clear,,
+1246,hubapi.com,DELETE,/webhooks/v3/{appId}/subscriptions/{subscriptionId},delete-/webhooks/v3/{appId}/subscriptions/{subscriptionId}_archive,,
+1247,hubapi.com,PATCH,/webhooks/v3/{appId}/subscriptions/{subscriptionId},patch-/webhooks/v3/{appId}/subscriptions/{subscriptionId}_update,,
+1248,hubapi.com,PUT,/automation/v4/actions/{appId}/{definitionId}/functions/{functionType},put-/automation/v4/actions/{appId}/{definitionId}/functions/{functionType}_createOrReplaceByFunctionType,Create or replace a custom action function,Creates or replaces a function for a custom workflow action.
+1249,hubapi.com,PUT,/automation/v4/actions/{appId}/{definitionId}/functions/{functionType}/{functionId},put-/automation/v4/actions/{appId}/{definitionId}/functions/{functionType}/{functionId}_createOrReplace,Create or replace a custom action function,Creates or replaces a function for a custom workflow action.
+1250,hubapi.com,PUT,/files/v3/files/{fileId},put-/files/v3/files/{fileId}_replace,Replace file.,Replace existing file data with new file data. Can be used to change image content without having to upload a new file and update all references.
+1251,hubapi.com,PUT,/marketing/v3/marketing-events/events/{externalEventId},put-/marketing/v3/marketing-events/events/{externalEventId}_replace,,
+1252,hubapi.com,PUT,/webhooks/v3/{appId}/settings,put-/webhooks/v3/{appId}/settings_configure,,
+1253,i-cue.solutions,DELETE,/administration/entity/{id},,Delete organization,This is an iCUE only endpoint or Enterprise feature.
+1254,i-cue.solutions,DELETE,/administration/planning-level/{entityId}/{id},,Delete planning level,Delete planning level. This is an Enterprise feature.
+1255,i-cue.solutions,DELETE,/administration/user/{entityId}/{id},,Delete user,Delete user
+1256,i-cue.solutions,PUT,/administration/entity,,Pause organization,This is an iCUE only endpoint or Enterprise feature.
+1257,i-cue.solutions,PUT,/administration/user,,Update user,Update user
+1258,i-cue.solutions,PUT,/administration/user/lock,,Lock user,After lock user won't be able to use iCUE API endpoints.
+1259,id4i.de,DELETE,/api/v1/apikeys/{key}/privileges/{privilege}/id4ns,removeApiKeyPrivilegeForId4ns,Remove id4ns of a privilege,
+1260,id4i.de,DELETE,/api/v1/collections/{id4n},deleteCollection,Delete collection,
+1261,id4i.de,DELETE,/api/v1/collections/{id4n}/elements,removeElementsFromCollection,Remove elements from collection,
+1262,id4i.de,DELETE,/api/v1/organizations/{organizationId}/partner,removePartnerOrganization,Remove partner,Removing a partner organization
+1263,id4i.de,PATCH,/api/v1/collections/{id4n},updateCollection,Update collection,Update collection changing only the given values
+1264,id4i.de,PATCH,/api/v1/documents/{id4n}/{organizationId}/{fileName}/metadata,updateDocumentMetadata,Update a document,
+1265,id4i.de,PATCH,/api/v1/history/{id4n}/{organizationId}/{sequenceId},updateItem,Update history item,
+1266,id4i.de,PATCH,/api/v1/organizations/{organizationId}/messaging,patchDefaultQueue,,
+1267,id4i.de,PUT,/account/password,verifyPasswordReset,Verify password reset,Setting a new password and verifying the request to set the password.
+1268,id4i.de,PUT,/api/v1/apikeys/{key},updateApiKey,Update API keys,"API keys can be updated with new labels, and be activated and deactivated. The secret or UUID cannot be changed."
+1269,id4i.de,PUT,/api/v1/documents/{id4n}/{organizationId},putDocument,Put an document for an id4n,Creating or overwriting an existing document
+1270,id4i.de,PUT,/api/v1/history/{id4n}/{organizationId}/{sequenceId}/visibility,updateItemVisibility,Set history item visibility,
+1271,id4i.de,PUT,/api/v1/organizations/{organizationId},updateOrganization,Update organization,
+1272,id4i.de,PUT,/api/v1/organizations/{organizationId}/addresses/billing,updateOrganizationBillingAddress,Store billing address,
+1273,id4i.de,PUT,/api/v1/routingfiles/{id4n},updateRoutingFile,Store routing file,
+1274,id4i.de,PUT,/api/v1/transfers/{id4n}/receiveInfo,receive,"Transfer a GUID or collection, obtaining it (i.e. becoming the holder) and if allowed also taking ownership",Taking ownership can be forbidden by a previous owner. See methods prepare and getInfo
+1275,ideal-postcodes.co.uk,DELETE,/keys/{key}/configs/{config},DeleteConfig,Delete,Permanently deletes a configuration object.
+1276,ideal-postcodes.co.uk,DELETE,/keys/{key}/licensees/{licensee},DeleteLicensee,Cancel,Cancels a licensee key. This renders a licensee unusable. This action can be reversed if you get in contact with us.
+1277,ideal-postcodes.co.uk,PUT,/keys/{key}/licensees/{licensee},UpdateLicensee,Update,Update Licensee
+1278,ijenko.net,DELETE,/account/tokens/{tokenId},Account.revokeToken,Revoke a Token,Revoke the given *Token*. **Note:** requires full access to the *Account*.
+1279,ijenko.net,DELETE,/account/users/{userId},Account.deleteUser,Delete a User,"Delete a *User* from this *Account*, and revoke all his/her *Tokens*. **Note**: requires full access to the *Account*."
+1280,ijenko.net,DELETE,/notifications/{notificationId},Notification.delete,Delete a Notification,Delete a *Notification*.
+1281,ijenko.net,DELETE,/programs/{programId},Program.delete,Delete a Program,Delete a *Program*. **Note**: requires full access to the *Account*.
+1282,ijenko.net,PATCH,/account/users/{userId},Account.patchUser,Modify a User,Modify a *User*. **Note**: requires full access to the *Account*.
+1283,ijenko.net,PATCH,/devices/{deviceId}/tags,Device.patchTags,Modify tags,Modify the tags of a *Device*.
+1284,ijenko.net,PATCH,/functionalities/{functionalityId},Functionality.patch,Modify a Functionality,Modify information about a *Functionality*: its name.
+1285,ijenko.net,PATCH,/functionalities/{functionalityId}/metadata,Functionality.patchMetadata,Modify metadata,"Modify the metadata. Keys are limited to the same format as tags (up to 21 characters, [a-z0-9], starting with [a-z]). Values can be any JSON value."
+1286,ijenko.net,PATCH,/functionalities/{functionalityId}/tags,Functionality.patchTags,Modify tags,Modify the tags of a *Functionality*.
+1287,ijenko.net,PATCH,/notifications/{notificationId},Notification.patch,Modify a Notification,Modify a *Notification*.
+1288,ijenko.net,PATCH,/notifications/{notificationId}/metadata,Notification.patchMetadata,Modify metadata of a Notification,"Modify the metadata of a *Notification*. Keys are limited to the same format as tags (up to 21 characters, [a-z0-9], starting with [a-z]). Values can be any JSON value."
+1289,ijenko.net,PATCH,/places/{placeId},Place.patch,Update a Place,Change information about a *Place*. **Note**: requires full access to the *Account*.
+1290,ijenko.net,PATCH,/programs/{programId},Program.patch,Modify a Program,Modify a *Program*: - name - status (enabled/disabled) - code **Note**: requires full access to the *Account*.
+1291,ijenko.net,PATCH,/programs/{programId}/metadata,Program.patchMetadata,Modify metadata of a Program,"Modify the metadata of a *Program*. Keys are limited to the same format as tags (up to 21 characters, [a-z0-9], starting with [a-z]). Values can be any JSON value."
+1292,ijenko.net,PUT,/functionalities/{functionalityId}/attributes/{attributeName},Functionality.set,Modify an Attribute value,Modify the value of the *Attribute*.
+1293,ijenko.net,PUT,/places/{placeId}/buses/{busId}/pairing,Place.openPairing,Open/Close the pairing window,Open/Close the pairing window. **Note**: requires full access to the *Account*.
+1294,illumidesk.com,DELETE,/v1/{namespace}/billing/cards/{id}/,billing_cards_delete,Delete a credit card,
+1295,illumidesk.com,DELETE,/v1/{namespace}/billing/subscriptions/{id}/,billing_subscriptions_delete,Delete a subscription,
+1296,illumidesk.com,DELETE,/v1/{namespace}/projects/{project}/servers/{server}/run-stats/{id}/,projects_servers_run-stats_delete,Delete a server's statistics,
+1297,illumidesk.com,DELETE,/v1/servers/options/server-size/{size}/,servers_options_server_size_delete,Delete a server size by id,Only super users with on-premises version have acceess to this endpoint.
+1298,illumidesk.com,DELETE,/v1/teams/{team}/,teams_delete,Delete a team,
+1299,illumidesk.com,DELETE,/v1/teams/{team}/groups/{group}/,teams_groups_delete,Delete team group,
+1300,illumidesk.com,PATCH,/v1/{namespace}/projects/{project}/deployments/{deployment}/,projects_deployments_update,Update a deployment,
+1301,illumidesk.com,PATCH,/v1/{namespace}/projects/{project}/servers/{server}/,projects_servers_update,Update a server,
+1302,illumidesk.com,PATCH,/v1/{namespace}/projects/{project}/servers/{server}/run-stats/{id}/,projects_servers_run-stats_update,Update a server's statistics,
+1303,illumidesk.com,PATCH,/v1/{namespace}/projects/{project}/servers/{server}/triggers/{trigger}/,service_trigger_update,Update a server trigger,
+1304,illumidesk.com,PATCH,/v1/teams/{team}/groups/{group}/,teams_groups_update,Patch team group,
+1305,illumidesk.com,PUT,/v1/{namespace}/projects/{project}/servers/{server}/,projects_servers_replace,Replace a server,
+1306,illumidesk.com,PUT,/v1/{namespace}/projects/{project}/servers/{server}/ssh-tunnels/{tunnel}/,projects_servers_ssh-tunnels_replace,Replace SSH Tunnel associated to a server,
+1307,illumidesk.com,PUT,/v1/{namespace}/projects/{project}/servers/{server}/triggers/{trigger}/,service_trigger_replace,Replace a server trigger,
+1308,illumidesk.com,PUT,/v1/teams/{team}/groups/{group}/,teams_groups_replace,Patch team group,
+1309,illumidesk.com,PUT,/v1/users/{user}/emails/{email_id}/,users_emails_replace,Replace an email address,
+1310,impala.travel,PUT,/bookings/{bookingId}/booking-contact,updateBookingContact,Change a booking contact,"Updates a confirmed booking with the booking contact details you provide in the request body. In addition, we require you to supply a `updateBookingVersionAtTimestamp` field with the `updatedAt` timestamp of the booking. You can find this value by looking up the booking via the [Retrieve a booking](https://docs.impala.travel/docs/booking-api/spec/openapi.seller.yaml/paths/~1bookings~1%7BbookingId%7D/get) endpoint. This is to avoid race conditions where another update might have happened since th"
+1311,import.io,DELETE,/extractor/{extractorId}/,,Delete an existing schedule,
+1312,inboxroute.com,DELETE,/contacts/{contactid},,,Delete an existing contact
+1313,increase.com,PATCH,/account_numbers/{account_number_id},update_an_account_number,Update an Account Number,
+1314,increase.com,PATCH,/accounts/{account_id},update_an_account,Update an Account,
+1315,increase.com,PATCH,/cards/{card_id},update_a_card,Update a Card,
+1316,increase.com,PATCH,/event_subscriptions/{event_subscription_id},update_an_event_subscription,Update an Event Subscription,
+1317,increase.com,PATCH,/external_accounts/{external_account_id},update_an_external_account,Update an External Account,
+1318,increase.com,PATCH,/limits/{limit_id},update_a_limit,Update a Limit,
+1319,influxdata.com,DELETE,/buckets/{bucketID},DeleteBucketsID,Delete a bucket,
+1320,influxdata.com,DELETE,/buckets/{bucketID}/owners/{userID},DeleteBucketsIDOwnersID,Remove an owner from a bucket,
+1321,influxdata.com,DELETE,/checks/{checkID},DeleteChecksID,Delete a check,
+1322,influxdata.com,DELETE,/dashboards/{dashboardID},DeleteDashboardsID,Delete a dashboard,
+1323,influxdata.com,DELETE,/dashboards/{dashboardID}/cells/{cellID},DeleteDashboardsIDCellsID,Delete a dashboard cell,
+1324,influxdata.com,DELETE,/notificationEndpoints/{endpointID},DeleteNotificationEndpointsID,Delete a notification endpoint,
+1325,influxdata.com,DELETE,/notificationRules/{ruleID}/labels/{labelID},DeleteNotificationRulesIDLabelsID,Delete label from a notification rule,
+1326,influxdata.com,DELETE,/orgs/{orgID}/members/{userID},DeleteOrgsIDMembersID,Remove a member from an organization,
+1327,influxdata.com,DELETE,/telegrafs/{telegrafID}/owners/{userID},DeleteTelegrafsIDOwnersID,Remove an owner from a Telegraf config,
+1328,influxdata.com,DELETE,/variables/{variableID},DeleteVariablesID,Delete a variable,
+1329,influxdata.com,PATCH,/authorizations/{authID},PatchAuthorizationsID,Update an authorization to be active or inactive,
+1330,influxdata.com,PATCH,/dashboards/{dashboardID},PatchDashboardsID,Update a dashboard,
+1331,influxdata.com,PATCH,/dashboards/{dashboardID}/cells/{cellID}/view,PatchDashboardsIDCellsIDView,Update the view for a cell,
+1332,influxdata.com,PATCH,/tasks/{taskID},PatchTasksID,Update a task,Update a task. This will cancel all queued runs.
+1333,influxdata.com,PUT,/checks/{checkID},PutChecksID,Update a check,
+1334,influxdata.com,PUT,/notificationRules/{ruleID},PutNotificationRulesID,Update a notification rule,
+1335,instagram.com,DELETE,/media/{media-id}/comments/{comment-id},,Remove a comment.,Remove a comment either on the authenticated user's media object or authored by the authenticated user.
+1336,instagram.com,DELETE,/media/{media-id}/likes,,Remove a like on this media by the current user.,Remove a like on this media by the currently authenticated user.
+1337,intellifi.nl,DELETE,/blobs/{id},deleteBlob,Delete binary large object (blob),
+1338,intellifi.nl,DELETE,/items/{id},deleteItem,Delete item,
+1339,intellifi.nl,DELETE,/keys/{id},deleteKey,Delete key,Can only be used by an **administrative** user.
+1340,intellifi.nl,DELETE,/locations/{id},deleteLocation,Delete location,
+1341,intellifi.nl,DELETE,/sets/itemlists/{id},deleteItemSet,Delete item list,
+1342,intellifi.nl,DELETE,/sets/spotlists/{id},deleteSpotList,Delete spot list,
+1343,intellifi.nl,DELETE,/sets/spotlists/{id}/ids/{itemId},deleteItemIdFromSpotList,Delete spot from list,
+1344,intellifi.nl,DELETE,/subscriptions/{id},deleteSubscription,Delete subscription,
+1345,intellifi.nl,PUT,/items/{id},updateItem,Update existing item,
+1346,intellifi.nl,PUT,/keys/{id},updateKey,Update existing key,Can only be used by an **administrative** user.
+1347,intellifi.nl,PUT,/locations/{id},updateLocation,Update existing location,
+1348,intellifi.nl,PUT,/services/{id},updateService,Update existing service,
+1349,intellifi.nl,PUT,/spots/{id},updateSpot,Update existing spot,
+1350,intellifi.nl,PUT,/spotsets/{id},,Update existing spotset,
+1351,intellifi.nl,PUT,/subscriptions/{id},updateSubscription,Update existing subscription,
+1352,intellifi.nl,PUT,/users/{id},updateUser,Update existing user,Can only be used by an **administrative** user.
+1353,interactivebrokers.com,DELETE,/accounts/{account}/orders/{CustomerOrderId},,Cancel Order,Cancels the order with the referenced Customer Order ID for the account passed in the URL.
+1354,interactivebrokers.com,PUT,/accounts/{account}/orders/{CustomerOrderId},,Modify Order,Allows the caller to modify the order with the referenced Customer Order ID specified in the URL. A separate Customer Order ID must be provided in the request body for the modification.
+1355,iqualify.com,DELETE,/offerings/{offeringId}/assessments/{assessmentId}/documents/{documentId},,Remove assessment document,Removes the assessment document file for a specified assessment in an offering.
+1356,iqualify.com,DELETE,/offerings/{offeringId}/channels/{channelId}/learners,,Remove learners from a group channel,Removes a learner from the specified group channel.
+1357,iqualify.com,DELETE,/offerings/{offeringId}/groups/{groupId}/learners/{userEmail},,Remove a learner from an assessment group,Removes a learner from the specified assessment group.
+1358,iqualify.com,PATCH,/offerings/{offeringId},,Update offering,Updates the offering.
+1359,iqualify.com,PATCH,/offerings/{offeringId}/assessments/{assessmentId}/{userEmail},,Update the due dates for a learner's quiz attempt,Updates the due dates for a learner's quiz attempt specified by the assessmentId.
+1360,iqualify.com,PATCH,/offerings/{offeringId}/channels/{channelId},,Update channel,Updates a channel in an offering.
+1361,iqualify.com,PATCH,/users/{userEmail},,Update user,Updates the specified user by email.
+1362,iqualify.com,PATCH,/users/{userEmail}/transfer,,Transfer a user between offerings,Moves the user's access and progress from one offering to another.
+1363,iqualify.com,PUT,/courses/{contentId}/metadata/level,,Update course level,Add or update the course level in the metadata of a course.
+1364,iqualify.com,PUT,/courses/{contentId}/metadata/tags,,Update course tags,Add or update course tags in the metadata of a course.
+1365,iqualify.com,PUT,/courses/{contentId}/metadata/topic,,Update course topic,Add or update the course topic in the metadata of a course.
+1366,iqualify.com,PUT,/offerings/{offeringId}/metadata/category,,Update offering category metadata,Updates the offering category metadata.
+1367,iqualify.com,PUT,/offerings/{offeringId}/metadata/tags,,Update offering tags metadata,Updates the offering tags metadata.
+1368,iqualify.com,PUT,/offerings/{offeringId}/metadata/topic,,Update offering topic metadata,Updates the offering topic metadata.
+1369,iqualify.com,PUT,/users/{userEmail}/suspend,,Suspend user,Suspends the specified user's account.
+1370,isendpro.com,PUT,/repertoire,repertoire,Gestion repertoire (modification),Ajoute ou supprime une liste de numéros à un répertoire existant.
+1371,isendpro.com,PUT,/subaccount,subaccountEdit,Edit a subaccount,Edit a subaccount
+1372,ix-api.net,DELETE,/accounts/{id},accounts_destroy,,"Accounts can be deleted, when all services and configs are decommissioned or the account is not longer referenced e.g. as a `managing_account` or `billing_account`. Deleting an account will cascade to `contacts` and `role-assignments`. The request will immediately fail, if the above preconditions are not met."
+1373,ix-api.net,DELETE,/network-service-configs/{id},network_service_configs_destroy,,Request decommissioning the network service configuration. The network service config will assume the state `decommission_requested`. This will cascade to related resources like `network-feature-configs`.
+1374,ix-api.net,DELETE,/network-services/{id}/change-request,network_service_change_request_destroy,,Retract or reject a change to the network service.
+1375,ix-api.net,PATCH,/accounts/{id},accounts_partial_update,,Update parts of an account.
+1376,ix-api.net,PATCH,/contacts/{id},contacts_partial_update,,Update parts of a contact
+1377,ix-api.net,PATCH,/ips/{id},ips_partial_update,,"Update parts of an ip address. As with the `PUT` opertaion, IP addresses, where you don't have update rights, will yield a `resource access denied` error when attempting an update. If the ip address was allocated for you, you might not be able to change anything but the `fqdn`."
+1378,ix-api.net,PATCH,/member-joining-rules/{id},member_joining_rules_partial_update,,Partially update a joining rule
+1379,ix-api.net,PATCH,/network-feature-configs/{id},network_feature_configs_partial_update,,Update parts of a network feature configuration
+1380,ix-api.net,PATCH,/network-service-configs/{id},network_service_configs_partial_update,,Update parts of an exisiting `network-service-config`.
+1381,ix-api.net,PATCH,/network-services/{id},network_services_partial_update,,Partially update a network service
+1382,ix-api.net,PUT,/accounts/{id},accounts_update,,Update the entire account.
+1383,ix-api.net,PUT,/ips/{id},ips_update,,"Update an ip address object. You can only update IP addresses within your current scope. Not all addresses you can read you can update. If the ip address was allocated for you, you might not be able to change anything but the `fqdn`."
+1384,ix-api.net,PUT,/member-joining-rules/{id},member_joining_rules_update,,Update a joining rule
+1385,ix-api.net,PUT,/network-feature-configs/{id},network_feature_configs_update,,Update a network feature configuration
+1386,ix-api.net,PUT,/network-service-configs/{id},network_service_configs_update,,Update an exisiting `network-service-config`
+1387,ix-api.net,PUT,/network-services/{id},network_services_update,,Update a network service
+1388,izettle.com,DELETE,/organizations/{organizationUuid}/categories/v2/{categoryUuid},deleteCategory,Delete a category,
+1389,izettle.com,DELETE,/organizations/{organizationUuid}/discounts/{discountUuid},deleteDiscount,Delete a single discount,
+1390,izettle.com,DELETE,/organizations/{organizationUuid}/products,deleteProducts,Delete a list of products,
+1391,izettle.com,DELETE,/organizations/{organizationUuid}/products/{productUuid},deleteProduct,Delete a single product,
+1392,izettle.com,DELETE,/v1/taxes/{taxRateUuid},deleteTaxRate,Delete a single tax rate,
+1393,izettle.com,PATCH,/organizations/{organizationUuid}/categories/v2/{categoryUuid},renameCategory,Rename a category,
+1394,izettle.com,PUT,/organizations/{organizationUuid}/discounts/{discountUuid},updateDiscount,Update a single discount,"Updates a discount entity using JSON merge patch (https://tools.ietf.org/html/rfc7386). This means that only included fields will be changed: null values removes the field on the target entity, and other values updates the field. Conditional updates are supported through the HttpHeaders.IF_MATCH header. If the conditional prerequisite is fullfilled, the discount is updated: otherwise a 412 precondition failed will be returned with an empty body."
+1395,izettle.com,PUT,/organizations/{organizationUuid}/products/v2/{productUuid},updateProduct,Update a single product,"Updates a product entity using JSON merge patch (https://tools.ietf.org/html/rfc7386). This means that only included fields will be changed: null values removes the field on the target entity, and other values updates the field. Conditional updates are supported through the HttpHeaders.IF_MATCH header. If the conditional prerequisite is fullfilled, the product is updated: otherwise a 412 (precondition failed) will be returned with an empty body."
+1396,izettle.com,PUT,/v1/taxes/{taxRateUuid},updateTaxRate,Update a single tax rate,
+1397,izettle.com,PUT,/v1/taxes/settings,setTaxationMode,Update the organization tax settings,
+1398,jellyfin.local,DELETE,/Auth/Keys/{key},RevokeKey,Remove an api key.,
+1399,jellyfin.local,DELETE,/Collections/{collectionId}/Items,RemoveFromCollection,Removes items from a collection.,
+1400,jellyfin.local,DELETE,/Devices,DeleteDevice,Deletes a device.,
