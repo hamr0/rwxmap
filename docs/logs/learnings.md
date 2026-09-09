@@ -2111,3 +2111,254 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   description-only prose with third-person verb phrasing on a GET.
 
 - No fix was applied in this pass.
+
+### M1-C13b the A/B/C fix measurement; stemming adopted, inert today (2026-09-08)
+
+- Three candidate fixes for C13's three root causes were built behind
+  flags in `poc/m1/arbiter/c13.mjs` and measured by
+  `poc/m1/arbiter/run-c13.mjs` over eight configurations across all six
+  sets. Flags require strict `true` (passing 1 silently does nothing).
+  - A = `opts.readGet`: GET no longer returns immediately; the
+    live-verb raise runs on GETs, raise-only.
+  - B = `opts.textFallback`: use `row.description` when `row.summary`
+    is empty.
+  - C = `opts.stem`: verb-correct suffix stripping instead of
+    `naiveSingular` for verbs.
+
+- Results on hold-out 5 (n=323), as exact / leaks / over-tight:
+
+  | config | exact | leaks | over-tight |
+  |---|---|---|---|
+  | baseline | 241 | 17 | 65 |
+  | B alone | 241 | 17 | 65 |
+  | C alone | 241 | 17 | 65 |
+  | A alone | 237 | 15 | 71 |
+  | A+B | 238 | 14 | 71 |
+  | A+B+C | 237 | 14 | 72 |
+
+- B alone and C alone are inert, and the reason is structural, not
+  statistical: c11's rule 1 returns `r` for GET before any text is
+  read, so on a GET there is no text path for B or C to fix; and on
+  POST the floor is already `x`, so a rule that raises to `x` is a
+  no-op. A is the only switch that opens the door. B then fixes
+  exactly three more rows: auth_revoke, rtm_connect, views_publish.
+
+- Across all eight configurations 20 rows tightened and 0 loosened;
+  both negative controls stayed `x` in all eight.
+
+- Still leaking under A+B+C, 14 Slack GET rows:
+  apps_permissions_request, apps_permissions_users_request,
+  apps_uninstall, dialog_open, files_remote_share, oauth_access,
+  oauth_token, oauth_v2_access, views_open, views_push, views_update,
+  workflows_stepCompleted, workflows_stepFailed, workflows_updateStep.
+  Plus four pre-existing leaks outside hold-out 5, unchanged from
+  baseline: TrafficInfluence deleteTrafficInfluence, github
+  issues/set-issue-field-values, github issues/remove-sub-issue,
+  vercel deleteRedirects.
+
+- What it taught: the failure is roughly one third plumbing, two
+  thirds vocabulary. The 14 remaining leaks need words that are not in
+  LIVE_VERBS at all — open, access, token, uninstall, request, share,
+  push, update, stepCompleted, stepFailed, updateStep. Stemming cannot
+  reach them; it only inflects words already in the list.
+
+- Fix C was adopted (A and B were not, in this pass), in two steps:
+  1. `stemMatches` / `matchesAnyStem` were moved into `judge.mjs` and
+     made the default for LIVE_VERBS and READ_VERBS on BOTH the
+     summary path and the operationId path, so the two finally agree
+     on what a word is. `naiveSingular` was kept and still used by the
+     noun sets. c13.mjs's `opts.stem` became a no-op; `opts.readGet`
+     and `opts.textFallback` still work.
+  2. The -ing / -ies / doubled-consonant gap was closed: a stem ending
+     in `e` accepts stem-minus-e + ing (invoke -> invoking); consonant
+     + y accepts -ies / -ied (verify -> verifies / verified); a CVC
+     stem accepts a doubled final consonant + ing / ed (cancel ->
+     cancelling / cancelled), excluding a final w/x/y.
+
+- Adversarial behaviour verified: invoking, terminating, revoking,
+  verifies, verified, cancelling, cancelled, running, ending, paying
+  all MATCH their stems; revoke-vs-invok, address-vs-add,
+  spend-vs-send, banner-vs-ban, sender-vs-send, listings-vs-list all do
+  NOT match. `listing` does match `list`, which is correct English and
+  cannot cause a leak, because `list` is a read verb that only ever
+  lowers POSTs.
+
+- Measured impact of both stemming steps: ZERO rows changed on all six
+  sets — same exact, leaks and over-tight everywhere, both controls
+  `x`, 150 tests pass, run-benchmark.mjs and run-c11-final.mjs both
+  exit 0. The value is future headroom (one list entry now covers its
+  inflections), not a score gain today. The only visible difference is
+  the evidence column, which now names the actual matched word
+  (opid:cancels instead of opid:cancel) — same class, same rule, on
+  every row.
+
+- A separate defect was left standing and is recorded here so it is
+  not lost: the noun paths (headNounForRow, operationIdHeadNoun in
+  judge.mjs) still normalise through `naiveSingular`, which is the
+  same es-stripping rule that mangled the verbs. Verbs were fixed,
+  nouns were not.
+
+- User ruling this session: no verb or noun is deleted from a list
+  without a measurement first and the user's approval after. An
+  unfiring word costs nothing to keep and may fire on vendor sixteen.
+
+### M1-C15 per-method floors and one direction per method (2026-09-09)
+
+- Truth distribution per method over all 1478 labelled rows, which is
+  what the floors are set from:
+
+  | method | n | r | w | x |
+  |---|---|---|---|---|
+  | GET | 550 | 533 (97%) | 4 (1%) | 13 (2%) |
+  | POST | 509 | 88 (17%) | 103 (20%) | 318 (62%) |
+  | DELETE | 250 | 0 (0%) | 203 (81%) | 47 (19%) |
+  | PUT | 127 | 2 (2%) | 106 (83%) | 19 (15%) |
+  | PATCH | 42 | 0 (0%) | 29 (69%) | 13 (31%) |
+
+- The floor is now each method's own lean, and is a STARTING VALUE,
+  never an early return: GET/HEAD/OPTIONS -> r, POST -> x, PUT -> w,
+  DELETE -> w, PATCH -> w. PATCH moved from x (c11) to w; every other
+  floor is unchanged.
+
+- Each method gets ONE direction of travel, because its floor sits at
+  one end of what is actually possible for it:
+  - GET/HEAD/OPTIONS: no word rules run at all. 97% right already;
+    every rule tried on GET made it worse.
+  - POST: LOWER only (find the r's). Its floor x is already the top,
+    so a raise is a no-op.
+  - PUT / DELETE / PATCH: RAISE only (find the x's). DELETE has zero
+    truth-r rows in 250; PUT has two in 127; PATCH has none in 42 — so
+    lowering has almost nothing to find and only risks leaks.
+
+- Why the blanket scan was wrong, with the rows that showed it: the
+  noun `access` correctly raises a DELETE but on GET produced
+  `listAccesses` r->x; a read verb correctly lowers a POST but is
+  meaningless on DELETE where no row is truth r; `refund` correctly
+  raises a DELETE but on `retrieveRefunds` it is a noun, not a verb,
+  and wrongly raised a GET. One word list cannot serve two opposite
+  jobs, so the vocabulary is now scoped per direction: a lowering list
+  used only on POST, and a raising list used only on PUT/DELETE/PATCH.
+
+- Scores, all 1478 rows:
+
+  | classifier | exact | leaks | over-tight |
+  |---|---|---|---|
+  | floor only, no word rules | 1189 (80.4%) | 96 (6.5%) | 193 (13.1%) |
+  | c11 (blanket rules) | 1221 (82.6%) | 21 (1.4%) | 236 (16.0%) |
+  | c15 (per-method) | 1247 (84.4%) | 27 (1.8%) | 204 (13.8%) |
+
+- c15 per method: GET n=550 exact=533 leak=17 over=0; POST n=509
+  exact=382 leak=0 over=127; PUT n=127 exact=102 leak=1 over=24; DELETE
+  n=250 exact=200 leak=3 over=47; PATCH n=42 exact=30 leak=6 over=6.
+
+- Versus c11: +26 exact, -32 over-tight, +6 leaks. All six new leaks
+  are PATCH and come from moving the PATCH floor from x to w. That
+  same move took PATCH exact from 13 to 30 of 42 and cut PATCH
+  over-tightening from 29 to 6. Dropping the blanket live-verb scan
+  from POST also helped on its own — that scan had been pre-empting
+  the read-verb lower, so POST exact went 380 to 382.
+
+- The word rules earn their keep: floor-only leaks 96, with rules 27.
+  They close 69.
+
+- DETECTABILITY, the important negative result. Split every row by
+  whether a word rule actually fired:
+
+  | bucket | n | exact | leaks | over-tight |
+  |---|---|---|---|---|
+  | evidence (a rule fired) | 208 | 133 | 0 | 75 |
+  | floor (method alone) | 1270 | 1114 | 27 | 129 |
+
+  Every one of the 27 leaks is a floor row. In 208 rows where a rule
+  read the operation and fired, we have never leaked. So the tool
+  cannot detect "this w is really an x" — that judgement needs ground
+  truth. What it CAN emit honestly is "I had no evidence here", and
+  that flag captures 100% of the leaks. The cost: on PUT/DELETE/PATCH
+  the no-evidence pile is 275 rows to find 10 hidden x. Shrinking that
+  pile, not inventing a confidence score, is the job.
+
+- The 10 remaining x-dressed-as-w rows (truth x, predicted w), the
+  whole non-GET leak problem: camara PATCH patchTrafficInfluence;
+  camara DELETE deleteTrafficInfluence; holdout1 PUT
+  issues/set-issue-field-values; holdout1 DELETE
+  issues/remove-sub-issue; holdout3 PATCH update_stage_instance;
+  holdout3 PATCH patchUrlProtectionBypass; holdout3 PATCH
+  updateSandbox; holdout3 DELETE deleteRedirects; holdout4 PATCH
+  ssl-verification-edit-ssl-certificate-pack-validation-method;
+  holdout5 PATCH patch-block-children. All ten are vocabulary gaps —
+  traffic influence, sandbox, redirects, stage instance, field values
+  never appear in LIVE_VERBS, PARTY_NOUNS or SHARED_NOUNS.
+
+- The other 17 leaks are the known Slack GET rows, unchanged from c11
+  and structurally untouched by this shape, since GET runs no word
+  rules by design.
+
+- A `noTextRaise` switch was built and measured, NOT adopted, default
+  off: on PUT/DELETE/PATCH with no summary and no description, raise
+  to x instead of using the w floor. It closes exactly one leak
+  (holdout3 PATCH update_stage_instance), 27 leaks to 26, and leaves
+  the review pile unchanged. It is a raise on zero evidence, which is
+  a doctrine question and is left to the user.
+
+- Two human-facing outputs are now kept deliberately separate: a
+  per-API report (poc/m1/arbiter/report.mjs) that a person runs on a
+  real spec, carrying class counts, the evidence-vs-floor split and a
+  review-first list, and NO accuracy, leak or over-tight number,
+  because without ground truth we do not have one; and the benchmark,
+  which has truth and therefore reports leaks and labels
+  x-dressed-as-w rows.
+
+- The labelled corpus was consolidated into one canonical table,
+  data/corpus/labelled.csv, 1478 rows and 37 columns, generated by
+  poc/m1/corpus/build-labelled.mjs and read by loadLabelledCorpus() in
+  poc/m1/arbiter/load-corpus.mjs, byte-identical across runs. It had
+  been scattered across six directories in two file shapes behind four
+  loaders. The raw APIs.guru per-operation dump and the downloaded specs
+  were written by poc/m1/corpus/extract.mjs to a session scratchpad that
+  has since been wiped, and are gone. The aggregate they produced
+  survives in the repo at docs/logs/m1/corpus-leans.csv — 3688 tokens,
+  each with position (lead or opid), provider count, total ops and per-
+  method counts, hold-out vendors excluded at extract time — and it is
+  sufficient for the per-method word-lean scan this shape needs.
+  Verified examples: `delete` in lead position, 3354 ops of which 2624
+  DELETE; `update` in opid position, 5397 ops of which 2867 PUT and 1343
+  PATCH; `partial` in opid position, 320 ops of which 316 PATCH. A re-
+  extract is owed only for questions the aggregate cannot answer, such
+  as reading operation summaries or word co-occurrence.
+
+### M1-C15 wild reading — the shape run over the APIs.guru corpus (2026-09-09)
+
+- Corpus: data/corpus/apis-guru-ops.csv.gz — 2,529 specs fetched with
+  poc/m1/corpus/fetch-corpus.mjs (resumable, 0 failures, 402 MB of
+  specs kept local and gitignored), 123,339 operations extracted by
+  poc/m1/corpus/extract-ops.mjs with NO provider excluded at
+  collection time; 673 providers, 2,517 APIs. Per method: GET 59,779;
+  POST 34,805; DELETE 13,276; PATCH 7,734; PUT 7,542. The previous
+  session's extract had been written to a scratchpad and lost; this
+  one lives in the repo (4.5 MB gzipped, byte-identical to the raw on
+  md5).
+- Reading: c15 classify() run over the 92,049 wild rows that remain
+  after excluding every provider present in the six labelled sets. No
+  truth exists on the wild; the comparison is truth-lean on the
+  labelled 1478 vs the classifier's own output split on the wild.
+- Then the table exactly as it appears in the PRD's "Wild reading
+  (2026-09-09)" block (copy it from prd.md so the two never diverge):
+
+| method | truth r | truth w | truth x | wild output r | wild output w | wild output x | rules fired on wild | reading |
+|---|---|---|---|---|---|---|---|---|
+| GET | 97% | 1% | 2% | 100% | 0% | 0% | 0% | aligned by design |
+| PUT | 2% | 83% | 15% | 0% | 87% | 13% | 13% | aligned |
+| DELETE | 0% | 81% | 19% | 0% | 86% | 14% | 14% | close, slightly under-raising |
+| PATCH | 0% | 69% | 31% | 0% | 88% | 12% | 12% | under-raising: a third are x, the list catches an eighth |
+| POST | 17% | 20% | 62% | 2% | 0% | 98% | 2% | way off: 37% are not x, the lowering list fires on 2% |
+
+- What it taught: the floors hold outside the labelled set for GET,
+  PUT and DELETE (wild output within ~5 points of the truth lean).
+  PATCH under-raises: truth says ~31% x, the raise list fires on 12%.
+  POST is the largest gap: truth says 37% of POSTs are not x, the
+  lowering list fires on 2%, so 98% land on the x floor. By size the
+  vocabulary job is POST-lowering first, PATCH-raising second. This is
+  the reading that fixes M1 step 3's order.
+- Sampling note, for the record only: our labelled set is 2.8% PATCH
+  where the wild is 6.3% (0.45x), and 16.9% DELETE where the wild is
+  10.8% (1.57x). The PATCH floor rests on 42 rows. Not acted on.

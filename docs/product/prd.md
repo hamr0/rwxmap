@@ -166,25 +166,9 @@ last thing tried.
 
 **M1 — The informed arbiter (fresh POC).** A new arbiter in `poc/m1/`,
 nothing imported from `poc/m0/` except plumbing (spec loader, split,
-CSV parser, scorer). Shape under test, each step its own numbered
-experiment with both error directions counted apart:
-
-1. The method sets a prior, not only a floor: GET locked `r`; PUT and
-   DELETE lean `w`; POST and PATCH lean nowhere.
-2. Machine-facing fields first, prose last: per-operation OAuth scopes,
-   `Idempotency-Key` parameters, `callbacks`, `202` responses,
-   request-body property names, and the resource schema's fields (a
-   field pointing at another party such as `accessible_by`, `owner`,
-   `assignee`, `recipient`), each admitted as a rule only if a census
-   shows it present consistently in the set it is applied to, and each
-   only ever raising on presence, never lowering on absence.
-3. Verb and noun leans derived from a large corpus (APIs.guru
-   `openapi-directory`, D7), not from the 719 labelled rows, used as
-   graded evidence.
-4. Weighted evidence decides the class and the distance from the
-   boundary is the confidence; lowering below the method prior is
-   allowed only when the lowering evidence is strong and no raising
-   evidence is present (fail-closed, D2).
+CSV parser, scorer). Shape under test: see 'M1 arbiter shape (current)' below. Its steps as
+originally listed on 2026-09-06 are recorded in learnings M1-C2 through
+M1-C10.
 
 Riskiest assumption, tested first: that structural fields are present
 often enough and split the truth classes cleanly enough to carry a
@@ -194,10 +178,11 @@ sample of each set; report its two error directions separately like
 the class.
 
 **M1 go/no-go (D30, spec interview 2026-09-07).** Every operation gets a
-class and a confidence. Confidence accumulates across layers — method
-prior, scope where dominant, verb lean, noun lean, request-body shape —
-and above a threshold the class is assigned; below it the class is the
-safe floor and the row is tagged for human review. Go means all of:
+class and a floor flag (D44): floor:false when a word rule read the
+operation and fired, floor:true when the class came from the method
+alone. Under the current shape "assigned" means floor:false and "sent
+to review" means floor:true on PUT/DELETE/PATCH, the bucket where every
+measured leak lives. Go means all of:
 
 1. Zero leaks (wrong loosenings) among assigned rows, on every set.
 2. Rows sent to review plus over-tightened rows, together, land near 5%
@@ -216,121 +201,97 @@ safe floor and the row is tagged for human review. Go means all of:
    method co-occurrence — which methods a verb or noun travels with —
    with CAMARA usable as one signal among them. No hand lists.
 
-Status 2026-09-08 after M1-C10: shape stable (D33); zero leaks on
-every set; both negative controls x; review + over-tight at floor on
-20/292 (7%), 106/207 (51%), 47/220 (21%). Rule 2 met on CAMARA. The
-summary-verb source that would resolve GitHub and Box is held back by
-three hold-out 1 truth rows (M1-C10); with them re-read the
-hypothetical is 7% / 23% / 10% at zero leaks. Awaiting the user's
-rulings on the floor and the truth re-read.
+Gate status 2026-09-09 under this reading: rule 1 fails (27 leaks: 17
+Slack GET, 10 x-dressed-as-w on PUT/DELETE/PATCH). Rule 2 fails by a
+wide margin: floor:true rows on PUT/DELETE/PATCH number 275 of 419
+across all six sets, plus 204 over-tightenings, against a 5% target.
+Rules 3-5 not yet assessed for the current shape. Rule 5 is the next
+step (M1 step 3).
 
-Status 2026-09-08, M1-C11 (user-directed, POC): floor = method prior,
-raise-only from two fixed hand lists (live verbs, party nouns), one
-lowering (POST read-verb list). At near-zero leaks: over-tight 9.9% /
-24.2% / 11.4% vs C10's 7% / 51% / 21%. Candidate replacement for the
-C7–C10 arbiter shape; decision pending user (see learnings M1-C11
-entries).
+Status 2026-09-09. M1 is a POC, not graduated. The current shape is
+below (D42-D44). The D30 gate is NOT met: 27 leaks, of which 17 are
+Slack GET rows (one vendor; GET runs no rules by design) and 10 are
+x-dressed-as-w on PUT/DELETE/PATCH, all vocabulary gaps. Next step is
+M1 step 3: derive the POST-lowering and PUT/DELETE/PATCH-raising lists
+from the corpus (D30 rule 5) and re-measure. Prior statuses (C10, C11)
+are in learnings.
 
-### M1 arbiter flow (C11, adopted 2026-09-08)
+Labelled sets (what the shape is scored against):
 
-1. Floor by method. GET, HEAD, OPTIONS -> r, locked, stop. PUT, DELETE
-   -> w. POST, PATCH -> x.
-2. Live-verb raise, any method: if any token of the operationId
-   (camelCase/_/-/. split, leading HTTP-method word stripped when
-   followed by a separator) or the summary's first word (singularised)
-   is in LIVE_VERBS -> x. LIVE_VERBS = terminate, kick, cancel, revoke,
-   convert, merge, start, dial, hangup, end, reject, accept, approve,
-   invite, transfer, pay, refund, send, notify, publish, submit,
-   trigger, execute, run, launch, reboot.
-3. Party-noun raise, PUT/DELETE/PATCH only: head noun of the summary's
-   object phrase (last word before a stop word, stepping back over
-   generic tails like information/record/status) or the operationId's
-   last noun (same step-back) in PARTY_NOUNS -> x. Skipped when the
-   summary contains a caller phrase ("for the authenticated user",
-   "authenticated user", "your account", "your ", "yourself").
-   PARTY_NOUNS = member, membership, collaborator, collaboration,
-   customer, account, user, role, team, group, installation, token,
-   access, restriction, sponsorship, participant, call, seat,
-   organization, invitation, assignment, person, people, contact,
-   recipient, subscriber, tenant, partner, device, session, network,
-   repository. Shared-object nouns (2026-09-08, user ruling): message,
-   channel, emoji, sticker, pin, guild, permission, overwrite, ban,
-   webhook, reaction, matched on either head noun or any operationId
-   token, raise the same way.
-4. Read-verb lowering, POST only, only when steps 2-3 did not fire:
-   operationId lead verb in READ_VERBS -> r. READ_VERBS = retrieve,
-   verify, check, query, read, fetch, list, search, match, count,
-   lookup, assess, find, get. ("validate" was measured and leaks; it is
-   out.)
-5. No-text tighten (Rule A, user ruling 2026-09-08): a PUT, DELETE or
-   PATCH that reached this step with no summary and no description ->
-   x, marked no-text. The judge could not run; doctrine says no
-   evidence takes the tighter class. The mark lets a consumer tell
-   "could not read" from "found" and from "floor". Never touches POST
-   (already x) or GET (locked r).
-6. Else the row keeps its floor class and is marked floor. Floor is the
-   "not known, tighter class" mark; a consumer can tell a found x from
-   a default x.
-
-| set | n | exact | leaks | over-tight |
-|---|---|---|---|---|
-| camara | 292 | 260 | 1 | 31 (10.6%) |
-| holdout1 | 207 | 146 | 2 | 59 (28.5%) |
-| holdout2 | 220 | 194 | 0 | 26 (11.8%) |
-| holdout3 | 226 | 198 | 1 | 27 (11.9%) |
-| holdout4 | 210 | 182 | 0 | 28 (13.3%) |
-| holdout5 | 323 | 241 | 17 | 65 (20.1%) |
-
-Across all five sets before hold-out 5: 1155 rows, 4 leaks (0.3%), 171
-over-tight (14.8%). Across all six sets including hold-out 5: 1478 rows,
-21 leaks (1.4%), 236 over-tight (16.0%).
-
-**Hold-out 5 fails the gate (D39).** All 17 leaks are Slack GET rows.
-Three root causes: c11 rule 1 locks GET/HEAD/OPTIONS to `r` before any
-text is read; the text rules read `summary` while Slack and Amazon
-(both Swagger 2.0) put their prose in `description` instead (290 of 323
-rows here have no summary); `naiveSingular`'s `es`-stripping rule
-destroys third-person verb stems written by Slack and Amazon
-(revokes->revok, exchanges->exchang), a phrasing the earlier twelve
-vendors mostly avoided. See learnings "M1-C13 hold-out 5 scored once"
-for the full numbers. The gate (D30) is not met, and M1 cannot close
-until it is met again on every set including this one.
-
-Clean-exam comparison (hold-out 4, n=210; D38):
-
-| classifier | exact | leaks | over-tight |
+| set | ops | providers | bucket |
 |---|---|---|---|
-| c11 | 182 (86.7%) | 0 (0.0%) | 28 (13.3%) |
-| method-prior | 187 (89.0%) | 3 (1.4%) | 20 (9.5%) |
-| get-else-x | 142 (67.6%) | 0 (0.0%) | 68 (32.4%) |
+| camara | 292 | 60 CAMARA repos | tuned |
+| holdout1 | 207 | twilio 94, github 81, stripe 32 | tuned |
+| holdout2 | 220 | box 99, pagerduty 93, adyen 28 | reference |
+| holdout3 | 226 | discord 81, sentry 76, vercel 69 | tuned |
+| holdout4 | 210 | linode 75, cloudflare 71, x 64 | clean exam |
+| holdout5 | 323 | slack 174, amazon 125, notion 24 | tuned (was clean; D40) |
 
-On the clean exam c11 is not more exact than the plain method prior —
-what it buys over method-prior is zero leaks (vs 3) and both negative
-controls right (method-prior gets both wrong, w not x), at a cost of
-2.3 points of exactness and 3.8 points of extra review.
+Truth is model-read, blind, per D-series notes; "tuned" means code was
+changed while its scores were visible; "clean exam" means scored once
+and never used to choose. Canonical file: data/corpus/labelled.csv
+(D45).
 
-Hold-out 3 (Discord, Sentry, Vercel, 2026-09-08) was scored once
-untuned at 11 leaks; Rule A, adopted on it, brings it to 2 (vercel
-deleteRedirects, discord update_guild_incident_actions), so hold-out 3
-is now a tuning set and hold-out 4 (Linode, Cloudflare, X;
-data/holdout4-2026-09-08) is the clean exam.
+### M1 arbiter shape (current, C15, D42-D44)
 
-Hold-out 4 (Linode, Cloudflare, X, 2026-09-08) is the clean exam,
-scored once after Rule A: 2 leaks (deleteBroadcastChatMessage,
-validateWebhooks), both writes on shared objects or live checks with no
-list word. The shared-object noun step (2026-09-08) fixed both, plus
-discord update_guild_incident_actions on hold-out 3.
+Floor per method = that method's own measured truth lean, a starting
+value, never an early return:
 
-Both negative controls x. Remaining leaks (4, all floor w with text and
-no list word): camara deleteTrafficInfluence, github
-issues/set-issue-field-values and issues/remove-sub-issue (truth
-disputed, pending user), vercel deleteRedirects. List growth rule:
-lists change only by hand review; the corpus is not used at score time
-(measured in C11-V9: corpus-mined verbs changed nothing).
+| method | n | truth r | truth w | truth x | floor |
+|---|---|---|---|---|---|
+| GET / HEAD / OPTIONS | 550 | 97% | 1% | 2% | r |
+| POST | 509 | 17% | 20% | 62% | x |
+| PUT | 127 | 2% | 83% | 15% | w |
+| DELETE | 250 | 0% | 81% | 19% | w |
+| PATCH | 42 | 0% | 69% | 31% | w |
 
-M1 status 2026-09-08: C11 + Rule A measured on five sets; M1 closes
-pending the user's rulings on the shared-object noun line and the three
-disputed truth rows.
+One direction of travel per method:
+
+- GET / HEAD / OPTIONS: no word rules run. Return the floor.
+- POST: LOWER only. A read verb in lead position lowers x to r. No
+  raise runs (the floor is already the top).
+- PUT / DELETE / PATCH: RAISE only. A live verb, or a party/shared
+  noun (suppressed by a caller phrase), raises w to x. No lowering
+  runs.
+
+Vocabulary is split to match: one lowering list used only on POST; one
+raising list used only on PUT/DELETE/PATCH. Per D30 rule 5 both lists
+are to be derived from the APIs.guru corpus
+(data/corpus/apis-guru-ops.csv.gz, 123,339 operations, 673 providers;
+read with `zcat`), not
+hand-written; the hand lists in poc/m1/arbiter/c11.mjs are the
+placeholder until M1 step 3 replaces them.
+
+Output per row: class, rule, evidence, and floor:true/false (whether a
+word rule fired). No confidence score (D44).
+
+Score over 1478 rows: exact 84.4%, leaks 27 (1.8%), over-tight 204
+(13.8%). Per method: GET 533/550 exact, 17 leaks (all Slack GET, one
+vendor), 0 over; POST 382/509, 0 leaks, 127 over; PUT 102/127, 1 leak,
+24 over; DELETE 200/250, 3 leaks, 47 over; PATCH 30/42, 6 leaks, 6
+over.
+
+**Wild reading (2026-09-09).** c15 run over 92,049 APIs.guru operations
+with every labelled-set provider excluded; no truth exists on the wild,
+so this compares what truth says on the labelled 1478 against what the
+classifier outputs on the wild:
+
+| method | truth r | truth w | truth x | wild output r | wild output w | wild output x | rules fired on wild | reading |
+|---|---|---|---|---|---|---|---|---|
+| GET | 97% | 1% | 2% | 100% | 0% | 0% | 0% | aligned by design |
+| PUT | 2% | 83% | 15% | 0% | 87% | 13% | 13% | aligned |
+| DELETE | 0% | 81% | 19% | 0% | 86% | 14% | 14% | close, slightly under-raising |
+| PATCH | 0% | 69% | 31% | 0% | 88% | 12% | 12% | under-raising: a third are x, the list catches an eighth |
+| POST | 17% | 20% | 62% | 2% | 0% | 98% | 2% | way off: 37% are not x, the lowering list fires on 2% |
+
+What it says: the floors hold on the wild for GET, PUT and DELETE;
+PATCH under-raises (the six leaks); POST is the largest gap (the 127
+over-tightenings). The vocabulary job, by size, is POST-lowering first,
+then PATCH-raising.
+
+Superseded shapes — E12b (M0), C7-C10 weighted arbiter, C11 blanket
+cascade — are recorded in docs/logs/learnings.md under their own
+headings and are not restated here.
 
 **M2 — Shape rules, only if justified.** For each divergence class from
 M0/M1 that appears more than once, add one deterministic OpenAPI-shape
@@ -383,7 +344,8 @@ once, so every shape rule has a row that justifies it.
 
 ### 4.3 Output contract (D6)
 
-Per operation: class (`r`/`w`/`x`), confidence, rule id, evidence (the
+Per operation: class (`r`/`w`/`x`), `floor` (boolean; true = class came
+from the method alone, no word rule fired), rule id, evidence (the
 matched verb and the method), plus the four MCP tool-annotation fields
 `readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`,
 mapped from the class and the method so any MCP client can consume the
@@ -457,80 +419,11 @@ that is the origin of every high-confidence wrong answer M0 found.
 
 ### 4.5 Floor from the method, ceiling from the text (supersedes D3)
 
-What the method permits the text signal to do:
-
-| method | RFC 9110 guarantee | floor | text may move the class |
-|---|---|---|---|
-| GET, HEAD, OPTIONS | safe: no state-changing semantics | r | not at all; locked at r |
-| PUT, DELETE | idempotent: repetition is equivalent | w | up to x only |
-| POST, PATCH | neither safe nor idempotent; no guarantee | x by policy, not by fact | up or down |
-
-POST is the exception in both directions, and for one reason: RFC 9110
-gives no guarantee for POST at all, so its `x` default is a fail-closed
-policy choice, not a derived fact. Replacing a policy choice with
-evidence read from the document is an upgrade, not a loosening. A safe
-method's `r`, by contrast, is a derived fact — it is never revisited.
-
-The arbiter, restated as an ordered procedure:
-
-1. Take the floor from the method.
-2. Read the operation's `summary` and `description`, plus structural
-   markers present in the document: `callbacks`, a `sink` field in the
-   request body, a 409 response indicating a repeat is not equivalent.
-3. Evidence of consequence — reaching a third party, moving money,
-   acting on a live session, network path, or device, or an effect that
-   cannot be undone — raises the class to `x`.
-4. For POST and PATCH only, clear evidence that the operation is a pure
-   lookup, with no evidence of consequence, lowers the class to `r`.
-5. Anything unresolved keeps the floor.
-
-Never lower the class on a safe method, and never lower it below `w` for
-PUT or DELETE.
-
-**The shape as of 2026-09-07 (E12b)**
-
-The procedure above, restated as implemented, in order:
-
-- L0 safe method → `r`, high.
-- L1 callbacks or sink → `x`, high.
-- L2 any danger-verb stem in `summary`, `description`, `operationId` or
-  `path` → `x`, high (the lexicon is hand-written, tighten-only, 43
-  stems; `poc/m0/lexicon-v2.json`).
-- L3 any live-noun stem in the same text, unless the leading verb is a
-  read verb → `x` (high if the leading verb is a write verb, else low).
-- L4 POST or PATCH whose leading verb is on the hand read-verb list and
-  with no 409 response → `r`, low.
-- L5 otherwise the method floor, confidence method-only.
-
-Measured weaknesses, one line each:
-
-- Live nouns are vendor-specific and fire on boilerplate (GitHub's
-  "personal access tokens" sentence tightened 41 of 81 GitHub
-  operations).
-- Danger verbs transferred across three vendors but miss danger stated
-  without a listed word ("assign a team to an organisation").
-- Scanning beyond the operation's own text collapses to "everything x"
-  because file-level boilerplate carries the stems.
-- There is no path from POST to `w`, so vendors that update through POST
-  (Twilio) are over-tightened.
-- Vendor extensions such as `x-github.triggersNotification` are
-  structural evidence the extractor does not yet read.
-- 16 of 94 Twilio operations have no prose at all.
-- The verb-object rule capped the object phrase at four tokens after the
-  verb, so a party word beyond that was never seen: "Delete shield
-  information barrier segment member by ID" resolved to `segment`, not
-  `member`. Recorded 2026-09-07, removed in E21 (D25).
-- Deleting a relationship object whose other end is a person is
-  invisible to both the lexicon and the verb-object rule when the prose
-  names neither the person nor an effect; collaboration is now on the
-  party list (E23), but the shape remains invisible for every other
-  relationship noun (membership, assignment, share, ...). The candidate
-  signal is structural, in the resource's schema, and stays on M1's
-  list.
-- The live-noun rule matches substrings: "call" fires on "called" and
-  "calling this endpoint", "access" on PagerDuty's "Early Access"
-  banner. Pass 2 marks these low, does not clear them. Recorded
-  2026-09-07 (E22), not fixed; part of the M1 list trim.
+Superseded by 'M1 arbiter shape (current)' above (D42). The RFC-9110
+framing — safe methods locked at r, idempotent methods floored at w,
+POST/PATCH x by policy — was replaced by floors set at each method's
+measured truth lean, which moved PATCH from x to w. The 2026-09-07 E12b
+shape and its measured weaknesses are in learnings under E12b.
 
 This section describes the archived M0 arbiter (D29). It is kept as
 the measured ceiling of prose-only rules.
@@ -797,3 +690,9 @@ starts, not yet exercised.
 | D37 | Per-vendor extension keys are rejected as a signal. GitHub's `x-github.triggersNotification` was measured — true on 3 of 81 labelled GitHub rows, all truth x, absent on 78, true on 22 of ~1225 whole-spec operations, a zero-leak raise that would have closed 2 of the 4 remaining leaks — and still refused: a rule that names one vendor is per-API maintenance, not a rule. Signals must be commonalities that hold across vendors. Leaks stay at 4. Decided 2026-09-08 at the user's word. |
 | D38 | The benchmark reports against three dumb baselines (all-x, get-else-x, method-prior) and splits the five sets into tuned / reference / clean-exam, with the headline quoted from the clean exam only. One re-runnable command, `node poc/m1/arbiter/run-benchmark.mjs`. Decided 2026-09-08. |
 | D39 | Hold-out 5 (Slack, Notion, Amazon SP-API; 323 rows; `data/holdout5-2026-09-08`) scored once 2026-09-08; the M1 go/no-go gate (D30, zero leaks) FAILS on it with 17 leaks, all Slack GET rows. Three root causes: c11's rule 1 locks GET/HEAD/OPTIONS to `r` before any text is read; the text rules read `summary` while Swagger 2.0 vendors (Slack, Amazon) fill `description` instead; `naiveSingular`'s `es`-stripping rule destroys third-person verb stems (revokes->revok, exchanges->exchang). No fix applied in this pass. |
+| D40 | Hold-out 5 is reclassified from clean exam to TUNING set. Eight switch configurations were measured against it in M1-C13b, which is using it to choose — forbidden of a clean exam by D24. Every set bucket table (docs/logs/m1/benchmark.md, README) that lists hold-out 5 must now bucket it as tuned. Hold-out 6, not yet built, becomes the next clean exam. |
+| D41 | M1-C13 fix C (verb-correct stem matching in judge.mjs, covering bare/-s/-es/-d/-ed/-ing plus silent-e drop, consonant+y -> -ies/-ied, and CVC doubled-consonant forms) is adopted as the default matcher for LIVE_VERBS and READ_VERBS on both the operationId and summary paths. Measured inert: zero rows changed on all six sets. Fixes A (read GET) and B (description fallback) were measured but NOT adopted in that pass. The noun sets still use naiveSingular and were not fixed. |
+| D42 | Each HTTP method's floor is set at its own measured truth lean over the 1478-row labelled corpus, and the floor is a starting value, never an early return: GET/HEAD/OPTIONS -> r (truth 97% r), POST -> x (62% x), PUT -> w (83% w), DELETE -> w (81% w), PATCH -> w (69% w). PATCH moves from x to w; all other floors are unchanged. Measured 2026-09-09. |
+| D43 | Word rules are scoped per method, one direction of travel each, replacing c11's blanket scan across all methods: GET/HEAD/OPTIONS run no word rules; POST lowers only; PUT/DELETE/PATCH raise only. Vocabulary is split to match — a lowering list used only on POST, a raising list used only on PUT/DELETE/PATCH. Measured over 1478 rows: exact 82.6% -> 84.4%, over-tight 16.0% -> 13.8%, leaks 1.4% -> 1.8% (the six new leaks are all PATCH, from the D42 floor move). |
+| D44 | rwxmap emits no confidence score. The only honest per-row signal is evidence vs floor — whether a word rule actually read the operation and fired. Measured: all 27 leaks are floor rows; in 208 evidence rows there are zero leaks. The per-API report therefore carries class counts, the evidence/floor split and a review-first list of floor rows on PUT/DELETE/PATCH, and carries no accuracy, leak or over-tight figure, because those need ground truth. Leak reporting and x-dressed-as-w labelling belong to the benchmark only. |
+| D45 | The labelled corpus is consolidated at data/corpus/labelled.csv (1478 rows, 37 columns), generated by poc/m1/corpus/build-labelled.mjs, read by loadLabelledCorpus(). It is the single source for readings from here on. The existing scattered loaders in load-sets.mjs stay in place and unchanged. The APIs.guru per-token lean table survives at docs/logs/m1/corpus-leans.csv (3688 tokens, position lead/opid, provider counts and per-method counts, hold-out vendors excluded at extract time) and is sufficient for a per-method word-lean scan. What was not persisted is the raw per-operation dump and the downloaded specs, which extract.mjs wrote to a session scratchpad since wiped; a re-extract is needed only for questions the aggregate cannot answer, such as reading operation summaries or word co-occurrence. |
