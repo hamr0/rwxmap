@@ -106,11 +106,21 @@ re-measure. Prior statuses (C10, C11) are in learnings.
 | holdout3 | 226 | discord 81, sentry 76, vercel 69 | tuned |
 | holdout4 | 210 | linode 75, cloudflare 71, x 64 | clean exam |
 | holdout5 | 323 | slack 174, amazon 125, notion 24 | tuned (was clean; D40) |
+| exam 1 (data/exam-2026-09-09/) | 200 (199 scorable) | 105 | blind exam, scored once — now burned, used to hand-pick C16/C17 words |
+| exam 2 (data/exam2-2026-09-10/) | 1000 (994 scorable) | 246 | blind exam, scored once — now burned, used to hand-pick C16/C17 words and swept in C20 |
+| exam 3 (data/exam3-2026-09-11/) | 3000 (2993 scorable) | 305 | blind exam, scored once — now burned, C19 admitted `owner` off it and C20 swept it |
 
 Truth is model-read, blind, per D-series notes; "tuned" means code was
 changed while its scores were visible; "clean exam" means scored once
-and never used to choose. Canonical file: data/corpus/labelled.csv
-(D45). (docs/archive/prd.md:219-233)
+and never used to choose. Exams 1-3 were drawn from
+data/corpus/apis-guru-ops.csv.gz, providers appearing in none of the
+six original sets, each as a separate blind paper plus answer key,
+labellers forbidden to open any classifier and free to answer '?'
+(D46). All three are now burned as blind material for goal 2 — a fresh
+exam 4 is owed before scoring any further change to C20's rule.
+Combined with the original six sets the labelled corpus reaches 5465
+rows across 332 providers. Canonical file for the original six:
+data/corpus/labelled.csv (D45). (docs/archive/prd.md:219-233)
 
 ## M1 arbiter shape (current, C15, D42-D44)
 
@@ -155,6 +165,43 @@ Score over 1478 rows: exact 84.4%, leaks 27 (1.8%), over-tight 204
 vendor), 0 over; POST 382/509, 0 leaks, 127 over; PUT 102/127, 1 leak,
 24 over; DELETE 200/250, 3 leaks, 47 over; PATCH 30/42, 6 leaks, 6
 over. (docs/archive/prd.md:268-272)
+
+### The C20 layer — goal 2's adopted shape (POC, not shipped, 2026-09-09)
+
+Layered on top of c15 above, changing nothing before it: c15.mjs and
+judge.mjs are never modified. `classifyC20` calls c15's real
+`classify()` unchanged and only reconsiders rows c15 already left at
+the w floor on PUT/DELETE/PATCH (floor:true, no c15 word rule fired).
+If the row has at least one cleaned head noun and every one is on a
+learned allowlist of "yours" nouns, it stays w; otherwise it raises to
+x under rule `no-own-noun`. Never lowers, never touches r; GET and
+POST pass through untouched.
+
+This inverts the direction every prior goal-2 pass took (C16-C19
+learned a BLOCKLIST of third-party nouns and none of them transferred
+under leave-one-vendor-out, LOVO); C20 learns an ALLOWLIST of "yours"
+nouns instead and treats the ABSENCE of one as the evidence for x.
+Adopted at the LOOSE bar: n>=2 PUT/DELETE/PATCH rows carrying the noun
+and w-share>=0.80, 439 words. Measured LOVO over the 5465-row combined
+corpus (D48):
+
+| config | leaks | real over-tight | flagged unknown |
+|---|---|---|---|
+| c15 today | 297 (5.4%) | 522 (9.6%) | 152 (2.8%) |
+| C20 loose (adopted) | 89 (1.6%) | 522 (9.6%) | 1397 (25.6%) |
+| C20 tight | 29 (0.5%) | 522 (9.6%) | 2725 (49.9%) |
+
+Full nine-point sweep in docs/logs/m1/c20-sweep.md. C20 is a POC in
+poc/m1/arbiter/c20.mjs and c20.test.mjs; it has not graduated and does
+not replace the c15 shape below. Open: the six contested words shared
+with PARTY_NOUNS (network, device, person, customer, contact, partner)
+all measured as leaning "yours" (D50) but PARTY_NOUNS in c11.mjs has
+not been edited to match, so the C20 layer never sees a row those
+words would otherwise resolve; and every exam (1, 2, 3) is now burned
+as blind material for this rule, so a fresh exam 4 is owed before the
+next change can be scored honestly. See docs/logs/learnings.md
+(M1-C16 through M1-C20) for the full run, including the two deleted
+passes (C16, C17) and the C18/C19 derivation that preceded it.
 
 ### Wild reading (2026-09-09)
 

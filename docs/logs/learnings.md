@@ -2362,3 +2362,295 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
 - Sampling note, for the record only: our labelled set is 2.8% PATCH
   where the wild is 6.3% (0.45x), and 16.9% DELETE where the wild is
   10.8% (1.57x). The PATCH floor rests on 42 rows. Not acted on.
+
+### M1 step 3 — corpus-derived raising list, measured and failed (2026-09-09)
+
+- The task: M1 step 3, per the PRD's D30 rule 5 — "Verb and noun
+  leans come from a broader corpus (APIs.guru, D7) as method
+  co-occurrence — which methods a verb or noun travels with — with
+  CAMARA usable as one signal among them. No hand lists." The
+  specific job was the RAISING list used on PUT/DELETE/PATCH (w ->
+  x), chosen ahead of the POST lowering list because raising is what
+  closes leaks, and leaks are what fail the gate.
+
+- Method: from data/corpus/apis-guru-ops.csv.gz, take every
+  PUT/DELETE/PATCH operation (28,552 rows) and count, per word, how
+  many DISTINCT PROVIDERS use it in the operationId or summary. Score
+  each candidate on the labelled TUNED sets only (camara, holdout1,
+  holdout3) — 279 PUT/DELETE/PATCH rows with truth w or x, of which
+  65 are x, a 23% base rate. Admit candidates with at least 5 labelled
+  rows and at least 20 providers in the corpus, at precision bars
+  1.00, 0.90, 0.80 and 0.67. Then re-score the whole 1478-row labelled
+  corpus and the clean exam.
+
+- Result: FAILED. At every precision bar the list closed ZERO of the
+  10 leaks and moved exact by 0 or -1. Only two words were ever
+  admitted: `member` and `role`. The clean exam (linode/cloudflare/x)
+  was unchanged at 185/210 exact, 1 leak, 24 over-tight — identical
+  to the c15 baseline.
+
+  | precision bar | words admitted | all six sets: exact | leaks | over-tight |
+  |---|---|---|---|---|
+  | baseline (no list) | 0 | 1247 (84.4%) | 27 | 204 (13.8%) |
+  | 1.00 | 1 (member) | 1247 (84.4%) | 27 | 204 (13.8%) |
+  | 0.90 | 1 (member) | 1247 (84.4%) | 27 | 204 (13.8%) |
+  | 0.80 | 2 (member, role) | 1246 (84.3%) | 27 | 205 (13.9%) |
+  | 0.67 | 2 (member, role) | 1246 (84.3%) | 27 | 205 (13.9%) |
+
+- Why it failed, and this is structural rather than a tuning problem:
+  method co-occurrence answers "which method does this word travel
+  with". Every candidate here travels with PUT/DELETE/PATCH — that IS
+  the selection filter. But inside those methods the w-vs-x question
+  is whether the object belongs to someone else, and co-occurrence is
+  blind to that. The corpus cannot see whose thing is being deleted.
+
+- The measurement that shows it: breadth is ANTI-correlated with
+  discrimination. Against the 23% base rate, on tuned PUT/DELETE/PATCH
+  rows:
+
+  | word | labelled rows | of which x | precision | providers |
+  |---|---|---|---|---|
+  | member | 8 | 8 | 100% | 33 |
+  | team | 10 | 9 | 90% | 16 |
+  | role | 5 | 4 | 80% | 36 |
+  | message | 6 | 4 | 67% | 26 |
+  | app | 9 | 4 | 44% | 28 |
+  | remove | 22 | 9 | 41% | 91 |
+  | user | 25 | 10 | 40% | 121 |
+  | update | 52 | 15 | 29% | 220 |
+
+  The widest-travelling words — update at 220 providers, user at 121,
+  remove at 91 — sit at or barely above the base rate, because a word
+  that every vendor uses on DELETE is a generic one. The three words
+  that do separate (member, team, role) are "another person is
+  affected" nouns, they are rare, and they are already in the
+  hand-written PARTY_NOUNS the rule was meant to replace.
+
+- The method was given every advantage and still produced nothing:
+  candidates were scored on the TUNED sets, which is fitting, and the
+  clean exam was only used to confirm the result afterwards.
+
+- What this does NOT invalidate: the corpus is still worth what it
+  cost. It is a good CANDIDATE GENERATOR (breadth without vendor
+  bias) and a good VENDOR-BIAS CHECK — it proved member/team/role are
+  not one vendor's habit, at 33, 16 and 36 providers. What it cannot
+  do is SCORE a candidate. Only truth can score, and truth exists
+  only in the 1478 labelled rows.
+
+- Consequence for the spec: D30 rule 5 as written ("no hand lists",
+  leans derived from corpus co-occurrence) is falsified for the
+  raising direction. Per AGENT_RULES a failed POC goes back to the
+  PRD as a spec change, not a retry. Two options were put to the user
+  and NEITHER is yet chosen: (a) rewrite rule 5 so the corpus
+  proposes candidates, the labelled tuned sets score them, and the
+  clean exam validates once — admitting openly that this is
+  fitting-with-a-holdout rather than derivation; or (b) stop
+  attacking w-vs-x with words at all and examine signals never yet
+  looked at for this question — response_codes, security_scopes,
+  tags and the full description text, all of which the corpus now
+  carries.
+
+- The 10 rows this was trying to close, unchanged: camara PATCH
+  patchTrafficInfluence; camara DELETE deleteTrafficInfluence;
+  holdout1 PUT issues/set-issue-field-values; holdout1 DELETE
+  issues/remove-sub-issue; holdout3 PATCH update_stage_instance;
+  holdout3 PATCH patchUrlProtectionBypass; holdout3 PATCH
+  updateSandbox; holdout3 DELETE deleteRedirects; holdout4 PATCH
+  ssl-verification-edit-ssl-certificate-pack-validation-method;
+  holdout5 PATCH patch-block-children.
+
+### M1-C16 — description reach-phrase raise, DELETED (2026-09-09)
+
+- Goal 2 attempt: a small hand-derived phrase list (3 phrases:
+  "notification will be sent", "organization-level", "shareable
+  link"), read off the 10 c15 goal-2 leak rows, layered as a raise-only
+  pass on PUT/DELETE/PATCH rows whose description matches.
+- On the 1478-row labelled set it closed 3 of 10 leaks (10 -> 7),
+  zero new goal-1 cost. Looked promising.
+- Leave-one-vendor-out killed it: rebuilding the phrase list with each
+  leak's own vendor held out, 0 of 9 tuned-set leak rows were caught.
+  Every phrase was contributed by exactly one vendor's own leak row and
+  never appears in any other vendor's leak-row description.
+- Scored once against exam 1 (data/exam-2026-09-09/, 25 scorable
+  PUT/DELETE/PATCH leak rows in scope): 0 of 25 closed. Zero transfer
+  off the tuned sets, not just zero transfer under LOVO.
+- DELETED. docs/logs/m1/c16-sweep.md and c16-rows.csv stay in the repo
+  as the evidence it failed; poc/m1/arbiter/c16.mjs is removed.
+- Lesson: a phrase list read off the leak rows it is meant to fix is
+  memorisation dressed as generalisation — LOVO is the check that
+  catches it, and a same-day blind exam is the check that confirms LOVO
+  wasn't itself lucky.
+
+### M1-C17 — named-noun raise, DELETED, D24 breach recorded (2026-09-09)
+
+- Goal 2 attempt, layered on c16: a 9-word hand-named noun list
+  ("children", "method", "issue", "instance", "field", "sandbox",
+  "influence", "bypass", "redirect"), each read off one of the 10 c15
+  goal-2 leak rows, raise-only on PUT/DELETE/PATCH rows still at the w
+  floor after c16.
+- On the 1478-row labelled set it closed all 10 remaining leaks (10 ->
+  0) but cost 7 new over-tight rows (178 -> 185 goal-1 errors, 204 ->
+  211 total over-tight): twilio DeleteConnectApp, twilio
+  DeleteSipDomain, github orgs/delete-issue-field, pagerduty
+  deleteServiceCustomField, and three linode/cloudflare "instance"
+  deletes.
+- D24 BREACH, recorded plainly: one of the nine nouns, "method", was
+  read off a holdout4 row (cloudflare's
+  ssl-verification-edit-ssl-certificate-pack-validation-method).
+  holdout4 is the clean exam; D24 says the clean exam is scored once
+  per rule change and never used to pick a rule's shape. Naming a word
+  off a clean-exam row breaks that wall — the clean exam's read on that
+  one word is no longer blind, even though the other 219 holdout4 rows
+  are unaffected.
+- Scored once against exam 2 (data/exam2-2026-09-10/, 81 scorable
+  PUT/DELETE/PATCH leak-shaped rows in scope): closed 1 of 81.
+- Leave-one-vendor-out: 3 of 10 tuned-set leak rows caught by a noun
+  list that never saw their own vendor — real but thin transfer, and
+  bought at a rising over-tight cost.
+- DELETED. docs/logs/m1/c17-sweep.md and c17-rows.csv stay in the repo
+  as the evidence it failed; poc/m1/arbiter/c17.mjs is removed.
+- Lesson: closing every labelled leak by reading the leak rows
+  themselves is the memorisation trap by construction, LOVO and the
+  same-day blind exam both confirmed it doesn't transfer, and the
+  process itself broke the clean-exam wall it was supposed to respect.
+  Named word lists read off failing rows are now off the table for
+  goal 2; derivation has to come from the corpus, not from the leak
+  list.
+
+### M1-C18 — party-noun derivation, mechanical bar, zero admitted (2026-09-09)
+
+- Goal 2 attempt, corpus-derived this time per D30 rule 5: candidate
+  head nouns on PUT/DELETE/PATCH rows, admitted only at n>=3 rows and
+  x-share>=75%, and only if the candidate survives leave-one-vendor-out
+  (qualifies with every contributing vendor held out in turn). Not
+  hand-picked; not tuned to the leak rows.
+- First run on the original 1478-row labelled corpus: 6 nouns
+  qualified (member, team, role, message, membership, rol); all were
+  already in PARTY_NOUNS/SHARED_NOUNS or failed LOVO. 0 admitted.
+- Re-run on the combined corpus after exam 2 was added (2472 rows: the
+  1478 plus exam 2's 994 scorable rows): 11 nouns qualified, still 0
+  admitted — order, rol, appointment, password, owned, security all
+  qualified on the full set but failed with at least one vendor
+  removed, rejected as memorisation.
+- Score, unchanged at both corpus sizes: 10 goal-2 leaks / 178 goal-1
+  errors on the original 1478; 91 goal-2 leaks / 277 goal-1 errors on
+  the 2472-row combined corpus, before and after adding the (empty)
+  admitted set.
+- Named check, no hinting: owner, credential, username, password were
+  looked for specifically at the user's earlier suggestion. owner did
+  not qualify (0 PDP rows); credential did not qualify (1 row, 0%
+  x-share); username and password do not appear as a head noun
+  anywhere in the corpus at this size.
+- Lesson: the mechanical bar is honest but the corpus was still too
+  thin — several near-miss candidates (order, password) had only 4-5
+  examples total. Left open explicitly: does more data admit more
+  words, or is the blocklist shape itself the problem? Both were tested
+  next.
+
+### M1-C19 — same derivation, bigger corpus: one word survives (2026-09-09)
+
+- Same c18 derivation, unchanged (n>=3, x-share>=75%, LOVO-gated), run
+  once more after exam 3 was added: combined corpus 5465 rows (1478 +
+  994 exam-2 + 2993 exam-3 scorable rows), 332 distinct providers.
+- 15 nouns qualified this time (member, permission, owned, security,
+  membership, call, collaborator, owner, participant, organizer,
+  subuser, invitation, admin, webinar, psu). 1 ADMITTED: `owner` — 7
+  PDP rows, 5 vendors, survives every vendor held out in turn.
+- Learning curve of admissions by corpus size: 1478 rows -> 0 admitted;
+  2472 rows -> 0 admitted; 5465 rows -> 1 admitted (owner). More data
+  did move the needle, but by exactly one word.
+- Effect of adding `owner`, full 5465-row corpus: goal-2 leaks 280 ->
+  274 (closes 6 of 280), goal-1 errors 625 -> 626 (costs 1 over-tight).
+  On the original 1478 rows alone the addition changes nothing (10
+  leaks both before and after) — the 6 closed leaks all live in the
+  new exam material.
+- Lesson: the blocklist (third-party noun) shape is not dead, it is
+  just starved — one admission per ~1800 rows of PUT/DELETE/PATCH
+  evidence at this bar is real signal, not noise, but it will not close
+  280 leaks at this rate without a lot more labelled data. That
+  pointed straight at the user's inversion idea, tested next as C20.
+
+### M1-C20 — the inversion: an allowlist of "yours" nouns (2026-09-09, the user's idea)
+
+- Every blocklist attempt (C16-C19) tried to learn which nouns mean
+  "someone else's thing" and failed to transfer, because every vendor
+  invents its own third-party noun and they don't repeat across
+  vendors. C20 inverts the question: learn an ALLOWLIST of "yours"
+  nouns (project, file, record, config, zone, ...) instead, and treat
+  the ABSENCE of a known "yours" noun on a PUT/DELETE/PATCH floor row
+  as the evidence for x.
+- Layered on c15, changing nothing before it: only PUT/DELETE/PATCH
+  rows c15 already leaves at the w floor (floor:true, no c15 word rule
+  fired) are eligible. If the row has at least one cleaned head noun
+  and every one is on the allowlist, it stays w; otherwise it raises to
+  x under rule 'no-own-noun'. Never lowers, never touches r; GET and
+  POST pass through untouched.
+- Measured leave-one-vendor-out (the allowlist rebuilt from every OTHER
+  vendor's rows, then scored on the held-out vendor), over all 5465
+  combined rows. Numbers below are the LOVO ones, the only honest read
+  — every point looked much better fitted (allowlist built and scored
+  on the same rows) and every point collapsed going to LOVO, at one
+  point 2 fitted leaks becoming 41 LOVO leaks. Full nine-point sweep
+  (minN in {2,3,5} x minW in {0.80,0.90,0.95}) is in
+  docs/logs/m1/c20-sweep.md.
+
+  | config | leaks | real over-tight (a rule fired and was wrong) | flagged unknown (no evidence, went safe) |
+  |---|---|---|---|
+  | c15 today | 297 (5.4%) | 522 (9.6%) | 152 (2.8%) |
+  | C20 loose (n>=2, minW 0.80, 439 words) | 89 (1.6%) | 522 (9.6%) | 1397 (25.6%) |
+  | C20 tight (n>=5, minW 0.95, 106 words) | 29 (0.5%) | 522 (9.6%) | 2725 (49.9%) |
+
+- Every LOVO point on the sweep beat the c15 baseline by a wide margin
+  (29-89 leaks vs 280-297), the opposite of what happened to the
+  blocklist attempts, where LOVO admitted zero transferable words at
+  every corpus size. An allowlist of "yours" words carries real,
+  non-zero signal across held-out vendors that a blocklist of "their"
+  words did not. The honest cost is steep: flagged-unknown rows (rows
+  with no evidence, sent safe rather than guessed) rise sharply as the
+  bar tightens, from a quarter of all rows at the loose end to half at
+  the tight end.
+- Contested words, settled by measured lean rather than by taste, per
+  the user's instruction: network, device, person, customer, contact,
+  partner all sit in both the general candidate pool and c11.mjs's
+  hand-written PARTY_NOUNS. All six measured as leaning "yours" (w) on
+  PUT/DELETE/PATCH rows, at 83.3%-100% w-share. Three agreed with the
+  user's own expectation (device, person, contact); three disagreed
+  (network, customer, partner — the user expected these to read as
+  third-party and the data says otherwise). This currently has NO
+  scored effect: c15's own PARTY_NOUNS rule fires before a row can ever
+  reach the w floor and become eligible for the C20 layer, so acting on
+  the lean means editing PARTY_NOUNS in c11.mjs, and that edit has NOT
+  been made. Open.
+- THE PROPERTY THAT HELD EVERY TIME, across every goal-2 pass run
+  today (C16 through C20): every leak ever measured — 10 on the
+  original labelled set, 25 on exam 1, 81 on exam 2, 189 on exam 3, 297
+  on the combined corpus — landed on a floor row, one the tool had
+  already flagged as having no evidence. Zero leaks have ever come from
+  a row where a word rule actually fired. 297 of 297. Also measured:
+  leaks skew to the rare tail (the head noun on a caught dangerous op
+  is shared by a median of 44 providers, on a missed one by 17), but
+  68% of leaks still carry a noun 10+ providers share, so it is a lean
+  and not a wall.
+- Grounding for the long-tail question, from published sources:
+  Treblle's "Anatomy of an API 2023" (1 billion requests, 9,000 APIs)
+  reports an average of 22 endpoints per API and that 20% of endpoints
+  go unused for 30+ days. Web request traffic follows Zipf with alpha
+  measured between 0.6 and 1.0; applying that alpha to endpoint counts
+  puts the top 20% of endpoints at roughly 50-70% of calls, not 80% —
+  concentration is real but weaker than the common 80/20 claim. The
+  alpha is borrowed from web-page traffic, not measured on API
+  endpoints — stated plainly, not measured here.
+- User decisions taken today, recorded in the decisions log (D46-D50):
+  attack order is goal 2, then 1, then 3, GET last, one goal at a time;
+  goal 2's shape is the via-negativa allowlist, adopted at the LOOSE
+  bar (n>=2, minW 0.80); leaks in the 2-4% range are acceptable given
+  every leak is flagged; contested words are settled by measured lean
+  (this pass), acting on it is still open.
+- Status: C20 is a POC in poc/m1/arbiter/c20.mjs and c20.test.mjs, not
+  shipped — "never ship the POC" stands. Two things are open before it
+  can graduate: the PARTY_NOUNS edit for the six contested words, and a
+  fresh exam 4, since exam 1, exam 2 and exam 3 have all now been used
+  to derive or admit a word (C16/C17 read exam-1/2 leak rows for
+  hand-picking, C19 admitted `owner` off exam-3 evidence, C20's sweep
+  was scored on all three) and are burned as blind material for scoring
+  any further change to this rule.

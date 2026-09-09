@@ -26,7 +26,8 @@ lowers to `r`: `r` comes from the GET floor and nowhere else.
 
 One direction of travel per method (D43):
 
-- GET / HEAD / OPTIONS — no word rules run. The floor stands.
+- GET / HEAD / OPTIONS — no word rules run. The floor stands. Last in
+  the attack order, after goals 2, 1 and 3.
 - POST — lower only, `x -> w`.
 - PUT / DELETE / PATCH — raise only, `w -> x`.
 
@@ -39,17 +40,85 @@ classifier's errors over the 1478 labelled rows.
 
 | # | error | count | where it lives | why it matters |
 |---|---|---|---|---|
+| 2 | **x dressed as w** | 10 (1478 rows); 297 (5465 rows, combined corpus) | PATCH, DELETE, PUT | a dangerous operation is treated as a safe write — this is the leak |
 | 1 | **w dressed as x** | 178 | POST 103, DELETE 47, PUT 22, PATCH 6 | a safe write is treated as dangerous, so it gets blocked when it should not be |
-| 2 | **x dressed as w** | 10 | PATCH 6, DELETE 3, PUT 1 | a dangerous operation is treated as a safe write — this is the leak |
 | 3 | **r dressed as x or w** | 26 | POST 24 (r->x), PUT 2 (r->w) | a pure read is treated as a write. Deferred: smallest and least harmful |
 
-Separately, 17 GET rows leak on one vendor (Slack). GET runs no word
-rules by design, so these are out of the three goals and are not chased
-per-vendor.
+Attack order is 2, then 1, then 3. One goal at a time: while a goal is
+open, everything outside it — the other goals, other methods, other
+vendors — is out of focus and is not chased. That isolation is what
+stops the noise that caused the earlier repeated failures. (D47)
 
-Goal 1 makes a safe action needlessly inaccessible. Goal 2 makes a risky
-action wrongly accessible. Goal 3 is the same shape as goal 1, one step
-further out, and waits.
+Goal 2 (x dressed as w) is open now: a risky operation treated as a safe
+write. It is the leak and the one that fails the go/no-go gate.
+
+**Goal 2 has a measured answer (2026-09-09): the via-negativa
+allowlist, M1-C20.** Five passes (C16-C20) were run against goal 2 this
+pass. C16 (hand-read description phrases) and C17 (hand-named nouns)
+each closed every leak they were tuned on and then failed to transfer
+under leave-one-vendor-out (LOVO) — C17 also breached D24 by naming a
+word off a clean-exam row — so both are deleted. C18 and C19 tried the
+corpus-derived alternative D30 rule 5 called for: a mechanically
+admitted blocklist of third-party nouns, gated on surviving LOVO. C18
+admitted zero words at 1478 and 2472 rows; C19, run again after a third
+blind exam brought the corpus to 5465 rows, admitted exactly one
+(`owner`), closing 6 of 280 leaks at that size. The blocklist shape is
+real but starved — roughly one admission per 1800 evidence rows — and
+would not reach zero leaks at any corpus size reachable soon.
+
+C20 is the user's inversion: instead of learning which nouns mean
+"someone else's thing," learn an allowlist of "yours" nouns (project,
+file, record, config, zone, ...) and raise a PUT/DELETE/PATCH floor row
+to x when it carries no word from that list. Adopted at the LOOSE bar
+(n>=2 rows, minW 0.80 w-share, 439 words). Measured leave-one-vendor-out
+over the full 5465-row combined corpus (the only honest number — fitted
+numbers looked far better and collapsed going to LOVO, at one point 2
+fitted leaks becoming 41):
+
+| config | leaks | real over-tight (a rule fired and was wrong) | flagged unknown (no evidence, went safe) |
+|---|---|---|---|
+| c15 today | 297 (5.4%) | 522 (9.6%) | 152 (2.8%) |
+| C20 loose (n>=2, minW 0.80, 439 words) — adopted | 89 (1.6%) | 522 (9.6%) | 1397 (25.6%) |
+| C20 tight (n>=5, minW 0.95, 106 words) | 29 (0.5%) | 522 (9.6%) | 2725 (49.9%) |
+
+Every point on the nine-point sweep (docs/logs/m1/c20-sweep.md) beats
+the c15 baseline under LOVO — the opposite of what happened to the
+blocklist attempts, which transferred nothing. The cost is steep:
+flagged-unknown rows rise from a quarter to half of all rows as the bar
+tightens. The user judged leaks in the 2-4% range acceptable, given
+every leak is flagged (D49) — and the strongest single result of the
+day held across every pass: every goal-2 leak ever measured, 297 of
+297, landed on a row the tool had already flagged as unresolved
+(floor:true), never on a row where a word rule actually fired.
+
+Contested words shared with c11.mjs's hand-written PARTY_NOUNS
+(network, device, person, customer, contact, partner) were settled by
+measured lean rather than taste, per the user's instruction (D50): all
+six lean "yours" (w) at 83.3%-100% w-share. This has no scored effect
+yet — c15's own PARTY_NOUNS rule fires before a row can reach the C20
+layer — and editing PARTY_NOUNS accordingly is still open.
+
+C20 is a POC (poc/m1/arbiter/c20.mjs), not shipped; "never ship the
+POC" stands. Open before it can graduate: the PARTY_NOUNS edit above,
+and a fresh exam 4 — exam 1, exam 2 and exam 3 have all now been used
+to hand-pick, admit, or sweep-score a rule change and are burned as
+blind material for scoring any further change to this rule. Full
+numbers, the deleted C16/C17 passes, and the C18/C19 derivation are in
+docs/logs/learnings.md (M1-C16 through M1-C20) and D46-D50.
+
+Goal 1 (w dressed as x) waits: a safe action needlessly blocked. A
+usability cost only.
+
+Goal 3 (r dressed as x or w) is the same shape as goal 1, one step
+further out, and waits behind it.
+
+GET is last on the list. 97% of GET rows are truly r, GET runs no word
+rules by design, and the 17 Slack GET leaks are not chased per-vendor.
+GET is not touched until goals 2, 1 and 3 are closed.
+
+Every row still gets a judgement — there is no "no answer" outcome —
+and where the judge is unsure it moves in the safer direction (tighter
+class).
 
 ## Where the work is
 
