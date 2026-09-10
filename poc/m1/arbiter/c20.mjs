@@ -165,8 +165,15 @@ export function rowNouns(row, junkSet) {
   return nouns;
 }
 
-export function classifyC20(row, junkSet, allowlist) {
-  const base = classifyC15(row);
+// M1-C24: classifyBase is an OPTIONAL trailing parameter, defaulting to the
+// real c15.classify (imported above, unchanged) — added so a caller (c24.mjs)
+// can inject an alternate base classifier (e.g. c19.mjs's classifyWithNouns
+// bound to a substituted noun set) without forking this file's layer logic.
+// Every existing call site in the repo passes 3 positional args, so this is
+// additive and behaviour-neutral for all of them (verified: c20.test.mjs,
+// c22.mjs's own reference call).
+export function classifyC20(row, junkSet, allowlist, classifyBase = classifyC15) {
+  const base = classifyBase(row);
   if (!RAISE_METHODS.has(row.method)) return base;
   if (base.class !== 'w' || base.floor !== true) return base;
 

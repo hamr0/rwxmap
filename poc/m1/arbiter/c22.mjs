@@ -106,8 +106,14 @@ function eligible(base, row, variant) {
 }
 
 // variant: 'N' (party-noun only) or 'NV' (party-noun or live-verb).
-export function classifyC22(row, junkSet, allowlist, variant) {
-  const base = classifyC15(row);
+// M1-C24: classifyBase is an OPTIONAL trailing parameter, defaulting to the
+// real c15.classify (imported above, unchanged) — same pattern as c20.mjs's
+// classifyC20, added so a caller (c24.mjs) can inject an alternate base
+// classifier without forking this file's eligibility/layer logic. Every
+// existing call site passes 4 positional args, so this is additive and
+// behaviour-neutral for all of them (verified: c23.mjs's calls).
+export function classifyC22(row, junkSet, allowlist, variant, classifyBase = classifyC15) {
+  const base = classifyBase(row);
   if (!eligible(base, row, variant)) return base;
 
   const nouns = rowNouns(row, junkSet);

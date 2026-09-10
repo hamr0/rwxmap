@@ -40,7 +40,7 @@ classifier's errors over the 1478 labelled rows.
 
 | # | error | count | where it lives | why it matters |
 |---|---|---|---|---|
-| 2 | **x dressed as w** | 10 (1478 rows); 297 (5465 rows, combined corpus) | PATCH, DELETE, PUT | a dangerous operation is treated as a safe write — this is the leak |
+| 2 | **x dressed as w** | 10 (1478 rows); 280 (5465 rows, combined corpus; 297 counts all loosening, including 17 GET rows) | PATCH, DELETE, PUT | a dangerous operation is treated as a safe write — this is the leak |
 | 1 | **w dressed as x** | 178 | POST 103, DELETE 47, PUT 22, PATCH 6 | a safe write is treated as dangerous, so it gets blocked when it should not be |
 | 3 | **r dressed as x or w** | 26 | POST 24 (r->x), PUT 2 (r->w) | a pure read is treated as a write. Deferred: smallest and least harmful |
 
@@ -77,7 +77,7 @@ fitted leaks becoming 41):
 
 | config | leaks | real over-tight (a rule fired and was wrong) | flagged unknown (no evidence, went safe) |
 |---|---|---|---|
-| c15 today | 297 (5.4%) | 522 (9.6%) | 152 (2.8%) |
+| c15 today | 280 (5.1%) | 522 (9.6%) | 152 (2.8%) |
 | C20 loose (n>=2, minW 0.80, 439 words) — adopted | 89 (1.6%) | 522 (9.6%) | 1397 (25.6%) |
 | C20 tight (n>=5, minW 0.95, 106 words) | 29 (0.5%) | 522 (9.6%) | 2725 (49.9%) |
 
@@ -87,27 +87,37 @@ blocklist attempts, which transferred nothing. The cost is steep:
 flagged-unknown rows rise from a quarter to half of all rows as the bar
 tightens. The user judged leaks in the 2-4% range acceptable, given
 every leak is flagged (D49) — and the strongest single result of the
-day held across every pass: every goal-2 leak ever measured, 297 of
-297, landed on a row the tool had already flagged as unresolved
-(floor:true), never on a row where a word rule actually fired.
+day held across every pass: every all-loosening row ever measured, 297
+of 297 (280 goal-2 plus 17 GET rows), landed on a row the tool had
+already flagged as unresolved (floor:true), never on a row where a
+word rule actually fired.
 
 Contested words shared with c11.mjs's hand-written PARTY_NOUNS
 (network, device, person, customer, contact, partner) were settled by
 measured lean rather than taste, per the user's instruction (D50): all
 six lean "yours" (w) at 83.3%-100% w-share. This has no scored effect
 yet — c15's own PARTY_NOUNS rule fires before a row can reach the C20
-layer — and editing PARTY_NOUNS accordingly is still open.
+layer. The PARTY_NOUNS edit itself is now closed: M1-C24 measured the
+via-negativa cleanup and found every variant raises goal-2 leaks above
+the 95-leak baseline, so under the user's advance ruling the list stays
+unchanged (D52, measured no).
 
 C20 is a POC (poc/m1/arbiter/c20.mjs), not shipped; "never ship the
-POC" stands. Open before it can graduate: the PARTY_NOUNS edit above,
-and a fresh exam 4 — exam 1, exam 2 and exam 3 have all now been used
-to hand-pick, admit, or sweep-score a rule change and are burned as
-blind material for scoring any further change to this rule. Full
-numbers, the deleted C16/C17 passes, and the C18/C19 derivation are in
-docs/logs/learnings.md (M1-C16 through M1-C20) and D46-D50. Exams 1-3
-are now further burned: C22 and C23 were scored on them too, so any
-future change to this rule needs the fresh exam 4 before it can be
-scored honestly.
+POC" stands. Open before it can graduate: a fresh exam 4 — exam 1,
+exam 2 and exam 3 have all now been used to hand-pick, admit, or
+sweep-score a rule change and are burned as blind material for scoring
+any further change to this rule. Exam 4 is drawn (D53,
+data/exam4-2026-09-12/, 4000 rows, 318 providers) but unlabelled;
+labelling it is the next gate before any further rule change,
+including a re-score of goal 1's C22 layer, can be scored honestly.
+Also open: "flagged" is not wired in code — C20's raises carry
+floor:false and C22's lowered rows are unmarked, so "flagged" exists
+only in how passes are reported — and must be wired before anything
+graduates. Full numbers, the deleted C16/C17 passes, and the C18/C19
+derivation are in docs/logs/learnings.md (M1-C16 through M1-C20) and
+D46-D50. Exams 1-3 are now further burned: C22 and C23 were scored on
+them too, so any future change to this rule needs the fresh exam 4
+before it can be scored honestly.
 
 **Goal 1 has a measured answer (2026-09-10, the user's ruling): the
 allowlist wins, M1-C22.** Three passes (C21-C23) were run against goal
@@ -146,6 +156,12 @@ across 28 of 5465 rows, too thin to build on. C22 is a POC
 (poc/m1/arbiter/c22.mjs), not shipped; "never ship the POC" stands.
 Full numbers are in docs/logs/learnings.md (M1-C21 through M1-C23) and
 D51.
+
+The 8.4% (461-row) false-alarm figure above counts only the
+hand-written word rules. The real full stack (C20 + C22 together,
+leave-one-vendor-out, 5465 rows) has 1875 false alarms (34.3%) — 1311
+from C20's no-own-noun raise, 461 from the word rules, 103 from POST's
+x default — and 95 goal-2 leaks (1.7%); see D52.
 
 Goal 3 (r dressed as x or w) is the same shape as goal 1, one step
 further out, and waits behind it.

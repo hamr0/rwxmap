@@ -2819,3 +2819,128 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   offered to the user as the safer alternative and not taken, because
   with flagging on a leak is not silent, so the extra 13 rescues cost
   nothing the user cares about.
+
+### M1-C24 — PARTY_NOUNS via-negativa cleanup, measured and rejected (2026-09-10)
+
+- The idea (the user's): apply via negativa to the last hand-written
+  blocklist — take every word that measures as "yours" out of
+  PARTY_NOUNS/SHARED_NOUNS and let the absence of a "yours" noun do
+  the work. The user's ruling was set in advance: re-measure first;
+  if it breaks goal 2, leave the list alone.
+- Script `poc/m1/arbiter/c24.mjs`, report
+  `docs/logs/m1/c24-party-nouns-cleanup.md`. To feed a substituted
+  noun set through the real stack, `classifyC20` (c20.mjs) and
+  `classifyC22` (c22.mjs) got an optional trailing `classifyBase`
+  parameter that defaults to the real c15 classify. Additive,
+  behaviour-neutral: 254/254 tests, c21 still 522, c22 still rescued
+  61 / new leaks 6, c23 exit 0.
+- Word groups over PUT/DELETE/PATCH rows of the 5465-row corpus
+  (PARTY_NOUNS 32 words including c11.mjs's added 'repository',
+  SHARED_NOUNS 11): YOURS (n>=5, w-share>=0.80), 9 words: contact,
+  customer, device, network, partner, person, repository, channel,
+  webhook (contact, person, webhook also pass at 0.95). THIRD-PARTY
+  (w-share<0.50), 14: call, collaboration, collaborator, invitation,
+  member, membership, participant, restriction, sponsorship, team,
+  user, guild, overwrite, permission. MIXED, 14: access, account,
+  assignment, group, installation, organization, role, session,
+  token, emoji, message, pin, reaction, sticker. DEAD (never a
+  candidate noun), 6: people, recipient, seat, subscriber, tenant,
+  ban.
+- Two variants: KEEP removes only the 9 YOURS words (34 of 43 words
+  remain); STRIP keeps only the 14 THIRD-PARTY words.
+- Important correction found during this pass — the baselines. The
+  numbers quoted for goal 1 (461) and goal 2 (89) had each been
+  measured with the OTHER layer switched off; nobody had run C20 and
+  C22 together. The real full stack, all 5465 rows, LOVO (C20
+  n>=2/0.80, C22 variant N n>=5/0.95), verified independently by the
+  orchestrator:
+
+  | config | goal-2 (x as w) | all loosening | loosening on GET | goal-1 (w as x) | goal-1 by rule |
+  |---|---|---|---|---|---|
+  | c15 | 280 | 297 | 17 | 625 | floor 103, live-verb 81, party-noun 441 |
+  | c15+C20 | 89 | 106 | 17 | 1936 | floor 103, live-verb 81, no-own-noun 1311, party-noun 441 |
+  | c15+C22 | 286 | 303 | 17 | 564 | floor 103, live-verb 81, party-noun 380 |
+  | c15+C20+C22 | 95 | 112 | 17 | 1875 | floor 103, live-verb 81, no-own-noun 1311, party-noun 380 |
+
+  Against the 5465-row base, today's full stack has 95 goal-2 leaks
+  (1.7%) and 1875 false alarms (34.3%). Of those false alarms, 1311
+  (24.0%) come from goal 2's own C20 `no-own-noun` raise, 461 (8.4%)
+  from the hand-written word rules (party-noun 380 + live-verb 81),
+  103 (1.9%) from POST's x default. Goal 1 as closed in C22 counted
+  only the word-rule share. The C20 share is the via-negativa trade
+  the user accepted in D48, recorded there as "flagged unknown".
+- Second finding: "flagged" is not wired in code. classifyC20 returns
+  its raises with `floor: false`, so they come out looking confident;
+  C22's lowered rows are not marked either. "Flagged" exists only in
+  how passes were reported. Fine for a POC; must be wired before
+  anything graduates.
+- Third finding: "297" was mislabelled as goal 2 in the PRD, D48 and
+  D49. The real goal-2 (x as w) count for bare c15 is 280 (5.1%); 297
+  is ALL loosening, i.e. 280 plus 17 GET rows. Both numbers are real.
+  D49's "297 of 297 leaks landed on flagged floor rows" remains true
+  as a statement about all loosening.
+- Scored configurations (LOVO, all 5465 rows; goal-2 / all loosening
+  / goal-1 total / goal-1 by rule): cfg 0 control (full stack, real
+  lists) 95 / 112 / 1875 / no-own-noun 1311, party-noun 380, floor
+  103, live-verb 81. cfg 1 KEEP 97 / 114 / 1811 / no-own-noun 1319,
+  party-noun 308, floor 103, live-verb 81. cfg 2 STRIP 103 / 120 /
+  1811 / no-own-noun 1488, party-noun 139, floor 103, live-verb 81.
+  cfg 3 STRIP with C22 off 101 / 118 / 1852 / no-own-noun 1488,
+  party-noun 180, floor 103, live-verb 81. cfg 3 vs cfg 2 shows C22
+  still rescues 41 rows after STRIP, so it is not redundant.
+- The buried-token bypass: classifyWithNouns (c19.mjs) always tests
+  the real SHARED_NOUNS in its operationId-token scan, so removed
+  SHARED_NOUNS words can still fire there (39 rows under KEEP, 52
+  under STRIP). This under-counts leaks. The orchestrator emulated a
+  real edit with the bypass off: KEEP 99 leaks (+4 over control),
+  STRIP 107 (+12). No leak disappeared under either variant.
+- The 4 new leaks under KEEP with a real edit, read by hand: `DELETE
+  /v1/customers/{customer} DeleteCustomersCustomer` "Delete a
+  customer" (holdout1/stripe, high confidence); `DELETE
+  /repos/{owner}/{repo} repos/delete` "Delete a repository"
+  (holdout1/github, high); `PUT
+  /v4/settings/notifications/channels toggleNotificationChannels`
+  (exam2/dracoon.team, low); `DELETE
+  /users/{user_id}/channels/{channel_id}
+  removeAppUserFromChannel` (exam2/ritc.io, low). The two
+  high-confidence rows are the lesson: `customer` and `repository`
+  mean the caller's own thing when a sub-part is edited, but deleting
+  the whole top-level object reaches other people. That is the fat
+  tail the user asked about; it lives on customer/repository rather
+  than on network.
+- Verdict under the user's ruling: every variant raises goal-2 leaks
+  above 95, so the list is left alone. D50's open item (edit
+  PARTY_NOUNS for the contested words) is closed with a measured no.
+- All 8 scoring sets are burned for a rule change; this was a
+  no-change verdict, so nothing needs exam 4 to confirm it.
+
+### Exam 4 drawn, unlabelled (2026-09-10)
+
+- Why: exams 1-3 are burned (C19 derived from exam 3; C20 tuned
+  against all three; C22/C23 scored on all three). Exam 4 is virgin
+  material for scoring the goal 1 C22 layer and any future rule
+  change.
+- Script `poc/m1/arbiter/make-exam4.mjs`, seed 20260912, output
+  `data/exam4-2026-09-12/`: blind paper `exam-blind.csv` (4000 rows,
+  no class column) plus 20 part files, `exam-key.csv`, and a README.
+  Truth files will be created by a later labelling pass, following
+  exam 3's actual layout (separate exam-truth-partN.csv files), not
+  an empty class column in the key.
+- Pool: 123,339 rows / 673 providers before exclusion; 92,409 rows /
+  663 providers after excluding every provider in the burned sets;
+  eligible PUT/DELETE/PATCH rows 21,643 across 318 providers; drawn
+  4000 rows across 318 providers, capped at 22 per provider; 17,657
+  eligible rows remain unused. Method split: DELETE 1842, PUT 1582,
+  PATCH 576 — PUT/DELETE/PATCH only, the same shape as exam 3
+  (DELETE 1382, PUT 1169, PATCH 449).
+- Exclusion used make-exam3.mjs's exact registrable-domain matching
+  with its amazonaws->amazon alias. The burned-provider union is 332,
+  not 332+105: every exam 1 provider was already inside the combined
+  corpus. The script computes the intersection of drawn providers
+  with the burned set and throws unless it is 0; it was 0.
+- Reproducible: run twice, byte-identical output.
+- A stated limit: the effects being measured are rare. C22's new-miss
+  cost is 6 in 5465 rows (0.11%), so a 4000-row exam expects about 4.
+  Exam 4 can confirm the shape holds; it cannot pin the rate to a
+  decimal.
+- Status: unlabelled and unscored.
