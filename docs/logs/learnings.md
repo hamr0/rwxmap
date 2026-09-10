@@ -2654,3 +2654,168 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   hand-picking, C19 admitted `owner` off exam-3 evidence, C20's sweep
   was scored on all three) and are burned as blind material for scoring
   any further change to this rule.
+
+### M1-C21 — word-by-word audit of the hand-written danger lists (2026-09-10)
+
+- Script `poc/m1/arbiter/c21.mjs`, report
+  `docs/logs/m1/c21-word-audit.md`. Read-only diagnosis; no vocabulary
+  was changed. Direct measurement, not leave-one-vendor-out, because
+  LIVE_VERBS/PARTY_NOUNS/SHARED_NOUNS were hand-written months earlier
+  and never saw this corpus.
+- Numbers: combined corpus 5465 rows, 332 providers, 8 sets, 0
+  unscorable. 4406 scorable PUT/DELETE/PATCH rows (the only rows c15
+  can raise on). 847 fired a word rule; 325 right (truth x), 522 wrong
+  (all truth w, zero truth r). Reproduces the known 522 exactly.
+- Worst words by wrong count (word, fires, right, wrong, precision):
+  user 140/78/62/0.557; webhook 55/1/54/0.018; account 65/15/50/0.231;
+  group 64/16/48/0.250; channel 30/4/26/0.133; token 28/6/22/0.214;
+  device 23/2/21/0.087; cancel 48/28/20/0.583; contact 20/1/19/0.050;
+  role 28/12/16/0.429.
+- 13 words never fire at all: dial, execute, hangup, launch, refund,
+  reject, people, recipient, seat, sponsorship, subscriber, tenant,
+  ban. 29 words are below 0.50 precision.
+- Two causes found by reading the rows, not by counting: (a) a
+  part-of-speech failure — LIVE_VERBS entries matching nouns. trigger
+  12 fires/0 right, run 11/2, transfer 9/2, pay 6/0 — together 38
+  fires, 4 right, 34 wrong. Real rows: `DELETE /{username}/triggers/{id}
+  destroyTrigger`; `PATCH /dags/{dag_id}/dagRuns/{id}
+  update_dag_run_state`; `DELETE /Employer/{id}/PayRun/{id}
+  DeletePayRun`; `PUT /BankTransfers/{id}/Attachments
+  createBankTransferAttachment`. Also `DELETE /reboot-requests/{id}
+  deleteRebootRequest` (CAMARA) — deleting a request record, nothing
+  reboots. (b) nouns that mean "the caller's own thing", not "another
+  party" — webhook, channel, device, contact, network, repository,
+  customer: together 173 fires, 13 right, 160 wrong. (c) a third,
+  smaller failure: SHARED_NOUNS scans every operationId token, so a
+  word buried mid-name fires even when it is not the object — CAMARA's
+  updateNotificationChannelSubscription and
+  deleteNotificationChannelSubscription fire on "channel" when the
+  object is a subscription.
+- C20's measured "yours" allowlist
+  already rates all seven of those nouns 87-100% truth-w (webhook 97%
+  n=36 across 24 vendors; contact 95% n=21/13; network 94% n=16/8;
+  device 92% n=24/15; repository 88% n=16/3; customer 87% n=15/9;
+  channel 87% n=15/10), and also trigger (100%, n=11, 6 vendors) and
+  run (100%, n=6, 5 vendors). The same words sit on both a
+  hand-written "danger" list and a measured "yours" list, and c15's
+  PARTY_NOUNS fires first, so the measured evidence never gets a say.
+  This is D50's note showing up as 522 real rows. By contrast user
+  (44% w-share, n=153), account (76%, n=68), group (71%, n=69) and
+  token (74%, n=34) are NOT on the allowlist — the two lists disagree
+  only where the evidence is genuinely mixed.
+
+### M1-C22 — the allowlist wins: goal 1's answer (2026-09-10, the user's ruling)
+
+- Script `poc/m1/arbiter/c22.mjs`, report
+  `docs/logs/m1/c22-allowlist-wins.md`.
+- The layer: on PUT/DELETE/PATCH rows where c15 returned class x with
+  rule `live-verb` or `party-noun`, extract the row's cleaned head
+  nouns exactly as C20 does; if the row has at least one noun AND
+  every noun is on the "yours" allowlist, LOWER the class back to w
+  with rule `allowlist-wins`. Otherwise unchanged. c15.mjs, c11.mjs and
+  judge.mjs were not modified by this pass.
+- This is the FIRST rule in the project that
+  LOOSENS (x -> w), the one direction the project's single invariant
+  guards. A wrong firing here is a leak, not a usability cost.
+- Isolation, measured not assumed: C20 acts only on rows c15 left at
+  the w floor; C22 acts only on rows c15 raised to x — disjoint row
+  sets. Across both variants and all 16 grid points C22 changed 0 of
+  the 3559 floor rows, and c20's own goal-2 leak count was unaffected.
+- Two variants measured: N (rule `party-noun` only) and NV (adds
+  `live-verb`). Bar swept over minN in [2,3,5,10] x minW in
+  [0.80,0.90,0.95,1.00]. All headline numbers are leave-one-vendor-out,
+  the allowlist rebuilt from the other 331 vendors for each of the 332
+  vendors in turn; fitted numbers are reported in the doc only as a
+  labelled contrast, per C20's precedent where 2 fitted leaks became 41
+  under LOVO.
+- LOVO grid points worth recording: N n>=2/0.80 (439 words) rescued
+  160, new leaks 23; N n>=5/0.95 (106 words) rescued 61, new leaks 6,
+  remaining wrong 461; N n>=10/1.00 (35 words) rescued 10, leaks 6; NV
+  n>=2/0.80 rescued 203, leaks 38; NV n>=10/1.00 rescued 15, leaks 7.
+  No grid point anywhere reaches zero leaks.
+- Adopted point: variant N, minN=5, minW=0.95, 106-word allowlist.
+  Rescued 61, new leaks 6.
+- Per-set at the adopted point (rescued/leaks): camara 4/3, holdout1
+  5/0, holdout2 0/0, holdout3 1/0, holdout4 2/1, holdout5 0/0, exam2
+  10/1, exam3 39/1. CAMARA, the declared test bed,
+  is the worst set — 4 rescued for 3 leaks — with the softening that
+  CAMARA is a single vendor so LOVO holds out all 292 of its rows at
+  once, the harshest possible case; across every other set the trade
+  is 56 rescued for 3 leaks.
+- The 6 new-leak rows, listed in full: `DELETE /networks/{networkId}
+  deleteNetwork` (truth x, let through by "network"); `PATCH
+  /v1/devices/{deviceId} updateDevice` ("device"); `DELETE
+  /v1/devices/{deviceId} deleteDevice` ("device"); `PUT
+  /2/webhooks/{webhook_id} validateWebhooks` ("webhook"); `PUT
+  /v2.1/accounts/{accountId}/permission_profiles/{permissionProfileId}
+  PermissionProfiles_PutPermissionProfiles` ("profile"); `PUT
+  /bookings/{bookingId}/booking-contact updateBookingContact`
+  ("contact", and its truth label is marked LOW confidence).
+- Reading those 6 by hand: 1 is provably unlearnable — CAMARA contains
+  both `DELETE /networks/{networkId} deleteNetwork` "Delete a
+  dedicated network" (truth x, high confidence) and `DELETE
+  /networks/{serviceId} deleteNetwork` "Delete multipoint virtual
+  private network" (truth w); same catalogue, same method, same verb,
+  same noun, opposite truth, so no word rule can ever split them. 2
+  rest on low-confidence truth labels. 3 have a tell in the description
+  (blocks network access / removes access control rules / triggers a
+  CRC check) — the shape C16 already measured at zero transfer.
+- The description-marker measurement run this pass over
+  the 3037 PUT/DELETE/PATCH rows that carry a description (truth w
+  2600, x 429), as x-hits/w-hits/precision: "affects others" (other
+  users, everyone, participants, members of) 19/9/0.679; "access
+  control" 2/3/0.400; "live or active" 20/42/0.323; "sends outward"
+  (sends, triggers, delivers, notifies) 33/100/0.248; "irreversible"
+  (cannot be undone, permanent) 5/41/0.109. Only one marker beats
+  chance and it covers 28 rows in 5465 — too thin to build on. Note
+  that "irreversible" is ANTI-correlated with x, independent support
+  for D28's separation of a destructive axis from r/w/x blast radius.
+- The one-base framing the user asked for, against 5465 rows: goal-1
+  false alarms fall from 522 (9.6%) to 461 (8.4%); new misses rise
+  from 0 to 6 (0.11%). Per 1000 rows: 96 false alarms and 0 misses
+  become 84 false alarms and 1 miss.
+- Flagging is a condition of adoption, not an optional extra: every
+  row lowered by `allowlist-wins` must be marked review, never
+  confident, so the 6 leaks stay visible and the project's standing
+  property — never confidently wrong in the loosening direction —
+  survives.
+
+### M1-C23 — path-tail noun trial, a clean negative (2026-09-10)
+
+- Script `poc/m1/arbiter/c23.mjs`, report
+  `docs/logs/m1/c23-path-tail-noun.md`. Trial of reading the object
+  noun from the path tail instead of the operationId head noun.
+- `judge.mjs`'s `GENERIC_TAILS` was made exported — a one-word,
+  visibility-only change (`const` -> `export const`), no behaviour
+  change — so c23 could reuse the list rather than copy it, on the
+  repo's "one writer per piece of state" rule. Verified
+  behaviour-neutral: 254/254 tests still pass and c21 still reports
+  exactly 522.
+- Agreement census over 4406 scorable PUT/DELETE/PATCH rows: path-tail
+  null on 353 (8.0%), operationIdHeadNoun empty on 883 (20.0%), summary
+  head noun empty on 1025 (23.3%); vs operationIdHeadNoun agree 1125 /
+  disagree 2052 / path-tail-only 876 / opid-only 346.
+- LOVO results: A (today's nouns, n>=5/0.95) rescued 61 leaks 6; B
+  (path-tail only, best at n>=10/1.00) rescued 31 leaks 5; C (union,
+  best at n>=5/0.95) rescued 48 leaks 4. Path-tail loses. Of the 6 leak
+  rows, path-tail fixes only 2 (PermissionProfiles and
+  updateBookingContact).
+- Two flaws found: path segments are not camelCase-split, so
+  `IncomingPhoneNumbers` yields `incomingphonenumber` rather than
+  `number`; and the brief's stated expectation that a union can only
+  tighten was violated by the data, because each configuration
+  rebuilds its allowlist from its own candidate table rather than
+  sharing one.
+- The disproved premise, recorded: the trial was motivated by
+  two Discord rows (`update_webhook_message`,
+  `update_original_webhook_message`) believed to be misread as
+  "webhook". They are NOT among C22's 6 leak rows, and
+  `operationIdHeadNoun` already resolves both to "message", which is
+  already in SHARED_NOUNS, so c15 classifies them correctly as x
+  today. The orchestrator's premise came from a substring grep and was
+  wrong; the agent caught it and the orchestrator verified it
+  directly.
+- Also note the union configuration C (48 rescued / 4 leaks) was
+  offered to the user as the safer alternative and not taken, because
+  with flagging on a leak is not silent, so the extra 13 rescues cost
+  nothing the user cares about.

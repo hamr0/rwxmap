@@ -93,7 +93,7 @@ export function isPartyNoun(word, repoNounOn) {
 // lands on a generic tail word (Update device INFORMATION, Delete device
 // RECORD) instead of the real object one word earlier. Checked on the raw
 // (pre-singularisation) lowercased word.
-const GENERIC_TAILS = new Set([
+export const GENERIC_TAILS = new Set([
   'information', 'info', 'record', 'details', 'detail', 'data', 'status',
   'resource', 'entry', 'item', 'object', 'id', 'identifier', 'value', 'values',
 ]);

@@ -104,10 +104,48 @@ and a fresh exam 4 — exam 1, exam 2 and exam 3 have all now been used
 to hand-pick, admit, or sweep-score a rule change and are burned as
 blind material for scoring any further change to this rule. Full
 numbers, the deleted C16/C17 passes, and the C18/C19 derivation are in
-docs/logs/learnings.md (M1-C16 through M1-C20) and D46-D50.
+docs/logs/learnings.md (M1-C16 through M1-C20) and D46-D50. Exams 1-3
+are now further burned: C22 and C23 were scored on them too, so any
+future change to this rule needs the fresh exam 4 before it can be
+scored honestly.
 
-Goal 1 (w dressed as x) waits: a safe action needlessly blocked. A
-usability cost only.
+**Goal 1 has a measured answer (2026-09-10, the user's ruling): the
+allowlist wins, M1-C22.** Three passes (C21-C23) were run against goal
+1 this pass. C21 audited the hand-written danger lists word by word
+and found the 522 false alarms sit disproportionately on nouns —
+webhook, channel, device, contact, network, repository, customer —
+and on verbs mismatched to nouns — trigger, run, transfer, pay — that
+C20's measured "yours" allowlist already rates 87-100% truth-w; the
+two lists disagree only where the evidence is genuinely mixed (user,
+account, group, token).
+
+C22 is the fix: on any PUT/DELETE/PATCH row c15 raised to x under rule
+`live-verb` or `party-noun`, if every one of the row's cleaned head
+nouns is on the allowlist, lower the class back to w with rule
+`allowlist-wins`. This is the first rule in the project that loosens
+(x -> w), the one direction the safety spine guards, so a wrong firing
+here is a leak, not a usability cost. Adopted at variant N (party-noun
+rule only, not live-verb) with the TIGHT bar minN=5, minW=0.95, a
+106-word allowlist — deliberately tighter than goal 2's loose bar
+(D48), because this is the project's first loosening rule. Measured
+leave-one-vendor-out over the full 5465-row combined corpus: 61 of the
+522 over-tight rows rescued, at a cost of 6 new leaks; against the
+5465-row base, false alarms fall from 9.6% to 8.4% and new misses rise
+from 0 to 0.11%. Adoption is conditional on flagging: every row
+`allowlist-wins` lowers is marked review, never confident, so the 6
+leaks stay visible and the project's standing property — never
+confidently wrong in the loosening direction — survives.
+
+C23 tried reading the object noun from the path tail instead of the
+operationId head noun, and lost: 31 rescued / 5 leaks against C22's 61
+rescued / 6 leaks, and a union of both sources (48 rescued / 4 leaks)
+was offered as a safer alternative and not taken, since flagging
+already keeps a leak from being silent. Description-marker phrases
+(C21) were also measured and rejected — only one marker beat chance,
+across 28 of 5465 rows, too thin to build on. C22 is a POC
+(poc/m1/arbiter/c22.mjs), not shipped; "never ship the POC" stands.
+Full numbers are in docs/logs/learnings.md (M1-C21 through M1-C23) and
+D51.
 
 Goal 3 (r dressed as x or w) is the same shape as goal 1, one step
 further out, and waits behind it.
