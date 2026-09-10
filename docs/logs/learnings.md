@@ -2862,8 +2862,9 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   | c15+C22 | 286 | 303 | 17 | 564 | floor 103, live-verb 81, party-noun 380 |
   | c15+C20+C22 | 95 | 112 | 17 | 1875 | floor 103, live-verb 81, no-own-noun 1311, party-noun 380 |
 
-  Against the 5465-row base, today's full stack has 95 goal-2 leaks
-  (1.7%) and 1875 false alarms (34.3%). Of those false alarms, 1311
+  Against the 5465-row base, today's combined stack (c15 + C20 + C22)
+  has 95 leaks (1.7%) and 1875 false alarms (34.3%); goal 2's own
+  count is 89. Of those false alarms, 1311
   (24.0%) come from goal 2's own C20 `no-own-noun` raise, 461 (8.4%)
   from the hand-written word rules (party-noun 380 + live-verb 81),
   103 (1.9%) from POST's x default. Goal 1 as closed in C22 counted
@@ -2909,10 +2910,18 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   tail the user asked about; it lives on customer/repository rather
   than on network.
 - Verdict under the user's ruling: every variant raises goal-2 leaks
-  above 95, so the list is left alone. D50's open item (edit
-  PARTY_NOUNS for the contested words) is closed with a measured no.
+  above goal 2's own 89 (and the combined 95), so the list is left
+  alone. D50's open item (edit PARTY_NOUNS for the contested words)
+  is closed with a measured no.
 - All 8 scoring sets are burned for a rule change; this was a
   no-change verdict, so nothing needs exam 4 to confirm it.
+- Re-checked on goal 2's own ledger after the user flagged that 95
+  mixed goal 1's C22 cost into goal 2's count: c15 + C20 only, C22
+  off, real edit emulated — control 89, KEEP 98 (+9), STRIP 106
+  (+17). Verdict unchanged and stronger. From here, each goal's count
+  is reported on its own ledger; a fix's cost to another goal is
+  charged to the fixing goal; combined totals appear only on a line
+  labelled combined.
 
 ### Exam 4 drawn, unlabelled (2026-09-10)
 

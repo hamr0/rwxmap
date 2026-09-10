@@ -99,8 +99,8 @@ six lean "yours" (w) at 83.3%-100% w-share. This has no scored effect
 yet — c15's own PARTY_NOUNS rule fires before a row can reach the C20
 layer. The PARTY_NOUNS edit itself is now closed: M1-C24 measured the
 via-negativa cleanup and found every variant raises goal-2 leaks above
-the 95-leak baseline, so under the user's advance ruling the list stays
-unchanged (D52, measured no).
+goal 2's own baseline of 89 (KEEP 98, STRIP 106), so under the user's
+advance ruling the list stays unchanged (D52, measured no).
 
 C20 is a POC (poc/m1/arbiter/c20.mjs), not shipped; "never ship the
 POC" stands. Open before it can graduate: a fresh exam 4 — exam 1,
@@ -158,10 +158,12 @@ Full numbers are in docs/logs/learnings.md (M1-C21 through M1-C23) and
 D51.
 
 The 8.4% (461-row) false-alarm figure above counts only the
-hand-written word rules. The real full stack (C20 + C22 together,
-leave-one-vendor-out, 5465 rows) has 1875 false alarms (34.3%) — 1311
-from C20's no-own-noun raise, 461 from the word rules, 103 from POST's
-x default — and 95 goal-2 leaks (1.7%); see D52.
+hand-written word rules. Goal 1 owns those 461 word-rule false alarms
+and, as goal 1's C22 fix, a cost of 6 leaks charged to goal 1's
+ledger. Goal 2 owns 89 leaks and, as the price of its C20 fix, 1311
+false alarms. POST's x default gives 103 false alarms on its own.
+Combined: both shipped together (leave-one-vendor-out, 5465 rows)
+gives 95 leaks (1.7%) and 1875 false alarms (34.3%); see D52.
 
 Goal 3 (r dressed as x or w) is the same shape as goal 1, one step
 further out, and waits behind it.
