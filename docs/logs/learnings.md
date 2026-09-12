@@ -3045,3 +3045,52 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   everywhere at roughly ten times the cost. The orchestrator
   recommended A. No decisions-log row exists yet because the ruling
   has not been made.
+
+### M1-C26 rejected; goal 2 rebuilt clean in poc/m1/goal2 (2026-09-12)
+
+- M1-C26: delete the 43-word hand-written PARTY_NOUNS+SHARED_NOUNS
+  list and make the yours-allowlist exclusive of it. Goal-2 ledger
+  89 -> 95 (+6, 0 rescued). REJECTED. The 6 were all buried-token
+  rows (`permission` x5, `guild` x1) that only the old rule's
+  every-token scan caught. An earlier scratch measurement had said
+  89 for this shape; it was wrong because it injected an empty noun
+  set into c19's classifyWithNouns, which keeps a hardcoded
+  SHARED_NOUNS token scan alive. Lesson: measure the real edit,
+  never an injection.
+- Root cause of the contradiction: five files each carry their own
+  copy of METHOD_FLOOR and their own variant of step 1 (c15, c18,
+  c19, c26, derive-nouns) and they have drifted. arbiter.mjs exports
+  39 functions, the goal-2 path uses 6; judge.mjs exports 22, the
+  path uses 7. The live shape was written down from the code as
+  `docs/product/goal2-solution.md`.
+- Clean rebuild in `poc/m1/goal2/` (goal2.mjs 91 lines, measure.mjs,
+  goal2.test.mjs; 342 lines total vs 6728 in the c* pass files). One
+  floor table, one verb rule, one noun layer. The only behavioural
+  change from the frozen shape: the yours-noun layer reads EVERY
+  noun token in the operation name (verbs stripped), not just the
+  two head nouns -- and the hand-written third-party list is gone
+  entirely. Reuses judge.mjs/arbiter.mjs primitives; imports c11's
+  LIVE_VERBS and READ_VERBS; does not import PARTY_NOUNS or
+  SHARED_NOUNS.
+- Numbers (5465 rows, 332 vendors, leave-one-vendor-out, allowlist
+  bar minN=2 minW=0.80 unchanged):
+
+  | shape | goal-2 leaks | goal-1 false alarms (info) | all-loosening |
+  |---|---|---|---|
+  | GATE -- frozen (c15 + C20), reproduced through the new harness | 89 | 1936 | 106 |
+  | NEW -- classifyGoal2 | 37 | 2727 | 54 |
+  | NEW, verbs only, no noun layer | 527 | 184 | 544 |
+
+- The gate printed exactly 89, so the old measurements reproduce;
+  the housing was the problem, not the numbers. 65 rescued, 13 new
+  leaks, net -52. All 37 remaining leaks are floor rows (flagged, no
+  evidence fired): DELETE 18, PUT 14, PATCH 5; 27 distinct vendors;
+  4.0% of the 936 truth-x rows. Tests 16/16.
+- Goal 2 ledger (own ledger, never blended): frozen 89 -> candidate
+  37. Cost charged to goal 1: +791 false alarms (1936 -> 2727), i.e.
+  flagged rows rise from about a third to about half.
+- Status: candidate, NOT adopted, NOT exam-checked. Measured on the
+  tuning corpus under LOVO only -- the same footing as the 89, so
+  the comparison is fair, but neither number is a clean-exam number.
+  Next: a proper broad exam with its labelling brief saved to the
+  repo before any row is labelled.
