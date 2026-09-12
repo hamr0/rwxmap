@@ -36,143 +36,87 @@ One direction of travel per method (D43):
 Work one goal at a time and bring them together afterwards. Attacking
 several at once is what caused the repeated failures: they have
 different shapes and need different evidence. Counts are the current
-classifier's errors over the 1478 labelled rows.
+shape's errors over the 5465-row combined corpus (332 vendors),
+leave-one-vendor-out. Truth split: 936 x, 3883 w, 646 r.
 
 | # | error | count | where it lives | why it matters |
 |---|---|---|---|---|
-| 2 | **x dressed as w** | 10 (1478 rows); 280 (5465 rows, combined corpus; 297 counts all loosening, including 17 GET rows) | PATCH, DELETE, PUT | a dangerous operation is treated as a safe write — this is the leak |
-| 1 | **w dressed as x** | 178 | POST 103, DELETE 47, PUT 22, PATCH 6 | a safe write is treated as dangerous, so it gets blocked when it should not be |
-| 3 | **r dressed as x or w** | 26 | POST 24 (r->x), PUT 2 (r->w) | a pure read is treated as a write. Deferred: smallest and least harmful |
+| 2 | **x dressed as w** | 37 (4.0% of truth-x) — FROZEN 2026-09-12 | DELETE 18, PUT 14, PATCH 5; all floor rows | a dangerous operation is treated as a safe write — this is the leak |
+| 1 | **w dressed as x** | 2727 (70.2% of truth-w) — REOPENED | PUT/DELETE/PATCH floor rows raised by the yours-noun layer | a safe write is treated as dangerous, so it gets blocked when it should not be |
+| 3 | **r dressed as x or w** | 49 | POST 24 (r->x), PUT 14, DELETE 5, PATCH 6 | a pure read is treated as a write. Deferred: smallest and least harmful |
 
 Attack order is 2, then 1, then 3. One goal at a time: while a goal is
 open, everything outside it — the other goals, other methods, other
 vendors — is out of focus and is not chased. That isolation is what
 stops the noise that caused the earlier repeated failures. (D47)
 
-Goal 2 (x dressed as w) is open now: a risky operation treated as a safe
-write. It is the leak and the one that fails the go/no-go gate.
+Goal 1 (w dressed as x) is open now. Goal 2 is frozen at 37, below.
 
-**Goal 2 has a measured answer (2026-09-09): the via-negativa
-allowlist, M1-C20.** Five passes (C16-C20) were run against goal 2 this
-pass. C16 (hand-read description phrases) and C17 (hand-named nouns)
-each closed every leak they were tuned on and then failed to transfer
-under leave-one-vendor-out (LOVO) — C17 also breached D24 by naming a
-word off a clean-exam row — so both are deleted. C18 and C19 tried the
-corpus-derived alternative D30 rule 5 called for: a mechanically
-admitted blocklist of third-party nouns, gated on surviving LOVO. C18
-admitted zero words at 1478 and 2472 rows; C19, run again after a third
-blind exam brought the corpus to 5465 rows, admitted exactly one
-(`owner`), closing 6 of 280 leaks at that size. The blocklist shape is
-real but starved — roughly one admission per 1800 evidence rows — and
-would not reach zero leaks at any corpus size reachable soon.
+### The shape (one copy, poc/m1/goal2/goal2.mjs)
 
-C20 is the user's inversion: instead of learning which nouns mean
-"someone else's thing," learn an allowlist of "yours" nouns (project,
-file, record, config, zone, ...) and raise a PUT/DELETE/PATCH floor row
-to x when it carries no word from that list. Adopted at the LOOSE bar
-(n>=2 rows, minW 0.80 w-share, 439 words). Measured leave-one-vendor-out
-over the full 5465-row combined corpus (the only honest number — fitted
-numbers looked far better and collapsed going to LOVO, at one point 2
-fitted leaks becoming 41):
+Two word lists, not three. The hand-written third-party noun list is
+gone.
 
-| config | leaks | real over-tight (a rule fired and was wrong) | flagged unknown (no evidence, went safe) |
+| list | size | job |
+|---|---|---|
+| verbs — `LIVE_VERBS` (26) and `READ_VERBS` (14), hand-written | 40 | move a row off its floor |
+| yours-nouns — mined allowlist, n>=2 rows, w-share>=0.80 | 439 | hold a floor row at `w` |
+
+Flow for one row:
+
+1. **Floor by method.** GET/HEAD/OPTIONS `r`; POST `x`; PUT/DELETE/PATCH `w`.
+2. **Verbs.** GET: nothing runs. POST: a read verb lowers to `r`.
+   PUT/DELETE/PATCH: a live verb (in the operationId, else the summary's
+   lead verb) raises to `x`, unless the summary carries a caller phrase.
+   No hit: stay at the floor, marked `floor`.
+3. **Yours-nouns.** Only on PUT/DELETE/PATCH rows still at the `w`
+   floor. Take every noun token in the operation name (both head nouns
+   plus every other token, singularised, verbs stripped). All on the
+   yours list → stay `w`. Any not → `x`, rule `no-own-noun`.
+
+Nothing is hand-listed as "someone else's". Via negativa: a noun is
+third-party unless the corpus says it is yours. Spec read from live
+code: `docs/product/goal2-solution.md`.
+
+**Goal 2 is FROZEN at 37 (2026-09-12).** The shape above, measured
+leave-one-vendor-out over the 5465-row combined corpus:
+
+| shape | goal-2 leaks | goal-1 false alarms (charged to goal 1) | all-loosening |
 |---|---|---|---|
-| c15 today | 280 (5.1%) | 522 (9.6%) | 152 (2.8%) |
-| C20 loose (n>=2, minW 0.80, 439 words) — adopted | 89 (1.6%) | 522 (9.6%) | 1397 (25.6%) |
-| C20 tight (n>=5, minW 0.95, 106 words) | 29 (0.5%) | 522 (9.6%) | 2725 (49.9%) |
+| previous frozen (c15 + C20: hand list + two head nouns) | 89 (9.5% of truth-x) | 1936 | 106 |
+| **current (poc/m1/goal2)** | **37 (4.0%)** | 2727 | 54 |
 
-Every point on the nine-point sweep (docs/logs/m1/c20-sweep.md) beats
-the c15 baseline under LOVO — the opposite of what happened to the
-blocklist attempts, which transferred nothing. The cost is steep:
-flagged-unknown rows rise from a quarter to half of all rows as the bar
-tightens. The user judged leaks in the 2-4% range acceptable, given
-every leak is flagged (D49) — and the strongest single result of the
-day held across every pass: every all-loosening row ever measured, 297
-of 297 (280 goal-2 plus 17 GET rows), landed on a row the tool had
-already flagged as unresolved (floor:true), never on a row where a
-word rule actually fired.
+65 leaks rescued, 13 new; net −52. All 37 remaining leaks are floor
+rows — no evidence fired, so the tool flags them as unresolved rather
+than confidently wrong. 27 distinct vendors, none above 4.
 
-Contested words shared with c11.mjs's hand-written PARTY_NOUNS
-(network, device, person, customer, contact, partner) were settled by
-measured lean rather than taste, per the user's instruction (D50): all
-six lean "yours" (w) at 83.3%-100% w-share. This has no scored effect
-yet — c15's own PARTY_NOUNS rule fires before a row can reach the C20
-layer. The PARTY_NOUNS edit itself is now closed: M1-C24 measured the
-via-negativa cleanup and found every variant raises goal-2 leaks above
-goal 2's own baseline of 89 (KEEP 98, STRIP 106), so under the user's
-advance ruling the list stays unchanged (D52, measured no).
+The gate: the previous frozen shape reproduced its 89 exactly through
+the new harness before the new number was trusted.
 
-C20 is a POC (poc/m1/arbiter/c20.mjs), not shipped; "never ship the
-POC" stands. Open before it can graduate: a fresh exam 4 — exam 1,
-exam 2 and exam 3 have all now been used to hand-pick, admit, or
-sweep-score a rule change and are burned as blind material for scoring
-any further change to this rule. Exam 4 is drawn, labelled (4000 rows, 318 providers) and scored
-once by `poc/m1/arbiter/c25.mjs`, but its result is NOT comparable
-to any earlier set — its truth is roughly twice as x-heavy (25.2% x
-against exam 2's 14.9% and exam 3's 12.6%) because its labelling
-brief was reconstructed after exam 3's was lost. Corrected for that
-drift, goal 2's wild leak rate estimates at 2.5-5% against the 1.6%
-corpus prediction, while goal 1 transferred cleanly at 58 rescued
-and 11 leaks against 61 and 6 predicted. The next gate is now the
-user's ruling between enlarging the calibration and relabelling
-exam 4, and neither has been chosen. See
-`docs/logs/learnings.md` (M1-C25),
-`data/exam4-2026-09-12/LABELLING-BRIEF.md` and
-`data/calibration-2026-09-12/`.
-Also open: "flagged" is not wired in code — C20's raises carry
-floor:false and C22's lowered rows are unmarked, so "flagged" exists
-only in how passes are reported — and must be wired before anything
-graduates. Full numbers, the deleted C16/C17 passes, and the C18/C19
-derivation are in docs/logs/learnings.md (M1-C16 through M1-C20) and
-D46-D50. Exams 1-3 are now further burned: C22 and C23 were scored on
-them too, so any future change to this rule needs the fresh exam 4
-before it can be scored honestly.
+Known limits, stated plainly: this is a tuning-corpus number under
+LOVO, the same footing as the 89 it replaces, so the comparison is
+fair — but neither is a clean-exam number. Exams 1–4 are burned.
+A fresh broad exam, with its labelling brief saved to the repo before
+any row is labelled, is the only thing that turns 37 into a wild
+number. "Flagged" is still not wired in code — `floor:true` exists
+only on the row result, not as a reported state — and must be before
+anything graduates. The shape is a POC; "never ship the POC" stands.
+Row-level results for every goal: `run-proof/`.
 
-**Goal 1 has a measured answer (2026-09-10, the user's ruling): the
-allowlist wins, M1-C22.** Three passes (C21-C23) were run against goal
-1 this pass. C21 audited the hand-written danger lists word by word
-and found the 522 false alarms sit disproportionately on nouns —
-webhook, channel, device, contact, network, repository, customer —
-and on verbs mismatched to nouns — trigger, run, transfer, pay — that
-C20's measured "yours" allowlist already rates 87-100% truth-w; the
-two lists disagree only where the evidence is genuinely mixed (user,
-account, group, token).
+**Goal 1 is REOPENED (2026-09-12).** Its previous answer, M1-C22
+(lower a row back to `w` when the party-noun rule raised it and every
+head noun is on the tight yours list), is void: the party-noun rule no
+longer exists, so there is nothing for C22 to undo. Under the current
+shape goal 1 stands at 2727 false alarms — up from 1936 — because the
+yours-noun layer now reads every token and raises more floor rows.
+That cost was charged to goal 1 when goal 2 was frozen. Goal 1 is next.
+Past result and numbers: `docs/logs/learnings.md` (M1-C21 to C23).
 
-C22 is the fix: on any PUT/DELETE/PATCH row c15 raised to x under rule
-`live-verb` or `party-noun`, if every one of the row's cleaned head
-nouns is on the allowlist, lower the class back to w with rule
-`allowlist-wins`. This is the first rule in the project that loosens
-(x -> w), the one direction the safety spine guards, so a wrong firing
-here is a leak, not a usability cost. Adopted at variant N (party-noun
-rule only, not live-verb) with the TIGHT bar minN=5, minW=0.95, a
-106-word allowlist — deliberately tighter than goal 2's loose bar
-(D48), because this is the project's first loosening rule. Measured
-leave-one-vendor-out over the full 5465-row combined corpus: 61 of the
-522 over-tight rows rescued, at a cost of 6 new leaks; against the
-5465-row base, false alarms fall from 9.6% to 8.4% and new misses rise
-from 0 to 0.11%. Adoption is conditional on flagging: every row
-`allowlist-wins` lowers is marked review, never confident, so the 6
-leaks stay visible and the project's standing property — never
-confidently wrong in the loosening direction — survives.
-
-C23 tried reading the object noun from the path tail instead of the
-operationId head noun, and lost: 31 rescued / 5 leaks against C22's 61
-rescued / 6 leaks, and a union of both sources (48 rescued / 4 leaks)
-was offered as a safer alternative and not taken, since flagging
-already keeps a leak from being silent. Description-marker phrases
-(C21) were also measured and rejected — only one marker beat chance,
-across 28 of 5465 rows, too thin to build on. C22 is a POC
-(poc/m1/arbiter/c22.mjs), not shipped; "never ship the POC" stands.
-Full numbers are in docs/logs/learnings.md (M1-C21 through M1-C23) and
-D51.
-
-The 8.4% (461-row) false-alarm figure above counts only the
-hand-written word rules. Goal 1 owns those 461 word-rule false alarms
-and, as goal 1's C22 fix, a cost of 6 leaks charged to goal 1's
-ledger. Goal 2 owns 89 leaks and, as the price of its C20 fix, 1311
-false alarms. POST's x default gives 103 false alarms on its own.
-Combined: both shipped together (leave-one-vendor-out, 5465 rows)
-gives 95 leaks (1.7%) and 1875 false alarms (34.3%); see D52.
+Ledgers stay separate. Goal 2 owns 37 leaks. Goal 1 owns 2727 false
+alarms, of which 791 are the charged cost of goal 2's freeze (1936
+before it). POST's x floor gives 103 of those on its own. Goal 3 owns
+49. A blended number appears only on a line labelled combined, and
+there is none yet for this shape.
 
 Goal 3 (r dressed as x or w) is the same shape as goal 1, one step
 further out, and waits behind it.
