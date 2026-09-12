@@ -2953,3 +2953,95 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   Exam 4 can confirm the shape holds; it cannot pin the rate to a
   decimal.
 - Status: unlabelled and unscored.
+
+### M1-C25 — exam 4 scored once; the truth drifted, the result is not comparable (2026-09-12)
+
+- Purpose: exams 1-3 were burned (C19 derived from exam 3, C20 tuned
+  on all three, C22/C23 scored on all three), so exam 4 was drawn as
+  virgin material to score the frozen shapes. Script
+  `poc/m1/arbiter/c25.mjs`, report `docs/logs/m1/c25-exam4-score.md`,
+  run once as `node poc/m1/arbiter/c25.mjs data/exam4-2026-09-12
+  docs/logs/m1/c25-exam4-score.md`. Allowlists built once from the
+  full 5465-row corpus (goal-2 list 439 words at n>=2/minW 0.80;
+  goal-1 list 106 words at n>=5/minW 0.95). No leave-one-vendor-out
+  needed — every exam-4 provider is absent from the corpus by
+  construction.
+- Exam 4 itself: 4000 PUT/DELETE/PATCH rows, 318 providers, labelled
+  blind by agents working 200 rows at a time. Truth totals w=2970,
+  x=1006, r=24, zero '?' rows; confidence high=3158, low=842.
+- Scores on all 4000 rows, each goal on its own ledger: goal 2's own
+  ledger (c15 + C20) leaked 365 (9.1%) and its no-own-noun rule added
+  728 false alarms (18.2%). Goal 1's own ledger (c15 + C22) left 324
+  word-rule false alarms (8.1%), rescued 58 versus c15 alone, and
+  added 11 leaks charged to goal 1. c15 alone leaked 684 (17.1%) with
+  382 false alarms (9.6%). The combined line (c15 + C20 + C22) leaked
+  376 (9.4%) with 1052 false alarms (26.3%), exact 2548.
+- On high-confidence rows only (3158): c15 alone 281 leaks (8.9%);
+  c15 + C20 130 (4.1%); c15 + C22 287 (9.1%); combined 136 (4.3%).
+- Corpus predictions for comparison: goal 2 1.6% (D48); goal 1 522
+  word-rule false alarms with 61 rescued and 6 new leaks (D51).
+- The finding, and it blocks reading any of the above as a
+  wild-world result: exam 4's truth is roughly twice as x-heavy as
+  every comparable set. x-share by set — exam2 14.9%, exam3 12.6%,
+  corpus PUT/DELETE/PATCH 13.7%, exam4 25.2% — on the same draw
+  method and the same method mix. Per shared head noun exam 4 reads
+  far tighter than the corpus: model +64pp, address +42pp, role
+  +37pp, comment +37pp, state +36pp, event +36pp, organization
+  +33pp; overall shared-noun x-share 14.1% corpus versus 25.0% exam
+  4. More truth-x rows mechanically produce more x-said-w leaks.
+- Cause: exam 3's labelling brief was never saved,
+  so exam 4's was reconstructed by the orchestrator from D46, D20
+  and D28. The reconstruction lists more roads to x and carries an
+  explicit tighter-on-doubt rule. The brief is now saved at
+  `data/exam4-2026-09-12/LABELLING-BRIEF.md` so this cannot recur.
+- Normalised as a share of truth-x rows, the gap shrinks but does
+  not vanish: c15 alone misses 68% of x rows on exam 4 against 46%
+  on corpus PUT/DELETE/PATCH; c15 + C20 36% against 15%; combined
+  37% against 16%.
+- The calibration that measured the drift
+  (`data/calibration-2026-09-12/`): 200 rows drawn from exam 3's
+  blind file with a mulberry32 PRNG, seed 20260913, method mix
+  DELETE 96, PUT 73, PATCH 31, relabelled blind under exam 4's brief
+  (r=1, w=141, x=58; high=132, low=68). Against exam 3's stored
+  truth, 177 of 200 agree (89%). Confusion old->new: w->w 150, x->x
+  26, w->x 21, x->w 2, r->r 1. Flip rates: old w -> new x is
+  21/171 = 12.3%; old x -> new w is 2/28 = 7.1%. Of rows the new
+  brief called x, 26 of 47 (55.3%) were also x under the old
+  standard. x-share on those rows moved 14.0% to 23.5%. Note as a
+  reproducibility gap that the draw was done inline by the
+  orchestrator, not by a committed script.
+- Same 200 rows, same classifier, only the truth swapped: c15 + C20
+  leaked 3 under stored truth versus 11 under new-brief truth
+  (factor 3.67x); c15 alone 8 versus 21 (factor 2.63x).
+- Corrected estimates for exam 4's 9.1%: 2.5% by the leak-ratio
+  estimator — which rests on only 3 leaks and is too thin to trust
+  — and 5.0% by the surviving-x-rows estimator, which rests on 47
+  rows and is sturdier. The corpus prediction is 1.6%. Exam 4
+  back-solved to the old standard gives w about 3335 and x about
+  641, an x-share of 16.1% against exam 3's 12.6%.
+- Honest reading: goal 2's real-world leak
+  rate is somewhere around 2.5-5% against 1.6% predicted. Drift
+  explains most of the 9.1% but not all of it, so goal 2 looks
+  genuinely somewhat worse in the wild. Goal 1 transferred cleanly —
+  58 rescued and 11 leaks against 61 and 6 predicted.
+- Labelling process notes: labellers invented a `medium` confidence
+  value the brief does not define; 276 such values across parts 3,
+  5, 6, 11, 15, 16, 17, 18 and 19 were converted to `low` by the
+  orchestrator on the rule "high only if genuinely sure, anything
+  less is low". That widens the error band in the safe direction
+  but is not the labellers' own judgement — the one labeller that
+  resolved its own medium rows split them roughly half high and half
+  low, so the high-confidence share is understated. Part 20 was sent
+  back once to re-apply road 1 to money-moving and live-session rows
+  and moved 5 rows from w to x (createCreditNoteAllocation,
+  PUT_CancelCreditMemo, Object_PUTRefund, stopLiveStream,
+  stopTranscoder).
+- OPEN, not decided: two options were put to the user and neither is
+  chosen. Option A, label about 600 more exam-3 rows under the new
+  brief to turn 3 leaks into 10-15 and collapse the 2.5-5% range
+  into a single number, then restate exam 4 against the old
+  standard. Option B, relabel all 4000 exam-4 rows with a brief
+  written to match exams 2 and 3, giving one consistent standard
+  everywhere at roughly ten times the cost. The orchestrator
+  recommended A. No decisions-log row exists yet because the ruling
+  has not been made.

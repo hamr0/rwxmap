@@ -106,10 +106,19 @@ C20 is a POC (poc/m1/arbiter/c20.mjs), not shipped; "never ship the
 POC" stands. Open before it can graduate: a fresh exam 4 — exam 1,
 exam 2 and exam 3 have all now been used to hand-pick, admit, or
 sweep-score a rule change and are burned as blind material for scoring
-any further change to this rule. Exam 4 is drawn (D53,
-data/exam4-2026-09-12/, 4000 rows, 318 providers) but unlabelled;
-labelling it is the next gate before any further rule change,
-including a re-score of goal 1's C22 layer, can be scored honestly.
+any further change to this rule. Exam 4 is drawn, labelled (4000 rows, 318 providers) and scored
+once by `poc/m1/arbiter/c25.mjs`, but its result is NOT comparable
+to any earlier set — its truth is roughly twice as x-heavy (25.2% x
+against exam 2's 14.9% and exam 3's 12.6%) because its labelling
+brief was reconstructed after exam 3's was lost. Corrected for that
+drift, goal 2's wild leak rate estimates at 2.5-5% against the 1.6%
+corpus prediction, while goal 1 transferred cleanly at 58 rescued
+and 11 leaks against 61 and 6 predicted. The next gate is now the
+user's ruling between enlarging the calibration and relabelling
+exam 4, and neither has been chosen. See
+`docs/logs/learnings.md` (M1-C25),
+`data/exam4-2026-09-12/LABELLING-BRIEF.md` and
+`data/calibration-2026-09-12/`.
 Also open: "flagged" is not wired in code — C20's raises carry
 floor:false and C22's lowered rows are unmarked, so "flagged" exists
 only in how passes are reported — and must be wired before anything
