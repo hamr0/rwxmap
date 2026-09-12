@@ -5,7 +5,7 @@
 Row-level proof of every goal's current number: every truth-x, truth-w and
 truth-r row, with its predicted class and verdict, next to what the
 previously frozen shape would have predicted for the same row. Regenerate
-with `node poc/m1/goal2/proof.mjs`.
+with `node poc/m1/run/proof.mjs`.
 
 ## Corpus
 

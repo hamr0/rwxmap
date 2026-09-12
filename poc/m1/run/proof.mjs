@@ -1,16 +1,13 @@
 // Row-level proof of every goal's current number, one CSV per goal plus a
 // short markdown summary, written to run-proof/ at the repo root.
 //
-// Run: node poc/m1/goal2/proof.mjs
+// Run: node poc/m1/run/proof.mjs
 //
-// Loads and classifies exactly as measure.mjs does (same corpus loader,
-// same cleanNounTable -> nounStats -> buildLovoAllowlists(stats, vendors,
-// 2, 0.80) pipeline, leave-one-vendor-out). measure.mjs has no exported
-// helper that bundles this exact setup (it's inline in its top-level
-// script body, not a function), so the minimum of it is copied here
-// verbatim rather than editing measure.mjs. Everything classification-side
-// (loadCombinedCorpus, buildNounTable, cleanNounTable, nounStats,
-// buildLovoAllowlists, classifyC20, classifyGoal2) is imported, not
+// Loads and classifies via core/corpus.mjs (loadContext) and
+// run/pipeline.mjs (classify), the same leave-one-vendor-out setup
+// measure.mjs uses — the corpus load itself lives only in corpus.mjs.
+// Everything classification-side (the noun-table build/clean, the LOVO
+// allowlist build, classifyC20, the pipeline layers) is imported, not
 // reimplemented.
 //
 // A note on goal 2's verdict column vs its ledger number: the brief asks
@@ -35,9 +32,9 @@
 import { writeFileSync, readFileSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadCombinedCorpus, buildNounTable } from '../arbiter/c19.mjs';
-import { cleanNounTable, nounStats, buildLovoAllowlists, classifyC20 } from '../arbiter/c20.mjs';
-import { classifyGoal2 } from './goal2.mjs';
+import { classifyC20 } from '../arbiter/c20.mjs';
+import { loadContext } from '../core/corpus.mjs';
+import { classify } from './pipeline.mjs';
 import { toCsv, parseCsv } from '../../m0/csv.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -49,27 +46,16 @@ function escalate(msg) {
   process.exit(1);
 }
 
-// --- load + classify, copied minimally from measure.mjs (see file header) ---
+// --- load + classify, via core/corpus.mjs and run/pipeline.mjs ---------
 
-const { allRows } = loadCombinedCorpus();
-const vendors = [...new Set(allRows.map((r) => r.vendor))].sort();
-
-if (allRows.length !== 5465) escalate(`corpus rows ${allRows.length}, expected 5465`);
-if (vendors.length !== 332) escalate(`corpus vendors ${vendors.length}, expected 332`);
-
-const { junkSet, cleanTable } = cleanNounTable(buildNounTable(allRows));
-const stats = nounStats(cleanTable);
-const perVendorAllowlist = buildLovoAllowlists(stats, vendors, 2, 0.80); // D48 constants
-
-function allowlistFor(row) {
-  return perVendorAllowlist.get(row.vendor) || new Set();
-}
+const { rows: allRows, vendors, junkSet, allowlistFor } = loadContext();
+const ctx = { junkSet, allowlistFor };
 
 // --- classify every row once, both shapes -----------------------------
 
 const records = allRows.map((row) => {
-  const allow = allowlistFor(row);
-  const pred = classifyGoal2(row, junkSet, allow);
+  const allow = allowlistFor(row.vendor);
+  const pred = classify(row, ctx, { upTo: 'goal2' });
   const prev = classifyC20(row, junkSet, allow);
   return { row, pred, prev };
 });
@@ -233,7 +219,7 @@ const md = `# rwxmap row-level proof
 Row-level proof of every goal's current number: every truth-x, truth-w and
 truth-r row, with its predicted class and verdict, next to what the
 previously frozen shape would have predicted for the same row. Regenerate
-with \`node poc/m1/goal2/proof.mjs\`.
+with \`node poc/m1/run/proof.mjs\`.
 
 ## Corpus
 
