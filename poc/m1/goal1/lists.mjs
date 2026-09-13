@@ -72,3 +72,61 @@ export function buildGoal1LowerVerbs(pile, vendors) {
 
   return { lowerVerbsFor };
 }
+
+// D57 piece 4: goal 1's own yours-noun list — same shape as goal 2's
+// allowlist (goal2/allowlist.mjs's buildGoal2Context -> allowlistFor), the
+// other direction (this one LOWERS x -> w) and goal 1's own bar, mined
+// from goal 1's own pile. Never imports goal 2's allowlist build; only
+// reuses nounsForRow (the noun reader, not a list) as a caller-supplied
+// per-row noun set.
+//
+// The pile: every PUT/DELETE/PATCH row still at x after goal 1's
+// lower-verb rule runs (piece 3), each entry { row, nouns } where nouns
+// is that row's noun set from goal2/allowlist.mjs's nounsForRow(row,
+// ctx.junkSet) (assembled in run/context.mjs). A noun is admitted
+// leave-one-vendor-out: excluding vendor v's own rows, the remaining rows
+// bearing that noun must span >= NOUN_MIN_VENDORS distinct OTHER vendors
+// and have an x-share <= 1 - NOUN_MIN_SAFE_SHARE (i.e. non-x share >=
+// NOUN_MIN_SAFE_SHARE), with at least one row.
+export const NOUN_MIN_VENDORS = 2;
+export const NOUN_MIN_SAFE_SHARE = 0.90;
+
+export function buildGoal1YoursNouns(pile, vendors) {
+  const stat = new Map(); // noun -> { w, x, r, byVendor: Map<vendor, {w,x,r}> }
+
+  for (const entry of pile) {
+    const row = entry.row || entry;
+    const nouns = entry.nouns;
+    if (!nouns || nouns.size === 0) continue;
+    const cls = row.gt_class;
+    for (const n of nouns) {
+      if (!stat.has(n)) stat.set(n, { w: 0, x: 0, r: 0, byVendor: new Map() });
+      const t = stat.get(n);
+      t[cls] = (t[cls] || 0) + 1;
+      if (!t.byVendor.has(row.vendor)) t.byVendor.set(row.vendor, { w: 0, x: 0, r: 0 });
+      const v = t.byVendor.get(row.vendor);
+      v[cls] = (v[cls] || 0) + 1;
+    }
+  }
+
+  const perVendor = new Map();
+  for (const vendor of vendors) {
+    const admitted = new Set();
+    for (const [noun, t] of stat) {
+      const own = t.byVendor.get(vendor) || { w: 0, x: 0, r: 0 };
+      const w = t.w - own.w, x = t.x - own.x, r = t.r - own.r;
+      const n = w + x + r;
+      const otherVendors = t.byVendor.size - (t.byVendor.has(vendor) ? 1 : 0);
+      if (n > 0 && otherVendors >= NOUN_MIN_VENDORS && x / n <= 1 - NOUN_MIN_SAFE_SHARE) {
+        admitted.add(noun);
+      }
+    }
+    perVendor.set(vendor, admitted);
+  }
+
+  function yoursNounsFor(vendor) {
+    return perVendor.get(vendor) || new Set();
+  }
+
+  return { yoursNounsFor };
+}

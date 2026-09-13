@@ -49,8 +49,8 @@ function escalate(msg) {
 
 // --- load + classify, via core/corpus.mjs and run/pipeline.mjs ---------
 
-const { rows: allRows, vendors, junkSet, allowlistFor, lowerVerbsFor, frozenJunkSet, frozenAllowlistFor } = loadContext();
-const ctx = { junkSet, allowlistFor, lowerVerbsFor };
+const { rows: allRows, vendors, junkSet, allowlistFor, lowerVerbsFor, yoursNounsFor, frozenJunkSet, frozenAllowlistFor } = loadContext();
+const ctx = { junkSet, allowlistFor, lowerVerbsFor, yoursNounsFor };
 
 // --- classify every row, both shapes ------------------------------------
 //
@@ -160,7 +160,7 @@ const ledger = [
 
 const EXPECTED = [
   { previous: 89, current: 37 },
-  { previous: 1936, current: 2592 },
+  { previous: 1936, current: 2531 },
   { previous: 49, current: 49 },
 ];
 

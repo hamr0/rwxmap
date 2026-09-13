@@ -3283,3 +3283,69 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   ledger (goal 2 stayed 37 throughout) while still costing another goal
   real rows -- the two ledgers really do move independently, exactly as
   the per-goal ledger rule (D57's neighbor) predicts.
+
+### Goal 1 piece 4 -- own yours-noun list (2026-09-13)
+
+- Goal: after piece 3's lowering-verb rule, use goal 1's own
+  leave-one-vendor-out yours-noun list -- same shape as goal 2's
+  allowlist (D48), the other direction (lowers x -> w), goal 1's own
+  bar -- to free more of the false alarms still sitting at x.
+- The pile: every PUT/DELETE/PATCH row still at x after the lower-verb
+  rule runs (before piece 4 exists), read with goal 2's `nounsForRow`
+  (the reader, not a list). 3057 rows: 2489 truth-w (the false alarms
+  this piece targets), 568 truth-x (the leak risk).
+- Bar sweep (vendors >= 2, sweeping the safe-share bar): 85% -> 192
+  freed / 19 leaks; 90% -> 70 freed / 7 leaks; 95% -> 55 freed / 4
+  leaks; 100% -> 53 freed / 4 leaks. 90% adopted -- 2 vendors / 90%
+  safe, looser than goal 2's own raising bar (n>=2, w-share>=0.80 is
+  actually about as loose already) but the point is this is goal 1's
+  own bar, chosen on goal 1's own cost curve, not borrowed from goal 2.
+- Per-word hand check at the adopted bar (row freed only when the word
+  covers every noun in the row alongside other admitted nouns): user
+  17 freed / 15 leaks, account 14/2, group 12/5, organization 5/0,
+  request 7/0, order 1/6. Order is the clearest warning sign: "order"
+  reads as yours in some vendors (order status, order items) and as a
+  live third-party action in others (place an order against someone
+  else's account) -- a hand-picked word that is a genuinely different
+  API each time it appears cannot be a safe list entry, exactly the
+  kind of word the mined, per-vendor LOVO bar is built to catch and a
+  hand list would not.
+- Outcome (first pass, unrestricted -- fires on any prev.rule): leave-
+  one-vendor-out over 5465 rows -- goal 2 unchanged at 37 leaks, goal 3
+  unchanged at 49, goal 1's false alarms fall 2592 -> 2522 (70 freed),
+  goal 1's leak cost moves 0 -> 7 (all 7 flagged).
+- The 7 leaks, read one by one: amazon PUT cancelShipment; appveyor.com
+  PUT cancelDeployment "Cancel deployment"; getgo.com DELETE
+  cancelRegistration "Cancel Registration"; ticketmaster.com PATCH
+  patchEvent "Publish a patch on an event"; ote-godaddy.com DELETE
+  (unnamed operationId) "Cancel the most recent user action for the
+  specified domain"; fulfillment.com PUT put-returns "Inform us of an
+  RMA"; lufthansa.com PUT "Auto Check-In". Checking each row's
+  prev.rule (the rule that raised it to x before goal 1's own-noun rule
+  looked at it) showed 5 of the 7 -- cancelShipment, cancelDeployment,
+  cancelRegistration, patchEvent, and the ote-godaddy row -- came from
+  goal 2's LIVE-VERB raise, not the noun rule; only 2 (fulfillment.com,
+  lufthansa.com) came from goal 2's own no-own-noun raise. A noun list
+  overriding a live verb is the wrong direction of evidence -- the verb
+  said "this operation acts on something live", and no noun list should
+  get to say otherwise.
+- Fix: restricted the own-noun rule (poc/m1/goal1/goal1.mjs) to fire
+  only when prev.rule === 'no-own-noun' -- noun evidence undoing noun
+  evidence, never touching a live-verb raise, which now always stands
+  once goal 1's lower-verb rule has already had its say.
+- Outcome (restricted): leave-one-vendor-out over 5465 rows -- goal 2
+  unchanged at 37, goal 3 unchanged at 49, goal 1's false alarms fall
+  2592 -> 2531 (61 freed, 9 fewer than the unrestricted 70 -- the 5
+  live-verb rows plus 4 more that only cleared the bar in combination
+  with the now-excluded rows' contribution to the LOVO stats), goal 1's
+  leak cost moves 0 -> 2 (fulfillment.com and lufthansa.com only, both
+  flagged, charged to goal 1's own ledger).
+- Lesson: a noun rule and a verb rule are different kinds of evidence
+  and must not be allowed to overrule each other freely -- restricting
+  a lowering rule to answer only the raising rule of the *same kind*
+  (noun undoes noun) is a cheap, mechanical way to keep that boundary
+  without hand-picking exceptions. Name-only evidence is otherwise
+  close to exhausted for goal 1: what remains after this restriction is
+  still nearly 2500 false alarms, and the next evidence has to come
+  from the sentence itself (summary + description text), not from
+  which nouns appear.

@@ -12,13 +12,15 @@ test('goal 2 ledger is 37', () => {
   assert.equal(ledger.goal2.leaks, 37);
 });
 
-// moved 2026-09-13, goal 2's noun-reader junk-token fix (user's ruling)
-test('goal 1 ledger is 2592', () => {
-  assert.equal(ledger.goal1.falseAlarms, 2592);
+// moved 2026-09-13, piece 4 restricted to answering only goal 2's own
+// no-own-noun raise (61 freed, 2 leaks flagged on goal 1's own ledger,
+// D49 accepts flagged leaks)
+test('goal 1 ledger is 2531', () => {
+  assert.equal(ledger.goal1.falseAlarms, 2531);
 });
 
-test('goal 1 leak cost is 0', () => {
-  assert.equal(ledger.goal1.leakCost, 0);
+test('goal 1 leak cost is 2', () => {
+  assert.equal(ledger.goal1.leakCost, 2);
 });
 
 test('goal 3 ledger is 49', () => {

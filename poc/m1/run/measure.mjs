@@ -20,8 +20,8 @@ function escalate(msg) {
   process.exit(1);
 }
 
-const { rows: allRows, vendors, junkSet, allowlistFor, lowerVerbsFor, frozenJunkSet, frozenAllowlistFor } = loadContext();
-const ctx = { junkSet, allowlistFor, lowerVerbsFor };
+const { rows: allRows, vendors, junkSet, allowlistFor, lowerVerbsFor, yoursNounsFor, frozenJunkSet, frozenAllowlistFor } = loadContext();
+const ctx = { junkSet, allowlistFor, lowerVerbsFor, yoursNounsFor };
 
 const isGoal2Leak = (predClass, gtClass) => gtClass === 'x' && predClass === 'w';
 const isGoal1FalseAlarm = (predClass, gtClass) => gtClass === 'w' && predClass === 'x';

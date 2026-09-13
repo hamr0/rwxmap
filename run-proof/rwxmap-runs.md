@@ -19,7 +19,7 @@ Run date: 2026-09-13.
 | goal | error | previous frozen | current | delta |
 |---|---|---|---|---|
 | goal 2 | leak (truth x, predicted w) | 89 | 37 | -52 |
-| goal 1 | false alarm (truth w, predicted x) | 1936 | 2592 | 656 |
+| goal 1 | false alarm (truth w, predicted x) | 1936 | 2531 | 595 |
 | goal 3 | over-tight (truth r, predicted not r) | 49 | 49 | 0 |
 
 ## How to read a CSV
@@ -57,10 +57,10 @@ committed to the repo.
 
 ### goal1.csv — truth w (3883 rows)
 
-- error count (false alarms): 2592 (66.8%)
-- errors by method: DELETE=1162, PUT=972, PATCH=355, POST=103
+- error count (false alarms): 2531 (65.2%)
+- errors by method: DELETE=1135, PUT=942, PATCH=351, POST=103
 - errors that are floor rows: 103
-- distinct vendors among the errors: 293
+- distinct vendors among the errors: 292
 
 ### goal3.csv — truth r (646 rows)
 

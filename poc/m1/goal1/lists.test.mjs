@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildGoal1LowerVerbs, foldedVerbForRow, MIN_VENDORS, MIN_NON_X_SHARE } from './lists.mjs';
+import {
+  buildGoal1LowerVerbs, foldedVerbForRow, MIN_VENDORS, MIN_NON_X_SHARE,
+  buildGoal1YoursNouns, NOUN_MIN_VENDORS, NOUN_MIN_SAFE_SHARE,
+} from './lists.mjs';
 
 function row(overrides) {
   return { method: 'PUT', operationId: '', summary: '', description: '', path: '', vendor: 'test', gt_class: 'w', ...overrides };
@@ -53,4 +56,73 @@ test('buildGoal1LowerVerbs: a verb with too high an x-share is admitted for nobo
   const vendors = ['A', 'C', 'D', 'E', 'F', 'G'];
   const { lowerVerbsFor } = buildGoal1LowerVerbs(pile, vendors);
   assert.ok(!lowerVerbsFor('A').has('DELETE terminate'));
+});
+
+// Piece 4 — buildGoal1YoursNouns: same LOVO shape as buildGoal1LowerVerbs,
+// but keyed on nouns (bar: NOUN_MIN_VENDORS=2, NOUN_MIN_SAFE_SHARE=0.90)
+// instead of (method, verb).
+
+test('noun-list constants match goal 1\'s own bar', () => {
+  assert.equal(NOUN_MIN_VENDORS, 2);
+  assert.equal(NOUN_MIN_SAFE_SHARE, 0.90);
+});
+
+test('buildGoal1YoursNouns: LOVO exclusion — admitted for vendor A, not for vendor B whose own rows are the only x\'s', () => {
+  const pile = [];
+  for (const vendor of ['C', 'D']) {
+    for (let i = 0; i < 10; i += 1) {
+      pile.push({ row: row({ vendor, gt_class: 'w' }), nouns: new Set(['account']) });
+    }
+  }
+  pile.push({ row: row({ vendor: 'B', gt_class: 'x' }), nouns: new Set(['account']) });
+
+  const vendors = ['A', 'C', 'D', 'B'];
+  const { yoursNounsFor } = buildGoal1YoursNouns(pile, vendors);
+
+  // Vendor A: excludes nothing of its own, sees C, D, B (3 other vendors,
+  // x-share 1/21 well under 10%) -> admitted.
+  assert.ok(yoursNounsFor('A').has('account'), 'expected admission for bystander vendor A');
+  // Vendor B: excluding its own x row leaves C, D (2 other vendors,
+  // x-share now 0/20) -> also admitted — excluding the sole x contributor
+  // only helps its own admission bar, it does not punish it.
+  assert.ok(yoursNounsFor('B').has('account'), 'expected admission for vendor B too, once its own x row is excluded');
+});
+
+test('buildGoal1YoursNouns: excluding a vendor whose exclusion drops other vendors below the bar denies admission to it alone', () => {
+  const pile = [];
+  for (const vendor of ['C', 'D']) {
+    for (let i = 0; i < 10; i += 1) {
+      pile.push({ row: row({ vendor, gt_class: 'w' }), nouns: new Set(['account']) });
+    }
+  }
+  // Only C and D ever carry 'account' (2 vendors total).
+  const vendors = ['A', 'C', 'D'];
+  const { yoursNounsFor } = buildGoal1YoursNouns(pile, vendors);
+
+  // Vendor A: excludes nothing of its own, sees C, D (2 other vendors) -> admitted.
+  assert.ok(yoursNounsFor('A').has('account'), 'expected admission for bystander vendor A');
+  // Vendor C: excluding its own 10 rows leaves only D (1 other vendor),
+  // below NOUN_MIN_VENDORS (2) -> not admitted.
+  assert.ok(!yoursNounsFor('C').has('account'), 'vendor C sees only 1 other vendor (D) once its own rows are excluded');
+});
+
+test('buildGoal1YoursNouns: too few other vendors (below NOUN_MIN_VENDORS) admits nobody', () => {
+  const pile = [
+    { row: row({ vendor: 'C', gt_class: 'w' }), nouns: new Set(['widget']) },
+  ];
+  const vendors = ['A', 'C'];
+  const { yoursNounsFor } = buildGoal1YoursNouns(pile, vendors);
+  // Only 1 vendor (C) ever carries 'widget'; for vendor A that's 1 other
+  // vendor, below NOUN_MIN_VENDORS (2).
+  assert.ok(!yoursNounsFor('A').has('widget'));
+});
+
+test('buildGoal1YoursNouns: a noun with too high an x-share is admitted for nobody', () => {
+  const pile = [];
+  for (const vendor of ['C', 'D']) {
+    pile.push({ row: row({ vendor, gt_class: 'x' }), nouns: new Set(['secret']) });
+  }
+  const vendors = ['A', 'C', 'D'];
+  const { yoursNounsFor } = buildGoal1YoursNouns(pile, vendors);
+  assert.ok(!yoursNounsFor('A').has('secret'));
 });
