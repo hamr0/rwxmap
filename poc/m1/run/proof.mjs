@@ -18,10 +18,11 @@
 // predicted-w case — that is what "goal 2 leak = gt_class 'x', predicted
 // 'w'" (this brief's own fixed definition) means, and it's what reproduces
 // the numbers already committed to the repo. Measuring here: 13 truth-x
-// rows are predicted r under BOTH the frozen baseline and the new shape
-// (a read-verb rule inherited unchanged from c11/c15, untouched by either
-// goal2.mjs or c20.mjs's noun layer) — so this 13-row group is not a
-// regression of this pass, it's a pre-existing, unchanged category. Those
+// rows are predicted r under BOTH the frozen baseline and the new shape —
+// all 13 are GET rows sitting at the GET floor (rule 'floor', floor true;
+// GET runs no word rules at all), untouched by either goal2.mjs or
+// c20.mjs's noun layer — so this 13-row group is not a regression of this
+// pass, it's a pre-existing, unchanged category. Those
 // 13 rows ARE marked LEAK in goal2.csv (per the brief), but the "error
 // count" printed in the ledger and in the per-goal breakdown stays the
 // frozen strict definition (predicted w only), so it reproduces 37/89
@@ -48,15 +49,16 @@ function escalate(msg) {
 
 // --- load + classify, via core/corpus.mjs and run/pipeline.mjs ---------
 
-const { rows: allRows, vendors, junkSet, allowlistFor } = loadContext();
+const { rows: allRows, vendors, junkSet, allowlistFor, frozenJunkSet, frozenAllowlistFor } = loadContext();
 const ctx = { junkSet, allowlistFor };
 
 // --- classify every row once, both shapes -----------------------------
 
 const records = allRows.map((row) => {
-  const allow = allowlistFor(row.vendor);
   const pred = classify(row, ctx, { upTo: 'goal2' });
-  const prev = classifyC20(row, junkSet, allow);
+  // "previous" replays the frozen c15 + C20 shape exactly as frozen, so it
+  // uses the frozen (raw, unsplit) junkSet/allowlist pair.
+  const prev = classifyC20(row, frozenJunkSet, frozenAllowlistFor(row.vendor));
   return { row, pred, prev };
 });
 
@@ -148,7 +150,7 @@ const ledger = [
 
 const EXPECTED = [
   { previous: 89, current: 37 },
-  { previous: 1936, current: 2727 },
+  { previous: 1936, current: 2703 },
   { previous: 49, current: 49 },
 ];
 
@@ -161,7 +163,7 @@ ledger.forEach((row, i) => {
   }
 });
 if (ledgerMismatch) {
-  escalate('computed ledger differs from the expected 89/37, 1936/2727, 49/49 — reporting the discrepancy, not correcting it.');
+  escalate('computed ledger differs from the expected 89/37, 1936/2703, 49/49 — reporting the discrepancy, not correcting it.');
 }
 
 // --- write the three CSVs -------------------------------------------------
@@ -254,8 +256,8 @@ Run date: ${runDate}.
 Note on goal2.csv specifically: a truth-x row predicted \`r\` is an even
 further loosening than predicted \`w\`, so it is also marked \`LEAK\` in the
 \`verdict\` column (${goal2LeakRExtra} such rows here, present under both the
-current and the previous shape — a pre-existing read-verb rule unchanged by
-this pass, not a regression). The ledger's goal-2 number above stays the
+current and the previous shape — all GET rows sitting at the GET floor,
+unchanged by this pass, not a regression). The ledger's goal-2 number above stays the
 frozen strict definition (predicted \`w\` only), matching the number already
 committed to the repo.
 

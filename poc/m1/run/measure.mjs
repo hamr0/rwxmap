@@ -18,7 +18,7 @@ function escalate(msg) {
   process.exit(1);
 }
 
-const { rows: allRows, vendors, junkSet, allowlistFor } = loadContext();
+const { rows: allRows, vendors, junkSet, allowlistFor, frozenJunkSet, frozenAllowlistFor } = loadContext();
 const ctx = { junkSet, allowlistFor };
 
 const isGoal2Leak = (predClass, gtClass) => gtClass === 'x' && predClass === 'w';
@@ -42,7 +42,9 @@ function score(fn) {
   return { leaks, falseAlarms, loosening, leakRows, ruleCounts };
 }
 
-const gate = score((row) => classifyC20(row, junkSet, allowlistFor(row.vendor)));
+// GATE replays the frozen c15 + C20 shape exactly as frozen, so it uses the
+// frozen (raw, unsplit) junkSet/allowlist pair — not the splitter-aware one.
+const gate = score((row) => classifyC20(row, frozenJunkSet, frozenAllowlistFor(row.vendor)));
 if (gate.leaks !== 89) {
   escalate(`GATE printed ${gate.leaks} goal-2 leaks, expected exactly 89 — old numbers do not reproduce`);
 }
@@ -52,8 +54,8 @@ const verbsOnly = score((row) => classifyByVerb(row));
 
 let mismatch = false;
 if (fresh.leaks !== 37) { console.error(`NEW leaks ${fresh.leaks}, expected 37`); mismatch = true; }
-if (fresh.falseAlarms !== 2727) { console.error(`NEW goal-1 false alarms ${fresh.falseAlarms}, expected 2727`); mismatch = true; }
-if (mismatch) escalate('NEW did not match the reference script numbers (37 leaks / 2727 goal-1 false alarms)');
+if (fresh.falseAlarms !== 2703) { console.error(`NEW goal-1 false alarms ${fresh.falseAlarms}, expected 2703`); mismatch = true; }
+if (mismatch) escalate('NEW did not match the reference script numbers (37 leaks / 2703 goal-1 false alarms)');
 
 // regressions: leak under NEW, not under GATE. rescues: the reverse.
 const gateLeakKeys = new Set(gate.leakRows.map(({ row }) => `${row.vendor} ${row.method} ${row.operationId} ${row.path}`));
@@ -83,7 +85,7 @@ rows ${allRows.length}, vendors ${vendors.length}, leave-one-vendor-out.
 | NEW — classifyGoal2 (this module) | ${fresh.leaks} | ${fresh.falseAlarms} | ${fresh.loosening} |
 | NEW, verbs only — classifyByVerb (no noun layer) | ${verbsOnly.leaks} | ${verbsOnly.falseAlarms} | ${verbsOnly.loosening} |
 
-GATE reproduced 89 exactly: yes. NEW matched 37 leaks / 2727 goal-1 false alarms: yes.
+GATE reproduced 89 exactly: yes. NEW matched 37 leaks / 2703 goal-1 false alarms: yes.
 
 ## NEW goal-2 leaks by rule
 

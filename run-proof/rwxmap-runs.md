@@ -12,14 +12,14 @@ with `node poc/m1/run/proof.mjs`.
 5465 rows, 332 vendors. Truth split: r=646, w=3883, x=936.
 Scored leave-one-vendor-out (each row scored against an allowlist built
 from every OTHER vendor's rows). Allowlist bar: n>=2, w-share>=0.80.
-Run date: 2026-09-12.
+Run date: 2026-09-13.
 
 ## Ledger
 
 | goal | error | previous frozen | current | delta |
 |---|---|---|---|---|
 | goal 2 | leak (truth x, predicted w) | 89 | 37 | -52 |
-| goal 1 | false alarm (truth w, predicted x) | 1936 | 2727 | 791 |
+| goal 1 | false alarm (truth w, predicted x) | 1936 | 2703 | 767 |
 | goal 3 | over-tight (truth r, predicted not r) | 49 | 49 | 0 |
 
 ## How to read a CSV
@@ -40,8 +40,8 @@ Run date: 2026-09-12.
 Note on goal2.csv specifically: a truth-x row predicted `r` is an even
 further loosening than predicted `w`, so it is also marked `LEAK` in the
 `verdict` column (13 such rows here, present under both the
-current and the previous shape — a pre-existing read-verb rule unchanged by
-this pass, not a regression). The ledger's goal-2 number above stays the
+current and the previous shape — all GET rows sitting at the GET floor,
+unchanged by this pass, not a regression). The ledger's goal-2 number above stays the
 frozen strict definition (predicted `w` only), matching the number already
 committed to the repo.
 
@@ -57,8 +57,8 @@ committed to the repo.
 
 ### goal1.csv — truth w (3883 rows)
 
-- error count (false alarms): 2727 (70.2%)
-- errors by method: DELETE=1205, PUT=1051, PATCH=368, POST=103
+- error count (false alarms): 2703 (69.6%)
+- errors by method: DELETE=1194, PUT=1046, PATCH=360, POST=103
 - errors that are floor rows: 103
 - distinct vendors among the errors: 294
 

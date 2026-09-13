@@ -18,10 +18,23 @@ export function floorFor(method) {
   }
 }
 
+// arbiter.mjs's own splitTokens only splits on '_ - .' and camelCase, so an
+// operationId like 'gists/unstar' or 'delete team member' stays one token.
+// arbiter.mjs is frozen history, so the fix lives here instead: trim, then
+// collapse every run of '/' or whitespace into '_' before anything in this
+// file reads operationId — this is the one place the split lives. A
+// whitespace-only operationId trims to '' first, so it still falls back to
+// the path (rawLeadStringForRow's behaviour) exactly as before.
+export function withSplitOperationId(row) {
+  const trimmed = (row.operationId || '').trim();
+  return { ...row, operationId: trimmed.replace(/[\/\s]+/g, '_') };
+}
+
 // Floor + verb rules only, no noun evidence. One direction of travel per
 // method: POST only ever lowers off its x floor, PUT/DELETE/PATCH only
 // ever raise off their w floor.
 export function classifyByVerb(row) {
+  row = withSplitOperationId(row);
   const method = row.method;
   const floor = floorFor(method);
 
@@ -59,6 +72,7 @@ export function classifyByVerb(row) {
 // nouns, and a verb token slipping into the noun set would let it satisfy
 // the allowlist test for the wrong reason.
 export function nounsForRow(row, junkSet) {
+  row = withSplitOperationId(row);
   const out = new Set();
   for (const n of [headNounForRow(row), operationIdHeadNoun(row)]) {
     if (n && !junkSet.has(n)) out.add(n);
