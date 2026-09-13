@@ -12,15 +12,15 @@ test('goal 2 ledger is 37', () => {
   assert.equal(ledger.goal2.leaks, 37);
 });
 
-// moved 2026-09-13, piece 4 restricted to answering only goal 2's own
-// no-own-noun raise (61 freed, 2 leaks flagged on goal 1's own ledger,
-// D49 accepts flagged leaks)
-test('goal 1 ledger is 2531', () => {
-  assert.equal(ledger.goal1.falseAlarms, 2531);
+// 2026-09-13, goal 1 rebuilt as its own classifier (the user's ruling):
+// floor -> own live verbs -> own other-party noun list (LOVO, 2 vendors,
+// 30% danger share), not a layer patching goal 2's output.
+test('goal 1 false alarms is 803', () => {
+  assert.equal(ledger.goal1.falseAlarms, 803);
 });
 
-test('goal 1 leak cost is 2', () => {
-  assert.equal(ledger.goal1.leakCost, 2);
+test('goal 1 leaks is 211', () => {
+  assert.equal(ledger.goal1.leaks, 211);
 });
 
 test('goal 3 ledger is 49', () => {

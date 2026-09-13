@@ -36,7 +36,10 @@ import { fileURLToPath } from 'node:url';
 import { classifyC20 } from '../arbiter/c20.mjs';
 import { loadContext } from './context.mjs';
 import { classify } from './pipeline.mjs';
+import { classifyGoal1 } from '../goal1/goal1.mjs';
 import { toCsv, parseCsv } from '../../m0/csv.mjs';
+
+const GOAL1_METHODS = new Set(['PUT', 'DELETE', 'PATCH']);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '../../..');
@@ -49,27 +52,28 @@ function escalate(msg) {
 
 // --- load + classify, via core/corpus.mjs and run/pipeline.mjs ---------
 
-const { rows: allRows, vendors, junkSet, allowlistFor, lowerVerbsFor, yoursNounsFor, frozenJunkSet, frozenAllowlistFor } = loadContext();
-const ctx = { junkSet, allowlistFor, lowerVerbsFor, yoursNounsFor };
+const { rows: allRows, vendors, junkSet, allowlistFor, otherNounsFor, frozenJunkSet, frozenAllowlistFor } = loadContext();
+const ctx = { junkSet, allowlistFor };
+const goal1Ctx = { junkSet, otherNounsFor };
 
 // --- classify every row, both shapes ------------------------------------
 //
-// Each goal's CSV is classified at that goal's OWN pipeline stage —
-// goal2.csv at upTo 'goal2', goal1.csv at 'goal1', goal3.csv at 'goal3' —
-// the same rule run/ledger.mjs's computeLedger already follows. A row is
-// never classified further downstream than the goal whose CSV it is
-// going into, so a later goal's layer (e.g. goal 1 starting to lower
-// rows) can never leak into an earlier goal's ledger or CSV. "previous"
-// replays the frozen c15 + C20 shape exactly as frozen (it has no
-// per-goal stages), so it uses the frozen (raw, unsplit) junkSet/allowlist
-// pair and is computed once, the same for every goal.
+// goal2.csv and goal3.csv are classified at that goal's OWN pipeline
+// stage (upTo 'goal2' / 'goal3') — the same rule run/ledger.mjs's
+// computeLedger already follows. goal1.csv is NOT a pipeline stage: goal
+// 1 is its own standalone classifier (the user's ruling, 2026-09-13), so
+// its rows are classified directly with classifyGoal1, never chained
+// through goal 2's output. "previous" replays the frozen c15 + C20 shape
+// exactly as frozen (it has no per-goal stages), so it uses the frozen
+// (raw, unsplit) junkSet/allowlist pair and is computed once, the same
+// for every goal.
 function withPrev(row) {
   const prev = classifyC20(row, frozenJunkSet, frozenAllowlistFor(row.vendor));
   return { row, prev };
 }
 
 const atGoal2 = allRows.map((row) => ({ ...withPrev(row), pred: classify(row, ctx, { upTo: 'goal2' }) }));
-const atGoal1 = allRows.map((row) => ({ ...withPrev(row), pred: classify(row, ctx, { upTo: 'goal1' }) }));
+const atGoal1 = allRows.map((row) => ({ ...withPrev(row), pred: classifyGoal1(row, goal1Ctx) }));
 const atGoal3 = allRows.map((row) => ({ ...withPrev(row), pred: classify(row, ctx, { upTo: 'goal3' }) }));
 
 // --- per-goal CSV row shaping -------------------------------------------
@@ -134,12 +138,36 @@ const goal2 = buildGoalCsv(
   (cls) => cls === 'w',
 );
 
-// goal 1: truth w, classified at upTo 'goal1'. error = predicted x.
-const goal1Records = atGoal1.filter((r) => r.row.gt_class === 'w');
+// goal 1: truth w, classified by classifyGoal1 directly (not a pipeline
+// stage). Scoped to goal 1's own raise-eligible methods (PUT/DELETE/
+// PATCH) — classifyGoal1 returns every other method's untouched floor,
+// and a truth-w POST row sitting at the POST floor's default 'x' is a
+// floor-level mismatch goal 1 never produced or could fix, not its
+// error to carry (matches the reference measurement, g1block.mjs, and
+// run/ledger.mjs's own scoping). error = predicted x.
+const goal1Records = atGoal1.filter((r) => r.row.gt_class === 'w' && GOAL1_METHODS.has(r.row.method));
 const goal1 = buildGoalCsv(
   goal1Records,
   (cls) => (cls === 'x') ? 'FALSE-ALARM' : 'ok',
   (cls) => cls === 'x',
+);
+// The ledger's "previous" column for goal 1 stays the historical,
+// unscoped number (1936, matching the number already committed to the
+// repo) — computed over every truth-w row under the frozen shape, not
+// goal 1's own PUT/DELETE/PATCH scoping (that scoping is specific to
+// goal 1's own classifier, not the frozen c15+C20 shape it is compared
+// against).
+const goal1PrevUnscoped = atGoal1
+  .filter((r) => r.row.gt_class === 'w')
+  .filter((r) => r.prev.class === 'x').length;
+
+// goal 1's own leaks (its ledger's other number): truth x rows, scoped
+// the same way, predicted w by classifyGoal1.
+const goal1LeakRecords = atGoal1.filter((r) => r.row.gt_class === 'x' && GOAL1_METHODS.has(r.row.method));
+const goal1Leaks = buildGoalCsv(
+  goal1LeakRecords,
+  (cls) => (cls === 'w') ? 'LEAK' : 'ok',
+  (cls) => cls === 'w',
 );
 
 // goal 3: truth r, classified at upTo 'goal3'. error = predicted not r.
@@ -154,13 +182,13 @@ const goal3 = buildGoalCsv(
 
 const ledger = [
   { goal: 'goal 2 (leak)', previous: goal2.prevErrorCount, current: goal2.errorCount },
-  { goal: 'goal 1 (false alarm)', previous: goal1.prevErrorCount, current: goal1.errorCount },
+  { goal: 'goal 1 (false alarm)', previous: goal1PrevUnscoped, current: goal1.errorCount },
   { goal: 'goal 3 (over-tight)', previous: goal3.prevErrorCount, current: goal3.errorCount },
 ];
 
 const EXPECTED = [
   { previous: 89, current: 37 },
-  { previous: 1936, current: 2531 },
+  { previous: 1936, current: 803 },
   { previous: 49, current: 49 },
 ];
 
@@ -173,7 +201,11 @@ ledger.forEach((row, i) => {
   }
 });
 if (ledgerMismatch) {
-  escalate('computed ledger differs from the expected 89/37, 1936/2592, 49/49 — reporting the discrepancy, not correcting it.');
+  escalate('computed ledger differs from the expected 89/37, 1936/803, 49/49 — reporting the discrepancy, not correcting it.');
+}
+
+if (goal1Leaks.errorCount !== 211) {
+  escalate(`goal 1 leaks computed ${goal1Leaks.errorCount}, expected exactly 211 — old numbers do not reproduce`);
 }
 
 // --- write the three CSVs -------------------------------------------------
@@ -183,6 +215,7 @@ mkdirSync(OUT_DIR, { recursive: true });
 const csvOut = {
   'goal2.csv': goal2,
   'goal1.csv': goal1,
+  'goal1-leaks.csv': goal1Leaks,
   'goal3.csv': goal3,
 };
 
@@ -216,11 +249,15 @@ function vendorErrorCount(rows, errorPredCls) {
   return new Set(rows.filter((r) => errorPredCls(r.predicted)).map((r) => r.vendor)).size;
 }
 
-const truthSplit = { r: goal3Records.length, w: goal1Records.length, x: goal2Records.length };
+// Corpus-wide truth split, unscoped (goal1Records/goal1LeakRecords are
+// scoped to goal 1's own PUT/DELETE/PATCH population — see below).
+const allTruthW = atGoal1.filter((r) => r.row.gt_class === 'w').length;
+const truthSplit = { r: goal3Records.length, w: allTruthW, x: goal2Records.length };
 const runDate = new Date().toISOString().slice(0, 10);
 
 const goal2ErrCls = (cls) => cls === 'w';
 const goal1ErrCls = (cls) => cls === 'x';
+const goal1LeakErrCls = (cls) => cls === 'w';
 const goal3ErrCls = (cls) => cls !== 'r';
 const goal2LeakRExtra = goal2.rows.filter((r) => r.verdict === 'LEAK' && r.predicted === 'r').length;
 
@@ -247,6 +284,7 @@ Run date: ${runDate}.
 | goal 2 | leak (truth x, predicted w) | ${ledger[0].previous} | ${ledger[0].current} | ${ledger[0].current - ledger[0].previous} |
 | goal 1 | false alarm (truth w, predicted x) | ${ledger[1].previous} | ${ledger[1].current} | ${ledger[1].current - ledger[1].previous} |
 | goal 3 | over-tight (truth r, predicted not r) | ${ledger[2].previous} | ${ledger[2].current} | ${ledger[2].current - ledger[2].previous} |
+| goal 1 (info) | leak (truth x, predicted w, goal 1's own classifier) | ${goal1Leaks.prevErrorCount} | ${goal1Leaks.errorCount} | ${goal1Leaks.errorCount - goal1Leaks.prevErrorCount} |
 
 ## How to read a CSV
 
@@ -281,12 +319,26 @@ committed to the repo.
 - errors that are floor rows: ${floorErrorCount(goal2.rows, goal2ErrCls)}
 - distinct vendors among the errors: ${vendorErrorCount(goal2.rows, goal2ErrCls)}
 
-### goal1.csv — truth w (${goal1Records.length} rows)
+### goal1.csv — truth w, PUT/DELETE/PATCH only (${goal1Records.length} of ${allTruthW} truth-w rows)
+
+Goal 1 is a standalone classifier (its own live-verb list, then its own
+other-party noun list), scored only on the methods it classifies — a
+truth-w POST/GET/HEAD/OPTIONS row is excluded here, since goal 1 never
+touches it (classifyGoal1 returns that row's untouched method floor).
 
 - error count (false alarms): ${goal1.errorCount} (${pct(goal1.errorCount, goal1Records.length)})
 - errors by method: ${methodBreakdown(goal1.rows, goal1ErrCls)}
 - errors that are floor rows: ${floorErrorCount(goal1.rows, goal1ErrCls)}
 - distinct vendors among the errors: ${vendorErrorCount(goal1.rows, goal1ErrCls)}
+
+### goal1-leaks.csv — truth x, PUT/DELETE/PATCH only (${goal1LeakRecords.length} rows)
+
+Goal 1's other ledger number: truth-x rows its own classifier predicts w.
+
+- error count (leaks): ${goal1Leaks.errorCount} (${pct(goal1Leaks.errorCount, goal1LeakRecords.length)})
+- errors by method: ${methodBreakdown(goal1Leaks.rows, goal1LeakErrCls)}
+- errors that are floor rows: ${floorErrorCount(goal1Leaks.rows, goal1LeakErrCls)}
+- distinct vendors among the errors: ${vendorErrorCount(goal1Leaks.rows, goal1LeakErrCls)}
 
 ### goal3.csv — truth r (${goal3Records.length} rows)
 
@@ -319,7 +371,8 @@ function checkCsvCount(name, expectedTotal) {
 }
 
 const goal2Rows = checkCsvCount('goal2.csv', 936);
-const goal1Rows = checkCsvCount('goal1.csv', 3883);
+const goal1Rows = checkCsvCount('goal1.csv', 3776);
+const goal1LeaksRows = checkCsvCount('goal1-leaks.csv', 605);
 const goal3Rows = checkCsvCount('goal3.csv', 646);
 
 function checkErrorCount(name, rows, errorFn, expected) {
@@ -330,6 +383,7 @@ function checkErrorCount(name, rows, errorFn, expected) {
 
 checkErrorCount('goal2.csv', goal2Rows, (r) => r.predicted === 'w' && r.truth === 'x', goal2.errorCount);
 checkErrorCount('goal1.csv', goal1Rows, (r) => r.predicted === 'x' && r.truth === 'w', goal1.errorCount);
+checkErrorCount('goal1-leaks.csv', goal1LeaksRows, (r) => r.predicted === 'w' && r.truth === 'x', goal1Leaks.errorCount);
 checkErrorCount('goal3.csv', goal3Rows, (r) => r.predicted !== 'r' && r.truth === 'r', goal3.errorCount);
 
 const allSelfChecksPass = selfCheckResults.every((r) => r.ok);

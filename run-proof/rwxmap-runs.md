@@ -19,8 +19,9 @@ Run date: 2026-09-13.
 | goal | error | previous frozen | current | delta |
 |---|---|---|---|---|
 | goal 2 | leak (truth x, predicted w) | 89 | 37 | -52 |
-| goal 1 | false alarm (truth w, predicted x) | 1936 | 2531 | 595 |
+| goal 1 | false alarm (truth w, predicted x) | 1936 | 803 | -1133 |
 | goal 3 | over-tight (truth r, predicted not r) | 49 | 49 | 0 |
+| goal 1 (info) | leak (truth x, predicted w, goal 1's own classifier) | 89 | 211 | 122 |
 
 ## How to read a CSV
 
@@ -55,12 +56,26 @@ committed to the repo.
 - errors that are floor rows: 37
 - distinct vendors among the errors: 27
 
-### goal1.csv — truth w (3883 rows)
+### goal1.csv — truth w, PUT/DELETE/PATCH only (3776 of 3883 truth-w rows)
 
-- error count (false alarms): 2531 (65.2%)
-- errors by method: DELETE=1135, PUT=942, PATCH=351, POST=103
-- errors that are floor rows: 103
-- distinct vendors among the errors: 292
+Goal 1 is a standalone classifier (its own live-verb list, then its own
+other-party noun list), scored only on the methods it classifies — a
+truth-w POST/GET/HEAD/OPTIONS row is excluded here, since goal 1 never
+touches it (classifyGoal1 returns that row's untouched method floor).
+
+- error count (false alarms): 803 (21.3%)
+- errors by method: DELETE=419, PUT=291, PATCH=93
+- errors that are floor rows: 0
+- distinct vendors among the errors: 203
+
+### goal1-leaks.csv — truth x, PUT/DELETE/PATCH only (605 rows)
+
+Goal 1's other ledger number: truth-x rows its own classifier predicts w.
+
+- error count (leaks): 211 (34.9%)
+- errors by method: PUT=93, DELETE=76, PATCH=42
+- errors that are floor rows: 211
+- distinct vendors among the errors: 92
 
 ### goal3.csv — truth r (646 rows)
 

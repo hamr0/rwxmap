@@ -42,7 +42,7 @@ leave-one-vendor-out. Truth split: 936 x, 3883 w, 646 r.
 | # | error | count | where it lives | why it matters |
 |---|---|---|---|---|
 | 2 | **x dressed as w** | 37 (4.0% of truth-x) — FROZEN 2026-09-12 | DELETE 18, PUT 14, PATCH 5; all floor rows | a dangerous operation is treated as a safe write — this is the leak |
-| 1 | **w dressed as x** | 2531 (65.2% of truth-w) — REOPENED | PUT/DELETE/PATCH floor rows raised by the yours-noun layer | a safe write is treated as dangerous, so it gets blocked when it should not be |
+| 1 | **w dressed as x** | 803 false alarms (21.3% of the 3776 PUT/DELETE/PATCH truth-w rows), 211 leaks — on goal 1's own ledger, STANDALONE 2026-09-13 | goal 1's own live-verb + other-party-noun classifier, scored over its own 4406-row PUT/DELETE/PATCH population (3776 truth w, 605 truth x) | a safe write is treated as dangerous, so it gets blocked when it should not be |
 | 3 | **r dressed as x or w** | 49 | POST 24 (r->x), PUT 14, DELETE 5, PATCH 6 | a pure read is treated as a write. Deferred: smallest and least harmful |
 
 Attack order is 2, then 1, then 3. One goal at a time: while a goal is
@@ -50,50 +50,63 @@ open, everything outside it — the other goals, other methods, other
 vendors — is out of focus and is not chased. That isolation is what
 stops the noise that caused the earlier repeated failures. (D47)
 
-Goal 1 (w dressed as x) is open now. Goal 2 is frozen at 37, below.
+Goal 1 (w dressed as x) is its own standalone classifier now
+(2026-09-13, the user's ruling — see below). Goal 2 is frozen at 37,
+below.
 
-### The shape (core in poc/m1/core, goal 2 layer in poc/m1/goal2)
+### Two flows, not one pipeline (core in poc/m1/core; goal 2 in poc/m1/goal2; goal 1 in poc/m1/goal1)
 
-Two word lists, not three. The hand-written third-party noun list is
-gone.
+Goal 2 and goal 1 are two separate, standalone classifiers over the same
+PUT/DELETE/PATCH rows — not two stages of one chain. Each answers the
+question its own way, from its own evidence; goal 1 never sees or
+touches goal 2's output. Bringing the two into a single combined answer
+is a later step, not done here (the user's ruling, 2026-09-13).
 
 | list | owner | size | job |
 |---|---|---|---|
 | `LIVE_VERBS`, hand-written | goal 2 | 26 | raise a `w`-floor row off its floor |
+| `LIVE_VERBS`, a literal copy of goal 2's (D57: copy, never import) | goal 1 | 26 | raise a `w`-floor row off its floor, goal 1's own copy |
 | `READ_VERBS`, hand-written | goal 3 | 14 | lower an `x`-floor row off its floor |
 | yours-nouns — mined allowlist, n>=2 rows, w-share>=0.80 | goal 2 | 439 | hold a floor row at `w` |
+| other-party nouns — mined leave-one-vendor-out blocklist, other vendors>=2, danger (truth-x) share>=0.30 | goal 1 | ~130 words per vendor, mined fresh per vendor | raise a floor row to `x` |
 
-Flow for one row:
+**Goal 2 (frozen), for one row:**
 
-1. **Floor by method** (core). GET/HEAD/OPTIONS `r`; POST `x`;
-   PUT/DELETE/PATCH `w`.
-2. **Goal 2 — live verb.** PUT/DELETE/PATCH rows still at the `w` floor:
-   a live verb (in the operationId, else the summary's lead verb) raises
-   to `x`, unless the summary carries a caller phrase. No hit: stay at
-   the floor, marked `floor`.
-3. **Goal 2 — yours-nouns.** Only on PUT/DELETE/PATCH rows still at the
-   `w` floor after step 2. Take every noun token in the operation name
-   (both head nouns plus every other token, singularised, verbs
-   stripped, path placeholders/version tags/filler words dropped as
-   junk). All on the yours list → stay `w`. Any not → `x`, rule
-   `no-own-noun`.
-4. **Goal 1 — lowering verb.** A PUT/DELETE/PATCH row still at `x`
-   (raised by goal 2, or by the floor's own live-verb evidence) whose
-   summary lead verb is on goal 1's own leave-one-vendor-out list
-   lowers to `w`, flagged.
-5. **Goal 1 — own-noun.** Undoes only goal 2's own `no-own-noun` raise —
-   never a `live-verb` raise, which stands. Else, if the row is still at
-   `x` on PUT/DELETE/PATCH and `prev.rule === 'no-own-noun'`: read its
-   noun set (goal 2's `nounsForRow`, the reader not a list) and lower to
-   `w`, flagged, when every noun is on goal 1's own leave-one-vendor-out
-   yours-noun list (bar 2 vendors, 90% safe — goal 1's own bar, not
-   goal 2's).
-6. **Goal 3 — read verb.** POST rows still at the `x` floor: a read verb
-   lowers to `r`.
+1. **Floor by method** (core). PUT/DELETE/PATCH `w`.
+2. **Live verb.** A live verb (in the operationId, else the summary's
+   lead verb) raises to `x`, unless the summary carries a caller phrase.
+   No hit: stay at the floor, marked `floor`.
+3. **Yours-nouns.** Only if still at the `w` floor after step 2. Take
+   every noun token in the operation name (both head nouns plus every
+   other token, singularised, verbs stripped, path placeholders/version
+   tags/filler words dropped as junk). All on the vendor's mined
+   allowlist → stay `w`. Any not → `x`, rule `no-own-noun`.
 
-Nothing is hand-listed as "someone else's". Via negativa: a noun is
-third-party unless the corpus says it is yours. Spec read from live
-code: `docs/product/goal2-solution.md`.
+**Goal 1 (standalone), for the same row, independently:**
+
+1. **Floor by method** (core). PUT/DELETE/PATCH `w`; every other method
+   returns that method's own untouched floor — goal 1 has no rule for
+   GET/HEAD/OPTIONS/POST rows and never classifies them.
+2. **Live verb, goal 1's own copy.** The same live-verb check as goal
+   2's, using goal 1's own `LIVE_VERBS` (a literal copy of goal 2's 26
+   words — D57 allows copying entries, never importing another goal's
+   list). Raises a `w`-floor row to `x`, rule `live-verb`.
+3. **Other-party noun.** Only if still at the `w` floor after step 2.
+   Read the row's noun set with goal 2's `nounsForRow` (the reader, not
+   a list — reused, never goal 2's evidence). Mined leave-one-vendor-out
+   over ALL PUT/DELETE/PATCH rows: a noun is "someone else's" for vendor
+   v when, excluding v's own rows, it appears across >=2 other vendors
+   with a danger (truth-x) share >=30%. Any noun on that list → `x`,
+   rule `other-noun`. No hit: stay `w`, floor.
+
+Goal 3 still runs as its own pipeline stage, after goal 2 (POST rows
+still at the `x` floor: a read verb lowers to `r`); it is unaffected by
+goal 1's rebuild.
+
+Nothing goal 1 raises on is hand-listed as "someone else's" — the
+other-party list is mined the same via-negativa way goal 2's yours-noun
+list is, just in the opposite direction and off goal 1's own bar. Spec
+for goal 2 read from live code: `docs/product/goal2-solution.md`.
 
 The operationId is split on `_ - .`, camelCase, `/` and whitespace
 before any rule reads it; the splitter lives in core (D58).
@@ -101,49 +114,58 @@ before any rule reads it; the splitter lives in core (D58).
 ### How the goals stay separate
 
 Goals 1 and 2 judge the same rows — PUT/DELETE/PATCH at the `w`
-floor — from opposite sides: raise too much and goal 1 grows, hold too
-much and goal 2 grows. No rule can move one and be unable to touch the
-other. So separation is enforced in code, tests and ledgers, not
-assumed.
+floor — but as two independent, standalone classifiers, not opposite
+sides of one chain (the user's ruling, 2026-09-13). Each goal's row =
+its own full classifier: its own live-verb copy plus its own
+other-party (goal 1) or yours-noun (goal 2) list, run start to finish
+over the same rows, never reading or moving the other's output. So
+separation is enforced in code, tests and ledgers, not assumed.
 
 | folder | owns | may move a row |
 |---|---|---|
 | `poc/m1/core/` | floor table, the operationId splitter, row loading | — (shared; changes need every pin green) |
 | `poc/m1/goal2/` | live-verb rule, the yours-noun layer, the allowlist build | raise only (`w` → `x`) |
-| `poc/m1/goal1/` | lower-back layer: its own mined lowering-verb list + its own yours-noun list | lower only (`x` → `w`), every lowered row flagged |
+| `poc/m1/goal1/` | its own standalone classifier: own `LIVE_VERBS` copy + own mined other-party noun list | its own full classify, floor → raise; never chained onto goal 2's output |
 | `poc/m1/goal3/` | read-verb layer | lower to `r` only |
-| `poc/m1/run/` | the one fixed order, the ledgers, the proof | — |
+| `poc/m1/run/` | the one fixed pipeline order (floor → goal 2 → goal 3), the ledgers, the proof; goal 1 runs standalone, outside that order | — |
 
 Rules:
 
 1. **One order, written once** (`run/pipeline.mjs`): floor → goal 2 →
-   goal 1 → goal 3. Nobody reorders.
-2. **One direction per layer.** The pipeline throws if a layer moves a
-   row the wrong way.
-3. **A goal may not turn another goal's knob.** Goal 1 may not change
-   the floor table, or any goal's word lists or allowlist bar; those
-   belong to core, goal 2 and goal 3. It can only add its own evidence.
+   goal 3. Nobody reorders. Goal 1 is not in this order — it is a
+   standalone classifier (`classifyGoal1`) run separately, over the same
+   rows, by `run/ledger.mjs`, `run/measure.mjs` and `run/proof.mjs`
+   directly; nobody chains it onto the pipeline's output.
+2. **One direction per layer.** The pipeline throws if a goal-2 or
+   goal-3 layer moves a row the wrong way. Goal 1, being standalone, has
+   no such guard to satisfy — its own rule order (floor → live-verb →
+   other-noun) is fixed by `classifyGoal1` itself, raise only.
+3. **A goal may not turn another goal's knob.** Goal 1's own classifier
+   reuses core's floor and goal 2's noun reader (`nounsForRow`) as
+   read-only inputs; it never imports another goal's word list, reads
+   another goal's evidence, or writes to another goal's ledger.
 4. **Each goal's number is pinned by its own test**
-   (`run/ledger.test.mjs`): goal 2 = 37, goal 1 = 2531 (leak cost 2),
-   goal 3 = 49. A change that moves another goal's pin turns that test
-   red; the pin moves only by a ruling recorded here.
+   (`run/ledger.test.mjs`): goal 2 = 37, goal 1 = 803 false alarms (211
+   leaks, both on goal 1's own ledger), goal 3 = 49. A change that moves
+   another goal's pin turns that test red; the pin moves only by a
+   ruling recorded here.
 5. **Each goal has its own ledger.** Goal 2 is measured through its own
-   layer; goal 1 through its own; a goal's leak cost (rows its layer
-   loosened into a leak) is charged to that goal. A stacked number
-   appears only on a line labelled combined.
+   pipeline stage; goal 1 by running its own classifier directly; goal 1
+   is scored, both false alarms and leaks, over its own 4406-row
+   PUT/DELETE/PATCH population (see below) — never blended with goal
+   2's. A stacked number appears only on a line labelled combined.
 6. **Each goal owns its own word lists** (D57): a goal never imports
    another goal's list, though it may copy entries that genuinely
    apply. Core holds only what is truly shared — the floor and the
    splitter, no lists. Goal 2 owns `LIVE_VERBS` (26) and the
    yours-noun allowlist (439); goal 3 owns `READ_VERBS` (14); goal 1
-   owns its own mined lowering-verb list (4 words today: PUT enable,
-   mark, edit, save) and its own mined yours-noun list (piece 4, bar 2
-   vendors/90% safe, restricted to undoing only goal 2's own
-   `no-own-noun` raise — never a `live-verb` raise), both built
-   leave-one-vendor-out from goal 1's own pile, never goal 2's.
+   owns its own `LIVE_VERBS` (26, a literal copy of goal 2's) and its
+   own mined other-party noun list (leave-one-vendor-out, other
+   vendors>=2, danger share>=0.30), both built fresh from goal 1's own
+   pile, never goal 2's.
 
 Run: `node poc/m1/run/measure.mjs` (gate + scores),
-`node --test poc/m1/run/ledger.test.mjs` (the five per-goal pins) and
+`node --test poc/m1/run/ledger.test.mjs` (the per-goal pins) and
 `node poc/m1/run/proof.mjs` (row-level CSVs in `run-proof/`).
 
 **Goal 2 is FROZEN at 37 (2026-09-12).** The shape above, measured
@@ -171,45 +193,48 @@ only on the row result, not as a reported state — and must be before
 anything graduates. The shape is a POC; "never ship the POC" stands.
 Row-level results for every goal: `run-proof/`, regenerated by `node poc/m1/run/proof.mjs`.
 
-**Goal 1 is REOPENED (2026-09-12).** Its previous answer, M1-C22
-(lower a row back to `w` when the party-noun rule raised it and every
-head noun is on the tight yours list), is void: the party-noun rule no
-longer exists, so there is nothing for C22 to undo. Under the current
-shape goal 1 stood at 2727 false alarms at the freeze — up from 1936 —
-because the yours-noun layer now reads every token and raises more
-floor rows. That cost was charged to goal 1 when goal 2 was frozen.
-The splitter fix (D58) then freed 24 of those, so goal 1 stood at
-2703. Piece 3 then adopted a lowering-verb rule with goal 1's own
-leave-one-vendor-out list (mined from goal 1's own pile, never goal
-2's): 53 rows fixed, 0 leaks, moving goal 1 from 2703 to 2650. Goal 2's
-noun reader then stopped reading `{id}`, `v1` and filler words (from,
-using, or, and, ...) as nouns, freeing a further 58 false alarms at
-zero leak cost, moving goal 1 from 2650 to 2592. Piece 4 then adds
-goal 1's own yours-noun list (bar 2 vendors, 90% safe): unrestricted it
-freed 70 at a cost of 7 leaks, but 5 of those 7 were rows goal 2 had
-raised on a live verb (cancelShipment, cancelDeployment,
-cancelRegistration, patchEvent "Publish a patch on an event", and
-ote-godaddy's "Cancel the most recent user action") — a noun list must
-not override verb evidence, so the rule was restricted to answering
-only goal 2's own `no-own-noun` raise. Restricted: 61 freed, 2 leaks
-(fulfillment.com "Inform us of an RMA", lufthansa "Auto Check-In"),
-both flagged, charged to goal 1 (D49 accepts flagged leaks);
-2592 → 2531.
-Past result and numbers: `docs/logs/learnings.md` (M1-C21 to C23, and
-pieces 3 and 4, 2026-09-13).
+**Goal 1 is rebuilt as its own standalone classifier (2026-09-13, the
+user's ruling).** It is no longer a layer that patches goal 2's
+output — goal 1 and goal 2 are two separate lenses over the same
+PUT/DELETE/PATCH rows; bringing them together into one combined answer
+is a later step, not done here. The earlier "lower-back" design
+(D60-D62: a mined lowering-verb rule, then a mined own-noun rule, both
+restricted to only ever undoing a raise goal 2 itself had made) moved
+goal 1 from 2727 to 2531 false alarms, but by construction it could only
+ever undo what goal 2 raised — it inherited goal 2's own curve rather
+than answering the question on its own evidence. That design is
+retired; its numbers, its bar sweeps and the reasoning behind each piece
+move to `docs/logs/learnings.md` (2026-09-13 entry) and are not carried
+forward here.
 
-Ledgers stay separate. Goal 2 owns 37 leaks, unchanged by this fix.
-Goal 1 owns 2531 false alarms (leak cost 2). At the freeze it was 2727,
-of which 791 were the charged cost of goal 2's freeze (1936 before
-it). D58's splitter fix then freed 24 (to 2703); piece 3's
-lowering-verb rule then freed a further 53 at zero leak cost (to
-2650); goal 2's junk-token noun-reader fix then freed a further 58 at
-zero leak cost (to 2592); piece 4's own yours-noun list, restricted to
-answering only goal 2's `no-own-noun` raise, then freed a further 61 at
-a cost of 2 flagged leaks charged to goal 1 (to 2531).
-POST's x floor gives 103 of those on its own. Goal 3 owns 49. A
-blended number appears only on a line labelled combined, and there is
-none yet for this shape.
+State the base plainly: goal 1's ledger is scored only over the 4406
+PUT/DELETE/PATCH rows (3776 truth w, 605 truth x) — the same population
+its own classifier classifies, matching the reference measurement.
+The corpus's other 103 truth-w rows are POST rows sitting at the POST
+floor's own default (`x`); that mismatch belongs to the POST floor, not
+to goal 1 — `classifyGoal1` returns every non-PUT/DELETE/PATCH row's
+floor untouched and never assigns it a class of its own, so it cannot
+be charged for a row it never classifies.
+
+The new shape (see "Two flows" above): floor `w` → goal 1's own
+live-verb list (a literal copy of goal 2's 26 words) raises to `x` →
+if still `w`, goal 1's own mined other-party noun list raises to `x`
+when any noun on the row is "someone else's" for that vendor
+(leave-one-vendor-out: excluding the row's own vendor, the noun appears
+across >=2 other vendors with a danger, truth-x, share >=30%). Bar
+sweep across the full 4406-row population: 30% → 803 false alarms / 211
+leaks (adopted); 40% → 472/251; 50% → 268/382. Unlike goal 2's
+yours-noun allowlist, this is not a zero-leak design — tightening the
+bar trades false alarms for leaks close to one-for-one at this end of
+the curve, and 211 leaks sit on goal 1's own ledger, charged nowhere
+else. Full sweep and reasoning: `docs/logs/learnings.md` (2026-09-13
+entry, "Goal 1 rebuilt as its own classifier").
+
+Ledgers stay separate. Goal 2 owns 37 leaks, unaffected by this
+rebuild. Goal 1 owns 803 false alarms and 211 leaks, both on its own
+ledger, both scored over its own 4406-row PUT/DELETE/PATCH population.
+Goal 3 owns 49. A blended number appears only on a line labelled
+combined, and there is none yet for this shape.
 
 Goal 3 (r dressed as x or w) is the same shape as goal 1, one step
 further out, and waits behind it.

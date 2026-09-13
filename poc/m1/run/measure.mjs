@@ -12,6 +12,7 @@ import { classifyC20 } from '../arbiter/c20.mjs';
 import { classifyFloor } from '../core/core.mjs';
 import { applyLiveVerb } from '../goal2/goal2.mjs';
 import { applyGoal3 } from '../goal3/goal3.mjs';
+import { classifyGoal1 } from '../goal1/goal1.mjs';
 import { loadContext } from './context.mjs';
 import { classify } from './pipeline.mjs';
 
@@ -20,12 +21,14 @@ function escalate(msg) {
   process.exit(1);
 }
 
-const { rows: allRows, vendors, junkSet, allowlistFor, lowerVerbsFor, yoursNounsFor, frozenJunkSet, frozenAllowlistFor } = loadContext();
-const ctx = { junkSet, allowlistFor, lowerVerbsFor, yoursNounsFor };
+const { rows: allRows, vendors, junkSet, allowlistFor, otherNounsFor, frozenJunkSet, frozenAllowlistFor } = loadContext();
+const ctx = { junkSet, allowlistFor };
+const goal1Ctx = { junkSet, otherNounsFor };
 
 const isGoal2Leak = (predClass, gtClass) => gtClass === 'x' && predClass === 'w';
 const isGoal1FalseAlarm = (predClass, gtClass) => gtClass === 'w' && predClass === 'x';
 const isLoosening = (predClass, gtClass) => CLASS_ORDER[predClass] < CLASS_ORDER[gtClass];
+const GOAL1_METHODS = new Set(['PUT', 'DELETE', 'PATCH']);
 
 function score(fn) {
   let leaks = 0, falseAlarms = 0, loosening = 0;
@@ -52,7 +55,22 @@ if (gate.leaks !== 89) {
 }
 
 const fresh = score((row) => classify(row, ctx, { upTo: 'goal2' }));
-const atGoal1 = score((row) => classify(row, ctx, { upTo: 'goal1' }));
+
+// Goal 1 standalone: its own classifier, scored on its own raise-eligible
+// population (PUT/DELETE/PATCH), matching the reference measurement
+// (g1block.mjs) — not a pipeline stage, never chained onto goal 2's
+// output (the user's ruling, 2026-09-13).
+let goal1FalseAlarms = 0, goal1Leaks = 0;
+for (const row of allRows) {
+  if (!GOAL1_METHODS.has(row.method)) continue;
+  const res = classifyGoal1(row, goal1Ctx);
+  if (isGoal1FalseAlarm(res.class, row.gt_class)) goal1FalseAlarms += 1;
+  if (isGoal2Leak(res.class, row.gt_class)) goal1Leaks += 1;
+}
+if (goal1FalseAlarms !== 803 || goal1Leaks !== 211) {
+  escalate(`GOAL1 standalone printed ${goal1FalseAlarms} false alarms / ${goal1Leaks} leaks, expected 803 / 211`);
+}
+
 const verbsOnly = score((row) => {
   const afterLiveVerb = applyLiveVerb(classifyFloor(row), row);
   return applyGoal3(afterLiveVerb, row, ctx);
@@ -118,6 +136,6 @@ console.log('rows', allRows.length, 'vendors', vendors.length, 'LOVO');
 console.log('GATE  leaks', gate.leaks, '| goal1 fa', gate.falseAlarms, '| loosening', gate.loosening);
 console.log('NEW   leaks', fresh.leaks, '| goal1 fa', fresh.falseAlarms, '| loosening', fresh.loosening);
 console.log('VERBS leaks', verbsOnly.leaks, '| goal1 fa', verbsOnly.falseAlarms, '| loosening', verbsOnly.loosening);
-console.log('GOAL1 after lower-verb: goal1 fa', atGoal1.falseAlarms, '| goal-2 leaks at goal1 stage', atGoal1.leaks);
+console.log('GOAL1 standalone: false alarms', goal1FalseAlarms, '| leaks', goal1Leaks);
 console.log('regressions', regressions.length, 'rescues', rescues.length);
 console.log('wrote docs/logs/m1/goal2-clean.md');

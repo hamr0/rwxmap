@@ -3349,3 +3349,167 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   still nearly 2500 false alarms, and the next evidence has to come
   from the sentence itself (summary + description text), not from
   which nouns appear.
+
+### Goal 1 rebuilt as its own classifier (2026-09-13)
+
+- Goal: the user ruled that goal 1's lower-back design (D57/D60-D62,
+  pieces 1-4) was the wrong shape. It could only ever move a row goal 2
+  itself had raised (`x -> w`, and only when goal 2's own rule had
+  fired), so goal 1 was never answering "is this row safe?" on its own
+  evidence -- it was only ever undoing goal 2's mistakes, which means
+  its result was mathematically bound to goal 2's own curve no matter
+  what bar was chosen. A standalone classifier built with a YOURS
+  (allowlist) list -- the same shape as goal 2's, just run as its own
+  classifier instead of as a patch -- was tried first and confirmed
+  this: at any bar it traced the same curve as goal 2's own allowlist,
+  giving pairs like 1798 false alarms / 200 leaks up to 2765/28 across
+  the sweep, and adding hand-picked words on top only moved it along
+  the same line (1297/348) rather than off it. An allowlist-shaped
+  classifier cannot escape an allowlist's curve, whoever owns it.
+- Fix: invert the shape. Instead of asking "is every noun mine?"
+  (allowlist, goal 2's shape), goal 1 asks "is any noun someone
+  else's?" (blocklist) -- a genuinely different question with its own
+  curve, not another point on goal 2's. Built `buildGoal1OtherNouns`
+  (poc/m1/goal1/lists.mjs): mined leave-one-vendor-out over ALL
+  PUT/DELETE/PATCH rows (not just floor-w rows) -- for vendor v, a noun
+  is "someone else's" when, excluding v's own rows, it appears across
+  >= OTHER_MIN_VENDORS other vendors with a danger (truth-x) share >=
+  OTHER_MIN_DANGER_SHARE. `classifyGoal1` (poc/m1/goal1/goal1.mjs) is
+  now genuinely standalone: floor w -> goal 1's own `LIVE_VERBS` (a
+  literal copy of goal 2's 26 words, D57 copy-not-import) raises to x
+  -> if still w, any noun on the other-party list raises to x, rule
+  `other-noun`. Reference measurement: `scratchpad/g1block.mjs`.
+- Bar sweep, full 4406-row PUT/DELETE/PATCH population (V = other
+  vendors required, S = danger/x-share required), false alarms / leaks:
+  ```
+  V>=2 danger>=30%   803  211   101 words
+  V>=2 danger>=40%   472  251    74 words
+  V>=2 danger>=50%   268  382    59 words
+  V>=2 danger>=60%   175  418    36 words
+  V>=3 danger>=30%   728  229    60 words
+  V>=3 danger>=40%   408  271    39 words
+  V>=3 danger>=50%   202  406    26 words
+  V>=3 danger>=60%   150  421    20 words
+  V>=5 danger>=30%   635  246    28 words
+  V>=5 danger>=40%   352  293    17 words
+  V>=5 danger>=50%   168  427    13 words: call, assignment, security, permission, collaborator, membership, member, authorization, order, invitation, role, admin, team
+  V>=5 danger>=60%   122  437     8 words: call, security, permission, collaborator, membership, member, invitation, admin
+  ```
+  For scale: floor + live-verb only (no noun rule at all) gives 82
+  false alarms / 524 leaks; goal 2's frozen shape (a different
+  question, not comparable row-for-row) sits at 2645/37. V>=2,
+  danger>=30% adopted: 803 false alarms / 211 leaks, the point where
+  false alarms are already cut roughly in half from the un-noun'd floor
+  without pushing leaks past false alarms.
+- Scoping finding: a first pass scored `classifyGoal1` over ALL 5465
+  rows (not just PUT/DELETE/PATCH) and got 906 false alarms, not 803 --
+  103 too many. Root cause: POST's method floor defaults to `x`, and
+  `classifyGoal1` returns every non-PUT/DELETE/PATCH row's floor
+  untouched (goal 1 has no rule for POST), so a truth-w POST row already
+  sits at a wrong prediction before goal 1 ever runs -- exactly 103 such
+  rows exist in the corpus. That mismatch is the POST floor's, not goal
+  1's: goal 1 never assigns those rows a class of its own, so charging
+  it for a row it never classifies is the wrong scope. Fixed by scoring
+  goal 1's ledger and CSVs (`run/ledger.mjs`, `run/proof.mjs`) only over
+  the 4406 PUT/DELETE/PATCH rows (3776 truth w, 605 truth x), matching
+  both the reference script's population and goal 1's own stated domain.
+  goal1.csv's "previous" comparison column, however, stays computed over
+  the *unscoped* truth-w population (3883 rows) so it keeps reproducing
+  the historical 1936 pin already committed to the repo -- current and
+  previous are each the right number for the population they describe,
+  not the same population.
+- Outcome: goal 1 moves from 2531 (the retired lower-back number) to a
+  new, differently-shaped 803 false alarms / 211 leaks, both now on goal
+  1's own ledger for the first time (previously only false alarms were
+  goal 1's; leaks were a "leak cost" borrowed from goal 2's ledger).
+  Goal 2 is untouched and stays frozen at 37; goal 3 stays at 49. Files:
+  `poc/m1/goal1/lists.mjs` (rewritten, `buildGoal1OtherNouns`),
+  `poc/m1/goal1/goal1.mjs` (rewritten, `classifyGoal1`),
+  `poc/m1/run/context.mjs`, `run/pipeline.mjs` (goal 1 removed from the
+  pipeline order), `run/ledger.mjs`, `run/measure.mjs`, `run/proof.mjs`
+  (new `goal1-leaks.csv`). D63.
+- Lesson: goal 1 and goal 2 are different shapes -- an allowlist
+  ("everything is yours unless proven otherwise") and a blocklist
+  ("everything is safe unless proven someone else's") -- not two bars of
+  the same shape. A layer that can only ever undo another layer's raises
+  inherits that layer's shape by construction, no matter how its own bar
+  is tuned; building a truly independent classifier meant asking the
+  opposite question, not just moving goal 1's bar around inside goal
+  2's allowlist logic. The scoping bug (906 vs 803) is a second, smaller
+  lesson: a classifier that only ever returns some methods' untouched
+  floor must be scored on the population it actually classifies, or its
+  ledger silently absorbs another method's floor-level error.
+
+### Goal 1 POC: mining tweaks all sit on the same curve (2026-09-13)
+- Goal: with goal 1 standalone at 803 false alarms / 211 leaks (4406
+  PUT/DELETE/PATCH rows, 3776 truth w, 605 truth x), find out whether
+  any goal-1-only change lowers more x to w without leaking. POC only,
+  measured in a scratch script (g1pile.mjs, g1exp.mjs); no code in the
+  repo changed.
+- Tried: (1) pile readout: 721 of the 803 are other-noun raises, 82 are
+  live-verb; DELETE 419, PUT 291, PATCH 93. Per blocklist word, false
+  alarms vs true catches: user 145/122, group 72/37, remove 67/28,
+  organization 32/14, payment 30/2, org 28/3, add 26/2, request 25/2,
+  message 17/0, password 15/0, member 14/38, permission 6/25; 76 of 101
+  admitted words fire more false alarms than catches. Verbs read as
+  nouns (remove, add, reset, enable, unfollow) are on the blocklist.
+  (2) E2 mine the danger share only on the residual after live verbs:
+  V2 30% 765/219, V2 40% 460/269, V2 50% 234/391. (3) E3 drop verb-ish
+  tokens from the noun reader: V2 30% 710/218, V2 40% 456/253. (4) E4 =
+  E2+E3: V2 20% 925/173, V2 30% 668/225, V2 40% 442/271, V2 50% 221/394,
+  V5 50% 133/441. (5) E5 goal 1's own LOVO summary lowering verbs on
+  top of E4: 665/228 at every bar tried (frees 3, leaks 3). (6) E6
+  structural lowering on top of the 803/211 base: caller-shaped path
+  (/user/, /users/me) frees 39 for 4 leaks; summary caller phrase frees
+  12 for 1; summary+description caller phrase frees 50 for 19; no path
+  param frees 110 for 25; exactly one path param frees 351 for 167.
+- Outcome: every variant lands on the same trade-off curve as the plain
+  bar sweep (803/211, 472/251, 268/382). At the top of the curve each
+  10 false alarms freed cost about 1 leak; lower down it is 1 for 2.
+  Nothing measured goes under the curve. Not adopted; goal 1 stays at
+  803/211.
+- Lesson: on PUT/DELETE/PATCH the name words (user, group, member,
+  role, order) are safe about half the time, and every list, verb or
+  path shape tried only re-slices that same ambiguity. Lowering x to w
+  safely from here needs evidence of a different kind than name words:
+  a human on the flagged pile (D44) or a labelled per-API hint. The
+  next honest step for goal 1 is to pick the point on the curve, not to
+  search for a better list.
+
+### Goal 1 POC E7: verb and noun as complements (2026-09-13)
+- Goal: the user asked why amazon DELETE cancelFeed / cancelReport /
+  deleteDestination are false alarms when they read as plain w. Traced:
+  cancelFeed and cancelReport are live-verb raises (cancel is on the
+  26-word list; pooled over PUT/DELETE/PATCH cancel is 20 w / 29 x, a
+  coin flip). deleteDestination is an other-noun raise: destination
+  appears on 3 rows from 3 vendors, 1 x (lyft PUT SetRideDestination),
+  so 33% clears the 2-vendor 30% bar and one row poisons the word for
+  every vendor. The user proposed that verb and noun complement each
+  other: when the verb cannot decide, the noun should.
+- Tried: E7, scratch script g1verbnoun.mjs, on the 803/211 standalone
+  base. Rule: a live-verb raise goes back to w when every noun on the
+  row is on goal 1's own LOVO yours-noun list (noun safe share among
+  other vendors >= bar, >= 2 vendors, >= N rows). E7a applies to any
+  live verb, E7b only to coin-flip verbs (pooled x share < 70%: cancel,
+  revoke, trigger, run, transfer, terminate, pay, end, merge, reboot,
+  submit, notify). Results (fa/leaks): rows>=5 safe>=0.9: E7a 793/219,
+  E7b 793/217; safe>=0.95: 797/213 both; safe>=0.8 rows>=2: E7a
+  765/228, E7b 765/223; rows>=10 safe>=0.95: 799/212. Rows moved by E7b
+  rows>=5 safe>=0.9 (16): ok amazon cancelFeed, cancelReport, appveyor
+  cancelBuild, taxamo cancelTransaction, britbox cancelSubscription,
+  atlassian mergeVersions, clicksend Transfer a Contact, adafruit
+  replaceTrigger, illumidesk service_trigger_replace, payrun
+  PatchPayCode; LEAK amazon cancelShipment, appveyor cancelDeployment,
+  zuora PUT_CancelSubscription, getgo cancelRegistration, godaddy
+  cancel (subscription), godaddy DELETE (action).
+- Outcome: 10 freed for 6 leaks at the best-looking bar, 6 for 2 at the
+  tightest; the plain curve gives 10 for 1. Below the curve on every
+  setting. Not adopted.
+- Lesson: the noun only settles rows the noun alone would have
+  settled. subscription is w for britbox (your own) and x for zuora
+  and godaddy (a customer's billing); shipment and deployment count as
+  yours 90% of the time on update/delete rows but cancelling one
+  reaches a carrier or a running server. cancelFeed reads as w to a
+  person because they know an Amazon feed is a job the caller
+  submitted; that is per-API knowledge, not a word. Goal 1's remaining
+  false alarms need evidence that is not in the name.
