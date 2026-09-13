@@ -3513,3 +3513,123 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   person because they know an Amazon feed is a job the caller
   submitted; that is per-API knowledge, not a word. Goal 1's remaining
   false alarms need evidence that is not in the name.
+
+### Goal 3 readout: where the 49 over-tight rows come from (2026-09-13)
+- Goal: goal 1 committed standalone at 803/211 (3283211, D63) and
+  parked by the user until goal 3 is done. Goal 3 (truth r dressed as w
+  or x) opened with a POC readout, no code change: scratch scripts
+  g3pile.mjs and g3verbs.mjs.
+- Tried: population = 4915 write-method rows, 113 truth r (POST 88, PUT
+  14, DELETE 5, PATCH 6). Today's rule (POST operationId lead verb on
+  READ_VERBS lowers to r) gives 49 over-tight / 0 leaks; the 64 lowered
+  rows are all truth r. E1 also read the summary lead verb on POST:
+  38 / 4 leaks. Per verb on those summary-only rows: query 3 r / 0 w /
+  0 x (camara x2, vercel), match 2/0/0 (camara), search 1/0/0
+  (cloudflare), get 4/0/1 (adyen; leak post-applePay-sessions "Get an
+  Apple Pay session" x), verify 1/1/0 (camara validateCode "Verifies
+  the OTP" w), retrieve 0/0/2 (camara postServiceCapability,
+  calculateCarbonFootprint). E2 also applied both verb reads to
+  PUT/PATCH/DELETE: 34 / 26 leaks (verify, list, retrieve, check as
+  nouns or as write verbs: twitter listIdDelete, sendgrid
+  DELETE_verified_senders, zuora PUT_VerifyPaymentMethods x, powerdns
+  axfrRetrieveZone x).
+- Outcome: of the 49 misses, 17 are httpbin.org echo rows (PUT/PATCH/
+  DELETE on /anything, /delay, /status, /redirect-to; no operationId),
+  4 are amazon POST rows with no summary, and the rest carry coin-flip
+  verbs across the corpus: validate 3 r / 1 w / 2 x, generate 3/0/3,
+  check on PUT, parse (1 vendor), create (adyen post-originKeys, truth
+  r). The only zero-leak addition found is summary lead verb query/
+  match/search on POST: 6 freed, 0 leaks, but from 3 vendors and mostly
+  camara, below the 5-vendor admission bar. Nothing adopted; goal 3
+  stays 49 / 0.
+- Lesson: lowering to r is the loosest move the tool can make, and
+  goal 3's 0 leaks is its real asset; every widening tried (summary
+  verb, other methods) buys single-digit rows for leaks. The remaining
+  misses are either one vendor's test API with no names, or verbs
+  (validate, generate, verify, retrieve) that mean read in one API and
+  act in another. Same wall as goal 1, smaller.
+
+### Floor ladder measured; floor table refreshed (2026-09-13)
+- Goal: the user proposed reading the floor as a ladder: r first (GET
+  97%, then POST rows that are r), then w (PUT/DELETE/PATCH floor,
+  then POST rows that are w), and whatever is left is x; and asked
+  whether the per-method floor table was a wrong start. Also refresh
+  the PRD's floor table, which still showed the 1478-row set.
+- Tried: (1) truth shares on the 5465 rows: GET 550 (97/1/2), POST
+  509 (17/20/62), PUT 1696 (1/85/15), DELETE 2079 (0/87/13), PATCH
+  631 (1/85/14). Old table: PUT 127 (2/83/15), DELETE 250 (0/81/19),
+  PATCH 42 (0/69/31). (2) Cost of each floor before any word rule: r
+  on POST 421 leaks; x on POST 191 over-tight; w on PUT/DELETE/PATCH
+  605 leaks / 25 over-tight; x on PUT/DELETE/PATCH 3801 over-tight; x
+  on PATCH only 544 over-tight (goal 2's PATCH leaks 5 -> 0, goal 1's
+  PATCH false alarms 90 -> 538). (3) The ladder's "POST that is w"
+  step, scratch script ladder.mjs, over 509 POST rows (88 r, 103 w,
+  318 x), after read verb -> r and live verb -> x: A today (else x):
+  0 leaks / 127 over-tight. B every noun on goal 2's yours allowlist
+  -> w: said w on 61 rows, 12 truth w, 45 truth x, 4 r; 45 leaks / 115
+  over-tight. C no goal-1 blocklist noun -> w: 170 leaks / 73
+  over-tight. D plain w floor on POST: 277 leaks / 35 over-tight. B's
+  leaks are creates: camara createSubscription, createNetwork,
+  createAccess, vercel createDeployment, x createWebhooks, notion
+  post-page, slack conversations_create, amazon purchaseLabels,
+  twilio CreateAddress.
+- Outcome: PRD floor table refreshed to the 5465-row numbers; floors
+  unchanged (PATCH stays w: 14% x, same as PUT and DELETE, the 31%
+  was 42 rows). The ladder reading is adopted as the description of
+  today's shape: r first (GET, POST read verb), then w (PUT/DELETE/
+  PATCH floor), the rest x. The "POST that is w" step is not adopted:
+  even the strictest bar says w wrongly on 45 of 61 rows.
+- Lesson: on POST, x mostly means "not repeatable" (a create), and a
+  noun cannot say whether a create is repeatable; yours-nouns that
+  hold w on PUT/DELETE/PATCH (subscription, webhook, network, page)
+  are exactly the things a POST creates. The floor table was not a
+  wrong start; it is the majority class per method, and rules move
+  off it. What was wrong, and is fixed, was goal 1 chained behind
+  goal 2.
+
+### One-flow ladder and the "POST that is w" step measured (2026-09-13)
+- Goal: the user's reading of the shape as one sequential flow, not
+  three goals: step 1 r (GET floor, then POST read verb), step 2 w
+  (PUT/DELETE/PATCH floor, then POST leftover that has a verb plus a
+  yours noun), step 3 x is whatever remains. Measure it as one
+  classifier over all 5465 rows, and measure the new step 2 piece on
+  POST. Scratch scripts oneflow.mjs, postw.mjs, postw2.mjs; no code
+  changed.
+- Tried: (1) One flow, POST included in the w step (3p noun -> x, else
+  w): said r 597/4/13, said w 42/3098/443, said x 7/781/480 (columns
+  truth r/w/x); exact 76.4%, leaks 460 (8.4%), over-tight 830 (15.2%);
+  POST alone leaks 183 / over-tight 67. (2) Same flow plus live verbs,
+  POST without read verb stays x: said r 597/4/13, said w 25/2973/211,
+  said x 24/906/712; exact 78.4%, leaks 228 (4.2%), over-tight 955
+  (17.5%); by method GET 17/0, POST 0/127, PUT 93/305, DELETE 76/424,
+  PATCH 42/99. This is exactly today's pieces (goal 3 read verbs, goal
+  1 lens) run as one sequence; the 211 w-leaks are goal 1's 211. (3)
+  The 103 truth-w POST rows: twilio Update* (18), slack group-word
+  names whose verb sits after the prefix (conversations_rename,
+  chat_update, files_delete, dnd_setSnooze; 49 rows), linode
+  cancel/resize/resume/close, pagerduty enable/associate/dismiss. Lead
+  verb on the 445 leftover POST rows: create 9 w / 117 x, update 20 /
+  12, add 0 / 8, set 9 / 10 (any position: update 27 / 18, delete 7 /
+  3, add 6 / 20). (4) Rules on the 445 leftover POST rows (24 r, 103
+  w, 318 x): M1 modify verb anywhere (update, set, rename, archive,
+  close, resize, resume, enable, disable, delete, remove, mark,
+  cancel, ...) -> w: 77 right / 69 leaks; M2 same minus live verbs: 73
+  / 63; M3 modify verb plus every noun on the yours allowlist -> w
+  (the user's rule as stated): 10 right / 4 leaks; M5 "update" alone:
+  27 / 19. M2's leaks: twilio UpdateCall (terminates a call),
+  UpdateStream (stops a stream), UpdateParticipant; slack admin_*
+  (an admin acting on other users' things: admin_users_setOwner,
+  admin_conversations_rename); camara addDevicesToAccess,
+  enableEsimProfile; vercel addProjectDomain, updateAccessGroup;
+  sentry addOrganizationMember.
+- Outcome: the one-flow reading is adopted as the way to describe the
+  shape (PRD floor section). The POST w step is real but tiny: verb
+  plus yours noun says w on 14 rows, 10 right, 4 wrong; the verb alone
+  is a coin flip (73 / 63). Not adopted; POST stays x unless a read
+  verb lowers it.
+- Lesson: on POST the modify verbs split the same way the nouns did on
+  PUT/DELETE/PATCH: twilio UpdateAccount is w and twilio UpdateCall is
+  x; slack conversations_rename is w and slack admin_conversations_rename
+  is x. The yours noun filters those down to a handful because the
+  nouns a POST touches (call, stream, member, domain) are mostly not
+  on any yours list. Same wall, third time.

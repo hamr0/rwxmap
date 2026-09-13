@@ -9,16 +9,42 @@ status: stable
 ## The floor (start here)
 
 Every operation starts at its method's floor. The floor is each method's
-own measured truth lean over the 1478-row labelled corpus. It is a
-starting value, never an early return (D42).
+own measured truth lean over the 5465-row labelled corpus (refreshed
+2026-09-13; the original 1478-row table is in docs/logs/learnings.md).
+It is a starting value, never an early return (D42).
 
 | method | n | truth r | truth w | truth x | floor |
 |---|---|---|---|---|---|
 | GET / HEAD / OPTIONS | 550 | 97% | 1% | 2% | **r** |
 | POST | 509 | 17% | 20% | 62% | **x** |
-| PUT | 127 | 2% | 83% | 15% | **w** |
-| DELETE | 250 | 0% | 81% | 19% | **w** |
-| PATCH | 42 | 0% | 69% | 31% | **w** |
+| PUT | 1696 | 1% | 85% | 15% | **w** |
+| DELETE | 2079 | 0% | 87% | 13% | **w** |
+| PATCH | 631 | 1% | 85% | 14% | **w** |
+
+**How the flow works (the user's reading, 2026-09-13).** One sequence,
+three steps. Each step takes the rows the step before left behind.
+
+1. **Step 1, r.** Start every GET / HEAD / OPTIONS row at r. Then look
+   at POST: a POST whose lead verb is a read verb is r too.
+2. **Step 2, w.** Start every PUT / DELETE / PATCH row at w. Then look
+   at the POST rows step 1 left behind: a POST with a modify verb plus
+   a yours noun is w. (Measured 2026-09-13: 10 right, 4 wrong on 14
+   rows; the verb alone is a coin flip, 77 to 69. Not adopted today —
+   POST leftover stays x. See learnings, "One-flow ladder".)
+3. **Step 3, x.** Whatever is left is x. That is every POST / PUT /
+   DELETE / PATCH row that step 1 and step 2 did not claim: no read
+   verb, and no verb-plus-yours-noun. Rows that step 2 started at w
+   are pulled up to x here when a live verb or a not-yours noun fires.
+
+On the 5465 rows PATCH is no longer the outlier it was on 42 rows (31%
+x); it sits with PUT and DELETE at 14-15% x, so it keeps the w floor.
+
+In code today, `run/pipeline.mjs` runs floor -> goal 2 -> goal 3, which
+is this same sequence (goal 3's read verbs touch only POST rows on the x
+floor; goal 2's rules touch only rows on the w floor; the two never see
+the same row). Goal 1 is a second, standalone lens on steps 2 and 3
+(a not-yours blocklist instead of a yours allowlist); which lens step 3
+uses in the end is the open "bring them together" decision.
 
 **Movement rule.** Raising is `w -> x` on PUT/DELETE/PATCH. Lowering is
 `x -> r` on POST, by a read verb. `r` comes from the GET floor or from
