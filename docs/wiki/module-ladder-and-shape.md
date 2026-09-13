@@ -81,20 +81,9 @@ measured leak lives. Go means all of:
 
 (docs/archive/prd.md:187-202)
 
-**Gate status, 2026-09-09.** Rule 1 fails: 27 leaks (17 Slack GET, 10
-x-dressed-as-w on PUT/DELETE/PATCH). Rule 2 fails by a wide margin:
-floor:true rows on PUT/DELETE/PATCH number 275 of 419 across all six
-sets, plus 204 over-tightenings, against a 5% target. Rules 3-5 not
-yet assessed for the current shape; rule 5 is the next step (M1 step
-3). (docs/archive/prd.md:204-209)
-
-M1 is a POC, not graduated. The D30 gate is NOT met: 27 leaks, of
-which 17 are Slack GET rows (one vendor; GET runs no rules by design)
-and 10 are x-dressed-as-w on PUT/DELETE/PATCH, all vocabulary gaps.
-Next step is M1 step 3: derive the POST-lowering and
-PUT/DELETE/PATCH-raising lists from the corpus (D30 rule 5) and
-re-measure. Prior statuses (C10, C11) are in learnings.
-(docs/archive/prd.md:211-217)
+M1 is a POC, not graduated. The D30 gate is not met. Current per-goal
+numbers and status live in `docs/product/prd.md`, "The three goals";
+past statuses are in `docs/logs/learnings.md`.
 
 ## Labelled sets
 

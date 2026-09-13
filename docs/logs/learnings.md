@@ -3094,3 +3094,73 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   the comparison is fair, but neither number is a clean-exam number.
   Next: a proper broad exam with its labelling brief saved to the
   repo before any row is labelled.
+
+### Goal 2 frozen at 37; goal 1 reopened; layers split (2026-09-12)
+
+- Goal 2's rebuilt shape (poc/m1/goal2) is frozen at 37 leaks (4.0%
+  of 936 truth-x), down from 89, provisionally -- a clean exam may
+  still move it (D54). The hand-written PARTY_NOUNS/SHARED_NOUNS
+  lists are not part of the frozen shape; D52's "keep the list"
+  ruling applied to the old shape only, so it does not carry over.
+- Goal 1 reopens at 2727 false alarms (was 1936), the +791 charged to
+  goal 1's ledger as the cost of goal 2's freeze (D55). M1-C22 /
+  D51's lower-back layer is void: the party-noun rule it lowered
+  back no longer exists, so there is nothing left for it to undo.
+- Code split into poc/m1/{core,goal1,goal2,goal3,run}: core holds the
+  floor table and shared primitives; each goal is its own layer, one
+  direction of travel; run/pipeline.mjs fixes one order (verbs ->
+  goal 2 -> goal 1 -> goal 3) and throws if a layer moves a row the
+  wrong way; run/ledger.test.mjs pins each goal's number. The old
+  poc/m1/arbiter/c*.mjs pass files are frozen history, not built on
+  again (D56, commit dd16c52).
+
+### Goal 1 measured: where the 2727 false alarms come from (2026-09-13)
+
+- By rule: no-own-noun 2543 (DELETE 1159, PUT 1027, PATCH 357), POST
+  floor 103, live-verb 81 (DELETE 46, PUT 24, PATCH 11).
+- Among the 2543 no-own-noun rows: 16 raised with no nouns at all.
+  Blocking words per row: 1 word 1414, 2 words 724, 3 words 232, 4+
+  words 157. 1526 distinct blocking words, 780 of them on one row
+  only. Top blockers: user 145, account 110, v1 76, group 72.
+- A random 15-row sample: most blocking words are ordinary nouns not
+  on the yours list (token, request, synonym, group, log, period,
+  key) -- not third-party nouns, just nouns the allowlist has not
+  seen.
+- Tried stripping judge.mjs's OWN_VERBS (36) from the noun set: frees
+  29 false alarms but moves goal 2 from 37 to 38 leaks. Not adopted
+  -- goal 2's ledger is frozen (D54).
+- Lessons, both withdrawn: an earlier claim that the operationId
+  splitter bug was a big contributor to goal 1 was made before
+  measuring it -- it frees only 24 (see next entry). A claim that "a
+  word list won't work for goal 1" was made from goal 2's history
+  without ever measuring goal 1 -- also withdrawn.
+
+### Splitter into core: '/' and whitespace (2026-09-13)
+
+- The operationId splitter moves into `poc/m1/core/` and also splits
+  on `/` and whitespace, not only `_ - .` and camelCase -- the old
+  splitter in arbiter.mjs left `gists/unstar` as one token. It now
+  reaches the verb rules, the noun set and the allowlist build (D58).
+- Measured LOVO over 5465 rows: 176 rows touched across 11 vendors;
+  goal 2 unchanged at 37; goal 3 unchanged at 49; goal 1 falls 2727
+  -> 2703; the old-shape gate still reproduces 89 exactly. Goal 1's
+  pin moves 2727 -> 2703 at the user's word.
+- Lesson: the split has to reach the allowlist build too, not only
+  the pipeline's read of the row -- a pipeline-only split gave 2713,
+  not 2703, because the allowlist itself was still built from
+  unsplit tokens.
+
+### MCP hints measured, GET ruling (2026-09-13)
+
+- Mapping considered: `readOnlyHint` = class r; `idempotentHint` =
+  class r or w; `destructiveHint` and `openWorldHint` have no r/w/x
+  signal (D28) and stay at the MCP default of true.
+- Hinting every row: `readOnlyHint` wrong on 17 rows, all GET floor
+  rows (13 truth x, 4 truth w); `idempotentHint` wrong on 50 rows.
+- Hinting only evidence rows (floor:false, 3273 of 5465 rows): zero
+  wrong on both hints. 2192 floor rows would go unhinted (POST 445,
+  GET 550, PUT 403, PATCH 177, DELETE 617). Of GET's 550 rows, truth
+  is r 533 / w 4 / x 13.
+- Ruling (D59): GET's `readOnlyHint` follows the class -- floor r, so
+  `readOnlyHint` true -- accepting the 17-row, 3.1% cost. No code
+  emits hints yet (M3); parked while goal 1 is open.

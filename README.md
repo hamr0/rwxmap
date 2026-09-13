@@ -8,9 +8,9 @@
               r ─ w ─ x  ·  what a call does, before it is made
 ```
 
-**[WIP] Maps every OpenAPI operation to r / w / x, with a confidence, so an agent knows what a call does before it is made.**
+**[WIP] Maps every OpenAPI operation to r / w / x, so an agent knows what a call does before it is made.**
 
-Status: [WIP] — PRD stage, nothing built yet. See `docs/product/prd.md`.
+Status: [WIP] — a POC in progress, not shipped. See `docs/product/prd.md`.
 
 rwxmap reads an OpenAPI document and classifies each operation as a read,
 a write, or an execute — the strictest, most consequential class — so
@@ -20,14 +20,17 @@ ones a human got around to labeling.
 ## What it does
 
 Reads an OpenAPI document and maps each operation to `r` (read), `w`
-(write), or `x` (execute), with a confidence, from two mechanical
-signals — HTTP method per RFC 9110 safe/idempotent semantics, and the
-verb in the path or operationId, looked up in a verb library — and one
-arbiter: agree → that class, high confidence; disagree → the tighter
-class, low confidence; verb unknown → the method default. Emits MCP
-tool-annotation hints (`readOnlyHint`, `destructiveHint`,
-`idempotentHint`, `openWorldHint`) so any MCP client can consume the map
-unchanged. Zero dependencies.
+(write), or `x` (execute): every operation starts at its HTTP method's
+floor (GET/HEAD/OPTIONS -> `r`, POST -> `x`, PUT/DELETE/PATCH -> `w`),
+then a verb rule can move it (a read verb lowers a POST to `r`; a live
+verb raises a PUT/DELETE/PATCH to `x`), then a yours-noun layer looks
+only at PUT/DELETE/PATCH rows still at the `w` floor and raises such a
+row to `x` unless every noun in its operation name is on the tool's
+allowlist of "yours" words. On doubt the
+answer is the tighter class; floor rows (no word rule fired) are
+flagged for review rather than trusted. rwxmap emits no confidence
+score (D44). MCP tool-annotation hints are not built yet (M3). Zero
+dependencies.
 
 ## Why
 
@@ -56,85 +59,50 @@ normative anywhere; not a standards track; not a conformance harness.
 
 ## Test bed
 
-1478 operations labelled by blind LLM reading — five Sonnet agents per
-hold-out, each working from a fixed reading brief, no human expert
-labels — the CAMARA catalogue (292 ops, 60 repositories) plus 15 vendor
-APIs — in six SHA-pinned sets under `data/`, each with a deterministic
-selection rule.
+5465 rows across 332 vendors — the CAMARA catalogue plus a growing set
+of vendor APIs and four blind-drawn exams — labelled by blind LLM
+reading, scored leave-one-vendor-out (LOVO): every vendor's rows are
+scored by rules built from every other vendor's rows, never their own.
+This is a tuning corpus, not exam-checked; exams 1-4 are burned —
+exams 1-3 were used to tune, and exam 4's truth drifted because its
+labelling brief was lost — so none is a clean exam (see
+`docs/logs/learnings.md`, M1-C25).
 
-The sets fall into three buckets:
+Current per-goal numbers (5465 rows, LOVO):
 
-- **tuned** (camara, hold-out 1: GitHub, Stripe, Twilio; hold-out 3:
-  Discord, Sentry, Vercel) — the word lists were fitted on these rows;
-  numbers here are upper bounds, not evidence of transfer.
-- **reference** (hold-out 2: Adyen, Box, PagerDuty) — never used to
-  pick a rule, but scored repeatedly, so not blind either.
-- **clean-exam** (hold-out 5: Slack, Notion, Amazon SP-API) — scored
-  once, never fitted on. The headline below is quoted from this set
-  only. Hold-out 4 (Linode, Cloudflare, X) was the previous clean exam;
-  its numbers stay below, relabelled.
-
-Clean-exam result (hold-out 5, n=323):
-
-| classifier | exact | leaks | over-tight |
-|---|---|---|---|
-| c11 | 241 (74.6%) | 17 (5.3%) | 65 (20.1%) |
-| method-prior | 230 (71.2%) | 22 (6.8%) | 71 (22.0%) |
-| get-else-x | 223 (69.0%) | 17 (5.3%) | 83 (25.7%) |
-
-**The tool leaks on 5.3% of hold-out 5, all on GET operations whose
-spec documents the side effect clearly in prose but which the
-classifier never reads** — c11 locks every GET to `r` before looking at
-any text, so a spec-documented action (e.g. Slack `oauth_access`, which
-"exchanges a temporary OAuth verifier code for an access token") is
-never checked. **The M1 go/no-go gate (zero leaks) FAILS on this set.**
-See `docs/product/prd.md` D39 and `docs/logs/learnings.md` "M1-C13"
-for the root causes and full numbers.
-
-Previous clean exam (hold-out 4, Linode/Cloudflare/X, n=210):
-
-| classifier | exact | leaks | over-tight |
-|---|---|---|---|
-| c11 | 182 (86.7%) | 0 (0.0%) | 28 (13.3%) |
-| method-prior | 187 (89.0%) | 3 (1.4%) | 20 (9.5%) |
-| get-else-x | 142 (67.6%) | 0 (0.0%) | 68 (32.4%) |
+| goal | error | count |
+|---|---|---|
+| 2 | x dressed as w (leak) | 37 (4.0% of truth-x) — frozen |
+| 1 | w dressed as x (false alarm) | 2703 (69.6% of truth-w) — open |
+| 3 | r dressed as x or w | 49 |
 
 A leak is a wrong loosening — a robot takes an action it should not
-have. An over-tighten is a false flag — a human glances at a row that
-was fine. The two are never merged into one accuracy number: they cost
-different things and a reader needs both.
+have. A false alarm (over-tighten) is a usability cost — a human
+glances at a row that was fine. The two are never merged into one
+accuracy number: they cost different things and a reader needs both.
+Full detail: `docs/product/prd.md`, "The three goals".
 
 Two negative controls must come out `x`: ClickToDial `DELETE
 /calls/{callId}` `terminateCall`, and WebRTC `PUT
-/sessions/{mediaSessionId}/status` `updateSessionStatus`. c11 gets both
-right; the plain method prior gets both wrong (`w`, should be `x`).
+/sessions/{mediaSessionId}/status` `updateSessionStatus`. Both come out
+`x` under the current shape.
 
-**On hold-out 4, c11 was not more accurate than the plain method
-prior.** What it bought over the method prior there was leaks going to
-zero (from 3) and both negative controls correct, at a cost of 2.3
-points of exactness and 3.8 points of extra review. On hold-out 5 c11
-is more exact than method-prior (74.6% vs 71.2%) but no longer meets
-the zero-leak bar either shape needs.
-
-**How to re-run:** `node poc/m1/arbiter/run-benchmark.mjs`
+**How to re-run:** `node poc/m1/run/measure.mjs` (gate + scores),
+`node --test poc/m1/run/ledger.test.mjs` (per-goal pins),
+`node poc/m1/run/proof.mjs` (row-level CSVs in `run-proof/`).
 
 **What these numbers do not say:**
 
 - The truth is itself model-generated — blind LLM readers on a fixed
   brief — so the scores measure agreement with that reading process,
   not with a human expert or with any standard.
-- No row on hold-out 1 through 4 has been read twice by an independent
-  reader, so their truth's own noise is unmeasured and their numbers
-  carry no error bar.
-- Hold-out 5's ground truth had 60 of its 323 rows read a second time
-  by an independent reader: 57/60 agreed (95.0%), so the error bar is
-  now stated rather than absent for that set — about 1 row in 20 of
-  its truth labels could plausibly flip under a second reading.
+- This is a tuning-corpus number under LOVO, not a clean-exam number.
+  Exams 1-4 are burned — exams 1-3 were used to tune, and exam 4's
+  truth drifted because its labelling brief was lost (`docs/logs/learnings.md`, M1-C25).
 - CAMARA's GET half was judged by template, not operation by
   operation.
-- The 57-of-138 read-named-POST figure (above) is a reader's
-  judgement, not a rule output.
-- Tuned-set numbers are upper bounds, not transfer.
+- The 57-of-138 read-named-POST figure (`docs/product/prd.md`) is a
+  reader's judgement, not a rule output.
 - This is a proof-of-concept, not a shipped tool.
 
 ## The bare ecosystem
