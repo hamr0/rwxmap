@@ -8,8 +8,27 @@
 // confident) so a lowered row is still visibly unresolved rather than a
 // silent, confident w.
 //
-// Empty today — goal 1 is reopened but not yet attacked. Pass-through
-// until it has a rule of its own.
-export function applyGoal1(prev, _row, _ctx) {
+// Piece 3 — lowering-verb rule (D57): a PUT/DELETE/PATCH row still at x
+// whose summary's lead verb (fallbackVerbFromSummary, trailing 's'
+// folded) is on goal 1's own leave-one-vendor-out list (lists.mjs,
+// mined from goal 1's own pile — never goal 2's LIVE_VERBS) lowers to w.
+import { foldedVerbForRow } from './lists.mjs';
+
+const RAISE_METHODS = new Set(['PUT', 'DELETE', 'PATCH']);
+
+// ctx.lowerVerbsFor(vendor) -> Set<"METHOD verb">, from
+// goal1/lists.mjs's buildGoal1LowerVerbs(), assembled in run/context.mjs.
+export function applyGoal1(prev, row, ctx) {
+  if (!RAISE_METHODS.has(row.method)) return prev;
+  if (prev.class !== 'x') return prev;
+
+  const verb = foldedVerbForRow(row);
+  if (!verb) return prev;
+
+  const key = `${row.method} ${verb}`;
+  const lowerVerbs = ctx.lowerVerbsFor(row.vendor);
+  if (lowerVerbs.has(key)) {
+    return { class: 'w', rule: 'lower-verb', floor: true };
+  }
   return prev;
 }

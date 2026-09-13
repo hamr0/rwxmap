@@ -3211,3 +3211,50 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   outcomes end up identical -- any caller that hardcodes a stop-point
   (`upTo`) has to be re-checked against where the moved rule now runs,
   not just against the final numbers.
+
+### Goal 1 piece 3 — lowering-verb rule (2026-09-13)
+- Goal: give goal 1 its own lower-back rule, mirroring goal 2's shape in the
+  opposite direction -- a mined leave-one-vendor-out list of summary lead
+  verbs that lowers a PUT/DELETE/PATCH row still at x back to w, flagged.
+- The pile (every PUT/DELETE/PATCH row still at x after goal 2, any rule):
+  2600 truth-w, 568 truth-x, 17 truth-r (3185 rows).
+- Bar sweep (vendors excluded = the row's own vendor; non-x share measured
+  over the rest):
+  ```
+  vendors>=3 non-x>=0.90  fix  262  leak  30 (17 vendors)  r 0  words 12: PATCH update, PUT enable, PUT mark, PUT edit, PATCH patch, PUT save, PATCH partially, DELETE reset, PUT replace, PUT stop, PUT create, DELETE unfollow
+  vendors>=3 non-x>=0.95  fix   74  leak   1 (1 vendors)  r 0  words 8: PUT enable, PUT mark, PUT edit, PATCH patch, PUT save, PATCH partially, DELETE reset, PUT stop
+  vendors>=3 non-x>=1.00  fix   74  leak   1 (1 vendors)  r 0  words 8: PUT enable, PUT mark, PUT edit, PATCH patch, PUT save, PATCH partially, DELETE reset, PUT stop
+  vendors>=5 non-x>=0.90  fix  241  leak  29 (16 vendors)  r 0  words 8: PATCH update, PUT enable, PUT mark, PUT edit, PUT save, PUT replace, PUT create, DELETE unfollow
+  vendors>=5 non-x>=0.95  fix   53  leak   0 (0 vendors)  r 0  words 4: PUT enable, PUT mark, PUT edit, PUT save
+  vendors>=5 non-x>=1.00  fix   53  leak   0 (0 vendors)  r 0  words 4: PUT enable, PUT mark, PUT edit, PUT save
+  vendors>=8 non-x>=0.90  fix  221  leak  26 (15 vendors)  r 0  words 5: PATCH update, PUT mark, PUT edit, PUT replace, PUT create
+  vendors>=8 non-x>=0.95  fix   33  leak   0 (0 vendors)  r 0  words 2: PUT mark, PUT edit
+  vendors>=8 non-x>=1.00  fix   33  leak   0 (0 vendors)  r 0  words 2: PUT mark, PUT edit
+  ```
+  Adopted bar: vendors>=5, non-x>=0.95 -- 53 fixed, 0 leaks, 4 words (PUT
+  enable, mark, edit, save).
+- A noun-list candidate (raise-only nouns already on the wall, tried in the
+  lowering direction) was measured and NOT adopted: best variant fixed 102
+  rows at a cost of 5 leaks; the zero-leak bar on the same list gave only
+  7 fixed for 1 leak -- worse on both axes than the verb list.
+- Caller-phrase and path candidates were measured and NOT adopted: a
+  summary caller-phrase check fixed 21 rows for 3 leaks; a description
+  caller-phrase check fixed 113 for 29 leaks; a caller-shaped path check
+  (GitHub's /user/... convention, generalised) fixed 59 for 6 leaks. None
+  cleared the zero-leak bar the verb list did.
+- Reading bugs surfaced in goal 2's noun set while auditing candidates
+  (goal 2 is frozen, so fixing these needs the user's ruling, not done
+  here): placeholder tokens like `{id}` leaking into the noun set (29
+  rows touched, 0 leaks if cleaned); bare version segments like `v1` (8,
+  0); filler words that survived cleaning (21, 0); verbs misread as nouns
+  (40, 1 leak if cleaned). Left exactly as-is; called out for the user.
+- Outcome: goal 1 moves 2703 -> 2650 (53 fixed), leak cost stays 0 (goal 2
+  still 37 at the goal-1 stage). Files: `poc/m1/goal1/lists.mjs` (new,
+  `buildGoal1LowerVerbs`), `poc/m1/goal1/goal1.mjs` (piece 3's rule),
+  `poc/m1/run/context.mjs` (builds goal 1's pile and `lowerVerbsFor`),
+  pins updated in `run/ledger.test.mjs` and `run/proof.mjs`.
+- Lesson: the operation name alone separates safe writes from dangerous
+  ones badly even for a single verb -- "delete" alone splits 591 w vs 93 x
+  in this corpus. The next evidence to read, still untouched today, is
+  the description text; the reading bugs found above are all evidence
+  this pass could see but wasn't asked to fix.

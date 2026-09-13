@@ -12,9 +12,9 @@ test('goal 2 ledger is 37', () => {
   assert.equal(ledger.goal2.leaks, 37);
 });
 
-// moved 2026-09-13 by the user's ruling for the '/' + whitespace splitter fix
-test('goal 1 ledger is 2703', () => {
-  assert.equal(ledger.goal1.falseAlarms, 2703);
+// moved 2026-09-13, goal 1's lower-verb rule (piece 3)
+test('goal 1 ledger is 2650', () => {
+  assert.equal(ledger.goal1.falseAlarms, 2650);
 });
 
 test('goal 1 leak cost is 0', () => {

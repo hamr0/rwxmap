@@ -49,8 +49,8 @@ function escalate(msg) {
 
 // --- load + classify, via core/corpus.mjs and run/pipeline.mjs ---------
 
-const { rows: allRows, vendors, junkSet, allowlistFor, frozenJunkSet, frozenAllowlistFor } = loadContext();
-const ctx = { junkSet, allowlistFor };
+const { rows: allRows, vendors, junkSet, allowlistFor, lowerVerbsFor, frozenJunkSet, frozenAllowlistFor } = loadContext();
+const ctx = { junkSet, allowlistFor, lowerVerbsFor };
 
 // --- classify every row, both shapes ------------------------------------
 //
@@ -160,7 +160,7 @@ const ledger = [
 
 const EXPECTED = [
   { previous: 89, current: 37 },
-  { previous: 1936, current: 2703 },
+  { previous: 1936, current: 2650 },
   { previous: 49, current: 49 },
 ];
 
@@ -173,7 +173,7 @@ ledger.forEach((row, i) => {
   }
 });
 if (ledgerMismatch) {
-  escalate('computed ledger differs from the expected 89/37, 1936/2703, 49/49 — reporting the discrepancy, not correcting it.');
+  escalate('computed ledger differs from the expected 89/37, 1936/2650, 49/49 — reporting the discrepancy, not correcting it.');
 }
 
 // --- write the three CSVs -------------------------------------------------
