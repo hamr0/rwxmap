@@ -160,7 +160,7 @@ const ledger = [
 
 const EXPECTED = [
   { previous: 89, current: 37 },
-  { previous: 1936, current: 2650 },
+  { previous: 1936, current: 2592 },
   { previous: 49, current: 49 },
 ];
 
@@ -173,7 +173,7 @@ ledger.forEach((row, i) => {
   }
 });
 if (ledgerMismatch) {
-  escalate('computed ledger differs from the expected 89/37, 1936/2650, 49/49 — reporting the discrepancy, not correcting it.');
+  escalate('computed ledger differs from the expected 89/37, 1936/2592, 49/49 — reporting the discrepancy, not correcting it.');
 }
 
 // --- write the three CSVs -------------------------------------------------

@@ -60,8 +60,8 @@ const verbsOnly = score((row) => {
 
 let mismatch = false;
 if (fresh.leaks !== 37) { console.error(`NEW leaks ${fresh.leaks}, expected 37`); mismatch = true; }
-if (fresh.falseAlarms !== 2703) { console.error(`NEW goal-1 false alarms ${fresh.falseAlarms}, expected 2703`); mismatch = true; }
-if (mismatch) escalate('NEW did not match the reference script numbers (37 leaks / 2703 goal-1 false alarms)');
+if (fresh.falseAlarms !== 2645) { console.error(`NEW goal-1 false alarms ${fresh.falseAlarms}, expected 2645`); mismatch = true; }
+if (mismatch) escalate('NEW did not match the reference script numbers (37 leaks / 2645 goal-1 false alarms)');
 
 // regressions: leak under NEW, not under GATE. rescues: the reverse.
 const gateLeakKeys = new Set(gate.leakRows.map(({ row }) => `${row.vendor} ${row.method} ${row.operationId} ${row.path}`));
@@ -91,7 +91,7 @@ rows ${allRows.length}, vendors ${vendors.length}, leave-one-vendor-out.
 | NEW — classifyGoal2 (this module) | ${fresh.leaks} | ${fresh.falseAlarms} | ${fresh.loosening} |
 | NEW, verbs only — classifyByVerb (no noun layer) | ${verbsOnly.leaks} | ${verbsOnly.falseAlarms} | ${verbsOnly.loosening} |
 
-GATE reproduced 89 exactly: yes. NEW matched 37 leaks / 2703 goal-1 false alarms: yes.
+GATE reproduced 89 exactly: yes. NEW matched 37 leaks / 2645 goal-1 false alarms: yes.
 
 ## NEW goal-2 leaks by rule
 

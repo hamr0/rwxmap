@@ -12,9 +12,9 @@ test('goal 2 ledger is 37', () => {
   assert.equal(ledger.goal2.leaks, 37);
 });
 
-// moved 2026-09-13, goal 1's lower-verb rule (piece 3)
-test('goal 1 ledger is 2650', () => {
-  assert.equal(ledger.goal1.falseAlarms, 2650);
+// moved 2026-09-13, goal 2's noun-reader junk-token fix (user's ruling)
+test('goal 1 ledger is 2592', () => {
+  assert.equal(ledger.goal1.falseAlarms, 2592);
 });
 
 test('goal 1 leak cost is 0', () => {

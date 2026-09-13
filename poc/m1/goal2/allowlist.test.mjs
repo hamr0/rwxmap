@@ -44,3 +44,21 @@ test('nounsForRow: splits an operationId on whitespace', () => {
   for (const n of nouns) assert.ok(!/\s/.test(n));
   assert.ok(nouns.has('member'));
 });
+
+test('nounsForRow: drops version tags like v1 from a path-derived operationId', () => {
+  const r = row({ method: 'PUT', operationId: 'delete_application_api_v1_app__app_id_', summary: 'Delete Application' });
+  const nouns = nounsForRow(r, new Set());
+  assert.ok(!nouns.has('v1'));
+});
+
+test('nounsForRow: drops path placeholder tokens like {id}', () => {
+  const r = row({ method: 'DELETE', operationId: 'delete {id}', summary: 'Delete a person' });
+  const nouns = nounsForRow(r, new Set());
+  assert.ok(!nouns.has('{id}'));
+});
+
+test('nounsForRow: drops filler words like "from"', () => {
+  const r = row({ method: 'DELETE', operationId: 'delete from', summary: 'Deletes a single image from a product' });
+  const nouns = nounsForRow(r, new Set());
+  assert.ok(!nouns.has('from'));
+});

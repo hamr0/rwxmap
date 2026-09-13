@@ -7,10 +7,10 @@ rows 5465, vendors 332, leave-one-vendor-out.
 | pass | goal-2 leaks | goal-1 false alarms (info) | all-loosening |
 |---|---|---|---|
 | GATE — frozen baseline (classifyC20 + c15) | 89 | 1936 | 106 |
-| NEW — classifyGoal2 (this module) | 37 | 2703 | 54 |
+| NEW — classifyGoal2 (this module) | 37 | 2645 | 54 |
 | NEW, verbs only — classifyByVerb (no noun layer) | 524 | 185 | 541 |
 
-GATE reproduced 89 exactly: yes. NEW matched 37 leaks / 2703 goal-1 false alarms: yes.
+GATE reproduced 89 exactly: yes. NEW matched 37 leaks / 2645 goal-1 false alarms: yes.
 
 ## NEW goal-2 leaks by rule
 

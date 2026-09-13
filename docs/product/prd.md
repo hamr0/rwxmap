@@ -42,7 +42,7 @@ leave-one-vendor-out. Truth split: 936 x, 3883 w, 646 r.
 | # | error | count | where it lives | why it matters |
 |---|---|---|---|---|
 | 2 | **x dressed as w** | 37 (4.0% of truth-x) — FROZEN 2026-09-12 | DELETE 18, PUT 14, PATCH 5; all floor rows | a dangerous operation is treated as a safe write — this is the leak |
-| 1 | **w dressed as x** | 2650 (68.2% of truth-w) — REOPENED | PUT/DELETE/PATCH floor rows raised by the yours-noun layer | a safe write is treated as dangerous, so it gets blocked when it should not be |
+| 1 | **w dressed as x** | 2592 (66.8% of truth-w) — REOPENED | PUT/DELETE/PATCH floor rows raised by the yours-noun layer | a safe write is treated as dangerous, so it gets blocked when it should not be |
 | 3 | **r dressed as x or w** | 49 | POST 24 (r->x), PUT 14, DELETE 5, PATCH 6 | a pure read is treated as a write. Deferred: smallest and least harmful |
 
 Attack order is 2, then 1, then 3. One goal at a time: while a goal is
@@ -74,7 +74,8 @@ Flow for one row:
 3. **Goal 2 — yours-nouns.** Only on PUT/DELETE/PATCH rows still at the
    `w` floor after step 2. Take every noun token in the operation name
    (both head nouns plus every other token, singularised, verbs
-   stripped). All on the yours list → stay `w`. Any not → `x`, rule
+   stripped, path placeholders/version tags/filler words dropped as
+   junk). All on the yours list → stay `w`. Any not → `x`, rule
    `no-own-noun`.
 4. **Goal 1 — lowering verb.** A PUT/DELETE/PATCH row still at `x`
    (raised by goal 2, or by the floor's own live-verb evidence) whose
@@ -116,7 +117,7 @@ Rules:
    the floor table, or any goal's word lists or allowlist bar; those
    belong to core, goal 2 and goal 3. It can only add its own evidence.
 4. **Each goal's number is pinned by its own test**
-   (`run/ledger.test.mjs`): goal 2 = 37, goal 1 = 2650, goal 3 = 49. A
+   (`run/ledger.test.mjs`): goal 2 = 37, goal 1 = 2592, goal 3 = 49. A
    change that moves another goal's pin turns that test red; the pin
    moves only by a ruling recorded here.
 5. **Each goal has its own ledger.** Goal 2 is measured through its own
@@ -171,18 +172,22 @@ floor rows. That cost was charged to goal 1 when goal 2 was frozen.
 The splitter fix (D58) then freed 24 of those, so goal 1 stood at
 2703. Piece 3 then adopted a lowering-verb rule with goal 1's own
 leave-one-vendor-out list (mined from goal 1's own pile, never goal
-2's): 53 rows fixed, 0 leaks, moving goal 1 from 2703 to 2650.
+2's): 53 rows fixed, 0 leaks, moving goal 1 from 2703 to 2650. Goal 2's
+noun reader then stopped reading `{id}`, `v1` and filler words (from,
+using, or, and, ...) as nouns, freeing a further 58 false alarms at
+zero leak cost, moving goal 1 from 2650 to 2592.
 Past result and numbers: `docs/logs/learnings.md` (M1-C21 to C23, and
 piece 3, 2026-09-13).
 
-Ledgers stay separate. Goal 2 owns 37 leaks. Goal 1 owns 2650 false
-alarms. At the freeze it was 2727, of which 791 were the charged cost
-of goal 2's freeze (1936 before it). D58's splitter fix then freed 24
-(to 2703); piece 3's lowering-verb rule then freed a further 53 at
-zero leak cost (to 2650). POST's x floor gives 103 of those on its own.
-Goal 3 owns 49. A blended number appears
-only on a line labelled combined, and there is none yet for this
-shape.
+Ledgers stay separate. Goal 2 owns 37 leaks, unchanged by this fix.
+Goal 1 owns 2592 false alarms. At the freeze it was 2727, of which 791
+were the charged cost of goal 2's freeze (1936 before it). D58's
+splitter fix then freed 24 (to 2703); piece 3's lowering-verb rule then
+freed a further 53 at zero leak cost (to 2650); goal 2's junk-token
+noun-reader fix then freed a further 58 at zero leak cost (to 2592).
+POST's x floor gives 103 of those on its own. Goal 3 owns 49. A
+blended number appears only on a line labelled combined, and there is
+none yet for this shape.
 
 Goal 3 (r dressed as x or w) is the same shape as goal 1, one step
 further out, and waits behind it.

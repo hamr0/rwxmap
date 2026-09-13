@@ -13,6 +13,14 @@ import { LIVE_VERBS, NON_NOUN_READ_VERBS } from './lists.mjs';
 export const MIN_N = 2;
 export const MIN_W_SHARE = 0.80;
 
+// Tokens that are never nouns: path placeholders ({id}, {app), version
+// tags (v1, 10) and filler words. Measured 2026-09-13 in a copy before
+// this edit: frees 58 goal-1 false alarms, goal 2 unchanged at 37.
+const FILLER = new Set(['from','using','or','and','by','for','to','of','the','a','an','with','in','on','at','into','via','all']);
+export function isJunkToken(w) {
+  return /[{}]/.test(w) || /^v?\d+$/.test(w) || FILLER.has(w);
+}
+
 // The widened noun set: both head nouns plus every remaining operationId
 // token (singularised), skipping junk and verb tokens — verbs aren't
 // nouns, and a verb token slipping into the noun set would let it satisfy
@@ -21,11 +29,11 @@ export function nounsForRow(row, junkSet) {
   row = withSplitOperationId(row);
   const out = new Set();
   for (const n of [headNounForRow(row), operationIdHeadNoun(row)]) {
-    if (n && !junkSet.has(n)) out.add(n);
+    if (n && !junkSet.has(n) && !isJunkToken(n)) out.add(n);
   }
   for (const t of tokensForRow(row).tokens) {
     const w = naiveSingular(t.toLowerCase());
-    if (!w || junkSet.has(w)) continue;
+    if (!w || junkSet.has(w) || isJunkToken(w)) continue;
     if (matchesAnyStem(w, LIVE_VERBS) || matchesAnyStem(w, NON_NOUN_READ_VERBS)) continue;
     out.add(w);
   }

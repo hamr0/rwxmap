@@ -3258,3 +3258,28 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   in this corpus. The next evidence to read, still untouched today, is
   the description text; the reading bugs found above are all evidence
   this pass could see but wasn't asked to fix.
+
+### Goal 2 noun reader: junk tokens dropped (2026-09-13)
+- Goal: apply the user's ruling on the reading bugs flagged in piece 3
+  (placeholder tokens, version segments, filler words leaking into goal
+  2's noun set) -- measured in a copy first, then reproduced for real.
+- Fix: `poc/m1/goal2/allowlist.mjs`'s `nounsForRow` gained an
+  `isJunkToken` check (path placeholders like `{id}`/`{app`, version
+  tags like `v1`/bare digits, and filler words: from, using, or, and, by,
+  for, to, of, the, a, an, with, in, on, at, into, via, all), applied in
+  both extraction loops (head nouns and remaining tokens). The allowlist
+  TABLE build (`buildNounTable` in `poc/m1/arbiter/c19.mjs`) does not go
+  through `nounsForRow` -- it only ever read `headNounForRow` +
+  `operationIdHeadNoun`, so this fix changes a row's own nouns at
+  classify time, not which nouns land on a vendor's allowlist. Checked,
+  not assumed.
+- Outcome: leave-one-vendor-out over 5465 rows -- goal 2 unchanged at 37
+  leaks (freeze holds), goal 1's false alarms fall 2650 -> 2592 (58
+  freed), goal 1's leak cost stays 0, goal 3 unchanged at 49. Example
+  rows freed: salesloft DELETE `{id}` "Delete a person"; svix DELETE
+  `v1` "Delete Application"; billbee DELETE `from` "Deletes a single
+  image from a product"; gamesparks PUT `using` "updateSnippet".
+- Lesson: a noun-reading bug can sit dormant behind a frozen goal's own
+  ledger (goal 2 stayed 37 throughout) while still costing another goal
+  real rows -- the two ledgers really do move independently, exactly as
+  the per-goal ledger rule (D57's neighbor) predicts.
