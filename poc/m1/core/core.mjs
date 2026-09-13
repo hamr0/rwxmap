@@ -1,12 +1,6 @@
-// The shared shape: method floor, the two verb rules, and noun extraction.
-// Every goal layer reads these; only goal 2's layer writes past them (see
-// docs/product/goal2-solution.md for the full spec these reproduce).
-import { tokensForRow, leadVerbForRow } from '../arbiter/arbiter.mjs';
-import {
-  headNounForRow, operationIdHeadNoun, naiveSingular, matchesAnyStem,
-  fallbackVerbFromSummary, summaryHasCallerPhrase,
-} from '../arbiter/judge.mjs';
-import { LIVE_VERBS, READ_VERBS } from '../arbiter/c11.mjs';
+// The shared shape: only the method floor and the operationId splitter.
+// D57: core holds no word lists — every goal owns its own (see
+// docs/product/prd.md, "How the goals stay separate").
 
 // One table, one place. GET/HEAD/OPTIONS -> r, POST -> x, PUT/DELETE/PATCH -> w.
 export function floorFor(method) {
@@ -21,67 +15,17 @@ export function floorFor(method) {
 // arbiter.mjs's own splitTokens only splits on '_ - .' and camelCase, so an
 // operationId like 'gists/unstar' or 'delete team member' stays one token.
 // arbiter.mjs is frozen history, so the fix lives here instead: trim, then
-// collapse every run of '/' or whitespace into '_' before anything in this
-// file reads operationId — this is the one place the split lives. A
-// whitespace-only operationId trims to '' first, so it still falls back to
-// the path (rawLeadStringForRow's behaviour) exactly as before.
+// collapse every run of '/' or whitespace into '_' before anything reads
+// operationId — this is the one place the split lives. A whitespace-only
+// operationId trims to '' first, so it still falls back to the path
+// (rawLeadStringForRow's behaviour) exactly as before.
 export function withSplitOperationId(row) {
   const trimmed = (row.operationId || '').trim();
   return { ...row, operationId: trimmed.replace(/[\/\s]+/g, '_') };
 }
 
-// Floor + verb rules only, no noun evidence. One direction of travel per
-// method: POST only ever lowers off its x floor, PUT/DELETE/PATCH only
-// ever raise off their w floor.
-export function classifyByVerb(row) {
-  row = withSplitOperationId(row);
-  const method = row.method;
-  const floor = floorFor(method);
-
-  if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') {
-    return { class: 'r', rule: 'floor', floor: true };
-  }
-
-  if (method === 'POST') {
-    const verb = leadVerbForRow(row);
-    if (matchesAnyStem(verb, READ_VERBS)) {
-      return { class: 'r', rule: 'read-verb', floor: false };
-    }
-    return { class: floor, rule: 'floor', floor: true };
-  }
-
-  // PUT / DELETE / PATCH
-  const { tokens } = tokensForRow(row);
-  let hit = null;
-  for (const t of tokens) {
-    const w = t.toLowerCase();
-    if (matchesAnyStem(w, LIVE_VERBS)) { hit = w; break; }
-  }
-  if (!hit) {
-    const sv = fallbackVerbFromSummary(row.summary);
-    if (matchesAnyStem(sv, LIVE_VERBS)) hit = sv;
-  }
-  if (hit && !summaryHasCallerPhrase(row.summary)) {
-    return { class: 'x', rule: 'live-verb', floor: false };
-  }
-  return { class: floor, rule: 'floor', floor: true };
-}
-
-// The widened noun set: both head nouns plus every remaining operationId
-// token (singularised), skipping junk and verb tokens — verbs aren't
-// nouns, and a verb token slipping into the noun set would let it satisfy
-// the allowlist test for the wrong reason.
-export function nounsForRow(row, junkSet) {
-  row = withSplitOperationId(row);
-  const out = new Set();
-  for (const n of [headNounForRow(row), operationIdHeadNoun(row)]) {
-    if (n && !junkSet.has(n)) out.add(n);
-  }
-  for (const t of tokensForRow(row).tokens) {
-    const w = naiveSingular(t.toLowerCase());
-    if (!w || junkSet.has(w)) continue;
-    if (matchesAnyStem(w, LIVE_VERBS) || matchesAnyStem(w, READ_VERBS)) continue;
-    out.add(w);
-  }
-  return out;
+// The base pipeline layer: no evidence, no word lists — just the method
+// floor. Every goal layer runs after this one.
+export function classifyFloor(row) {
+  return { class: floorFor(row.method), rule: 'floor', floor: true };
 }

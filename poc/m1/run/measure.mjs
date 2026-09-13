@@ -9,8 +9,10 @@
 import { writeFileSync } from 'node:fs';
 import { CLASS_ORDER } from '../arbiter/arbiter.mjs';
 import { classifyC20 } from '../arbiter/c20.mjs';
-import { loadContext } from '../core/corpus.mjs';
-import { classifyByVerb } from '../core/core.mjs';
+import { classifyFloor } from '../core/core.mjs';
+import { applyLiveVerb } from '../goal2/goal2.mjs';
+import { applyGoal3 } from '../goal3/goal3.mjs';
+import { loadContext } from './context.mjs';
 import { classify } from './pipeline.mjs';
 
 function escalate(msg) {
@@ -50,7 +52,10 @@ if (gate.leaks !== 89) {
 }
 
 const fresh = score((row) => classify(row, ctx, { upTo: 'goal2' }));
-const verbsOnly = score((row) => classifyByVerb(row));
+const verbsOnly = score((row) => {
+  const afterLiveVerb = applyLiveVerb(classifyFloor(row), row);
+  return applyGoal3(afterLiveVerb, row, ctx);
+});
 
 let mismatch = false;
 if (fresh.leaks !== 37) { console.error(`NEW leaks ${fresh.leaks}, expected 37`); mismatch = true; }

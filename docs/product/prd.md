@@ -57,22 +57,27 @@ Goal 1 (w dressed as x) is open now. Goal 2 is frozen at 37, below.
 Two word lists, not three. The hand-written third-party noun list is
 gone.
 
-| list | size | job |
-|---|---|---|
-| verbs — `LIVE_VERBS` (26) and `READ_VERBS` (14), hand-written | 40 | move a row off its floor |
-| yours-nouns — mined allowlist, n>=2 rows, w-share>=0.80 | 439 | hold a floor row at `w` |
+| list | owner | size | job |
+|---|---|---|---|
+| `LIVE_VERBS`, hand-written | goal 2 | 26 | raise a `w`-floor row off its floor |
+| `READ_VERBS`, hand-written | goal 3 | 14 | lower an `x`-floor row off its floor |
+| yours-nouns — mined allowlist, n>=2 rows, w-share>=0.80 | goal 2 | 439 | hold a floor row at `w` |
 
 Flow for one row:
 
-1. **Floor by method.** GET/HEAD/OPTIONS `r`; POST `x`; PUT/DELETE/PATCH `w`.
-2. **Verbs.** GET: nothing runs. POST: a read verb lowers to `r`.
-   PUT/DELETE/PATCH: a live verb (in the operationId, else the summary's
-   lead verb) raises to `x`, unless the summary carries a caller phrase.
-   No hit: stay at the floor, marked `floor`.
-3. **Yours-nouns.** Only on PUT/DELETE/PATCH rows still at the `w`
-   floor. Take every noun token in the operation name (both head nouns
-   plus every other token, singularised, verbs stripped). All on the
-   yours list → stay `w`. Any not → `x`, rule `no-own-noun`.
+1. **Floor by method** (core). GET/HEAD/OPTIONS `r`; POST `x`;
+   PUT/DELETE/PATCH `w`.
+2. **Goal 2 — live verb.** PUT/DELETE/PATCH rows still at the `w` floor:
+   a live verb (in the operationId, else the summary's lead verb) raises
+   to `x`, unless the summary carries a caller phrase. No hit: stay at
+   the floor, marked `floor`.
+3. **Goal 2 — yours-nouns.** Only on PUT/DELETE/PATCH rows still at the
+   `w` floor after step 2. Take every noun token in the operation name
+   (both head nouns plus every other token, singularised, verbs
+   stripped). All on the yours list → stay `w`. Any not → `x`, rule
+   `no-own-noun`.
+4. **Goal 3 — read verb.** POST rows still at the `x` floor: a read verb
+   lowers to `r`.
 
 Nothing is hand-listed as "someone else's". Via negativa: a noun is
 third-party unless the corpus says it is yours. Spec read from live
@@ -91,21 +96,21 @@ assumed.
 
 | folder | owns | may move a row |
 |---|---|---|
-| `poc/m1/core/` | floor table, the operationId splitter, verb rules, noun extraction, corpus + allowlist setup | — (shared; changes need every pin green) |
-| `poc/m1/goal2/` | the yours-noun layer | raise only (`w` → `x`) |
+| `poc/m1/core/` | floor table, the operationId splitter, row loading | — (shared; changes need every pin green) |
+| `poc/m1/goal2/` | live-verb rule, the yours-noun layer, the allowlist build | raise only (`w` → `x`) |
 | `poc/m1/goal1/` | lower-back layer (empty today) | lower only (`x` → `w`), every lowered row flagged |
-| `poc/m1/goal3/` | read layer (empty today) | lower to `r` only |
+| `poc/m1/goal3/` | read-verb layer | lower to `r` only |
 | `poc/m1/run/` | the one fixed order, the ledgers, the proof | — |
 
 Rules:
 
-1. **One order, written once** (`run/pipeline.mjs`): floor → verbs →
-   goal 2 → goal 1 → goal 3. Nobody reorders.
+1. **One order, written once** (`run/pipeline.mjs`): floor → goal 2 →
+   goal 1 → goal 3. Nobody reorders.
 2. **One direction per layer.** The pipeline throws if a layer moves a
    row the wrong way.
 3. **A goal may not turn another goal's knob.** Goal 1 may not change
-   the floor table, the verb lists or the allowlist bar; those belong to
-   core and goal 2. It can only add its own evidence.
+   the floor table, or any goal's word lists or allowlist bar; those
+   belong to core, goal 2 and goal 3. It can only add its own evidence.
 4. **Each goal's number is pinned by its own test**
    (`run/ledger.test.mjs`): goal 2 = 37, goal 1 = 2703, goal 3 = 49. A
    change that moves another goal's pin turns that test red; the pin
@@ -119,9 +124,7 @@ Rules:
    apply. Core holds only what is truly shared — the floor and the
    splitter, no lists. Goal 2 owns `LIVE_VERBS` (26) and the
    yours-noun allowlist (439); goal 3 owns `READ_VERBS` (14); goal 1
-   builds its own lists fresh. The lists still physically sit behind
-   core's imports today; moving them out is a later step, not done
-   yet.
+   builds its own lists fresh.
 
 Run: `node poc/m1/run/measure.mjs` (gate + scores),
 `node --test poc/m1/run/ledger.test.mjs` (the five per-goal pins) and
@@ -318,6 +321,19 @@ full ruling record.
 
 Non-blocking; never silently assumed.
 
+- MCP hints (future feature, M3; the user's end goal is to feed them).
+  Nothing emits hints yet.
+  - `readOnlyHint`: true when class is `r`; GET follows its `r` floor
+    (D59).
+  - `idempotentHint`: two readings, not yet chosen. From the class: true
+    for `r` or `w`, since by D20 an operation you can't safely repeat is
+    `x`. From the method, per RFC 9110 §9.2.2: true for safe methods
+    plus PUT and DELETE (`docs/archive/prd.md:363`, §4.3). The method
+    reading disagrees with D20 on idempotent-but-`x` rows (D20 counted
+    20 such DELETE rows on its 499-row set).
+  - `destructiveHint`: a separate axis from r/w/x (D28), not built; MCP
+    default `true` until then.
+  - `openWorldHint`: no signal; MCP default `true`.
 - Whether tightening enters the -02 argument, or stays a demonstration
   (D4, M4).
 - The exact confidence formula and line — M0 finds it.

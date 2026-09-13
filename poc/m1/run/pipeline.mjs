@@ -1,13 +1,13 @@
 // The one fixed pipeline order, and the direction guard that enforces it.
 //
-// classifyByVerb -> applyGoal2 -> applyGoal1 -> applyGoal3. This array is
+// classifyFloor -> applyGoal2 -> applyGoal1 -> applyGoal3. This array is
 // the only place that order is written; nothing else in the codebase may
 // hardcode it. Each goal layer may only move a row the direction its
 // folder owns (see docs/product/prd.md, "How the goals stay separate") —
 // a layer that moves a row the wrong way throws instead of silently
 // corrupting another goal's ledger.
 import { CLASS_ORDER } from '../arbiter/arbiter.mjs';
-import { classifyByVerb } from '../core/core.mjs';
+import { classifyFloor } from '../core/core.mjs';
 import { applyGoal2 } from '../goal2/goal2.mjs';
 import { applyGoal1 } from '../goal1/goal1.mjs';
 import { applyGoal3 } from '../goal3/goal3.mjs';
@@ -43,10 +43,10 @@ export function guardGoal3(name, prev, next, row) {
   }
 }
 
-// 'verbs' is the base call (no prev result yet), so it carries no guard —
+// 'floor' is the base call (no prev result yet), so it carries no guard —
 // there is nothing to compare it against.
 const LAYERS = [
-  { name: 'verbs', apply: (_prev, row) => classifyByVerb(row), guard: null },
+  { name: 'floor', apply: (_prev, row) => classifyFloor(row), guard: null },
   { name: 'goal2', apply: applyGoal2, guard: guardRaiseOnly },
   { name: 'goal1', apply: applyGoal1, guard: guardGoal1 },
   { name: 'goal3', apply: applyGoal3, guard: guardGoal3 },

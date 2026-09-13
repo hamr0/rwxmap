@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { loadContext } from '../core/corpus.mjs';
+import { loadContext } from './context.mjs';
 import { computeLedger } from './ledger.mjs';
 
 const ctx = loadContext();

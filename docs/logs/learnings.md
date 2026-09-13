@@ -3164,3 +3164,50 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
 - Ruling (D59): GET's `readOnlyHint` follows the class -- floor r, so
   `readOnlyHint` true -- accepting the 17-row, 3.1% cost. No code
   emits hints yet (M3); parked while goal 1 is open.
+
+### Word lists moved to their owners (2026-09-13)
+
+- Goal 1 piece 2 (D57): moved `LIVE_VERBS` (26) and the yours-noun
+  allowlist build out of `core/core.mjs` and `core/corpus.mjs` into
+  `goal2/lists.mjs` and `goal2/allowlist.mjs`; moved `READ_VERBS` (14)
+  into `goal3/lists.mjs` and its rule into `goal3/goal3.mjs`. Core now
+  holds only the floor table, the operationId splitter, and row
+  loading (`core/corpus.mjs`'s 5465/332 asserts) -- no word list, no
+  noun table. A new `run/context.mjs` assembles the full run context
+  (core's rows + goal 2's LOVO allowlist + the frozen replay pair) for
+  `measure.mjs`, `proof.mjs` and `ledger.test.mjs`. `run/pipeline.mjs`'s
+  base layer is renamed `verbs` -> `floor`, calling `core.mjs`'s new
+  `classifyFloor` instead of the retired `classifyByVerb`.
+- The POST read-verb rule moved with `READ_VERBS`, from the base layer
+  into goal 3's layer (last in the pipeline: floor -> goal2 -> goal1 ->
+  goal3). Checked before moving it: all 64 rows the rule lowers are
+  truth r (0 truth w, 0 truth x), so the move costs goal 1 and goal 2
+  nothing.
+- Surfaced by the move, not by the brief: `run/proof.mjs` classified at
+  `upTo: 'goal2'` for all three goals' CSVs, which used to be
+  equivalent to the full pipeline (goal 1 and goal 3 were both
+  pass-through). Once the read-verb rule lives in goal 3, `upTo:
+  'goal2'` no longer reaches it, and goal 3's over-tight count jumped
+  49 -> 113 (the 64 read-verb rows, all truth r, stuck at the x floor).
+  Fixed to match `run/ledger.mjs`'s own rule: each CSV is classified at
+  its own goal's stage -- goal2.csv at upTo 'goal2', goal1.csv at
+  'goal1', goal3.csv at 'goal3' -- so a later goal's layer (once goal 1
+  starts lowering rows) can never leak into an earlier goal's ledger or
+  CSV.
+- Proof it is a pure move: `node --test` on core/goal1/goal2/goal3/run's
+  *.test.mjs -- 42 pass, 0 fail (list-copy equality tests added,
+  comparing each goal's copy against c11.mjs, frozen history). `node
+  poc/m1/run/measure.mjs` reproduces GATE 89/1936/106, NEW 37/2703/54,
+  VERBS 524/185/541, 13 regressions / 65 rescues, byte-for-byte
+  unchanged. `node poc/m1/run/proof.mjs` -- all six SELF-CHECK rows
+  PASS, ledger 89/37, 1936/2703, 49/49. `git diff --stat run-proof/
+  docs/logs/m1/goal2-clean.md` shows no diff at all, not even the
+  run-date line. `grep -rn "LIVE_VERBS\|READ_VERBS\|c11.mjs"` across
+  core/goal1/goal2/goal3/run: zero hits in core; goal3 does not import
+  goal2's lists and vice versa (each has its own copy, checked only in
+  tests against c11.mjs).
+- Lesson: a "pure move" of a list can still move a *rule's effective
+  position* in a pipeline, even when the list's contents and the row
+  outcomes end up identical -- any caller that hardcodes a stop-point
+  (`upTo`) has to be re-checked against where the moved rule now runs,
+  not just against the final numbers.

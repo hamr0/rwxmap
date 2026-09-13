@@ -10,7 +10,7 @@ const ctx = { junkSet: new Set(), allowlistFor: () => new Set() };
 
 test('classify: goal2 slot illegally lowering throws, names the layer', () => {
   const badLayers = [
-    { name: 'verbs', apply: () => ({ class: 'w', rule: 'floor', floor: true }), guard: null },
+    { name: 'floor', apply: () => ({ class: 'w', rule: 'floor', floor: true }), guard: null },
     { name: 'goal2', apply: (prev) => ({ ...prev, class: 'r' }), guard: guardRaiseOnly },
   ];
   assert.throws(
@@ -21,7 +21,7 @@ test('classify: goal2 slot illegally lowering throws, names the layer', () => {
 
 test('classify: goal1 slot illegally raising throws, names the layer', () => {
   const badLayers = [
-    { name: 'verbs', apply: () => ({ class: 'w', rule: 'floor', floor: true }), guard: null },
+    { name: 'floor', apply: () => ({ class: 'w', rule: 'floor', floor: true }), guard: null },
     { name: 'goal1', apply: (prev) => ({ ...prev, class: 'x' }), guard: guardGoal1 },
   ];
   assert.throws(
@@ -32,7 +32,7 @@ test('classify: goal1 slot illegally raising throws, names the layer', () => {
 
 test('classify: goal1 slot lowering to something other than w throws (only x->w allowed)', () => {
   const badLayers = [
-    { name: 'verbs', apply: () => ({ class: 'x', rule: 'floor', floor: true }), guard: null },
+    { name: 'floor', apply: () => ({ class: 'x', rule: 'floor', floor: true }), guard: null },
     { name: 'goal1', apply: (prev) => ({ ...prev, class: 'r' }), guard: guardGoal1 },
   ];
   assert.throws(
@@ -43,7 +43,7 @@ test('classify: goal1 slot lowering to something other than w throws (only x->w 
 
 test('classify: goal3 slot lowering to something other than r throws', () => {
   const badLayers = [
-    { name: 'verbs', apply: () => ({ class: 'x', rule: 'floor', floor: true }), guard: null },
+    { name: 'floor', apply: () => ({ class: 'x', rule: 'floor', floor: true }), guard: null },
     { name: 'goal3', apply: (prev) => ({ ...prev, class: 'w' }), guard: guardGoal3 },
   ];
   assert.throws(
@@ -54,7 +54,7 @@ test('classify: goal3 slot lowering to something other than r throws', () => {
 
 test('classify: opts.upTo stops after the named layer', () => {
   const layers = [
-    { name: 'verbs', apply: () => ({ class: 'w', rule: 'floor', floor: true }), guard: null },
+    { name: 'floor', apply: () => ({ class: 'w', rule: 'floor', floor: true }), guard: null },
     { name: 'goal2', apply: (prev) => ({ class: 'x', rule: 'no-own-noun', floor: false }), guard: guardRaiseOnly },
     { name: 'goal1', apply: () => { throw new Error('should not run'); }, guard: guardGoal1 },
   ];

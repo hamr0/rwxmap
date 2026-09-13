@@ -34,7 +34,7 @@ import { writeFileSync, readFileSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { classifyC20 } from '../arbiter/c20.mjs';
-import { loadContext } from '../core/corpus.mjs';
+import { loadContext } from './context.mjs';
 import { classify } from './pipeline.mjs';
 import { toCsv, parseCsv } from '../../m0/csv.mjs';
 
@@ -52,15 +52,25 @@ function escalate(msg) {
 const { rows: allRows, vendors, junkSet, allowlistFor, frozenJunkSet, frozenAllowlistFor } = loadContext();
 const ctx = { junkSet, allowlistFor };
 
-// --- classify every row once, both shapes -----------------------------
-
-const records = allRows.map((row) => {
-  const pred = classify(row, ctx, { upTo: 'goal2' });
-  // "previous" replays the frozen c15 + C20 shape exactly as frozen, so it
-  // uses the frozen (raw, unsplit) junkSet/allowlist pair.
+// --- classify every row, both shapes ------------------------------------
+//
+// Each goal's CSV is classified at that goal's OWN pipeline stage —
+// goal2.csv at upTo 'goal2', goal1.csv at 'goal1', goal3.csv at 'goal3' —
+// the same rule run/ledger.mjs's computeLedger already follows. A row is
+// never classified further downstream than the goal whose CSV it is
+// going into, so a later goal's layer (e.g. goal 1 starting to lower
+// rows) can never leak into an earlier goal's ledger or CSV. "previous"
+// replays the frozen c15 + C20 shape exactly as frozen (it has no
+// per-goal stages), so it uses the frozen (raw, unsplit) junkSet/allowlist
+// pair and is computed once, the same for every goal.
+function withPrev(row) {
   const prev = classifyC20(row, frozenJunkSet, frozenAllowlistFor(row.vendor));
-  return { row, pred, prev };
-});
+  return { row, prev };
+}
+
+const atGoal2 = allRows.map((row) => ({ ...withPrev(row), pred: classify(row, ctx, { upTo: 'goal2' }) }));
+const atGoal1 = allRows.map((row) => ({ ...withPrev(row), pred: classify(row, ctx, { upTo: 'goal1' }) }));
+const atGoal3 = allRows.map((row) => ({ ...withPrev(row), pred: classify(row, ctx, { upTo: 'goal3' }) }));
 
 // --- per-goal CSV row shaping -------------------------------------------
 
@@ -114,26 +124,26 @@ function buildGoalCsv(records, verdictFn, errorFn) {
   return { rows, errorCount, prevErrorCount };
 }
 
-// goal 2: truth x. verdict widens to LEAK for both predicted w and
-// predicted r (see file header); the ledger/error-count stays the strict
-// predicted-w-only definition (errorFn).
-const goal2Records = records.filter((r) => r.row.gt_class === 'x');
+// goal 2: truth x, classified at upTo 'goal2'. verdict widens to LEAK for
+// both predicted w and predicted r (see file header); the ledger/error-count
+// stays the strict predicted-w-only definition (errorFn).
+const goal2Records = atGoal2.filter((r) => r.row.gt_class === 'x');
 const goal2 = buildGoalCsv(
   goal2Records,
   (cls) => (cls === 'w' || cls === 'r') ? 'LEAK' : 'ok',
   (cls) => cls === 'w',
 );
 
-// goal 1: truth w, error = predicted x.
-const goal1Records = records.filter((r) => r.row.gt_class === 'w');
+// goal 1: truth w, classified at upTo 'goal1'. error = predicted x.
+const goal1Records = atGoal1.filter((r) => r.row.gt_class === 'w');
 const goal1 = buildGoalCsv(
   goal1Records,
   (cls) => (cls === 'x') ? 'FALSE-ALARM' : 'ok',
   (cls) => cls === 'x',
 );
 
-// goal 3: truth r, error = predicted not r.
-const goal3Records = records.filter((r) => r.row.gt_class === 'r');
+// goal 3: truth r, classified at upTo 'goal3'. error = predicted not r.
+const goal3Records = atGoal3.filter((r) => r.row.gt_class === 'r');
 const goal3 = buildGoalCsv(
   goal3Records,
   (cls) => (cls !== 'r') ? 'OVER-TIGHT' : 'ok',
