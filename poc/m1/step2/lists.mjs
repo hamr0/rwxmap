@@ -1,10 +1,11 @@
-// Goal 1's own word lists (D57: each goal owns its own, never imports
-// another goal's build). Goal 1 is a standalone classifier — the user's
-// ruling 2026-09-13 — not a layer patching goal 2's output.
+// Step 2's own word lists (was goal 1 until 2026-09-13; D57: each step
+// owns its own, never imports another step's build). Step 2 is a
+// standalone classifier — the user's ruling 2026-09-13 — not a layer
+// patching step 3's output.
 
-// LIVE_VERBS (26): a literal copy of goal2/lists.mjs's LIVE_VERBS (D57
-// allows copying entries; never import goal 2's set). Same 26 words, goal
-// 1's own copy so goal 1 never depends on goal 2 at runtime.
+// LIVE_VERBS (26): a literal copy of step3/lists.mjs's LIVE_VERBS (D57
+// allows copying entries; never import step 3's set). Same 26 words, step
+// 2's own copy so step 2 never depends on step 3 at runtime.
 export const LIVE_VERBS = new Set([
   'accept', 'approve', 'cancel', 'convert', 'dial', 'end', 'execute',
   'hangup', 'invite', 'kick', 'launch', 'merge', 'notify', 'pay', 'publish',
@@ -12,13 +13,13 @@ export const LIVE_VERBS = new Set([
   'terminate', 'transfer', 'trigger',
 ]);
 
-// nounsForRow is goal 2's noun reader (goal2/allowlist.mjs) — a reader,
+// nounsForRow is step 3's noun reader (step3/allowlist.mjs) — a reader,
 // not a list; reused here to build the noun stats this module owns.
-import { nounsForRow } from '../goal2/allowlist.mjs';
+import { nounsForRow } from '../step3/allowlist.mjs';
 
 const RAISE_METHODS = new Set(['PUT', 'DELETE', 'PATCH']);
 
-// Bar for goal 1's own "other party" noun list (D63, 2026-09-13): a noun
+// Bar for step 2's own "other party" noun list (D63, 2026-09-13): a noun
 // is "other" for vendor v when, excluding v's own rows, it appears across
 // >= OTHER_MIN_VENDORS other vendors and its x-share (danger share) among
 // those rows is >= OTHER_MIN_DANGER_SHARE. Reference measurement:
@@ -27,11 +28,11 @@ const RAISE_METHODS = new Set(['PUT', 'DELETE', 'PATCH']);
 export const OTHER_MIN_VENDORS = 2;
 export const OTHER_MIN_DANGER_SHARE = 0.30;
 
-// Builds goal 1's own leave-one-vendor-out "other party" noun list.
+// Builds step 2's own leave-one-vendor-out "other party" noun list.
 //
 // rows: ALL rows (this function filters to PUT/DELETE/PATCH itself).
 // vendors: every vendor name.
-// junkSet: goal 2's junk-noun set (buildGoal2Context's junkSet) — passed
+// junkSet: step 3's junk-noun set (buildStep3Context's junkSet) — passed
 // in by the caller (run/context.mjs), reused only as a noun-reader input,
 // not as evidence.
 //
@@ -42,8 +43,8 @@ export const OTHER_MIN_DANGER_SHARE = 0.30;
 // is at least one remaining row, and their x-share >= OTHER_MIN_DANGER_SHARE.
 //
 // Returns { otherNounsFor } — otherNounsFor(vendor) -> Set<noun>, mirroring
-// goal2/allowlist.mjs's buildGoal2Context -> { allowlistFor } shape.
-export function buildGoal1OtherNouns(rows, vendors, junkSet) {
+// step3/allowlist.mjs's buildStep3Context -> { allowlistFor } shape.
+export function buildStep2OtherNouns(rows, vendors, junkSet) {
   const stat = new Map(); // noun -> { w, x, r, byVendor: Map<vendor, {w,x,r}> }
 
   for (const row of rows) {

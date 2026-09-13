@@ -81,8 +81,8 @@ measured leak lives. Go means all of:
 
 (docs/archive/prd.md:187-202)
 
-M1 is a POC, not graduated. The D30 gate is not met. Current per-goal
-numbers and status live in `docs/product/prd.md`, "The three goals";
+M1 is a POC, not graduated. The D30 gate is not met. Current per-step
+numbers and status live in `docs/product/prd.md`, "The three steps";
 past statuses are in `docs/logs/learnings.md`.
 
 ## Labelled sets
@@ -105,7 +105,7 @@ and never used to choose. Exams 1-3 were drawn from
 data/corpus/apis-guru-ops.csv.gz, providers appearing in none of the
 six original sets, each as a separate blind paper plus answer key,
 labellers forbidden to open any classifier and free to answer '?'
-(D46). All three are now burned as blind material for goal 2 — a fresh
+(D46). All three are now burned as blind material for step 3 — a fresh
 exam 4 is owed before scoring any further change to C20's rule.
 Combined with the original six sets the labelled corpus reaches 5465
 rows across 332 providers. Canonical file for the original six:
@@ -155,7 +155,7 @@ vendor), 0 over; POST 382/509, 0 leaks, 127 over; PUT 102/127, 1 leak,
 24 over; DELETE 200/250, 3 leaks, 47 over; PATCH 30/42, 6 leaks, 6
 over. (docs/archive/prd.md:268-272)
 
-### The C20 layer — goal 2's adopted shape (POC, not shipped, 2026-09-09)
+### The C20 layer — step 3's adopted shape (POC, not shipped, 2026-09-09)
 
 Layered on top of c15 above, changing nothing before it: c15.mjs and
 judge.mjs are never modified. `classifyC20` calls c15's real
@@ -166,7 +166,7 @@ learned allowlist of "yours" nouns, it stays w; otherwise it raises to
 x under rule `no-own-noun`. Never lowers, never touches r; GET and
 POST pass through untouched.
 
-This inverts the direction every prior goal-2 pass took (C16-C19
+This inverts the direction every prior step-3 pass took (C16-C19
 learned a BLOCKLIST of third-party nouns and none of them transferred
 under leave-one-vendor-out, LOVO); C20 learns an ALLOWLIST of "yours"
 nouns instead and treats the ABSENCE of one as the evidence for x.

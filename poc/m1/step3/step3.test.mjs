@@ -4,7 +4,7 @@ import { classifyFloor } from '../core/core.mjs';
 import { LIVE_VERBS as C11_LIVE_VERBS, READ_VERBS as C11_READ_VERBS } from '../arbiter/c11.mjs';
 import { LIVE_VERBS, NON_NOUN_READ_VERBS } from './lists.mjs';
 import { nounsForRow } from './allowlist.mjs';
-import { applyGoal2, applyLiveVerb } from './goal2.mjs';
+import { applyStep3, applyLiveVerb } from './step3.mjs';
 
 function row(overrides) {
   return { method: 'GET', operationId: '', summary: '', description: '', path: '', vendor: 'test', gt_class: 'r', ...overrides };
@@ -14,9 +14,9 @@ function ctxWith(allowlist, junkSet = new Set()) {
   return { junkSet, allowlistFor: () => allowlist };
 }
 
-// D57: goal 2's own copies must stay equal to c11.mjs's (frozen history)
+// D57: step 3's own copies must stay equal to c11.mjs's (frozen history)
 // resolved sets — checked here, not imported for real use elsewhere.
-test('goal2 list copies match c11.mjs exactly', () => {
+test('step3 list copies match c11.mjs exactly', () => {
   assert.equal(LIVE_VERBS.size, 26);
   assert.deepEqual(LIVE_VERBS, C11_LIVE_VERBS);
   assert.equal(NON_NOUN_READ_VERBS.size, 14);
@@ -49,35 +49,35 @@ test('applyLiveVerb: a whitespace-only operationId still falls back to the path,
   assert.deepEqual(applyLiveVerb(classifyFloor(withSpaces), withSpaces), applyLiveVerb(classifyFloor(withEmpty), withEmpty));
 });
 
-test('applyGoal2: floor-w row whose nouns are all on the allowlist stays w', () => {
+test('applyStep3: floor-w row whose nouns are all on the allowlist stays w', () => {
   const r = row({ method: 'PUT', operationId: 'updateDeviceStatus', summary: 'Update device status' });
   const allowlist = nounsForRow(r, new Set()); // every noun this row has is "on" the allowlist
   const prev = classifyFloor(r);
-  const res = applyGoal2(prev, r, ctxWith(allowlist));
+  const res = applyStep3(prev, r, ctxWith(allowlist));
   assert.equal(res.class, 'w');
 });
 
-test('applyGoal2: floor-w row with one noun off the allowlist becomes x/no-own-noun', () => {
+test('applyStep3: floor-w row with one noun off the allowlist becomes x/no-own-noun', () => {
   const r = row({ method: 'PUT', operationId: 'updateDeviceStatus', summary: 'Update device status' });
   const allowlist = nounsForRow(r, new Set());
   allowlist.delete('device'); // one noun now missing from the allowlist
   const prev = classifyFloor(r);
-  const res = applyGoal2(prev, r, ctxWith(allowlist));
+  const res = applyStep3(prev, r, ctxWith(allowlist));
   assert.deepEqual(res, { class: 'x', rule: 'no-own-noun', floor: false });
 });
 
-test('applyGoal2: a row already raised to x by the live-verb check is returned untouched by the noun check', () => {
+test('applyStep3: a row already raised to x by the live-verb check is returned untouched by the noun check', () => {
   const r = row({ method: 'PUT', operationId: 'terminateCall', summary: 'Terminate a call' });
   const prev = classifyFloor(r);
-  const res = applyGoal2(prev, r, ctxWith(new Set()));
+  const res = applyStep3(prev, r, ctxWith(new Set()));
   assert.equal(res.class, 'x');
   assert.equal(res.rule, 'live-verb');
 });
 
-test('applyGoal2: a GET row is returned untouched', () => {
+test('applyStep3: a GET row is returned untouched', () => {
   const r = row({ method: 'GET', operationId: 'getDevice' });
   const prev = classifyFloor(r);
-  const res = applyGoal2(prev, r, ctxWith(new Set()));
+  const res = applyStep3(prev, r, ctxWith(new Set()));
   assert.deepEqual(res, { class: 'r', rule: 'floor', floor: true });
 });
 
@@ -85,7 +85,7 @@ test('applyGoal2: a GET row is returned untouched', () => {
 // head noun IS on the allowlist but a buried token ('permission') is NOT.
 // The old shape needed a hand-written third-party noun list to catch this;
 // this shape must get it for free from the widened noun set.
-test('applyGoal2: buried-token regression — walletobjects.permissions.update', () => {
+test('applyStep3: buried-token regression — walletobjects.permissions.update', () => {
   const r = row({
     method: 'PUT',
     operationId: 'walletobjects.permissions.update',
@@ -95,7 +95,7 @@ test('applyGoal2: buried-token regression — walletobjects.permissions.update',
   // as a buried operationId token.
   const allowlist = new Set(['setting', 'update', 'walletobject']);
   const prev = classifyFloor(r);
-  const res = applyGoal2(prev, r, ctxWith(allowlist));
+  const res = applyStep3(prev, r, ctxWith(allowlist));
   assert.equal(res.class, 'x');
   assert.equal(res.rule, 'no-own-noun');
 });

@@ -31,20 +31,19 @@ three steps. Each step takes the rows the step before left behind.
    a yours noun is w. (Measured 2026-09-13: 10 right, 4 wrong on 14
    rows; the verb alone is a coin flip, 77 to 69. Not adopted today —
    POST leftover stays x. See learnings, "One-flow ladder".)
-3. **Step 3, x.** Whatever is left is x. That is every POST / PUT /
-   DELETE / PATCH row that step 1 and step 2 did not claim: no read
-   verb, and no verb-plus-yours-noun. Rows that step 2 started at w
-   are pulled up to x here when a live verb or a not-yours noun fires.
+3. **Step 3, x.** Not a step of its own — x is the byproduct: every
+   POST / PUT / DELETE / PATCH row that step 1 and step 2 did not
+   claim. Step 2 gives a w row up (a live verb or a not-yours noun
+   fires) and it lands here.
 
 On the 5465 rows PATCH is no longer the outlier it was on 42 rows (31%
 x); it sits with PUT and DELETE at 14-15% x, so it keeps the w floor.
 
-In code today, `run/pipeline.mjs` runs floor -> goal 2 -> goal 3, which
-is this same sequence (goal 3's read verbs touch only POST rows on the x
-floor; goal 2's rules touch only rows on the w floor; the two never see
-the same row). Goal 1 is a second, standalone lens on steps 2 and 3
-(a not-yours blocklist instead of a yours allowlist); which lens step 3
-uses in the end is the open "bring them together" decision.
+In code, `run/pipeline.mjs` runs floor -> step 1 -> step 3 (the raise
+rules that decide what step 2 gives up). Step 2 is a second, standalone
+lens on the same w rows (a not-yours blocklist instead of a yours
+allowlist); which lens decides in the end is the open "bring them
+together" decision.
 
 **Movement rule.** Raising is `w -> x` on PUT/DELETE/PATCH. Lowering is
 `x -> r` on POST, by a read verb. `r` comes from the GET floor or from
@@ -53,13 +52,13 @@ a POST read verb — nowhere else (D43).
 One direction of travel per method (D43):
 
 - GET / HEAD / OPTIONS — no word rules run. The floor stands. Last in
-  the attack order, after goals 2, 1 and 3.
+  the attack order, after step 3, step 2 and step 1.
 - POST — lower only, `x -> r`.
 - PUT / DELETE / PATCH — raise only, `w -> x`.
 
-## The three goals
+## The three steps
 
-Work one goal at a time and bring them together afterwards. Attacking
+Work one step at a time and bring them together afterwards. Attacking
 several at once is what caused the repeated failures: they have
 different shapes and need different evidence. Counts are the current
 shape's errors over the 5465-row combined corpus (332 vendors),
@@ -67,36 +66,39 @@ leave-one-vendor-out. Truth split: 936 x, 3883 w, 646 r.
 
 | # | error | count | where it lives | why it matters |
 |---|---|---|---|---|
-| 2 | **x dressed as w** | 37 (4.0% of truth-x) — FROZEN 2026-09-12 | DELETE 18, PUT 14, PATCH 5; all floor rows | a dangerous operation is treated as a safe write — this is the leak |
-| 1 | **w dressed as x** | 803 false alarms (21.3% of the 3776 PUT/DELETE/PATCH truth-w rows), 211 leaks — on goal 1's own ledger, STANDALONE 2026-09-13 | goal 1's own live-verb + other-party-noun classifier, scored over its own 4406-row PUT/DELETE/PATCH population (3776 truth w, 605 truth x) | a safe write is treated as dangerous, so it gets blocked when it should not be |
-| 3 | **r dressed as x or w** | 49 | POST 24 (r->x), PUT 14, DELETE 5, PATCH 6 | a pure read is treated as a write. Deferred: smallest and least harmful |
+| step 1 (r) | **r dressed as w or x** | 49 over-tight, 0 leaks | POST 24 (r->x), PUT 14, DELETE 5, PATCH 6 | a pure read is treated as a write |
+| step 2 (w) | **w dressed as x** | 803 false alarms (21.3% of the 3776 PUT/DELETE/PATCH truth-w rows), 211 leaks — on step 2's own ledger, STANDALONE 2026-09-13 | step 2's own live-verb + other-party-noun classifier, scored over its own 4406-row PUT/DELETE/PATCH population (3776 truth w, 605 truth x) | a safe write is treated as dangerous, so it gets blocked when it should not be |
+| step 3 (x) | **x dressed as w** | 37 (4.0% of truth-x) — FROZEN 2026-09-12 | DELETE 18, PUT 14, PATCH 5; all floor rows | a dangerous operation is treated as a safe write — this is the leak |
 
-Attack order is 2, then 1, then 3. One goal at a time: while a goal is
-open, everything outside it — the other goals, other methods, other
+Work order so far was step 3, then step 2, then step 1 (by harm: leaks
+first). That is fine because the steps never share a row: step 1's rule
+touches only POST rows on the x floor, steps 2 and 3 only
+PUT/DELETE/PATCH rows on the w floor. One step at a time: while a step
+is open, everything outside it — the other steps, other methods, other
 vendors — is out of focus and is not chased. That isolation is what
 stops the noise that caused the earlier repeated failures. (D47)
 
-Goal 1 (w dressed as x) is its own standalone classifier now
-(2026-09-13, the user's ruling — see below). Goal 2 is frozen at 37,
+Step 2 (w dressed as x) is its own standalone classifier now
+(2026-09-13, the user's ruling — see below). Step 3 is frozen at 37,
 below.
 
-### Two flows, not one pipeline (core in poc/m1/core; goal 2 in poc/m1/goal2; goal 1 in poc/m1/goal1)
+### Two flows, not one pipeline (core in poc/m1/core; step 3 in poc/m1/step3; step 2 in poc/m1/step2)
 
-Goal 2 and goal 1 are two separate, standalone classifiers over the same
+Step 3 and step 2 are two separate, standalone classifiers over the same
 PUT/DELETE/PATCH rows — not two stages of one chain. Each answers the
-question its own way, from its own evidence; goal 1 never sees or
-touches goal 2's output. Bringing the two into a single combined answer
+question its own way, from its own evidence; step 2 never sees or
+touches step 3's output. Bringing the two into a single combined answer
 is a later step, not done here (the user's ruling, 2026-09-13).
 
 | list | owner | size | job |
 |---|---|---|---|
-| `LIVE_VERBS`, hand-written | goal 2 | 26 | raise a `w`-floor row off its floor |
-| `LIVE_VERBS`, a literal copy of goal 2's (D57: copy, never import) | goal 1 | 26 | raise a `w`-floor row off its floor, goal 1's own copy |
-| `READ_VERBS`, hand-written | goal 3 | 14 | lower an `x`-floor row off its floor |
-| yours-nouns — mined allowlist, n>=2 rows, w-share>=0.80 | goal 2 | 439 | hold a floor row at `w` |
-| other-party nouns — mined leave-one-vendor-out blocklist, other vendors>=2, danger (truth-x) share>=0.30 | goal 1 | ~130 words per vendor, mined fresh per vendor | raise a floor row to `x` |
+| `LIVE_VERBS`, hand-written | step 3 | 26 | raise a `w`-floor row off its floor |
+| `LIVE_VERBS`, a literal copy of step 3's (D57: copy, never import) | step 2 | 26 | raise a `w`-floor row off its floor, step 2's own copy |
+| `READ_VERBS`, hand-written | step 1 | 14 | lower an `x`-floor row off its floor |
+| yours-nouns — mined allowlist, n>=2 rows, w-share>=0.80 | step 3 | 439 | hold a floor row at `w` |
+| other-party nouns — mined leave-one-vendor-out blocklist, other vendors>=2, danger (truth-x) share>=0.30 | step 2 | ~130 words per vendor, mined fresh per vendor | raise a floor row to `x` |
 
-**Goal 2 (frozen), for one row:**
+**Step 3 (frozen), for one row:**
 
 1. **Floor by method** (core). PUT/DELETE/PATCH `w`.
 2. **Live verb.** A live verb (in the operationId, else the summary's
@@ -108,99 +110,99 @@ is a later step, not done here (the user's ruling, 2026-09-13).
    tags/filler words dropped as junk). All on the vendor's mined
    allowlist → stay `w`. Any not → `x`, rule `no-own-noun`.
 
-**Goal 1 (standalone), for the same row, independently:**
+**Step 2 (standalone), for the same row, independently:**
 
 1. **Floor by method** (core). PUT/DELETE/PATCH `w`; every other method
-   returns that method's own untouched floor — goal 1 has no rule for
+   returns that method's own untouched floor — step 2 has no rule for
    GET/HEAD/OPTIONS/POST rows and never classifies them.
-2. **Live verb, goal 1's own copy.** The same live-verb check as goal
-   2's, using goal 1's own `LIVE_VERBS` (a literal copy of goal 2's 26
-   words — D57 allows copying entries, never importing another goal's
+2. **Live verb, step 2's own copy.** The same live-verb check as step
+   3's, using step 2's own `LIVE_VERBS` (a literal copy of step 3's 26
+   words — D57 allows copying entries, never importing another step's
    list). Raises a `w`-floor row to `x`, rule `live-verb`.
 3. **Other-party noun.** Only if still at the `w` floor after step 2.
-   Read the row's noun set with goal 2's `nounsForRow` (the reader, not
-   a list — reused, never goal 2's evidence). Mined leave-one-vendor-out
+   Read the row's noun set with step 3's `nounsForRow` (the reader, not
+   a list — reused, never step 3's evidence). Mined leave-one-vendor-out
    over ALL PUT/DELETE/PATCH rows: a noun is "someone else's" for vendor
    v when, excluding v's own rows, it appears across >=2 other vendors
    with a danger (truth-x) share >=30%. Any noun on that list → `x`,
    rule `other-noun`. No hit: stay `w`, floor.
 
-Goal 3 still runs as its own pipeline stage, after goal 2 (POST rows
+Step 1 still runs as its own pipeline stage, after step 3 (POST rows
 still at the `x` floor: a read verb lowers to `r`); it is unaffected by
-goal 1's rebuild.
+step 2's rebuild.
 
-Nothing goal 1 raises on is hand-listed as "someone else's" — the
-other-party list is mined the same via-negativa way goal 2's yours-noun
-list is, just in the opposite direction and off goal 1's own bar. Spec
-for goal 2 read from live code: `docs/product/goal2-solution.md`.
+Nothing step 2 raises on is hand-listed as "someone else's" — the
+other-party list is mined the same via-negativa way step 3's yours-noun
+list is, just in the opposite direction and off step 2's own bar. Spec
+for step 3 read from live code: `docs/product/goal2-solution.md`.
 
 The operationId is split on `_ - .`, camelCase, `/` and whitespace
 before any rule reads it; the splitter lives in core (D58).
 
-### How the goals stay separate
+### How the steps stay separate
 
-Goals 1 and 2 judge the same rows — PUT/DELETE/PATCH at the `w`
+Steps 2 and 3 judge the same rows — PUT/DELETE/PATCH at the `w`
 floor — but as two independent, standalone classifiers, not opposite
-sides of one chain (the user's ruling, 2026-09-13). Each goal's row =
+sides of one chain (the user's ruling, 2026-09-13). Each step's row =
 its own full classifier: its own live-verb copy plus its own
-other-party (goal 1) or yours-noun (goal 2) list, run start to finish
+other-party (step 2) or yours-noun (step 3) list, run start to finish
 over the same rows, never reading or moving the other's output. So
 separation is enforced in code, tests and ledgers, not assumed.
 
 | folder | owns | may move a row |
 |---|---|---|
 | `poc/m1/core/` | floor table, the operationId splitter, row loading | — (shared; changes need every pin green) |
-| `poc/m1/goal2/` | live-verb rule, the yours-noun layer, the allowlist build | raise only (`w` → `x`) |
-| `poc/m1/goal1/` | its own standalone classifier: own `LIVE_VERBS` copy + own mined other-party noun list | its own full classify, floor → raise; never chained onto goal 2's output |
-| `poc/m1/goal3/` | read-verb layer | lower to `r` only |
-| `poc/m1/run/` | the one fixed pipeline order (floor → goal 2 → goal 3), the ledgers, the proof; goal 1 runs standalone, outside that order | — |
+| `poc/m1/step3/` | live-verb rule, the yours-noun layer, the allowlist build | raise only (`w` → `x`) |
+| `poc/m1/step2/` | its own standalone classifier: own `LIVE_VERBS` copy + own mined other-party noun list | its own full classify, floor → raise; never chained onto step 3's output |
+| `poc/m1/step1/` | read-verb layer | lower to `r` only |
+| `poc/m1/run/` | the one fixed pipeline order (floor → step 1 → step 3), the ledgers, the proof; step 2 runs standalone, outside that order | — |
 
 Rules:
 
-1. **One order, written once** (`run/pipeline.mjs`): floor → goal 2 →
-   goal 3. Nobody reorders. Goal 1 is not in this order — it is a
-   standalone classifier (`classifyGoal1`) run separately, over the same
+1. **One order, written once** (`run/pipeline.mjs`): floor → step 1 →
+   step 3. Nobody reorders. Step 2 is not in this order — it is a
+   standalone classifier (`classifyStep2`) run separately, over the same
    rows, by `run/ledger.mjs`, `run/measure.mjs` and `run/proof.mjs`
    directly; nobody chains it onto the pipeline's output.
-2. **One direction per layer.** The pipeline throws if a goal-2 or
-   goal-3 layer moves a row the wrong way. Goal 1, being standalone, has
+2. **One direction per layer.** The pipeline throws if a step 1 or
+   step 3 layer moves a row the wrong way. Step 2, being standalone, has
    no such guard to satisfy — its own rule order (floor → live-verb →
-   other-noun) is fixed by `classifyGoal1` itself, raise only.
-3. **A goal may not turn another goal's knob.** Goal 1's own classifier
-   reuses core's floor and goal 2's noun reader (`nounsForRow`) as
-   read-only inputs; it never imports another goal's word list, reads
-   another goal's evidence, or writes to another goal's ledger.
-4. **Each goal's number is pinned by its own test**
-   (`run/ledger.test.mjs`): goal 2 = 37, goal 1 = 803 false alarms (211
-   leaks, both on goal 1's own ledger), goal 3 = 49. A change that moves
-   another goal's pin turns that test red; the pin moves only by a
+   other-noun) is fixed by `classifyStep2` itself, raise only.
+3. **A step may not turn another step's knob.** Step 2's own classifier
+   reuses core's floor and step 3's noun reader (`nounsForRow`) as
+   read-only inputs; it never imports another step's word list, reads
+   another step's evidence, or writes to another step's ledger.
+4. **Each step's number is pinned by its own test**
+   (`run/ledger.test.mjs`): step 3 = 37, step 2 = 803 false alarms (211
+   leaks, both on step 2's own ledger), step 1 = 49. A change that moves
+   another step's pin turns that test red; the pin moves only by a
    ruling recorded here.
-5. **Each goal has its own ledger.** Goal 2 is measured through its own
-   pipeline stage; goal 1 by running its own classifier directly; goal 1
+5. **Each step has its own ledger.** Step 3 is measured through its own
+   pipeline stage; step 2 by running its own classifier directly; step 2
    is scored, both false alarms and leaks, over its own 4406-row
-   PUT/DELETE/PATCH population (see below) — never blended with goal
-   2's. A stacked number appears only on a line labelled combined.
-6. **Each goal owns its own word lists** (D57): a goal never imports
-   another goal's list, though it may copy entries that genuinely
+   PUT/DELETE/PATCH population (see below) — never blended with step
+   3's. A stacked number appears only on a line labelled combined.
+6. **Each step owns its own word lists** (D57): a step never imports
+   another step's list, though it may copy entries that genuinely
    apply. Core holds only what is truly shared — the floor and the
-   splitter, no lists. Goal 2 owns `LIVE_VERBS` (26) and the
-   yours-noun allowlist (439); goal 3 owns `READ_VERBS` (14); goal 1
-   owns its own `LIVE_VERBS` (26, a literal copy of goal 2's) and its
+   splitter, no lists. Step 3 owns `LIVE_VERBS` (26) and the
+   yours-noun allowlist (439); step 1 owns `READ_VERBS` (14); step 2
+   owns its own `LIVE_VERBS` (26, a literal copy of step 3's) and its
    own mined other-party noun list (leave-one-vendor-out, other
-   vendors>=2, danger share>=0.30), both built fresh from goal 1's own
-   pile, never goal 2's.
+   vendors>=2, danger share>=0.30), both built fresh from step 2's own
+   pile, never step 3's.
 
 Run: `node poc/m1/run/measure.mjs` (gate + scores),
-`node --test poc/m1/run/ledger.test.mjs` (the per-goal pins) and
+`node --test poc/m1/run/ledger.test.mjs` (the per-step pins) and
 `node poc/m1/run/proof.mjs` (row-level CSVs in `run-proof/`).
 
-**Goal 2 is FROZEN at 37 (2026-09-12).** The shape above, measured
+**Step 3 is FROZEN at 37 (2026-09-12).** The shape above, measured
 leave-one-vendor-out over the 5465-row combined corpus:
 
-| shape | goal-2 leaks | goal-1 false alarms (charged to goal 1) | all-loosening |
+| shape | step-3 leaks | step-2 false alarms (charged to step 2) | all-loosening |
 |---|---|---|---|
 | previous frozen (c15 + C20: hand list + two head nouns) | 89 (9.5% of truth-x) | 1936 | 106 |
-| **current (poc/m1/goal2), at freeze** | **37 (4.0%)** | 2727 | 54 |
+| **current (poc/m1/step3), at freeze** | **37 (4.0%)** | 2727 | 54 |
 
 65 leaks rescued, 13 new; net −52. All 37 remaining leaks are floor
 rows — no evidence fired, so the tool flags them as unresolved rather
@@ -217,57 +219,57 @@ any row is labelled, is the only thing that turns 37 into a wild
 number. "Flagged" is still not wired in code — `floor:true` exists
 only on the row result, not as a reported state — and must be before
 anything graduates. The shape is a POC; "never ship the POC" stands.
-Row-level results for every goal: `run-proof/`, regenerated by `node poc/m1/run/proof.mjs`.
+Row-level results for every step: `run-proof/`, regenerated by `node poc/m1/run/proof.mjs`.
 
-**Goal 1 is rebuilt as its own standalone classifier (2026-09-13, the
-user's ruling).** It is no longer a layer that patches goal 2's
-output — goal 1 and goal 2 are two separate lenses over the same
+**Step 2 is rebuilt as its own standalone classifier (2026-09-13, the
+user's ruling).** It is no longer a layer that patches step 3's
+output — step 2 and step 3 are two separate lenses over the same
 PUT/DELETE/PATCH rows; bringing them together into one combined answer
 is a later step, not done here. The earlier "lower-back" design
 (D60-D62: a mined lowering-verb rule, then a mined own-noun rule, both
-restricted to only ever undoing a raise goal 2 itself had made) moved
-goal 1 from 2727 to 2531 false alarms, but by construction it could only
-ever undo what goal 2 raised — it inherited goal 2's own curve rather
+restricted to only ever undoing a raise step 3 itself had made) moved
+step 2 from 2727 to 2531 false alarms, but by construction it could only
+ever undo what step 3 raised — it inherited step 3's own curve rather
 than answering the question on its own evidence. That design is
 retired; its numbers, its bar sweeps and the reasoning behind each piece
 move to `docs/logs/learnings.md` (2026-09-13 entry) and are not carried
 forward here.
 
-State the base plainly: goal 1's ledger is scored only over the 4406
+State the base plainly: step 2's ledger is scored only over the 4406
 PUT/DELETE/PATCH rows (3776 truth w, 605 truth x) — the same population
 its own classifier classifies, matching the reference measurement.
 The corpus's other 103 truth-w rows are POST rows sitting at the POST
 floor's own default (`x`); that mismatch belongs to the POST floor, not
-to goal 1 — `classifyGoal1` returns every non-PUT/DELETE/PATCH row's
+to step 2 — `classifyStep2` returns every non-PUT/DELETE/PATCH row's
 floor untouched and never assigns it a class of its own, so it cannot
 be charged for a row it never classifies.
 
-The new shape (see "Two flows" above): floor `w` → goal 1's own
-live-verb list (a literal copy of goal 2's 26 words) raises to `x` →
-if still `w`, goal 1's own mined other-party noun list raises to `x`
+The new shape (see "Two flows" above): floor `w` → step 2's own
+live-verb list (a literal copy of step 3's 26 words) raises to `x` →
+if still `w`, step 2's own mined other-party noun list raises to `x`
 when any noun on the row is "someone else's" for that vendor
 (leave-one-vendor-out: excluding the row's own vendor, the noun appears
 across >=2 other vendors with a danger, truth-x, share >=30%). Bar
 sweep across the full 4406-row population: 30% → 803 false alarms / 211
-leaks (adopted); 40% → 472/251; 50% → 268/382. Unlike goal 2's
+leaks (adopted); 40% → 472/251; 50% → 268/382. Unlike step 3's
 yours-noun allowlist, this is not a zero-leak design — tightening the
 bar trades false alarms for leaks close to one-for-one at this end of
-the curve, and 211 leaks sit on goal 1's own ledger, charged nowhere
+the curve, and 211 leaks sit on step 2's own ledger, charged nowhere
 else. Full sweep and reasoning: `docs/logs/learnings.md` (2026-09-13
 entry, "Goal 1 rebuilt as its own classifier").
 
-Ledgers stay separate. Goal 2 owns 37 leaks, unaffected by this
-rebuild. Goal 1 owns 803 false alarms and 211 leaks, both on its own
+Ledgers stay separate. Step 3 owns 37 leaks, unaffected by this
+rebuild. Step 2 owns 803 false alarms and 211 leaks, both on its own
 ledger, both scored over its own 4406-row PUT/DELETE/PATCH population.
-Goal 3 owns 49. A blended number appears only on a line labelled
+Step 1 owns 49. A blended number appears only on a line labelled
 combined, and there is none yet for this shape.
 
-Goal 3 (r dressed as x or w) is the same shape as goal 1, one step
+Step 1 (r dressed as w or x) is the same shape as step 2, one step
 further out, and waits behind it.
 
 GET is last on the list. 97% of GET rows are truly r, GET runs no word
 rules by design, and the 17 Slack GET leaks are not chased per-vendor.
-GET is not touched until goals 2, 1 and 3 are closed.
+GET is not touched until steps 3, 2 and 1 are closed.
 
 Every row still gets a judgement — there is no "no answer" outcome —
 and where the judge is unsure it moves in the safer direction (tighter

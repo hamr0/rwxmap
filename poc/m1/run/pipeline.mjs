@@ -1,35 +1,35 @@
 // The one fixed pipeline order, and the direction guard that enforces it.
 //
-// classifyFloor -> applyGoal2 -> applyGoal3. This array is the only place
+// classifyFloor -> applyStep1 -> applyStep3. This array is the only place
 // that order is written; nothing else in the codebase may hardcode it.
-// Each goal layer may only move a row the direction its folder owns (see
+// Each step layer may only move a row the direction its folder owns (see
 // docs/product/prd.md, "How the goals stay separate") — a layer that
 // moves a row the wrong way throws instead of silently corrupting
-// another goal's ledger.
+// another step's ledger.
 //
-// Goal 1 is NOT a layer here (the user's ruling, 2026-09-13): it is its
-// own standalone classifier (goal1/goal1.mjs's classifyGoal1), run
+// Step 2 is NOT a layer here (the user's ruling, 2026-09-13): it is its
+// own standalone classifier (step2/step2.mjs's classifyStep2), run
 // separately over the same rows, never chained onto this pipeline.
-// guardGoal1 stays exported below only because pipeline.test.mjs uses it
+// guardStep2 stays exported below only because pipeline.test.mjs uses it
 // directly to test the guard mechanism itself.
 import { CLASS_ORDER } from '../arbiter/arbiter.mjs';
 import { classifyFloor } from '../core/core.mjs';
-import { applyGoal2 } from '../goal2/goal2.mjs';
-import { applyGoal3 } from '../goal3/goal3.mjs';
+import { applyStep3 } from '../step3/step3.mjs';
+import { applyStep1 } from '../step1/step1.mjs';
 
 function rowLabel(row) {
   return `${row.vendor} ${row.method} ${row.operationId}`;
 }
 
-// goal2: keep or raise only (w -> x). No lower allowed.
+// step3: keep or raise only (w -> x). No lower allowed.
 export function guardRaiseOnly(name, prev, next, row) {
   if (CLASS_ORDER[next.class] < CLASS_ORDER[prev.class]) {
     throw new Error(`${name} layer lowered ${rowLabel(row)} from ${prev.class} to ${next.class}, only raises allowed`);
   }
 }
 
-// goal1: keep, or exactly x -> w. No raise, no other lower.
-export function guardGoal1(name, prev, next, row) {
+// step2: keep, or exactly x -> w. No raise, no other lower.
+export function guardStep2(name, prev, next, row) {
   if (CLASS_ORDER[next.class] > CLASS_ORDER[prev.class]) {
     throw new Error(`${name} layer raised ${rowLabel(row)} from ${prev.class} to ${next.class}, only lowers allowed`);
   }
@@ -38,8 +38,8 @@ export function guardGoal1(name, prev, next, row) {
   }
 }
 
-// goal3: keep, or lower to r from anything. No raise, no lower to non-r.
-export function guardGoal3(name, prev, next, row) {
+// step1: keep, or lower to r from anything. No raise, no lower to non-r.
+export function guardStep1(name, prev, next, row) {
   if (CLASS_ORDER[next.class] > CLASS_ORDER[prev.class]) {
     throw new Error(`${name} layer raised ${rowLabel(row)} from ${prev.class} to ${next.class}, only lowers allowed`);
   }
@@ -52,16 +52,16 @@ export function guardGoal3(name, prev, next, row) {
 // there is nothing to compare it against.
 const LAYERS = [
   { name: 'floor', apply: (_prev, row) => classifyFloor(row), guard: null },
-  { name: 'goal2', apply: applyGoal2, guard: guardRaiseOnly },
-  { name: 'goal3', apply: applyGoal3, guard: guardGoal3 },
+  { name: 'step1', apply: applyStep1, guard: guardStep1 },
+  { name: 'step3', apply: applyStep3, guard: guardRaiseOnly },
 ];
 
-// opts.upTo stops after the named layer runs (default 'goal3', the full
+// opts.upTo stops after the named layer runs (default 'step3', the full
 // pipeline). opts.layers is a test-only override of the layer list, used
 // by pipeline.test.mjs to inject a fake bad layer and prove the guard
 // throws — never used outside tests.
 export function classify(row, ctx, opts = {}) {
-  const { upTo = 'goal3', layers = LAYERS } = opts;
+  const { upTo = 'step3', layers = LAYERS } = opts;
   let result = null;
   for (const layer of layers) {
     const prev = result;

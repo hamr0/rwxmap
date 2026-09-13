@@ -3633,3 +3633,9 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   is x. The yours noun filters those down to a handful because the
   nouns a POST touches (call, stream, member, domain) are mostly not
   on any yours list. Same wall, third time.
+
+### Goals renamed to steps; pipeline reordered floor -> step 1 -> step 3 (2026-09-13)
+- Goal: the user's ruling: the three goals were never three classifiers; they were error counts on one sequence (step 1 claims r, step 2 claims w, x is the byproduct). Rename to match the flow and reorder the code so it reads like it. Map: goal 3 -> step 1 (r), goal 1 -> step 2 (w), goal 2 -> step 3 (x).
+- Tried: git mv of poc/m1/goal{3,1,2} to step{1,2,3}, function renames (applyStep1, classifyStep2, applyStep3), pipeline LAYERS floor -> step1 -> step3, proof CSVs renamed (step1.csv, step2.csv, step2-leaks.csv, step3.csv), docs renamed. Verified by re-running tests, measure and proof, and diffing each new CSV (sorted) against the pre-rename copy.
+- Outcome: zero row change; 49 / 803+211 / 37 unchanged. D64.
+- Lesson: the earlier "three goals, attack one at a time" wording made the pipeline read as three classifiers; it was one chain with counters on it, and the orchestrator should have said so in one line when first asked. Older learnings entries keep the old names; read them through the map above.

@@ -1,6 +1,6 @@
 // The one place the combined corpus is loaded, plus its shape asserts.
-// D57: the noun table / allowlist build moved to goal2/allowlist.mjs — core
-// owns row loading only, not any goal's evidence.
+// D57: the noun table / allowlist build moved to step3/allowlist.mjs — core
+// owns row loading only, not any step's evidence.
 import { loadCombinedCorpus } from '../arbiter/c19.mjs';
 
 function escalate(msg) {

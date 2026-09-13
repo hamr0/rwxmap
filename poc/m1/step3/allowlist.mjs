@@ -1,6 +1,7 @@
-// Goal 2's own noun extraction, junk-noun cleaning, and leave-one-vendor-out
-// yours-noun allowlist build. Moved out of core/corpus.mjs (D57: goal 2 owns
-// its own lists and their build, core owns only the floor + splitter).
+// Step 3's own noun extraction, junk-noun cleaning, and leave-one-vendor-out
+// yours-noun allowlist build (was goal 2 until 2026-09-13). Moved out of
+// core/corpus.mjs (D57: step 3 owns its own lists and their build, core
+// owns only the floor + splitter).
 import { headNounForRow, operationIdHeadNoun, naiveSingular, matchesAnyStem } from '../arbiter/judge.mjs';
 import { tokensForRow } from '../arbiter/arbiter.mjs';
 import { buildNounTable } from '../arbiter/c19.mjs';
@@ -15,7 +16,8 @@ export const MIN_W_SHARE = 0.80;
 
 // Tokens that are never nouns: path placeholders ({id}, {app), version
 // tags (v1, 10) and filler words. Measured 2026-09-13 in a copy before
-// this edit: frees 58 goal-1 false alarms, goal 2 unchanged at 37.
+// this edit: frees 58 false alarms on what was goal 1 (now step 2),
+// what was goal 2 (now step 3) unchanged at 37.
 const FILLER = new Set(['from','using','or','and','by','for','to','of','the','a','an','with','in','on','at','into','via','all']);
 export function isJunkToken(w) {
   return /[{}]/.test(w) || /^v?\d+$/.test(w) || FILLER.has(w);
@@ -45,8 +47,8 @@ export function nounsForRow(row, junkSet) {
 // (withSplitOperationId applied) — the noun table must see the '/' +
 // whitespace split too, or the LOVO allowlist is built from different
 // tokens than the pipeline reads (measured: allowlist-only omission moved
-// goal 1's count to 2713, not 2703).
-export function buildGoal2Context(rows, vendors) {
+// what was goal 1's (now step 2's) count to 2713, not 2703).
+export function buildStep3Context(rows, vendors) {
   const { junkSet, cleanTable } = cleanNounTable(buildNounTable(rows.map(withSplitOperationId)));
   const stats = nounStats(cleanTable);
   const perVendorAllowlist = buildLovoAllowlists(stats, vendors, MIN_N, MIN_W_SHARE);

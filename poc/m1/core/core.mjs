@@ -1,5 +1,5 @@
 // The shared shape: only the method floor and the operationId splitter.
-// D57: core holds no word lists — every goal owns its own (see
+// D57: core holds no word lists — every step owns its own (see
 // docs/product/prd.md, "How the goals stay separate").
 
 // One table, one place. GET/HEAD/OPTIONS -> r, POST -> x, PUT/DELETE/PATCH -> w.
@@ -25,7 +25,7 @@ export function withSplitOperationId(row) {
 }
 
 // The base pipeline layer: no evidence, no word lists — just the method
-// floor. Every goal layer runs after this one.
+// floor. Every step layer runs after this one.
 export function classifyFloor(row) {
   return { class: floorFor(row.method), rule: 'floor', floor: true };
 }

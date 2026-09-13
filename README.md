@@ -68,19 +68,19 @@ exams 1-3 were used to tune, and exam 4's truth drifted because its
 labelling brief was lost — so none is a clean exam (see
 `docs/logs/learnings.md`, M1-C25).
 
-Current per-goal numbers (5465 rows, LOVO):
+Current per-step numbers (5465 rows, LOVO):
 
-| goal | error | count |
+| step | error | count |
 |---|---|---|
-| 2 | x dressed as w (leak) | 37 (4.0% of truth-x) — frozen |
-| 1 | w dressed as x (false alarm) | 2703 (69.6% of truth-w) — open |
-| 3 | r dressed as x or w | 49 |
+| step 1 (r) | r dressed as x or w | 49 over-tight, 0 leaks |
+| step 2 (w) | w dressed as x (false alarm) | 803 false alarms / 211 leaks — standalone lens, parked |
+| step 3 (x) | x dressed as w (leak) | 37 (4.0% of truth-x) — frozen |
 
 A leak is a wrong loosening — a robot takes an action it should not
 have. A false alarm (over-tighten) is a usability cost — a human
 glances at a row that was fine. The two are never merged into one
 accuracy number: they cost different things and a reader needs both.
-Full detail: `docs/product/prd.md`, "The three goals".
+Full detail: `docs/product/prd.md`, "The three steps".
 
 Two negative controls must come out `x`: ClickToDial `DELETE
 /calls/{callId}` `terminateCall`, and WebRTC `PUT
@@ -88,7 +88,7 @@ Two negative controls must come out `x`: ClickToDial `DELETE
 `x` under the current shape.
 
 **How to re-run:** `node poc/m1/run/measure.mjs` (gate + scores),
-`node --test poc/m1/run/ledger.test.mjs` (per-goal pins),
+`node --test poc/m1/run/ledger.test.mjs` (per-step pins),
 `node poc/m1/run/proof.mjs` (row-level CSVs in `run-proof/`).
 
 **What these numbers do not say:**

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { classifyGoal1 } from './goal1.mjs';
+import { classifyStep2 } from './step2.mjs';
 
 function row(overrides) {
   return { method: 'PUT', operationId: '', summary: '', description: '', path: '', vendor: 'test', gt_class: 'w', ...overrides };
@@ -13,51 +13,51 @@ function ctxWith(otherNouns) {
   };
 }
 
-test('classifyGoal1: a PUT row with no evidence stays at the w floor', () => {
+test('classifyStep2: a PUT row with no evidence stays at the w floor', () => {
   const r = row({ summary: 'Change the widget' });
-  const res = classifyGoal1(r, ctxWith());
+  const res = classifyStep2(r, ctxWith());
   assert.deepEqual(res, { class: 'w', rule: 'floor', floor: true });
 });
 
-test('classifyGoal1: a PUT row with a live verb raises to x', () => {
+test('classifyStep2: a PUT row with a live verb raises to x', () => {
   const r = row({ operationId: 'cancelBooking', summary: 'Cancel the booking' });
-  const res = classifyGoal1(r, ctxWith());
+  const res = classifyStep2(r, ctxWith());
   assert.equal(res.class, 'x');
   assert.equal(res.rule, 'live-verb');
   assert.equal(res.floor, false);
 });
 
-test('classifyGoal1: a PUT row whose noun is on the other-party list raises to x', () => {
+test('classifyStep2: a PUT row whose noun is on the other-party list raises to x', () => {
   const r = row({ operationId: 'updateWidgetSecret', summary: 'Update something' });
-  const res = classifyGoal1(r, ctxWith(new Set(['secret'])));
+  const res = classifyStep2(r, ctxWith(new Set(['secret'])));
   assert.equal(res.class, 'x');
   assert.equal(res.rule, 'other-noun');
   assert.equal(res.floor, false);
 });
 
-test('classifyGoal1: live-verb wins first over other-noun', () => {
+test('classifyStep2: live-verb wins first over other-noun', () => {
   const r = row({ operationId: 'cancelWidgetSecret', summary: 'Cancel something' });
-  const res = classifyGoal1(r, ctxWith(new Set(['secret'])));
+  const res = classifyStep2(r, ctxWith(new Set(['secret'])));
   assert.equal(res.rule, 'live-verb');
 });
 
-test('classifyGoal1: a PUT row whose nouns are all clean stays at the w floor', () => {
+test('classifyStep2: a PUT row whose nouns are all clean stays at the w floor', () => {
   const r = row({ operationId: 'updateWidgetSetting', summary: 'Update something' });
-  const res = classifyGoal1(r, ctxWith(new Set(['secret'])));
+  const res = classifyStep2(r, ctxWith(new Set(['secret'])));
   assert.deepEqual(res, { class: 'w', rule: 'floor', floor: true });
 });
 
-test('classifyGoal1: DELETE and PATCH also raise-eligible', () => {
+test('classifyStep2: DELETE and PATCH also raise-eligible', () => {
   const del = row({ method: 'DELETE', operationId: 'terminateSession', summary: 'Terminate the session' });
-  assert.equal(classifyGoal1(del, ctxWith()).class, 'x');
+  assert.equal(classifyStep2(del, ctxWith()).class, 'x');
   const patch = row({ method: 'PATCH', operationId: 'patchWidgetSecret', summary: 'Patch something' });
-  assert.equal(classifyGoal1(patch, ctxWith(new Set(['secret']))).class, 'x');
+  assert.equal(classifyStep2(patch, ctxWith(new Set(['secret']))).class, 'x');
 });
 
-test('classifyGoal1: a non-PUT/DELETE/PATCH method returns the untouched floor', () => {
+test('classifyStep2: a non-PUT/DELETE/PATCH method returns the untouched floor', () => {
   const get = row({ method: 'GET', operationId: 'cancelBooking', summary: 'Cancel the booking' });
-  assert.deepEqual(classifyGoal1(get, ctxWith()), { class: 'r', rule: 'floor', floor: true });
+  assert.deepEqual(classifyStep2(get, ctxWith()), { class: 'r', rule: 'floor', floor: true });
 
   const post = row({ method: 'POST', operationId: 'cancelBooking', summary: 'Cancel the booking' });
-  assert.deepEqual(classifyGoal1(post, ctxWith()), { class: 'x', rule: 'floor', floor: true });
+  assert.deepEqual(classifyStep2(post, ctxWith()), { class: 'x', rule: 'floor', floor: true });
 });
