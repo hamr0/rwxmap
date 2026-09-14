@@ -35,6 +35,10 @@ split the truth classes cleanly enough to carry a rule; a census over
 the 719 operations is the first artefact.
 (docs/archive/prd.md:167-178)
 
+As of 2026-09-14 (D65) the M1 code is archived under `poc/archive/m1/`
+and the current classifier is `poc/flow/`; the numbers below in this
+page that cite `poc/m1/arbiter` files are history.
+
 **M2 — Shape rules, only if justified.** For each divergence class
 from M0/M1 that appears more than once, add one deterministic
 OpenAPI-shape rule (request body present, response schema, status

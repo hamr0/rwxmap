@@ -1,7 +1,9 @@
 # Goal 2 — the solution as it actually runs today
 
 Naming note (2026-09-13, D64): what this document calls goal 2 is now
-step 3 (x); code lives in poc/m1/step3/.
+step 3 (x); code is archived at poc/archive/m1/step3/, and the live
+shape is poc/flow/step2.mjs (the yours-noun check is check c of step 2
+now, D65).
 
 Read from the live code on 2026-09-12 (`c15.mjs`, `c20.mjs`, `c11.mjs`,
 `judge.mjs`, `arbiter.mjs`), not from any pass log. This is the spec the

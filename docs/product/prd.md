@@ -162,7 +162,7 @@ if a pin moves); `node --test poc/flow/*.test.mjs` (the pins).
 Known limits: this is a tuning-corpus number under LOVO; exams 1-4 are
 burned, none is a clean exam; this is a POC, never shipped as one; the
 x-pile flag is reported in the CSV, not yet wired to any consumer;
-poc/m1 is to be archived next.
+poc/m1 is archived at poc/archive/m1/ (D65).
 
 GET is last on the list. 97% of GET rows are truly r, GET runs no word
 rules by design, and the 17 Slack GET leaks are not chased per-vendor.
