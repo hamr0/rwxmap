@@ -102,6 +102,14 @@ const SYN_ROWS = [
   mkRow('D', 'PUT', 'updateProfile', 'w'),
   // GET rows should not feed the "other" mining (PUT/DELETE/PATCH only).
   mkRow('B', 'GET', 'listWidget', 'r'),
+  // Noun "gizmo": write rows are all w for B, C. A GET row for B (class r)
+  // must NOT count toward the yours mining (2026-09-14 decision) -- if it
+  // did, excluding A the share would be 2/3 (0.666, below the 0.80 bar);
+  // excluding the GET row, excluding A it's B+C = 2/2 (1.0), admitted.
+  mkRow('A', 'PUT', 'updateGizmo', 'w'),
+  mkRow('B', 'PUT', 'updateGizmo', 'w'),
+  mkRow('C', 'PUT', 'updateGizmo', 'w'),
+  mkRow('B', 'GET', 'listGizmo', 'r'),
 ];
 const SYN_VENDORS = ['A', 'B', 'C', 'D'];
 
@@ -115,4 +123,9 @@ test('buildStep2Context: yours-noun mining bar (n>=2, w-share>=0.80)', () => {
   const ctx = buildStep2Context(SYN_ROWS, SYN_VENDORS);
   assert.ok(ctx.yoursFor('A').has('profile'), 'profile should be admitted as yours for A');
   assert.ok(!ctx.yoursFor('A').has('widget'), 'widget is x-heavy excluding A, must not be admitted as yours');
+});
+
+test('buildStep2Context: yours mining excludes GET/HEAD/OPTIONS rows', () => {
+  const ctx = buildStep2Context(SYN_ROWS, SYN_VENDORS);
+  assert.ok(ctx.yoursFor('A').has('gizmo'), 'gizmo should be admitted as yours for A once the B GET row is excluded');
 });

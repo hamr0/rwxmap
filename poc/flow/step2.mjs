@@ -31,6 +31,11 @@ const NOUN_SKIP_VERBS = new Set([...LIVE_VERBS, ...NON_NOUN_READ_VERBS]);
 
 const RAISE_METHODS = new Set(['PUT', 'DELETE', 'PATCH']);
 
+// GET/HEAD/OPTIONS rows are truth r no matter whose thing they touch, so
+// they carry no yours/other signal and only dilute the w-share; excluded
+// from the yours mining (2026-09-14 decision).
+const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+
 // Mining bars (D63/D48 — not swept; named here instead of left as bare
 // literals at the call site).
 export const OTHER_MIN_VENDORS = 2;
@@ -62,14 +67,18 @@ function countNounsByVendor(rows, nounsOf) {
 
 // Builds step 2's context: the junk set, a noun reader, and the two
 // leave-one-vendor-out minings (other-party nouns over PUT/DELETE/PATCH
-// only, yours nouns over every row/method).
+// only, yours nouns over write rows: every method but GET/HEAD/OPTIONS).
+// Measured trade (2026-09-14): over all rows pile 2441 / 192 leaks; over
+// write rows 1998 / 179; over PUT/DELETE/PATCH only 1582 / 159; classes
+// (803/211) unchanged across all three — only the flag pile moves.
 export function buildStep2Context(rows, vendors) {
   const junkSet = buildJunkSet(rows);
   const nounsOf = (row) => nounsForRow(row, junkSet, NOUN_SKIP_VERBS);
 
   const raiseRows = rows.filter((r) => RAISE_METHODS.has(r.method));
   const otherStat = countNounsByVendor(raiseRows, nounsOf);
-  const yoursStat = countNounsByVendor(rows, nounsOf);
+  const writeRows = rows.filter((r) => !READ_METHODS.has(r.method));
+  const yoursStat = countNounsByVendor(writeRows, nounsOf);
 
   const otherByVendor = new Map();
   const yoursByVendor = new Map();

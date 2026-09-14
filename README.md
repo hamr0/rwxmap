@@ -72,9 +72,12 @@ Current per-step numbers (5465 rows, LOVO):
 
 | step | error | count |
 |---|---|---|
-| step 1 (r) | r dressed as x or w | 49 over-tight, 0 leaks |
-| step 2 (w) | w dressed as x (false alarm) | 803 false alarms / 211 leaks — standalone lens, parked |
-| step 3 (x) | x dressed as w (leak) | 37 (4.0% of truth-x) — frozen |
+| step 1 (r) | over-tight | 49 over-tight / 0 leaks |
+| step 2 (w) | false alarms / leaks | 803 false alarms / 211 leaks, 179 of them in the 1998-row x-pile |
+| step 3 (x) | no rules (POST leftovers and what step 2 gave up) | — |
+| GET floor | leaks | 17, parked |
+
+Whole flow: exact 78.4%, leaks 4.2%, over-tight 17.5%.
 
 A leak is a wrong loosening — a robot takes an action it should not
 have. A false alarm (over-tighten) is a usability cost — a human
@@ -87,9 +90,8 @@ Two negative controls must come out `x`: ClickToDial `DELETE
 /sessions/{mediaSessionId}/status` `updateSessionStatus`. Both come out
 `x` under the current shape.
 
-**How to re-run:** `node poc/m1/run/measure.mjs` (gate + scores),
-`node --test poc/m1/run/ledger.test.mjs` (per-step pins),
-`node poc/m1/run/proof.mjs` (row-level CSVs in `run-proof/`).
+**How to re-run:** `node poc/flow/proof.mjs` (one CSV + one markdown
+report in `run-proof/`), `node --test poc/flow/*.test.mjs` (the pins).
 
 **What these numbers do not say:**
 

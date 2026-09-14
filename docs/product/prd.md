@@ -45,23 +45,23 @@ three steps. Each step takes the rows the step before left behind.
    - a live verb (send, cancel, pay) → give up, x.
    - a 3p noun → give up, x.
    - every noun yours → keep, w, marked "evidence".
-   - none of the above → keep, w, marked "no evidence". This is the
-     1972-row pile, and it is the leaks marker: 175 of step 2's 211
-     leaks sit in it.
+   - none of the above → keep, w, marked "x-pile" (no evidence fired).
+     This is the 1998-row pile, and it is the leaks marker: 179 of
+     step 2's 211 leaks sit in it.
 3. **Step 3, x.** Only what step 2 gave up. No rules.
 4. **Output.** One CSV, all 5465 rows: the step that claimed the row,
    class, flag, truth, verdict.
 5. **Ledger pins.** Step 1: 49 over-tight / 0 leaks. Step 2: 803 false
-   alarms / 211 leaks, with 175 of the 211 in the flagged pile. Whole
-   flow: exact 78.4%, leaks 4.2%, over-tight 17.5%.
+   alarms / 211 leaks, with 179 of the 211 in the x-pile (1998 rows).
+   Whole flow: exact 78.4%, leaks 4.2%, over-tight 17.5%.
 
 The four checks in step 2 run one after another, each on what the
 one before left. Dropping the 3p check sends its 1034 rows to the
-no-evidence pile: 82 false alarms / 524 leaks. Dropping the
-no-evidence flag changes no count; it only hides the 175 leaks among
-2973 confident w rows instead of a 1972-row pile. Sending the
-no-evidence pile to x instead (shape A) doubles the x pile to 3572
-rows, 2645 of them safe writes, for 37 leaks.
+x-pile: 82 false alarms / 524 leaks. Dropping the x-pile flag
+changes no count; it only hides the 179 leaks among 3209 w rows
+instead of a 1998-row pile. Sending the x-pile to x instead (shape A)
+doubles the x pile to 3572 rows, 2645 of them safe writes, for 37
+leaks.
 
 **Step 2 in order (measured 2026-09-13, the chosen shape B plus a flag).**
 A PUT / DELETE / PATCH row is checked in this order; the first hit
@@ -70,39 +70,35 @@ decides and the rest are not consulted:
 - a. a live verb (send, cancel, pay, ...) → give up, x.
 - b. a someone-else's noun (the mined 3p blocklist) → give up, x.
 - c. every noun on the yours list → keep, w, flagged "evidence".
-- d. none of the above → keep, w, flagged "no evidence".
+- d. none of the above → keep, w, flagged "x-pile".
 
 Both noun lists are mined, not hand-written, so each has a bar: a
-noun is "yours" when 2+ other vendors used it on 2+ rows and it was
-safe 80%+ of the time; it is "someone else's" when 2+ other vendors
-used it and it was dangerous 30%+ of the time. A noun that meets
-neither bar is on no list, and its row lands in d. On the 4406
-PUT / DELETE / PATCH rows:
+noun is "yours" when it was seen on 2+ other-vendor rows over write
+rows (every method but GET/HEAD/OPTIONS) and was safe 80%+ of the
+time — GET is truth r no matter whose thing it touches, so it carries
+no yours signal and only dilutes the w-share; it is "someone else's"
+when 2+ other vendors used it over PUT/DELETE/PATCH rows and it was
+dangerous 30%+ of the time. A noun that meets neither bar is on no
+list, and its row lands in d. On the 4406 PUT / DELETE / PATCH rows:
 
 | group | rows | truly w | truly x |
 |---|---|---|---|
 | a. live verb → x | 163 | 82 | 81 |
 | b. 3p noun → x | 1034 | 721 | 313 |
-| c. every noun yours → w | 1237 | 1201 | 36 |
-| d. neither → w, no evidence | 1972 | 1797 | 175 |
+| c. every noun yours → w | 1211 | 1176 | 32 |
+| d. neither → w, x-pile | 1998 | 1797 | 179 |
 
-Why a row lands in d: a noun only this vendor uses, so no other
-vendor can vouch (1327 rows, e.g. camara deleteGeofencingSubscription);
-a noun between the two bars, 20-30% dangerous (130, e.g. stripe
-DeleteAccountsAccount, "account" 24%); a noun with too few rows from
-other vendors (499, e.g. stripe DeleteCouponsCoupon); no noun at all
-(16). Group d is 91% safe and holds 175 of step 2's 211 leaks; it is
-the pile a human or a per-API hint sorts later (D44), not a list
-problem.
+Why a row lands in d: the reasons were measured on the earlier
+1972-row pile (learnings, 2026-09-13) and have not yet been
+re-measured on this one. Group d is 90% safe and holds 179 of step
+2's 211 leaks; it is the pile a human or a per-API hint sorts later
+(D44), not a list problem.
 
 Sequential beats joint. Letting a yours noun override a live verb
 (live + all-yours → w) gives 772 false alarms / 221 leaks against
 803 / 211 sequential: 31 freed for 10 leaks, under the 10-for-1 curve.
-Letting "no 3p noun" override a live verb: 738 / 260. One candidate
-kept for later: where the two noun lists disagree (a 3p noun fires
-but every noun is also yours), letting yours win gives 762 / 212 (41
-freed for 1 leak); to be re-measured once the yours list lives in
-step 2.
+Letting "no 3p noun" override a live verb: 738 / 260. The yours-beats-3p
+candidate (762 / 212) is parked, to be re-measured.
 
 Step 2's ledger on this shape: 803 false alarms / 211 leaks. Whole
 flow on all 5465 rows: exact 78.4%, leaks 4.2%, over-tight 17.5%.
@@ -112,11 +108,8 @@ The alternative (d → x, the yours-list-only shape A) is 37 leaks /
 On the 5465 rows PATCH is no longer the outlier it was on 42 rows (31%
 x); it sits with PUT and DELETE at 14-15% x, so it keeps the w floor.
 
-In code, `run/pipeline.mjs` runs floor -> step 1 -> step 3 (the raise
-rules that decide what step 2 gives up). Step 2 is a second, standalone
-lens on the same w rows (a not-yours blocklist instead of a yours
-allowlist); which lens decides in the end is the open "bring them
-together" decision.
+In code, poc/flow/flow.mjs runs step 1 -> step 2 -> floor x, one order
+written once; there is no second lens.
 
 **Movement rule.** Raising is `w -> x` on PUT/DELETE/PATCH. Lowering is
 `x -> r` on POST, by a read verb. `r` comes from the GET floor or from
@@ -131,218 +124,48 @@ One direction of travel per method (D43):
 
 ## The three steps
 
-Work one step at a time and bring them together afterwards. Attacking
-several at once is what caused the repeated failures: they have
-different shapes and need different evidence. Counts are the current
-shape's errors over the 5465-row combined corpus (332 vendors),
-leave-one-vendor-out. Truth split: 936 x, 3883 w, 646 r.
+Counts are the current shape's errors over the 5465-row combined
+corpus (332 vendors), leave-one-vendor-out. Truth split: 936 x, 3883
+w, 646 r.
 
-| # | error | count | where it lives | why it matters |
-|---|---|---|---|---|
-| step 1 (r) | **r dressed as w or x** | 49 over-tight, 0 leaks | POST 24 (r->x), PUT 14, DELETE 5, PATCH 6 | a pure read is treated as a write |
-| step 2 (w) | **w dressed as x** | 803 false alarms (21.3% of the 3776 PUT/DELETE/PATCH truth-w rows), 211 leaks — on step 2's own ledger, STANDALONE 2026-09-13 | step 2's own live-verb + other-party-noun classifier, scored over its own 4406-row PUT/DELETE/PATCH population (3776 truth w, 605 truth x) | a safe write is treated as dangerous, so it gets blocked when it should not be |
-| step 3 (x) | **x dressed as w** | 37 (4.0% of truth-x) — FROZEN 2026-09-12 | DELETE 18, PUT 14, PATCH 5; all floor rows | a dangerous operation is treated as a safe write — this is the leak |
-
-Work order so far was step 3, then step 2, then step 1 (by harm: leaks
-first). That is fine because the steps never share a row: step 1's rule
-touches only POST rows on the x floor, steps 2 and 3 only
-PUT/DELETE/PATCH rows on the w floor. One step at a time: while a step
-is open, everything outside it — the other steps, other methods, other
-vendors — is out of focus and is not chased. That isolation is what
-stops the noise that caused the earlier repeated failures. (D47)
-
-Step 2 (w dressed as x) is its own standalone classifier now
-(2026-09-13, the user's ruling — see below). Step 3 is frozen at 37,
-below.
-
-### Two flows, not one pipeline (core in poc/m1/core; step 3 in poc/m1/step3; step 2 in poc/m1/step2)
-
-Step 3 and step 2 are two separate, standalone classifiers over the same
-PUT/DELETE/PATCH rows — not two stages of one chain. Each answers the
-question its own way, from its own evidence; step 2 never sees or
-touches step 3's output. Bringing the two into a single combined answer
-is a later step, not done here (the user's ruling, 2026-09-13).
-
-| list | owner | size | job |
+| step | error | count | note |
 |---|---|---|---|
-| `LIVE_VERBS`, hand-written | step 3 | 26 | raise a `w`-floor row off its floor |
-| `LIVE_VERBS`, a literal copy of step 3's (D57: copy, never import) | step 2 | 26 | raise a `w`-floor row off its floor, step 2's own copy |
-| `READ_VERBS`, hand-written | step 1 | 14 | lower an `x`-floor row off its floor |
-| yours-nouns — mined allowlist, n>=2 rows, w-share>=0.80 | step 3 | 439 | hold a floor row at `w` |
-| other-party nouns — mined leave-one-vendor-out blocklist, other vendors>=2, danger (truth-x) share>=0.30 | step 2 | ~130 words per vendor, mined fresh per vendor | raise a floor row to `x` |
+| step 1 (r) | over-tight | 49 | 0 leaks |
+| step 2 (w) | false alarms / leaks | 803 / 211 | 179 of the 211 leaks sit in the 1998-row x-pile |
+| step 3 (x) | no rules, no ledger of its own | — | its errors are step 2's 211 leaks and POST's 127 over-tight |
+| GET floor | leaks | 17 | parked, D59, charged to the floor |
 
-**Step 3 (frozen), for one row:**
+### Where the code lives (poc/flow)
 
-1. **Floor by method** (core). PUT/DELETE/PATCH `w`.
-2. **Live verb.** A live verb (in the operationId, else the summary's
-   lead verb) raises to `x`, unless the summary carries a caller phrase.
-   No hit: stay at the floor, marked `floor`.
-3. **Yours-nouns.** Only if still at the `w` floor after step 2. Take
-   every noun token in the operation name (both head nouns plus every
-   other token, singularised, verbs stripped, path placeholders/version
-   tags/filler words dropped as junk). All on the vendor's mined
-   allowlist → stay `w`. Any not → `x`, rule `no-own-noun`.
+| file | owns |
+|---|---|
+| `corpus.mjs` | corpus loading |
+| `csv.mjs` | CSV read/write |
+| `words.mjs` | the splitter, tokenizer, verb stemmer, noun reader — readers only, no lists |
+| `floor.mjs` | the per-method floor |
+| `step1.mjs` | the read-verb rule (r) |
+| `step2.mjs` | the live-verb, other-noun and yours-noun rules (w/x) |
+| `flow.mjs` | the one classifier entry point, step order |
+| `ledger.mjs` | every pin, in one place |
+| `proof.mjs` | the one CSV + the one markdown report |
 
-**Step 2 (standalone), for the same row, independently:**
+- One order, written once, in `flow.mjs`.
+- Each step owns its own word lists; `words.mjs` holds readers only,
+  never a list.
+- Every pin lives in `ledger.mjs` PINS and moves only with a logged
+  re-measure and the user's word.
+- The proof is one CSV, `run-proof/flow.csv`.
 
-1. **Floor by method** (core). PUT/DELETE/PATCH `w`; every other method
-   returns that method's own untouched floor — step 2 has no rule for
-   GET/HEAD/OPTIONS/POST rows and never classifies them.
-2. **Live verb, step 2's own copy.** The same live-verb check as step
-   3's, using step 2's own `LIVE_VERBS` (a literal copy of step 3's 26
-   words — D57 allows copying entries, never importing another step's
-   list). Raises a `w`-floor row to `x`, rule `live-verb`.
-3. **Other-party noun.** Only if still at the `w` floor after step 2.
-   Read the row's noun set with step 3's `nounsForRow` (the reader, not
-   a list — reused, never step 3's evidence). Mined leave-one-vendor-out
-   over ALL PUT/DELETE/PATCH rows: a noun is "someone else's" for vendor
-   v when, excluding v's own rows, it appears across >=2 other vendors
-   with a danger (truth-x) share >=30%. Any noun on that list → `x`,
-   rule `other-noun`. No hit: stay `w`, floor.
+Run: `node poc/flow/proof.mjs` (one CSV + one markdown report, exits 1
+if a pin moves); `node --test poc/flow/*.test.mjs` (the pins).
 
-Step 1 still runs as its own pipeline stage, after step 3 (POST rows
-still at the `x` floor: a read verb lowers to `r`); it is unaffected by
-step 2's rebuild.
-
-Nothing step 2 raises on is hand-listed as "someone else's" — the
-other-party list is mined the same via-negativa way step 3's yours-noun
-list is, just in the opposite direction and off step 2's own bar. Spec
-for step 3 read from live code: `docs/product/goal2-solution.md`.
-
-The operationId is split on `_ - .`, camelCase, `/` and whitespace
-before any rule reads it; the splitter lives in core (D58).
-
-### How the steps stay separate
-
-Steps 2 and 3 judge the same rows — PUT/DELETE/PATCH at the `w`
-floor — but as two independent, standalone classifiers, not opposite
-sides of one chain (the user's ruling, 2026-09-13). Each step's row =
-its own full classifier: its own live-verb copy plus its own
-other-party (step 2) or yours-noun (step 3) list, run start to finish
-over the same rows, never reading or moving the other's output. So
-separation is enforced in code, tests and ledgers, not assumed.
-
-| folder | owns | may move a row |
-|---|---|---|
-| `poc/m1/core/` | floor table, the operationId splitter, row loading | — (shared; changes need every pin green) |
-| `poc/m1/step3/` | live-verb rule, the yours-noun layer, the allowlist build | raise only (`w` → `x`) |
-| `poc/m1/step2/` | its own standalone classifier: own `LIVE_VERBS` copy + own mined other-party noun list | its own full classify, floor → raise; never chained onto step 3's output |
-| `poc/m1/step1/` | read-verb layer | lower to `r` only |
-| `poc/m1/run/` | the one fixed pipeline order (floor → step 1 → step 3), the ledgers, the proof; step 2 runs standalone, outside that order | — |
-
-Rules:
-
-1. **One order, written once** (`run/pipeline.mjs`): floor → step 1 →
-   step 3. Nobody reorders. Step 2 is not in this order — it is a
-   standalone classifier (`classifyStep2`) run separately, over the same
-   rows, by `run/ledger.mjs`, `run/measure.mjs` and `run/proof.mjs`
-   directly; nobody chains it onto the pipeline's output.
-2. **One direction per layer.** The pipeline throws if a step 1 or
-   step 3 layer moves a row the wrong way. Step 2, being standalone, has
-   no such guard to satisfy — its own rule order (floor → live-verb →
-   other-noun) is fixed by `classifyStep2` itself, raise only.
-3. **A step may not turn another step's knob.** Step 2's own classifier
-   reuses core's floor and step 3's noun reader (`nounsForRow`) as
-   read-only inputs; it never imports another step's word list, reads
-   another step's evidence, or writes to another step's ledger.
-4. **Each step's number is pinned by its own test**
-   (`run/ledger.test.mjs`): step 3 = 37, step 2 = 803 false alarms (211
-   leaks, both on step 2's own ledger), step 1 = 49. A change that moves
-   another step's pin turns that test red; the pin moves only by a
-   ruling recorded here.
-5. **Each step has its own ledger.** Step 3 is measured through its own
-   pipeline stage; step 2 by running its own classifier directly; step 2
-   is scored, both false alarms and leaks, over its own 4406-row
-   PUT/DELETE/PATCH population (see below) — never blended with step
-   3's. A stacked number appears only on a line labelled combined.
-6. **Each step owns its own word lists** (D57): a step never imports
-   another step's list, though it may copy entries that genuinely
-   apply. Core holds only what is truly shared — the floor and the
-   splitter, no lists. Step 3 owns `LIVE_VERBS` (26) and the
-   yours-noun allowlist (439); step 1 owns `READ_VERBS` (14); step 2
-   owns its own `LIVE_VERBS` (26, a literal copy of step 3's) and its
-   own mined other-party noun list (leave-one-vendor-out, other
-   vendors>=2, danger share>=0.30), both built fresh from step 2's own
-   pile, never step 3's.
-
-Run: `node poc/m1/run/measure.mjs` (gate + scores),
-`node --test poc/m1/run/ledger.test.mjs` (the per-step pins) and
-`node poc/m1/run/proof.mjs` (row-level CSVs in `run-proof/`).
-
-**Step 3 is FROZEN at 37 (2026-09-12).** The shape above, measured
-leave-one-vendor-out over the 5465-row combined corpus:
-
-| shape | step-3 leaks | step-2 false alarms (charged to step 2) | all-loosening |
-|---|---|---|---|
-| previous frozen (c15 + C20: hand list + two head nouns) | 89 (9.5% of truth-x) | 1936 | 106 |
-| **current (poc/m1/step3), at freeze** | **37 (4.0%)** | 2727 | 54 |
-
-65 leaks rescued, 13 new; net −52. All 37 remaining leaks are floor
-rows — no evidence fired, so the tool flags them as unresolved rather
-than confidently wrong. 27 distinct vendors, none above 4.
-
-The gate: the previous frozen shape reproduced its 89 exactly through
-the new harness before the new number was trusted.
-
-Known limits, stated plainly: this is a tuning-corpus number under
-LOVO, the same footing as the 89 it replaces, so the comparison is
-fair — but neither is a clean-exam number. Exams 1–4 are burned.
-A fresh broad exam, with its labelling brief saved to the repo before
-any row is labelled, is the only thing that turns 37 into a wild
-number. "Flagged" is still not wired in code — `floor:true` exists
-only on the row result, not as a reported state — and must be before
-anything graduates. The shape is a POC; "never ship the POC" stands.
-Row-level results for every step: `run-proof/`, regenerated by `node poc/m1/run/proof.mjs`.
-
-**Step 2 is rebuilt as its own standalone classifier (2026-09-13, the
-user's ruling).** It is no longer a layer that patches step 3's
-output — step 2 and step 3 are two separate lenses over the same
-PUT/DELETE/PATCH rows; bringing them together into one combined answer
-is a later step, not done here. The earlier "lower-back" design
-(D60-D62: a mined lowering-verb rule, then a mined own-noun rule, both
-restricted to only ever undoing a raise step 3 itself had made) moved
-step 2 from 2727 to 2531 false alarms, but by construction it could only
-ever undo what step 3 raised — it inherited step 3's own curve rather
-than answering the question on its own evidence. That design is
-retired; its numbers, its bar sweeps and the reasoning behind each piece
-move to `docs/logs/learnings.md` (2026-09-13 entry) and are not carried
-forward here.
-
-State the base plainly: step 2's ledger is scored only over the 4406
-PUT/DELETE/PATCH rows (3776 truth w, 605 truth x) — the same population
-its own classifier classifies, matching the reference measurement.
-The corpus's other 103 truth-w rows are POST rows sitting at the POST
-floor's own default (`x`); that mismatch belongs to the POST floor, not
-to step 2 — `classifyStep2` returns every non-PUT/DELETE/PATCH row's
-floor untouched and never assigns it a class of its own, so it cannot
-be charged for a row it never classifies.
-
-The new shape (see "Two flows" above): floor `w` → step 2's own
-live-verb list (a literal copy of step 3's 26 words) raises to `x` →
-if still `w`, step 2's own mined other-party noun list raises to `x`
-when any noun on the row is "someone else's" for that vendor
-(leave-one-vendor-out: excluding the row's own vendor, the noun appears
-across >=2 other vendors with a danger, truth-x, share >=30%). Bar
-sweep across the full 4406-row population: 30% → 803 false alarms / 211
-leaks (adopted); 40% → 472/251; 50% → 268/382. Unlike step 3's
-yours-noun allowlist, this is not a zero-leak design — tightening the
-bar trades false alarms for leaks close to one-for-one at this end of
-the curve, and 211 leaks sit on step 2's own ledger, charged nowhere
-else. Full sweep and reasoning: `docs/logs/learnings.md` (2026-09-13
-entry, "Goal 1 rebuilt as its own classifier").
-
-Ledgers stay separate. Step 3 owns 37 leaks, unaffected by this
-rebuild. Step 2 owns 803 false alarms and 211 leaks, both on its own
-ledger, both scored over its own 4406-row PUT/DELETE/PATCH population.
-Step 1 owns 49. A blended number appears only on a line labelled
-combined, and there is none yet for this shape.
-
-Step 1 (r dressed as w or x) is the same shape as step 2, one step
-further out, and waits behind it.
+Known limits: this is a tuning-corpus number under LOVO; exams 1-4 are
+burned, none is a clean exam; this is a POC, never shipped as one; the
+x-pile flag is reported in the CSV, not yet wired to any consumer;
+poc/m1 is to be archived next.
 
 GET is last on the list. 97% of GET rows are truly r, GET runs no word
 rules by design, and the 17 Slack GET leaks are not chased per-vendor.
-GET is not touched until steps 3, 2 and 1 are closed.
 
 Every row still gets a judgement — there is no "no answer" outcome —
 and where the judge is unsure it moves in the safer direction (tighter
@@ -354,7 +177,7 @@ M1, the informed arbiter, is a POC and has not graduated. The full
 module ladder, the M1 go/no-go gate, the labelled sets and the current
 arbiter shape with its scores live in
 [module ladder and arbiter shape](../wiki/module-ladder-and-shape.md).
-Decisions D1-D59 are in [the decisions log](../wiki/decisions-log.md).
+Decisions D1-D65 are in [the decisions log](../wiki/decisions-log.md).
 M0 is closed; its gate statement and results are in
 [go/no-go gate and M0 results](../logs/gate-and-m0-results.md). Notes
 carried from the original outline are in

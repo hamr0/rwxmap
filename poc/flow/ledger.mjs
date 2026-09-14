@@ -10,7 +10,7 @@ export const PINS = {
   step2: {
     falseAlarms: 803,
     leaks: 211,
-    xPile: { rows: 2441, leaks: 192 },
+    xPile: { rows: 1998, leaks: 179 },
   },
   exact: 4282,
   leaks: 228,

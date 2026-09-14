@@ -108,7 +108,7 @@ with \`node poc/flow/proof.mjs\`.
 
 ## Corpus
 
-${rows.length} rows, ${vendors.length} vendors. Truth split: r ${truthR} (${pct(truthR, rows.length)}), w ${truthW} (${pct(truthW, rows.length)}), x ${truthX} (${pct(truthX, rows.length)}). Leave-one-vendor-out. Mining bars: other-party nouns admitted at >= ${OTHER_MIN_VENDORS} vendors and x-share >= ${OTHER_MIN_DANGER_SHARE} over PUT/DELETE/PATCH; yours nouns admitted at n >= ${YOURS_MIN_N} and w-share >= ${YOURS_MIN_W_SHARE} over all rows. Run date: ${runDate}.
+${rows.length} rows, ${vendors.length} vendors. Truth split: r ${truthR} (${pct(truthR, rows.length)}), w ${truthW} (${pct(truthW, rows.length)}), x ${truthX} (${pct(truthX, rows.length)}). Leave-one-vendor-out. Mining bars: other-party nouns admitted at >= ${OTHER_MIN_VENDORS} vendors and x-share >= ${OTHER_MIN_DANGER_SHARE} over PUT/DELETE/PATCH; yours nouns admitted at n >= ${YOURS_MIN_N} and w-share >= ${YOURS_MIN_W_SHARE} over write rows (every method but GET/HEAD/OPTIONS). Run date: ${runDate}.
 
 ## How the flow runs
 

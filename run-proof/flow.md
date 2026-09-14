@@ -7,7 +7,7 @@ with `node poc/flow/proof.mjs`.
 
 ## Corpus
 
-5465 rows, 332 vendors. Truth split: r 646 (11.8%), w 3883 (71.1%), x 936 (17.1%). Leave-one-vendor-out. Mining bars: other-party nouns admitted at >= 2 vendors and x-share >= 0.3 over PUT/DELETE/PATCH; yours nouns admitted at n >= 2 and w-share >= 0.8 over all rows. Run date: 2026-09-14.
+5465 rows, 332 vendors. Truth split: r 646 (11.8%), w 3883 (71.1%), x 936 (17.1%). Leave-one-vendor-out. Mining bars: other-party nouns admitted at >= 2 vendors and x-share >= 0.3 over PUT/DELETE/PATCH; yours nouns admitted at n >= 2 and w-share >= 0.8 over write rows (every method but GET/HEAD/OPTIONS). Run date: 2026-09-14.
 
 ## How the flow runs
 
@@ -24,8 +24,8 @@ with `node poc/flow/proof.mjs`.
 | GET floor | leaks (parked D59, charged to the floor) | 17 | 17 |
 | step 2 | false alarms | 803 | 803 |
 | step 2 | leaks | 211 | 211 |
-| step 2 | x-pile rows | 2441 | 2441 |
-| step 2 | x-pile leaks | 192 | 192 |
+| step 2 | x-pile rows | 1998 | 1998 |
+| step 2 | x-pile leaks | 179 | 179 |
 | whole flow | exact | 4282 (78.4%) | 4282 (78.4%) |
 | whole flow | leaks | 228 (4.2%) | 228 (4.2%) |
 | whole flow | over-tight | 955 (17.5%) | 955 (17.5%) |
@@ -45,8 +45,8 @@ with `node poc/flow/proof.mjs`.
 | step | class | flag | rows | truth r | truth w | truth x |
 | --- | --- | --- | ---: | ---: | ---: | ---: |
 | 1 | r | (none) | 614 | 597 | 4 | 13 |
-| 2 | w | evidence | 768 | 3 | 746 | 19 |
-| 2 | w | x-pile | 2441 | 22 | 2227 | 192 |
+| 2 | w | evidence | 1211 | 3 | 1176 | 32 |
+| 2 | w | x-pile | 1998 | 22 | 1797 | 179 |
 | 3 | x | (none) | 1642 | 24 | 906 | 712 |
 
 ## CSV columns (run-proof/flow.csv)
