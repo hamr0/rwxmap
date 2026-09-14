@@ -36,6 +36,52 @@ three steps. Each step takes the rows the step before left behind.
    claim. Step 2 gives a w row up (a live verb or a not-yours noun
    fires) and it lands here.
 
+**Step 2 in order (measured 2026-09-13, the chosen shape B plus a flag).**
+A PUT / DELETE / PATCH row is checked in this order; the first hit
+decides and the rest are not consulted:
+
+- a. a live verb (send, cancel, pay, ...) → give up, x.
+- b. a someone-else's noun (the mined 3p blocklist) → give up, x.
+- c. every noun on the yours list → keep, w, flagged "evidence".
+- d. none of the above → keep, w, flagged "no evidence".
+
+Both noun lists are mined, not hand-written, so each has a bar: a
+noun is "yours" when 2+ other vendors used it on 2+ rows and it was
+safe 80%+ of the time; it is "someone else's" when 2+ other vendors
+used it and it was dangerous 30%+ of the time. A noun that meets
+neither bar is on no list, and its row lands in d. On the 4406
+PUT / DELETE / PATCH rows:
+
+| group | rows | truly w | truly x |
+|---|---|---|---|
+| a. live verb → x | 163 | 82 | 81 |
+| b. 3p noun → x | 1034 | 721 | 313 |
+| c. every noun yours → w | 1237 | 1201 | 36 |
+| d. neither → w, no evidence | 1972 | 1797 | 175 |
+
+Why a row lands in d: a noun only this vendor uses, so no other
+vendor can vouch (1327 rows, e.g. camara deleteGeofencingSubscription);
+a noun between the two bars, 20-30% dangerous (130, e.g. stripe
+DeleteAccountsAccount, "account" 24%); a noun with too few rows from
+other vendors (499, e.g. stripe DeleteCouponsCoupon); no noun at all
+(16). Group d is 91% safe and holds 175 of step 2's 211 leaks; it is
+the pile a human or a per-API hint sorts later (D44), not a list
+problem.
+
+Sequential beats joint. Letting a yours noun override a live verb
+(live + all-yours → w) gives 772 false alarms / 221 leaks against
+803 / 211 sequential: 31 freed for 10 leaks, under the 10-for-1 curve.
+Letting "no 3p noun" override a live verb: 738 / 260. One candidate
+kept for later: where the two noun lists disagree (a 3p noun fires
+but every noun is also yours), letting yours win gives 762 / 212 (41
+freed for 1 leak); to be re-measured once the yours list lives in
+step 2.
+
+Step 2's ledger on this shape: 803 false alarms / 211 leaks. Whole
+flow on all 5465 rows: exact 78.4%, leaks 4.2%, over-tight 17.5%.
+The alternative (d → x, the yours-list-only shape A) is 37 leaks /
+2645 false alarms, exact 49.7%; rejected by the user 2026-09-13.
+
 On the 5465 rows PATCH is no longer the outlier it was on 42 rows (31%
 x); it sits with PUT and DELETE at 14-15% x, so it keeps the w floor.
 
