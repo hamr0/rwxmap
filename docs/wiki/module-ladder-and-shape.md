@@ -102,6 +102,7 @@ past statuses are in `docs/logs/learnings.md`.
 | exam 1 (data/exam-2026-09-09/) | 200 (199 scorable) | 105 | blind exam, scored once — now burned, used to hand-pick C16/C17 words |
 | exam 2 (data/exam2-2026-09-10/) | 1000 (994 scorable) | 246 | blind exam, scored once — now burned, used to hand-pick C16/C17 words and swept in C20 |
 | exam 3 (data/exam3-2026-09-11/) | 3000 (2993 scorable) | 305 | blind exam, scored once — now burned, C19 admitted `owner` off it and C20 swept it |
+| exam 5 (data/exam5-2026-09-14/) | 1999 scorable | 267 (writes from 103 corpus vendors, row-disjoint; POST/GET from 164 unseen) | exam, scored once 2026-09-14 (D68); not in the tuning corpus |
 
 Truth is model-read, blind, per D-series notes; "tuned" means code was
 changed while its scores were visible; "clean exam" means scored once

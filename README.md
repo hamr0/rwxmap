@@ -65,8 +65,10 @@ reading, scored leave-one-vendor-out (LOVO): every vendor's rows are
 scored by rules built from every other vendor's rows, never their own.
 This is a tuning corpus, not exam-checked; exams 1-3 were used to tune,
 and exam 4 was found (2026-09-14) to be drawn from already-burned
-providers, not a virgin set — so no clean exam exists (see
-`docs/logs/learnings.md`, M1-C25 and "Exam 4 was never virgin").
+providers, not a virgin set, and exam 5 (2026-09-14) is the first exam
+scored once on unseen rows: 68.4% exact / 3.2% leaks / 28.4% over-tight
+overall, writes 73.3 / 3.7 / 23.0 (`docs/logs/learnings.md`, "Exam 5
+scored once").
 
 Current per-step numbers (5465 rows, LOVO):
 
@@ -100,8 +102,10 @@ report in `run-proof/`), `node --test poc/flow/*.test.mjs` (the pins).
   not with a human expert or with any standard.
 - This is a tuning-corpus number under LOVO, not a clean-exam number.
   Exams 1-3 were used to tune, and exam 4 was found (2026-09-14) to be
-  drawn from already-burned providers, not a virgin set — so no clean
-  exam exists (`docs/logs/learnings.md`, M1-C25 and "Exam 4 was never virgin").
+  drawn from already-burned providers, not a virgin set, and exam 5
+  (2026-09-14) is the first exam scored once on unseen rows: 68.4%
+  exact / 3.2% leaks / 28.4% over-tight overall, writes 73.3 / 3.7 /
+  23.0 (`docs/logs/learnings.md`, "Exam 5 scored once").
 - CAMARA's GET half was judged by template, not operation by
   operation.
 - The 57-of-138 read-named-POST figure (`docs/product/prd.md`) is a

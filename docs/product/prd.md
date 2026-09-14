@@ -176,9 +176,12 @@ Run: `node poc/flow/proof.mjs` (one CSV + one markdown report, exits 1
 if a pin moves); `node --test poc/flow/*.test.mjs` (the pins).
 
 Known limits: this is a tuning-corpus number under LOVO; exams 1-3 were
-used to tune and exam 4 was found (2026-09-14) to be drawn from
-already-burned providers, not a virgin set, so no clean exam exists
-(`docs/logs/learnings.md`, "Exam 4 was never virgin"); this is a POC, never shipped as one; the
+used to tune and exam 4 was found to be drawn from
+already-burned providers; exam 5 (D68) is the first exam scored once on
+unseen rows — row-disjoint for writes, vendor-disjoint for POST and
+GET — and came out 68.4% exact / 3.2% leaks / 28.4% over-tight overall,
+writes 73.3 / 3.7 / 23.0, POST 25.1 / 0.7 / 74.2
+(`docs/logs/learnings.md`, "Exam 5 scored once"); this is a POC, never shipped as one; the
 x-pile flag is reported in the CSV, not yet wired to any consumer;
 poc/m1 is archived at poc/archive/m1/ (D65).
 
@@ -195,7 +198,7 @@ M1, the informed arbiter, is a POC and has not graduated. The full
 module ladder, the M1 go/no-go gate, the labelled sets and the current
 arbiter shape with its scores live in
 [module ladder and arbiter shape](../wiki/module-ladder-and-shape.md).
-Decisions D1-D66 are in [the decisions log](../wiki/decisions-log.md).
+Decisions D1-D68 are in [the decisions log](../wiki/decisions-log.md).
 M0 is closed; its gate statement and results are in
 [go/no-go gate and M0 results](../logs/gate-and-m0-results.md). Notes
 carried from the original outline are in
@@ -325,6 +328,14 @@ full ruling record.
 
 Non-blocking; never silently assumed.
 
+- The POST floor (x) does not hold on exam 5: unseen vendors' POSTs are
+  12% truth x against the corpus's 62%, and the floor leaves 74% of
+  exam POST rows over-tight. Whether that is the tool or the truth is
+  open until the brief's POST guidance is calibrated against the
+  corpus's 509 labelled POST rows. The two raising rules also lose
+  precision on exam 5 (other-party noun 24% right, live verb 32%).
+  Nothing is adopted from exam 5; candidates are measured on the corpus
+  first (D40). Raised 2026-09-14.
 - MCP hints (future feature, M3; the user's end goal is to feed them).
   Nothing emits hints yet.
   - `readOnlyHint`: true when class is `r`; GET follows its `r` floor

@@ -90,3 +90,21 @@ Use the calibrated, adopted brief at
   labellers.
 - `exam-truth-part1.csv` .. `exam-truth-part10.csv` — NOT produced by
   this script; written later by blind labellers, one per part.
+
+## Score (scored once, 2026-09-14)
+
+Scorer: `node poc/exam/score-exam5.mjs`; row detail in `score.csv`.
+
+1999 scorable rows (1 '?'); truth r 385 / w 1410 / x 204. Whole exam
+exact 1368 (68.4%), leaks 64 (3.2%), over-tight 567 (28.4%);
+high-confidence rows only (1755) exact 69.7%, leaks 2.5%, over-tight
+27.9%. By stratum against the corpus: PUT/DELETE/PATCH 1500 rows exact
+73.3% (corpus 76.9%), leaks 3.7% (4.2%), over-tight 23.0% (18.8%) — PUT
+70.0 / 4.6 / 25.4 (corpus 5.2% leaks, 18.0% over-tight), DELETE 74.0 /
+3.3 / 22.7 (3.6%, 20.4%), PATCH 79.2 / 2.7 / 18.1 (3.6%, 15.8%); GET
+200 rows exact 97.0%, leaks 3.0% (corpus 96.9%, 3.1%); POST 299 rows
+exact 25.1% (corpus 75.0%), leaks 0.7% (0%), over-tight 74.2% (25.0%).
+
+Nothing was tuned on these rows. Measuring any candidate word or rule
+against exam 5 makes it a tuning set (D40); candidates are measured on
+the corpus first.
