@@ -12,7 +12,7 @@ with `node poc/flow/proof.mjs`.
 ## How the flow runs
 
 - Step 1, r: every GET/HEAD/OPTIONS row is r; a POST whose lead verb is a read verb is r.
-- Step 2, w: PUT/DELETE/PATCH rows start at w — a live verb raises to x, an other-party noun raises to x, every noun on the row being a "yours" noun keeps it w flagged "evidence", otherwise it stays w flagged "x-pile".
+- Step 2, w: PUT/DELETE/PATCH rows start at w — a live verb raises to x, an other-party noun or a money noun raises to x, every noun on the row being a "yours" noun keeps it w flagged "evidence", otherwise it stays w flagged "x-pile".
 - Step 3, x: whatever step 1 and step 2 leave behind (POST with no read verb) floors to x.
 
 ## Ledger
@@ -22,13 +22,13 @@ with `node poc/flow/proof.mjs`.
 | step 1 | over-tight | 49 | 49 |
 | step 1 | leaks (read-verb rule) | 0 | 0 |
 | GET floor | leaks (parked D59, charged to the floor) | 17 | 17 |
-| step 2 | false alarms | 803 | 803 |
-| step 2 | leaks | 211 | 211 |
-| step 2 | x-pile rows | 1998 | 1998 |
-| step 2 | x-pile leaks | 179 | 179 |
-| whole flow | exact | 4282 (78.4%) | 4282 (78.4%) |
-| whole flow | leaks | 228 (4.2%) | 228 (4.2%) |
-| whole flow | over-tight | 955 (17.5%) | 955 (17.5%) |
+| step 2 | false alarms | 805 | 805 |
+| step 2 | leaks | 187 | 187 |
+| step 2 | x-pile rows | 1972 | 1972 |
+| step 2 | x-pile leaks | 155 | 155 |
+| whole flow | exact | 4304 (78.8%) | 4304 (78.8%) |
+| whole flow | leaks | 204 (3.7%) | 204 (3.7%) |
+| whole flow | over-tight | 957 (17.5%) | 957 (17.5%) |
 
 ## Per method
 
@@ -36,9 +36,9 @@ with `node poc/flow/proof.mjs`.
 | --- | ---: | ---: | ---: |
 | GET | 550 | 17 | 0 |
 | POST | 509 | 0 | 127 |
-| PUT | 1696 | 93 | 305 |
-| DELETE | 2079 | 76 | 424 |
-| PATCH | 631 | 42 | 99 |
+| PUT | 1696 | 89 | 305 |
+| DELETE | 2079 | 75 | 425 |
+| PATCH | 631 | 23 | 100 |
 
 ## Where the rows sit
 
@@ -46,8 +46,8 @@ with `node poc/flow/proof.mjs`.
 | --- | --- | --- | ---: | ---: | ---: | ---: |
 | 1 | r | (none) | 614 | 597 | 4 | 13 |
 | 2 | w | evidence | 1211 | 3 | 1176 | 32 |
-| 2 | w | x-pile | 1998 | 22 | 1797 | 179 |
-| 3 | x | (none) | 1642 | 24 | 906 | 712 |
+| 2 | w | x-pile | 1972 | 22 | 1795 | 155 |
+| 3 | x | (none) | 1668 | 24 | 908 | 736 |
 
 ## Why a row sits in the x-pile
 
@@ -61,11 +61,11 @@ rows but its w-share fell short of 0.8.
 
 | reason | rows | truth r | truth w | truth x | share of pile |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| between bars | 1072 | 11 | 933 | 128 | 53.7% |
-| too few rows | 240 | 4 | 220 | 16 | 12.0% |
-| vendor-only | 670 | 7 | 628 | 35 | 33.5% |
+| between bars | 1046 | 11 | 931 | 104 | 53.0% |
+| too few rows | 240 | 4 | 220 | 16 | 12.2% |
+| vendor-only | 670 | 7 | 628 | 35 | 34.0% |
 | no noun | 16 | 0 | 16 | 0 | 0.8% |
-| **total** | **1998** | 22 | 1797 | 179 | 100.0% |
+| **total** | **1972** | 22 | 1795 | 155 | 100.0% |
 
 ## CSV columns (run-proof/flow.csv)
 

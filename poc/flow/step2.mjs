@@ -1,20 +1,26 @@
 // Step 2, w: PUT/DELETE/PATCH rows start at w. In order, first hit
-// decides: (a) live verb -> x, (b) other-party noun -> x, (c) every noun
-// on the row is a "yours" noun -> w, flagged 'evidence', (d) otherwise ->
-// w, flagged 'x-pile' (class stays w; rows step 2 gives up on belong to
-// step 3). Imports nothing from poc/m1 or poc/m0 — each step owns its own
-// lists (D57).
+// decides: (a) live verb -> x, (b) other-party noun then money noun -> x,
+// (c) every noun on the row is a "yours" noun -> w, flagged 'evidence',
+// (d) otherwise -> w, flagged 'x-pile' (class stays w; rows step 2 gives
+// up on belong to step 3). Imports nothing from poc/m1 or poc/m0 — each
+// step owns its own lists (D57).
 import { tokensForRow, matchesAnyStem, summaryVerb, callerPhraseInText, buildJunkSet, nounsForRow } from './words.mjs';
 
-// LIVE_VERBS (26): literal copy of poc/archive/m1/step2/lists.mjs's LIVE_VERBS
+// LIVE_VERBS (27): literal copy of poc/archive/m1/step2/lists.mjs's LIVE_VERBS
 // (itself a copy of step 3's list, D57 — never import another step's
-// list, only copy it).
+// list, only copy it), plus 'confirm' added 2026-09-14 (hand raiser,
+// measured 19 x / 2 w on 3 vendors).
 export const LIVE_VERBS = new Set([
-  'accept', 'approve', 'cancel', 'convert', 'dial', 'end', 'execute',
-  'hangup', 'invite', 'kick', 'launch', 'merge', 'notify', 'pay', 'publish',
-  'reboot', 'refund', 'reject', 'revoke', 'run', 'send', 'start', 'submit',
-  'terminate', 'transfer', 'trigger',
+  'accept', 'approve', 'cancel', 'confirm', 'convert', 'dial', 'end',
+  'execute', 'hangup', 'invite', 'kick', 'launch', 'merge', 'notify', 'pay',
+  'publish', 'reboot', 'refund', 'reject', 'revoke', 'run', 'send', 'start',
+  'submit', 'terminate', 'transfer', 'trigger',
 ]);
+
+// Hand raising nouns, money moves by D20; measured 2026-09-14 payment
+// 11 x / 0 w on 5 vendors; invoice, transaction, charge, checkout, payout
+// rejected (mostly safe).
+export const MONEY_NOUNS = new Set(['payment']);
 
 // NON_NOUN_READ_VERBS (14): literal copy of poc/archive/m1/step3/lists.mjs's
 // NON_NOUN_READ_VERBS (the same 14 as step1's READ_VERBS; each step keeps
@@ -151,6 +157,9 @@ export function classifyStep2(row, ctx) {
   const otherNouns = ctx.otherNounsFor(row.vendor);
   if ([...nouns].some((n) => otherNouns.has(n))) {
     return { class: 'x', step: 3, rule: 'other-noun', flag: '' };
+  }
+  if ([...nouns].some((n) => MONEY_NOUNS.has(n))) {
+    return { class: 'x', step: 3, rule: 'money-noun', flag: '' };
   }
 
   const yoursNouns = ctx.yoursFor(row.vendor);

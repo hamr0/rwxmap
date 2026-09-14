@@ -34,5 +34,5 @@ test('pinDiffs: one moved number yields exactly that one diff', () => {
   delete score.vendors;
   score.step2.xPile.leaks = 193;
   const diffs = pinDiffs(score, PINS.rows, PINS.vendors);
-  assert.deepEqual(diffs, [{ name: 'step2.xPile.leaks', pinned: 179, actual: 193 }]);
+  assert.deepEqual(diffs, [{ name: 'step2.xPile.leaks', pinned: 155, actual: 193 }]);
 });

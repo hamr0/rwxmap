@@ -73,8 +73,26 @@ test('classifyStep2: nouns present but not every one is yours -> w, x-pile', () 
   assert.deepEqual(res, { class: 'w', step: 2, rule: 'floor', flag: 'x-pile' });
 });
 
-test('LIVE_VERBS: 26 words', () => {
-  assert.equal(LIVE_VERBS.size, 26);
+test('LIVE_VERBS: 27 words', () => {
+  assert.equal(LIVE_VERBS.size, 27);
+});
+
+test('classifyStep2: money noun -> x', () => {
+  const ctx = {
+    nounsOf: () => new Set(['payment']),
+    otherNounsFor: () => new Set(),
+    yoursFor: () => new Set(),
+  };
+  const row = { method: 'PUT', operationId: 'updatePayment', path: '/payments/{id}', summary: 'Update a payment' };
+  const res = classifyStep2(row, ctx);
+  assert.deepEqual(res, { class: 'x', step: 3, rule: 'money-noun', flag: '' });
+});
+
+test('classifyStep2: live verb via operationId "confirmOrder" -> x', () => {
+  const ctx = { nounsOf: () => new Set(), otherNounsFor: () => new Set(), yoursFor: () => new Set() };
+  const row = { method: 'PUT', operationId: 'confirmOrder', path: '/orders/{id}', summary: 'Confirm an order' };
+  const res = classifyStep2(row, ctx);
+  assert.deepEqual(res, { class: 'x', step: 3, rule: 'live-verb', flag: '' });
 });
 
 // --- mining bars on a small synthetic corpus --------------------------------

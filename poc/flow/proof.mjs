@@ -166,7 +166,7 @@ ${rows.length} rows, ${vendors.length} vendors. Truth split: r ${truthR} (${pct(
 ## How the flow runs
 
 - Step 1, r: every GET/HEAD/OPTIONS row is r; a POST whose lead verb is a read verb is r.
-- Step 2, w: PUT/DELETE/PATCH rows start at w — a live verb raises to x, an other-party noun raises to x, every noun on the row being a "yours" noun keeps it w flagged "evidence", otherwise it stays w flagged "x-pile".
+- Step 2, w: PUT/DELETE/PATCH rows start at w — a live verb raises to x, an other-party noun or a money noun raises to x, every noun on the row being a "yours" noun keeps it w flagged "evidence", otherwise it stays w flagged "x-pile".
 - Step 3, x: whatever step 1 and step 2 leave behind (POST with no read verb) floors to x.
 
 ## Ledger
