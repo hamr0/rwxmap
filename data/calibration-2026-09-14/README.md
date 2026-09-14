@@ -35,6 +35,10 @@ brief did.
   file.
 - `calibA-labels.csv`, `calibB-labels.csv` — written 2026-09-14 by two
   blind labellers working from `BRIEF.md`.
+- `calibC-blind.csv` — 200 random exam-3 rows, disjoint from A and B,
+  seed 20260915, drawn 2026-09-14 to measure the revised brief once,
+  since A has now been scored under two briefs and is a tuning set.
+- `calibC-labels.csv` — written 2026-09-14 by a blind labeller.
 
 ## How to reproduce
 
@@ -66,5 +70,8 @@ Sample A: 185/200 (92.5%) agree with exam 3 truth (old brief 177/200,
 88.5%, on the same rows; w->x flips 21 -> 5, x->w flips 2 -> 10).
 Sample B: 123/150 (82.0%) land on the exam 3 label. Full results and
 remaining misses are in `docs/logs/learnings.md` under "Calibrated
-labelling brief, first measure (2026-09-14)". `BRIEF.md` is not yet
-adopted for exam 5 — four fixes are pending the user.
+labelling brief, first measure (2026-09-14)".
+Sample C (revised brief, fresh rows): 185/200 (92.5%), w->x 5, x->w 9
+of 23. `BRIEF.md` is ADOPTED 2026-09-14 as the standard for exam 5 and
+later exams, with the recorded lean that it errs slightly loose on
+truth-x rows.

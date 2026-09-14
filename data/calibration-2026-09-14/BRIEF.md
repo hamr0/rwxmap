@@ -7,6 +7,12 @@ brief and exam 4's reconstructed brief (272 flipped w->x, 33 x->w) and
 measuring the corpus truth lean of the words that decided them. It is
 saved verbatim so exam 5 and every later exam label to the same
 standard. Rationale and numbers: README.md in this directory.
+Revised 2026-09-14 after the first blind measure (learnings,
+"Calibrated labelling brief, first measure"): rule 4 names access
+bundles, rule 6 names the caller's own consent, rule 11 drops the
+inferred read receipt and names the caller's own customer session,
+and a "do not infer" bullet was added; a Methods paragraph covers
+GET and POST for exam 5.
 
 ## The brief, verbatim
 
@@ -26,14 +32,27 @@ normal API key for this provider calls it.
 
 The classes:
 
-- r — nothing changes. A read, echo, validate or dry-run that happens
-  to use PUT/DELETE/PATCH. Rare.
+- r — nothing changes. A read, echo, validate, search or dry-run —
+  usual for GET, and it also happens on POST and, rarely, on
+  PUT/DELETE/PATCH.
 - w — changes only the caller's OWN stuff: records, configuration,
   files, settings, definitions inside the caller's own account,
   tenant, workspace, server or system. Risky to the caller, not to
-  anyone else. w is the DEFAULT for PUT, DELETE and PATCH.
+  anyone else. w is the DEFAULT for PUT, DELETE and PATCH; see
+  Methods below for GET and POST.
 - x — the operation REACHES BEYOND the caller, or is NOT REPEATABLE.
   Either road alone is enough.
+
+Methods. GET, HEAD and OPTIONS are r unless the text says the call
+changes something (a GET that "sends", "triggers" or "deletes" is
+labelled by what it does, not by its method). PUT, DELETE and PATCH
+start at w and rise to x only on evidence. POST has no default: label
+it by what it does. A POST that creates or edits the caller's own
+record, runs a search, a lookup, a calculation, a validation or a
+dry-run, or reads back data by posting a query, is r when nothing
+changes and w when only the caller's own stuff changes; a POST that
+sends, notifies, publishes, pays, charges, invites, grants, assigns,
+dispatches, triggers a run, or otherwise takes road 1 or road 2, is x.
 
 Road 1, reaches beyond the caller. The text must say, or make plain,
 that one of these happens:
@@ -90,7 +109,11 @@ Apply these before your instinct:
    custom fields, catalogue entries: creating, editing or deleting the
    definition or container is w, even if members exist and even if it
    cascades to its own contents. Changing WHO is in it, or WHAT its
-   members may do, is x (road 1b). "Delete role" -> w; "Remove user
+   members may do, is x (road 1b). A bundle of access — a permission
+   scheme, a permission set, an access policy, an ACL, or a role or
+   group whose text says it grants or controls what members may do —
+   is that access: deleting, replacing or reassigning it is x
+   (road 1b). "Delete role" (no access text) -> w; "Remove user
    from role", "Add a member", "Update collaborator" -> x.
 5. Admin, instance-wide and server-wide configuration is w. The caller
    administers their own instance. "Update the configuration of this
@@ -98,8 +121,11 @@ Apply these before your instinct:
 6. Your own network and infrastructure are w. DNS zones and records,
    certificates, servers, connectors, SIM preferences, keys and tokens
    the caller owns are w. Rotating or refreshing your own certificate
-   or key is w. Revoking, compromising or overwriting a key, token or
-   consent that ANOTHER party holds is x (road 1b).
+   or key is w. Revoking, compromising or overwriting a key or token
+   that ANOTHER party holds is x (road 1b). A consent, agreement,
+   authorisation or grant that the CALLER gave or holds (account-
+   access consent, end-user agreement, requisition) is the caller's
+   own: deleting or withdrawing it is w.
 7. Social relations are w. Follow, unfollow, like, unlike, repost,
    promise, react: the caller changes its own relation to an item ->
    w. x only if the text says the other party is notified or their
@@ -119,10 +145,14 @@ Apply these before your instinct:
     charging is w. Charging, refunding, paying out, confirming a
     payment, renewing or switching a paid plan that bills the card ->
     x (road 1c).
-11. Sessions and logins. Logging out your own session is w. Logging
-    out, invalidating or ending another person's session is x
-    (road 1b). Mark-as-read is w unless the text says a read receipt
-    goes to the sender (then x, road 1a).
+11. Sessions and logins. Logging out, ending or invalidating a session
+    or ticket that the caller itself opened is w, even when the path
+    or text calls it a "customer" session — the caller logged that
+    customer in through the same API. Logging out, invalidating or
+    ending a session that another person opened, or deleting another
+    person's active login, is x (road 1b). Mark-as-read, mark-as-seen,
+    acknowledge: w. Do not infer a read receipt; only the text saying
+    a receipt or notification is sent makes it x (road 1a).
 12. Trigger, refresh, run, re-run, sync, import, rebuild that starts a
     job each call is x (road 2) even when it touches only the caller's
     own data.
@@ -138,6 +168,9 @@ Rules that trip people up:
 - A cascade inside the caller's own system stays w ("deletes the team
   and its groups" -> w). A cascade that removes other people's ACCESS
   is x ("deletes the account and all its users" -> x).
+- Do not infer. "May", "possibly", "could affect", "others may rely
+  on" are not evidence. The text must state the reach. If it does
+  not, the row is w.
 - When the row genuinely could be either AFTER applying rules 1-12,
   pick the TIGHTER class (x over w, w over r) and mark confidence low.
   Apply the rules first; "tighter on doubt" is for rows the rules do

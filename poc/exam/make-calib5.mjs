@@ -9,6 +9,11 @@
 // exam 4's (reconstructed-brief) truth disagree, joined on
 // provider|method|path|operationId. Seeded mulberry32, seed 20260914.
 //
+// Sample C: 200 fresh exam-3 blind rows, excluding every row_id in sample A
+// or sample B and every row whose exam-3 truth_class is '?'. Seeded
+// mulberry32, seed 20260915 (a separate stream from sample B's, so sample B
+// is unaffected).
+//
 // Determinism: same seed, same input files -> same output files, every run.
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -25,8 +30,10 @@ const OUT_DIR = path.join(REPO_ROOT, 'data/calibration-2026-09-14');
 const CALIBA_OUT = path.join(OUT_DIR, 'calibA-blind.csv');
 const CALIBB_BLIND_OUT = path.join(OUT_DIR, 'calibB-blind.csv');
 const CALIBB_KEY_OUT = path.join(OUT_DIR, 'calibB-key.csv');
+const CALIBC_OUT = path.join(OUT_DIR, 'calibC-blind.csv');
 
 const SEED = 20260914;
+const SEED_C = 20260915;
 const EXAM3_TRUTH_PARTS = 15;
 const EXAM4_TRUTH_PARTS = 20;
 const EXPECTED_MATCHES = 2109;
@@ -34,6 +41,7 @@ const EXPECTED_DRIFT = 305;
 const EXPECTED_W_TO_X = 272;
 const EXPECTED_X_TO_W = 33;
 const SAMPLE_B_SIZE = 150;
+const SAMPLE_C_SIZE = 200;
 
 // --- mulberry32: tiny seeded PRNG, deterministic across runs -------------
 // Copied verbatim from poc/archive/m1/arbiter/make-exam4.mjs.
@@ -187,8 +195,40 @@ function main() {
   // Sample A: byte-for-byte copy of the 2026-09-12 calibration blind file.
   copyFileSync(CALIB12_BLIND, CALIBA_OUT);
 
+  // Sample C: 200 fresh exam-3 blind rows, excluding sample A's row_ids,
+  // sample B's row_ids, and any row whose exam-3 truth_class is '?'.
+  const sampleAText = readFileSync(CALIBA_OUT, 'utf8');
+  const sampleARows = parseCsv(sampleAText);
+  const excludedIds = new Set();
+  for (const row of sampleARows) excludedIds.add(row.row_id);
+  for (const { row3 } of sampleB) excludedIds.add(row3.row_id);
+
+  const eligible = [];
+  for (const row of exam3Blind.values()) {
+    if (excludedIds.has(row.row_id)) continue;
+    const t3 = exam3Truth.get(row.row_id);
+    if (t3 && t3.truth_class === '?') continue;
+    eligible.push(row);
+  }
+
+  const rngC = mulberry32(SEED_C);
+  const shuffledC = seededShuffle(eligible, rngC);
+  const sampleC = shuffledC.slice(0, SAMPLE_C_SIZE);
+  sampleC.sort((a, b) => Number(a.row_id) - Number(b.row_id));
+
+  const calibCRows = sampleC.map((row) => ({
+    row_id: row.row_id,
+    provider: row.provider,
+    method: row.method,
+    path: row.path,
+    operationId: row.operationId,
+    summary: row.summary,
+    description: row.description,
+  }));
+  writeFileSync(CALIBC_OUT, toCsv(blindHeader, calibCRows));
+
   console.log(
-    `calibA 200 rows; calibB 150 of 305 drift rows (w->x ${sampleWToX}, x->w ${sampleXToW}); seed ${SEED}`
+    `calibA 200 rows; calibB 150 of 305 drift rows (w->x ${sampleWToX}, x->w ${sampleXToW}); calibC 200 fresh rows (excluding A and B); seeds ${SEED} (B) ${SEED_C} (C)`
   );
 }
 
