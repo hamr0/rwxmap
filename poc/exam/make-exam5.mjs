@@ -1,15 +1,19 @@
-// data/exam5-2026-09-14: draw the first genuinely clean exam — 2000 rows
-// from providers absent from the labelled corpus (5465 rows / 332
-// vendors), exam 1 (200 rows / its own providers) and exam 4 (4000 rows /
-// its own providers), checked under both name forms (raw and registrable)
-// and both directions (drawn-vs-burned and burned-vs-drawn).
+// data/exam5-2026-09-14: draw exam 5 — 2000 rows from
+// data/corpus/apis-guru-ops.csv.gz (123339 rows / 673 providers).
 //
-// Why this script exists: make-exam4.mjs's provider exclusion compared
-// registrable names ("ably") against raw vendor tokens ("ably.net") and so
-// excluded almost nothing — a bug discovered 2026-09-14 (see learnings).
-// Exam 5's exclusion logic is written fresh below to close that gap; the
-// registrableName()/VENDOR_NAME_ALIASES/cap-search/row_id/part-file/CSV
-// pieces are otherwise reused verbatim from make-exam4.mjs.
+// Why this script exists (rewritten 2026-09-14, see docs/logs/learnings.md
+// "Exam 5 draw: the APIs.guru pool has no unseen write vendors"): the
+// original design wanted a fully vendor-disjoint exam, but the APIs.guru
+// pool has only 327 providers with any PUT/DELETE/PATCH row at all, and
+// of those, 325 already map onto one of the 332 labelled-corpus write
+// vendors (316 by exact provider string, 9 by registrable name), leaving
+// only 2 truly unseen write providers — nowhere near the 1500-row write
+// stratum this exam needs. The new design accepts that and makes the
+// write stratum (W) ROW-disjoint instead of vendor-disjoint: every drawn
+// W row's provider maps onto a labelled-corpus write vendor
+// (corpus_vendor), but the exact row (by method+path or method+operationId)
+// is excluded if the corpus, exam 1, or exam 4 already has it. The two
+// other strata (POST, GET) stay fully vendor-disjoint, as before.
 //
 // CRITICAL RAIL: this script never imports a classify function and never
 // computes or records a predicted class. It imports loadRows() from
@@ -18,15 +22,17 @@
 // loadRows() reads internally, and no truth file for exam 1 or exam 4 is
 // read at all (only their exam-blind.csv files, for row identities).
 //
-// Determinism: PRNG is a seeded mulberry32, seed = 20260914 (distinct from
-// exam 1's 20260909, exam 2's 20260910, exam 3's 20260911, exam 4's
-// 20260912). One PRNG stream is shared across the three stratified draws,
-// in order PUT/DELETE/PATCH, then POST, then GET, so the same corpus file
-// + seed always produces the same 2000 rows.
+// Determinism: seed = 20260914 (distinct from exam 1's 20260909, exam 2's
+// 20260910, exam 3's 20260911, exam 4's 20260912). Strata are drawn in
+// order W, POST, GET (stratum index 0, 1, 2). Within a stratum's cap
+// search, every cap attempt reshuffles the same eligible list from a
+// fresh mulberry32(SEED + stratumIndex) — so the shuffle order is fixed
+// per stratum and only the cap changes, making the whole draw
+// deterministic and reproducible from this file + the input files alone.
 //
-// Cap search: each stratum starts its own cap at 12 rows/provider (per
-// spec) and raises it by 1 until that stratum's target is reachable; the
-// final cap per stratum is reported.
+// Cap search: each stratum starts its own cap at 12 rows/provider and
+// raises it by 1 until that stratum's target is reachable; the final cap
+// per stratum is reported.
 
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
@@ -45,15 +51,26 @@ const EXAM4_BLIND = path.join(REPO_ROOT, 'data/exam4-2026-09-12/exam-blind.csv')
 const OUT_DIR = path.join(REPO_ROOT, 'data/exam5-2026-09-14');
 const START_CAP = 12;
 
+// Expected mapping counts among pool providers with a PUT/DELETE/PATCH
+// row, measured in the main session before this script was written. If a
+// run of this script disagrees, that's evidence something changed
+// upstream (corpus, alias table, or pool file) — escalate rather than
+// silently accept a different number.
+const EXPECTED_WRITE_PROVIDERS = 327;
+const EXPECTED_EXACT = 316;
+const EXPECTED_REGISTRABLE = 9;
+const EXPECTED_AMBIGUOUS = 0;
+const EXPECTED_UNMATCHED = 2;
+
+// Strata, in draw order. index is used as the mulberry32 seed offset.
 const STRATA = [
-  { name: 'PUT/DELETE/PATCH', methods: new Set(['PUT', 'DELETE', 'PATCH']), target: 1500 },
-  { name: 'POST', methods: new Set(['POST']), target: 300 },
-  { name: 'GET', methods: new Set(['GET']), target: 200 },
+  { name: 'W', methods: new Set(['PUT', 'DELETE', 'PATCH']), target: 1500, index: 0 },
+  { name: 'POST', methods: new Set(['POST']), target: 300, index: 1 },
+  { name: 'GET', methods: new Set(['GET']), target: 200, index: 2 },
 ];
 const TARGET_N = STRATA.reduce((s, st) => s + st.target, 0);
 
 // --- mulberry32: tiny seeded PRNG, deterministic across runs -------------
-// Copied verbatim from make-exam4.mjs.
 function mulberry32(seed) {
   let a = seed >>> 0;
   return function () {
@@ -122,12 +139,14 @@ function existsOk(p) {
   try { readFileSync(p); return true; } catch { return false; }
 }
 
-function rowKey(provider, method, opPath, operationId) {
-  return [provider, method, opPath, operationId].join('|');
+function pathKey(method, opPath) {
+  return `${method.toUpperCase()}|${opPath}`;
+}
+function opKey(method, operationId) {
+  return `${method.toUpperCase()}|${operationId}`;
 }
 
-// --- STEP 1: load the three burned identity sources -----------------------
-// 1a. the labelled corpus (5465 rows / 332 vendors) via flow's loadRows().
+// --- STEP 1: load the burned identity sources ------------------------------
 const { rows: corpusRows, vendors: corpusVendors } = loadRows();
 if (corpusRows.length !== 5465) {
   throw new Error(`ESCALATE: expected 5465 combined-corpus rows from loadRows(), got ${corpusRows.length}.`);
@@ -137,7 +156,6 @@ if (corpusVendors.length !== 332) {
 }
 console.log(`Loaded labelled corpus: ${corpusRows.length} rows, ${corpusVendors.length} vendors (via poc/flow/corpus.mjs loadRows()).`);
 
-// 1b. exam 1's blind file (200 rows; providers not part of loadRows()'s set).
 if (!existsOk(EXAM1_BLIND)) throw new Error(`ESCALATE: exam-1 blind file missing: ${EXAM1_BLIND}`);
 const exam1Rows = parseCsv(readFileSync(EXAM1_BLIND, 'utf8'));
 if (exam1Rows.length !== 200) {
@@ -145,8 +163,6 @@ if (exam1Rows.length !== 200) {
 }
 console.log(`Loaded exam 1 blind file: ${exam1Rows.length} rows, ${new Set(exam1Rows.map((r) => r.provider)).size} providers.`);
 
-// 1c. exam 4's blind file (4000 rows; providers were supposed to be, but
-// were not correctly, excluded from the corpus and exam 1 already).
 if (!existsOk(EXAM4_BLIND)) throw new Error(`ESCALATE: exam-4 blind file missing: ${EXAM4_BLIND}`);
 const exam4Rows = parseCsv(readFileSync(EXAM4_BLIND, 'utf8'));
 if (exam4Rows.length !== 4000) {
@@ -154,78 +170,183 @@ if (exam4Rows.length !== 4000) {
 }
 console.log(`Loaded exam 4 blind file: ${exam4Rows.length} rows, ${new Set(exam4Rows.map((r) => r.provider)).size} providers.`);
 
-// --- STEP 2: build BURNED_TOKENS (provider identities, both name forms) --
-// and BURNED_ROW_KEYS (exact operation identities) from all three sources.
-const burnedProviderStringsRaw = new Set(); // raw provider strings, original case
-for (const v of corpusVendors) burnedProviderStringsRaw.add(v);
-for (const r of exam1Rows) burnedProviderStringsRaw.add(r.provider);
-for (const r of exam4Rows) burnedProviderStringsRaw.add(r.provider);
-
-const BURNED_TOKENS = new Set(); // lowercase: raw + registrable(+alias) forms
-for (const p of burnedProviderStringsRaw) {
-  BURNED_TOKENS.add(p.toLowerCase());
-  BURNED_TOKENS.add(canonicalRegistrableName(p));
-}
-console.log(`\nBURNED_TOKENS: ${burnedProviderStringsRaw.size} raw provider strings (corpus ${corpusVendors.length} + exam1 ${new Set(exam1Rows.map((r) => r.provider)).size} + exam4 ${new Set(exam4Rows.map((r) => r.provider)).size}, deduped) -> ${BURNED_TOKENS.size} distinct raw+registrable lowercase tokens.`);
-
-const BURNED_ROW_KEYS = new Set();
-for (const r of corpusRows) BURNED_ROW_KEYS.add(rowKey(r.vendor, r.method, r.path, r.operationId));
-for (const r of exam1Rows) BURNED_ROW_KEYS.add(rowKey(r.provider, r.method, r.path, r.operationId));
-for (const r of exam4Rows) BURNED_ROW_KEYS.add(rowKey(r.provider, r.method, r.path, r.operationId));
-console.log(`BURNED_ROW_KEYS: ${BURNED_ROW_KEYS.size} distinct provider|method|path|operationId keys (of ${corpusRows.length + exam1Rows.length + exam4Rows.length} raw, so ${corpusRows.length + exam1Rows.length + exam4Rows.length - BURNED_ROW_KEYS.size} overlapped).`);
-
-function isBurnedProvider(p) {
-  return BURNED_TOKENS.has(p.toLowerCase()) || BURNED_TOKENS.has(canonicalRegistrableName(p));
+// --- STEP 2: mapVendor(p) ---------------------------------------------------
+const corpusVendorSet = new Set(corpusVendors);
+const registrableToVendors = new Map(); // canonicalRegistrableName -> [corpus vendor strings]
+for (const v of corpusVendors) {
+  const reg = canonicalRegistrableName(v);
+  if (!registrableToVendors.has(reg)) registrableToVendors.set(reg, []);
+  registrableToVendors.get(reg).push(v);
 }
 
-// --- STEP 3: load the pool (gunzip via shell; no new deps) -----------------
+// Returns { vendor, matchType } where matchType is 'exact' | 'registrable' | 'none'.
+// Throws ESCALATE if more than one corpus vendor shares p's registrable name.
+function mapVendorDetailed(p) {
+  if (corpusVendorSet.has(p)) return { vendor: p, matchType: 'exact' };
+  const reg = canonicalRegistrableName(p);
+  const matches = registrableToVendors.get(reg) || [];
+  if (matches.length === 1) return { vendor: matches[0], matchType: 'registrable' };
+  if (matches.length > 1) {
+    throw new Error(`ESCALATE: provider "${p}" (registrable "${reg}") matches ${matches.length} corpus vendors: ${matches.join(', ')}.`);
+  }
+  return { vendor: '', matchType: 'none' };
+}
+function mapVendor(p) {
+  return mapVendorDetailed(p).vendor;
+}
+
+// --- STEP 3: load + dedupe the pool -----------------------------------------
 if (!existsOk(CORPUS_GZ)) throw new Error(`ESCALATE: corpus pool file missing: ${CORPUS_GZ}`);
 const poolCsvText = execSync(`gzip -dc ${JSON.stringify(CORPUS_GZ)}`, { maxBuffer: 1024 * 1024 * 512 }).toString('utf8');
-const poolRows = parseCsv(poolCsvText);
-const poolSizeBefore = poolRows.length;
-const poolProviders = new Set(poolRows.map((r) => r.provider));
-console.log(`\nLoaded ${poolSizeBefore} pool operations from ${poolProviders.size} providers (${CORPUS_GZ}).`);
-
-// --- STEP 4: exclude burned providers (both name forms) --------------------
-const excludedProviders = new Set();
-for (const p of poolProviders) {
-  if (isBurnedProvider(p)) excludedProviders.add(p);
+const poolRowsRaw = parseCsv(poolCsvText);
+const poolProvidersRaw = new Set(poolRowsRaw.map((r) => r.provider));
+console.log(`\nLoaded pool: ${poolRowsRaw.length} rows from ${poolProvidersRaw.size} providers (${CORPUS_GZ}).`);
+if (poolRowsRaw.length !== 123339 || poolProvidersRaw.size !== 673) {
+  throw new Error(`ESCALATE: expected 123339 pool rows / 673 providers, got ${poolRowsRaw.length} / ${poolProvidersRaw.size}.`);
 }
-let excludedOpCount = 0;
+
+const seenPoolKeys = new Set();
+const poolRows = [];
+let poolDedupeDrops = 0;
+for (const r of poolRowsRaw) {
+  const key = `${r.provider}|${r.method}|${r.path}`;
+  if (seenPoolKeys.has(key)) { poolDedupeDrops += 1; continue; }
+  seenPoolKeys.add(key);
+  poolRows.push(r);
+}
+console.log(`Deduped pool on provider|method|path (keeping first in file order): dropped ${poolDedupeDrops} rows, ${poolRows.length} remain.`);
+
+// --- STEP 4: measure vendor-mapping counts among write providers -----------
+const writeProviders = new Set(
+  poolRows.filter((r) => STRATA[0].methods.has((r.method || '').toUpperCase())).map((r) => r.provider),
+);
+let mapExact = 0, mapRegistrable = 0, mapUnmatched = 0;
+for (const p of writeProviders) {
+  const { matchType } = mapVendorDetailed(p);
+  if (matchType === 'exact') mapExact += 1;
+  else if (matchType === 'registrable') mapRegistrable += 1;
+  else mapUnmatched += 1;
+}
+console.log(`\nWrite-provider mapping: ${writeProviders.size} pool providers with a PUT/DELETE/PATCH row -> ${mapExact} exact, ${mapRegistrable} by registrable name, 0 ambiguous (ambiguous throws), ${mapUnmatched} unmatched.`);
+if (
+  writeProviders.size !== EXPECTED_WRITE_PROVIDERS ||
+  mapExact !== EXPECTED_EXACT ||
+  mapRegistrable !== EXPECTED_REGISTRABLE ||
+  mapUnmatched !== EXPECTED_UNMATCHED
+) {
+  throw new Error(`ESCALATE: write-provider mapping counts changed since the main session's measurement. Expected ${EXPECTED_WRITE_PROVIDERS} providers (${EXPECTED_EXACT} exact / ${EXPECTED_REGISTRABLE} registrable / ${EXPECTED_AMBIGUOUS} ambiguous / ${EXPECTED_UNMATCHED} unmatched), got ${writeProviders.size} (${mapExact} / ${mapRegistrable} / 0 / ${mapUnmatched}).`);
+}
+console.log(`Mapping counts match the main session's measurement. PASS`);
+
+// --- STEP 5: burned-by-vendor sets for stratum W's already-seen check ------
+// vendor key: for corpus rows, row.vendor as-is; for exam1/exam4 rows, the
+// row's provider mapped through mapVendor(), falling back to the raw
+// provider when mapVendor() returns ''.
+const burnedByVendor = new Map(); // vendor -> { pathKeys: Set, opKeys: Set }
+function burnedBucket(vendor) {
+  if (!burnedByVendor.has(vendor)) burnedByVendor.set(vendor, { pathKeys: new Set(), opKeys: new Set() });
+  return burnedByVendor.get(vendor);
+}
+function addBurnedRow(vendor, method, opPath, operationId) {
+  const b = burnedBucket(vendor);
+  b.pathKeys.add(pathKey(method, opPath));
+  if (operationId) b.opKeys.add(opKey(method, operationId));
+}
+for (const r of corpusRows) addBurnedRow(r.vendor, r.method, r.path, r.operationId);
+for (const r of exam1Rows) addBurnedRow(mapVendor(r.provider) || r.provider, r.method, r.path, r.operationId);
+for (const r of exam4Rows) addBurnedRow(mapVendor(r.provider) || r.provider, r.method, r.path, r.operationId);
+console.log(`\nburnedByVendor built: ${burnedByVendor.size} distinct vendor keys from corpus (${corpusRows.length}) + exam1 (${exam1Rows.length}) + exam4 (${exam4Rows.length}) rows.`);
+
+// --- STEP 6: unseen-provider token set for strata POST/GET -----------------
+// Both name forms (raw lowercased, registrable+alias) of exam1/exam4
+// providers only (mapVendor(p) === '' already rules out any match, exact
+// or registrable, against a corpus vendor).
+const examProviderTokens = new Set();
+const examProviderStringsRaw = new Set();
+for (const r of exam1Rows) examProviderStringsRaw.add(r.provider);
+for (const r of exam4Rows) examProviderStringsRaw.add(r.provider);
+for (const p of examProviderStringsRaw) {
+  examProviderTokens.add(p.toLowerCase());
+  examProviderTokens.add(canonicalRegistrableName(p));
+}
+// Non-throwing check for POST/GET eligibility. A provider is UNSEEN only
+// if: (1) its raw lowercased form is not a corpus vendor (lowercased), (2)
+// its registrable name (with alias) matches ZERO corpus vendors — one
+// match or several both mean "seen", no ESCALATE — and (3) it is not an
+// exam 1 / exam 4 provider under either name form. Returns
+// { unseen, ambiguous } so callers can separately count/list providers
+// excluded specifically because they matched more than one corpus vendor.
+const corpusVendorSetLower = new Set(corpusVendors.map((v) => v.toLowerCase()));
+function unseenProviderCheck(p) {
+  if (corpusVendorSetLower.has(p.toLowerCase())) return { unseen: false, ambiguous: false };
+  const reg = canonicalRegistrableName(p);
+  const matches = registrableToVendors.get(reg) || [];
+  if (matches.length >= 1) return { unseen: false, ambiguous: matches.length > 1 };
+  if (examProviderTokens.has(p.toLowerCase())) return { unseen: false, ambiguous: false };
+  if (examProviderTokens.has(reg)) return { unseen: false, ambiguous: false };
+  return { unseen: true, ambiguous: false };
+}
+
+// --- STEP 7: build eligible rows per stratum --------------------------------
+let excludedByA = 0; // same method+path already burned
+let excludedByB = 0; // same method+non-empty-operationId already burned
+
+const eligibleW = [];
 for (const r of poolRows) {
-  if (excludedProviders.has(r.provider)) excludedOpCount += 1;
+  const method = (r.method || '').toUpperCase();
+  if (!STRATA[0].methods.has(method)) continue;
+  if (!r.path) continue;
+  const vendor = mapVendor(r.provider);
+  if (vendor === '') continue; // not a write provider that maps onto the labelled corpus
+  const bucket = burnedByVendor.get(vendor);
+  let matchA = false, matchB = false;
+  if (bucket) {
+    matchA = bucket.pathKeys.has(pathKey(method, r.path));
+    matchB = !!r.operationId && bucket.opKeys.has(opKey(method, r.operationId));
+  }
+  if (matchA) excludedByA += 1;
+  if (matchB) excludedByB += 1;
+  if (matchA || matchB) continue;
+  eligibleW.push({ ...r, method, corpus_vendor: vendor });
 }
-console.log(`\nExcluded ${excludedProviders.size} pool providers (raw or registrable-name match against BURNED_TOKENS), removing ${excludedOpCount} operations.`);
-console.log(`Pool after exclusion: ${poolSizeBefore - excludedOpCount} rows / ${poolProviders.size - excludedProviders.size} providers.`);
+console.log(`\nStratum W eligible: ${eligibleW.length} rows (excluded-as-already-seen: ${excludedByA} by (a) same method+path, ${excludedByB} by (b) same method+operationId; a row can match both).`);
 
-// belt-and-braces row-level exclusion: any surviving-provider row whose
-// exact key is still burned (should be 0 given provider exclusion above).
-let excludedAsBurnedRow = 0;
-const eligibleAll = poolRows.filter((r) => {
-  if (excludedProviders.has(r.provider)) return false;
-  if (!r.path || !r.method) return false;
-  const key = rowKey(r.provider, r.method, r.path, r.operationId);
-  if (BURNED_ROW_KEYS.has(key)) { excludedAsBurnedRow += 1; return false; }
-  return true;
-});
-console.log(`Excluded ${excludedAsBurnedRow} additional rows by exact burned-row-key match (belt-and-braces; expected 0 since burned providers are already wholly excluded above).`);
-console.log(`Eligible pool (all methods, non-empty path/method): ${eligibleAll.length} rows from ${new Set(eligibleAll.map((r) => r.provider)).size} providers.`);
+const eligiblePost = [];
+const eligibleGet = [];
+const ambiguousPostGetProviders = new Set();
+for (const r of poolRows) {
+  const method = (r.method || '').toUpperCase();
+  if (method !== 'POST' && method !== 'GET') continue;
+  if (!r.path) continue;
+  const check = unseenProviderCheck(r.provider);
+  if (check.ambiguous) ambiguousPostGetProviders.add(r.provider);
+  if (!check.unseen) continue;
+  const row = { ...r, method, corpus_vendor: '' };
+  if (method === 'POST') eligiblePost.push(row);
+  else eligibleGet.push(row);
+}
+console.log(`Stratum POST eligible: ${eligiblePost.length} rows from ${new Set(eligiblePost.map((r) => r.provider)).size} unseen providers.`);
+console.log(`Stratum GET eligible: ${eligibleGet.length} rows from ${new Set(eligibleGet.map((r) => r.provider)).size} unseen providers.`);
+console.log(`POST/GET candidate providers excluded for matching MORE THAN ONE corpus vendor (ambiguous registrable name): ${ambiguousPostGetProviders.size} -> ${[...ambiguousPostGetProviders].sort().join(', ') || '(none)'}`);
 
-// --- STEP 5: three stratified draws, one shared PRNG stream ---------------
-const rng = mulberry32(SEED);
+const eligibleByStratum = { W: eligibleW, POST: eligiblePost, GET: eligibleGet };
+
+// --- STEP 8: cap-search draw per stratum ------------------------------------
 const selectedAll = [];
 const strataReport = [];
 
 for (const stratum of STRATA) {
-  const eligible = eligibleAll.filter((r) => stratum.methods.has((r.method || '').toUpperCase()));
+  const eligible = eligibleByStratum[stratum.name];
   if (eligible.length < stratum.target) {
     throw new Error(`ESCALATE: stratum ${stratum.name} has only ${eligible.length} eligible rows, fewer than its ${stratum.target} target.`);
   }
-  const shuffled = seededShuffle(eligible, rng);
 
   let cap = START_CAP;
   let picked = null;
+  let shuffled = null;
   while (picked === null) {
+    const rng = mulberry32(SEED + stratum.index);
+    shuffled = seededShuffle(eligible, rng);
     const perProviderCount = new Map();
     const attempt = [];
     for (const row of shuffled) {
@@ -247,19 +368,19 @@ for (const stratum of STRATA) {
   strataReport.push({
     name: stratum.name,
     target: stratum.target,
-    eligiblePoolSize: eligible.length,
+    eligibleSize: eligible.length,
     eligibleProviders: new Set(eligible.map((r) => r.provider)).size,
     finalCap: cap,
     distinctProviders: new Set(picked.map((r) => r.provider)).size,
   });
-  console.log(`\nStratum ${stratum.name}: target ${stratum.target}, eligible pool ${eligible.length} rows / ${new Set(eligible.map((r) => r.provider)).size} providers, final cap ${cap}, drawn from ${new Set(picked.map((r) => r.provider)).size} distinct providers.`);
+  console.log(`\nStratum ${stratum.name}: target ${stratum.target}, eligible ${eligible.length} rows / ${new Set(eligible.map((r) => r.provider)).size} providers, final cap ${cap}, drawn from ${new Set(picked.map((r) => r.provider)).size} distinct providers.`);
 }
 
 if (selectedAll.length !== TARGET_N) {
   throw new Error(`ESCALATE: expected ${TARGET_N} total drawn rows, got ${selectedAll.length}.`);
 }
 
-// --- STEP 6: combine, sort, assign row_id -----------------------------------
+// --- STEP 9: combine, sort, assign row_id -----------------------------------
 selectedAll.sort((a, b) => {
   if (a.provider !== b.provider) return a.provider.localeCompare(b.provider);
   if (a.method !== b.method) return a.method.localeCompare(b.method);
@@ -268,50 +389,79 @@ selectedAll.sort((a, b) => {
 });
 const withRowId = selectedAll.map((row, i) => ({ row_id: i + 1, ...row }));
 
-// --- STEP 7: assertions ------------------------------------------------------
-// 1. Provider-level, both directions.
-const distinctDrawnProviders = new Set(withRowId.map((r) => r.provider));
-const providerViolations = [];
-for (const p of distinctDrawnProviders) {
-  if (isBurnedProvider(p)) providerViolations.push(`drawn provider "${p}" is burned`);
-}
-for (const b of burnedProviderStringsRaw) {
-  const bLower = b.toLowerCase();
-  const bReg = canonicalRegistrableName(b);
-  for (const p of distinctDrawnProviders) {
-    if (p.toLowerCase() === bLower || canonicalRegistrableName(p) === bReg) {
-      providerViolations.push(`burned provider "${b}" collides with drawn provider "${p}"`);
-    }
-  }
-}
-if (providerViolations.length > 0) {
-  throw new Error(`ESCALATE: ${providerViolations.length} provider-level burn violations, e.g.: ${providerViolations.slice(0, 5).join('; ')}`);
-}
-console.log(`\nAssertion 1 (provider-level, both directions): 0 violations across ${distinctDrawnProviders.size} drawn providers vs ${burnedProviderStringsRaw.size} burned providers. PASS`);
+// --- STEP 10: assertions -----------------------------------------------------
 
-// 2. Row-level.
-const rowViolations = withRowId.filter((r) => BURNED_ROW_KEYS.has(rowKey(r.provider, r.method, r.path, r.operationId)));
-if (rowViolations.length > 0) {
-  throw new Error(`ESCALATE: ${rowViolations.length} drawn rows collide with a burned row key.`);
-}
-console.log(`Assertion 2 (row-level): 0 of ${withRowId.length} drawn rows collide with a burned corpus/exam1/exam4 row key. PASS`);
-
-// 3. Counts.
-const methodCounts = { PUT: 0, DELETE: 0, PATCH: 0, POST: 0, GET: 0 };
+// 1. Counts.
+const strataCounts = { W: 0, POST: 0, GET: 0 };
 for (const r of withRowId) {
   const m = r.method.toUpperCase();
-  if (methodCounts[m] === undefined) throw new Error(`ESCALATE: unexpected method "${m}" in drawn rows.`);
-  methodCounts[m] += 1;
+  if (m === 'PUT' || m === 'DELETE' || m === 'PATCH') strataCounts.W += 1;
+  else if (m === 'POST') strataCounts.POST += 1;
+  else if (m === 'GET') strataCounts.GET += 1;
+  else throw new Error(`ESCALATE: unexpected method "${m}" in drawn rows.`);
 }
-const putDelPatch = methodCounts.PUT + methodCounts.DELETE + methodCounts.PATCH;
-if (withRowId.length !== 2000 || putDelPatch !== 1500 || methodCounts.POST !== 300 || methodCounts.GET !== 200) {
-  throw new Error(`ESCALATE: count mismatch — total ${withRowId.length} (want 2000), PUT+DELETE+PATCH ${putDelPatch} (want 1500), POST ${methodCounts.POST} (want 300), GET ${methodCounts.GET} (want 200).`);
+if (withRowId.length !== 2000 || strataCounts.W !== 1500 || strataCounts.POST !== 300 || strataCounts.GET !== 200) {
+  throw new Error(`ESCALATE: count mismatch — total ${withRowId.length} (want 2000), W ${strataCounts.W} (want 1500), POST ${strataCounts.POST} (want 300), GET ${strataCounts.GET} (want 200).`);
 }
-console.log(`Assertion 3 (counts): 2000 total, PUT+DELETE+PATCH=${putDelPatch}, POST=${methodCounts.POST}, GET=${methodCounts.GET}. PASS`);
-console.log(`Method breakdown: PUT=${methodCounts.PUT}, DELETE=${methodCounts.DELETE}, PATCH=${methodCounts.PATCH}, POST=${methodCounts.POST}, GET=${methodCounts.GET}`);
-console.log(`Distinct providers in final sample: ${distinctDrawnProviders.size}`);
+console.log(`\nAssertion 1 (counts): 2000 total, W=${strataCounts.W}, POST=${strataCounts.POST}, GET=${strataCounts.GET}. PASS`);
 
-// --- STEP 8: write outputs ---------------------------------------------------
+// 2. Every W row has corpus_vendor in the 332 vendors, and is not
+// already-seen by (a) or (b).
+const wRows = withRowId.filter((r) => r.corpus_vendor);
+let wViolations = 0;
+for (const r of wRows) {
+  if (!corpusVendorSet.has(r.corpus_vendor)) { wViolations += 1; continue; }
+  const bucket = burnedByVendor.get(r.corpus_vendor);
+  if (bucket) {
+    const a = bucket.pathKeys.has(pathKey(r.method, r.path));
+    const b = !!r.operationId && bucket.opKeys.has(opKey(r.method, r.operationId));
+    if (a || b) wViolations += 1;
+  }
+}
+if (wRows.length !== 1500 || wViolations > 0) {
+  throw new Error(`ESCALATE: assertion 2 failed — ${wRows.length} W rows have a corpus_vendor (want 1500), ${wViolations} violate the already-seen exclusion.`);
+}
+console.log(`Assertion 2 (W vendor + already-seen): 1500 W rows all carry a valid corpus_vendor, 0 already-seen violations. PASS`);
+
+// 3. Every POST/GET row's provider fails mapVendor and is not an exam1/exam4
+// provider in either name form, both directions.
+const postGetRows = withRowId.filter((r) => r.method === 'POST' || r.method === 'GET');
+let postGetViolations = 0;
+const distinctPostGetProviders = new Set(postGetRows.map((r) => r.provider));
+for (const p of distinctPostGetProviders) {
+  if (mapVendor(p) !== '') { postGetViolations += 1; continue; }
+  const pLower = p.toLowerCase();
+  const pReg = canonicalRegistrableName(p);
+  for (const b of examProviderStringsRaw) {
+    const bLower = b.toLowerCase();
+    const bReg = canonicalRegistrableName(b);
+    if (pLower === bLower || pReg === bReg) { postGetViolations += 1; break; }
+  }
+}
+if (postGetViolations > 0) {
+  throw new Error(`ESCALATE: ${postGetViolations} POST/GET drawn providers collide with a corpus vendor or exam1/exam4 provider.`);
+}
+console.log(`Assertion 3 (POST/GET vendor-disjointness, both directions): 0 violations across ${distinctPostGetProviders.size} distinct providers. PASS`);
+
+// 4. No duplicate provider|method|path within the exam.
+const finalKeys = new Set();
+let dupCount = 0;
+for (const r of withRowId) {
+  const key = `${r.provider}|${r.method}|${r.path}`;
+  if (finalKeys.has(key)) dupCount += 1;
+  finalKeys.add(key);
+}
+if (dupCount > 0) {
+  throw new Error(`ESCALATE: ${dupCount} duplicate provider|method|path rows within the drawn exam.`);
+}
+console.log(`Assertion 4 (no duplicate provider|method|path): 0 duplicates across ${withRowId.length} rows. PASS`);
+
+const methodCounts = { PUT: 0, DELETE: 0, PATCH: 0, POST: 0, GET: 0 };
+for (const r of withRowId) methodCounts[r.method] += 1;
+console.log(`\nMethod breakdown: PUT=${methodCounts.PUT}, DELETE=${methodCounts.DELETE}, PATCH=${methodCounts.PATCH}, POST=${methodCounts.POST}, GET=${methodCounts.GET}`);
+console.log(`Distinct providers in final sample: ${new Set(withRowId.map((r) => r.provider)).size}`);
+
+// --- STEP 11: write outputs ---------------------------------------------------
 mkdirSync(OUT_DIR, { recursive: true });
 
 const blindHeader = ['row_id', 'provider', 'method', 'path', 'operationId', 'summary', 'description'];
@@ -326,14 +476,16 @@ const blindRows = withRowId.map((r) => ({
 }));
 writeFileSync(path.join(OUT_DIR, 'exam-blind.csv'), toCsv(blindRows, blindHeader), 'utf8');
 
-const keyHeader = ['row_id', 'provider', 'api_key', 'method', 'path', 'operationId'];
+const keyHeader = ['row_id', 'provider', 'corpus_vendor', 'api_key', 'method', 'path', 'operationId', 'stratum'];
 const keyRows = withRowId.map((r) => ({
   row_id: r.row_id,
   provider: r.provider,
+  corpus_vendor: r.corpus_vendor,
   api_key: r.api_key,
   method: r.method,
   path: r.path,
   operationId: r.operationId,
+  stratum: r.corpus_vendor ? 'W' : (r.method === 'POST' ? 'POST' : 'GET'),
 }));
 writeFileSync(path.join(OUT_DIR, 'exam-key.csv'), toCsv(keyRows, keyHeader), 'utf8');
 
@@ -360,45 +512,66 @@ const hasClassCol = (cols) => cols.some((c) => /class/i.test(c));
 console.log(`\nexam-blind.csv columns: ${blindCols.join(',')} — class column present: ${hasClassCol(blindCols)}`);
 console.log(`exam-key.csv columns: ${keyCols.join(',')} — class column present: ${hasClassCol(keyCols)}`);
 
-// --- STEP 9: README.md --------------------------------------------------------
+// --- STEP 12: README.md --------------------------------------------------------
+const distinctW = new Set(wRows.map((r) => r.provider)).size;
+const distinctPost = new Set(strataReport.find((s) => s.name === 'POST') ? withRowId.filter((r) => r.method === 'POST').map((r) => r.provider) : []).size;
+const distinctGet = new Set(withRowId.filter((r) => r.method === 'GET').map((r) => r.provider)).size;
+
 const readmeLines = [
-  '# data/exam5-2026-09-14 — exam 5 (first clean exam)',
+  '# data/exam5-2026-09-14 — exam 5',
   '',
   'Drawn 2026-09-14, seed 20260914, by `poc/exam/make-exam5.mjs`, from',
-  '`data/corpus/apis-guru-ops.csv.gz` (123339 pool operations).',
+  `\`data/corpus/apis-guru-ops.csv.gz\` (${poolRowsRaw.length} pool rows / ${poolProvidersRaw.size} providers, deduped on`,
+  `provider|method|path to ${poolRows.length} rows, dropping ${poolDedupeDrops}).`,
   '',
-  'This is the first exam drawn with a corrected provider-exclusion rule.',
-  'Exam 4 (`data/exam4-2026-09-12/`) was meant to exclude every already-',
-  'labelled provider but compared registrable names ("ably") against raw',
-  'vendor tokens ("ably.net") and so excluded almost nothing — discovered',
-  '2026-09-14 (see `docs/logs/learnings.md`). Exam 5 excludes any pool',
-  'provider whose raw string, raw string lowercased, registrable name, or',
-  'aliased registrable name matches a burned token, and checks the',
-  'reverse direction too (every burned provider against every drawn',
-  'provider, both name forms). Burned providers are the union of:',
-  `  - the labelled corpus: ${corpusVendors.length} vendors from poc/flow/corpus.mjs loadRows() (${corpusRows.length} rows)`,
-  `  - exam 1: ${new Set(exam1Rows.map((r) => r.provider)).size} providers from data/exam-2026-09-09/exam-blind.csv (${exam1Rows.length} rows)`,
-  `  - exam 4: ${new Set(exam4Rows.map((r) => r.provider)).size} providers from data/exam4-2026-09-12/exam-blind.csv (${exam4Rows.length} rows)`,
+  '## What exam 5 is',
   '',
-  'Row-level and provider-level zero-intersection are asserted in the',
-  'script itself (it throws an ESCALATE error and produces no output if',
-  'either check fails) — see the run numbers below.',
+  'Exam 5 has three strata: W (writes: PUT/DELETE/PATCH, 1500 rows), POST',
+  '(300 rows), and GET (200 rows).',
+  '',
+  'Stratum W is ROW-disjoint, not vendor-disjoint, because the APIs.guru',
+  `pool has no unseen write vendors: only ${writeProviders.size} pool providers have any`,
+  `write row at all, and ${mapExact + mapRegistrable} of those (${mapExact} by exact provider string, ${mapRegistrable} by`,
+  `registrable name) already map onto one of the 332 labelled-corpus write`,
+  `vendors, leaving only ${mapUnmatched} truly unseen write providers — far short of`,
+  '1500 rows. See `docs/logs/learnings.md`, "Exam 5 draw: the APIs.guru',
+  'pool has no unseen write vendors", for the full measurement. Every',
+  'drawn W row\'s provider maps onto a labelled-corpus write vendor',
+  '(recorded as `corpus_vendor`), but the exact row (matched by method+path',
+  'or method+operationId) is excluded if the corpus, exam 1, or exam 4',
+  'already has it. It is scored with the flow\'s leave-one-vendor-out lists',
+  'keyed on `corpus_vendor`, so a row\'s own vendor never feeds the mined',
+  'lists — but the hand lists were shaped on that vendor\'s OTHER rows,',
+  'which is the stated weakness of this stratum.',
+  '',
+  'Strata POST and GET are vendor-disjoint: every drawn row\'s provider',
+  'fails `mapVendor` (does not match any of the 332 labelled-corpus',
+  'vendors, exact or by registrable name) and is not an exam 1 or exam 4',
+  'provider under either name form, checked in both directions.',
   '',
   '## Run numbers (from the actual run that produced this directory)',
   '',
-  `- Pool size: ${poolSizeBefore} operations from ${poolProviders.size} providers.`,
-  `- BURNED_TOKENS: ${burnedProviderStringsRaw.size} raw provider strings -> ${BURNED_TOKENS.size} distinct raw+registrable lowercase tokens.`,
-  `- Excluded pool providers: ${excludedProviders.size} (removing ${excludedOpCount} operations).`,
-  `- Pool after provider exclusion: ${poolSizeBefore - excludedOpCount} rows / ${poolProviders.size - excludedProviders.size} providers.`,
-  `- Belt-and-braces row-key exclusions on top of that: ${excludedAsBurnedRow} (expected 0).`,
-  `- Eligible pool (all methods): ${eligibleAll.length} rows from ${new Set(eligibleAll.map((r) => r.provider)).size} providers.`,
+  `- Pool: ${poolRowsRaw.length} rows / ${poolProvidersRaw.size} providers; deduped on provider|method|path`,
+  `  -> ${poolDedupeDrops} dropped, ${poolRows.length} remain.`,
+  `- Write-provider mapping (providers with any PUT/DELETE/PATCH row):`,
+  `  ${writeProviders.size} total -> ${mapExact} exact, ${mapRegistrable} by registrable name, 0 ambiguous,`,
+  `  ${mapUnmatched} unmatched.`,
+  `- Stratum W eligible rows: ${eligibleW.length} (excluded as already-seen: ${excludedByA} by`,
+  `  (a) same method+path, ${excludedByB} by (b) same method+operationId; a row`,
+  '  can match both, so these are not additive).',
+  `- Stratum POST eligible rows: ${eligiblePost.length} from ${new Set(eligiblePost.map((r) => r.provider)).size} unseen providers.`,
+  `- Stratum GET eligible rows: ${eligibleGet.length} from ${new Set(eligibleGet.map((r) => r.provider)).size} unseen providers.`,
+  `- POST/GET candidate providers excluded for matching MORE THAN ONE corpus`,
+  `  vendor by registrable name (ambiguous; not thrown, just excluded from`,
+  `  the unseen pool per the user's ruling 2026-09-14): ${ambiguousPostGetProviders.size}`,
+  `  (${[...ambiguousPostGetProviders].sort().join(', ') || 'none'}).`,
   '',
-  '| Stratum | Target | Eligible pool (rows/providers) | Final per-provider cap |',
-  '|---|---|---|---|',
-  ...strataReport.map((s) => `| ${s.name} | ${s.target} | ${s.eligiblePoolSize} / ${s.eligibleProviders} | ${s.finalCap} |`),
+  '| Stratum | Target | Eligible rows / providers | Final per-provider cap | Distinct providers drawn |',
+  '|---|---|---|---|---|',
+  ...strataReport.map((s) => `| ${s.name} | ${s.target} | ${s.eligibleSize} / ${s.eligibleProviders} | ${s.finalCap} | ${s.distinctProviders} |`),
   '',
-  `- Distinct providers drawn into the final 2000-row sample: ${distinctDrawnProviders.size}.`,
-  `- Method split: PUT=${methodCounts.PUT}, DELETE=${methodCounts.DELETE}, PATCH=${methodCounts.PATCH}, POST=${methodCounts.POST}, GET=${methodCounts.GET}.`,
+  `- Method split within W: PUT=${methodCounts.PUT}, DELETE=${methodCounts.DELETE}, PATCH=${methodCounts.PATCH}.`,
+  `- Distinct providers in the final 2000-row sample: ${new Set(withRowId.map((r) => r.provider)).size} (W ${distinctW}, POST ${distinctPost}, GET ${distinctGet}).`,
   '',
   '## Reproduce',
   '',
@@ -411,14 +584,18 @@ const readmeLines = [
   '',
   '## Labelling',
   '',
-  'Use the calibrated brief at `data/calibration-2026-09-14/BRIEF.md`.',
+  'Use the calibrated, adopted brief at',
+  '`data/calibration-2026-09-14/BRIEF.md` (adopted 2026-09-14).',
   '',
   '## Files',
   '',
   '- `exam-blind.csv` — all 2000 rows (row_id, provider, method, path,',
-  '  operationId, summary, description). No class column.',
-  '- `exam-key.csv` — row_id, provider, api_key, method, path, operationId',
-  '  (for joining back to the pool after labelling; no class column).',
+  '  operationId, summary, description). No stratum, no corpus_vendor, no',
+  '  class column.',
+  '- `exam-key.csv` — row_id, provider, corpus_vendor, api_key, method,',
+  '  path, operationId, stratum (for joining back to the pool and for',
+  '  LOVO scoring after labelling; no class column). `corpus_vendor` and',
+  '  `stratum` are empty/`POST`/`GET` for the POST and GET strata.',
   '- `exam-blind-part1.csv` .. `exam-blind-part10.csv` — 200 rows each, in',
   '  row_id order, same header as `exam-blind.csv`, for parallel blind',
   '  labellers.',
