@@ -36,6 +36,33 @@ three steps. Each step takes the rows the step before left behind.
    claim. Step 2 gives a w row up (a live verb or a not-yours noun
    fires) and it lands here.
 
+**The build, step by step, in plain words (the user's ruling
+2026-09-14: keep it all as is, this is the best measured shape).**
+
+1. **Step 1, r.** GET is r. POST with a read verb is r. Unchanged.
+2. **Step 2, w.** PUT / DELETE / PATCH start at w. Then, in order,
+   the first hit decides:
+   - a live verb (send, cancel, pay) → give up, x.
+   - a 3p noun → give up, x.
+   - every noun yours → keep, w, marked "evidence".
+   - none of the above → keep, w, marked "no evidence". This is the
+     1972-row pile, and it is the leaks marker: 175 of step 2's 211
+     leaks sit in it.
+3. **Step 3, x.** Only what step 2 gave up. No rules.
+4. **Output.** One CSV, all 5465 rows: the step that claimed the row,
+   class, flag, truth, verdict.
+5. **Ledger pins.** Step 1: 49 over-tight / 0 leaks. Step 2: 803 false
+   alarms / 211 leaks, with 175 of the 211 in the flagged pile. Whole
+   flow: exact 78.4%, leaks 4.2%, over-tight 17.5%.
+
+The four checks in step 2 run one after another, each on what the
+one before left. Dropping the 3p check sends its 1034 rows to the
+no-evidence pile: 82 false alarms / 524 leaks. Dropping the
+no-evidence flag changes no count; it only hides the 175 leaks among
+2973 confident w rows instead of a 1972-row pile. Sending the
+no-evidence pile to x instead (shape A) doubles the x pile to 3572
+rows, 2645 of them safe writes, for 37 leaks.
+
 **Step 2 in order (measured 2026-09-13, the chosen shape B plus a flag).**
 A PUT / DELETE / PATCH row is checked in this order; the first hit
 decides and the rest are not consulted:
