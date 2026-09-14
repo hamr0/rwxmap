@@ -1,5 +1,17 @@
 # exam4-2026-09-12
 
+**WARNING (2026-09-14):** this set is NOT a virgin draw. 316 of its 318
+providers (all but apidapp.com and openlinksw.com) and 2702 of its 4000
+rows are the same corpus operations as exams 2 and 3 (593 from exam 2,
+2109 from exam 3), plus 1298 more rows from the same burned providers.
+Cause: the exclusion script compared registrable provider names against
+raw corpus vendor tokens, which never matched for the full-string tokens
+exams 2/3 use, so its own "intersection must be 0" self-check passed
+while comparing the wrong things. Any scoring or truth-drift finding
+made against this set before 2026-09-14 is void as a generalisation
+number. See `docs/logs/learnings.md`, "Exam 4 was never virgin; frozen
+shape scored, per-set stability measured (2026-09-14)".
+
 Fourth virgin blind exam, drawn 2026-09-10. Set name (`exam4-2026-09-12`)
 follows the exams 1-3 naming convention and is not the draw date.
 

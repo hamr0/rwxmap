@@ -63,10 +63,10 @@ normative anywhere; not a standards track; not a conformance harness.
 of vendor APIs and four blind-drawn exams — labelled by blind LLM
 reading, scored leave-one-vendor-out (LOVO): every vendor's rows are
 scored by rules built from every other vendor's rows, never their own.
-This is a tuning corpus, not exam-checked; exams 1-4 are burned —
-exams 1-3 were used to tune, and exam 4's truth drifted because its
-labelling brief was lost — so none is a clean exam (see
-`docs/logs/learnings.md`, M1-C25).
+This is a tuning corpus, not exam-checked; exams 1-3 were used to tune,
+and exam 4 was found (2026-09-14) to be drawn from already-burned
+providers, not a virgin set — so no clean exam exists (see
+`docs/logs/learnings.md`, M1-C25 and "Exam 4 was never virgin").
 
 Current per-step numbers (5465 rows, LOVO):
 
@@ -99,8 +99,9 @@ report in `run-proof/`), `node --test poc/flow/*.test.mjs` (the pins).
   brief — so the scores measure agreement with that reading process,
   not with a human expert or with any standard.
 - This is a tuning-corpus number under LOVO, not a clean-exam number.
-  Exams 1-4 are burned — exams 1-3 were used to tune, and exam 4's
-  truth drifted because its labelling brief was lost (`docs/logs/learnings.md`, M1-C25).
+  Exams 1-3 were used to tune, and exam 4 was found (2026-09-14) to be
+  drawn from already-burned providers, not a virgin set — so no clean
+  exam exists (`docs/logs/learnings.md`, M1-C25 and "Exam 4 was never virgin").
 - CAMARA's GET half was judged by template, not operation by
   operation.
 - The 57-of-138 read-named-POST figure (`docs/product/prd.md`) is a

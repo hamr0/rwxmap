@@ -159,8 +159,10 @@ w, 646 r.
 Run: `node poc/flow/proof.mjs` (one CSV + one markdown report, exits 1
 if a pin moves); `node --test poc/flow/*.test.mjs` (the pins).
 
-Known limits: this is a tuning-corpus number under LOVO; exams 1-4 are
-burned, none is a clean exam; this is a POC, never shipped as one; the
+Known limits: this is a tuning-corpus number under LOVO; exams 1-3 were
+used to tune and exam 4 was found (2026-09-14) to be drawn from
+already-burned providers, not a virgin set, so no clean exam exists
+(`docs/logs/learnings.md`, "Exam 4 was never virgin"); this is a POC, never shipped as one; the
 x-pile flag is reported in the CSV, not yet wired to any consumer;
 poc/m1 is archived at poc/archive/m1/ (D65).
 
