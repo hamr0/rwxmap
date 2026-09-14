@@ -1,10 +1,10 @@
-// Word/token helpers for poc/flow — copied from poc/m1/arbiter/arbiter.mjs,
-// poc/m1/arbiter/judge.mjs, poc/m1/step3/allowlist.mjs and
-// poc/m1/core/core.mjs (withSplitOperationId), reproducing the same
+// Word/token helpers for poc/flow — copied from poc/archive/m1/arbiter/arbiter.mjs,
+// poc/archive/m1/arbiter/judge.mjs, poc/archive/m1/step3/allowlist.mjs and
+// poc/archive/m1/core/core.mjs (withSplitOperationId), reproducing the same
 // behaviour except where marked (*) as a deliberate change. Imports nothing
 // from poc/m1 or poc/m0.
 
-// withSplitOperationId(row) — from poc/m1/core/core.mjs. arbiter.mjs's own
+// withSplitOperationId(row) — from poc/archive/m1/core/core.mjs. arbiter.mjs's own
 // splitTokens only splits on '_ - .' and camelCase, so an operationId like
 // 'gists/unstar' or 'delete team member' stays one token. This is the one
 // place the '/' + whitespace split lives: trim, then collapse every run of
@@ -238,7 +238,7 @@ export function operationIdHeadNoun(row) {
   return naiveSingular(operationIdHeadNounRaw(row));
 }
 
-// --- isJunkToken (poc/m1/step3/allowlist.mjs 20-24) -------------------------
+// --- isJunkToken (poc/archive/m1/step3/allowlist.mjs 20-24) -------------------------
 
 // Tokens that are never nouns: path placeholders ({id}, {app), version tags
 // (v1, 10) and filler words.
@@ -249,7 +249,7 @@ export function isJunkToken(w) {
 }
 
 // --- buildJunkSet — replaces c19's buildNounTable + c20's cleanNounTable
-// (poc/m1/arbiter/c19.mjs 191-208, c20.mjs 55-120) ---------------------------
+// (poc/archive/m1/arbiter/c19.mjs 191-208, c20.mjs 55-120) ---------------------------
 //
 // c20's own stopword list (STOPWORDS in c20.mjs), copied verbatim — a
 // stem-artifact check needs the SAME allCount table c20 built from
@@ -305,11 +305,11 @@ export function buildJunkSet(rows) {
   return junkSet;
 }
 
-// --- nounsForRow (poc/m1/step3/allowlist.mjs 30-43) -------------------------
+// --- nounsForRow (poc/archive/m1/step3/allowlist.mjs 30-43) -------------------------
 //
 // Same as the original, but the verb stems to skip are passed in as one Set
 // (today it checks LIVE_VERBS and NON_NOUN_READ_VERBS from
-// poc/m1/step3/lists.mjs separately; the caller here passes their union).
+// poc/archive/m1/step3/lists.mjs separately; the caller here passes their union).
 export function nounsForRow(row, junkSet, verbStems) {
   const splitRow = withSplitOperationId(row);
   const out = new Set();

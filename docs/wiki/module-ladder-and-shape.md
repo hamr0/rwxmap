@@ -115,7 +115,9 @@ Combined with the original six sets the labelled corpus reaches 5465
 rows across 332 providers. Canonical file for the original six:
 data/corpus/labelled.csv (D45). (docs/archive/prd.md:219-233)
 
-## M1 arbiter shape (current, C15, D42-D44)
+## M1 arbiter shape (superseded 2026-09-14, D65, C15, D42-D44)
+
+The current shape is docs/product/prd.md "The build, step by step", code poc/flow/.
 
 Floor per method = that method's own measured truth lean, a starting
 value, never an early return: (docs/archive/prd.md:237-238)

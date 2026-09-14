@@ -1,4 +1,4 @@
-// floorFor / classifyFloor — copied from poc/m1/core/core.mjs. The
+// floorFor / classifyFloor — copied from poc/archive/m1/core/core.mjs. The
 // operationId splitter (withSplitOperationId) moved to words.mjs instead.
 
 // One table, one place. GET/HEAD/OPTIONS -> r, POST -> x, PUT/DELETE/PATCH -> w.

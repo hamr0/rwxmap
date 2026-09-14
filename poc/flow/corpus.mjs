@@ -1,7 +1,7 @@
 // The combined corpus loader for poc/flow — reproduces, row-for-row and
-// field-for-field, poc/m1/core/corpus.mjs's loadContext() (which calls
-// loadCombinedCorpus() in poc/m1/arbiter/c19.mjs lines 40-162, which in
-// turn uses poc/m1/arbiter/load-sets.mjs). Imports nothing from poc/m1 or
+// field-for-field, poc/archive/m1/core/corpus.mjs's loadContext() (which calls
+// loadCombinedCorpus() in poc/archive/m1/arbiter/c19.mjs lines 40-162, which in
+// turn uses poc/archive/m1/arbiter/load-sets.mjs). Imports nothing from poc/m1 or
 // poc/m0 — this file is the fresh bottom layer for poc/flow.
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';

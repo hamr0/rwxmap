@@ -1,5 +1,5 @@
 // Step 1, r: every GET/HEAD/OPTIONS row is r; a POST whose lead verb is a
-// read verb is r. Literal copy of poc/m1/step1/lists.mjs's READ_VERBS
+// read verb is r. Literal copy of poc/archive/m1/step1/lists.mjs's READ_VERBS
 // (step1.test.mjs asserts this copy stays equal). Imports nothing from
 // poc/m1 or poc/m0.
 import { leadVerbForRow, matchesAnyStem } from './words.mjs';

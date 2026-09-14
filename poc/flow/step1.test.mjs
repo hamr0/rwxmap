@@ -32,7 +32,7 @@ test('applyStep1: PUT -> null', () => {
   assert.equal(res, null);
 });
 
-test('READ_VERBS: literal copy of poc/m1/step1/lists.mjs (14 words)', () => {
+test('READ_VERBS: literal copy of poc/archive/m1/step1/lists.mjs (14 words)', () => {
   const expected = new Set([
     'retrieve', 'verify', 'check', 'query', 'read', 'fetch', 'list', 'search',
     'match', 'count', 'lookup', 'assess', 'find', 'get',

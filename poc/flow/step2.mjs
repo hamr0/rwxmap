@@ -6,7 +6,7 @@
 // lists (D57).
 import { tokensForRow, matchesAnyStem, summaryVerb, callerPhraseInText, buildJunkSet, nounsForRow } from './words.mjs';
 
-// LIVE_VERBS (26): literal copy of poc/m1/step2/lists.mjs's LIVE_VERBS
+// LIVE_VERBS (26): literal copy of poc/archive/m1/step2/lists.mjs's LIVE_VERBS
 // (itself a copy of step 3's list, D57 — never import another step's
 // list, only copy it).
 export const LIVE_VERBS = new Set([
@@ -16,7 +16,7 @@ export const LIVE_VERBS = new Set([
   'terminate', 'transfer', 'trigger',
 ]);
 
-// NON_NOUN_READ_VERBS (14): literal copy of poc/m1/step3/lists.mjs's
+// NON_NOUN_READ_VERBS (14): literal copy of poc/archive/m1/step3/lists.mjs's
 // NON_NOUN_READ_VERBS (the same 14 as step1's READ_VERBS; each step keeps
 // its own copy). Used only to keep verb tokens out of the noun reader,
 // never as a rule step 2 applies on its own.
