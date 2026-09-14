@@ -73,11 +73,11 @@ Current per-step numbers (5465 rows, LOVO):
 | step | error | count |
 |---|---|---|
 | step 1 (r) | over-tight | 49 over-tight / 0 leaks |
-| step 2 (w) | false alarms / leaks | 803 false alarms / 211 leaks, 179 of them in the 1998-row x-pile |
+| step 2 (w) | false alarms / leaks | 805 false alarms / 187 leaks, 155 of them in the 1972-row x-pile |
 | step 3 (x) | no rules (POST leftovers and what step 2 gave up) | — |
 | GET floor | leaks | 17, parked |
 
-Whole flow: exact 78.4%, leaks 4.2%, over-tight 17.5%.
+Whole flow: exact 78.8%, leaks 3.7%, over-tight 17.5%.
 
 A leak is a wrong loosening — a robot takes an action it should not
 have. A false alarm (over-tighten) is a usability cost — a human

@@ -44,64 +44,80 @@ three steps. Each step takes the rows the step before left behind.
    the first hit decides:
    - a live verb (send, cancel, pay) → give up, x.
    - a 3p noun → give up, x.
+   - a money noun (payment) → give up, x.
    - every noun yours → keep, w, marked "evidence".
    - none of the above → keep, w, marked "x-pile" (no evidence fired).
-     This is the 1998-row pile, and it is the leaks marker: 179 of
-     step 2's 211 leaks sit in it.
+     This is the 1972-row pile, and it is the leaks marker: 155 of
+     step 2's 187 leaks sit in it.
 3. **Step 3, x.** Only what step 2 gave up. No rules.
 4. **Output.** One CSV, all 5465 rows: the step that claimed the row,
    class, flag, truth, verdict.
-5. **Ledger pins.** Step 1: 49 over-tight / 0 leaks. Step 2: 803 false
-   alarms / 211 leaks, with 179 of the 211 in the x-pile (1998 rows).
-   Whole flow: exact 78.4%, leaks 4.2%, over-tight 17.5%.
+5. **Ledger pins.** Step 1: 49 over-tight / 0 leaks. Step 2: 805 false
+   alarms / 187 leaks, with 155 of the 187 in the x-pile (1972 rows).
+   Whole flow: exact 78.8%, leaks 3.7%, over-tight 17.5%.
 
 The four checks in step 2 run one after another, each on what the
 one before left. Dropping the 3p check sends its 1034 rows to the
 x-pile: 82 false alarms / 524 leaks. Dropping the x-pile flag
-changes no count; it only hides the 179 leaks among 3209 w rows
-instead of a 1998-row pile. Sending the x-pile to x instead (shape A)
+changes no count; it only hides the 155 leaks among 3183 w rows
+instead of a 1972-row pile. Sending the x-pile to x instead (shape A)
 doubles the x pile to 3572 rows, 2645 of them safe writes, for 37
 leaks.
 
-**Step 2 in order (measured 2026-09-13, the chosen shape B plus a flag).**
+**Step 2 in order (measured 2026-09-13, the chosen shape B plus a flag;
+the money-noun raiser added 2026-09-14, D66).**
 A PUT / DELETE / PATCH row is checked in this order; the first hit
 decides and the rest are not consulted:
 
 - a. a live verb (send, cancel, pay, ...) → give up, x.
 - b. a someone-else's noun (the mined 3p blocklist) → give up, x.
+- b2. a money noun (payment) → give up, x.
 - c. every noun on the yours list → keep, w, flagged "evidence".
 - d. none of the above → keep, w, flagged "x-pile".
 
-Both noun lists are mined, not hand-written, so each has a bar: a
-noun is "yours" when it was seen on 2+ other-vendor rows over write
-rows (every method but GET/HEAD/OPTIONS) and was safe 80%+ of the
-time — GET is truth r no matter whose thing it touches, so it carries
-no yours signal and only dilutes the w-share; it is "someone else's"
-when 2+ other vendors used it over PUT/DELETE/PATCH rows and it was
-dangerous 30%+ of the time. A noun that meets neither bar is on no
-list, and its row lands in d. On the 4406 PUT / DELETE / PATCH rows:
+Both mined noun lists have a bar: a noun is "yours" when it was seen
+on 2+ other-vendor rows over write rows (every method but
+GET/HEAD/OPTIONS) and was safe 80%+ of the time — GET is truth r no
+matter whose thing it touches, so it carries no yours signal and only
+dilutes the w-share; it is "someone else's" when 2+ other vendors used
+it over PUT/DELETE/PATCH rows and it was dangerous 30%+ of the time. A
+noun that meets neither bar is on no mined list, and its row lands in
+d unless it is on the hand-picked money-noun list (payment). Step 2
+group table on the 4406 PUT/DELETE/PATCH rows:
 
 | group | rows | truly w | truly x |
 |---|---|---|---|
-| a. live verb → x | 163 | 82 | 81 |
-| b. 3p noun → x | 1034 | 721 | 313 |
+| a. live verb → x | 184 | 84 | 100 |
+| b. other-party or money noun → x | 1039 | 721 | 318 |
 | c. every noun yours → w | 1211 | 1176 | 32 |
-| d. neither → w, x-pile | 1998 | 1797 | 179 |
+| d. neither → w, x-pile | 1972 | 1795 | 155 |
 
-Why a row lands in d: the reasons were measured on the earlier
-1972-row pile (learnings, 2026-09-13) and have not yet been
-re-measured on this one. Group d is 90% safe and holds 179 of step
-2's 211 leaks; it is the pile a human or a per-API hint sorts later
-(D44), not a list problem.
+Of group b's 1039 rows, 5 are money-noun rows (rule money-noun),
+all truth x.
+
+Why a row lands in d, measured on this 1972-row pile:
+
+| reason | rows | truly x | what it means |
+|---|---|---|---|
+| between bars | 1046 | 104 | the noun had enough other-vendor rows but its w-share fell short of 0.8 |
+| too few rows | 240 | 16 | fewer than 2 other-vendor write rows carried the noun |
+| vendor-only | 670 | 35 | no other vendor ever wrote the noun on a write row |
+| no noun | 16 | 0 | the row carries no noun at all |
+
+Group d is 91% safe and holds 155 of step 2's 187 leaks; it is the
+pile a human or a per-API hint sorts later (D44), not a list problem.
 
 Sequential beats joint. Letting a yours noun override a live verb
 (live + all-yours → w) gives 772 false alarms / 221 leaks against
-803 / 211 sequential: 31 freed for 10 leaks, under the 10-for-1 curve.
-Letting "no 3p noun" override a live verb: 738 / 260. The yours-beats-3p
-candidate (762 / 212) is parked, to be re-measured.
+803 / 211 sequential (pre-money-noun baseline): 31 freed for 10 leaks,
+under the 10-for-1 curve. Letting "no 3p noun" override a live verb:
+738 / 260. The yours-beats-3p candidate (762 / 212) is parked, to be
+re-measured. A hand raiser is admitted only above that same 10-for-1
+line and only after a logged measurement — "confirm" and "payment"
+together closed 24 leaks for 2 false alarms, 12 per 1 (D66).
 
-Step 2's ledger on this shape: 803 false alarms / 211 leaks. Whole
-flow on all 5465 rows: exact 78.4%, leaks 4.2%, over-tight 17.5%.
+Step 2's ledger on this shape: 805 false alarms / 187 leaks. Whole
+flow on all 5465 rows: exact 78.8%, leaks 3.7%, over-tight 17.5%.
 The alternative (d → x, the yours-list-only shape A) is 37 leaks /
 2645 false alarms, exact 49.7%; rejected by the user 2026-09-13.
 
@@ -131,8 +147,8 @@ w, 646 r.
 | step | error | count | note |
 |---|---|---|---|
 | step 1 (r) | over-tight | 49 | 0 leaks |
-| step 2 (w) | false alarms / leaks | 803 / 211 | 179 of the 211 leaks sit in the 1998-row x-pile |
-| step 3 (x) | no rules, no ledger of its own | — | its errors are step 2's 211 leaks and POST's 127 over-tight |
+| step 2 (w) | false alarms / leaks | 805 / 187 | 155 of the 187 leaks sit in the 1972-row x-pile |
+| step 3 (x) | no rules, no ledger of its own | — | its errors are step 2's 187 leaks and POST's 127 over-tight |
 | GET floor | leaks | 17 | parked, D59, charged to the floor |
 
 ### Where the code lives (poc/flow)
@@ -179,7 +195,7 @@ M1, the informed arbiter, is a POC and has not graduated. The full
 module ladder, the M1 go/no-go gate, the labelled sets and the current
 arbiter shape with its scores live in
 [module ladder and arbiter shape](../wiki/module-ladder-and-shape.md).
-Decisions D1-D65 are in [the decisions log](../wiki/decisions-log.md).
+Decisions D1-D66 are in [the decisions log](../wiki/decisions-log.md).
 M0 is closed; its gate statement and results are in
 [go/no-go gate and M0 results](../logs/gate-and-m0-results.md). Notes
 carried from the original outline are in
