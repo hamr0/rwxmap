@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { classifyRow, scoreRows, buildContext } from './flow.mjs';
 import { loadRows } from './corpus.mjs';
+import { pinDiffs } from './ledger.mjs';
 
 test('classifyRow: GET -> r via step 1', () => {
   const res = classifyRow({ method: 'GET', operationId: 'listThings', path: '/things' }, {});
@@ -36,29 +37,7 @@ test('corpus integration: pins over all 5465 rows', () => {
   const ctx = buildContext(rows, vendors);
   const ledger = scoreRows(rows, ctx);
 
-  assert.equal(ledger.step1.overTight, 49);
-  assert.equal(ledger.step1.leaks, 0);
-  assert.equal(ledger.floorGet.leaks, 17);
-
-  assert.equal(ledger.step2.falseAlarms, 803);
-  assert.equal(ledger.step2.leaks, 211);
-  assert.equal(ledger.step2.xPile.rows, 2441);
-  assert.equal(ledger.step2.xPile.leaks, 192);
-
-  assert.equal(ledger.exact, 4282);
-  assert.equal(ledger.leaks, 228);
-  assert.equal(ledger.overTight, 955);
-
-  assert.equal(ledger.byMethod.GET.leaks, 17);
-  assert.equal(ledger.byMethod.GET.overTight, 0);
-  assert.equal(ledger.byMethod.POST.leaks, 0);
-  assert.equal(ledger.byMethod.POST.overTight, 127);
-  assert.equal(ledger.byMethod.PUT.leaks, 93);
-  assert.equal(ledger.byMethod.PUT.overTight, 305);
-  assert.equal(ledger.byMethod.DELETE.leaks, 76);
-  assert.equal(ledger.byMethod.DELETE.overTight, 424);
-  assert.equal(ledger.byMethod.PATCH.leaks, 42);
-  assert.equal(ledger.byMethod.PATCH.overTight, 99);
+  assert.deepEqual(pinDiffs(ledger, rows.length, vendors.length), []);
 });
 
 test('negative controls: both come out x', () => {
