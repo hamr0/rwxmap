@@ -129,3 +129,18 @@ test('buildStep2Context: yours mining excludes GET/HEAD/OPTIONS rows', () => {
   const ctx = buildStep2Context(SYN_ROWS, SYN_VENDORS);
   assert.ok(ctx.yoursFor('A').has('gizmo'), 'gizmo should be admitted as yours for A once the B GET row is excluded');
 });
+
+test('buildStep2Context: yoursStatFor excludes the given vendor\'s own rows', () => {
+  const ctx = buildStep2Context(SYN_ROWS, SYN_VENDORS);
+  // profile: excluding A, B+C+D each contribute one w row -> n=3, w=3.
+  assert.deepEqual(ctx.yoursStatFor('A', 'profile'), { n: 3, w: 3 });
+  // widget: excluding A, B+C contribute one x row each -> n=2, w=0.
+  assert.deepEqual(ctx.yoursStatFor('A', 'widget'), { n: 2, w: 0 });
+  // gadget: A's only own row, no other vendor ever wrote it -> {n:0,w:0}.
+  assert.deepEqual(ctx.yoursStatFor('A', 'gadget'), { n: 0, w: 0 });
+});
+
+test('buildStep2Context: yoursStatFor gives {n:0,w:0} for an unseen noun', () => {
+  const ctx = buildStep2Context(SYN_ROWS, SYN_VENDORS);
+  assert.deepEqual(ctx.yoursStatFor('A', 'nonexistent'), { n: 0, w: 0 });
+});

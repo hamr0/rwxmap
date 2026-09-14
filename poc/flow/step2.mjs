@@ -114,7 +114,20 @@ export function buildStep2Context(rows, vendors) {
     return yoursByVendor.get(vendor) || new Set();
   }
 
-  return { junkSet, nounsOf, otherNounsFor, yoursFor };
+  // yoursStatFor(vendor, noun): { n, w } of the OTHER vendors' write rows
+  // carrying this noun (n = w+x+r of the rest, w = w of the rest), the same
+  // population yoursFor's admission bar is measured against -- exposed so
+  // the proof can say why a noun did or didn't clear that bar. { n: 0, w: 0 }
+  // when the noun was never seen on a write row at all.
+  function yoursStatFor(vendor, noun) {
+    const t = yoursStat.get(noun);
+    if (!t) return { n: 0, w: 0 };
+    const own = t.byVendor.get(vendor) || { w: 0, x: 0, r: 0 };
+    const w = t.w - own.w, x = t.x - own.x, r = t.r - own.r;
+    return { n: w + x + r, w };
+  }
+
+  return { junkSet, nounsOf, otherNounsFor, yoursFor, yoursStatFor };
 }
 
 // classifyStep2(row, ctx): null unless method is PUT/DELETE/PATCH.

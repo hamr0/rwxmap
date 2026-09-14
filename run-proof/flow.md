@@ -49,6 +49,24 @@ with `node poc/flow/proof.mjs`.
 | 2 | w | x-pile | 1998 | 22 | 1797 | 179 |
 | 3 | x | (none) | 1642 | 24 | 906 | 712 |
 
+## Why a row sits in the x-pile
+
+Every x-pile row gets ONE reason: 'no noun' when the row carries no noun at
+all; otherwise, among the row's nouns not already admitted as "yours" for
+its vendor, the strongest reason wins ('between bars' beats 'too few rows'
+beats 'vendor-only') — 'vendor-only' means no other vendor ever wrote that
+noun on a write row (n=0), 'too few rows' means fewer than 2 other-vendor
+write rows carried it (n<2), 'between bars' means it had enough other-vendor
+rows but its w-share fell short of 0.8.
+
+| reason | rows | truth r | truth w | truth x | share of pile |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| between bars | 1072 | 11 | 933 | 128 | 53.7% |
+| too few rows | 240 | 4 | 220 | 16 | 12.0% |
+| vendor-only | 670 | 7 | 628 | 35 | 33.5% |
+| no noun | 16 | 0 | 16 | 0 | 0.8% |
+| **total** | **1998** | 22 | 1797 | 179 | 100.0% |
+
 ## CSV columns (run-proof/flow.csv)
 
 - `set`: which labelled set the row comes from (camara, holdout1..5, exam2, exam3).
@@ -63,6 +81,7 @@ with `node poc/flow/proof.mjs`.
 - `rule`: the rule within that step that fired.
 - `flag`: the flag the rule left (`evidence`, `x-pile`, or empty).
 - `verdict`: `ok`, `LEAK`, `FALSE-ALARM`, or `OVER-TIGHT` against truth.
+- `reason`: for x-pile rows, why the row sits there (`no noun`, `vendor-only`, `too few rows`, `between bars`); empty for every other row.
 
 ## Pins
 
