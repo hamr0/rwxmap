@@ -108,3 +108,10 @@ exact 25.1% (corpus 75.0%), leaks 0.7% (0%), over-tight 74.2% (25.0%).
 Nothing was tuned on these rows. Measuring any candidate word or rule
 against exam 5 makes it a tuning set (D40); candidates are measured on
 the corpus first.
+
+POST caveat (2026-09-15): the brief was found loose on POST
+(data/calibration-2026-09-15, 57.5% agreement with corpus POST truth; it
+calls POST creates w where the corpus calls them x). The POST truth and
+the POST score above are not trustworthy until exam 5's POST rows are
+relabelled under a fixed brief. The PUT/DELETE/PATCH and GET numbers are
+unaffected.

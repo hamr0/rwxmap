@@ -68,3 +68,12 @@ a similar share of rows x, the POST drop on exam 5 belongs to the tool. If
 the brief calls clearly fewer rows x than corpus truth, the brief is loose
 on POST and exam 5's POST score is not trustworthy until the brief is
 fixed and checked once on the holdback.
+
+## Result (2026-09-15)
+
+Scorer: `node poc/exam/score-postcal.mjs` (add `rows` for the disagreement
+list). 195 of 339 agree (57.5%); x-share sheet 22.4% vs corpus 60.5%; x
+called w 132. By the pre-registered reading, the brief is loose on POST.
+Cause: the brief calls POST creates w, corpus truth calls them x by road 2
+(create 117 x / 9 w). Holdback (170 rows) is still unlabelled and reserved
+for one check of a fixed brief.
