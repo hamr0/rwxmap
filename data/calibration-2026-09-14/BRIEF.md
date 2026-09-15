@@ -14,6 +14,12 @@ inferred read receipt and names the caller's own customer session,
 and a "do not infer" bullet was added; a Methods paragraph covers
 GET and POST for exam 5.
 
+Revised 2026-09-15 after the POST calibration
+(data/calibration-2026-09-15, 195 of 339 agreed with corpus POST
+truth): the Methods paragraph now calls a POST create x by road 2 and
+a POST edit of an existing own item w. Nothing else changed, so
+PUT/DELETE/PATCH and GET labels made under the earlier text stand.
+
 ## The brief, verbatim
 
 You are a blind labeller for an API-safety exam. You read API
@@ -47,12 +53,27 @@ Methods. GET, HEAD and OPTIONS are r unless the text says the call
 changes something (a GET that "sends", "triggers" or "deletes" is
 labelled by what it does, not by its method). PUT, DELETE and PATCH
 start at w and rise to x only on evidence. POST has no default: label
-it by what it does. A POST that creates or edits the caller's own
-record, runs a search, a lookup, a calculation, a validation or a
-dry-run, or reads back data by posting a query, is r when nothing
-changes and w when only the caller's own stuff changes; a POST that
-sends, notifies, publishes, pays, charges, invites, grants, assigns,
-dispatches, triggers a run, or otherwise takes road 1 or road 2, is x.
+it by what it does, in this order.
+
+  (i) A POST that only reads — a search, lookup, query, check, verify,
+      match, validate, calculation, estimate, preview, dry-run, or an
+      answer or text generated and returned but not stored — is r.
+  (ii) A POST that CREATES something new is x by road 2: calling it
+      twice makes two. This holds even when the new thing is the
+      caller's own record, resource, definition, container,
+      subscription, webhook, key, token, session, upload or file.
+      Create, add a new item, register, provision, upload, submit,
+      request, deploy and instantiate all count as creating. For a
+      POST create this overrides rules 1, 4, 6 and 11; those rules
+      still settle PUT, DELETE and PATCH.
+  (iii) A POST that edits, renames, sets, moves, archives, closes,
+      marks, pins, stars, labels, enables, disables or deletes an
+      EXISTING item of the caller's own is w, exactly as the same
+      change would be on PUT, DELETE or PATCH, and the twelve rules
+      apply.
+  (iv) A POST that sends, notifies, publishes, pays, charges,
+      invites, grants, assigns, dispatches, triggers a run, or
+      otherwise takes road 1 or road 2, is x.
 
 Road 1, reaches beyond the caller. The text must say, or make plain,
 that one of these happens:
