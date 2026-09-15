@@ -179,9 +179,9 @@ Known limits: this is a tuning-corpus number under LOVO; exams 1-3 were
 used to tune and exam 4 was found to be drawn from
 already-burned providers; exam 5 (D68) is the first exam scored once on
 unseen rows — row-disjoint for writes, vendor-disjoint for POST and
-GET — and came out 68.4% exact / 3.2% leaks / 28.4% over-tight overall,
-writes 73.3 / 3.7 / 23.0, POST 25.1 / 0.7 / 74.2 (truth from a brief
-loose on POST creates; relabel under the fixed brief pending)
+GET — and came out 70.2% exact / 3.2% leaks / 26.7% over-tight overall,
+writes 73.3 / 3.7 / 23.0, POST 36.8 / 0.3 / 62.9 (POST relabelled under
+the brief fixed 2026-09-15)
 (`docs/logs/learnings.md`, "Exam 5 scored once"); this is a POC, never shipped as one; the
 x-pile flag is reported in the CSV, not yet wired to any consumer;
 poc/m1 is archived at poc/archive/m1/ (D65).
@@ -329,15 +329,15 @@ full ruling record.
 
 Non-blocking; never silently assumed.
 
-- Is the POST floor (x) wrong? Exam 5 said the POST floor looks wrong
-  (unseen vendors' POSTs 12% truth x against the corpus's 62%; 74% of
-  exam POST rows over-tight), but that truth came from a brief that
-  called POST creates w. The brief's POST sentence was fixed (POST
-  create x by road 2) and passed one check on 170 held-back corpus
-  POST rows (85.3% agree, x-share 60.6% vs 66.5%, leaning loose on live
-  things and payment tokens). Exam 5's 300 POST rows are being
-  relabelled under the fixed brief and POST re-scored once; the
-  question stays open until that re-score. The two raising rules
+- Is the POST floor (x) wrong? After fixing the brief (POST create x)
+  and relabelling, exam 5's unseen-vendor POSTs are still only 23%
+  truth x against the corpus's 62%, and 63% are reads; POST scores
+  36.8 / 0.3 / 62.9; 148 of 188 over-tight rows are reads step 1's
+  POST read-verb list misses, 40 are own writes the x floor
+  over-tightens; leaks 1. So the gap is mostly step 1's read list, not
+  the x floor; whether the floor should move stays open, and
+  read-verb candidates are measured on the corpus, never on exam 5
+  rows (D40). The two raising rules
   also lose precision on exam 5 (other-party noun 24% right, live verb
   32%); those rows are PUT/DELETE/PATCH and stand. Nothing is adopted
   from exam 5; candidates are measured on the corpus first (D40).

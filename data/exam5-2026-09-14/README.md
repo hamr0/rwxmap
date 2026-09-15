@@ -90,6 +90,12 @@ Use the calibrated, adopted brief at
   labellers.
 - `exam-truth-part1.csv` .. `exam-truth-part10.csv` — NOT produced by
   this script; written later by blind labellers, one per part.
+- `exam-post-blind-part1.csv` / `exam-post-blind-part2.csv` — the 300
+  POST-stratum rows split for blind relabelling under the fixed brief;
+  `exam-post-truth-part1.csv` / `exam-post-truth-part2.csv` — the
+  labellers' blind truth for each part (150 rows each). The blind parts
+  are written by `poc/exam/make-exam5-post.mjs`; the truth parts are
+  written by labellers and read by `poc/exam/score-exam5.mjs`.
 
 ## Score (scored once, 2026-09-14)
 
@@ -109,9 +115,16 @@ Nothing was tuned on these rows. Measuring any candidate word or rule
 against exam 5 makes it a tuning set (D40); candidates are measured on
 the corpus first.
 
-POST caveat (2026-09-15): the brief was found loose on POST
-(data/calibration-2026-09-15, 57.5% agreement with corpus POST truth; it
-calls POST creates w where the corpus calls them x). The POST truth and
-the POST score above are not trustworthy until exam 5's POST rows are
-relabelled under a fixed brief. The PUT/DELETE/PATCH and GET numbers are
-unaffected.
+POST re-score (2026-09-15): exam 5's 300 POST rows were relabelled
+blind under the brief revised 2026-09-15 by two mid-tier labellers (150
+each; `data/exam5-2026-09-14/exam-post-truth-part1.csv` and
+`exam-post-truth-part2.csv`, split by `poc/exam/make-exam5-post.mjs`).
+New POST truth r 189 / w 40 / x 70 / ? 1 (x 23.4% of 299 scorable); old
+POST truth r 188 / w 75 / x 36 (12%). Re-scored once with
+`node poc/exam/score-exam5.mjs` (score.csv rewritten): POST 299 rows
+exact 110 (36.8%), leaks 1 (0.3%), over-tight 188 (62.9%); was 25.1 /
+0.7 / 74.2. Whole exam: exact 1403 (70.2%), leaks 63 (3.2%), over-tight
+533 (26.7%); was 68.4 / 3.2 / 28.4. Writes and GET numbers are
+unaffected. The original POST numbers above are superseded; see
+`docs/logs/learnings.md`, "Exam 5 POST relabelled under the fixed brief
+and re-scored once (2026-09-15)".
