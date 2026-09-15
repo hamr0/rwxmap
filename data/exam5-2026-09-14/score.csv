@@ -46,19 +46,19 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 45,W,agco-ats.com,agco-ats.com,PUT,/api/v2/UpdateGroupSubscriptions/{UpdateGroupSubscriptionID},UpdateGroupSubscriptions_PutUpdateGroupSubscription,Update an Update Group Subscription,w,high,rule5 own subscription config,3,x,other-noun,,FALSE-ALARM
 46,W,agco-ats.com,agco-ats.com,PUT,/api/v2/Users/Current,Users_PutCurrentUser,Update a user,w,high,rule2 own account update,3,x,other-noun,,FALSE-ALARM
 47,W,agco-ats.com,agco-ats.com,PUT,/api/v2/Vouchers/{VoucherCode},Vouchers_Put,Update a voucher,w,low,default PUT own voucher record,2,w,floor,x-pile,ok
-48,POST,aiception.com,,POST,/face,,Find all faces in the image [ image_url -> id ],r,high,read face detection no change,3,x,floor,,OVER-TIGHT
-49,POST,airbyte.local,,POST,/v1/connections/create,createConnection,Create a connection between a source and a destination,w,high,creates own connection resource,3,x,floor,,FALSE-ALARM
-50,POST,airbyte.local,,POST,/v1/destination_definitions/list_for_workspace,listDestinationDefinitionsForWorkspace,List all the destinationDefinitions the given workspace is configured to use,r,high,list own definitions,1,r,read-verb,,ok
-51,POST,airbyte.local,,POST,/v1/logs/get,getLogs,Get logs,r,high,read logs,1,r,read-verb,,ok
-52,POST,airbyte.local,,POST,/v1/source_definitions/get_for_workspace,getSourceDefinitionForWorkspace,Get a sourceDefinition that is configured for the given workspace,r,high,read own definition,1,r,read-verb,,ok
-53,POST,airbyte.local,,POST,/v1/source_definitions/list_for_workspace,listSourceDefinitionsForWorkspace,List all the sourceDefinitions the given workspace is configured to use,r,high,list own definitions,1,r,read-verb,,ok
-54,POST,airbyte.local,,POST,/v1/source_definitions/list_private,listPrivateSourceDefinitions,"List all private, non-custom sourceDefinitions, and for each indicate whether the given workspace has a grant for using the definition. Used by admins to view and modify a given workspace's grants.",r,high,list definitions view only,1,r,read-verb,,ok
-55,POST,airbyte.local,,POST,/v1/sources/discover_schema,discoverSchemaForSource,Discover the schema catalog of the source,r,high,read schema discovery,3,x,floor,,OVER-TIGHT
-56,POST,airbyte.local,,POST,/v1/sources/update,updateSource,Update a source,w,high,update own source config,3,x,floor,,FALSE-ALARM
-57,POST,airbyte.local,,POST,/v1/state/create_or_update,createOrUpdateState,Create or update the state for a connection.,w,high,own connection state update,3,x,floor,,FALSE-ALARM
-58,POST,airbyte.local,,POST,/v1/state/get,getState,Fetch the current state for a connection.,r,high,read connection state,1,r,read-verb,,ok
-59,POST,airbyte.local,,POST,/v1/workspaces/tag_feedback_status_as_done,updateWorkspaceFeedback,Update workspace feedback state,w,high,own workspace feedback state,3,x,floor,,FALSE-ALARM
-60,POST,airbyte.local,,POST,/v1/workspaces/update_name,updateWorkspaceName,Update workspace name,w,high,own workspace name update,3,x,floor,,FALSE-ALARM
+48,POST,aiception.com,,POST,/face,,Find all faces in the image [ image_url -> id ],r,high,road i search returns face locations not stored,3,x,floor,,OVER-TIGHT
+49,POST,airbyte.local,,POST,/v1/connections/create,createConnection,Create a connection between a source and a destination,x,high,road 2 create connection resource,3,x,floor,,ok
+50,POST,airbyte.local,,POST,/v1/destination_definitions/list_for_workspace,listDestinationDefinitionsForWorkspace,List all the destinationDefinitions the given workspace is configured to use,r,high,road i list is read,1,r,read-verb,,ok
+51,POST,airbyte.local,,POST,/v1/logs/get,getLogs,Get logs,r,high,road i get logs is read,1,r,read-verb,,ok
+52,POST,airbyte.local,,POST,/v1/source_definitions/get_for_workspace,getSourceDefinitionForWorkspace,Get a sourceDefinition that is configured for the given workspace,r,high,road i get is read,1,r,read-verb,,ok
+53,POST,airbyte.local,,POST,/v1/source_definitions/list_for_workspace,listSourceDefinitionsForWorkspace,List all the sourceDefinitions the given workspace is configured to use,r,high,road i list is read,1,r,read-verb,,ok
+54,POST,airbyte.local,,POST,/v1/source_definitions/list_private,listPrivateSourceDefinitions,"List all private, non-custom sourceDefinitions, and for each indicate whether the given workspace has a grant for using the definition. Used by admins to view and modify a given workspace's grants.",r,high,road i list is read,1,r,read-verb,,ok
+55,POST,airbyte.local,,POST,/v1/sources/discover_schema,discoverSchemaForSource,Discover the schema catalog of the source,r,high,road i discover schema is read,3,x,floor,,OVER-TIGHT
+56,POST,airbyte.local,,POST,/v1/sources/update,updateSource,Update a source,w,high,rule 4 edits existing source definition,3,x,floor,,FALSE-ALARM
+57,POST,airbyte.local,,POST,/v1/state/create_or_update,createOrUpdateState,Create or update the state for a connection.,x,low,ambiguous create or update state tighter class,3,x,floor,,ok
+58,POST,airbyte.local,,POST,/v1/state/get,getState,Fetch the current state for a connection.,r,high,road i get state is read,1,r,read-verb,,ok
+59,POST,airbyte.local,,POST,/v1/workspaces/tag_feedback_status_as_done,updateWorkspaceFeedback,Update workspace feedback state,w,high,rule 5 own workspace config edit,3,x,floor,,FALSE-ALARM
+60,POST,airbyte.local,,POST,/v1/workspaces/update_name,updateWorkspaceName,Update workspace name,w,high,rule 5 own workspace config edit,3,x,floor,,FALSE-ALARM
 61,W,akeneo.com,akeneo.com,DELETE,/api/rest/v1/catalogs/{id},delete_app_catalog,Delete a catalog,w,high,rule4 own catalog definition,2,w,yours-noun,evidence,ok
 62,W,akeneo.com,akeneo.com,DELETE,/api/rest/v1/products-uuid/{uuid},delete_products_uuid__uuid_,Delete a product,w,high,rule1 own product record,2,w,yours-noun,evidence,ok
 63,W,akeneo.com,akeneo.com,PATCH,/api/rest/v1/attributes,patch_attributes,Update/create several attributes,w,high,rule4 own attribute definitions,2,w,yours-noun,evidence,ok
@@ -142,7 +142,7 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 141,W,apacta.com,apacta.com,PUT,/time_entry_types/{time_entry_type_id},,Edit time entry type,w,high,rule4 own definition type,3,x,other-noun,,FALSE-ALARM
 142,W,apacta.com,apacta.com,PUT,/users/{user_id},,Edit user,w,high,rule2 own account plain details,3,x,other-noun,,FALSE-ALARM
 143,W,api2cart.com,api2cart.com,DELETE,/attribute.delete.json,AttributeDelete,,w,high,rule4 own attribute definition,2,w,yours-noun,evidence,ok
-144,POST,api2pdf.com,,POST,/chrome/url,chromeFromUrlPost,Convert URL to PDF,r,high,stateless url to pdf conversion,3,x,floor,,OVER-TIGHT
+144,POST,api2pdf.com,,POST,/chrome/url,chromeFromUrlPost,Convert URL to PDF,r,high,road i generated pdf returned not stored,3,x,floor,,OVER-TIGHT
 145,W,apicurio.local,apicurio.local,DELETE,/admin/roleMappings/{principalId},deleteRoleMapping,Delete a role mapping,x,high,rule4 denies access to user,3,x,other-noun,,ok
 146,W,apideck.com,apideck.com,DELETE,/crm/contacts/{id},contactsDelete,Delete contact,w,high,rule1 own contact record,2,w,yours-noun,evidence,ok
 147,W,apideck.com,apideck.com,DELETE,/crm/notes/{id},notesDelete,Delete note,w,high,rule1 own note record,2,w,yours-noun,evidence,ok
@@ -167,18 +167,18 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 166,W,apideck.com,apideck.com,PATCH,/pos/modifier-groups/{id},modifierGroupsUpdate,Update Modifier Group,w,high,rule4 own modifier group definition,3,x,other-noun,,FALSE-ALARM
 167,W,apideck.com,apideck.com,PATCH,/pos/tenders/{id},tendersUpdate,Update Tender,w,high,rule10 own tender config no charge,2,w,floor,x-pile,ok
 168,W,apideck.com,apideck.com,PATCH,/webhook/webhooks/{id},webhooksUpdate,Update webhook subscription,w,high,own webhook config,2,w,floor,x-pile,ok
-169,POST,apisetu.gov.in,,POST,/alsfc/certificate,alsfc,Application/ License for Factory,r,high,verification check no change,3,x,floor,,OVER-TIGHT
-170,POST,apisetu.gov.in,,POST,/dipcr/certificate,dipcr,Diploma Certificate,r,high,verification check no change,3,x,floor,,OVER-TIGHT
-171,POST,apisetu.gov.in,,POST,/dpcer/certificate,dpcer,Dependency Certificate,r,high,verification check no change,3,x,floor,,OVER-TIGHT
-172,POST,apisetu.gov.in,,POST,/ffcer/certificate,ffcer,Freedom Fighter Certificate,r,high,verification check no change,3,x,floor,,OVER-TIGHT
-173,POST,apisetu.gov.in,,POST,/miipc/certificate,miipc,Insurance Policy - Miscellaneous,r,high,verification check no change,3,x,floor,,OVER-TIGHT
-174,POST,apisetu.gov.in,,POST,/pecer/certificate,pecer,Pension Certificate,r,high,verification check no change,3,x,floor,,OVER-TIGHT
-175,POST,apisetu.gov.in,,POST,/pripc/certificate,pripc,Insurance Policy - Property,r,high,verification check no change,3,x,floor,,OVER-TIGHT
-176,POST,apisetu.gov.in,,POST,/pscer/certificate,pscer,Possession Certificate,r,high,verification check no change,3,x,floor,,OVER-TIGHT
-177,POST,apisetu.gov.in,,POST,/skhsc/certificate,skhsc,Skill Certificate (X),r,high,verification check no change,3,x,floor,,OVER-TIGHT
-178,POST,apisetu.gov.in,,POST,/skmst/certificate,skmst,Skill Marksheet/ Score Card,r,high,verification check no change,3,x,floor,,OVER-TIGHT
-179,POST,apisetu.gov.in,,POST,/tapcn/certificate,tapcn,New Tap Connection,r,high,verification check no change,3,x,floor,,OVER-TIGHT
-180,POST,apisetu.gov.in,,POST,/ugdcn/certificate,ugdcn,Jalanidhi - New UGD Connection,r,high,verification check no change,3,x,floor,,OVER-TIGHT
+169,POST,apisetu.gov.in,,POST,/alsfc/certificate,alsfc,Application/ License for Factory,r,high,road i verify listed as read,3,x,floor,,OVER-TIGHT
+170,POST,apisetu.gov.in,,POST,/dipcr/certificate,dipcr,Diploma Certificate,r,high,road i verify listed as read,3,x,floor,,OVER-TIGHT
+171,POST,apisetu.gov.in,,POST,/dpcer/certificate,dpcer,Dependency Certificate,r,high,road i verify listed as read,3,x,floor,,OVER-TIGHT
+172,POST,apisetu.gov.in,,POST,/ffcer/certificate,ffcer,Freedom Fighter Certificate,r,high,road i verify listed as read,3,x,floor,,OVER-TIGHT
+173,POST,apisetu.gov.in,,POST,/miipc/certificate,miipc,Insurance Policy - Miscellaneous,r,high,road i verify listed as read,3,x,floor,,OVER-TIGHT
+174,POST,apisetu.gov.in,,POST,/pecer/certificate,pecer,Pension Certificate,r,high,road i verify listed as read,3,x,floor,,OVER-TIGHT
+175,POST,apisetu.gov.in,,POST,/pripc/certificate,pripc,Insurance Policy - Property,r,high,road i verify listed as read,3,x,floor,,OVER-TIGHT
+176,POST,apisetu.gov.in,,POST,/pscer/certificate,pscer,Possession Certificate,r,high,road i verify listed as read,3,x,floor,,OVER-TIGHT
+177,POST,apisetu.gov.in,,POST,/skhsc/certificate,skhsc,Skill Certificate (X),r,high,road i verify listed as read,3,x,floor,,OVER-TIGHT
+178,POST,apisetu.gov.in,,POST,/skmst/certificate,skmst,Skill Marksheet/ Score Card,r,high,road i verify listed as read,3,x,floor,,OVER-TIGHT
+179,POST,apisetu.gov.in,,POST,/tapcn/certificate,tapcn,New Tap Connection,r,high,road i verify listed as read,3,x,floor,,OVER-TIGHT
+180,POST,apisetu.gov.in,,POST,/ugdcn/certificate,ugdcn,Jalanidhi - New UGD Connection,r,high,road i verify listed as read,3,x,floor,,OVER-TIGHT
 181,W,appcenter.ms,appcenter.ms,DELETE,/v0.1/api_tokens/{api_token_id},userApiTokens_delete,,w,high,rule6 own api token,3,x,other-noun,,FALSE-ALARM
 182,W,appcenter.ms,appcenter.ms,DELETE,/v0.1/apps/{owner_name}/{app_name}/analytics/audiences/{audience_name},Analytics_DeleteAudience,,w,high,rule4 own audience definition,2,w,floor,x-pile,ok
 183,W,appcenter.ms,appcenter.ms,DELETE,/v0.1/apps/{owner_name}/{app_name}/apple_mapping,appleMapping_delete,,w,high,own mapping config,2,w,floor,x-pile,ok
@@ -225,18 +225,18 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 224,W,apple.com,apple.com,PATCH,/v1/betaLicenseAgreements/{id},betaLicenseAgreements-update_instance,,w,low,own app license agreement text,2,w,floor,x-pile,ok
 225,W,apple.com,apple.com,PATCH,/v1/idfaDeclarations/{id},idfaDeclarations-update_instance,,w,low,own app declaration no text minimal info,2,w,floor,x-pile,ok
 226,W,apple.com,apple.com,PATCH,/v1/users/{id}/relationships/visibleApps,users-visibleApps-replace_to_many_relationship,,x,low,road 1b replaces users visible apps,3,x,other-noun,,ok
-227,POST,apptigent.com,,POST,/CalculateMinMax,CalculateMinMax,Math - Calculate minimum or maximum,r,high,computes value no state change,3,x,floor,,OVER-TIGHT
-228,POST,apptigent.com,,POST,/CalculateMultiplication,CalculateMultiplication,Math - Calculate Multiplication,r,high,computes product no state change,3,x,floor,,OVER-TIGHT
-229,POST,apptigent.com,,POST,/CollectionToJSON,CollectionToJSON,Collections - Collection to JSON,r,high,converts collection no state change,3,x,floor,,OVER-TIGHT
-230,POST,apptigent.com,,POST,/ConvertDistance,ConvertDistance,Math - Convert distance,r,high,converts units no state change,3,x,floor,,OVER-TIGHT
-231,POST,apptigent.com,,POST,/ConvertPower,ConvertPower,Math - Convert power,r,high,converts units no state change,3,x,floor,,OVER-TIGHT
-232,POST,apptigent.com,,POST,/CountCollection,CountCollection,Collections - Count collection,r,high,counts items no state change,1,r,read-verb,,ok
-233,POST,apptigent.com,,POST,/FlipImage,FlipImage,Files - Flip Image,r,high,transforms image returns result,3,x,floor,,OVER-TIGHT
-234,POST,apptigent.com,,POST,/ReplaceString,ReplaceString,Text - Replace string,r,high,replaces text returns result,3,x,floor,,OVER-TIGHT
-235,POST,apptigent.com,,POST,/SortCollection,SortCollection,Collections - Sort collection,r,high,sorts items returns result,3,x,floor,,OVER-TIGHT
-236,POST,apptigent.com,,POST,/TextToSpeech,TextToSpeech,Text - Text to Speech,r,high,converts text to audio output,3,x,floor,,OVER-TIGHT
-237,POST,apptigent.com,,POST,/ValidateEmail,ValidateEmail,Text - Validate email,r,high,validates email no state change,3,x,floor,,OVER-TIGHT
-238,POST,apptigent.com,,POST,/XMLtoJSON,XmlToJson,Data - XML to JSON,r,high,converts data no state change,3,x,floor,,OVER-TIGHT
+227,POST,apptigent.com,,POST,/CalculateMinMax,CalculateMinMax,Math - Calculate minimum or maximum,r,high,road i calculation returned not stored,3,x,floor,,OVER-TIGHT
+228,POST,apptigent.com,,POST,/CalculateMultiplication,CalculateMultiplication,Math - Calculate Multiplication,r,high,road i calculation returned not stored,3,x,floor,,OVER-TIGHT
+229,POST,apptigent.com,,POST,/CollectionToJSON,CollectionToJSON,Collections - Collection to JSON,r,high,road i conversion returned not stored,3,x,floor,,OVER-TIGHT
+230,POST,apptigent.com,,POST,/ConvertDistance,ConvertDistance,Math - Convert distance,r,high,road i conversion returned not stored,3,x,floor,,OVER-TIGHT
+231,POST,apptigent.com,,POST,/ConvertPower,ConvertPower,Math - Convert power,r,high,road i conversion returned not stored,3,x,floor,,OVER-TIGHT
+232,POST,apptigent.com,,POST,/CountCollection,CountCollection,Collections - Count collection,r,high,road i count returned not stored,1,r,read-verb,,ok
+233,POST,apptigent.com,,POST,/FlipImage,FlipImage,Files - Flip Image,r,high,road i image transform returned not stored,3,x,floor,,OVER-TIGHT
+234,POST,apptigent.com,,POST,/ReplaceString,ReplaceString,Text - Replace string,r,high,road i string transform returned not stored,3,x,floor,,OVER-TIGHT
+235,POST,apptigent.com,,POST,/SortCollection,SortCollection,Collections - Sort collection,r,high,road i sort returned not stored,3,x,floor,,OVER-TIGHT
+236,POST,apptigent.com,,POST,/TextToSpeech,TextToSpeech,Text - Text to Speech,r,high,road i speech file generated returned not stored,3,x,floor,,OVER-TIGHT
+237,POST,apptigent.com,,POST,/ValidateEmail,ValidateEmail,Text - Validate email,r,high,road i validate listed as read,3,x,floor,,OVER-TIGHT
+238,POST,apptigent.com,,POST,/XMLtoJSON,XmlToJson,Data - XML to JSON,r,high,road i conversion returned not stored,3,x,floor,,OVER-TIGHT
 239,W,appwrite.io,appwrite.io,DELETE,/functions/{functionId}/tags/{tagId},functionsDeleteTag,Delete Tag,w,high,rule 4 deletes own function tag,2,w,yours-noun,evidence,ok
 240,W,appwrite.io,appwrite.io,DELETE,/users/{userId}/sessions,usersDeleteSessions,Delete User Sessions,x,high,road 1b ends another users sessions,3,x,other-noun,,ok
 241,W,appwrite.io,appwrite.io,PUT,/teams/{teamId},teamsUpdate,Update Team,w,high,rule 4 own team definition update,3,x,other-noun,,FALSE-ALARM
@@ -357,9 +357,9 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 357,W,bitbucket.org,bitbucket.org,PUT,/users/{selected_user}/properties/{app_key}/{property_name},updateUserHostedPropertyValue,Update a user application property,w,high,rule 3 own user app property,3,x,other-noun,,FALSE-ALARM
 358,W,bitbucket.org,bitbucket.org,PUT,/workspaces/{workspace}/hooks/{uid},,Update a webhook for a workspace,w,high,own workspace webhook update,2,w,yours-noun,evidence,ok
 359,GET,botify.com,,GET,/projects/{username}/{project_slug}/filters/{identifier},getSavedFilter,"Retrieves a specific saved filter's name, ID and filter value",r,high,GET default read,1,r,method,,ok
-360,POST,botify.com,,POST,/analyses/{username}/{project_slug}/{analysis_slug}/urls/aggs,getUrlsAggs,Query aggregator,r,high,POST query aggregator reads data,1,r,read-verb,,ok
+360,POST,botify.com,,POST,/analyses/{username}/{project_slug}/{analysis_slug}/urls/aggs,getUrlsAggs,Query aggregator,r,high,road i query aggregator is read,1,r,read-verb,,ok
 361,GET,botschaft.local,,GET,/sns,sns_get_sns_get,Sns Get,r,high,GET default read,1,r,method,,ok
-362,POST,botschaft.local,,POST,/sns,sns_post_sns_post,Sns Post,w,low,no text stating external send default own,3,x,floor,,FALSE-ALARM
+362,POST,botschaft.local,,POST,/sns,sns_post_sns_post,Sns Post,x,low,sns post likely sends notification no description,3,x,floor,,ok
 363,W,box.com,box,DELETE,/collaboration_whitelist_entries/{collaboration_whitelist_entry_id},delete_collaboration_whitelist_entries_id,Remove domain from list of allowed collaboration domains,w,high,own enterprise domain allowlist removal,2,w,floor,x-pile,ok
 364,W,box.com,box,DELETE,/collaboration_whitelist_exempt_targets/{collaboration_whitelist_exempt_target_id},delete_collaboration_whitelist_exempt_targets_id,Remove user from list of users exempt from domain restrictions,x,low,road 1b removes users access exemption,3,x,other-noun,,ok
 365,W,box.com,box,DELETE,/device_pinners/{device_pinner_id},delete_device_pinners_id,Remove device pin,w,low,own device pin no reach stated,3,x,other-noun,,FALSE-ALARM
@@ -385,31 +385,31 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 385,W,box.com,box,PUT,/skill_invocations/{skill_id},put_skill_invocations_id,Update all Box Skill cards on file,w,high,own skill metadata cards update,2,w,floor,x-pile,ok
 386,GET,braze.com,,GET,/events/data_series,customEventsAnalytics,Custom Events Analytics,r,high,GET default read,1,r,method,,ok
 387,GET,braze.com,,GET,/kpi/new_users/data_series,dailyNewUsersByDate,Daily New Users by Date,r,high,GET default read,1,r,method,,ok
-388,POST,brex.io,,POST,/api/v1/company/deepsearch/isin,CompanyDeepsearchISIN,Retrieves a list of stock exchange listings,r,high,POST lookup search no state change,3,x,floor,,OVER-TIGHT
-389,POST,brex.io,,POST,/api/v1/pepsanction/monitor/unregister/{id},PepMonitorUnregister,Deactive a pep sanction monitor,x,low,road 1e cancels third party monitor order,3,x,floor,,ok
-390,POST,brex.io,,POST,/api/v1/pepsanction/order/{type}/{search},PepOrder,Orders a new Pep Sanction Check Report,x,high,road 1c orders a paid check report,3,x,floor,,ok
-391,POST,brex.io,,POST,/api/v1/vat-verification/leveltwo-check/{country},VatLevelTwo,Returns a level two verification result,x,low,optional order confirmation report commits outside party,3,x,floor,,ok
+388,POST,brex.io,,POST,/api/v1/company/deepsearch/isin,CompanyDeepsearchISIN,Retrieves a list of stock exchange listings,r,high,road i lookup returns listings,3,x,floor,,OVER-TIGHT
+389,POST,brex.io,,POST,/api/v1/pepsanction/monitor/unregister/{id},PepMonitorUnregister,Deactive a pep sanction monitor,w,high,rule 9 cancel own monitor no outside party named,3,x,floor,,FALSE-ALARM
+390,POST,brex.io,,POST,/api/v1/pepsanction/order/{type}/{search},PepOrder,Orders a new Pep Sanction Check Report,x,high,road 2 orders new report,3,x,floor,,ok
+391,POST,brex.io,,POST,/api/v1/vat-verification/leveltwo-check/{country},VatLevelTwo,Returns a level two verification result,r,high,road i verification result is read,3,x,floor,,OVER-TIGHT
 392,GET,bridgedb.org,,GET,/{organism}/search/{query},,,r,high,GET default read,1,r,method,,ok
 393,GET,bridgedb.org,,GET,/{organism}/xrefExists/{systemCode}/{identifier},,,r,high,GET default read,1,r,method,,ok
-394,POST,bufferapp.com,,POST,/updates/{id}/update{mediaTypeExtension},,,x,low,road 1a buffer posts publish content publicly,3,x,floor,,ok
-395,POST,bufferapp.com,,POST,/updates/create{mediaTypeExtension},,,x,low,road 1a buffer posts publish content publicly,3,x,floor,,ok
+394,POST,bufferapp.com,,POST,/updates/{id}/update{mediaTypeExtension},,,w,high,road iii edit existing own status update,3,x,floor,,FALSE-ALARM
+395,POST,bufferapp.com,,POST,/updates/create{mediaTypeExtension},,,x,high,road 1a publishes status update publicly,3,x,floor,,ok
 396,GET,bungie.net,,GET,/App/FirstParty/,App.GetBungieApplications,,r,high,GET default read,1,r,method,,ok
 397,GET,bungie.net,,GET,/Destiny2/{membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Stats/Activities/,Destiny2.GetActivityHistory,,r,high,GET default read,1,r,method,,ok
 398,GET,bungie.net,,GET,/Destiny2/{membershipType}/Profile/{destinyMembershipId}/Character/{characterId}/Vendors/,Destiny2.GetVendors,,r,high,GET default read,1,r,method,,ok
 399,GET,bungie.net,,GET,/Forum/GetForumTagSuggestions/,Forum.GetForumTagSuggestions,,r,high,GET default read,1,r,method,,ok
 400,GET,bungie.net,,GET,/Forum/GetPostsThreadedPagedFromChild/{childPostId}/{page}/{pageSize}/{replySize}/{rootThreadMode}/{sortMode}/,Forum.GetPostsThreadedPagedFromChild,,r,high,GET default read,1,r,method,,ok
-401,POST,bungie.net,,POST,/Destiny2/Actions/Items/EquipItem/,Destiny2.EquipItem,,w,high,equips own item own account,3,x,floor,,FALSE-ALARM
-402,POST,bungie.net,,POST,/Destiny2/Actions/Items/SetTrackedState/,Destiny2.SetQuestTrackedState,,w,high,tracks own item state own account,3,x,floor,,FALSE-ALARM
-403,POST,bungie.net,,POST,/Destiny2/Awa/Initialize/,Destiny2.AwaInitializeRequest,,w,low,initializes own request no reach stated,3,x,floor,,FALSE-ALARM
-404,POST,bungie.net,,POST,/Forum/Recruit/Summaries/,Forum.GetRecruitmentThreadSummaries,,r,high,reads thread summaries,3,x,floor,,OVER-TIGHT
-405,POST,bungie.net,,POST,/GroupV2/{groupId}/Members/{membershipType}/{membershipId}/Unban/,GroupV2.UnbanMember,,x,high,road 1b unbans allows rejoin,3,x,floor,,ok
-406,POST,bungie.net,,POST,/GroupV2/{groupId}/Members/Approve/{membershipType}/{membershipId}/,GroupV2.ApprovePending,,x,high,road 1b approves membership grants access,3,x,floor,,ok
-407,POST,bungie.net,,POST,/GroupV2/{groupId}/OptionalConversations/Add/,GroupV2.AddOptionalConversation,,w,high,rule 4 container conversation channel add,3,x,floor,,FALSE-ALARM
-408,POST,bungie.net,,POST,/GroupV2/NameV2/,GroupV2.GetGroupByNameV2,,r,high,reads group info via POST,3,x,floor,,OVER-TIGHT
-409,POST,bungie.net,,POST,/Social/Friends/Requests/Decline/{membershipId}/,Social.DeclineFriendRequest,,w,high,rule 7 own relation decline request,3,x,floor,,FALSE-ALARM
-410,POST,bungie.net,,POST,/Social/Friends/Requests/Remove/{membershipId}/,Social.RemoveFriendRequest,,w,high,rule 7 own relation remove request,3,x,floor,,FALSE-ALARM
-411,POST,bungie.net,,POST,/Tokens/Partner/ClaimOffer/,Tokens.ClaimPartnerOffer,,w,low,claims own reward no reach stated,3,x,floor,,FALSE-ALARM
-412,POST,bungie.net,,POST,/User/Search/GlobalName/{page}/,User.SearchByGlobalNamePost,,r,high,searches users by name,3,x,floor,,OVER-TIGHT
+401,POST,bungie.net,,POST,/Destiny2/Actions/Items/EquipItem/,Destiny2.EquipItem,,w,high,own game item state change,3,x,floor,,FALSE-ALARM
+402,POST,bungie.net,,POST,/Destiny2/Actions/Items/SetTrackedState/,Destiny2.SetQuestTrackedState,,w,high,own tracked state on own item,3,x,floor,,FALSE-ALARM
+403,POST,bungie.net,,POST,/Destiny2/Awa/Initialize/,Destiny2.AwaInitializeRequest,,x,low,road 2 initializes new advanced write request,3,x,floor,,ok
+404,POST,bungie.net,,POST,/Forum/Recruit/Summaries/,Forum.GetRecruitmentThreadSummaries,,r,high,road i get list is read,3,x,floor,,OVER-TIGHT
+405,POST,bungie.net,,POST,/GroupV2/{groupId}/Members/{membershipType}/{membershipId}/Unban/,GroupV2.UnbanMember,,x,high,road 1b changes another member access,3,x,floor,,ok
+406,POST,bungie.net,,POST,/GroupV2/{groupId}/Members/Approve/{membershipType}/{membershipId}/,GroupV2.ApprovePending,,x,high,road 1b approves another member access,3,x,floor,,ok
+407,POST,bungie.net,,POST,/GroupV2/{groupId}/OptionalConversations/Add/,GroupV2.AddOptionalConversation,,x,high,road 2 post create overrides rule 4 container,3,x,floor,,ok
+408,POST,bungie.net,,POST,/GroupV2/NameV2/,GroupV2.GetGroupByNameV2,,r,high,road i get group is read,3,x,floor,,OVER-TIGHT
+409,POST,bungie.net,,POST,/Social/Friends/Requests/Decline/{membershipId}/,Social.DeclineFriendRequest,,w,high,rule 7 own relation decline no notify stated,3,x,floor,,FALSE-ALARM
+410,POST,bungie.net,,POST,/Social/Friends/Requests/Remove/{membershipId}/,Social.RemoveFriendRequest,,w,high,rule 7 own relation remove no notify stated,3,x,floor,,FALSE-ALARM
+411,POST,bungie.net,,POST,/Tokens/Partner/ClaimOffer/,Tokens.ClaimPartnerOffer,,x,high,road 2 claim consumes offer not repeatable,3,x,floor,,ok
+412,POST,bungie.net,,POST,/User/Search/GlobalName/{page}/,User.SearchByGlobalNamePost,,r,high,road i search returns users,3,x,floor,,OVER-TIGHT
 413,W,bunq.com,bunq.com,DELETE,/user/{userID}/monetary-account/{monetary-accountID}/draft-payment/{draft-paymentID}/note-text/{itemId},DELETE_NoteText_for_User_MonetaryAccount_DraftPayment,,w,high,deletes own note text,3,x,other-noun,,FALSE-ALARM
 414,W,bunq.com,bunq.com,DELETE,/user/{userID}/monetary-account/{monetary-accountID}/ideal-merchant-transaction/{ideal-merchant-transactionID}/note-attachment/{itemId},DELETE_NoteAttachment_for_User_MonetaryAccount_IdealMerchantTransaction,,w,high,deletes own note attachment,3,x,other-noun,,FALSE-ALARM
 415,W,bunq.com,bunq.com,DELETE,/user/{userID}/monetary-account/{monetary-accountID}/payment/{paymentID}/note-attachment/{itemId},DELETE_NoteAttachment_for_User_MonetaryAccount_Payment,,w,high,deletes own note attachment,3,x,other-noun,,FALSE-ALARM
@@ -433,14 +433,14 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 433,W,bunq.com,bunq.com,PUT,/user/{userID}/monetary-account/{monetary-accountID}/switch-service-payment/{switch-service-paymentID}/note-text/{itemId},UPDATE_NoteText_for_User_MonetaryAccount_SwitchServicePayment,,w,high,updates own note text,3,x,other-noun,,FALSE-ALARM
 434,W,bunq.com,bunq.com,PUT,/user/{userID}/oauth-client/{itemId},UPDATE_OauthClient_for_User,,w,high,rule 6 manages own oauth client,3,x,other-noun,,FALSE-ALARM
 435,W,bunq.com,bunq.com,PUT,/user/{userID}/whitelist-sdd-one-off/{itemId},UPDATE_WhitelistSddOneOff_for_User,,w,high,rule 10 sets own auto accept config,3,x,other-noun,,FALSE-ALARM
-436,POST,chaingateway.io,,POST,/getBlock,getBlock,getBlock,r,high,reads block info,1,r,read-verb,,ok
-437,POST,chaingateway.io,,POST,/getEthereumBalance,getEthereumBalance,getEthereumBalance,r,high,reads balance,1,r,read-verb,,ok
-438,POST,chaingateway.io,,POST,/getLastBlockNumber,getLastBlockNumber,getLastBlockNumber,r,high,reads block number,1,r,read-verb,,ok
-439,POST,chaingateway.io,,POST,/getToken,getToken,getToken,r,high,reads token info,1,r,read-verb,,ok
-440,POST,chaingateway.io,,POST,/newAddress,newAddress,newAddress,w,high,generates own new address,3,x,floor,,FALSE-ALARM
+436,POST,chaingateway.io,,POST,/getBlock,getBlock,getBlock,r,high,road i get block is read,1,r,read-verb,,ok
+437,POST,chaingateway.io,,POST,/getEthereumBalance,getEthereumBalance,getEthereumBalance,r,high,road i get balance is read,1,r,read-verb,,ok
+438,POST,chaingateway.io,,POST,/getLastBlockNumber,getLastBlockNumber,getLastBlockNumber,r,high,road i get block number is read,1,r,read-verb,,ok
+439,POST,chaingateway.io,,POST,/getToken,getToken,getToken,r,high,road i get token info is read,1,r,read-verb,,ok
+440,POST,chaingateway.io,,POST,/newAddress,newAddress,newAddress,x,high,road 2 create new address,3,x,floor,,ok
 441,GET,channel4.com,,GET,/4od/recently-added/videos.atom,4oD_Clips_Catch_Up_Feed,4oD Clips Catch Up Feed,r,high,reads feed,1,r,method,,ok
-442,POST,circl.lu,,POST,/bulk/md5,post_bulkmd5,,r,high,bulk hash search,3,x,floor,,OVER-TIGHT
-443,POST,circl.lu,,POST,/bulk/sha1,post_bulksha1,,r,high,bulk hash search,3,x,floor,,OVER-TIGHT
+442,POST,circl.lu,,POST,/bulk/md5,post_bulkmd5,,r,high,road i bulk search is read,3,x,floor,,OVER-TIGHT
+443,POST,circl.lu,,POST,/bulk/sha1,post_bulksha1,,r,high,road i bulk search is read,3,x,floor,,OVER-TIGHT
 444,W,circuitsandbox.net,circuitsandbox.net,DELETE,/conversations/community/{convId}/participants,removeParticipantCommunity,Removes participants from a community,x,high,road 1b removes community members,3,x,other-noun,,ok
 445,W,circuitsandbox.net,circuitsandbox.net,PUT,/conversations/{convId}/messages/{itemId},updateTextItem,Updates a message,w,high,rule 1 updates own message,3,x,other-noun,,FALSE-ALARM
 446,W,circuitsandbox.net,circuitsandbox.net,PUT,/conversations/community/{convId},updateConversationCommunity,Updates the information of a community,w,high,rule 4 updates container community info,2,w,floor,x-pile,ok
@@ -520,24 +520,24 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 520,W,clicksend.com,clicksend.com,PUT,/sms/inbound-read,Mark all Inbound SMS as read,Mark all Inbound SMS as read,w,high,rule 11 marks own messages read,3,x,other-noun,,FALSE-ALARM
 521,W,clicksend.com,clicksend.com,PUT,/sms/inbound-read/{message_id},Mark a specific Inbound SMS as read,Mark a specific Inbound SMS as read,w,high,rule 11 marks own message read,3,x,other-noun,,FALSE-ALARM
 522,W,clicksend.com,clicksend.com,PUT,/subaccounts/{subaccount_id},Update a specific subaccount,Update a specific subaccount,w,low,rule 2 edits subaccount plain details,2,w,floor,x-pile,ok
-523,POST,clickup.com,,POST,/questions,Create a New Question,Create a New Question,w,high,creates own question,3,x,floor,,FALSE-ALARM
-524,POST,cloudmersive.com,,POST,/ocr/image/to/words-with-location,ImageOcr_ImageWordsWithLocation,Convert a scanned image into words with location,r,high,OCR conversion returns text,3,x,floor,,OVER-TIGHT
-525,POST,cloudmersive.com,,POST,/ocr/pdf/to/lines-with-location,PdfOcr_PdfToLinesWithLocation,Convert a PDF into text lines with location,r,high,OCR conversion returns text,3,x,floor,,OVER-TIGHT
-526,POST,cloudmersive.com,,POST,/ocr/photo/recognize/form/advanced,ImageOcr_PhotoRecognizeFormAdvanced,"Recognize a photo of a form, extract key fields using stored templates",r,high,OCR analysis returns fields,3,x,floor,,OVER-TIGHT
-527,POST,cloudmersive.com,,POST,/ocr/photo/recognize/receipt,ImageOcr_PhotoRecognizeReceipt,"Recognize a photo of a receipt, extract key business information",r,high,OCR analysis returns fields,3,x,floor,,OVER-TIGHT
-528,POST,cloudmersive.com,,POST,/ocr/photo/to/words-with-location,ImageOcr_PhotoWordsWithLocation,Convert a photo of a document or receipt into words with location,r,high,OCR conversion returns text,3,x,floor,,OVER-TIGHT
-529,POST,cloudmersive.com,,POST,/ocr/preprocessing/image/binarize,Preprocessing_Binarize,Convert an image of text into a binarized (light and dark) view,r,high,image preprocessing returns image,3,x,floor,,OVER-TIGHT
-530,POST,cloudmersive.com,,POST,/ocr/preprocessing/image/get-page-angle,Preprocessing_GetPageAngle,Get the angle of the page / document / receipt,r,high,detects page angle,3,x,floor,,OVER-TIGHT
-531,POST,cloudmersive.com,,POST,/ocr/preprocessing/image/unrotate,Preprocessing_Unrotate,Detect and unrotate a document image,r,high,unrotates image returns result,3,x,floor,,OVER-TIGHT
-532,POST,cloudrf.com,,POST,/path,path,Point-to-point path profile analysis (Tx to Rx),r,high,path profile calculation,3,x,floor,,OVER-TIGHT
-533,POST,clubhouseapi.com,,POST,/get_release_notes,,gets release notes.,r,high,gets release notes,1,r,read-verb,,ok
-534,POST,clubhouseapi.com,,POST,/get_topic,,looks up topic by ID.,r,high,looks up topic,1,r,read-verb,,ok
-535,POST,clubhouseapi.com,,POST,/invite_from_waitlist,,wave to another user on the waitlist to give them access,x,high,road 1b grants waitlist access,3,x,floor,,ok
-536,POST,clubhouseapi.com,,POST,/invite_to_app,,"invite a user to the app, using one of your invites",x,high,road 1b invites grants app access,3,x,floor,,ok
-537,POST,clubhouseapi.com,,POST,/leave_channel,,leave a channel.,w,high,rule 7 own membership leave,3,x,floor,,FALSE-ALARM
-538,POST,clubhouseapi.com,,POST,/record_action_trails,,analytics,w,low,records own analytics data,3,x,floor,,FALSE-ALARM
-539,POST,clubhouseapi.com,,POST,/search_clubs,,search clubs.,r,high,search clubs,1,r,read-verb,,ok
-540,POST,cnab-online.herokuapp.com,,POST,/file,,Faz o upload de um arquivo,w,low,uploads own file returns temp id,3,x,floor,,FALSE-ALARM
+523,POST,clickup.com,,POST,/questions,Create a New Question,Create a New Question,x,high,road 2 create new question,3,x,floor,,ok
+524,POST,cloudmersive.com,,POST,/ocr/image/to/words-with-location,ImageOcr_ImageWordsWithLocation,Convert a scanned image into words with location,r,high,road i ocr result returned not stored,3,x,floor,,OVER-TIGHT
+525,POST,cloudmersive.com,,POST,/ocr/pdf/to/lines-with-location,PdfOcr_PdfToLinesWithLocation,Convert a PDF into text lines with location,r,high,road i ocr result returned not stored,3,x,floor,,OVER-TIGHT
+526,POST,cloudmersive.com,,POST,/ocr/photo/recognize/form/advanced,ImageOcr_PhotoRecognizeFormAdvanced,"Recognize a photo of a form, extract key fields using stored templates",r,high,road i ocr result returned not stored,3,x,floor,,OVER-TIGHT
+527,POST,cloudmersive.com,,POST,/ocr/photo/recognize/receipt,ImageOcr_PhotoRecognizeReceipt,"Recognize a photo of a receipt, extract key business information",r,high,road i ocr result returned not stored,3,x,floor,,OVER-TIGHT
+528,POST,cloudmersive.com,,POST,/ocr/photo/to/words-with-location,ImageOcr_PhotoWordsWithLocation,Convert a photo of a document or receipt into words with location,r,high,road i ocr result returned not stored,3,x,floor,,OVER-TIGHT
+529,POST,cloudmersive.com,,POST,/ocr/preprocessing/image/binarize,Preprocessing_Binarize,Convert an image of text into a binarized (light and dark) view,r,high,road i image preprocessing returned not stored,3,x,floor,,OVER-TIGHT
+530,POST,cloudmersive.com,,POST,/ocr/preprocessing/image/get-page-angle,Preprocessing_GetPageAngle,Get the angle of the page / document / receipt,r,high,road i angle detection returned not stored,3,x,floor,,OVER-TIGHT
+531,POST,cloudmersive.com,,POST,/ocr/preprocessing/image/unrotate,Preprocessing_Unrotate,Detect and unrotate a document image,r,high,road i image preprocessing returned not stored,3,x,floor,,OVER-TIGHT
+532,POST,cloudrf.com,,POST,/path,path,Point-to-point path profile analysis (Tx to Rx),r,high,road i path analysis returned not stored,3,x,floor,,OVER-TIGHT
+533,POST,clubhouseapi.com,,POST,/get_release_notes,,gets release notes.,r,high,road i get release notes is read,1,r,read-verb,,ok
+534,POST,clubhouseapi.com,,POST,/get_topic,,looks up topic by ID.,r,high,road i lookup topic is read,1,r,read-verb,,ok
+535,POST,clubhouseapi.com,,POST,/invite_from_waitlist,,wave to another user on the waitlist to give them access,x,high,road 1b grants another user access,3,x,floor,,ok
+536,POST,clubhouseapi.com,,POST,/invite_to_app,,"invite a user to the app, using one of your invites",x,high,road 1a invites another person to app,3,x,floor,,ok
+537,POST,clubhouseapi.com,,POST,/leave_channel,,leave a channel.,w,high,rule 9 leave own channel no outside party named,3,x,floor,,FALSE-ALARM
+538,POST,clubhouseapi.com,,POST,/record_action_trails,,analytics,x,low,record creation vague description tighter class,3,x,floor,,ok
+539,POST,clubhouseapi.com,,POST,/search_clubs,,search clubs.,r,high,road i search is read,1,r,read-verb,,ok
+540,POST,cnab-online.herokuapp.com,,POST,/file,,Faz o upload de um arquivo,x,high,road 2 upload creates new processed file,3,x,floor,,ok
 541,GET,collegefootballdata.com,,GET,/game/box/advanced,getAdvancedBoxScore,Advanced box scores,r,high,reads box score,1,r,method,,ok
 542,GET,collegefootballdata.com,,GET,/live/plays,getLivePlays,Live metrics and PBP (Patreon only),r,high,reads live plays,1,r,method,,ok
 543,GET,collegefootballdata.com,,GET,/recruiting/teams,getRecruitingTeams,Team recruiting rankings and ratings,r,high,reads recruiting rankings,1,r,method,,ok
@@ -550,13 +550,13 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 550,W,contract-p.fit,contract-p.fit,PATCH,/integrations/{integration_id},patch_integration_resource,Update integration,w,high,updates own integration,2,w,floor,x-pile,ok
 551,W,contract-p.fit,contract-p.fit,PATCH,/roles/{role_id},patch_role_resource,Update role,w,high,rule 4 updates role no access text,3,x,other-noun,,FALSE-ALARM
 552,W,contract-p.fit,contract-p.fit,PATCH,/users/{user_id},patch_user_resource,Update user,w,high,rule 1 updates own user record,3,x,other-noun,,FALSE-ALARM
-553,POST,core.ac.uk,,POST,/journals/search,,Batch operation for search through journals,r,high,batch search journals,1,r,read-verb,,ok
+553,POST,core.ac.uk,,POST,/journals/search,,Batch operation for search through journals,r,high,road i batch search is read,1,r,read-verb,,ok
 554,GET,corrently.io,,GET,/alternative/easee/lastSessions,easeeSessions,Returns lastSession info for all easee wallboxes (chargers) given user has access to.,r,high,reads sessions for own chargers,1,r,method,,ok
 555,GET,corrently.io,,GET,/alternative/openmeter/meters,omMeters,Public shared smart meters installed in Germany and available for subservices and exploration.,r,high,reads public shared meters,1,r,method,,ok
 556,GET,corrently.io,,GET,/metering/reading,meteringGet,Meter Reading,r,high,reads own metered reading,1,r,method,,ok
-557,POST,corrently.io,,POST,/quittung/prepare,quittungPrepare,Allows to collect data with several requests (or a single) for a receipt.,w,high,prepares own receipt data,3,x,floor,,FALSE-ALARM
-558,POST,corrently.io,,POST,/quittung/tsesignature,quittungTSEsignature,Retrieve TSE (Technische Sicherheitseinrichtung) Signature only for a given receipt (Strom-Quittung).,r,high,retrieves own receipt signature,3,x,floor,,OVER-TIGHT
-559,POST,corrently.io,,POST,/stromkonto/prepareTransaction,prepareTransaction,Prepare Transaction,w,low,prepares transaction not yet confirmed,3,x,floor,,FALSE-ALARM
+557,POST,corrently.io,,POST,/quittung/prepare,quittungPrepare,Allows to collect data with several requests (or a single) for a receipt.,x,low,ambiguous prepare receipt could be create tighter class,3,x,floor,,ok
+558,POST,corrently.io,,POST,/quittung/tsesignature,quittungTSEsignature,Retrieve TSE (Technische Sicherheitseinrichtung) Signature only for a given receipt (Strom-Quittung).,r,high,road i retrieve signature is read,3,x,floor,,OVER-TIGHT
+559,POST,corrently.io,,POST,/stromkonto/prepareTransaction,prepareTransaction,Prepare Transaction,x,high,road 2 creates pending transaction request,3,x,floor,,ok
 560,W,cpy.re,cpy.re,DELETE,/api/v1/abuses/{abuseId}/messages/{abuseMessageId},,Delete an abuse message,w,high,deletes own moderation message,3,x,other-noun,,FALSE-ALARM
 561,W,cpy.re,cpy.re,DELETE,/api/v1/config/custom,delCustomConfig,Delete instance runtime configuration,w,high,rule 5 deletes own instance config,2,w,yours-noun,evidence,ok
 562,W,cpy.re,cpy.re,DELETE,/api/v1/server/followers/{nameWithHost},,Remove or reject a follower to your server,w,high,rule 7 own follower list change,2,w,floor,x-pile,ok
@@ -571,7 +571,7 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 571,GET,crossbrowsertesting.com,,GET,/screenshots/{target_screenshot_test_id}/{target_version_id}/comparison/parallel/{base_version_id},,Compare Screenshot Test Versions,r,high,reads screenshot comparison,1,r,method,,ok
 572,GET,cycat.org,,GET,/child/{uuid},get_child,,r,high,reads child uuids,1,r,method,,ok
 573,GET,cycat.org,,GET,/relationships/{uuid},get_relationships,,r,high,reads relationships,1,r,method,,ok
-574,POST,cycat.org,,POST,/propose,post_propose,,w,low,proposes own resource not yet public,3,x,floor,,FALSE-ALARM
+574,POST,cycat.org,,POST,/propose,post_propose,,x,high,road 2 propose creates new resource,3,x,floor,,ok
 575,W,data2crm.com,data2crm.com,DELETE,/application/entity/account/{account_id},deleteAccountEntity,DELETE for account,w,high,rule 1 deletes own account record,2,w,floor,x-pile,ok
 576,W,data2crm.com,data2crm.com,DELETE,/application/entity/campaign/bulk,deleteCampaignCollectionBulk,DELETE bulk  for campaign,w,high,deletes own campaign records,2,w,floor,x-pile,ok
 577,W,data2crm.com,data2crm.com,DELETE,/application/entity/comment/{comment_id},deleteCommentEntity,DELETE for comment,w,high,deletes own comment record,2,w,yours-noun,evidence,ok
@@ -599,14 +599,14 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 599,GET,dataatwork.org,,GET,/jobs/autocomplete,,Job Title Autocomplete,r,high,autocomplete job titles,1,r,method,,ok
 600,GET,dataatwork.org,,GET,/jobs/normalize,,Job Title Normalization,r,high,normalizes job title,1,r,method,,ok
 601,GET,datasette.local,,GET,/content.json,query,Execute a SQLite SQL query against the content database,r,high,GET read only query no writes,1,r,method,,ok
-602,POST,datumbox.com,,POST,/1.0/AdultContentDetection.json,AdultContentDetection,Classifies the Document as adult or noadult,r,high,POST classification no state change,3,x,floor,,OVER-TIGHT
-603,POST,datumbox.com,,POST,/1.0/EducationalDetection.json,EducationalDetection,Classifies the Document as educational or noeducational,r,high,POST classification no state change,3,x,floor,,OVER-TIGHT
-604,POST,datumbox.com,,POST,/1.0/SentimentAnalysis.json,SentimentAnalysis,Identifies the Sentiment of the Document,r,high,POST classification no state change,3,x,floor,,OVER-TIGHT
-605,POST,datumbox.com,,POST,/1.0/TopicClassification.json,TopicClassification,Identifies the Topic of the Document,r,high,POST classification no state change,3,x,floor,,OVER-TIGHT
-606,POST,deeparteffects.com,,POST,/noauth/upload,,,w,low,no text default own file upload,3,x,floor,,FALSE-ALARM
+602,POST,datumbox.com,,POST,/1.0/AdultContentDetection.json,AdultContentDetection,Classifies the Document as adult or noadult,r,high,road i classification returned not stored,3,x,floor,,OVER-TIGHT
+603,POST,datumbox.com,,POST,/1.0/EducationalDetection.json,EducationalDetection,Classifies the Document as educational or noeducational,r,high,road i classification returned not stored,3,x,floor,,OVER-TIGHT
+604,POST,datumbox.com,,POST,/1.0/SentimentAnalysis.json,SentimentAnalysis,Identifies the Sentiment of the Document,r,high,road i classification returned not stored,3,x,floor,,OVER-TIGHT
+605,POST,datumbox.com,,POST,/1.0/TopicClassification.json,TopicClassification,Identifies the Topic of the Document,r,high,road i classification returned not stored,3,x,floor,,OVER-TIGHT
+606,POST,deeparteffects.com,,POST,/noauth/upload,,,x,low,upload path implies create no description,3,x,floor,,ok
 607,GET,deutschebahn.com,,GET,/stations/{id},,This operation provides the master data for a german railway station selected by its station-id.,r,high,GET reads station master data,1,r,method,,ok
 608,GET,digitallocker.gov.in,,GET,/oauth2/2/xml/eaadhaar,Get e-Aadhaar Data in XML Format id,Get e-Aadhaar Data in XML Format,r,high,GET reads own eAadhaar data,1,r,method,,ok
-609,POST,digitallocker.gov.in,,POST,/oauth2/1/file/upload,Upload File to Locker id,Upload file to locker,w,high,POST own file upload to locker,3,x,floor,,FALSE-ALARM
+609,POST,digitallocker.gov.in,,POST,/oauth2/1/file/upload,Upload File to Locker id,Upload file to locker,x,high,road 2 upload creates new file,3,x,floor,,ok
 610,GET,digitalnz.org,,GET,/records/{record_id}/more_like_this.{format},,"The ""More Like This"" call returns similar records to the specified ID.",r,high,GET read similar records search,1,r,method,,ok
 611,W,digitalocean.com,digitalocean.com,DELETE,/v2/apps/{id},apps_delete,Delete an App,w,high,rule deletes caller own app,2,w,yours-noun,evidence,ok
 612,W,digitalocean.com,digitalocean.com,DELETE,/v2/cdn/endpoints/{cdn_id},cdn_delete_endpoint,Delete a CDN Endpoint,w,high,rule deletes caller own cdn endpoint,2,w,floor,x-pile,ok
@@ -706,45 +706,45 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 706,GET,dweet.io,,GET,/get/stored/alerts/for/{thing},getStoredAlerts,Read all the saved alerts for a thing from long term storage.  You can query a maximum of 1 day per request and a granularly of 1 hour.,r,high,GET reads stored alerts,1,r,method,,ok
 707,GET,dweet.io,,GET,/lock/{thing},lockThing,Reserve and lock a thing.,w,low,GET locks thing state change,1,r,method,,LEAK
 708,GET,envoice.in,,GET,/api/general/dateformats,GeneralApi_DateFormats,Return all of the platform supported Date Formats,r,high,GET reads date formats,1,r,method,,ok
-709,POST,envoice.in,,POST,/api/invoice/deletecategory,,Delete an existing invoice category,w,high,rule deletes own invoice category,3,x,floor,,FALSE-ALARM
-710,POST,envoice.in,,POST,/api/invoice/newcategory,,Create an invoice category,w,high,rule creates own invoice category,3,x,floor,,FALSE-ALARM
+709,POST,envoice.in,,POST,/api/invoice/deletecategory,,Delete an existing invoice category,w,high,rule 4 delete own category definition,3,x,floor,,FALSE-ALARM
+710,POST,envoice.in,,POST,/api/invoice/newcategory,,Create an invoice category,x,high,road 2 post create overrides rule 4 category,3,x,floor,,ok
 711,POST,envoice.in,,POST,/api/invoice/sendtoaccountant,InvoiceApi_SendToAccountant,Send the provided invoice to the accountant,x,high,road 1a sends invoice to accountant,3,x,floor,,ok
-712,POST,envoice.in,,POST,/api/order/delete,OrderApi_Delete,Delete an existing order,w,low,deletes own order record,3,x,floor,,FALSE-ALARM
-713,POST,envoice.in,,POST,/api/paymentlink/new,PaymentLinkApi_New,Create a payment link,w,high,rule 10 stores payment link no charge,3,x,floor,,FALSE-ALARM
-714,POST,envoice.in,,POST,/api/product/delete,ProductApi_Delete,Delete an existing product,w,high,rule deletes own product,3,x,floor,,FALSE-ALARM
-715,POST,envoice.in,,POST,/api/tax/new,TaxApi_New,Create a tax,w,high,rule creates own tax definition,3,x,floor,,FALSE-ALARM
-716,POST,envoice.in,,POST,/api/worktype/update,WorkTypeApi_Update,Update an existing work type,w,high,rule updates own work type,3,x,floor,,FALSE-ALARM
-717,POST,eos.local,,POST,/net/connections,connections,connections,r,high,POST returns connection statuses only,3,x,floor,,OVER-TIGHT
+712,POST,envoice.in,,POST,/api/order/delete,OrderApi_Delete,Delete an existing order,w,high,own order record deletion no outside party named,3,x,floor,,FALSE-ALARM
+713,POST,envoice.in,,POST,/api/paymentlink/new,PaymentLinkApi_New,Create a payment link,w,high,rule 10 payment link without charging,3,x,floor,,FALSE-ALARM
+714,POST,envoice.in,,POST,/api/product/delete,ProductApi_Delete,Delete an existing product,w,high,rule 4 delete own catalogue product,3,x,floor,,FALSE-ALARM
+715,POST,envoice.in,,POST,/api/tax/new,TaxApi_New,Create a tax,x,high,road 2 post create overrides rule 4 tax,3,x,floor,,ok
+716,POST,envoice.in,,POST,/api/worktype/update,WorkTypeApi_Update,Update an existing work type,w,high,road iii edit existing own work type,3,x,floor,,FALSE-ALARM
+717,POST,eos.local,,POST,/net/connections,connections,connections,r,high,road i returns statuses is read,3,x,floor,,OVER-TIGHT
 718,GET,epa.gov,,GET,/dfr_rest_services.get_aws_docs,,Placeholder,r,high,GET placeholder read only,1,r,method,,ok
 719,GET,epa.gov,,GET,/dfr_rest_services.get_cwa_rnc_compliance,,Detailed Facility Report CWA RNC Compliance Service,r,high,GET reads compliance report data,1,r,method,,ok
 720,GET,epa.gov,,GET,/rcra_rest_services.get_info_clusters,,Resource Conservation and Recovery Act (RCRA) Info Clusters Service,r,high,GET downloads cluster facility data,1,r,method,,ok
-721,POST,epa.gov,,POST,/dfr_rest_services.cwa_3_yr_sepscs_download,,"Downloads NPDES Compliance Schedule, Permit Schedule and Single Event Violation Information by month and quarter.",r,high,POST downloads report data,3,x,floor,,OVER-TIGHT
-722,POST,epa.gov,,POST,/dfr_rest_services.get_cwa_eff_alr,,Detailed Facility Report CWA Effluent ALR Service,r,high,POST reads effluent report data,3,x,floor,,OVER-TIGHT
-723,POST,epa.gov,,POST,/dfr_rest_services.get_cwa_eff_compliance,,Detailed Facility Report CWA Effluent Compliance Service,r,high,POST reads compliance report data,3,x,floor,,OVER-TIGHT
-724,POST,epa.gov,,POST,/dfr_rest_services.get_cwa_ps_compliance,,Detailed Facility Report CWA PSV Compliance Service,r,high,POST reads compliance report data,3,x,floor,,OVER-TIGHT
-725,POST,epa.gov,,POST,/dfr_rest_services.get_d80d90s_details,,Display detailed D80/D90 information for the facility for a given quarter or month,r,high,POST reads detail report data,3,x,floor,,OVER-TIGHT
-726,POST,epa.gov,,POST,/dfr_rest_services.get_dfr,,Detailed Facility Report Service,r,high,POST reads full facility report,3,x,floor,,OVER-TIGHT
-727,POST,epa.gov,,POST,/dfr_rest_services.get_enforcement_summary,,Detailed Facility Report Enforcement Summary Service,r,high,POST reads enforcement summary data,3,x,floor,,OVER-TIGHT
-728,POST,epa.gov,,POST,/dfr_rest_services.get_map,,Detailed Facility Report Map Service,r,high,POST returns facility coordinates,3,x,floor,,OVER-TIGHT
-729,POST,epa.gov,,POST,/dfr_rest_services.get_tri_history,,Detailed Facility Report TRI History Service,r,high,POST reads history report data,3,x,floor,,OVER-TIGHT
-730,POST,epa.gov,,POST,/dfr_rest_services.get_water_quality_details,,Displays detailed Water Quality information from EPA's Office of Water Systems,r,high,POST reads water quality data,3,x,floor,,OVER-TIGHT
-731,POST,epa.gov,,POST,/echo_rest_services.get_facilities,,Combined ECHO Facility Search Service,r,high,POST validates search returns query id,3,x,floor,,OVER-TIGHT
-732,POST,epa.gov,,POST,/rcra_rest_services.get_facility_info,,Resource Conservation and Recovery Act (RCRA) Facility Enhanced Search Service,r,high,POST search returns facility list,3,x,floor,,OVER-TIGHT
+721,POST,epa.gov,,POST,/dfr_rest_services.cwa_3_yr_sepscs_download,,"Downloads NPDES Compliance Schedule, Permit Schedule and Single Event Violation Information by month and quarter.",r,high,road i downloads report data is read,3,x,floor,,OVER-TIGHT
+722,POST,epa.gov,,POST,/dfr_rest_services.get_cwa_eff_alr,,Detailed Facility Report CWA Effluent ALR Service,r,high,road i obtains data is read,3,x,floor,,OVER-TIGHT
+723,POST,epa.gov,,POST,/dfr_rest_services.get_cwa_eff_compliance,,Detailed Facility Report CWA Effluent Compliance Service,r,high,road i obtains data is read,3,x,floor,,OVER-TIGHT
+724,POST,epa.gov,,POST,/dfr_rest_services.get_cwa_ps_compliance,,Detailed Facility Report CWA PSV Compliance Service,r,high,road i obtains data is read,3,x,floor,,OVER-TIGHT
+725,POST,epa.gov,,POST,/dfr_rest_services.get_d80d90s_details,,Display detailed D80/D90 information for the facility for a given quarter or month,r,high,road i displays data is read,3,x,floor,,OVER-TIGHT
+726,POST,epa.gov,,POST,/dfr_rest_services.get_dfr,,Detailed Facility Report Service,r,high,road i returns report data is read,3,x,floor,,OVER-TIGHT
+727,POST,epa.gov,,POST,/dfr_rest_services.get_enforcement_summary,,Detailed Facility Report Enforcement Summary Service,r,high,road i obtains data is read,3,x,floor,,OVER-TIGHT
+728,POST,epa.gov,,POST,/dfr_rest_services.get_map,,Detailed Facility Report Map Service,r,high,road i returns coordinates is read,3,x,floor,,OVER-TIGHT
+729,POST,epa.gov,,POST,/dfr_rest_services.get_tri_history,,Detailed Facility Report TRI History Service,r,high,road i obtains data is read,3,x,floor,,OVER-TIGHT
+730,POST,epa.gov,,POST,/dfr_rest_services.get_water_quality_details,,Displays detailed Water Quality information from EPA's Office of Water Systems,r,high,road i displays data is read,3,x,floor,,OVER-TIGHT
+731,POST,epa.gov,,POST,/echo_rest_services.get_facilities,,Combined ECHO Facility Search Service,r,high,road i validates and searches is read,3,x,floor,,OVER-TIGHT
+732,POST,epa.gov,,POST,/rcra_rest_services.get_facility_info,,Resource Conservation and Recovery Act (RCRA) Facility Enhanced Search Service,r,high,road i returns facilities is read,3,x,floor,,OVER-TIGHT
 733,GET,etherpad.local,,GET,/getHTML,getHTMLUsingGET,returns the text of a pad formatted as HTML,r,high,GET reads pad html,1,r,method,,ok
 734,GET,etherpad.local,,GET,/getSavedRevisionsCount,getSavedRevisionsCountUsingGET,,r,high,GET reads revision count,1,r,method,,ok
 735,GET,etherpad.local,,GET,/listSavedRevisions,listSavedRevisionsUsingGET,,r,high,GET lists saved revisions,1,r,method,,ok
-736,POST,etherpad.local,,POST,/copyPadWithoutHistory,copyPadWithoutHistoryUsingPOST,,w,low,no text copies own pad,3,x,floor,,FALSE-ALARM
-737,POST,etherpad.local,,POST,/createGroupPad,createGroupPadUsingPOST,creates a new pad in this group,w,high,creates own group pad,3,x,floor,,FALSE-ALARM
-738,POST,etherpad.local,,POST,/getAttributePool,getAttributePoolUsingPOST,,r,high,POST reads attribute pool,1,r,read-verb,,ok
-739,POST,etherpad.local,,POST,/getChatHead,getChatHeadUsingPOST,returns the chatHead (chat-message) of the pad,r,high,POST reads chat head,1,r,read-verb,,ok
-740,POST,etherpad.local,,POST,/getRevisionsCount,getRevisionsCountUsingPOST,returns the number of revisions of this pad,r,high,POST reads revision count,1,r,read-verb,,ok
-741,POST,etherpad.local,,POST,/getStats,getStatsUsingPOST,,r,high,POST reads stats,1,r,read-verb,,ok
-742,POST,etherpad.local,,POST,/listAllPads,listAllPadsUsingPOST,list all the pads,r,high,POST lists own pads,1,r,read-verb,,ok
-743,POST,etherpad.local,,POST,/restoreRevision,restoreRevisionUsingPOST,,w,low,no text restores own pad,3,x,floor,,FALSE-ALARM
-744,POST,europeana.eu,,POST,/record/v2/search.json,searchRecordsPost,search for records post,r,high,POST search records,1,r,read-verb,,ok
-745,POST,exude-api.herokuapp.com,,POST,/exude/{type}/file,filterFileDataStoppings,Filter the stopping words from the provided input file,r,low,filters input file no storage,3,x,floor,,OVER-TIGHT
-746,POST,facecheck.id,,POST,/api/info,,"Returns remaining search credits, search engine online status, and number of indexed faces",r,high,POST returns account info only,3,x,floor,,OVER-TIGHT
-747,POST,faceidentity-beta.azurewebsites.net,,POST,/authentication/customer/token,authenticateUser,Get Token,w,low,obtains own auth token,3,x,floor,,FALSE-ALARM
+736,POST,etherpad.local,,POST,/copyPadWithoutHistory,copyPadWithoutHistoryUsingPOST,,x,high,road 2 copy creates new pad,3,x,floor,,ok
+737,POST,etherpad.local,,POST,/createGroupPad,createGroupPadUsingPOST,creates a new pad in this group,x,high,road 2 creates new pad in group,3,x,floor,,ok
+738,POST,etherpad.local,,POST,/getAttributePool,getAttributePoolUsingPOST,,r,high,road i get pool is read,1,r,read-verb,,ok
+739,POST,etherpad.local,,POST,/getChatHead,getChatHeadUsingPOST,returns the chatHead (chat-message) of the pad,r,high,road i returns chat head is read,1,r,read-verb,,ok
+740,POST,etherpad.local,,POST,/getRevisionsCount,getRevisionsCountUsingPOST,returns the number of revisions of this pad,r,high,road i returns count is read,1,r,read-verb,,ok
+741,POST,etherpad.local,,POST,/getStats,getStatsUsingPOST,,r,high,road i returns stats is read,1,r,read-verb,,ok
+742,POST,etherpad.local,,POST,/listAllPads,listAllPadsUsingPOST,list all the pads,r,high,road i list is read,1,r,read-verb,,ok
+743,POST,etherpad.local,,POST,/restoreRevision,restoreRevisionUsingPOST,,w,high,road iii edit existing own pad content,3,x,floor,,FALSE-ALARM
+744,POST,europeana.eu,,POST,/record/v2/search.json,searchRecordsPost,search for records post,r,high,road i search is read,1,r,read-verb,,ok
+745,POST,exude-api.herokuapp.com,,POST,/exude/{type}/file,filterFileDataStoppings,Filter the stopping words from the provided input file,r,high,road i filter text returned not stored,3,x,floor,,OVER-TIGHT
+746,POST,facecheck.id,,POST,/api/info,,"Returns remaining search credits, search engine online status, and number of indexed faces",r,high,road i returns status info is read,3,x,floor,,OVER-TIGHT
+747,POST,faceidentity-beta.azurewebsites.net,,POST,/authentication/customer/token,authenticateUser,Get Token,x,high,road 2 post create session token,3,x,floor,,ok
 748,GET,fec.gov,,GET,/calendar-dates/,,,r,high,GET reads calendar dates,1,r,method,,ok
 749,GET,fec.gov,,GET,/committee/{committee_id}/candidates/,,,r,high,GET reads candidate info,1,r,method,,ok
 750,GET,fec.gov,,GET,/electioneering/totals/by_candidate/,,,r,high,GET reads totals data,1,r,method,,ok
@@ -785,7 +785,7 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 785,W,files.com,files.com,PATCH,/users/{id},PatchUsersId,Update User,w,high,rule 2 updates account plain details,3,x,other-noun,,FALSE-ALARM
 786,GET,firebrowse.org,,GET,/Samples/Clinical,Clinical,"Retrieve TCGA CDEs verbatim, i.e. not normalized by Firehose.",r,high,GET reads clinical data,1,r,method,,ok
 787,GET,firmalyzer.com,,GET,/firmware/{firmware_hash}/weak-keys,get_weak_keys,Get weak crypto keys with short length,r,high,GET reads weak keys report,1,r,method,,ok
-788,POST,fisheye.local,,POST,/rest-service-fe/search-v1/reviewsForChangesets/{repository},getReviewsForChangesets,,r,high,POST retrieves review list,1,r,read-verb,,ok
+788,POST,fisheye.local,,POST,/rest-service-fe/search-v1/reviewsForChangesets/{repository},getReviewsForChangesets,,r,high,road i retrieve list is read,1,r,read-verb,,ok
 789,W,flat.io,flat.io,DELETE,/classes/{class}/archive,unarchiveClass,Unarchive the class,w,low,unarchive marks own class active,2,w,yours-noun,evidence,ok
 790,GET,funtranslations.com,,GET,/translate/us2uk,,,r,high,GET translates text,1,r,method,,ok
 791,W,gambitcomm.local,gambitcomm.local,PUT,/mimic/agent/{agentNum}/ipalias/start/{IP}/{port},start_ipalias,Starts an existing ipalias for the agent.,w,low,starts own agent ip alias,3,x,live-verb,,FALSE-ALARM
@@ -812,7 +812,7 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 812,W,gambitcomm.local,gambitcomm.local,PUT,/mimic/agent/{agentNum}/value/state/set/{object}/{state},set_state,Set the state of a MIB object object,w,high,rule5 own MIB config,2,w,floor,x-pile,ok
 813,W,gambitcomm.local,gambitcomm.local,PUT,/mimic/set/persistent,store_save,This operation flushes all global objects which need to be made persistent to disk.,w,low,own cache flush to disk,2,w,floor,x-pile,ok
 814,GET,geneea.com,,GET,/s1/entities,entitiesGet,Performs named-entity recognition on the given document,r,high,read named entity recognition,1,r,method,,ok
-815,POST,geneea.com,,POST,/s1/sentiment,sentimentPost,Performs sentiment analysis on the given document,r,high,read sentiment analysis no change,3,x,floor,,OVER-TIGHT
+815,POST,geneea.com,,POST,/s1/sentiment,sentimentPost,Performs sentiment analysis on the given document,r,high,road i sentiment analysis returned not stored,3,x,floor,,OVER-TIGHT
 816,GET,geodesystems.com,,GET,/repository/search/type/bio_dicom,search_bio_dicom,Search API for 'DICOM File' entry type,r,high,search own repository entries,1,r,method,,ok
 817,GET,geodesystems.com,,GET,/repository/search/type/campaign_expenditures,search_campaign_expenditures,Search API for 'Campaign Expenditures' entry type,r,high,search own repository entries,1,r,method,,ok
 818,GET,geodesystems.com,,GET,/repository/search/type/feccandidates,search_feccandidates,Search API for 'Candidates' entry type,r,high,search own repository entries,1,r,method,,ok
@@ -949,12 +949,12 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 949,GET,gov.bc.ca,,GET,/config,config_list,,r,high,read general configuration,1,r,method,,ok
 950,GET,gov.bc.ca,,GET,/geomarks/{geomarkId}/boundingBox.{fileFormatExtension},,Gets the bounding box of the geomark,r,high,read bounding box computation,1,r,method,,ok
 951,GET,gov.bc.ca,,GET,/occupants/addresses.{outputFormat},,Geocode an address and identify site occupants,r,high,read geocode lookup,1,r,method,,ok
-952,POST,gov.bc.ca,,POST,/directions.{outputFormat},,"Get the directions, path, distance and travel time between a series of geographic points",r,high,read directions computation no change,3,x,floor,,OVER-TIGHT
-953,POST,gov.bc.ca,,POST,/distance/betweenPairs.{outputFormat},,Get distance and travel time between each pair of geographic points,r,high,read distance computation no change,3,x,floor,,OVER-TIGHT
-954,POST,gov.bc.ca,,POST,/geomarks/new,,Create a new geomark,w,high,rule1 create own geomark record,3,x,floor,,FALSE-ALARM
-955,POST,gov.bc.ca,,POST,/truck/optimalRoute.{outputFormat},,"Get the path, distance and travel time between a start point and a series of end points which are reordered to minimize total distance or time.",r,high,read route computation no change,3,x,floor,,OVER-TIGHT
-956,POST,gov.bc.ca,,POST,/truck/route.{outputFormat},,"Get the path, distance and travel time between a series of geographic points",r,high,read route computation no change,3,x,floor,,OVER-TIGHT
-957,POST,graphhopper.com,,POST,/cluster,solveClusteringProblem,POST Cluster Endpoint,r,high,read clustering solution computation,3,x,floor,,OVER-TIGHT
+952,POST,gov.bc.ca,,POST,/directions.{outputFormat},,"Get the directions, path, distance and travel time between a series of geographic points",r,high,road i get directions is read,3,x,floor,,OVER-TIGHT
+953,POST,gov.bc.ca,,POST,/distance/betweenPairs.{outputFormat},,Get distance and travel time between each pair of geographic points,r,high,road i get distance is read,3,x,floor,,OVER-TIGHT
+954,POST,gov.bc.ca,,POST,/geomarks/new,,Create a new geomark,x,high,road 2 create new geomark,3,x,floor,,ok
+955,POST,gov.bc.ca,,POST,/truck/optimalRoute.{outputFormat},,"Get the path, distance and travel time between a start point and a series of end points which are reordered to minimize total distance or time.",r,high,road i get route is read,3,x,floor,,OVER-TIGHT
+956,POST,gov.bc.ca,,POST,/truck/route.{outputFormat},,"Get the path, distance and travel time between a series of geographic points",r,high,road i get route is read,3,x,floor,,OVER-TIGHT
+957,POST,graphhopper.com,,POST,/cluster,solveClusteringProblem,POST Cluster Endpoint,r,high,road i solve returns solution not stored,3,x,floor,,OVER-TIGHT
 958,W,gsmtasks.com,gsmtasks.com,DELETE,/exports/{id}/,exports_destroy,,w,low,delete own export no text,2,w,yours-noun,evidence,ok
 959,W,gsmtasks.com,gsmtasks.com,DELETE,/formrules/{id}/,formrules_destroy,,w,low,delete own form rule no text,2,w,floor,x-pile,ok
 960,W,gsmtasks.com,gsmtasks.com,DELETE,/notification_templates/{id}/,notification_templates_destroy,,w,low,delete own template no text,2,w,yours-noun,evidence,ok
@@ -984,12 +984,12 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 984,GET,haloapi.com,,GET,/hw2/cards,Halo-Wars-2-Cards,Halo Wars 2 - Cards,r,high,read game cards data,1,r,method,,ok
 985,GET,haloapi.com,,GET,/hw2/player-leaderboards/csr/{seasonId}/{playlistId},Halo-Wars-2-Leaderboard-Player-CSR,Halo Wars 2 - Leaderboard - Player CSR,r,high,read leaderboard data,1,r,method,,ok
 986,GET,handwrytten.com,,GET,/templateCategories/list,getTemplateCategories,List template categories,r,high,read list template categories,1,r,method,,ok
-987,POST,handwrytten.com,,POST,/cards/uploadCustomLogo,uploadCustomLogo,upload logo or cover image for card,w,low,upload own asset no description text,3,x,floor,,FALSE-ALARM
-988,POST,handwrytten.com,,POST,/giftCards/view,giftCardDetails,Lists information on gift cards,r,high,read gift card information,3,x,floor,,OVER-TIGHT
-989,POST,handwrytten.com,,POST,/profile/deleteRecipient,deleteRecipient,deletes an existing recipient address,w,high,rule1 delete own recipient record,3,x,floor,,FALSE-ALARM
-990,POST,handwrytten.com,,POST,/profile/recipientsList,recipientsList,list the addresses in the user's account,r,high,read list own addresses,3,x,floor,,OVER-TIGHT
-991,POST,handwrytten.com,,POST,/templateCategories/list,getTemplateCategoriesAuthorized,List template categories,r,high,read list template categories,1,r,read-verb,,ok
-992,POST,handwrytten.com,,POST,/templates/delete,deleteTemplate,Deletes a users template,w,high,rule1 delete own template record,3,x,floor,,FALSE-ALARM
+987,POST,handwrytten.com,,POST,/cards/uploadCustomLogo,uploadCustomLogo,upload logo or cover image for card,x,high,road 2 upload creates new logo,3,x,floor,,ok
+988,POST,handwrytten.com,,POST,/giftCards/view,giftCardDetails,Lists information on gift cards,r,high,road i list gift cards is read,3,x,floor,,OVER-TIGHT
+989,POST,handwrytten.com,,POST,/profile/deleteRecipient,deleteRecipient,deletes an existing recipient address,w,high,rule 1 own recipient record deletion,3,x,floor,,FALSE-ALARM
+990,POST,handwrytten.com,,POST,/profile/recipientsList,recipientsList,list the addresses in the user's account,r,high,road i list is read,3,x,floor,,OVER-TIGHT
+991,POST,handwrytten.com,,POST,/templateCategories/list,getTemplateCategoriesAuthorized,List template categories,r,high,road i list categories is read,1,r,read-verb,,ok
+992,POST,handwrytten.com,,POST,/templates/delete,deleteTemplate,Deletes a users template,w,high,rule 4 delete own template definition,3,x,floor,,FALSE-ALARM
 993,GET,healthcare.gov,,GET,/api/states{mediaTypeExtension},,,r,high,read page content,1,r,method,,ok
 994,GET,healthcare.gov,,GET,/api/topics{mediaTypeExtension},,,r,high,read page content,1,r,method,,ok
 995,W,here.com,here.com,DELETE,/associations/v3/{trackingId}/rules/{ruleId},,Disassociates a device and a rule,w,high,rule1 own device rule disassociate,2,w,yours-noun,evidence,ok
@@ -1019,9 +1019,9 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1019,GET,icons8.com,,GET,/api/iconsets/v3/total?since={since},Totals,Totals,r,high,totals lookup,1,r,method,,ok
 1020,W,id4i.de,id4i.de,DELETE,/api/v1/organizations/{organizationId}/addresses/billing,deleteOrganizationBillingAddress,Remove billing address,w,high,rule10 remove own billing address,3,x,other-noun,,FALSE-ALARM
 1021,W,id4i.de,id4i.de,PUT,/api/v1/organizations/{organizationId}/partner,addPartnerOrganization,Add partner,w,low,add partner unclear access grant,3,x,other-noun,,FALSE-ALARM
-1022,POST,ideaconsult.net,,POST,/select,solrquery_post,Apache Solr powered search,r,high,solr search query,3,x,floor,,OVER-TIGHT
+1022,POST,ideaconsult.net,,POST,/select,solrquery_post,Apache Solr powered search,r,high,road i search is read,3,x,floor,,OVER-TIGHT
 1023,GET,idtbeyond.com,,GET,/iatu/topups/reports/all.csv,,List of account topups in CSV,r,high,csv report of own topups,1,r,method,,ok
-1024,POST,idtbeyond.com,,POST,/iatu/topups/reports,,Search topups transactions,r,high,search own topups transactions,3,x,floor,,OVER-TIGHT
+1024,POST,idtbeyond.com,,POST,/iatu/topups/reports,,Search topups transactions,r,high,road i search transactions is read,3,x,floor,,OVER-TIGHT
 1025,W,illumidesk.com,illumidesk.com,DELETE,/v1/{namespace}/oauth/applications/{application}/,oauth_application_delete,Delete an application by id,w,high,delete own oauth application,2,w,yours-noun,evidence,ok
 1026,W,illumidesk.com,illumidesk.com,DELETE,/v1/users/{user}/emails/{email_id}/,users_emails_delete,Delete an email address,w,high,rule1 delete own email record,3,x,other-noun,,FALSE-ALARM
 1027,W,illumidesk.com,illumidesk.com,DELETE,/v1/users/profiles/{user}/,users_delete,Delete a user,x,high,rule2 delete user account removes access,3,x,other-noun,,ok
@@ -1083,7 +1083,7 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1083,W,jira.local,jira.local,PUT,/api/2/workflowscheme/{id}/draft,updateDraft,,w,high,update own draft scheme,2,w,yours-noun,evidence,ok
 1084,W,jira.local,jira.local,PUT,/api/2/workflowscheme/{id}/draft/default,updateDraftDefault,,w,high,set own draft default,2,w,yours-noun,evidence,ok
 1085,W,jira.local,jira.local,PUT,/api/2/workflowscheme/{id}/draft/issuetype/{issueType},setDraftIssueType,,w,high,set own draft issuetype,2,w,floor,x-pile,ok
-1086,POST,jirafe.com,,POST,/{siteId}/product,postProduct,Send a product for the given site,w,low,send product unclear if public,3,x,floor,,FALSE-ALARM
+1086,POST,jirafe.com,,POST,/{siteId}/product,postProduct,Send a product for the given site,x,high,road iv sends product data,3,x,floor,,ok
 1087,W,jumpseller.com,jumpseller.com,DELETE,/customer_categories/{id}/customers.json,,Delete Customers from an existing CustomerCategory.,w,high,remove customers from own category,2,w,yours-noun,evidence,ok
 1088,W,jumpseller.com,jumpseller.com,DELETE,/customers/{id}/fields/{field_id},,Delete a Customer Additional Field.,w,high,delete own customer field,2,w,yours-noun,evidence,ok
 1089,W,jumpseller.com,jumpseller.com,PUT,/customers/{id}/fields/{field_id},,Update a Customer Additional Field.,w,high,update own customer field,2,w,yours-noun,evidence,ok
@@ -1147,8 +1147,8 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1147,W,kubernetes.io,kubernetes.io,PUT,/apis/networking.k8s.io/v1/namespaces/{namespace}/networkpolicies/{name}/status,replaceNetworkingV1NamespacedNetworkPolicyStatus,,w,high,replace own networkpolicy status,2,w,floor,x-pile,ok
 1148,W,launchdarkly.com,launchdarkly.com,DELETE,/flags/{projectKey}/{featureFlagKey},deleteFeatureFlag,Delete a feature flag in all environments. Be careful-- only delete feature flags that are no longer being used by your application.,w,high,delete own feature flag,2,w,yours-noun,evidence,ok
 1149,W,launchdarkly.com,launchdarkly.com,PATCH,/roles/{customRoleKey},patchCustomRole,Modify a custom role by key.,w,high,rule4 modify role no access text,3,x,other-noun,,FALSE-ALARM
-1150,POST,libretranslate.local,,POST,/translate,,Translate text from a language to another,r,high,translate text no state change,3,x,floor,,OVER-TIGHT
-1151,POST,libretranslate.local,,POST,/translate_file,,Translate file from a language to another,r,high,translate file no state change,3,x,floor,,OVER-TIGHT
+1150,POST,libretranslate.local,,POST,/translate,,Translate text from a language to another,r,high,road i translate returned not stored,3,x,floor,,OVER-TIGHT
+1151,POST,libretranslate.local,,POST,/translate_file,,Translate file from a language to another,r,high,road i translate returned not stored,3,x,floor,,OVER-TIGHT
 1152,W,linode.com,linode,DELETE,/account/payment-methods/{paymentMethodId},deletePaymentMethod,Payment Method Delete,w,high,rule10 deactivate own payment method,3,x,other-noun,,FALSE-ALARM
 1153,W,linode.com,linode,DELETE,/databases/mongodb/instances/{instanceId}/backups/{backupId},deleteDatabaseMongoDBInstanceBackup,Managed MongoDB Database Backup Delete,w,high,delete own database backup,3,x,other-noun,,FALSE-ALARM
 1154,W,linode.com,linode,DELETE,/databases/mysql/instances/{instanceId}/backups/{backupId},deleteDatabaseMySQLInstanceBackup,Managed MySQL Database Backup Delete,w,high,delete own database backup,3,x,other-noun,,FALSE-ALARM
@@ -1172,14 +1172,14 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1172,W,linode.com,linode,PUT,/nodebalancers/{nodeBalancerId}/configs/{configId}/nodes/{nodeId},updateNodeBalancerNode,Node Update,w,high,update own nodebalancer node,2,w,yours-noun,evidence,ok
 1173,W,linode.com,linode,PUT,/profile,updateProfile,Profile Update,w,high,rule2 update own profile,2,w,floor,x-pile,ok
 1174,W,linode.com,linode,PUT,/profile/tokens/{tokenId},updatePersonalAccessToken,Personal Access Token Update,w,high,rule6 update own access token,2,w,floor,x-pile,ok
-1175,POST,ljaero.com,,POST,/us/v1/aerodromes/route-query,aerodromes_by_route_us_v1_aerodromes_route_query_post,Retrieve aerodromes found along a route.,r,high,route query no state change,3,x,floor,,OVER-TIGHT
-1176,POST,ljaero.com,,POST,/us/v1/airspace/polygon-query,asp_by_poly_us_v1_airspace_polygon_query_post,Retrieve all requested types of airspace located within given GeoJSON Polygon.,r,high,polygon query no state change,3,x,floor,,OVER-TIGHT
-1177,POST,ljaero.com,,POST,/us/v1/obstacles/distance-query,obstacles_by_distance_us_v1_obstacles_distance_query_post,Retrieve obstacles within given distance of location.,r,high,distance query no state change,3,x,floor,,OVER-TIGHT
-1178,POST,ljaero.com,,POST,/us/v1/obstacles/polygon-query,obstacles_by_poly_us_v1_obstacles_polygon_query_post,Retrieve obstacles located within given area.,r,high,polygon query no state change,3,x,floor,,OVER-TIGHT
-1179,POST,ljaero.com,,POST,/us/v1/restrictions/distance-query,tfr_by_distance_us_v1_restrictions_distance_query_post,Retrieve flight restrictions applicable within given distance of location.,r,high,distance query no state change,3,x,floor,,OVER-TIGHT
-1180,POST,ljaero.com,,POST,/us/v1/restrictions/route-query,tfr_by_route_us_v1_restrictions_route_query_post,Retrieve flight restrictions applicable along route.,r,high,route query no state change,3,x,floor,,OVER-TIGHT
-1181,POST,ljaero.com,,POST,/us/v1/ssa/route-query,ssa_by_route_us_v1_ssa_route_query_post,Retrieve all special security areas traversed by route.,r,high,route query no state change,3,x,floor,,OVER-TIGHT
-1182,POST,ljaero.com,,POST,/us/v1/wx-forecast/polygon-query,wx_by_poly_us_v1_wx_forecast_polygon_query_post,Retrieve forecast values within given GeoJSON polygon for all requested weather elements and time periods.,r,high,polygon query no state change,3,x,floor,,OVER-TIGHT
+1175,POST,ljaero.com,,POST,/us/v1/aerodromes/route-query,aerodromes_by_route_us_v1_aerodromes_route_query_post,Retrieve aerodromes found along a route.,r,high,road i retrieve returned not stored,3,x,floor,,OVER-TIGHT
+1176,POST,ljaero.com,,POST,/us/v1/airspace/polygon-query,asp_by_poly_us_v1_airspace_polygon_query_post,Retrieve all requested types of airspace located within given GeoJSON Polygon.,r,high,road i retrieve returned not stored,3,x,floor,,OVER-TIGHT
+1177,POST,ljaero.com,,POST,/us/v1/obstacles/distance-query,obstacles_by_distance_us_v1_obstacles_distance_query_post,Retrieve obstacles within given distance of location.,r,high,road i retrieve returned not stored,3,x,floor,,OVER-TIGHT
+1178,POST,ljaero.com,,POST,/us/v1/obstacles/polygon-query,obstacles_by_poly_us_v1_obstacles_polygon_query_post,Retrieve obstacles located within given area.,r,high,road i retrieve area query,3,x,floor,,OVER-TIGHT
+1179,POST,ljaero.com,,POST,/us/v1/restrictions/distance-query,tfr_by_distance_us_v1_restrictions_distance_query_post,Retrieve flight restrictions applicable within given distance of location.,r,high,road i retrieve distance query,3,x,floor,,OVER-TIGHT
+1180,POST,ljaero.com,,POST,/us/v1/restrictions/route-query,tfr_by_route_us_v1_restrictions_route_query_post,Retrieve flight restrictions applicable along route.,r,high,road i retrieve route query,3,x,floor,,OVER-TIGHT
+1181,POST,ljaero.com,,POST,/us/v1/ssa/route-query,ssa_by_route_us_v1_ssa_route_query_post,Retrieve all special security areas traversed by route.,r,high,road i retrieve route query,3,x,floor,,OVER-TIGHT
+1182,POST,ljaero.com,,POST,/us/v1/wx-forecast/polygon-query,wx_by_poly_us_v1_wx_forecast_polygon_query_post,Retrieve forecast values within given GeoJSON polygon for all requested weather elements and time periods.,r,high,road i retrieve forecast query,3,x,floor,,OVER-TIGHT
 1183,W,loket.nl,loket.nl,DELETE,/providers/employers/contractcodes/{contractCodeId},DeleteContractCodeByContractCodeId,Delete a contract code record,w,high,delete own contract code,2,w,yours-noun,evidence,ok
 1184,W,loket.nl,loket.nl,DELETE,/providers/employers/employees/children/{childId},DeleteChildByChildId,Delete a specific child record,w,high,rule1 delete own child record,2,w,yours-noun,evidence,ok
 1185,W,loket.nl,loket.nl,DELETE,/providers/employers/employees/employments/{employmentId}/documents/{documentId}/signature,DeleteSignatureByEmploymentIdAndDocumentId,Delete signature - Employment,w,high,delete own signature process,2,w,floor,x-pile,ok
@@ -1203,7 +1203,7 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1203,W,loket.nl,loket.nl,PUT,/providers/employers/employees/employments/socialsecurityconfigurations/{socialSecurityConfigurationId},PutSocialSecurityConfigurationBySocialSecurityConfigurationId,Edit the details of a social security record,w,high,rule4 own definition social security config,3,x,other-noun,,FALSE-ALARM
 1204,W,loket.nl,loket.nl,PUT,/providers/employers/functions/{functionId},PutFunctionByFunctionId,Edit the details of a function,w,high,rule4 own definition function,2,w,yours-noun,evidence,ok
 1205,W,loket.nl,loket.nl,PUT,/providers/employers/workflows/{workflowId},PutWorkflowByWorkflowId,Change the workflow,w,high,rule4 own definition workflow,2,w,yours-noun,evidence,ok
-1206,POST,lumminary.com,,POST,/products/{productId}/authorizations/{authorizationId}/credentials,post_authorization_result_credentials,Provide a result for the authorization,w,low,unclear reach provide authorization credentials,3,x,floor,,FALSE-ALARM
+1206,POST,lumminary.com,,POST,/products/{productId}/authorizations/{authorizationId}/credentials,post_authorization_result_credentials,Provide a result for the authorization,x,low,rule ii creates credential result for authorization,3,x,floor,,ok
 1207,W,magento.com,magento.com,DELETE,/V1/bundle-products/{sku}/options/{optionId},bundleProductOptionRepositoryV1DeleteByIdDelete,bundle-products/{sku}/options/{optionId},w,high,own catalog record bundle option,2,w,floor,x-pile,ok
 1208,W,magento.com,magento.com,DELETE,/V1/carts/{cartId}/giftCards/{giftCardCode},,carts/{cartId}/giftCards/{giftCardCode},w,high,own cart giftcard removal,2,w,floor,x-pile,ok
 1209,W,magento.com,magento.com,DELETE,/V1/carts/mine/coupons,quoteCouponManagementV1RemoveDelete,carts/mine/coupons,w,high,own cart coupon removal,3,x,other-noun,,FALSE-ALARM
@@ -1233,29 +1233,29 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1233,W,maif.local,maif.local,PUT,/api/auths/{id},updateGlobalAuthModule,Update one global auth. module config,w,high,rule5 admin instance auth config,2,w,floor,x-pile,ok
 1234,W,maif.local,maif.local,PUT,/api/data-exporter-configs/_bulk,updateBulkDataExporterConfig,Update a data exporter configs,w,high,own exporter config bulk update,2,w,floor,x-pile,ok
 1235,W,maif.local,maif.local,PUT,/api/groups/{serviceGroupId},updateGroup,Update a service group,w,high,rule4 own service group definition,3,x,other-noun,,FALSE-ALARM
-1236,POST,mandrillapp.com,,POST,/exports/whitelist.json,,,x,high,rule12 triggers export job each call,3,x,floor,,ok
-1237,POST,mandrillapp.com,,POST,/ips/check-custom-dns.json,,,r,high,dns validation test,1,r,read-verb,,ok
-1238,POST,mandrillapp.com,,POST,/ips/start-warmup.json,,,x,low,rule12 triggers warmup process each call,3,x,floor,,ok
-1239,POST,mandrillapp.com,,POST,/messages/cancel-scheduled.json,,,w,high,rule9 cancel own scheduled email,3,x,floor,,FALSE-ALARM
-1240,POST,mandrillapp.com,,POST,/messages/list-scheduled.json,,,r,high,query own scheduled emails,1,r,read-verb,,ok
-1241,POST,mandrillapp.com,,POST,/metadata/delete.json,,,w,high,delete own custom metadata field,3,x,floor,,FALSE-ALARM
-1242,POST,mandrillapp.com,,POST,/rejects/add.json,,,w,high,add to own rejection blacklist,3,x,floor,,FALSE-ALARM
-1243,POST,mandrillapp.com,,POST,/senders/check-domain.json,,,w,low,checks and auto adds own domain,1,r,read-verb,,LEAK
-1244,POST,mandrillapp.com,,POST,/subaccounts/delete.json,,,w,high,delete own subaccount,3,x,floor,,FALSE-ALARM
-1245,POST,mandrillapp.com,,POST,/subaccounts/pause.json,,,w,high,pause own subaccount sending,3,x,floor,,FALSE-ALARM
-1246,POST,mandrillapp.com,,POST,/templates/add.json,,,w,high,add own template,3,x,floor,,FALSE-ALARM
-1247,POST,mandrillapp.com,,POST,/templates/render.json,,,r,high,render template returns html no change,3,x,floor,,OVER-TIGHT
+1236,POST,mandrillapp.com,,POST,/exports/whitelist.json,,,x,high,rule 12 begins export job each call,3,x,floor,,ok
+1237,POST,mandrillapp.com,,POST,/ips/check-custom-dns.json,,,r,high,road i tests domain validity,1,r,read-verb,,ok
+1238,POST,mandrillapp.com,,POST,/ips/start-warmup.json,,,x,high,rule 12 begins warmup process job,3,x,floor,,ok
+1239,POST,mandrillapp.com,,POST,/messages/cancel-scheduled.json,,,w,high,rule 9 cancels own scheduled email,3,x,floor,,FALSE-ALARM
+1240,POST,mandrillapp.com,,POST,/messages/list-scheduled.json,,,r,high,road i queries own scheduled emails,1,r,read-verb,,ok
+1241,POST,mandrillapp.com,,POST,/metadata/delete.json,,,w,high,rule 4 deletes own definition field,3,x,floor,,FALSE-ALARM
+1242,POST,mandrillapp.com,,POST,/rejects/add.json,,,x,high,rule ii creates new blacklist entry,3,x,floor,,ok
+1243,POST,mandrillapp.com,,POST,/senders/check-domain.json,,,r,low,road i checks domain settings primarily,1,r,read-verb,,ok
+1244,POST,mandrillapp.com,,POST,/subaccounts/delete.json,,,w,high,rule 4 deletes own subaccount container,3,x,floor,,FALSE-ALARM
+1245,POST,mandrillapp.com,,POST,/subaccounts/pause.json,,,w,high,rule 9 pauses own subaccount sending,3,x,floor,,FALSE-ALARM
+1246,POST,mandrillapp.com,,POST,/templates/add.json,,,x,high,rule ii creates new template,3,x,floor,,ok
+1247,POST,mandrillapp.com,,POST,/templates/render.json,,,r,high,road i generated content returned not stored,3,x,floor,,OVER-TIGHT
 1248,GET,mbus.local,,GET,/mbus/hat,hat,,r,high,get device hat info,1,r,method,,ok
-1249,POST,mbus.local,,POST,/mbus/get/{device}/{baudrate}/{address},get,,r,high,gets data from slave despite post,1,r,read-verb,,ok
+1249,POST,mbus.local,,POST,/mbus/get/{device}/{baudrate}/{address},get,,r,high,road i reads data from device,1,r,read-verb,,ok
 1250,GET,mcw.edu,,GET,/agr/affectedGenomicModels/{taxonId},getAffectedGenomicModelsUsingGET,Get affected genomic models (rat strains with gene alleles) submitted by RGD to AGR by taxonId,r,high,get genomic models,1,r,method,,ok
 1251,GET,mcw.edu,,GET,/genes/alias/{aliasSymbol}/{speciesTypeKey},getGenesByAliasSymbolUsingGET,Return a list of genes for an alias and species,r,high,get genes by alias,1,r,method,,ok
 1252,GET,mcw.edu,,GET,/stats/diff/geneType/{speciesTypeKey}/{dateFromYYYYMMDD}/{dateToYYYYMMDD},getGeneTypeDiffUsingGET,"Count difference of gene types, for specified species and date range",r,high,get gene type stat diff,1,r,method,,ok
 1253,GET,mcw.edu,,GET,/strains/{rgdId},getStrainByRgdIdUsingGET,Return a strain by RGD ID,r,high,get strain by rgd id,1,r,method,,ok
-1254,POST,mcw.edu,,POST,/annotations/,getAnnotationsUsingPOST,Return a list of genes annotated to an ontology term,r,high,post query returns gene list,1,r,read-verb,,ok
-1255,POST,mcw.edu,,POST,/enrichment/annotatedGenes,getEnrichmentDataUsingPOST,Return a list of genes annotated to the term.Genes are rgdids separated by comma.Species type is an integer value.term is the ontology,r,high,post query returns gene list,1,r,read-verb,,ok
-1256,POST,mcw.edu,,POST,/enrichment/data,getEnrichmentDataUsingPOST_1,Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group,r,high,post query returns chart,1,r,read-verb,,ok
-1257,POST,mcw.edu,,POST,/lookup/id/map/GenBankProtein,getGenBankProteinMappingUsingPOST,Translate RGD IDs to GenBank Protein IDs,r,high,translate ids lookup,1,r,read-verb,,ok
-1258,POST,mcw.edu,,POST,/lookup/id/map/MGI,getMGIMappingUsingPOST,Translate RGD IDs to MGI IDs,r,high,translate ids lookup,1,r,read-verb,,ok
+1254,POST,mcw.edu,,POST,/annotations/,getAnnotationsUsingPOST,Return a list of genes annotated to an ontology term,r,high,road i returns list of genes,1,r,read-verb,,ok
+1255,POST,mcw.edu,,POST,/enrichment/annotatedGenes,getEnrichmentDataUsingPOST,Return a list of genes annotated to the term.Genes are rgdids separated by comma.Species type is an integer value.term is the ontology,r,high,road i returns annotated genes list,1,r,read-verb,,ok
+1256,POST,mcw.edu,,POST,/enrichment/data,getEnrichmentDataUsingPOST_1,Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group,r,high,road i returns chart of terms,1,r,read-verb,,ok
+1257,POST,mcw.edu,,POST,/lookup/id/map/GenBankProtein,getGenBankProteinMappingUsingPOST,Translate RGD IDs to GenBank Protein IDs,r,high,road i translate ids lookup,1,r,read-verb,,ok
+1258,POST,mcw.edu,,POST,/lookup/id/map/MGI,getMGIMappingUsingPOST,Translate RGD IDs to MGI IDs,r,high,road i translate ids lookup,1,r,read-verb,,ok
 1259,GET,medium.com,,GET,/article/{article_id}/content,,Get Article's Content,r,high,get article content,1,r,method,,ok
 1260,GET,medium.com,,GET,/user/{user_id}/followers,,Get User Followers,r,high,get user followers,1,r,method,,ok
 1261,W,meilisearch.com,meilisearch.com,DELETE,/indexes/books/settings/faceting,resetFaceting,Reset faceting,w,high,reset own index facet setting,3,x,other-noun,,FALSE-ALARM
@@ -1286,11 +1286,11 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1286,W,meraki.com,meraki.com,PUT,/organizations/{organizationId}/samlRoles/{samlRoleId},updateOrganizationSamlRole,Update a SAML role,w,high,rule4 role definition no access text,3,x,other-noun,,FALSE-ALARM
 1287,W,meraki.com,meraki.com,PUT,/organizations/{organizationId}/vpnFirewallRules,updateOrganizationVpnFirewallRules,Update the firewall rules of an organization's site-to-site VPN,w,high,update own vpn firewall rules,3,x,other-noun,,FALSE-ALARM
 1288,GET,mercedes-benz.com,,GET,/markets/{marketId}/models/{modelId}/configurations/{configurationId}/images/components/engine,imageComponentsEngineGET,,r,high,get engine image url,1,r,method,,ok
-1289,POST,mercedes-benz.com,,POST,/vehicles/{vehicleId}/dtcReadouts,getDtcDataListByEcuUsingPOST,View the List of DTCs for specific vehicleId.,x,high,rule12 creates readout job each call,1,r,read-verb,,LEAK
-1290,POST,mercure.local,,POST,/.well-known/mercure,,Publish an update,x,high,road1a publish update,3,x,floor,,ok
-1291,POST,mermade.org.uk,,POST,/validate,validate,Validate an OpenAPI 3.0.x definition supplied in the body of the request,r,high,validate openapi definition,3,x,floor,,OVER-TIGHT
-1292,POST,miataru.com,,POST,/GetVisitorHistory,getVisitorHistory,,r,high,read stored visitor history,1,r,read-verb,,ok
-1293,POST,miataru.com,,POST,/UpdateLocation,updateLocation,,w,high,update own device location record,3,x,floor,,FALSE-ALARM
+1289,POST,mercedes-benz.com,,POST,/vehicles/{vehicleId}/dtcReadouts,getDtcDataListByEcuUsingPOST,View the List of DTCs for specific vehicleId.,x,high,rule ii creates new dtc readout,1,r,read-verb,,LEAK
+1290,POST,mercure.local,,POST,/.well-known/mercure,,Publish an update,x,high,road 1a publishes update,3,x,floor,,ok
+1291,POST,mermade.org.uk,,POST,/validate,validate,Validate an OpenAPI 3.0.x definition supplied in the body of the request,r,high,road i validates definition,3,x,floor,,OVER-TIGHT
+1292,POST,miataru.com,,POST,/GetVisitorHistory,getVisitorHistory,,r,high,road i requests visitor history,1,r,read-verb,,ok
+1293,POST,miataru.com,,POST,/UpdateLocation,updateLocation,,w,high,rule 6 updates own device location,3,x,floor,,FALSE-ALARM
 1294,W,microsoft.com,microsoft.com,DELETE,/deviceManagement/userExperienceAnalyticsDeviceScope,deviceManagement.DeleteUserExperienceAnalyticsDeviceScope,Delete navigation property userExperienceAnalyticsDeviceScope for deviceManagement,w,high,delete own nav property scope,3,x,other-noun,,FALSE-ALARM
 1295,W,microsoft.com,microsoft.com,DELETE,/deviceManagement/virtualEndpoint/organizationSettings,deviceManagement.virtualEndpoint.DeleteOrganizationSettings,Delete navigation property organizationSettings for deviceManagement,w,high,delete own org settings,3,x,other-noun,,FALSE-ALARM
 1296,W,microsoft.com,microsoft.com,DELETE,/groups/{group-id}/calendarView/{event-id}/instances/{event-id1}/exceptionOccurrences/{event-id2}/attachments/{attachment-id},groups.calendarView.instances.exceptionOccurrences.DeleteAttachments,Delete navigation property attachments for groups,w,high,delete own attachment cascade own event,3,x,other-noun,,FALSE-ALARM
@@ -1342,18 +1342,18 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1342,GET,musixmatch.com,,GET,/track.snippet.get,,,r,high,get track snippet data,1,r,method,,ok
 1343,GET,namsor.com,,GET,/api2/json/genderJapaneseNameFull/{japaneseName},genderJapaneseNameFull,Infer the likely gender of a Japanese full name ex. 王晓明,r,high,infer gender computation,1,r,method,,ok
 1344,GET,namsor.com,,GET,/api2/json/learnable/{source}/{learnable}/{token},learnable,Activate/deactivate learning from a source.,w,high,get toggles own learning setting,1,r,method,,LEAK
-1345,POST,namsor.com,,POST,/api2/json/chineseNameCandidatesBatch,chineseNameCandidatesBatch,"Identify Chinese name candidates, based on the romanized name (firstName = chineseGivenName; lastName=chineseSurname), ex. Wang Xiaoming",r,high,compute name candidates,3,x,floor,,OVER-TIGHT
-1346,POST,namsor.com,,POST,/api2/json/chineseNameCandidatesGenderBatch,chineseNameCandidatesGenderBatch,"Identify Chinese name candidates, based on the romanized name (firstName = chineseGivenName; lastName=chineseSurname) ex. Wang Xiaoming.",r,high,compute name candidates,3,x,floor,,OVER-TIGHT
-1347,POST,namsor.com,,POST,/api2/json/countryBatch,countryBatch,"[USES 10 UNITS PER NAME] Infer the likely country of residence of up to 100 personal full names, or surnames. Assumes names as they are in the country of residence OR the country of origin.",r,high,compute country inference,3,x,floor,,OVER-TIGHT
-1348,POST,namsor.com,,POST,/api2/json/genderChineseNameBatch,genderChineseNameBatch,Infer the likely gender of up to 100 full names ex. 王晓明,r,high,compute gender inference,3,x,floor,,OVER-TIGHT
-1349,POST,namsor.com,,POST,/api2/json/genderFullBatch,genderFullBatch,"Infer the likely gender of up to 100 full names, detecting automatically the cultural context.",r,high,compute gender inference,3,x,floor,,OVER-TIGHT
-1350,POST,namsor.com,,POST,/api2/json/genderJapaneseNameBatch,genderJapaneseNamePinyinBatch,Infer the likely gender of up to 100 Japanese names in LATIN (Pinyin).,r,high,compute gender inference,3,x,floor,,OVER-TIGHT
-1351,POST,namsor.com,,POST,/api2/json/japaneseNameGenderKanjiCandidatesBatch,japaneseNameGenderKanjiCandidatesBatch,"Identify japanese name candidates in KANJI, based on the romanized name (firstName = japaneseGivenName; lastName=japaneseSurname) with KNOWN gender, ex. Yamamoto Sanae",r,high,compute name candidates,3,x,floor,,OVER-TIGHT
-1352,POST,namsor.com,,POST,/api2/json/japaneseNameKanjiCandidatesBatch,japaneseNameKanjiCandidatesBatch,"Identify japanese name candidates in KANJI, based on the romanized name (firstName = japaneseGivenName; lastName=japaneseSurname), ex. Yamamoto Sanae",r,high,compute name candidates,3,x,floor,,OVER-TIGHT
-1353,POST,namsor.com,,POST,/api2/json/parseChineseNameBatch,parseChineseNameBatch,"Infer the likely first/last name structure of a name, ex. 王晓明 -> 王(surname) 晓明(given name).",r,high,parse name structure,3,x,floor,,OVER-TIGHT
-1354,POST,namsor.com,,POST,/api2/json/parseJapaneseNameBatch,parseJapaneseNameBatch,"Infer the likely first/last name structure of a name, ex. 山本 早苗 or Yamamoto Sanae",r,high,parse name structure,3,x,floor,,OVER-TIGHT
-1355,POST,namsor.com,,POST,/api2/json/phoneCodeGeoBatch,phoneCodeGeoBatch,"[USES 11 UNITS PER NAME] Infer the likely country and phone prefix, of up to 100 personal names, with a local context (ISO2 country of residence).",r,high,compute phone code inference,3,x,floor,,OVER-TIGHT
-1356,POST,namsor.com,,POST,/api2/json/pinyinChineseNameBatch,pinyinChineseNameBatch,"Romanize a list of Chinese name to Pinyin, ex. 王晓明 -> Wang (surname) Xiaoming (given name).",r,high,romanize name computation,3,x,floor,,OVER-TIGHT
+1345,POST,namsor.com,,POST,/api2/json/chineseNameCandidatesBatch,chineseNameCandidatesBatch,"Identify Chinese name candidates, based on the romanized name (firstName = chineseGivenName; lastName=chineseSurname), ex. Wang Xiaoming",r,high,road i infer name candidates,3,x,floor,,OVER-TIGHT
+1346,POST,namsor.com,,POST,/api2/json/chineseNameCandidatesGenderBatch,chineseNameCandidatesGenderBatch,"Identify Chinese name candidates, based on the romanized name (firstName = chineseGivenName; lastName=chineseSurname) ex. Wang Xiaoming.",r,high,road i infer name candidates,3,x,floor,,OVER-TIGHT
+1347,POST,namsor.com,,POST,/api2/json/countryBatch,countryBatch,"[USES 10 UNITS PER NAME] Infer the likely country of residence of up to 100 personal full names, or surnames. Assumes names as they are in the country of residence OR the country of origin.",r,high,road i infer country of residence,3,x,floor,,OVER-TIGHT
+1348,POST,namsor.com,,POST,/api2/json/genderChineseNameBatch,genderChineseNameBatch,Infer the likely gender of up to 100 full names ex. 王晓明,r,high,road i infer gender,3,x,floor,,OVER-TIGHT
+1349,POST,namsor.com,,POST,/api2/json/genderFullBatch,genderFullBatch,"Infer the likely gender of up to 100 full names, detecting automatically the cultural context.",r,high,road i infer gender,3,x,floor,,OVER-TIGHT
+1350,POST,namsor.com,,POST,/api2/json/genderJapaneseNameBatch,genderJapaneseNamePinyinBatch,Infer the likely gender of up to 100 Japanese names in LATIN (Pinyin).,r,high,road i infer gender,3,x,floor,,OVER-TIGHT
+1351,POST,namsor.com,,POST,/api2/json/japaneseNameGenderKanjiCandidatesBatch,japaneseNameGenderKanjiCandidatesBatch,"Identify japanese name candidates in KANJI, based on the romanized name (firstName = japaneseGivenName; lastName=japaneseSurname) with KNOWN gender, ex. Yamamoto Sanae",r,high,road i infer name candidates,3,x,floor,,OVER-TIGHT
+1352,POST,namsor.com,,POST,/api2/json/japaneseNameKanjiCandidatesBatch,japaneseNameKanjiCandidatesBatch,"Identify japanese name candidates in KANJI, based on the romanized name (firstName = japaneseGivenName; lastName=japaneseSurname), ex. Yamamoto Sanae",r,high,road i infer name candidates,3,x,floor,,OVER-TIGHT
+1353,POST,namsor.com,,POST,/api2/json/parseChineseNameBatch,parseChineseNameBatch,"Infer the likely first/last name structure of a name, ex. 王晓明 -> 王(surname) 晓明(given name).",r,high,road i infer name structure,3,x,floor,,OVER-TIGHT
+1354,POST,namsor.com,,POST,/api2/json/parseJapaneseNameBatch,parseJapaneseNameBatch,"Infer the likely first/last name structure of a name, ex. 山本 早苗 or Yamamoto Sanae",r,high,road i infer name structure,3,x,floor,,OVER-TIGHT
+1355,POST,namsor.com,,POST,/api2/json/phoneCodeGeoBatch,phoneCodeGeoBatch,"[USES 11 UNITS PER NAME] Infer the likely country and phone prefix, of up to 100 personal names, with a local context (ISO2 country of residence).",r,high,road i infer country and phone code,3,x,floor,,OVER-TIGHT
+1356,POST,namsor.com,,POST,/api2/json/pinyinChineseNameBatch,pinyinChineseNameBatch,"Romanize a list of Chinese name to Pinyin, ex. 王晓明 -> Wang (surname) Xiaoming (given name).",r,high,road i romanize name,3,x,floor,,OVER-TIGHT
 1357,W,naviplancentral.com,naviplancentral.com,DELETE,/api/CriticalIllnessInsurancePolicies/{id},CriticalIllnessInsurancePolicies_DeleteById,,w,high,rule1 delete own fact finder record,3,x,other-noun,,FALSE-ALARM
 1358,W,naviplancentral.com,naviplancentral.com,DELETE,/api/DisabilityInsurancePolicies/{id},DisabilityInsurancePolicies_DeleteById,,w,high,rule1 delete own fact finder record,3,x,other-noun,,FALSE-ALARM
 1359,W,naviplancentral.com,naviplancentral.com,DELETE,/api/Liabilities/{id},Liabilities_DeleteById,,w,high,delete own liability record,2,w,floor,x-pile,ok
@@ -1369,15 +1369,15 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1369,GET,nba.com,,GET,/leaguedashptteamdefend,,,r,high,get league stats,1,r,method,,ok
 1370,GET,nebl.io,,GET,/ins/tx/{txid},getTx,Returns transaction object,r,high,get transaction object,1,r,method,,ok
 1371,GET,nebl.io,,GET,/ntp1/tokenmetadata/{tokenid},getTokenMetadata,Get Metadata of Token,r,high,get token metadata,1,r,method,,ok
-1372,POST,nebl.io,,POST,/,json_rpc,Send a JSON-RPC call to a localhost neblio-Qt or nebliod node,x,low,road2 generic rpc could broadcast tx,3,x,floor,,ok
-1373,POST,nebl.io,,POST,/ntp1/broadcast,broadcastTx,Broadcasts a signed raw transaction to the network,x,high,road1a broadcasts to network,3,x,floor,,ok
-1374,POST,nebl.io,,POST,/testnet/ins/tx/send,testnet_sendTx,Broadcasts a signed raw transaction to the network (not NTP1 specific),x,high,road1a broadcasts to network,3,x,floor,,ok
-1375,POST,nebl.io,,POST,/testnet/ntp1/burntoken,testnet_burnToken,Builds a transaction that burns an NTP1 Token,r,high,builds unsigned tx no broadcast,3,x,floor,,OVER-TIGHT
+1372,POST,nebl.io,,POST,/,json_rpc,Send a JSON-RPC call to a localhost neblio-Qt or nebliod node,x,low,generic rpc may sign and broadcast,3,x,floor,,ok
+1373,POST,nebl.io,,POST,/ntp1/broadcast,broadcastTx,Broadcasts a signed raw transaction to the network,x,high,road 1a broadcasts transaction to network,3,x,floor,,ok
+1374,POST,nebl.io,,POST,/testnet/ins/tx/send,testnet_sendTx,Broadcasts a signed raw transaction to the network (not NTP1 specific),x,high,road 1a broadcasts transaction to network,3,x,floor,,ok
+1375,POST,nebl.io,,POST,/testnet/ntp1/burntoken,testnet_burnToken,Builds a transaction that burns an NTP1 Token,r,low,builds unsigned transaction not broadcast,3,x,floor,,OVER-TIGHT
 1376,GET,neowsapp.com,,GET,/rest/v1/feed,retrieveNearEarthObjectFeed,Find Near Earth Objects by date,r,high,get near earth objects feed,1,r,method,,ok
 1377,GET,netatmo.net,,GET,/addwebhook,addwebhook,,w,high,get changes own webhook link,1,r,method,,LEAK
 1378,GET,netatmo.net,,GET,/getthermstate,getthermstate,,r,high,get thermostat state,1,r,method,,ok
-1379,POST,netatmo.net,,POST,/setpersonshome,setpersonshome,,w,high,sets own presence status,3,x,floor,,FALSE-ALARM
-1380,POST,netatmo.net,,POST,/setthermpoint,setthermpoint,,w,high,sets own thermostat setpoint,3,x,floor,,FALSE-ALARM
+1379,POST,netatmo.net,,POST,/setpersonshome,setpersonshome,,w,high,rule 1 record about person own system,3,x,floor,,FALSE-ALARM
+1380,POST,netatmo.net,,POST,/setthermpoint,setthermpoint,,w,high,rule 6 own device configuration,3,x,floor,,FALSE-ALARM
 1381,W,netbox.dev,netbox.dev,DELETE,/circuits/circuit-terminations/,circuits_circuit-terminations_bulk_delete,,w,high,bulk delete own circuit terminations,2,w,floor,x-pile,ok
 1382,W,netbox.dev,netbox.dev,DELETE,/dcim/device-bays/{id}/,dcim_device-bays_delete,,w,high,delete own device bay,2,w,floor,x-pile,ok
 1383,W,netbox.dev,netbox.dev,DELETE,/dcim/module-bays/,dcim_module-bays_bulk_delete,,w,high,bulk delete own module bays,2,w,yours-noun,evidence,ok
@@ -1428,8 +1428,8 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1428,W,netlify.com,netlify.com,PUT,/sites/{site_id}/unlink_repo,unlinkSiteRepo,,w,high,unlinks repo deletes own keys and webhooks,2,w,floor,x-pile,ok
 1429,GET,neutrinoapi.net,,GET,/email-validate,EmailValidate,Email Validate,r,high,validates email nothing changes,1,r,method,,ok
 1430,GET,neutrinoapi.net,,GET,/hlr-lookup,HLRLookup,HLR Lookup,r,high,lookup device status read only,1,r,method,,ok
-1431,POST,neutrinoapi.net,,POST,/phone-playback,PhonePlayback,Phone Playback,x,high,road1d places automated call plays message,3,x,floor,,ok
-1432,POST,neutrinoapi.net,,POST,/qr-code,QRCode,QR Code,r,high,generates qr code no state change,3,x,floor,,OVER-TIGHT
+1431,POST,neutrinoapi.net,,POST,/phone-playback,PhonePlayback,Phone Playback,x,high,road 1d automated call to live recipient,3,x,floor,,ok
+1432,POST,neutrinoapi.net,,POST,/qr-code,QRCode,QR Code,r,high,road i generated qr code returned,3,x,floor,,OVER-TIGHT
 1433,GET,nfusionsolutions.biz,,GET,/api/v1/Currencies/rate/supported,Currencies_SupportedCurrencies_Rate_GET,Get list of currencies supported by the rate endpoint,r,high,list supported currencies read only,1,r,method,,ok
 1434,GET,nic.at,,GET,/api/v1/suggest,,Get .at domain name suggestions,r,high,list domain suggestions read only,1,r,method,,ok
 1435,W,notion.com,notion,DELETE,/v1/blocks/{id},deleteABlock,Delete a block,w,high,delete own block content rule1,2,w,floor,x-pile,ok
@@ -1438,7 +1438,7 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1438,W,notion.com,notion,PATCH,/v1/databases/{id},updateADatabase,Update a database,w,high,update own database definition rule4,2,w,floor,x-pile,ok
 1439,W,notion.com,notion,PATCH,/v1/pages/{id},updatePageProperties,Update Page properties,w,high,update own page properties,2,w,yours-noun,evidence,ok
 1440,GET,nrel.gov,,GET,/v1/{id}.{output_format},transportation_incentives_laws_id,Fetch the details of a specific law given the law's ID.,r,high,fetch law details read only,1,r,method,,ok
-1441,POST,nrm.se,,POST,/upload,uploadFile,Batch upload,r,low,uploads then returns search results road r,3,x,floor,,OVER-TIGHT
+1441,POST,nrm.se,,POST,/upload,uploadFile,Batch upload,r,low,search results using uploaded data,3,x,floor,,OVER-TIGHT
 1442,GET,nytimes.com,,GET,/{year}/{month}.json,,Archive API,r,high,read archive listing,1,r,method,,ok
 1443,W,onsched.com,onsched.com,DELETE,/consumer/v1/appointments/{id},,Delete Appointment,w,high,delete own appointment record rule1,2,w,floor,x-pile,ok
 1444,W,onsched.com,onsched.com,DELETE,/setup/v1/calendars/block/{id},,Delete Calendar Block,w,high,delete own calendar block config,2,w,yours-noun,evidence,ok
@@ -1469,12 +1469,12 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1469,GET,opto22.com,,GET,/device/strategy/ios/digitalOutputs/{ioName}/state,readDigitalOutputState,,r,high,read digital output state,1,r,method,,ok
 1470,GET,opto22.com,,GET,/device/strategy/tables/int64s/{tableName}/{index}/_string,readInt64TableElementAsString,,r,high,read table element value,1,r,method,,ok
 1471,GET,opto22.com,,GET,/device/strategy/vars/int32s/{int32Name},readInt32Var,,r,high,read integer variable value,1,r,method,,ok
-1472,POST,opto22.com,,POST,/device/strategy/tables/int32s/{tableName}/{index},writeInt32TableElement,,w,high,write own device table element rule6,3,x,floor,,FALSE-ALARM
-1473,POST,opto22.com,,POST,/device/strategy/tables/int64s/{tableName}/{index},writeInt64TableElement,,w,high,write own device table element rule6,3,x,floor,,FALSE-ALARM
-1474,POST,opto22.com,,POST,/device/strategy/tables/int64s/{tableName}/{index}/_string,writeInt64TableElementAsString,,w,high,write own device table element rule6,3,x,floor,,FALSE-ALARM
-1475,POST,opto22.com,,POST,/device/strategy/vars/strings/{stringName},writeStringVar,,w,high,sets own device string variable rule6,3,x,floor,,FALSE-ALARM
-1476,POST,orghunter.com,,POST,/v1/charityfinancial,,Get details!,r,low,detail data lookup vague text,3,x,floor,,OVER-TIGHT
-1477,POST,orghunter.com,,POST,/v1/charitygeolocation,,Get details!,r,low,detail data lookup vague text,3,x,floor,,OVER-TIGHT
+1472,POST,opto22.com,,POST,/device/strategy/tables/int32s/{tableName}/{index},writeInt32TableElement,,w,high,rule 6 own device table write,3,x,floor,,FALSE-ALARM
+1473,POST,opto22.com,,POST,/device/strategy/tables/int64s/{tableName}/{index},writeInt64TableElement,,w,high,rule 6 own device table write,3,x,floor,,FALSE-ALARM
+1474,POST,opto22.com,,POST,/device/strategy/tables/int64s/{tableName}/{index}/_string,writeInt64TableElementAsString,,w,high,rule 6 own device table write,3,x,floor,,FALSE-ALARM
+1475,POST,opto22.com,,POST,/device/strategy/vars/strings/{stringName},writeStringVar,,w,high,rule 6 own device variable write,3,x,floor,,FALSE-ALARM
+1476,POST,orghunter.com,,POST,/v1/charityfinancial,,Get details!,r,high,road i get details read,3,x,floor,,OVER-TIGHT
+1477,POST,orghunter.com,,POST,/v1/charitygeolocation,,Get details!,r,high,road i get details read,3,x,floor,,OVER-TIGHT
 1478,W,orthanc-server.com,orthanc-server.com,DELETE,/instances/{id},,Delete some instance,w,high,delete own dicom instance,2,w,floor,x-pile,ok
 1479,W,orthanc-server.com,orthanc-server.com,DELETE,/peers/{id},,Delete Orthanc peer,w,high,delete own peer config rule6,2,w,yours-noun,evidence,ok
 1480,W,orthanc-server.com,orthanc-server.com,DELETE,/series/{id}/attachments/{name},,Delete attachment,w,high,delete own attachment record,2,w,yours-noun,evidence,ok
@@ -1519,9 +1519,9 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1519,GET,parliament.uk,,GET,/data/divisions.{format}/groupedbyparty,Divisions_GetDivisionsGroupsByParty,Return Divisions results grouped by party,r,high,read grouped division results,1,r,method,,ok
 1520,GET,parliament.uk,,GET,/data/Divisions/{divisionId},,Return a Division,r,high,read single division record,1,r,method,,ok
 1521,GET,patrowl.local,,GET,/clean/{scanId},CleanScanPage,Clean scan,w,low,get cleans deletes own scan data despite method,1,r,method,,LEAK
-1522,POST,patrowl.local,,POST,/startscan,StartScanPage,Start a new scan,x,high,road2 triggers new scan run,3,x,floor,,ok
+1522,POST,patrowl.local,,POST,/startscan,StartScanPage,Start a new scan,x,high,rule 12 starts new scan job,3,x,floor,,ok
 1523,GET,payments.service.gov.uk,,GET,/v1/payments/{paymentId}/refunds,Get all refunds for a payment,Get all refunds for a payment,r,high,list refunds for payment read only,1,r,method,,ok
-1524,POST,paypi.dev,,POST,/checkCode,,Check verification code,r,high,checks code validity nothing changes,1,r,read-verb,,ok
+1524,POST,paypi.dev,,POST,/checkCode,,Check verification code,r,high,road i checks code validity,1,r,read-verb,,ok
 1525,W,payrun.io,payrun.io,DELETE,/Employer/{EmployerId},DeleteEmployer,Delete an Employer,w,high,delete own employer record rule1,2,w,yours-noun,evidence,ok
 1526,W,payrun.io,payrun.io,DELETE,/Employer/{EmployerId}/CisTransaction/{CisTransactionId},DeleteCisTransaction,Delete the CIS transaction,w,high,delete own transaction record,2,w,floor,x-pile,ok
 1527,W,payrun.io,payrun.io,DELETE,/Employer/{EmployerId}/Employee/{EmployeeId},DeleteEmployee,Delete an Employee,w,high,delete own employee record rule1,2,w,yours-noun,evidence,ok
@@ -1545,41 +1545,41 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1545,W,payrun.io,payrun.io,PUT,/Employer/{EmployerId}/RtiTransaction/{RtiTransactionId}/Tag/{TagId},PutRtiTransactionTag,Insert RTI transaction tag,w,high,insert own tag record,2,w,floor,x-pile,ok
 1546,W,payrun.io,payrun.io,PUT,/Permission/{PermissionId},PutPermission,Puts permisson object,x,high,puts permission object grants access rule4,3,x,other-noun,,ok
 1547,W,payrun.io,payrun.io,PUT,/Permission/{PermissionId}/Tag/{TagId},PutPermissionTag,Insert Permission tag,w,low,tags permission object does not grant access,3,x,other-noun,,FALSE-ALARM
-1548,POST,pdfblocks.com,,POST,/v1/add_password,addPasswordV1,Add a password to a PDF,r,low,transforms pdf returns result no storage stated,3,x,floor,,OVER-TIGHT
-1549,POST,pdfblocks.com,,POST,/v1/add_watermark/image,addImageWatermarkV1,Add an image watermark to a PDF,r,low,transforms pdf returns result no storage stated,3,x,floor,,OVER-TIGHT
-1550,POST,pdfblocks.com,,POST,/v1/add_watermark/text,addTextWatermarkV1,Add a text watermark to a PDF,r,low,transforms pdf returns result no storage stated,3,x,floor,,OVER-TIGHT
-1551,POST,pdfbroker.io,,POST,/api/pdf/xslfo,,Create pdf-file from complete XSL-FO document.,r,low,generates pdf output no storage stated,3,x,floor,,OVER-TIGHT
-1552,POST,peoplefinderspro.com,,POST,/address/autocomplete,,Search,r,high,address search lookup read only,3,x,floor,,OVER-TIGHT
-1553,POST,peoplefinderspro.com,,POST,/contact/enrich,,Search,r,high,contact enrichment search read only,3,x,floor,,OVER-TIGHT
-1554,POST,peoplefinderspro.com,,POST,/email/enrich,,Search,r,high,email enrichment search read only,3,x,floor,,OVER-TIGHT
-1555,POST,peoplefinderspro.com,,POST,/phone/enrich,,Search,r,high,phone enrichment search read only,3,x,floor,,OVER-TIGHT
+1548,POST,pdfblocks.com,,POST,/v1/add_password,addPasswordV1,Add a password to a PDF,r,low,transforms pdf returns output not stored,3,x,floor,,OVER-TIGHT
+1549,POST,pdfblocks.com,,POST,/v1/add_watermark/image,addImageWatermarkV1,Add an image watermark to a PDF,r,low,transforms pdf returns output not stored,3,x,floor,,OVER-TIGHT
+1550,POST,pdfblocks.com,,POST,/v1/add_watermark/text,addTextWatermarkV1,Add a text watermark to a PDF,r,low,transforms pdf returns output not stored,3,x,floor,,OVER-TIGHT
+1551,POST,pdfbroker.io,,POST,/api/pdf/xslfo,,Create pdf-file from complete XSL-FO document.,r,low,generates pdf from input not stored,3,x,floor,,OVER-TIGHT
+1552,POST,peoplefinderspro.com,,POST,/address/autocomplete,,Search,r,high,road i search address autocomplete,3,x,floor,,OVER-TIGHT
+1553,POST,peoplefinderspro.com,,POST,/contact/enrich,,Search,r,high,road i search contact enrichment,3,x,floor,,OVER-TIGHT
+1554,POST,peoplefinderspro.com,,POST,/email/enrich,,Search,r,high,road i search email enrichment,3,x,floor,,OVER-TIGHT
+1555,POST,peoplefinderspro.com,,POST,/phone/enrich,,Search,r,high,road i search phone enrichment,3,x,floor,,OVER-TIGHT
 1556,GET,peoplegeneratorapi.live,,GET,/api/person/eyecolor/,eyecolor,,r,high,generates read only value,1,r,method,,ok
 1557,GET,pims.io,,GET,/events/{event_id}/categories,fetchAllEventsCategories,Find all categories for one event,r,high,list categories read only,1,r,method,,ok
 1558,GET,pims.io,,GET,/promotions/{promotion_id},fetchOnePromotion,Get one promotion by ID,r,high,get promotion read only,1,r,method,,ok
-1559,POST,plaid.com,,POST,/asset_report/audit_copy/create,assetReportAuditCopyCreate,Create Asset Report Audit Copy,x,high,road1b grants third party access to report,3,x,floor,,ok
-1560,POST,plaid.com,,POST,/asset_report/pdf/get,assetReportPdfGet,Retrieve a PDF Asset Report,r,high,retrieve pdf report read only,3,x,floor,,OVER-TIGHT
-1561,POST,plaid.com,,POST,/beta/transactions/rules/v1/remove,transactionsRulesRemove,Remove transaction rule,w,high,remove own transaction rule,3,x,floor,,FALSE-ALARM
-1562,POST,plaid.com,,POST,/beta/transactions/v1/enhance,transactionsEnhance,enhance locally-held transaction data,r,high,enriches data returns result no storage,3,x,floor,,OVER-TIGHT
-1563,POST,plaid.com,,POST,/institutions/search,institutionsSearch,Search institutions,r,high,search institutions read only,3,x,floor,,OVER-TIGHT
-1564,POST,plaid.com,,POST,/processor/token/create,processorTokenCreate,Create processor token,x,low,creates token to enable partner access road1b,3,x,floor,,ok
-1565,POST,plaid.com,,POST,/sandbox/item/fire_webhook,sandboxItemFireWebhook,Fire a test webhook,x,high,road2 triggers webhook each call,3,x,floor,,ok
-1566,POST,plaid.com,,POST,/sandbox/oauth/select_accounts,sandboxOauthSelectAccounts,Save the selected accounts when connecting to the Platypus Oauth institution,w,high,saves own selected accounts,3,x,floor,,FALSE-ALARM
-1567,POST,plaid.com,,POST,/sandbox/transfer/test_clock/advance,sandboxTransferTestClockAdvance,Advance a test clock,x,high,road2 advances test clock state machine,3,x,floor,,ok
-1568,POST,plaid.com,,POST,/sandbox/transfer/test_clock/get,sandboxTransferTestClockGet,Get a test clock,r,high,get test clock read only,3,x,floor,,OVER-TIGHT
-1569,POST,plaid.com,,POST,/transactions/enrich,transactionsEnrich,Enrich locally-held transaction data,r,high,enriches data returns result no storage,3,x,floor,,OVER-TIGHT
-1570,POST,plaid.com,,POST,/watchlist_screening/entity/get,watchlistScreeningEntityGet,Get an entity screening,r,high,retrieve entity screening read only,3,x,floor,,OVER-TIGHT
-1571,POST,portfoliooptimizer.io,,POST,/assets/analysis/absorption-ratio,,Absorption Ratio,r,high,computes ratio no state change,3,x,floor,,OVER-TIGHT
-1572,POST,portfoliooptimizer.io,,POST,/assets/correlation/matrix/informativeness,,Correlation Matrix Informativeness,r,high,computes matrix metric no state change,3,x,floor,,OVER-TIGHT
-1573,POST,portfoliooptimizer.io,,POST,/assets/returns/simulation/bootstrap,,Bootstrap,r,high,simulates returns no state change,3,x,floor,,OVER-TIGHT
-1574,POST,portfoliooptimizer.io,,POST,/assets/variance,,Variance,r,high,computes variance no state change,3,x,floor,,OVER-TIGHT
-1575,POST,portfoliooptimizer.io,,POST,/portfolio/analysis/effective-number-of-bets,,Effective Number of Bets,r,high,computes portfolio metric no state change,3,x,floor,,OVER-TIGHT
-1576,POST,portfoliooptimizer.io,,POST,/portfolio/analysis/return,,Arithmetic Return,r,high,computes portfolio return no state change,3,x,floor,,OVER-TIGHT
-1577,POST,portfoliooptimizer.io,,POST,/portfolio/analysis/returns/average,,Arithmetic Average Return,r,high,computes average return no state change,3,x,floor,,OVER-TIGHT
-1578,POST,portfoliooptimizer.io,,POST,/portfolio/analysis/sharpe-ratio/bias-adjusted,,Bias-Adjusted Sharpe Ratio,r,high,computes sharpe ratio no state change,3,x,floor,,OVER-TIGHT
-1579,POST,portfoliooptimizer.io,,POST,/portfolio/analysis/sharpe-ratio/probabilistic,,Probabilistic Sharpe Ratio,r,high,computes sharpe ratio no state change,3,x,floor,,OVER-TIGHT
-1580,POST,portfoliooptimizer.io,,POST,/portfolio/optimization/equal-risk-contributions,,Equal Risk Contributions Portfolio,r,high,computes portfolio weights no state change,3,x,floor,,OVER-TIGHT
-1581,POST,portfoliooptimizer.io,,POST,/portfolio/optimization/equal-sharpe-ratio-contributions,,Equal Sharpe Ratio Contributions Portfolio,r,high,computes portfolio weights no state change,3,x,floor,,OVER-TIGHT
-1582,POST,portfoliooptimizer.io,,POST,/portfolio/optimization/mean-variance-efficient,,Mean-Variance Efficient Portfolio,r,high,computes portfolio weights no state change,3,x,floor,,OVER-TIGHT
+1559,POST,plaid.com,,POST,/asset_report/audit_copy/create,assetReportAuditCopyCreate,Create Asset Report Audit Copy,x,high,road 1b grants third party access token,3,x,floor,,ok
+1560,POST,plaid.com,,POST,/asset_report/pdf/get,assetReportPdfGet,Retrieve a PDF Asset Report,r,high,road i retrieve pdf report,3,x,floor,,OVER-TIGHT
+1561,POST,plaid.com,,POST,/beta/transactions/rules/v1/remove,transactionsRulesRemove,Remove transaction rule,w,high,rule 4 deletes own rule definition,3,x,floor,,FALSE-ALARM
+1562,POST,plaid.com,,POST,/beta/transactions/v1/enhance,transactionsEnhance,enhance locally-held transaction data,r,high,road i enriches data returns result,3,x,floor,,OVER-TIGHT
+1563,POST,plaid.com,,POST,/institutions/search,institutionsSearch,Search institutions,r,high,road i search institutions,3,x,floor,,OVER-TIGHT
+1564,POST,plaid.com,,POST,/processor/token/create,processorTokenCreate,Create processor token,x,high,road 1b create token for partner access,3,x,floor,,ok
+1565,POST,plaid.com,,POST,/sandbox/item/fire_webhook,sandboxItemFireWebhook,Fire a test webhook,x,high,rule 12 fires webhook trigger each call,3,x,floor,,ok
+1566,POST,plaid.com,,POST,/sandbox/oauth/select_accounts,sandboxOauthSelectAccounts,Save the selected accounts when connecting to the Platypus Oauth institution,w,high,saves own selected accounts config,3,x,floor,,FALSE-ALARM
+1567,POST,plaid.com,,POST,/sandbox/transfer/test_clock/advance,sandboxTransferTestClockAdvance,Advance a test clock,x,high,rule 12 advances test clock state,3,x,floor,,ok
+1568,POST,plaid.com,,POST,/sandbox/transfer/test_clock/get,sandboxTransferTestClockGet,Get a test clock,r,high,road i get test clock read,3,x,floor,,OVER-TIGHT
+1569,POST,plaid.com,,POST,/transactions/enrich,transactionsEnrich,Enrich locally-held transaction data,r,high,road i enriches data returns result,3,x,floor,,OVER-TIGHT
+1570,POST,plaid.com,,POST,/watchlist_screening/entity/get,watchlistScreeningEntityGet,Get an entity screening,r,high,road i retrieve entity screening,3,x,floor,,OVER-TIGHT
+1571,POST,portfoliooptimizer.io,,POST,/assets/analysis/absorption-ratio,,Absorption Ratio,r,high,road i compute absorption ratio,3,x,floor,,OVER-TIGHT
+1572,POST,portfoliooptimizer.io,,POST,/assets/correlation/matrix/informativeness,,Correlation Matrix Informativeness,r,high,road i compute matrix informativeness,3,x,floor,,OVER-TIGHT
+1573,POST,portfoliooptimizer.io,,POST,/assets/returns/simulation/bootstrap,,Bootstrap,r,high,road i simulate returns computation,3,x,floor,,OVER-TIGHT
+1574,POST,portfoliooptimizer.io,,POST,/assets/variance,,Variance,r,high,road i compute variance,3,x,floor,,OVER-TIGHT
+1575,POST,portfoliooptimizer.io,,POST,/portfolio/analysis/effective-number-of-bets,,Effective Number of Bets,r,high,road i compute number of bets,3,x,floor,,OVER-TIGHT
+1576,POST,portfoliooptimizer.io,,POST,/portfolio/analysis/return,,Arithmetic Return,r,high,road i compute arithmetic return,3,x,floor,,OVER-TIGHT
+1577,POST,portfoliooptimizer.io,,POST,/portfolio/analysis/returns/average,,Arithmetic Average Return,r,high,road i compute average return,3,x,floor,,OVER-TIGHT
+1578,POST,portfoliooptimizer.io,,POST,/portfolio/analysis/sharpe-ratio/bias-adjusted,,Bias-Adjusted Sharpe Ratio,r,high,road i compute sharpe ratio,3,x,floor,,OVER-TIGHT
+1579,POST,portfoliooptimizer.io,,POST,/portfolio/analysis/sharpe-ratio/probabilistic,,Probabilistic Sharpe Ratio,r,high,road i compute probabilistic sharpe ratio,3,x,floor,,OVER-TIGHT
+1580,POST,portfoliooptimizer.io,,POST,/portfolio/optimization/equal-risk-contributions,,Equal Risk Contributions Portfolio,r,high,road i compute portfolio weights,3,x,floor,,OVER-TIGHT
+1581,POST,portfoliooptimizer.io,,POST,/portfolio/optimization/equal-sharpe-ratio-contributions,,Equal Sharpe Ratio Contributions Portfolio,r,high,road i compute portfolio weights,3,x,floor,,OVER-TIGHT
+1582,POST,portfoliooptimizer.io,,POST,/portfolio/optimization/mean-variance-efficient,,Mean-Variance Efficient Portfolio,r,high,road i compute portfolio weights,3,x,floor,,OVER-TIGHT
 1583,GET,pressassociation.io,,GET,/platform,listPlatforms,Platform Collection,r,high,list platforms read only,1,r,method,,ok
 1584,W,probely.com,probely.com,DELETE,/targets/{target_id}/keys/{id}/,,Delete target API key,w,high,delete own api key rule6,2,w,yours-noun,evidence,ok
 1585,W,probely.com,probely.com,DELETE,/targets/{target_id}/scheduledscans/{id}/,,Delete,w,high,delete own scheduled scan rule9,2,w,floor,x-pile,ok
@@ -1588,9 +1588,9 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1588,GET,ptv.vic.gov.au,,GET,/v3/runs/{run_ref}/route_type/{route_type},Runs_ForRunAndRouteType,View the trip/service run for a specific run_ref and route type,r,high,read run detail read only,1,r,method,,ok
 1589,GET,ptv.vic.gov.au,,GET,/v3/runs/route/{route_id}/route_type/{route_type},Runs_ForRouteAndRouteType,View all trip/service runs for a specific route ID and route type,r,high,read runs list read only,1,r,method,,ok
 1590,GET,ptv.vic.gov.au,,GET,/v3/search/{search_term},Search_Search,"View stops, routes and myki ticket outlets that match the search term",r,high,search stops routes read only,1,r,method,,ok
-1591,POST,qualpay.com,,POST,/ardef,Get Card Type Information ,"Get Card type Information for Visa, Mastercard, and Discover",r,high,get card type info read only,1,r,read-verb,,ok
-1592,POST,qualpay.com,,POST,/credit,Credit,Issue Credit to Cardholder,x,high,road1c issues credit moves money,3,x,floor,,ok
-1593,POST,qualpay.com,,POST,/tokenize,Tokenize,Tokenize Card,w,high,stores card token no charge rule10,3,x,floor,,FALSE-ALARM
+1591,POST,qualpay.com,,POST,/ardef,Get Card Type Information ,"Get Card type Information for Visa, Mastercard, and Discover",r,high,road i get card type information,1,r,read-verb,,ok
+1592,POST,qualpay.com,,POST,/credit,Credit,Issue Credit to Cardholder,x,high,road 1c issues credit to cardholder,3,x,floor,,ok
+1593,POST,qualpay.com,,POST,/tokenize,Tokenize,Tokenize Card,x,high,rule ii creates card token,3,x,floor,,ok
 1594,GET,rapidapi.com,,GET,/api/v2/predictions,,,r,high,read predictions list read only,1,r,method,,ok
 1595,GET,rawg.io,,GET,/games/{game_pk}/screenshots,games_screenshots_list,Get screenshots for the game.,r,high,read screenshots list read only,1,r,method,,ok
 1596,GET,rawg.io,,GET,/games/{id}/reddit,games_reddit_read,Get a list of most recent posts from the game's subreddit.,r,high,read reddit posts list read only,1,r,method,,ok
@@ -1604,7 +1604,7 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1604,W,rebilly.com,rebilly.com,PATCH,/tags/{tag},PatchTag,Update a tag,w,high,rule 4 tag definition update,2,w,yours-noun,evidence,ok
 1605,W,rebilly.com,rebilly.com,PUT,/attachments/{id},PutAttachment,Update the Attachment with predefined ID,w,high,rule 1 own attachment record,2,w,yours-noun,evidence,ok
 1606,W,rebilly.com,rebilly.com,PUT,/subscriptions/{id},PutSubscription,Upsert an order with predefined ID,w,low,rule 1 own order record upsert,3,x,other-noun,,FALSE-ALARM
-1607,POST,remove.bg,,POST,/removebg,,Remove the background of an image,r,high,image processing returns result no change,3,x,floor,,OVER-TIGHT
+1607,POST,remove.bg,,POST,/removebg,,Remove the background of an image,r,high,road i transforms image returns output,3,x,floor,,OVER-TIGHT
 1608,W,reverb.com,reverb.com,DELETE,/shop/vacation,,Disable vacation mode. All listings will be re-enabled.,x,high,road 1a relists all listings publicly,2,w,floor,x-pile,LEAK
 1609,W,rumble.run,rumble.run,DELETE,/account/credentials/{credential_id},removeAccountCredential,Remove this credential,w,low,rule 6 own credential removed,3,x,other-noun,,FALSE-ALARM
 1610,W,rumble.run,rumble.run,DELETE,/account/orgs/{org_id},removeAccountOrganization,Remove this organization,w,high,rule 4 organization definition removed,3,x,other-noun,,FALSE-ALARM
@@ -1612,11 +1612,11 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1612,W,rumble.run,rumble.run,PATCH,/org/assets/bulk/tags,updateBulkAssetTags,Update tags across multiple assets based on a search query,w,high,rule 1 own asset tags updated,2,w,floor,x-pile,ok
 1613,W,rumble.run,rumble.run,PATCH,/org/sites/{site_id},updateSite,Update a site definition,w,high,rule 4 site definition update,2,w,yours-noun,evidence,ok
 1614,W,rumble.run,rumble.run,PUT,/org/sites/{site_id}/import/nessus,importNessusScanData,Import a Nessus scan data file into a site,x,high,rule 12 triggers import job each call,2,w,floor,x-pile,LEAK
-1615,POST,scideas.net,,POST,/regression/api,,Returns regression analysis.,r,high,calculation returns regression result,3,x,floor,,OVER-TIGHT
+1615,POST,scideas.net,,POST,/regression/api,,Returns regression analysis.,r,high,road i returns regression analysis,3,x,floor,,OVER-TIGHT
 1616,GET,scrapewebsite.email,,GET,/v1/ping.json,GET-v1-ping---format-,Returns whether the system is up.,r,high,GET health check no change,1,r,method,,ok
-1617,POST,seldon.local,,POST,/seldon/{namespace}/{deployment}/api/v1.0/feedback,SendFeedback,,w,low,creates own feedback record no reach text,3,x,floor,,FALSE-ALARM
-1618,POST,seldon.local,,POST,/seldon/{namespace}/{deployment}/api/v1.0/predictions,Predict,,r,high,GET style prediction returns result,3,x,floor,,OVER-TIGHT
-1619,POST,seldon.local,,POST,/send-feedback,SendFeedback,,w,low,creates own feedback record no reach text,3,x,floor,,FALSE-ALARM
+1617,POST,seldon.local,,POST,/seldon/{namespace}/{deployment}/api/v1.0/feedback,SendFeedback,,w,low,sends feedback to own deployment,3,x,floor,,FALSE-ALARM
+1618,POST,seldon.local,,POST,/seldon/{namespace}/{deployment}/api/v1.0/predictions,Predict,,r,low,predict computation read,3,x,floor,,OVER-TIGHT
+1619,POST,seldon.local,,POST,/send-feedback,SendFeedback,,w,low,sends feedback to own deployment,3,x,floor,,FALSE-ALARM
 1620,W,sendgrid.com,sendgrid.com,DELETE,/access_settings/whitelist,DELETE_access_settings-whitelist,Remove one or more IPs from the allow list,w,high,rule 6 own allowlist edited,2,w,floor,x-pile,ok
 1621,W,sendgrid.com,sendgrid.com,DELETE,/campaigns/{campaign_id}/schedules,DELETE_campaigns-campaign_id-schedules,Unschedule a Scheduled Campaign,w,high,rule 9 cancels own scheduled campaign,2,w,floor,x-pile,ok
 1622,W,sendgrid.com,sendgrid.com,DELETE,/contactdb/recipients,DELETE_contactdb-recipients,Delete Recipients,w,high,rule 1 own contact records deleted,3,x,other-noun,,FALSE-ALARM
@@ -1642,7 +1642,7 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1642,W,sendgrid.com,sendgrid.com,PUT,/marketing/singlesends/{id}/schedule,PUT_marketing-singlesends-id-schedule,Schedule Single Send,x,high,road 1a schedules email delivery to recipients,2,w,floor,x-pile,LEAK
 1643,GET,setlist.fm,,GET,/1.0/search/artists,resource__1.0_search_artists_getArtists_GET,Search for artists.,r,high,GET search no change,1,r,method,,ok
 1644,GET,setlist.fm,,GET,/1.0/user/{userId}/attended,resource__1.0_user__userId__attended_getUserAttendedSetlists_GET,.,r,high,GET read attended setlists,1,r,method,,ok
-1645,POST,simplivpn.net,,POST,/login,Login,Login,w,low,rule 11 creates own login session,3,x,floor,,FALSE-ALARM
+1645,POST,simplivpn.net,,POST,/login,Login,Login,x,high,rule ii creates own login session,3,x,floor,,ok
 1646,W,sinao.app,sinao.app,DELETE,/apps/{appId}/accountcategories/{id},app.accounting.categories.delete,Remove a category,w,high,rule 4 category definition removed,2,w,yours-noun,evidence,ok
 1647,W,sinao.app,sinao.app,DELETE,/apps/{appId}/invoices/{id}/attach,app.documents.sales.invoices.detach,Detach a file at an invoice,w,high,rule 1 own invoice attachment removed,2,w,yours-noun,evidence,ok
 1648,W,sinao.app,sinao.app,DELETE,/apps/{appId}/persons/{id},app.contacts.persons.delete,Remove a person,w,high,rule 1 own person record removed,2,w,yours-noun,evidence,ok
@@ -1655,16 +1655,16 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1655,W,sinao.app,sinao.app,DELETE,/apps/{appId}/transactions/{id}/attach,app.cashflow.transactions.detach,Detach a file,w,high,rule 1 own transaction attachment removed,2,w,floor,x-pile,ok
 1656,W,sinao.app,sinao.app,DELETE,/apps/access/invite/{accessToken},app.policies.registration.delete,Delete an invitation from token,x,low,rule 4 revokes an invitation,3,x,other-noun,,ok
 1657,GET,skynewz-api-fortnite.herokuapp.com,,GET,/stats/id/{plateform}/{id},,Get user's stats by user id,r,high,GET read user stats,1,r,method,,ok
-1658,POST,skynewz-api-fortnite.herokuapp.com,,POST,/oauth/token,,Get a Bearer token,r,low,GET style token exchange no state change,3,x,floor,,OVER-TIGHT
+1658,POST,skynewz-api-fortnite.herokuapp.com,,POST,/oauth/token,,Get a Bearer token,x,high,rule ii creates bearer token,3,x,floor,,ok
 1659,W,slicebox.local,slicebox.local,PUT,/seriestypes/{id},,,x,high,rule 12 triggers async labelling job,2,w,floor,x-pile,LEAK
-1660,POST,sms77.io,,POST,/contacts,ContactsPOST,,w,low,creates own contact record,3,x,floor,,FALSE-ALARM
-1661,POST,sms77.io,,POST,/lookup,Lookup,,r,high,lookup returns data no change,1,r,read-verb,,ok
-1662,POST,sms77.io,,POST,/validate_for_voice,ValidateForVoice,,r,high,validation returns result no change,3,x,floor,,OVER-TIGHT
-1663,POST,sms77.io,,POST,/voice,Voice,,x,low,dispatches a voice call to a number,3,x,floor,,ok
-1664,POST,solarvps.com,,POST,/dns/{domain}/add,,Add dns record for given domain,w,high,rule 6 own dns record added,3,x,floor,,FALSE-ALARM
-1665,POST,solarvps.com,,POST,/domains/delete,,Delete domain from SolarVPS Distributed DNS,w,high,rule 6 own dns record deleted,3,x,floor,,FALSE-ALARM
-1666,POST,solarvps.com,,POST,/tickets/{ticketid}/update,,Post a reply to a ticket,x,low,road 1a reply reaches support staff,3,x,floor,,ok
-1667,POST,spinbot.net,,POST,/api/pretty-spinner,postPrettySpinner,Human readable auto rewrite your article.,r,high,text rewrite returns result no change,3,x,floor,,OVER-TIGHT
+1660,POST,sms77.io,,POST,/contacts,ContactsPOST,,x,low,likely creates new contact record,3,x,floor,,ok
+1661,POST,sms77.io,,POST,/lookup,Lookup,,r,high,road i lookup read,1,r,read-verb,,ok
+1662,POST,sms77.io,,POST,/validate_for_voice,ValidateForVoice,,r,high,road i validates for voice,3,x,floor,,OVER-TIGHT
+1663,POST,sms77.io,,POST,/voice,Voice,,x,low,likely places voice call to recipient,3,x,floor,,ok
+1664,POST,solarvps.com,,POST,/dns/{domain}/add,,Add dns record for given domain,x,high,rule ii post create adds dns record,3,x,floor,,ok
+1665,POST,solarvps.com,,POST,/domains/delete,,Delete domain from SolarVPS Distributed DNS,w,high,rule iii deletes existing own domain,3,x,floor,,FALSE-ALARM
+1666,POST,solarvps.com,,POST,/tickets/{ticketid}/update,,Post a reply to a ticket,x,low,reply likely reaches support staff,3,x,floor,,ok
+1667,POST,spinbot.net,,POST,/api/pretty-spinner,postPrettySpinner,Human readable auto rewrite your article.,r,high,road i rewrites text returns output,3,x,floor,,OVER-TIGHT
 1668,GET,sportsdata.io,,GET,/{format}/BoxScoreV3/{season}/{week}/{hometeam},BoxScoreV,Box Score V3,r,high,GET read box score,1,r,method,,ok
 1669,GET,sportsdata.io,,GET,/{format}/PlayerGameProjectionStatsByWeek/{season}/{week},ProjectedPlayerGameStatsByWeekWInjuriesLineupsDfsSalaries,"Projected Player Game Stats by Week (w/ Injuries, Lineups, DFS Salaries)",r,high,GET read projected stats,1,r,method,,ok
 1670,GET,sportsdata.io,,GET,/{format}/PlayerGameStatsByPlayerID/{season}/{week}/{playerid},PlayerGameStatsByPlayer,Player Game Stats by Player,r,high,GET read player stats,1,r,method,,ok
@@ -1680,35 +1680,35 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1680,GET,stackexchange.com,,GET,/me/reputation,,,r,high,GET read own reputation,1,r,method,,ok
 1681,GET,stackexchange.com,,GET,/me/suggested-edits,,,r,high,GET read own suggested edits,1,r,method,,ok
 1682,GET,stackexchange.com,,GET,/tags/{tag}/top-askers/{period},,,r,high,GET read top askers,1,r,method,,ok
-1683,POST,stackexchange.com,,POST,/posts/{id}/comments/add,,,x,high,road 1a posts public comment,3,x,floor,,ok
-1684,POST,statsocial.com,,POST,/reports/status/,,Get list of generated reports,r,high,returns list of generated reports,3,x,floor,,OVER-TIGHT
-1685,POST,statsocial.com,,POST,/reports/twitter/create/,,Used to create twitter follower report,w,low,creates own stored report,3,x,floor,,FALSE-ALARM
+1683,POST,stackexchange.com,,POST,/posts/{id}/comments/add,,,x,high,road 1a creates public comment on post,3,x,floor,,ok
+1684,POST,statsocial.com,,POST,/reports/status/,,Get list of generated reports,r,high,road i get list of own reports,3,x,floor,,OVER-TIGHT
+1685,POST,statsocial.com,,POST,/reports/twitter/create/,,Used to create twitter follower report,x,high,rule ii creates new twitter report,3,x,floor,,ok
 1686,W,superset.apache.local,superset.apache.local,DELETE,/dataset/{pk}/metric/{metric_id},,,w,high,rule 4 dataset metric deleted,2,w,floor,x-pile,ok
 1687,W,swaggerhub.com,swaggerhub.com,DELETE,/apis/{owner}/{api}/{version}/comments/{comment},deleteApiCommentV2,Delete a comment,w,high,own comment deleted,2,w,yours-noun,evidence,ok
 1688,W,swaggerhub.com,swaggerhub.com,DELETE,/domains/{owner}/{domain}/{version},deleteDomainVersion,Delete a domain version,w,high,rule 4 domain version deleted,2,w,floor,x-pile,ok
-1689,POST,symanto.net,,POST,/communication,communication,Communication & Tonality,r,high,text analysis returns labels no change,3,x,floor,,OVER-TIGHT
-1690,POST,symanto.net,,POST,/ekman-emotion,ekman-emotion,Emotion Analysis,r,high,text analysis returns labels no change,3,x,floor,,OVER-TIGHT
-1691,POST,symanto.net,,POST,/language-detection,language-detection,Language Detection,r,high,text analysis returns labels no change,3,x,floor,,OVER-TIGHT
-1692,POST,symanto.net,,POST,/personality,personality,Personality Traits,r,high,text analysis returns labels no change,3,x,floor,,OVER-TIGHT
-1693,POST,symanto.net,,POST,/sentiment,sentiment,Sentiment Analysis,r,high,text analysis returns labels no change,3,x,floor,,OVER-TIGHT
+1689,POST,symanto.net,,POST,/communication,communication,Communication & Tonality,r,high,road i analyzes text returns labels,3,x,floor,,OVER-TIGHT
+1690,POST,symanto.net,,POST,/ekman-emotion,ekman-emotion,Emotion Analysis,r,high,road i detects emotion returns labels,3,x,floor,,OVER-TIGHT
+1691,POST,symanto.net,,POST,/language-detection,language-detection,Language Detection,r,high,road i detects language returns label,3,x,floor,,OVER-TIGHT
+1692,POST,symanto.net,,POST,/personality,personality,Personality Traits,r,high,road i predicts personality returns label,3,x,floor,,OVER-TIGHT
+1693,POST,symanto.net,,POST,/sentiment,sentiment,Sentiment Analysis,r,high,road i evaluates sentiment returns label,3,x,floor,,OVER-TIGHT
 1694,POST,synq.fm,,POST,/video/stream,stream,Returns urls for streaming.,x,high,road 1d creates stream others watch,3,x,floor,,ok
-1695,POST,taggun.io,,POST,/api/account/v1/feedback,postApiAccountV1Feedback,Add manually verified receipt data to a given receipt for feedback and training purposes,w,high,rule 1 own receipt feedback edited,3,x,floor,,FALSE-ALARM
-1696,POST,taggun.io,,POST,/api/account/v1/merchantname/add,postApiAccountV1MerchantnameAdd,Add a keyword to your account's model to predict merchant name. Changes in your account's model are updated daily.,w,high,own account model keyword added,3,x,floor,,FALSE-ALARM
-1697,POST,taggun.io,,POST,/api/receipt/v1/match/file,postApiReceiptV1MatchFile,detect and match a receipt against keywords and metadata by uploading an image file,r,high,lookup match returns result no change,3,x,floor,,OVER-TIGHT
-1698,POST,taggun.io,,POST,/api/receipt/v1/simple/file,postApiReceiptV1SimpleFile,transcribe a receipt by uploading an image file,r,high,transcription returns result no change,3,x,floor,,OVER-TIGHT
-1699,POST,taggun.io,,POST,/api/receipt/v1/simple/storage,postApiReceiptV1SimpleStorage,transcribe a receipt in storage,r,high,transcription returns result no change,3,x,floor,,OVER-TIGHT
-1700,POST,telegram.org,,POST,/answerPreCheckoutQuery,,,x,high,road 1c confirms payment with buyer,3,x,floor,,ok
-1701,POST,telegram.org,,POST,/editMessageMedia,,,x,low,road 1a edits message others already saw,3,x,floor,,ok
-1702,POST,telegram.org,,POST,/exportChatInviteLink,,,x,high,road 1b revokes and issues invite link,3,x,floor,,ok
-1703,POST,telegram.org,,POST,/getChatMembersCount,,,r,high,GET style count returns result no change,1,r,read-verb,,ok
+1695,POST,taggun.io,,POST,/api/account/v1/feedback,postApiAccountV1Feedback,Add manually verified receipt data to a given receipt for feedback and training purposes,w,low,edits existing receipt with feedback data,3,x,floor,,FALSE-ALARM
+1696,POST,taggun.io,,POST,/api/account/v1/merchantname/add,postApiAccountV1MerchantnameAdd,Add a keyword to your account's model to predict merchant name. Changes in your account's model are updated daily.,x,low,adds new keyword to own model,3,x,floor,,ok
+1697,POST,taggun.io,,POST,/api/receipt/v1/match/file,postApiReceiptV1MatchFile,detect and match a receipt against keywords and metadata by uploading an image file,r,high,road i detects matches against keywords,3,x,floor,,OVER-TIGHT
+1698,POST,taggun.io,,POST,/api/receipt/v1/simple/file,postApiReceiptV1SimpleFile,transcribe a receipt by uploading an image file,r,high,road i transcribes receipt returns text,3,x,floor,,OVER-TIGHT
+1699,POST,taggun.io,,POST,/api/receipt/v1/simple/storage,postApiReceiptV1SimpleStorage,transcribe a receipt in storage,r,high,road i transcribes receipt returns text,3,x,floor,,OVER-TIGHT
+1700,POST,telegram.org,,POST,/answerPreCheckoutQuery,,,x,high,road 1c confirms payment checkout,3,x,floor,,ok
+1701,POST,telegram.org,,POST,/editMessageMedia,,,w,low,edits own previously sent message,3,x,floor,,FALSE-ALARM
+1702,POST,telegram.org,,POST,/exportChatInviteLink,,,x,low,generates invite link changes chat access,3,x,floor,,ok
+1703,POST,telegram.org,,POST,/getChatMembersCount,,,r,high,road i get member count read,1,r,read-verb,,ok
 1704,POST,telegram.org,,POST,/sendPoll,,,x,high,road 1a sends poll message to chat,3,x,floor,,ok
 1705,POST,telegram.org,,POST,/sendSticker,,,x,high,road 1a sends sticker message to chat,3,x,floor,,ok
-1706,POST,telegram.org,,POST,/setChatDescription,,,w,high,rule 4 chat container description edited,3,x,floor,,FALSE-ALARM
-1707,POST,telegram.org,,POST,/setChatTitle,,,w,high,rule 4 chat container title edited,3,x,floor,,FALSE-ALARM
-1708,POST,telegram.org,,POST,/setStickerSetThumb,,,w,high,own sticker set thumbnail set,3,x,floor,,FALSE-ALARM
-1709,POST,telegram.org,,POST,/stopMessageLiveLocation,,,x,high,road 1d live feed to viewers halts,3,x,floor,,ok
-1710,POST,telegram.org,,POST,/unpinAllChatMessages,,,w,high,rule 4 own chat container edited,3,x,floor,,FALSE-ALARM
-1711,POST,telegram.org,,POST,/uploadStickerFile,,,w,high,own sticker file uploaded,3,x,floor,,FALSE-ALARM
+1706,POST,telegram.org,,POST,/setChatDescription,,,w,high,rule 4 edits own chat container description,3,x,floor,,FALSE-ALARM
+1707,POST,telegram.org,,POST,/setChatTitle,,,w,high,rule 4 edits own chat container title,3,x,floor,,FALSE-ALARM
+1708,POST,telegram.org,,POST,/setStickerSetThumb,,,w,high,rule 4 edits own sticker set thumbnail,3,x,floor,,FALSE-ALARM
+1709,POST,telegram.org,,POST,/stopMessageLiveLocation,,,x,high,road 1d stops live feed viewers watching,3,x,floor,,ok
+1710,POST,telegram.org,,POST,/unpinAllChatMessages,,,w,high,rule 4 edits own chat pinned list,3,x,floor,,FALSE-ALARM
+1711,POST,telegram.org,,POST,/uploadStickerFile,,,x,high,rule ii uploads new sticker file,3,x,floor,,ok
 1712,GET,telematicssdk.com,,GET,/statistics/v1/Scorings/consolidated,/v1/scorings/consolidated,/v1/Scorings/consolidated,r,low,GET no description assume read,1,r,method,,ok
 1713,GET,telematicssdk.com,,GET,/statistics/v1/Statistics/consolidated,/v1/statistics/consolidated,/v1/Statistics/consolidated,r,low,GET no description assume read,1,r,method,,ok
 1714,W,telnyx.com,telnyx.com,DELETE,/call_control_applications/{id},deleteCallControlApplication,Delete a call control application,w,high,own call control app deleted,3,x,other-noun,,FALSE-ALARM
@@ -1741,11 +1741,11 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1741,GET,thebluealliance.com,,GET,/team/{team_key}/media/tag/{media_tag}/{year},getTeamMediaByTagYear,,r,high,GET read team media,1,r,method,,ok
 1742,GET,thebluealliance.com,,GET,/team/{team_key}/years_participated,getTeamYearsParticipated,,r,high,GET read team years participated,1,r,method,,ok
 1743,GET,thenounproject.com,,GET,/icons/recent_uploads,getRecentIcons,Get recent icons,r,high,GET read recent icons,1,r,method,,ok
-1744,POST,tinyuid.com,,POST,/v1/shorten,,Create short link,w,low,creates own short link record,3,x,floor,,FALSE-ALARM
+1744,POST,tinyuid.com,,POST,/v1/shorten,,Create short link,x,high,rule ii creates new public short link,3,x,floor,,ok
 1745,GET,tisane.ai,,GET,/values,listFeatureValues,List feature values,r,high,GET read feature values,1,r,method,,ok
 1746,GET,tokenjay.app,,GET,/createbabel/{address},ergoPayCreateBabelBox,,x,low,operationId names create action despite GET,1,r,method,,LEAK
-1747,POST,tokenjay.app,,POST,/payment/addrequest,addPaymentRequest,Creates a new payment request. Will return request id to check for transaction state and ergopay url to show the user as QR code,w,high,rule 10 creates payment request no charge,3,x,floor,,FALSE-ALARM
-1748,POST,tomtom.com,,POST,/routing/{versionNumber}/calculateReachableRange/{origin}/{contentType},,Reachable Range,r,high,calculation returns reachable range no change,3,x,floor,,OVER-TIGHT
+1747,POST,tokenjay.app,,POST,/payment/addrequest,addPaymentRequest,Creates a new payment request. Will return request id to check for transaction state and ergopay url to show the user as QR code,x,high,road 1c creates payment request commitment,3,x,floor,,ok
+1748,POST,tomtom.com,,POST,/routing/{versionNumber}/calculateReachableRange/{origin}/{contentType},,Reachable Range,r,high,road i calculates reachable range,3,x,floor,,OVER-TIGHT
 1749,W,traccar.org,traccar.org,DELETE,/session,,Close the Session,w,high,rule 11 closes own session,3,x,other-noun,,FALSE-ALARM
 1750,W,trashnothing.com,trashnothing.com,PUT,/conversations/{conversation_id}/mark-read,mark_conversation_read,Mark conversation as read,w,high,rule 11 mark conversation as read,3,x,other-noun,,FALSE-ALARM
 1751,W,trashnothing.com,trashnothing.com,PUT,/posts/{post_id}/withdraw,withdraw_post,Withdraw a post,w,high,rule 1 own post withdrawn,2,w,floor,x-pile,ok
@@ -1795,8 +1795,8 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1795,W,twilio.com,twilio,DELETE,/v2/Services/{ServiceSid}/RateLimits/{Sid},DeleteRateLimit,,w,high,own rate limit deleted,2,w,yours-noun,evidence,ok
 1796,W,twilio.com,twilio,DELETE,/v2/Services/{ServiceSid}/Users/{UserSid}/Channels/{ChannelSid},DeleteUserChannel,,x,high,road 1b removes user from channel,3,x,other-noun,,ok
 1797,W,twilio.com,twilio,DELETE,/v2/Services/{ServiceSid}/Webhooks/{Sid},DeleteWebhook,,w,high,own webhook deleted,2,w,yours-noun,evidence,ok
-1798,POST,uscann.net,,POST,/authentication/register,register,register,w,high,creates own account via registration,3,x,floor,,FALSE-ALARM
-1799,POST,vectara.io,,POST,/v1/list-corpora,ListCorpora,,r,high,returns list of corpora no change,1,r,read-verb,,ok
+1798,POST,uscann.net,,POST,/authentication/register,register,register,x,high,rule ii registers creates new account,3,x,floor,,ok
+1799,POST,vectara.io,,POST,/v1/list-corpora,ListCorpora,,r,high,road i list corpora read,1,r,read-verb,,ok
 1800,W,vercel.com,vercel,DELETE,/edge-config/{edgeConfigId},deleteEdgeConfig,Delete an Edge Config,w,high,own edge config deleted,3,x,other-noun,,FALSE-ALARM
 1801,W,vercel.com,vercel,DELETE,/edge-config/{edgeConfigId}/tokens,deleteEdgeConfigTokens,Delete one or more Edge Config tokens,w,high,rule6 own edge config token,3,x,other-noun,,FALSE-ALARM
 1802,W,vercel.com,vercel,DELETE,/v1/integrations/configuration/{id},deleteConfiguration,Delete an integration configuration,w,high,rule4 delete own integration container,2,w,yours-noun,evidence,ok
@@ -1820,12 +1820,12 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1820,W,vercel.com,vercel,PUT,/edge-config/{edgeConfigId},updateEdgeConfig,Update an Edge Config,w,high,update own edge config,3,x,other-noun,,FALSE-ALARM
 1821,W,vercel.com,vercel,PUT,/v7/certs,uploadCert,Upload a cert,w,high,upload own cert,2,w,floor,x-pile,ok
 1822,W,vercel.com,vercel,PUT,/v8/artifacts/{hash},uploadArtifact,Upload a cache artifact,w,high,upload own cache artifact,2,w,floor,x-pile,ok
-1823,POST,viator.com,,POST,/booking/availability/tourgrades/pricingmatrix,bookingAvailabilityTourgradesPricingmatrix,/booking/availability/tourgrades/pricingmatrix,r,high,POST read pricing matrix,3,x,floor,,OVER-TIGHT
-1824,POST,viator.com,,POST,/booking/calculateprice,bookingCalculateprice,/booking/calculateprice,r,high,POST calculates price no charge,3,x,floor,,OVER-TIGHT
-1825,POST,viator.com,,POST,/booking/pricingmatrix,bookingPricingmatrix,/booking/pricingmatrix,r,high,POST read pricing matrix,3,x,floor,,OVER-TIGHT
-1826,POST,viator.com,,POST,/booking/status,bookingStatus,/booking/status,r,high,POST reads booking status,3,x,floor,,OVER-TIGHT
-1827,POST,viator.com,,POST,/search/products,searchProducts,/search/products,r,high,POST search products,1,r,read-verb,,ok
-1828,POST,viator.com,,POST,/search/products/codes,searchProductsCodes,/search/products/codes,r,high,POST search by product code,1,r,read-verb,,ok
+1823,POST,viator.com,,POST,/booking/availability/tourgrades/pricingmatrix,bookingAvailabilityTourgradesPricingmatrix,/booking/availability/tourgrades/pricingmatrix,r,high,road i get pricing matrix read,3,x,floor,,OVER-TIGHT
+1824,POST,viator.com,,POST,/booking/calculateprice,bookingCalculateprice,/booking/calculateprice,r,high,road i confirms price preview before booking,3,x,floor,,OVER-TIGHT
+1825,POST,viator.com,,POST,/booking/pricingmatrix,bookingPricingmatrix,/booking/pricingmatrix,r,high,road i get pricing matrix read,3,x,floor,,OVER-TIGHT
+1826,POST,viator.com,,POST,/booking/status,bookingStatus,/booking/status,r,high,road i get booking status read,3,x,floor,,OVER-TIGHT
+1827,POST,viator.com,,POST,/search/products,searchProducts,/search/products,r,high,road i search products read,1,r,read-verb,,ok
+1828,POST,viator.com,,POST,/search/products/codes,searchProductsCodes,/search/products/codes,r,high,road i search products by code,1,r,read-verb,,ok
 1829,W,vimeo.com,vimeo.com,DELETE,/channels/{channel_id},delete_channel,Delete a channel,w,low,no description delete own channel,2,w,floor,x-pile,ok
 1830,W,vimeo.com,vimeo.com,DELETE,/channels/{channel_id}/categories/{category},delete_channel_category,Remove a category from a channel,w,high,remove category from own channel,2,w,floor,x-pile,ok
 1831,W,vimeo.com,vimeo.com,DELETE,/channels/{channel_id}/moderators/{user_id},remove_channel_moderator,Remove a specific channel moderator,x,high,road1b removes moderator role,3,x,other-noun,,ok
@@ -1850,8 +1850,8 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1850,W,vimeo.com,vimeo.com,PUT,/videos/{video_id}/presets/{preset_id},add_video_embed_preset,Add an embed preset to a video,w,high,add preset to own video,3,x,other-noun,,FALSE-ALARM
 1851,W,vimeo.com,vimeo.com,PUT,/videos/{video_id}/privacy/users,add_video_privacy_users,Permit a list of users to view a private video,x,high,road1b grants view permission others,3,x,other-noun,,ok
 1852,GET,visiblethread.com,,GET,/webscans/{scanId}/webUrls/{urlId},getScanUrlById,Gets data for a particular scan/webUrl,r,high,GET reads scan data,1,r,method,,ok
-1853,POST,visiblethread.com,,POST,/documents,uploadDoc,Upload a document,w,high,rule1 create own document upload,3,x,floor,,FALSE-ALARM
-1854,POST,visiblethread.com,,POST,/searches,runSearch,Run a search,r,high,POST runs a search,3,x,floor,,OVER-TIGHT
+1853,POST,visiblethread.com,,POST,/documents,uploadDoc,Upload a document,x,high,rule ii uploads new document,3,x,floor,,ok
+1854,POST,visiblethread.com,,POST,/searches,runSearch,Run a search,r,high,road i runs search on document,3,x,floor,,OVER-TIGHT
 1855,GET,visualcrossing.com,,GET,/VisualCrossingWebServices/rest/services/timeline/{location},,Historical and Forecast Weather API,r,high,GET weather data,1,r,method,,ok
 1856,W,visualstudio.com,visualstudio.com,DELETE,/api/v1/Environments/{environmentId},,,w,low,no text default own environment,2,w,yours-noun,evidence,ok
 1857,W,visualstudio.com,visualstudio.com,PATCH,/api/v1/Environments/{environmentId}/folder,,,w,low,no text default own env folder,2,w,yours-noun,evidence,ok
@@ -1864,7 +1864,7 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1864,W,vmware.local,vmware.local,DELETE,/groups/applications/{id}/tiers/{tier-id},deleteTier,Delete tier,w,high,delete own application tier,2,w,floor,x-pile,ok
 1865,W,vmware.local,vmware.local,PUT,/data-sources/hpov-managers/{id},updateHpovManager,Update a hp oneview data source,w,high,update own data source,3,x,other-noun,,FALSE-ALARM
 1866,GET,voodoomfg.com,,GET,/order,,Lists all orders.,r,high,GET lists own orders,1,r,method,,ok
-1867,POST,voodoomfg.com,,POST,/order/confirm,,Confirms an order from a quote_id and submits it to the Voodoo factory.,x,high,road1c submits order to factory,3,x,floor,,ok
+1867,POST,voodoomfg.com,,POST,/order/confirm,,Confirms an order from a quote_id and submits it to the Voodoo factory.,x,high,road 1e submits order to factory,3,x,floor,,ok
 1868,W,vtex.local,vtex.local,DELETE,/api/catalog/pvt/stockkeepingunit/disassociate/{skuId}/file/{skuFileId},,Disassociate SKU File,w,high,disassociate own catalog file,2,w,yours-noun,evidence,ok
 1869,W,vtex.local,vtex.local,DELETE,/api/catalog/pvt/subcollection/{subCollectionId}/brand/{brandId},,Delete Brand from Subcollection,w,high,rule4 remove brand own container,2,w,floor,x-pile,ok
 1870,W,vtex.local,vtex.local,DELETE,/api/catalog/pvt/subcollection/{subCollectionId}/brand/{categoryId},,Delete Category from Subcollection,w,high,rule4 remove category own container,2,w,floor,x-pile,ok
@@ -1897,7 +1897,7 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1897,GET,wikimedia.org,,GET,/transform/word/from/{from_lang}/to/{to_lang}/{word}/{provider},,Fetch the dictionary meaning of a word,r,high,GET dictionary lookup,1,r,method,,ok
 1898,W,windows.net,windows.net,PATCH,/{tenantID}/servicePrincipals/{objectId},ServicePrincipals_Update,,w,low,generic update own service principal,2,w,floor,x-pile,ok
 1899,GET,winsms.co.za,,GET,/subaccounts,getSubAccounts,Get a list of all Sub Accounts.,r,high,GET lists own subaccounts,1,r,method,,ok
-1900,POST,winsms.co.za,,POST,/sms/outgoing/sendmulti,smsSendBatch,Send multiple different SMS messages,x,high,road1a sends sms to recipients,3,x,floor,,ok
+1900,POST,winsms.co.za,,POST,/sms/outgoing/sendmulti,smsSendBatch,Send multiple different SMS messages,x,high,road 1a sends sms to recipients,3,x,floor,,ok
 1901,GET,wolframalpha.com,,GET,/api/v1/cloud-plugin,getWolframCloudResults,Evaluate Wolfram Language code,r,low,GET no text default no change,1,r,method,,ok
 1902,GET,wordnik.com,,GET,/word.json/{word}/definitions,getDefinitions,Return definitions for a word,r,high,GET word definition lookup,1,r,method,,ok
 1903,GET,wordnik.com,,GET,/words.json/randomWords,getRandomWords,Returns an array of random WordObjects,r,high,GET random words,1,r,method,,ok
@@ -1951,7 +1951,7 @@ row_id,stratum,provider,corpus_vendor,method,path,operationId,summary,truth,conf
 1951,W,xtrf.eu,xtrf.eu,PUT,/v2/projects/{projectId}/vendorInstructions,updateVendorInstructions,Updates instructions for all vendors performing the jobs in a project.,w,low,no notify text vendor instructions,2,w,yours-noun,evidence,ok
 1952,W,xtrf.eu,xtrf.eu,PUT,/v2/quotes/{quoteId}/quoteExpiry,updateQuoteExpiry,Updates Quote Expiry Date for a quote.,w,high,update own quote expiry,2,w,floor,x-pile,ok
 1953,W,xtrf.eu,xtrf.eu,PUT,/v2/quotes/{quoteId}/status,changeStatus_3,Changes quote status if possible (400 Bad Request is returned otherwise).,w,low,no notify text status change,2,w,floor,x-pile,ok
-1954,POST,zappiti.com,,POST,/LastMedia,,Get informations about last media playback,r,high,POST reads last media info,3,x,floor,,OVER-TIGHT
+1954,POST,zappiti.com,,POST,/LastMedia,,Get informations about last media playback,r,high,road i get last media info,3,x,floor,,OVER-TIGHT
 1955,W,zoom.us,zoom.us,DELETE,/accounts/{accountId},accountDisassociate,Disassociate a sub account,w,high,rule5 unlink own sub account,2,w,floor,x-pile,ok
 1956,W,zoom.us,zoom.us,DELETE,/accounts/{accountId}/sip_trunk/numbers,deleteAllSipNumbers,Delete all numbers,w,high,rule6 delete own phone numbers,2,w,floor,x-pile,ok
 1957,W,zoom.us,zoom.us,DELETE,/groups/{groupId}/settings/virtual_backgrounds,delGroupVB,Delete virtual background files,w,high,delete own virtual backgrounds,3,x,other-noun,,FALSE-ALARM
