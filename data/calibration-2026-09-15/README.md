@@ -102,3 +102,26 @@ The brief's Methods paragraph was revised (BRIEF.md header, "Revised
 Scorer: `node poc/exam/score-postcal.mjs v2` (practice) and
 `node poc/exam/score-postcal.mjs holdback` (check); add `rows` for the
 disagreement list.
+
+## Revised brief result (2026-09-15)
+
+Practice, 339 measure rows relabelled blind (`postcal-v2-labels-part1.csv`,
+`postcal-v2-labels-part2.csv`): agree 290/339 (85.5%); x-share sheet 57.2%
+vs corpus 60.5%; confusion x->w 26, w->x 17, x->r 3, w->r 1, r->x 1, r->w 1.
+
+Check, 170 holdback rows, scored once (`postcal-holdback-labels.csv`):
+agree 145/170 (85.3%); x-share sheet 60.6% vs corpus 66.5% (gap 5.9
+points); truth mix r 28 / w 29 / x 113; sheet mix r 32 / w 35 / x 103;
+confusion x->x 96, x->w 13, x->r 4, r->r 27, r->x 1, w->r 1, w->w 22,
+w->x 6.
+
+PASS on both pre-registered conditions (agreement >=85% on the holdback,
+and x-share within 10 points of corpus truth's x-share).
+
+The revised key still leans loose on POST: it under-calls x more than it
+over-calls it (holdback x->w 13 vs w->x 6; x-share 5.9 points under
+corpus), most often on live things (SIM/eSIM lifecycle, device-to-slice
+actions, recordings, streams, sessions) and on payment links or stored
+payment tokens.
+
+The holdback is burned.

@@ -12,6 +12,11 @@
 // keyed by exact corpus vendor name, and an unknown name silently gets
 // empty lists (a leak-shaped bug, not a crash) — see CLAUDE.md's rail on
 // vendor identity.
+//
+// If both data/exam5-2026-09-14/exam-post-truth-part1.csv and
+// exam-post-truth-part2.csv exist, the 300 POST-stratum rows' truth is
+// overridden from those files (relabelled under the brief's POST
+// paragraph revised 2026-09-15) instead of the original 10-part truth.
 
 import { readFileSync, existsSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -47,6 +52,71 @@ for (let i = 1; i <= 10; i++) {
 }
 if (truth.size !== 2000) {
   throw new Error(`expected 2000 truth rows across 10 parts, got ${truth.size}`);
+}
+
+const postTruthPath1 = D + 'exam-post-truth-part1.csv';
+const postTruthPath2 = D + 'exam-post-truth-part2.csv';
+const postTruth1Exists = existsSync(postTruthPath1);
+const postTruth2Exists = existsSync(postTruthPath2);
+
+if (postTruth1Exists !== postTruth2Exists) {
+  throw new Error(
+    'expected both exam-post-truth-part1.csv and exam-post-truth-part2.csv, found only ' +
+      (postTruth1Exists ? 'part1' : 'part2'),
+  );
+}
+
+if (postTruth1Exists && postTruth2Exists) {
+  const postKeyRowIds = keyRows.filter((k) => k.stratum === 'POST').map((k) => k.row_id);
+  if (postKeyRowIds.length !== 300) {
+    throw new Error(`expected 300 POST-stratum key rows, got ${postKeyRowIds.length}`);
+  }
+
+  const validateAgainstBlind = (truthPartRows, blindPath, label) => {
+    const blindPartRows = parseCsv(readFileSync(D + blindPath, 'utf8'));
+    if (truthPartRows.length !== blindPartRows.length) {
+      throw new Error(
+        `${label}: expected ${blindPartRows.length} rows to match ${blindPath}, got ${truthPartRows.length}`,
+      );
+    }
+    for (let i = 0; i < blindPartRows.length; i++) {
+      if (truthPartRows[i].row_id !== blindPartRows[i].row_id) {
+        throw new Error(
+          `${label}: row_id order mismatch at index ${i} (${truthPartRows[i].row_id} vs ${blindPartRows[i].row_id} in ${blindPath})`,
+        );
+      }
+      const cls = truthPartRows[i].truth_class;
+      if (!['r', 'w', 'x', '?'].includes(cls)) {
+        throw new Error(`${label}: row ${truthPartRows[i].row_id} has invalid truth_class "${cls}"`);
+      }
+      const conf = truthPartRows[i].confidence;
+      if (conf !== 'high' && conf !== 'low') {
+        throw new Error(`${label}: row ${truthPartRows[i].row_id} has invalid confidence "${conf}"`);
+      }
+    }
+  };
+
+  const postTruth1 = parseCsv(readFileSync(postTruthPath1, 'utf8'));
+  const postTruth2 = parseCsv(readFileSync(postTruthPath2, 'utf8'));
+  validateAgainstBlind(postTruth1, 'exam-post-blind-part1.csv', 'exam-post-truth-part1.csv');
+  validateAgainstBlind(postTruth2, 'exam-post-blind-part2.csv', 'exam-post-truth-part2.csv');
+
+  const postTruthUnion = new Map();
+  for (const t of [...postTruth1, ...postTruth2]) postTruthUnion.set(t.row_id, t);
+  const postKeyIdSet = new Set(postKeyRowIds);
+  if (postTruthUnion.size !== 300 || postKeyRowIds.some((id) => !postTruthUnion.has(id))) {
+    throw new Error('exam-post-truth-part1/2 union does not cover exactly the 300 POST-stratum row_ids');
+  }
+  for (const id of postTruthUnion.keys()) {
+    if (!postKeyIdSet.has(id)) {
+      throw new Error(`exam-post-truth row_id ${id} is not a POST-stratum row per exam-key.csv`);
+    }
+  }
+
+  for (const [id, t] of postTruthUnion) truth.set(id, t);
+  console.log('POST truth: relabel under brief revised 2026-09-15 (exam-post-truth-part1/2)');
+} else {
+  console.log('POST truth: original parts (brief before 2026-09-15)');
 }
 
 const scored = [];
