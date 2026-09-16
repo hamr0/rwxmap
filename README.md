@@ -1,26 +1,24 @@
 ```
-          ####  #   # #   # #   #  ###  ####
-          #   # #   #  # #  ## ## #   # #   #
-          ####  # # #   #   # # # ##### ####
-          #  #  ## ##  # #  #   # #   # #
-          #   # #   # #   # #   # #   # #
+██████╗ ██╗    ██╗██╗  ██╗███╗   ███╗ █████╗ ██████╗ 
+██╔══██╗██║    ██║╚██╗██╔╝████╗ ████║██╔══██╗██╔══██╗
+██████╔╝██║ █╗ ██║ ╚███╔╝ ██╔████╔██║███████║██████╔╝
+██╔══██╗██║███╗██║ ██╔██╗ ██║╚██╔╝██║██╔══██║██╔═══╝ 
+██║  ██║╚███╔███╔╝██╔╝ ██╗██║ ╚═╝ ██║██║  ██║██║     
+╚═╝  ╚═╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     
 
-              r ─ w ─ x  ·  what a call does, before it is made
+   r ─ w ─ x   what a call does, before it is made
 ```
 
 **[WIP] Maps every OpenAPI operation to r / w / x, so an agent knows what a call does before it is made.**
 
 ## The world this is for
 
-Automated traffic is already a large share of the web. Imperva/Thales put it at
-53% of all web traffic in 2025 — 40% bad bots, 13% benign automation
-([report](https://www.imperva.com/blog/bad-bot-report-2026-bots-agentic-age/),
-[summary](https://www.helpnetsecurity.com/2026/04/30/thales-ai-driven-bot-traffic-rise-report/)).
-Cloudflare's own measurement is lower, about 35% as of June 2026
-([source](https://technologychecker.io/blog/web-traffic-statistics)).
-The two numbers are far apart, so treat the exact share with care.
-Either way, automation is a large and growing part of the traffic, not
-a fringe of it.
+Automated traffic is already a large share of the web. Imperva/Thales
+put it at 53% of all web traffic in 2025 — 40% bad bots, 13% benign
+automation. Cloudflare's own measurement is lower, about 35% (both
+figures as of September 2026). The two numbers are far apart, so treat
+the exact share with care. Either way, automation is a large and
+growing part of the traffic, not a fringe of it.
 
 That share is going to keep including more agents acting for a real
 person: buying tickets, ordering groceries, filing forms. Today the
