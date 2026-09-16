@@ -17,7 +17,11 @@ operation DOES.
 ## Input
 A CSV at INPUT (columns repo,path,method,operationId). For each row, open
 the spec at data/holdout5-2026-09-08/specs/<repo>/<file> and locate that
-operation under `paths:` -> path -> method.
+operation under `paths:` -> path -> method. The specs/ folder is no
+longer committed (removed from this branch's git history, 2026-09-16 —
+see data/holdout5-2026-09-08/README.md); re-download the source specs
+from the vendor repositories named there before reading against this
+brief.
 
 This set has three vendors, two of them Swagger 2.0 rather than OpenAPI 3:
 - slack: `specs/slack/slack_web_openapi_v2.json` — **Swagger 2.0**.

@@ -3112,7 +3112,7 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   goal 2 -> goal 1 -> goal 3) and throws if a layer moves a row the
   wrong way; run/ledger.test.mjs pins each goal's number. The old
   poc/m1/arbiter/c*.mjs pass files are frozen history, not built on
-  again (D56, commit dd16c52).
+  again (D56, commit db04f24).
 
 ### Goal 1 measured: where the 2727 false alarms come from (2026-09-13)
 
@@ -3515,7 +3515,7 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   false alarms need evidence that is not in the name.
 
 ### Goal 3 readout: where the 49 over-tight rows come from (2026-09-13)
-- Goal: goal 1 committed standalone at 803/211 (3283211, D63) and
+- Goal: goal 1 committed standalone at 803/211 (1c5243c, D63) and
   parked by the user until goal 3 is done. Goal 3 (truth r dressed as w
   or x) opened with a POC readout, no code change: scratch scripts
   g3pile.mjs and g3verbs.mjs.
@@ -3678,7 +3678,7 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
 - Lesson: mining "yours" from rows whose truth cannot say whose thing it is (GET is truth r regardless of ownership) only dilutes the list; restricting to write rows is the right population, not just a tidier one. The population choice moved 443 rows between the evidence group and the x-pile with zero class change — a reminder that a flag pile's membership and a step's classes are different questions, and only the classes are pinned.
 
 ### Flow rebuild, step 5 of 5: poc/m1 archived (2026-09-14)
-- Goal: retire poc/m1/ now that poc/flow/ has been proven identical on all 5465 rows (dc01be0, D65) and is the only live classifier.
+- Goal: retire poc/m1/ now that poc/flow/ has been proven identical on all 5465 rows (701f3b6, D65) and is the only live classifier.
 - Tried: `git mv poc/m1 poc/archive/m1`; wrote poc/archive/m1/ARCHIVED.md modelled on poc/m0/ARCHIVED.md; deleted the five old per-step proof files (run-proof/step1.csv, step2.csv, step2-leaks.csv, step3.csv, rwxmap-runs.md), since run-proof/flow.csv and flow.md are the only proof now; updated poc/m0/ARCHIVED.md's successor pointer, docs/product/goal2-solution.md, docs/wiki/module-ladder-and-shape.md, and docs/product/prd.md to point at poc/archive/m1/ and poc/flow/ instead of poc/m1/.
 - Outcome: poc/flow/ is now the only live code — corpus.mjs, csv.mjs, floor.mjs, flow.mjs, ledger.mjs, proof.mjs, step1.mjs, step2.mjs, words.mjs (9 files) plus corpus.test.mjs, floor.test.mjs, flow.test.mjs, ledger.test.mjs, step1.test.mjs, step2.test.mjs, words.test.mjs (7 test files, 62 tests, 0 fail); `node poc/flow/proof.mjs` exits 0 with every pin held.
 - Lesson: the rebuild took five checkpointed steps in one day because every step was proved identical to the old code (mismatch scripts against the retired pipeline, then a full-corpus equivalence check before D65) before the old code was retired — nothing was archived on trust.
@@ -3748,3 +3748,9 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
 - Tried: leave-one-vendor-out sweep of source (summary / description / both) x minWShare (0.80/0.85/0.90/0.95) x minN (2/3/5), plus one union variant measured separately by the orchestrator (description nouns checked against the union of the summary-mined and description-mined lists).
 - Outcome: summary source resolved 0 rows at every setting — mechanically guaranteed, since the pile is exactly the rows that already failed that same bar, so it is a sanity check with no information. description, minN 2, 0.80: 130 resolved, 122 right, 8 leaks unflagged, pile down to 1842. description, minN 3, 0.80: 93 resolved, 92 right, 1 leak. both, minN 2, 0.80: 71 resolved, 69 right, 2 leaks (top vendor carried only 8 of the 71, so no single vendor carried the result). both, minN 2, 0.85: 35 resolved, 35 right, 0 leaks. Union variant (minN 3 / 0.80): 100 resolved, 98 right, 2 leaks, pile down to 1872. Best case is a 6.6% dent in the pile with 8 leaks; the safe (zero- or near-zero-leak) settings clear only 2-5%. Verified: poc/flow's 66 tests still pass and its own pins hold, unchanged by this POC; poc/desc-yours has 6 passing tests, including one confirming the summary-source baseline reproduces poc/flow's own yours list set-equal for 5 vendors. Nothing adopted.
 - Lesson: this is the second mining approach in a row to fail to cross vendors (after the corpus-derived raise list in M1-C15 and the hand/mechanical blocklist in M1-C12/M1-C9), and for the same underlying reason each time: the pile is stuck because vendors do not share the words that matter, not because the tool reads too little text — reading more text (description vs summary) only found a handful more matching nouns per vendor, not a transferable list. The pile earns its place as a flag rather than a rule (it holds 155 of the run's 204 leaks). The user's decision: stop mining words for the pile, keep the pile as the flag, and freeze the core at 78.8% exact / 3.7% leaks / 17.5% over-tight (exam 5: 70.2 / 3.2 / 26.7) as of 2026-09-16. Next candidate work, not started: step 1's POST read-verb list (exam 5 shows 148 of 188 over-tight POST rows are reads the list misses).
+
+### Holdout5 specs removed from branch history after GH013 push protection (2026-09-16)
+- Goal: unblock the push of branch m1/informed-arbiter, which GitHub's push protection (GH013) rejected over two vendor-published example credentials — an AWS access key ID and a Slack bot token — sitting inside third-party OpenAPI spec files committed under data/holdout5-2026-09-08/specs/, 9.6 MB of raw vendor downloads that no code ever reads (the classifier reads only ground-truth.csv and operations.csv, poc/flow/corpus.mjs:19-21).
+- Tried: toggling the repo-level secret_scanning_push_protection setting off did not lift the block and the change propagates with a lag of minutes, not immediately; the GitHub unblock URLs the push error printed 404'd for the user; git-filter-repo could not be installed in this environment, so git filter-branch --index-filter removed the path data/holdout5-2026-09-08/specs from all 84 commits of the branch.
+- Outcome: 84 commits before and after, 0 dropped, 0 empty, 0 subject mismatches; the specs path appears 0 times anywhere in branch history; no blob in branch history contains either secret; 66 poc/flow tests plus 6 poc/desc-yours tests pass; poc/flow/proof.mjs prints "All pins hold." with every number unchanged (x-pile 1972 rows / 155 leaks, whole flow 78.8% exact / 3.7% leaks / 17.5% over-tight).
+- Lesson: committed third-party corpus source files can carry vendor example credentials that block a push years after the commit, because push protection scans every commit in the push, not just the tip. Only the extracted rows are load-bearing for this project, so raw vendor downloads do not belong in git; once a secret is in history, a rewrite (filter-branch, or filter-repo where installable) is the only fix — a toggle or an unblock link is not reliable enough to depend on.

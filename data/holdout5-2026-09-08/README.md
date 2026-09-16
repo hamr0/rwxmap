@@ -5,6 +5,20 @@ anyone on this project before this extraction. shopify was dropped (see
 below); notion turned out to have a vendor-owned spec after all, contrary
 to the working assumption going in.
 
+## Specs no longer committed (2026-09-16)
+
+The `specs/` folder (the raw vendor OpenAPI/Swagger downloads described
+below, 9.6 MB) is no longer committed and was removed from this branch's
+git history. Two vendor-published example credentials — an AWS access
+key ID inside amazon's spec and a Slack bot token inside slack's spec —
+tripped GitHub push protection. No code ever read the specs; only
+`ground-truth.csv` and `operations.csv` are read (`poc/flow/corpus.mjs`).
+What survives: `ground-truth.csv`, `ground-truth-as-read.csv`,
+`operations.csv`, `reading/`, and this README — everything the classifier
+and the scoring actually use. Consequence: re-reading or re-labelling an
+operation from source now requires re-downloading the specs from the
+vendor repositories named below first.
+
 ## Vendors considered, and shopify's drop
 
 - slack: slackapi/slack-api-specs (slackapi is Slack's own GitHub org)
