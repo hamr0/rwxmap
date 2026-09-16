@@ -63,6 +63,9 @@ picture.
 - Flags 36% as "I don't know" rather than guessing. Inside that pile,
   91% are in fact the safe answer (`w`), 7.9% should have been marked
   stricter, 1.1% too strict.
+- That pile is mostly the long tail: 12% of operations on the 16
+  well-known vendors in the corpus, 45% across the 316 long-tail ones.
+  (Tuning-corpus numbers; the named vendors were used in tuning.)
 - Under 1% of all operations (0.9%) come out too loose with no flag at
   all — the number that matters for safety, and the one being worked
   on now.
