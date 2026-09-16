@@ -144,12 +144,28 @@ Counts are the current shape's errors over the 5465-row combined
 corpus (332 vendors), leave-one-vendor-out. Truth split: 936 x, 3883
 w, 646 r.
 
-| step | error | count | note |
-|---|---|---|---|
-| step 1 (r) | over-tight | 49 | 0 leaks |
-| step 2 (w) | false alarms / leaks | 805 / 187 | 155 of the 187 leaks sit in the 1972-row x-pile |
-| step 3 (x) | no rules, no ledger of its own | — | its errors are step 2's 187 leaks and POST's 127 over-tight |
-| GET floor | leaks | 17 | parked, D59, charged to the floor |
+| rows | ok | leaks | too tight | decided by |
+|---:|---:|---:|---:|---|
+| 1972 | 1795 | 155 | 22 | step 2 · `w` · floor |
+| 1211 | 1176 | 32 | 3 | step 2 · `w` · yours-noun |
+| 550 | 533 | 17 | 0 | step 1 · `r` · method floor |
+| 64 | 64 | 0 | 0 | step 1 · `r` · read-verb |
+| 1034 | 313 | 0 | 721 | step 3 · `x` · other-noun |
+| 184 | 100 | 0 | 84 | step 3 · `x` · live-verb |
+| 445 | 318 | 0 | 127 | step 3 · `x` · floor |
+| 5 | 5 | 0 | 0 | step 3 · `x` · money-noun |
+
+Every row of the corpus is decided by exactly one of these eight, so the
+columns sum to the ledger: 5465 rows, 4304 ok, 204 leaks, 957 too tight.
+Regenerate from `run-proof/flow.csv`.
+
+Leaks stop at step 3 by construction, not by luck. A leak is a class
+looser than truth, step 3 only ever assigns `x`, and there is nothing
+looser than `x` to be wrong toward. So leaks can only be created where a
+step stops at a loose class: step 1's `r` and step 2's `w`. Of the 204,
+172 come from a floor — no evidence fired and the step defaulted — and 32
+come from `yours-noun` firing and being wrong. The 17 on step 1's method
+floor are the parked GET leaks (D59).
 
 ### Where the code lives (poc/flow)
 
