@@ -13,13 +13,34 @@ own measured truth lean over the 5465-row labelled corpus (refreshed
 2026-09-13; the original 1478-row table is in docs/logs/learnings.md).
 It is a starting value, never an early return (D42).
 
-| method | n | truth r | truth w | truth x | floor |
-|---|---|---|---|---|---|
-| GET / HEAD / OPTIONS | 550 | 97% | 1% | 2% | **r** |
-| POST | 509 | 17% | 20% | 62% | **x** |
-| PUT | 1696 | 1% | 85% | 15% | **w** |
-| DELETE | 2079 | 0% | 87% | 13% | **w** |
-| PATCH | 631 | 1% | 85% | 14% | **w** |
+| method | n | truth r | truth w | truth x | floor | unseen (exam 5) | holds? |
+|---|---|---|---|---|---|---|---|
+| GET / HEAD / OPTIONS | 550 | 97% | 1% | 2% | **r** | r 97% / w 3% / x 1% (200 rows) | yes |
+| POST | 509 | 17% | 20% | 62% | **x** | r 63% / w 13% / x 23% (300 rows) | **no — inverts** |
+| PUT | 1696 | 1% | 85% | 15% | **w** | r 0% / w 87% / x 12% (603 rows) | yes |
+| DELETE | 2079 | 0% | 87% | 13% | **w** | r 0% / w 89% / x 11% (638 rows) | yes |
+| PATCH | 631 | 1% | 85% | 14% | **w** | r 0% / w 92% / x 8% (259 rows) | yes |
+
+Measured 2026-09-16 against exam 5, whose GET and POST strata are drawn
+from vendors the corpus has never seen; its write stratum is
+row-disjoint but not vendor-disjoint, so PUT / DELETE / PATCH are
+tested on unseen rows from known vendors, not unseen vendors. Four
+floors hold with the dominant class unchanged and the share stable or
+better. POST does not drift, it inverts: x 62% to 23%, r 17% to 63%.
+The flip is not a big-vendor artifact — corpus POST is only 14 vendors
+and 14 of the 14 are x-dominant, while exam 5 POST is 89 vendors split
+57 r-dominant / 27 x-dominant / 5 w-dominant, and vendor-weighting
+leaves the gap about two-fold.
+
+Every possible POST floor was priced on both sets. Floor r leaks 83%
+on the corpus and 37% on exam 5. Floor w leaks 62% on the corpus and
+23% on exam 5, and is over-tight 17% then 63%. Floor x never leaks,
+and is over-tight 38% then 77%. So x stays the only permissible POST
+floor, by the invariant and not by the corpus lean: it is the tightest
+class, and both alternatives are fail-open. Had the corpus leaned r,
+floor r would still be forbidden. The price of floor x is up to 77%
+over-tight on unseen vendors, which is safe but close to useless, so
+POST cannot be a floor-driven method in the new shape.
 
 **How the flow works (the user's reading, 2026-09-13).** One sequence,
 three steps. Each step takes the rows the step before left behind.
@@ -35,6 +56,11 @@ three steps. Each step takes the rows the step before left behind.
    POST / PUT / DELETE / PATCH row that step 1 and step 2 did not
    claim. Step 2 gives a w row up (a live verb or a not-yours noun
    fires) and it lands here.
+
+**Superseded 2026-09-16 — the core is reopened.** What follows describes
+the frozen shape that `poc/flow` still implements today. It stays until
+the POST POC below answers; the target shape is in "The new core"
+further down.
 
 **The build, step by step, in plain words (the user's ruling
 2026-09-14: keep it all as is, this is the best measured shape).**
@@ -137,6 +163,43 @@ One direction of travel per method (D43):
   the attack order, after step 3, step 2 and step 1.
 - POST — lower only, `x -> r`.
 - PUT / DELETE / PATCH — raise only, `w -> x`.
+
+### The new core (target shape, not built)
+
+The user's model, 2026-09-16, corrected where the 2026-09-16 floor POC
+contradicts it; the gist and the structure are the user's. Three
+steps; each step takes the rows the step before left behind, and every
+row comes out with a class and a flag.
+
+1. **Step 1, r floor** = GET / HEAD / OPTIONS 97% > POST 17%. How: read
+   verbs. A POST whose lead verb is a read verb is r; every other POST
+   passes down to step 2 unclaimed. Corrected here: the model said a
+   non-r POST goes to w. POST floored to w leaks 62% on the corpus and
+   23% on exam 5, which is fail-open and breaks the one invariant, so
+   failing the read test does not earn a POST a class.
+2. **Step 2, w floor** = PUT 85% / DELETE 87% / PATCH 85% > POST 20%.
+   How: live verbs plus yours noun. PUT / DELETE / PATCH start at w,
+   and evidence raises them to x. A POST can reach w here too, but
+   only on evidence — a modify verb plus a yours noun — never by
+   default. The 20% is real and today no path reaches it at all.
+3. **Step 3, x** = the fallback, not a floor. How: live verbs plus the
+   via-negativa yours noun; anything still unknown goes to the pile.
+   Corrected here: for PUT 15% / DELETE 13% / PATCH 14% this is
+   evidence-raised x, but POST's 62% is not a floor the tool may lean
+   on. An unclaimed POST lands at x because x is the tightest class,
+   not because POST leans x — that lean holds only on the corpus's 14
+   vendors and inverts to 23% on 89 unseen ones. Those rows are marked
+   unsure.
+
+The pile widens. Today only step 2 carries a sure/unsure flag, and
+2282 of 5465 rows (42%) carry none, including the 614 step 1 rows that
+hold all 17 GET leaks. In the new core every step flags every row.
+
+The riskiest piece, and the one the next POC targets: step 1's POST
+read-verb list catches only 42 of the 189 truth-r POSTs on unseen
+vendors, 22%. It was mined on a corpus where read-POSTs barely
+existed. If that cannot be raised, POST stays mostly unsure and rwxmap
+is a four-method tool that shrugs at POST.
 
 ## The three steps
 
