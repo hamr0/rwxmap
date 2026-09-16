@@ -5,8 +5,8 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { loadRows } from './corpus.mjs';
-import { applyStep1, READ_VERBS } from './step1.mjs';
-import { leadVerbAfterModifiers, matchesAnyStem, stemMatches } from './words.mjs';
+import { applyStep1, READ_VERBS, SAFE_VERBS } from './step1.mjs';
+import { leadVerbAfterModifiers, matchesAnyStem, stemMatches, tokensForRow } from './words.mjs';
 import { toCsv } from './csv.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -84,24 +84,24 @@ console.log(table(
 
 // --- Step 1 ledger ---------------------------------------------------------
 const results = rows.map((row) => ({ row, hit: applyStep1(row) }));
-const ledger = { method: { claimed: 0, right: 0, leaks: 0 }, 'read-verb': { claimed: 0, right: 0, leaks: 0 } };
+const RULES = ['method', 'read-verb', 'read-verb-anywhere'];
+const ledger = Object.fromEntries(RULES.map((r) => [r, { claimed: 0, right: 0, leaks: 0 }]));
 for (const { row, hit } of results) {
   if (!hit) continue;
   const l = ledger[hit.rule];
   l.claimed += 1;
   if (row.truth === 'r') l.right += 1; else l.leaks += 1;
 }
-const totalClaimed = ledger.method.claimed + ledger['read-verb'].claimed;
-const totalRight = ledger.method.right + ledger['read-verb'].right;
-const totalLeaks = ledger.method.leaks + ledger['read-verb'].leaks;
+const totalClaimed = RULES.reduce((n, r) => n + ledger[r].claimed, 0);
+const totalRight = RULES.reduce((n, r) => n + ledger[r].right, 0);
+const totalLeaks = RULES.reduce((n, r) => n + ledger[r].leaks, 0);
 const truthR = rows.filter((r) => r.truth === 'r');
 const missed = results.filter(({ row, hit }) => row.truth === 'r' && !hit).map(({ row }) => row);
 console.log('\n\nStep 1 ledger');
 console.log(table(
   ['rule', 'claimed', 'right', 'leaks'],
   [
-    ['method', ledger.method.claimed, ledger.method.right, ledger.method.leaks],
-    ['read-verb', ledger['read-verb'].claimed, ledger['read-verb'].right, ledger['read-verb'].leaks],
+    ...RULES.map((r) => [r, ledger[r].claimed, ledger[r].right, ledger[r].leaks]),
     ['total', totalClaimed, totalRight, totalLeaks],
   ],
   ['l', 'r', 'r', 'r'],
@@ -111,56 +111,72 @@ console.log(`\nmissed reads: ${missed.length} truth-r rows step 1 did not claim 
 // --- Per word --------------------------------------------------------------
 const postRows = rows.filter((r) => r.method === 'POST');
 const postLead = new Map(postRows.map((r) => [r.rowId, leadVerbAfterModifiers(r)]));
-const wordStats = [];
-for (const word of READ_VERBS) {
-  const fired = postRows.filter((r) => stemMatches(postLead.get(r.rowId), word));
-  if (!fired.length) continue;
-  const provs = [...new Set(fired.map((r) => r.provider))].sort();
-  wordStats.push({
-    word,
-    fires: fired.length,
-    right: fired.filter((r) => r.truth === 'r').length,
-    wrong: fired.filter((r) => r.truth !== 'r').length,
-    provs,
-  });
+const postTokens = new Map(postRows.map((r) => [r.rowId, tokensForRow(r).tokens]));
+// The anywhere rule only ever sees the POST rows the lead rule left behind.
+const anywhereRows = postRows.filter((r) => !matchesAnyStem(postLead.get(r.rowId), READ_VERBS));
+function statsFor(rule, words, pool, fires) {
+  const out = [];
+  for (const word of words) {
+    const hit = pool.filter((r) => fires(r, word));
+    if (!hit.length) continue;
+    const provs = [...new Set(hit.map((r) => r.provider))].sort();
+    out.push({
+      rule,
+      word,
+      fires: hit.length,
+      right: hit.filter((r) => r.truth === 'r').length,
+      wrong: hit.filter((r) => r.truth !== 'r').length,
+      provs,
+    });
+  }
+  return out.sort((a, b) => b.fires - a.fires || a.word.localeCompare(b.word));
 }
-wordStats.sort((a, b) => b.fires - a.fires || a.word.localeCompare(b.word));
-console.log('\n\nPer word (POST rows only)');
+const leadStats = statsFor('read-verb', READ_VERBS, postRows, (r, w) => stemMatches(postLead.get(r.rowId), w));
+const anywhereStats = statsFor('read-verb-anywhere', SAFE_VERBS, anywhereRows, (r, w) => postTokens.get(r.rowId).some((t) => stemMatches(t, w)));
+console.log('\n\nPer word (POST rows only; rule method uses no words and claims every GET/HEAD/OPTIONS row)');
+console.log('read-verb fires on the lead token of any POST row; read-verb-anywhere on any token of the POST rows read-verb left behind.');
 console.log(table(
-  ['word', 'fires', 'right', 'wrong', 'providers', 'provider list'],
-  wordStats.map((s) => [s.word, s.fires, s.right, s.wrong, s.provs.length, s.provs.join(' ')]),
-  ['l', 'r', 'r', 'r', 'r', 'l'],
+  ['rule', 'word', 'fires', 'right', 'wrong', 'providers', 'provider list'],
+  [...leadStats, ...anywhereStats].map((s) => [s.rule, s.word, s.fires, s.right, s.wrong, s.provs.length, s.provs.join(' ')]),
+  ['l', 'l', 'r', 'r', 'r', 'r', 'l'],
 ));
-const never = [...READ_VERBS].filter((w) => !wordStats.some((s) => s.word === w));
-console.log(`never fires: ${never.join(', ') || '(none)'}`);
+const neverLead = [...READ_VERBS].filter((w) => !leadStats.some((s) => s.word === w));
+const neverAnywhere = [...SAFE_VERBS].filter((w) => !anywhereStats.some((s) => s.word === w));
+console.log(`never fires as read-verb: ${neverLead.join(', ') || '(none)'}`);
+console.log(`never fires as read-verb-anywhere: ${neverAnywhere.join(', ') || '(none)'}`);
 
 // --- LOVO ------------------------------------------------------------------
-// For each provider in turn, rebuild READ_VERBS keeping a word only if it
-// fires on at least one OTHER provider's POST rows (the carried-over 13 are
-// always kept), then classify only that held-out provider's POST rows.
+// For each provider in turn, rebuild BOTH word lists keeping a word only if
+// it fires on at least one OTHER provider's POST rows — READ_VERBS on the
+// lead token (the carried-over 13 are always kept), SAFE_VERBS on any token
+// — then classify only that held-out provider's POST rows.
 let lovoClaimed = 0, lovoRight = 0, lovoLeaks = 0;
 const lovoRows = [];
 for (const held of providers) {
   const others = postRows.filter((r) => r.provider !== held);
-  const kept = new Set();
+  const keptRead = new Set();
   for (const word of READ_VERBS) {
-    if (CARRIED_OVER.has(word) || others.some((r) => stemMatches(postLead.get(r.rowId), word))) kept.add(word);
+    if (CARRIED_OVER.has(word) || others.some((r) => stemMatches(postLead.get(r.rowId), word))) keptRead.add(word);
+  }
+  const keptSafe = new Set();
+  for (const word of SAFE_VERBS) {
+    if (others.some((r) => postTokens.get(r.rowId).some((t) => stemMatches(t, word)))) keptSafe.add(word);
   }
   const mine = postRows.filter((r) => r.provider === held);
   let c = 0, ri = 0, le = 0;
   for (const row of mine) {
-    if (!matchesAnyStem(postLead.get(row.rowId), kept)) continue;
+    if (!applyStep1(row, { readVerbs: keptRead, safeVerbs: keptSafe })) continue;
     c += 1;
     if (row.truth === 'r') ri += 1; else le += 1;
   }
   lovoClaimed += c; lovoRight += ri; lovoLeaks += le;
-  lovoRows.push([held, mine.length, kept.size, c, ri, le]);
+  lovoRows.push([held, mine.length, keptRead.size, keptSafe.size, c, ri, le]);
 }
 console.log('\n\nLOVO (leave-one-vendor-out, POST rows only)');
 console.log(table(
-  ['held-out provider', 'POST rows', 'words kept', 'claimed', 'right', 'leaks'],
-  [...lovoRows, ['TOTAL', postRows.length, '', lovoClaimed, lovoRight, lovoLeaks]],
-  ['l', 'r', 'r', 'r', 'r', 'r'],
+  ['held-out provider', 'POST rows', 'read words kept', 'safe words kept', 'claimed', 'right', 'leaks'],
+  [...lovoRows, ['TOTAL', postRows.length, '', '', lovoClaimed, lovoRight, lovoLeaks]],
+  ['l', 'r', 'r', 'r', 'r', 'r', 'r'],
 ));
 
 // --- The misses ------------------------------------------------------------

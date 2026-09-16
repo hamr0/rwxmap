@@ -323,7 +323,7 @@ stripe,GET,/v1/payment_method_domains,GetPaymentMethodDomains,List payment metho
 stripe,POST,/v1/payment_method_domains,PostPaymentMethodDomains,Create a payment method domain,x,high,,,
 stripe,GET,/v1/payment_method_domains/{payment_method_domain},GetPaymentMethodDomainsPaymentMethodDomain,Retrieve a payment method domain,r,high,r,1,method
 stripe,POST,/v1/payment_method_domains/{payment_method_domain},PostPaymentMethodDomainsPaymentMethodDomain,Update a payment method domain,w,high,,,
-stripe,POST,/v1/payment_method_domains/{payment_method_domain}/validate,PostPaymentMethodDomainsPaymentMethodDomainValidate,Validate an existing payment method domain,w,low,,,
+stripe,POST,/v1/payment_method_domains/{payment_method_domain}/validate,PostPaymentMethodDomainsPaymentMethodDomainValidate,Validate an existing payment method domain,w,low,r,1,read-verb-anywhere
 stripe,GET,/v1/payment_methods,GetPaymentMethods,List PaymentMethods,r,high,r,1,method
 stripe,POST,/v1/payment_methods,PostPaymentMethods,Create a PaymentMethod,x,high,,,
 stripe,GET,/v1/payment_methods/{payment_method},GetPaymentMethodsPaymentMethod,Retrieve a PaymentMethod,r,high,r,1,method
@@ -1796,11 +1796,11 @@ digitalocean,GET,/v2/apps/{app_id}/events/{event_id}/logs,apps_get_event_logs,Re
 digitalocean,GET,/v2/apps/tiers/instance_sizes,apps_list_instanceSizes,List Instance Sizes,r,high,r,1,method
 digitalocean,GET,/v2/apps/tiers/instance_sizes/{slug},apps_get_instanceSize,Retrieve an Instance Size,r,high,r,1,method
 digitalocean,GET,/v2/apps/regions,apps_list_regions,List App Regions,r,high,r,1,method
-digitalocean,POST,/v2/apps/propose,apps_validate_appSpec,Propose an App Spec,r,high,,,
+digitalocean,POST,/v2/apps/propose,apps_validate_appSpec,Propose an App Spec,r,high,r,1,read-verb-anywhere
 digitalocean,GET,/v2/apps/{app_id}/alerts,apps_list_alerts,List all app alerts,r,high,r,1,method
 digitalocean,POST,/v2/apps/{app_id}/alerts/{alert_id}/destinations,apps_assign_alertDestinations,Update destinations for alerts,w,high,,,
 digitalocean,POST,/v2/apps/{app_id}/rollback,apps_create_rollback,Rollback App,x,high,,,
-digitalocean,POST,/v2/apps/{app_id}/rollback/validate,apps_validate_rollback,Validate App Rollback,r,high,,,
+digitalocean,POST,/v2/apps/{app_id}/rollback/validate,apps_validate_rollback,Validate App Rollback,r,high,r,1,read-verb-anywhere
 digitalocean,POST,/v2/apps/{app_id}/rollback/commit,apps_commit_rollback,Commit App Rollback,w,low,,,
 digitalocean,POST,/v2/apps/{app_id}/rollback/revert,apps_revert_rollback,Revert App Rollback,x,high,,,
 digitalocean,GET,/v2/apps/{app_id}/metrics/bandwidth_daily,apps_get_metrics_bandwidth_daily,Retrieve App Daily Bandwidth Metrics,r,high,r,1,method
@@ -2158,14 +2158,14 @@ digitalocean,GET,/v2/registries/{registry_name}/repositories/{repository_name}/t
 digitalocean,DELETE,/v2/registries/{registry_name}/repositories/{repository_name}/tags/{repository_tag},registries_delete_repositoryTag,Delete Container Registry Repository Tag,w,high,,,
 digitalocean,GET,/v2/registries/{registry_name}/repositories/{repository_name}/digests,registries_list_repositoryManifests,List All Container Registry Repository Manifests,r,high,r,1,method
 digitalocean,DELETE,/v2/registries/{registry_name}/repositories/{repository_name}/digests/{manifest_digest},registries_delete_repositoryManifest,Delete Container Registry Repository Manifest,w,high,,,
-digitalocean,POST,/v2/registries/validate-name,registries_validate_name,Validate a Container Registry Name,r,high,,,
+digitalocean,POST,/v2/registries/validate-name,registries_validate_name,Validate a Container Registry Name,r,high,r,1,read-verb-anywhere
 digitalocean,GET,/v2/registry,registry_get,Get Container Registry Information,r,high,r,1,method
 digitalocean,POST,/v2/registry,registry_create,Create Container Registry,x,high,,,
 digitalocean,DELETE,/v2/registry,registry_delete,Delete Container Registry,w,high,,,
 digitalocean,GET,/v2/registry/subscription,registry_get_subscription,Get Subscription,r,high,r,1,method
 digitalocean,POST,/v2/registry/subscription,registry_update_subscription,Update Subscription Tier,w,low,,,
 digitalocean,GET,/v2/registry/docker-credentials,registry_get_dockerCredentials,Get Docker Credentials for Container Registry,r,high,r,1,method
-digitalocean,POST,/v2/registry/validate-name,registry_validate_name,Validate a Container Registry Name,r,high,,,
+digitalocean,POST,/v2/registry/validate-name,registry_validate_name,Validate a Container Registry Name,r,high,r,1,read-verb-anywhere
 digitalocean,GET,/v2/registry/{registry_name}/repositories,registry_list_repositories,List All Container Registry Repositories,r,high,r,1,method
 digitalocean,GET,/v2/registry/{registry_name}/repositoriesV2,registry_list_repositoriesV2,List All Container Registry Repositories (V2),r,high,r,1,method
 digitalocean,GET,/v2/registry/{registry_name}/repositories/{repository_name}/tags,registry_list_repositoryTags,List All Container Registry Repository Tags,r,high,r,1,method

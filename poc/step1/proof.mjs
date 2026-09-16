@@ -2,8 +2,8 @@
 // Re-computes every pinned number from the corpus and asserts it. Prints
 // "All pins hold." and exits 0, or prints each mismatch and exits 1.
 import { loadRows } from './corpus.mjs';
-import { applyStep1, READ_VERBS } from './step1.mjs';
-import { leadVerbAfterModifiers, matchesAnyStem, stemMatches } from './words.mjs';
+import { applyStep1, READ_VERBS, SAFE_VERBS } from './step1.mjs';
+import { leadVerbAfterModifiers, matchesAnyStem, stemMatches, tokensForRow } from './words.mjs';
 
 const CARRIED_OVER = new Set([
   'retrieve', 'check', 'query', 'read', 'fetch', 'list', 'search',
@@ -61,7 +61,8 @@ check('intercom floor', perProviderFloor.find(([p]) => p === 'intercom').slice(1
 
 // --- step 1 ledger --------------------------------------------------------
 const results = rows.map((row) => ({ row, hit: applyStep1(row) }));
-const ledger = { method: { claimed: 0, right: 0, leaks: 0 }, 'read-verb': { claimed: 0, right: 0, leaks: 0 } };
+const RULES = ['method', 'read-verb', 'read-verb-anywhere'];
+const ledger = Object.fromEntries(RULES.map((r) => [r, { claimed: 0, right: 0, leaks: 0 }]));
 for (const { row, hit } of results) {
   if (!hit) continue;
   const l = ledger[hit.rule];
@@ -70,18 +71,38 @@ for (const { row, hit } of results) {
 }
 check('ledger method', ledger.method, { claimed: 1960, right: 1958, leaks: 2 });
 check('ledger read-verb', ledger['read-verb'], { claimed: 87, right: 87, leaks: 0 });
+// The price the user accepted on 2026-09-16: 5 claimed, 4 right, 1 leak.
+check('ledger read-verb-anywhere', ledger['read-verb-anywhere'], { claimed: 5, right: 4, leaks: 1 });
 check('ledger total', {
-  claimed: ledger.method.claimed + ledger['read-verb'].claimed,
-  right: ledger.method.right + ledger['read-verb'].right,
-  leaks: ledger.method.leaks + ledger['read-verb'].leaks,
-}, { claimed: 2047, right: 2045, leaks: 2 });
+  claimed: RULES.reduce((n, r) => n + ledger[r].claimed, 0),
+  right: RULES.reduce((n, r) => n + ledger[r].right, 0),
+  leaks: RULES.reduce((n, r) => n + ledger[r].leaks, 0),
+}, { claimed: 2052, right: 2049, leaks: 3 });
+check(
+  'read-verb-anywhere rows',
+  results.filter(({ hit }) => hit && hit.rule === 'read-verb-anywhere')
+    .map(({ row }) => [row.provider, row.operationId, row.truth, row.confidence]),
+  [
+    ['stripe', 'PostPaymentMethodDomainsPaymentMethodDomainValidate', 'w', 'low'],
+    ['digitalocean', 'apps_validate_appSpec', 'r', 'high'],
+    ['digitalocean', 'apps_validate_rollback', 'r', 'high'],
+    ['digitalocean', 'registries_validate_name', 'r', 'high'],
+    ['digitalocean', 'registry_validate_name', 'r', 'high'],
+  ],
+);
 const missed = results.filter(({ row, hit }) => row.truth === 'r' && !hit);
-check('missed reads', missed.length, 37);
-check('missed reads = POST truth r minus read-verb claims', byMethod.get('POST').r - ledger['read-verb'].claimed, 37);
+check('truth r rows', rows.filter((r) => r.truth === 'r').length, 2082);
+check('missed reads', missed.length, 33);
+check(
+  'missed reads = POST truth r minus POST claims',
+  byMethod.get('POST').r - ledger['read-verb'].right - ledger['read-verb-anywhere'].right,
+  33,
+);
 
 // --- per word -------------------------------------------------------------
 const postRows = rows.filter((r) => r.method === 'POST');
 const postLead = new Map(postRows.map((r) => [r.rowId, leadVerbAfterModifiers(r)]));
+const postTokens = new Map(postRows.map((r) => [r.rowId, tokensForRow(r).tokens]));
 const WANT_WORDS = {
   search: [27, 27, 4], get: [16, 16, 3], retrieve: [15, 15, 1], validate: [5, 5, 3],
   read: [4, 4, 1], list: [4, 4, 3], calculate: [2, 2, 1], evaluate: [2, 2, 1],
@@ -100,21 +121,42 @@ for (const word of READ_VERBS) {
 check('words that fire', fired.slice().sort(), Object.keys(WANT_WORDS).sort());
 check('words that never fire', [...READ_VERBS].filter((w) => !fired.includes(w)).sort(), WANT_NEVER.slice().sort());
 
+// --- per word, the anywhere rule ------------------------------------------
+// Only the POST rows the lead rule left behind ever reach this rule.
+const anywhereRows = postRows.filter((r) => !matchesAnyStem(postLead.get(r.rowId), READ_VERBS));
+const firedAnywhere = [];
+for (const word of SAFE_VERBS) {
+  const hits = anywhereRows.filter((r) => postTokens.get(r.rowId).some((t) => stemMatches(t, word)));
+  if (!hits.length) continue;
+  firedAnywhere.push(word);
+  check(`safe word ${word}`, [hits.length, hits.filter((r) => r.truth === 'r').length, new Set(hits.map((r) => r.provider)).size], word === 'validate' ? [5, 4, 2] : null);
+}
+check('safe words that fire', firedAnywhere, ['validate']);
+check('SAFE_VERBS is a subset of READ_VERBS', [...SAFE_VERBS].every((w) => READ_VERBS.has(w)), true);
+
 // --- LOVO -----------------------------------------------------------------
+// Both word lists are rebuilt per held-out provider: a READ_VERBS word is
+// kept if it fires on another provider's lead token (the carried-over 13
+// always), a SAFE_VERBS word if it fires on any token of another provider's
+// POST rows.
 let lovoClaimed = 0, lovoRight = 0, lovoLeaks = 0;
 for (const held of [...new Set(rows.map((r) => r.provider))]) {
   const others = postRows.filter((r) => r.provider !== held);
-  const kept = new Set();
+  const keptRead = new Set();
   for (const word of READ_VERBS) {
-    if (CARRIED_OVER.has(word) || others.some((r) => stemMatches(postLead.get(r.rowId), word))) kept.add(word);
+    if (CARRIED_OVER.has(word) || others.some((r) => stemMatches(postLead.get(r.rowId), word))) keptRead.add(word);
+  }
+  const keptSafe = new Set();
+  for (const word of SAFE_VERBS) {
+    if (others.some((r) => postTokens.get(r.rowId).some((t) => stemMatches(t, word)))) keptSafe.add(word);
   }
   for (const row of postRows.filter((r) => r.provider === held)) {
-    if (!matchesAnyStem(postLead.get(row.rowId), kept)) continue;
+    if (!applyStep1(row, { readVerbs: keptRead, safeVerbs: keptSafe })) continue;
     lovoClaimed += 1;
     if (row.truth === 'r') lovoRight += 1; else lovoLeaks += 1;
   }
 }
-check('LOVO', { claimed: lovoClaimed, right: lovoRight, leaks: lovoLeaks }, { claimed: 78, right: 78, leaks: 0 });
+check('LOVO', { claimed: lovoClaimed, right: lovoRight, leaks: lovoLeaks }, { claimed: 83, right: 82, leaks: 1 });
 
 if (failures.length) {
   for (const f of failures) console.log('MISMATCH ' + f);

@@ -196,20 +196,30 @@ row comes out with a class and a flag.
    1309). Built and measured, `poc/step1/` — this is the one step that
    is no longer "not built". How: the method floor (GET / HEAD /
    OPTIONS -> r; the corpus has no HEAD or OPTIONS rows, so those two
-   are carried on principle, not on evidence), plus one read-verb rule
-   on POST: the **lead token** of the operationId, after skipping the
-   modifier words `bulk` / `batch` / `deprecated` / `beta` / `async`,
-   matched stem-aware against a 23-word read-verb list. Every other
-   POST passes down to step 2 unclaimed. Ledger over all 4171 rows:
-   `method` 1960 claimed / 2 leaks; `read-verb` 87 claimed / 0 leaks;
-   total 2047 claimed / 2 leaks / 37 truth-r rows missed.
-   Leave-one-vendor-out: 78 claimed / 0 leaks. The 2 leaks are both on
-   the GET floor (`datadog GetGraphSnapshot`, `intercom
-   listContactBanners`, both labelled low confidence) and are out of
-   reach of a method floor by construction. The rule is positional on
-   purpose: the same word list read at any token position scores 31
-   leaks instead of 0, because `list`, `get`, `count` and `check` are
-   nouns in API names as often as verbs. See `docs/logs/learnings.md`.
+   are carried on principle, not on evidence), plus two read-verb
+   rules on POST: the **lead token** of the operationId, after
+   skipping the modifier words `bulk` / `batch` / `deprecated` /
+   `beta` / `async`, matched stem-aware against a 23-word read-verb
+   list; and, on a POST the lead-token rule did not claim, a
+   `SAFE_VERBS` word — the 10 never-a-noun compute verbs, a subset of
+   the 23 — matched at any token position. Every other POST passes
+   down to step 2 unclaimed. Ledger over all 4171 rows: `method` 1960
+   claimed / 2 leaks; `read-verb` 87 claimed / 0 leaks;
+   `read-verb-anywhere` 5 claimed / 1 leak; total 2052 claimed / 3
+   leaks / 33 truth-r rows missed. Of the corpus's 2082 truth-r rows,
+   2049 are found (98.4%). Leave-one-vendor-out: 83 claimed / 1 leak.
+   Two of the 3 leaks are on the GET floor (`datadog
+   GetGraphSnapshot`, `intercom listContactBanners`, both labelled low
+   confidence) and are out of reach of a method floor by construction.
+   The lead-token rule is positional on purpose: the same 23-word list
+   read at any token position scores 31 leaks instead of 0, because
+   `list`, `get`, `count` and `check` are nouns in API names as often
+   as verbs — which is why only the safe subset may be read that way.
+   The third rule is the tool's first deliberate leak, adopted on the
+   user's explicit decision 2026-09-16 at a priced cost of 4 right
+   rows for 1 leak, with the gains in one vendor (digitalocean) and
+   the leak in another (stripe), so LOVO expects the cost to
+   generalize and the gain not to. See `docs/logs/learnings.md`.
 2. **Step 2, w floor** = PUT 93% (n=345) / DELETE 92% (n=473) / PATCH
    98% (n=84) > POST 29%, all from Table 1 on the 4171-row provider
    corpus. How: live verbs plus yours noun. PUT / DELETE / PATCH start
