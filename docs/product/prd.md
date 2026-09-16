@@ -9,38 +9,59 @@ status: stable
 ## The floor (start here)
 
 Every operation starts at its method's floor. The floor is each method's
-own measured truth lean over the 5465-row labelled corpus (refreshed
-2026-09-13; the original 1478-row table is in docs/logs/learnings.md).
-It is a starting value, never an early return (D42).
+own measured truth lean over the 4171-row provider corpus
+(`data/provider-corpus-2026-09-16/`, 15 complete official API specs —
+stripe, openai, square, zoom, paypal, meta-whatsapp, spotify,
+digitalocean, jira, mailchimp, asana, datadog, intercom, canva, figma —
+labelled blind under `data/calibration-2026-09-14/BRIEF.md`). This
+replaced the prior 5465-row corpus on 2026-09-16: that corpus never saw
+one complete API (319 of its 332 providers had zero GET rows, 58
+contributed exactly 24 write rows and nothing else), so it could not
+give a per-provider truth read; the old table and its numbers are in
+`docs/logs/learnings.md`. It is a starting value, never an early return
+(D42).
 
-| method | n | truth r | truth w | truth x | floor | unseen (exam 5) | holds? |
-|---|---|---|---|---|---|---|---|
-| GET / HEAD / OPTIONS | 550 | 97% | 1% | 2% | **r** | r 97% / w 3% / x 1% (200 rows) | yes |
-| POST | 509 | 17% | 20% | 62% | **x** | r 63% / w 13% / x 23% (300 rows) | **no — inverts** |
-| PUT | 1696 | 1% | 85% | 15% | **w** | r 0% / w 87% / x 12% (603 rows) | yes |
-| DELETE | 2079 | 0% | 87% | 13% | **w** | r 0% / w 89% / x 11% (638 rows) | yes |
-| PATCH | 631 | 1% | 85% | 14% | **w** | r 0% / w 92% / x 8% (259 rows) | yes |
+| method | n | truth r | truth w | truth x | floor | holds? |
+|---|---|---|---|---|---|---|
+| GET | 1960 | 100% | 0% | 0% | **r** | yes |
+| POST | 1309 | 9% | 29% | 61% | **x** | yes |
+| PUT | 345 | 0% | 93% | 7% | **w** | yes |
+| DELETE | 473 | 0% | 92% | 8% | **w** | yes |
+| PATCH | 84 | 0% | 98% | 2% | **w** | yes |
 
-Measured 2026-09-16 against exam 5, whose GET and POST strata are drawn
-from vendors the corpus has never seen; its write stratum is
-row-disjoint but not vendor-disjoint, so PUT / DELETE / PATCH are
-tested on unseen rows from known vendors, not unseen vendors. Four
-floors hold with the dominant class unchanged and the share stable or
-better. POST does not drift, it inverts: x 62% to 23%, r 17% to 63%.
-The flip is not a big-vendor artifact — corpus POST is only 14 vendors
-and 14 of the 14 are x-dominant, while exam 5 POST is 89 vendors split
-57 r-dominant / 27 x-dominant / 5 w-dominant, and vendor-weighting
-leaves the gap about two-fold.
+Every floor holds on the new corpus, including POST at 61% x — unlike
+exam 5's unseen-vendor draw against the old corpus, where POST
+inverted (x 62% to 23%, r 17% to 63%); that inversion and its
+vendor-by-vendor recheck are recorded in `docs/logs/learnings.md` and
+are not repeated here since this table supersedes them as the current
+per-method truth read.
 
-Every possible POST floor was priced on both sets. Floor r leaks 83%
-on the corpus and 37% on exam 5. Floor w leaks 62% on the corpus and
-23% on exam 5, and is over-tight 17% then 63%. Floor x never leaks,
-and is over-tight 38% then 77%. So x stays the only permissible POST
-floor, by the invariant and not by the corpus lean: it is the tightest
-class, and both alternatives are fail-open. Had the corpus leaned r,
-floor r would still be forbidden. The price of floor x is up to 77%
-over-tight on unseen vendors, which is safe but close to useless, so
-POST cannot be a floor-driven method in the new shape.
+## Truth by provider (new — the old corpus could not give this)
+
+No single-corpus provider had enough rows to read a per-provider truth
+lean before; the 4171-row provider corpus's 15 complete specs can:
+
+| provider | n | r | w | x |
+|---|---|---|---|---|
+| digitalocean | 684 | 53% | 30% | 17% |
+| jira | 610 | 50% | 35% | 15% |
+| stripe | 594 | 46% | 29% | 25% |
+| openai | 346 | 48% | 24% | 28% |
+| square | 332 | 48% | 33% | 20% |
+| mailchimp | 298 | 50% | 31% | 19% |
+| asana | 249 | 48% | 27% | 25% |
+| datadog | 235 | 52% | 29% | 19% |
+| intercom | 231 | 49% | 32% | 19% |
+| zoom | 155 | 52% | 28% | 21% |
+| paypal | 115 | 37% | 24% | 39% |
+| meta-whatsapp | 113 | 43% | 22% | 35% |
+| spotify | 96 | 63% | 29% | 8% |
+| canva | 59 | 61% | 8% | 31% |
+| figma | 54 | 80% | 13% | 7% |
+
+32 rows overlap the old corpus (all stripe, every stripe row the old
+corpus had); 29 of 32 agree (90.6%), and all 3 disagreements are
+x → w — the new labels lean slightly looser.
 
 **How the flow works (the user's reading, 2026-09-13).** One sequence,
 three steps. Each step takes the rows the step before left behind.
@@ -171,64 +192,103 @@ contradicts it; the gist and the structure are the user's. Three
 steps; each step takes the rows the step before left behind, and every
 row comes out with a class and a flag.
 
-1. **Step 1, r floor** = GET / HEAD / OPTIONS 97% > POST 17%. How: read
+1. **Step 1, r floor** = GET 100% (n=1960) > POST 9%. How: read
    verbs. A POST whose lead verb is a read verb is r; every other POST
-   passes down to step 2 unclaimed. Corrected here: the model said a
-   non-r POST goes to w. POST floored to w leaks 62% on the corpus and
-   23% on exam 5, which is fail-open and breaks the one invariant, so
-   failing the read test does not earn a POST a class.
-2. **Step 2, w floor** = PUT 85% / DELETE 87% / PATCH 85% > POST 20%.
-   How: live verbs plus yours noun. PUT / DELETE / PATCH start at w,
-   and evidence raises them to x. A POST can reach w here too, but
+   passes down to step 2 unclaimed.
+2. **Step 2, w floor** = PUT 93% (n=345) / DELETE 92% (n=473) / PATCH
+   98% (n=84) > POST 29%, all from Table 1 on the 4171-row provider
+   corpus. How: live verbs plus yours noun. PUT / DELETE / PATCH start
+   at w, and evidence raises them to x. A POST can reach w here too, but
    only on evidence — a modify verb plus a yours noun — never by
-   default. The 20% is real and today no path reaches it at all.
+   default. Measured on the 4171-row provider corpus: 381 POST rows
+   have truth w, and the tool's current shape has no rule anywhere
+   that lowers a POST to w — it assigns w to 0 of 1309 POST rows. That
+   gap is 381 rows and 58% of the tool's total 658 over-tight rows on
+   this corpus.
 3. **Step 3, x** = the fallback, not a floor. How: live verbs plus the
    via-negativa yours noun; anything still unknown goes to the pile.
-   Corrected here: for PUT 15% / DELETE 13% / PATCH 14% this is
-   evidence-raised x, but POST's 62% is not a floor the tool may lean
-   on. An unclaimed POST lands at x because x is the tightest class,
-   not because POST leans x — that lean holds only on the corpus's 14
-   vendors and inverts to 23% on 89 unseen ones. Those rows are marked
-   unsure.
+   For PUT 7% / DELETE 8% / PATCH 2% (Table 1, provider corpus) this
+   is evidence-raised x. For POST, the 61% x lean is the measured
+   truth on 15 complete APIs
+   (Table 1) and holds under LOVO; the earlier reading that this lean
+   inverts to 23% on unseen vendors was a property of exam 5's draw
+   (89 vendors, median 1 POST row each, drawn from APIs.guru
+   fragments), not of POST itself — see `docs/logs/learnings.md`. An
+   unclaimed POST lands at x because x is the tightest class and the
+   floor holds; the measured gap is not that the floor is wrong, it is
+   that nothing built today can move a POST off it toward w.
 
 The pile widens. Today only step 2 carries a sure/unsure flag, and
 2282 of 5465 rows (42%) carry none, including the 614 step 1 rows that
 hold all 17 GET leaks. In the new core every step flags every row.
 
-The riskiest piece, and the one the next POC targets: step 1's POST
-read-verb list catches only 42 of the 189 truth-r POSTs on unseen
-vendors, 22%. It was mined on a corpus where read-POSTs barely
-existed. If that cannot be raised, POST stays mostly unsure and rwxmap
-is a four-method tool that shrugs at POST.
+The riskiest piece, and the one the next POC targets: reaching w for
+POST. This step is not built — no design for it is proposed here —
+and the size of the prize is 381 rows (29% of all POST rows, 58% of
+the tool's total over-tightness on the provider corpus).
 
 ## The three steps
 
-Counts are the current shape's errors over the 5465-row combined
-corpus (332 vendors), leave-one-vendor-out. Truth split: 936 x, 3883
-w, 646 r.
+The frozen core (`poc/flow`) was built and pinned on the old 5465-row
+corpus (those pins are unchanged and still live in `ledger.mjs`;
+history is in `docs/logs/learnings.md`). It was then scored once,
+unmodified, against the new 4171-row provider corpus — the harder
+test, since 14 of 15 providers are unseen (stripe is in the old corpus
+and was scored leave-one-vendor-out):
 
-| rows | ok | leaks | too tight | decided by |
-|---:|---:|---:|---:|---|
-| 1972 | 1795 | 155 | 22 | step 2 · `w` · floor |
-| 1211 | 1176 | 32 | 3 | step 2 · `w` · yours-noun |
-| 550 | 533 | 17 | 0 | step 1 · `r` · method floor |
-| 64 | 64 | 0 | 0 | step 1 · `r` · read-verb |
-| 1034 | 313 | 0 | 721 | step 3 · `x` · other-noun |
-| 184 | 100 | 0 | 84 | step 3 · `x` · live-verb |
-| 445 | 318 | 0 | 127 | step 3 · `x` · floor |
-| 5 | 5 | 0 | 0 | step 3 · `x` · money-noun |
+Whole corpus, n=4171: **exact 83.8%, leaks 0.4% (17 rows), over-tight
+15.8%.** By method:
 
-Every row of the corpus is decided by exactly one of these eight, so the
-columns sum to the ledger: 5465 rows, 4304 ok, 204 leaks, 957 too tight.
-Regenerate from `run-proof/flow.csv`.
+| method | n | exact | leaks | over-tight |
+|---|---|---|---|---|
+| GET | 1960 | 99.9% | 0.1% | 0.0% |
+| POST | 1309 | 66.2% | 0.2% | 33.6% |
+| PUT | 345 | 74.2% | 2.0% | 23.8% |
+| DELETE | 473 | 75.1% | 1.1% | 23.9% |
+| PATCH | 84 | 72.6% | 0.0% | 27.4% |
 
-Leaks stop at step 3 by construction, not by luck. A leak is a class
+This beats the prior pins (78.8% exact / 3.7% leaks / 17.5% over-tight
+on the old corpus) on all three counts, on a harder unseen-vendor test.
+
+Per-rule, over the same 4171 rows — the important finding:
+
+| rule | n | exact | leaks | over-tight |
+|---|---|---|---|---|
+| method (GET → r) | 1960 | 100% | 2 | 0 |
+| floor | 1629 | 72% | 8 | 440 |
+| yours-noun | 245 | 98% | 4 | 0 |
+| other-noun | 241 | 19% | 0 | 195 |
+| read-verb | 65 | 95% | 3 | 0 |
+| live-verb | 31 | 26% | 0 | 23 |
+
+The two raising rules (other-noun, live-verb) together raise 218 rows
+wrongly and close zero leaks on this corpus. They were adopted on the
+old corpus because they closed leaks there. yours-noun, the one
+loosening rule, is 98% right. This is a measurement, not a decision —
+whether to drop or change either raising rule is open to the user.
+
+Evidence-vs-floor flag against truth:
+
+| flag | rows | leaks | over-tight |
+|---|---|---|---|
+| evidence | 245 | 4 | 0 |
+| x-pile | 385 | 8 | 0 |
+| no flag | 3541 | 5 | 658 |
+
+The x-pile flag holds 8 of 17 leaks in 9% of rows — weaker than the old
+corpus, where it held 155 of 187 (83%), because the leaks moved: the 17
+leaks on the new corpus cluster in jira roles/filters (6), "verify" on
+POST not being a read (3), two GET leaks the floor cannot reach by
+design (datadog GetGraphSnapshot, intercom listContactBanners), and
+singletons across stripe, zoom, digitalocean, intercom, paypal and
+spotify.
+
+Leaks stop at step 3 by construction, not by luck: a leak is a class
 looser than truth, step 3 only ever assigns `x`, and there is nothing
-looser than `x` to be wrong toward. So leaks can only be created where a
-step stops at a loose class: step 1's `r` and step 2's `w`. Of the 204,
-172 come from a floor — no evidence fired and the step defaulted — and 32
-come from `yours-noun` firing and being wrong. The 17 on step 1's method
-floor are the parked GET leaks (D59).
+looser than `x` to be wrong toward. Leaks can only be created where a
+step stops at a loose class — step 1's `r` and step 2's `w` — which is
+why the table above shows all 17 leaks sitting on `method`, `floor`,
+`yours-noun` and `read-verb`, never on the raising rules.
 
 ### Where the code lives (poc/flow)
 
@@ -263,15 +323,19 @@ writes 73.3 / 3.7 / 23.0, POST 36.8 / 0.3 / 62.9 (POST relabelled under
 the brief fixed 2026-09-15)
 (`docs/logs/learnings.md`, "Exam 5 scored once"); this is a POC, never shipped as one; the
 x-pile flag is reported in the CSV, not yet wired to any consumer;
-poc/m1 is archived at poc/archive/m1/ (D65). The core is FROZEN as of
-2026-09-16 at these numbers: 78.8% exact / 3.7% leaks / 17.5% over-tight
-on the corpus under LOVO; exam 5 70.2 / 3.2 / 26.7. The x-pile holds
-1972 rows (36.1% of the corpus); inside it, 91.0% are truth w, 7.9% are
-flagged leaks, and 1.1% are over-tight; 49 leaks (0.9% of rows) are
-unflagged. No word list or rule changes while the core is frozen.
+poc/m1 is archived at poc/archive/m1/ (D65). The core was FROZEN on
+2026-09-16 at these numbers on the old corpus: 78.8% exact / 3.7% leaks
+/ 17.5% over-tight under LOVO; exam 5 70.2 / 3.2 / 26.7; the x-pile
+held 1972 rows (36.1% of the corpus), 91.0% truth w, 7.9% flagged
+leaks, 1.1% over-tight, 49 leaks (0.9%) unflagged. No word list or rule
+change has happened since. The same frozen core, unmodified, was then
+scored once against the new 4171-row provider corpus — see "The three
+steps" above for the current numbers (83.8% exact / 0.4% leaks / 15.8%
+over-tight) and the per-rule and x-pile breakdown on that corpus.
 
-GET is last on the list. 97% of GET rows are truly r, GET runs no word
-rules by design, and the 17 Slack GET leaks are not chased per-vendor.
+GET is last on the list; it runs no word rules by design. On the new
+provider corpus GET truth is 100% r (Table 1) and the frozen core
+scores 99.9% exact with 2 leaks (0.1%) on GET's 1960 rows.
 
 Every row still gets a judgement — there is no "no answer" outcome —
 and where the judge is unsure it moves in the safer direction (tighter
@@ -413,19 +477,18 @@ full ruling record.
 
 Non-blocking; never silently assumed.
 
-- Is the POST floor (x) wrong? After fixing the brief (POST create x)
-  and relabelling, exam 5's unseen-vendor POSTs are still only 23%
-  truth x against the corpus's 62%, and 63% are reads; POST scores
-  36.8 / 0.3 / 62.9; 148 of 188 over-tight rows are reads step 1's
-  POST read-verb list misses, 40 are own writes the x floor
-  over-tightens; leaks 1. So the gap is mostly step 1's read list, not
-  the x floor; whether the floor should move stays open, and
-  read-verb candidates are measured on the corpus, never on exam 5
-  rows (D40). The two raising rules
-  also lose precision on exam 5 (other-party noun 24% right, live verb
-  32%); those rows are PUT/DELETE/PATCH and stand. Nothing is adopted
-  from exam 5; candidates are measured on the corpus first (D40).
-  Raised 2026-09-14, updated 2026-09-15.
+- Is the POST floor (x) wrong? No — on the 4171-row provider corpus of
+  15 complete official APIs the POST floor holds: truth x is 61%
+  (804 of 1309), close to the old corpus's 62%, not to exam 5's 23%;
+  the inversion recorded 2026-09-14/15 is now read as a property of
+  exam 5's draw (89 vendors, median 1 POST row each, drawn from
+  APIs.guru fragments) rather than of POST itself. The open question
+  is no longer whether the floor is wrong — it's how a POST row
+  reaches w: the tool assigns w to 0 of 1309 POST rows today, 381 POST
+  rows have truth w, and that gap is 58% of the tool's total
+  over-tight rows on the provider corpus. No design for closing it is
+  proposed here. Raised 2026-09-14, updated 2026-09-15, updated
+  2026-09-16 with the provider-corpus read.
 - Can the "I don't know" pile be shrunk by reading the description?
   Answer so far: no — mining the yours list from description text
   resolves at best 130 of 1972 rows (6.6%) and leaks 8; the safe
