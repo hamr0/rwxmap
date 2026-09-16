@@ -185,16 +185,31 @@ One direction of travel per method (D43):
 - POST — lower only, `x -> r`.
 - PUT / DELETE / PATCH — raise only, `w -> x`.
 
-### The new core (target shape, not built)
+### The new core (target shape; step 1 built, steps 2 and 3 not)
 
 The user's model, 2026-09-16, corrected where the 2026-09-16 floor POC
 contradicts it; the gist and the structure are the user's. Three
 steps; each step takes the rows the step before left behind, and every
 row comes out with a class and a flag.
 
-1. **Step 1, r floor** = GET 100% (n=1960) > POST 9%. How: read
-   verbs. A POST whose lead verb is a read verb is r; every other POST
-   passes down to step 2 unclaimed.
+1. **Step 1, r floor** = GET 99.9% (1958 of 1960) > POST 9.5% (124 of
+   1309). Built and measured, `poc/step1/` — this is the one step that
+   is no longer "not built". How: the method floor (GET / HEAD /
+   OPTIONS -> r; the corpus has no HEAD or OPTIONS rows, so those two
+   are carried on principle, not on evidence), plus one read-verb rule
+   on POST: the **lead token** of the operationId, after skipping the
+   modifier words `bulk` / `batch` / `deprecated` / `beta` / `async`,
+   matched stem-aware against a 23-word read-verb list. Every other
+   POST passes down to step 2 unclaimed. Ledger over all 4171 rows:
+   `method` 1960 claimed / 2 leaks; `read-verb` 87 claimed / 0 leaks;
+   total 2047 claimed / 2 leaks / 37 truth-r rows missed.
+   Leave-one-vendor-out: 78 claimed / 0 leaks. The 2 leaks are both on
+   the GET floor (`datadog GetGraphSnapshot`, `intercom
+   listContactBanners`, both labelled low confidence) and are out of
+   reach of a method floor by construction. The rule is positional on
+   purpose: the same word list read at any token position scores 31
+   leaks instead of 0, because `list`, `get`, `count` and `check` are
+   nouns in API names as often as verbs. See `docs/logs/learnings.md`.
 2. **Step 2, w floor** = PUT 93% (n=345) / DELETE 92% (n=473) / PATCH
    98% (n=84) > POST 29%, all from Table 1 on the 4171-row provider
    corpus. How: live verbs plus yours noun. PUT / DELETE / PATCH start
