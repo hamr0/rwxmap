@@ -7,7 +7,7 @@ with `node poc/flow/proof.mjs`.
 
 ## Corpus
 
-5465 rows, 332 vendors. Truth split: r 646 (11.8%), w 3883 (71.1%), x 936 (17.1%). Leave-one-vendor-out. Mining bars: other-party nouns admitted at >= 2 vendors and x-share >= 0.3 over PUT/DELETE/PATCH; yours nouns admitted at n >= 2 and w-share >= 0.8 over write rows (every method but GET/HEAD/OPTIONS). Run date: 2026-09-14.
+5465 rows, 332 vendors. Truth split: r 646 (11.8%), w 3883 (71.1%), x 936 (17.1%). Leave-one-vendor-out. Mining bars: other-party nouns admitted at >= 2 vendors and x-share >= 0.3 over PUT/DELETE/PATCH; yours nouns admitted at n >= 2 and w-share >= 0.8 over write rows (every method but GET/HEAD/OPTIONS). Run date: 2026-09-16.
 
 ## How the flow runs
 
@@ -66,6 +66,8 @@ rows but its w-share fell short of 0.8.
 | vendor-only | 670 | 7 | 628 | 35 | 34.0% |
 | no noun | 16 | 0 | 16 | 0 | 0.8% |
 | **total** | **1972** | 22 | 1795 | 155 | 100.0% |
+
+1972 rows (36.1% of the corpus) sit in the x-pile: 1795 (91.0%) are truth w, 155 (7.9%) are truth x (the flagged leaks), and 22 (1.1%) are truth r. Of the run's 204 total leaks, 155 sit in the x-pile and 49 (0.9% of all corpus rows) are unflagged.
 
 ## CSV columns (run-proof/flow.csv)
 

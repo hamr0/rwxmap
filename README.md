@@ -10,134 +10,85 @@
 
 **[WIP] Maps every OpenAPI operation to r / w / x, so an agent knows what a call does before it is made.**
 
-Status: [WIP] — a POC in progress, not shipped. See `docs/product/prd.md`.
+## The world this is for
 
-rwxmap reads an OpenAPI document and classifies each operation as a read,
-a write, or an execute — the strictest, most consequential class — so
-agents, guards, and harnesses have an answer for every call, not just the
-ones a human got around to labeling.
+Automated traffic is already a large share of the web. Imperva/Thales put it at
+53% of all web traffic in 2025 — 40% bad bots, 13% benign automation
+([report](https://www.imperva.com/blog/bad-bot-report-2026-bots-agentic-age/),
+[summary](https://www.helpnetsecurity.com/2026/04/30/thales-ai-driven-bot-traffic-rise-report/)).
+Cloudflare's own measurement is lower, about 35% as of June 2026
+([source](https://technologychecker.io/blog/web-traffic-statistics)).
+The two numbers are far apart, so treat the exact share with care.
+Either way, automation is a large and growing part of the traffic, not
+a fringe of it.
 
-## What it does
+That share is going to keep including more agents acting for a real
+person: buying tickets, ordering groceries, filing forms. Today the
+human is often still in the loop for one reason — getting past
+anti-bot checks. That is a poor place for a human to be: not deciding
+anything, just proving they exist.
 
-Reads an OpenAPI document and maps each operation to `r` (read), `w`
-(write), or `x` (execute): every operation starts at its HTTP method's
-floor (GET/HEAD/OPTIONS -> `r`, POST -> `x`, PUT/DELETE/PATCH -> `w`),
-then a verb rule can move it (a read verb lowers a POST to `r`; a live
-verb raises a PUT/DELETE/PATCH to `x`), then a yours-noun layer looks
-only at PUT/DELETE/PATCH rows still at the `w` floor and raises such a
-row to `x` unless every noun in its operation name is on the tool's
-allowlist of "yours" words. On doubt the
-answer is the tighter class; floor rows (no word rule fired) are
-flagged for review rather than trusted. rwxmap emits no confidence
-score (D44). MCP tool-annotation hints are not built yet (M3). Zero
-dependencies.
+Agents reach real systems through APIs and MCP servers, and that is a
+good thing. Much of the industry — WebMCP and others — is working hard
+on the *exposure* side: making APIs usable by agents in the first
+place.
 
-## Why
+## Where rwxmap fits
 
-POST hides reads. On the CAMARA catalogue, 57 of 138 POST operations are
-read-shaped — retrieve, check, verify — yet class as `x` under a
-method-only rule; an agent restricted to reads cannot call them, and a
-guard cannot tell them from a real trigger. rwxmap draws the map so
-agents, guards, harnesses, and the human authoring a signed declared menu
-know what each call does. It is a discovery tool, not a proof.
+This project works the other side of that: safety, not exposure. It
+pairs with [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (HTTP
+Message Signatures) and with the author's Internet-Draft, "An
+Attenuated Delegation Profile for Automated Agents"
+([draft-hamr-oauth-agent-delegation-01](https://datatracker.ietf.org/doc/draft-hamr-oauth-agent-delegation/),
+2 September 2026, an individual submission, not a standard), which puts
+human authorization back into agentic flows — a person in the loop, not
+just a click.
 
-## The safety spine
+rwxmap's part in that: label every API operation r / w / x at the
+point an agent discovers it, so an external arbiter can watch what an
+agent is about to do, and so the same label can be handed to the agent
+itself as an MCP hint.
 
-Classes are `r < w < x`. When the tool does not know, the answer is the
-tighter class — never a loosening without evidence. The two error
-directions are reported separately, never as one accuracy number; wrong
-loosening is the one that fails the gate.
+- **r** — read. Nothing changes.
+- **w** — write. Changes your own stuff.
+- **x** — execute. Reaches beyond you (a third party), or isn't
+  repeatable: running it twice is not the same as running it once.
 
-## Where it sits
+## Where it is today
 
-The author's own tool, first. A supporting, non-load-bearing
-proof-of-concept for the `actionClass` axis and declared menu in the
-justabit Internet-Draft
-([github.com/hamr0/justabit](https://github.com/hamr0/justabit)). A
-stopgap map when an API owner has not published a declared menu. Not
-normative anywhere; not a standards track; not a conformance harness.
+Measured on a labelled corpus of 5465 operations across 332 vendors.
+This is a tuning number, not a shipped one — see
+`docs/product/prd.md` and `docs/logs/learnings.md` for the full
+picture.
 
-## Test bed
+- Gets the class right on about 78% of operations.
+- Flags 36% as "I don't know" rather than guessing. Inside that pile,
+  91% are in fact the safe answer (`w`), 7.9% should have been marked
+  stricter, 1.1% too strict.
+- Under 1% of all operations (0.9%) come out too loose with no flag at
+  all — the number that matters for safety, and the one being worked
+  on now.
+- On a fresh exam of unseen rows, scored once: 70.2% exact, 3.2% too
+  loose.
 
-5465 rows across 332 vendors — the CAMARA catalogue plus a growing set
-of vendor APIs and four blind-drawn exams — labelled by blind LLM
-reading, scored leave-one-vendor-out (LOVO): every vendor's rows are
-scored by rules built from every other vendor's rows, never their own.
-This is a tuning corpus, not exam-checked; exams 1-3 were used to tune,
-and exam 4 was found (2026-09-14) to be drawn from already-burned
-providers, not a virgin set, and exam 5 (2026-09-14) is the first exam
-scored once on unseen rows: 68.4% exact / 3.2% leaks / 28.4% over-tight
-overall, writes 73.3 / 3.7 / 23.0 (`docs/logs/learnings.md`, "Exam 5
-scored once").
+On doubt it picks the stricter class. It never loosens without
+evidence.
 
-Current per-step numbers (5465 rows, LOVO):
+## Use it for
 
-| step | error | count |
-|---|---|---|
-| step 1 (r) | over-tight | 49 over-tight / 0 leaks |
-| step 2 (w) | false alarms / leaks | 805 false alarms / 187 leaks, 155 of them in the 1972-row x-pile |
-| step 3 (x) | no rules (POST leftovers and what step 2 gave up) | — |
-| GET floor | leaks | 17, parked |
+- **Agentic automation** — give an agent, or the arbiter watching it,
+  an answer for every call before the call is made.
+- **Labelling your own API** — it does about three quarters of the job
+  in seconds with safe defaults; you correct the rest by hand.
+- **MCP hints** — feed the class straight to the agents already
+  calling your API.
 
-Whole flow: exact 78.8%, leaks 3.7%, over-tight 17.5%.
+## Status
 
-A leak is a wrong loosening — a robot takes an action it should not
-have. A false alarm (over-tighten) is a usability cost — a human
-glances at a row that was fine. The two are never merged into one
-accuracy number: they cost different things and a reader needs both.
-Full detail: `docs/product/prd.md`, "The three steps".
-
-Two negative controls must come out `x`: ClickToDial `DELETE
-/calls/{callId}` `terminateCall`, and WebRTC `PUT
-/sessions/{mediaSessionId}/status` `updateSessionStatus`. Both come out
-`x` under the current shape.
-
-**How to re-run:** `node poc/flow/proof.mjs` (one CSV + one markdown
-report in `run-proof/`), `node --test poc/flow/*.test.mjs` (the pins).
-
-**What these numbers do not say:**
-
-- The truth is itself model-generated — blind LLM readers on a fixed
-  brief — so the scores measure agreement with that reading process,
-  not with a human expert or with any standard.
-- This is a tuning-corpus number under LOVO, not a clean-exam number.
-  Exams 1-3 were used to tune, and exam 4 was found (2026-09-14) to be
-  drawn from already-burned providers, not a virgin set, and exam 5
-  (2026-09-14) is the first exam scored once on unseen rows: 68.4%
-  exact / 3.2% leaks / 28.4% over-tight overall, writes 73.3 / 3.7 /
-  23.0 (`docs/logs/learnings.md`, "Exam 5 scored once").
-- CAMARA's GET half was judged by template, not operation by
-  operation.
-- The 57-of-138 read-named-POST figure (`docs/product/prd.md`) is a
-  reader's judgement, not a rule output.
-- This is a proof-of-concept, not a shipped tool.
-
-## The bare ecosystem
-
-Local-first, composable agent infrastructure. Same API patterns throughout —
-mix and match, each module works standalone.
-
-**Core** — the brain, the gate, the memory.
-
-- **[bareagent](https://npmjs.com/package/bare-agent)** — the think→act→observe loop. *Goal in → coordinated actions out.* Replaces LangChain, CrewAI, AutoGen.
-- **[bareguard](https://npmjs.com/package/bareguard)** — the single gate every action passes through. *Action in → allow / deny / ask-a-human out.* Replaces hand-rolled allowlists and scattered policy code.
-- **[litectx](https://npmjs.com/package/litectx)** — tree-sitter code + memory graph with activation decay, plus lightweight context engineering (write · select · compress · isolate). *Query in → ranked context out.*
-
-**Optional reach** — give the agent hands.
-
-- **[barebrowse](https://npmjs.com/package/barebrowse)** — a real browser for agents. *URL in → pruned snapshot out.* Replaces Playwright, Selenium, Puppeteer.
-- **[baremobile](https://npmjs.com/package/baremobile)** — Android + iOS device control. *Screen in → pruned snapshot out.* Replaces Appium, Espresso, XCUITest.
-- **[beeperbox](https://github.com/hamr0/beeperbox)** — 50+ messaging networks via one MCP server (headless Beeper Desktop in Docker). *Chat in → unified message stream out.* Replaces Twilio, per-platform bot APIs.
-
-**What you can build:**
-
-- **Headless automation** — scrape sites, fill forms, extract data, monitor pages on a schedule
-- **QA & testing** — automated test suites for web and Android apps without heavyweight frameworks
-- **Personal AI assistants** — chatbots that browse the web or control your phone on your behalf
-- **Remote device control** — manage Android devices over WiFi, including on-device via Termux
-- **Agentic workflows** — multi-step tasks where an AI plans, browses, and acts across web and mobile
-
-**Why this exists:** Most automation stacks ship 200MB of opinions before you write a line of code. These don't. Install, import, go.
+[WIP] — a proof of concept, not shipped. The classifier core is frozen
+while the remaining work is measured. Design and numbers live in
+`docs/product/prd.md`; every experiment is logged in
+`docs/logs/learnings.md`.
 
 ## License
 

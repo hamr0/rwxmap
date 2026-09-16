@@ -205,6 +205,8 @@ rows but its w-share fell short of ${YOURS_MIN_W_SHARE}.
 ${xPileReasonRows.map(([r, v]) => `| ${r} | ${v.total} | ${v.r} | ${v.w} | ${v.x} | ${pct(v.total, xPileReasonTotal.total)} |`).join('\n')}
 | **total** | **${xPileReasonTotal.total}** | ${xPileReasonTotal.r} | ${xPileReasonTotal.w} | ${xPileReasonTotal.x} | 100.0% |
 
+${xPileReasonTotal.total} rows (${pct(xPileReasonTotal.total, rows.length)} of the corpus) sit in the x-pile: ${xPileReasonTotal.w} (${pct(xPileReasonTotal.w, xPileReasonTotal.total)}) are truth w, ${xPileReasonTotal.x} (${pct(xPileReasonTotal.x, xPileReasonTotal.total)}) are truth x (the flagged leaks), and ${xPileReasonTotal.r} (${pct(xPileReasonTotal.r, xPileReasonTotal.total)}) are truth r. Of the run's ${score.leaks} total leaks, ${xPileReasonTotal.x} sit in the x-pile and ${score.leaks - xPileReasonTotal.x} (${pct(score.leaks - xPileReasonTotal.x, rows.length)} of all corpus rows) are unflagged.
+
 ## CSV columns (run-proof/flow.csv)
 
 - \`set\`: which labelled set the row comes from (camara, holdout1..5, exam2, exam3).

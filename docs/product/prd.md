@@ -184,7 +184,12 @@ writes 73.3 / 3.7 / 23.0, POST 36.8 / 0.3 / 62.9 (POST relabelled under
 the brief fixed 2026-09-15)
 (`docs/logs/learnings.md`, "Exam 5 scored once"); this is a POC, never shipped as one; the
 x-pile flag is reported in the CSV, not yet wired to any consumer;
-poc/m1 is archived at poc/archive/m1/ (D65).
+poc/m1 is archived at poc/archive/m1/ (D65). The core is FROZEN as of
+2026-09-16 at these numbers: 78.8% exact / 3.7% leaks / 17.5% over-tight
+on the corpus under LOVO; exam 5 70.2 / 3.2 / 26.7. The x-pile holds
+1972 rows (36.1% of the corpus); inside it, 91.0% are truth w, 7.9% are
+flagged leaks, and 1.1% are over-tight; 49 leaks (0.9% of rows) are
+unflagged. No word list or rule changes while the core is frozen.
 
 GET is last on the list. 97% of GET rows are truly r, GET runs no word
 rules by design, and the 17 Slack GET leaks are not chased per-vendor.
@@ -342,6 +347,12 @@ Non-blocking; never silently assumed.
   32%); those rows are PUT/DELETE/PATCH and stand. Nothing is adopted
   from exam 5; candidates are measured on the corpus first (D40).
   Raised 2026-09-14, updated 2026-09-15.
+- Can the "I don't know" pile be shrunk by reading the description?
+  Answer so far: no — mining the yours list from description text
+  resolves at best 130 of 1972 rows (6.6%) and leaks 8; the safe
+  settings clear 2-5%. Rejected 2026-09-16, POC kept at
+  `poc/desc-yours/`. The pile stays as the flag because it holds 155
+  of 204 leaks.
 - MCP hints (future feature, M3; the user's end goal is to feed them).
   Nothing emits hints yet.
   - `readOnlyHint`: true when class is `r`; GET follows its `r` floor
