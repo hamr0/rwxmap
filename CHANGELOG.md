@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-09-16
+
+This release still ships no code. **Nothing in this package is importable.**
+It is the same three files as 0.1.0 — `README.md`, `CHANGELOG.md`, and
+`LICENSE` — with a corrected README.
+
+### Fixed
+
+- The README's License section still said "LICENSE file to follow" after
+  `LICENSE` (Apache-2.0) had already been added to the tarball. It now
+  links to [`LICENSE`](https://github.com/hamr0/rwxmap/blob/main/LICENSE).
+
+### Clarified
+
+- The README now states outright that `rwxmap` on npm is a name
+  reservation only, with no entry point, so a reader of the tarball
+  cannot mistake it for working code.
+
+[0.2.0]: https://github.com/hamr0/rwxmap/releases/tag/v0.2.0
+
 ## [0.1.0] - 2026-09-16
 
 This release reserves the `rwxmap` name on npm. There is no public API yet
