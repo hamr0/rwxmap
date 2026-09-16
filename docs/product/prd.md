@@ -67,7 +67,11 @@ x → w — the new labels lean slightly looser.
 three steps. Each step takes the rows the step before left behind.
 
 1. **Step 1, r.** Start every GET / HEAD / OPTIONS row at r. Then look
-   at POST: a POST whose lead verb is a read verb is r too.
+   at POST, twice: a POST whose **lead token** is a read verb is r; and
+   a POST the lead rule did not claim, carrying a never-a-noun compute
+   verb **anywhere** in its name, is r too. Built and frozen 2026-09-16
+   (D74) — 2052 claimed, 3 leaks, 2049 of the corpus's 2082 truth-r
+   rows found (98.4%).
 2. **Step 2, w.** Start every PUT / DELETE / PATCH row at w. Then look
    at the POST rows step 1 left behind: a POST with a modify verb plus
    a yours noun is w. (Measured 2026-09-13: 10 right, 4 wrong on 14
@@ -81,7 +85,8 @@ three steps. Each step takes the rows the step before left behind.
 **Superseded 2026-09-16 — the core is reopened.** What follows describes
 the frozen shape that `poc/flow` still implements today. It stays until
 the POST POC below answers; the target shape is in "The new core"
-further down.
+further down. Step 1 is the exception: it is no longer waiting on the
+POST POC, it is built and frozen separately in `poc/step1/` (D74).
 
 **The build, step by step, in plain words (the user's ruling
 2026-09-14: keep it all as is, this is the best measured shape).**
@@ -185,7 +190,7 @@ One direction of travel per method (D43):
 - POST — lower only, `x -> r`.
 - PUT / DELETE / PATCH — raise only, `w -> x`.
 
-### The new core (target shape; step 1 built, steps 2 and 3 not)
+### The new core (target shape; step 1 frozen, steps 2 and 3 not built)
 
 The user's model, 2026-09-16, corrected where the 2026-09-16 floor POC
 contradicts it; the gist and the structure are the user's. Three
@@ -193,12 +198,13 @@ steps; each step takes the rows the step before left behind, and every
 row comes out with a class and a flag.
 
 1. **Step 1, r floor** = GET 99.9% (1958 of 1960) > POST 9.5% (124 of
-   1309). Built and measured, `poc/step1/` — this is the one step that
-   is no longer "not built". How: the method floor (GET / HEAD /
-   OPTIONS -> r; the corpus has no HEAD or OPTIONS rows, so those two
-   are carried on principle, not on evidence), plus two read-verb
-   rules on POST: the **lead token** of the operationId, after
-   skipping the modifier words `bulk` / `batch` / `deprecated` /
+   1309). **FROZEN 2026-09-16 (D74)** — no rule or word-list change
+   until the user lifts the freeze. Built and measured, `poc/step1/` —
+   this is the one step that is no longer "not built". How: the method
+   floor (GET / HEAD / OPTIONS -> r; the corpus has no HEAD or OPTIONS
+   rows, so those two are carried on principle, not on evidence), plus
+   two read-verb rules on POST: the **lead token** of the operationId,
+   after skipping the modifier words `bulk` / `batch` / `deprecated` /
    `beta` / `async`, matched stem-aware against a 23-word read-verb
    list; and, on a POST the lead-token rule did not claim, a
    `SAFE_VERBS` word — the 10 never-a-noun compute verbs, a subset of
