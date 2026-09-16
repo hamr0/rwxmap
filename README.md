@@ -90,6 +90,11 @@ while the remaining work is measured. Design and numbers live in
 `docs/product/prd.md`; every experiment is logged in
 `docs/logs/learnings.md`.
 
+`rwxmap@0.1.0` exists on npm, but only to reserve the name: the tarball
+ships this README, the changelog, and the license — no code, no entry
+point, nothing to `require` or `import`. The classifier stays a POC in
+`poc/flow/` until it graduates.
+
 ## License
 
-Apache License, Version 2.0 — LICENSE file to follow.
+Apache License, Version 2.0 — see [`LICENSE`](LICENSE).
