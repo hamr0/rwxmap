@@ -1,5 +1,5 @@
-// floorFor / classifyFloor — copied from poc/archive/m1/core/core.mjs. The
-// operationId splitter (withSplitOperationId) moved to words.mjs instead.
+// floorFor — copied from poc/archive/m1/core/core.mjs. The operationId
+// splitter (withSplitOperationId) moved to words.mjs instead.
 
 // One table, one place. GET/HEAD/OPTIONS -> r, POST -> x, PUT/DELETE/PATCH -> w.
 export function floorFor(method) {
@@ -11,8 +11,7 @@ export function floorFor(method) {
   }
 }
 
-// The base pipeline layer: no evidence, no word lists — just the method
-// floor. Every step layer runs after this one.
-export function classifyFloor(row) {
-  return { class: floorFor(row.method), rule: 'floor', floor: true };
-}
+// The r<w<x ordering — the project's one invariant. One shared export so
+// flow.mjs's leak/over-tight tallies and ledger.mjs's verdictFor never
+// disagree on which direction is a leak.
+export const CLASS_ORDER = { r: 0, w: 1, x: 2 };

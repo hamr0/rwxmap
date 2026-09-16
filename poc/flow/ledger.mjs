@@ -4,6 +4,7 @@
 //
 // Pins are measured on the 5465-row tuning corpus, LOVO. A pin moves only
 // with a logged re-measure (learnings.md) and the user's word.
+import { CLASS_ORDER } from './floor.mjs';
 export const PINS = {
   step1: { overTight: 49, leaks: 0 },
   floorGet: { leaks: 17 },
@@ -25,8 +26,6 @@ export const PINS = {
   rows: 5465,
   vendors: 332,
 };
-
-const CLASS_ORDER = { r: 0, w: 1, x: 2 };
 
 // verdictFor(result, truth): 'ok' when result.class === truth; 'LEAK' when
 // result.class is looser than truth (r<w<x); otherwise 'FALSE-ALARM' when

@@ -2,10 +2,8 @@
 // then the floor as step 3's placeholder for whatever POST leaves behind.
 // Order is fixed here and nowhere else.
 import { applyStep1 } from './step1.mjs';
-import { floorFor } from './floor.mjs';
+import { floorFor, CLASS_ORDER } from './floor.mjs';
 import { buildStep2Context, classifyStep2 } from './step2.mjs';
-
-const CLASS_ORDER = { r: 0, w: 1, x: 2 };
 
 // The one ctx the flow needs, built once per corpus.
 export function buildContext(rows, vendors) {
