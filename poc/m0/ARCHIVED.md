@@ -29,4 +29,5 @@ scorer's two-error-direction counting.
 Ground truth is NOT here; it lives in `data/` and is shared by every
 module.
 
-Point to `poc/m1/` as the successor once it exists.
+The successor was `poc/m1/`, now archived at `poc/archive/m1/`
+(D65); the current shape is `poc/flow/`.

@@ -1,0 +1,6 @@
+set,repo,path,method,operationId,gt_class,pred,confidence,status,evidence
+camara,CarrierBillingCheckOut,/payments/{paymentId}/cancel,POST,cancelPayment,w,x,1,assigned,scope:write->raise:writeFamilyShare=1.000
+camara,NetworkAccessManagement,/trust-domains,POST,createTrustDomain,w,x,0.8,assigned,scope:trust-domains-unknown;verbtable:create->raise:shareX=1.000
+camara,WebRTC,/subscriptions/{subscriptionId},PUT,updateNotificationChannelSubscription,w,x,1,assigned,scope:update-agrees;bodyprop:config->raise:n=13:share=1.000
+holdout1,twilio,/2010-04-01/Accounts/{AccountSid}/Messages/{MessageSid}/Feedback.json,POST,CreateMessageFeedback,w,x,0.8,assigned,verbtable:create->raise:shareX=0.974
+holdout2,pagerduty,/automation_actions/actions/{id}/teams,POST,createAutomationActionTeamAssociation,w,x,0.8,assigned,verbtable:create->raise:shareX=0.974

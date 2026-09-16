@@ -1,91 +1,100 @@
 ```
-          ####  #   # #   # #   #  ###  ####
-          #   # #   #  # #  ## ## #   # #   #
-          ####  # # #   #   # # # ##### ####
-          #  #  ## ##  # #  #   # #   # #
-          #   # #   # #   # #   # #   # #
+██████╗ ██╗    ██╗██╗  ██╗███╗   ███╗ █████╗ ██████╗ 
+██╔══██╗██║    ██║╚██╗██╔╝████╗ ████║██╔══██╗██╔══██╗
+██████╔╝██║ █╗ ██║ ╚███╔╝ ██╔████╔██║███████║██████╔╝
+██╔══██╗██║███╗██║ ██╔██╗ ██║╚██╔╝██║██╔══██║██╔═══╝ 
+██║  ██║╚███╔███╔╝██╔╝ ██╗██║ ╚═╝ ██║██║  ██║██║     
+╚═╝  ╚═╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     
 
-              r ─ w ─ x  ·  what a call does, before it is made
+   r ─ w ─ x   what a call does, before it is made
 ```
 
-**[WIP] Maps every OpenAPI operation to r / w / x, with a confidence, so an agent knows what a call does before it is made.**
+**[WIP] Maps every OpenAPI operation to r / w / x, so an agent knows what a call does before it is made.**
 
-Status: [WIP] — PRD stage, nothing built yet. See `docs/product/prd.md`.
+## The world this is for
 
-rwxmap reads an OpenAPI document and classifies each operation as a read,
-a write, or an execute — the strictest, most consequential class — so
-agents, guards, and harnesses have an answer for every call, not just the
-ones a human got around to labeling.
+Automated traffic is already a large share of the web. Imperva/Thales
+put it at 53% of all web traffic in 2025 — 40% bad bots, 13% benign
+automation. Cloudflare's own measurement is lower, about 35% (both
+figures as of September 2026). The two numbers are far apart, so treat
+the exact share with care. Either way, automation is a large and
+growing part of the traffic, not a fringe of it.
 
-## What it does
+That share is going to keep including more agents acting for a real
+person: buying tickets, ordering groceries, filing forms. Today the
+human is often still in the loop for one reason — getting past
+anti-bot checks. That is a poor place for a human to be: not deciding
+anything, just proving they exist.
 
-Reads an OpenAPI document and maps each operation to `r` (read), `w`
-(write), or `x` (execute), with a confidence, from two mechanical
-signals — HTTP method per RFC 9110 safe/idempotent semantics, and the
-verb in the path or operationId, looked up in a verb library — and one
-arbiter: agree → that class, high confidence; disagree → the tighter
-class, low confidence; verb unknown → the method default. Emits MCP
-tool-annotation hints (`readOnlyHint`, `destructiveHint`,
-`idempotentHint`, `openWorldHint`) so any MCP client can consume the map
-unchanged. Zero dependencies.
+Agents reach real systems through APIs and MCP servers, and that is a
+good thing. Much of the industry — WebMCP and others — is working hard
+on the *exposure* side: making APIs usable by agents in the first
+place.
 
-## Why
+## Where rwxmap fits
 
-POST hides reads. On the CAMARA catalogue, 57 of 138 POST operations are
-read-shaped — retrieve, check, verify — yet class as `x` under a
-method-only rule; an agent restricted to reads cannot call them, and a
-guard cannot tell them from a real trigger. rwxmap draws the map so
-agents, guards, harnesses, and the human authoring a signed declared menu
-know what each call does. It is a discovery tool, not a proof.
+This project works the other side of that: safety, not exposure. It
+pairs with [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (HTTP
+Message Signatures) and with the author's Internet-Draft, "An
+Attenuated Delegation Profile for Automated Agents"
+([draft-hamr-oauth-agent-delegation-01](https://datatracker.ietf.org/doc/draft-hamr-oauth-agent-delegation/),
+2 September 2026, an individual submission, not a standard), which puts
+human authorization back into agentic flows — a person in the loop, not
+just a click.
 
-## The safety spine
+rwxmap's part in that: label every API operation r / w / x at the
+point an agent discovers it, so an external arbiter can watch what an
+agent is about to do, and so the same label can be handed to the agent
+itself as an MCP hint.
 
-Classes are `r < w < x`. When the tool does not know, the answer is the
-tighter class — never a loosening without evidence. The two error
-directions are reported separately, never as one accuracy number; wrong
-loosening is the one that fails the gate.
+- **r** — read. Nothing changes.
+- **w** — write. Changes your own stuff.
+- **x** — execute. Reaches beyond you (a third party), or isn't
+  repeatable: running it twice is not the same as running it once.
 
-## Where it sits
+## Where it is today
 
-The author's own tool, first. A supporting, non-load-bearing
-proof-of-concept for the `actionClass` axis and declared menu in the
-justabit Internet-Draft
-([github.com/hamr0/justabit](https://github.com/hamr0/justabit)). A
-stopgap map when an API owner has not published a declared menu. Not
-normative anywhere; not a standards track; not a conformance harness.
+Measured on a labelled corpus of 5465 operations across 332 vendors.
+This is a tuning number, not a shipped one — see
+`docs/product/prd.md` and `docs/logs/learnings.md` for the full
+picture.
 
-## Test bed
+- Gets the class right on about 78% of operations.
+- Flags 36% as "I don't know" rather than guessing. Inside that pile,
+  91% are in fact the safe answer (`w`), 7.9% should have been marked
+  stricter, 1.1% too strict.
+- That pile is mostly the long tail. On well-known APIs it is a small
+  fraction of operations; on rarely-used ones it is most of them.
+- Under 1% of all operations (0.9%) come out too loose with no flag at
+  all — the number that matters for safety, and the one being worked
+  on now.
+- On a fresh exam of unseen rows, scored once: 70.2% exact, 3.2% too
+  loose.
 
-292 operations across 60 CAMARA repositories, SHA-pinned, under
-`data/camara-2026-09-01/`.
+On doubt it picks the stricter class. It never loosens without
+evidence.
 
-## The bare ecosystem
+## Use it for
 
-Local-first, composable agent infrastructure. Same API patterns throughout —
-mix and match, each module works standalone.
+- **Agentic automation** — give an agent, or the arbiter watching it,
+  an answer for every call before the call is made.
+- **Labelling your own API** — it does about three quarters of the job
+  in seconds with safe defaults; you correct the rest by hand.
+- **MCP hints** — feed the class straight to the agents already
+  calling your API.
 
-**Core** — the brain, the gate, the memory.
+## Status
 
-- **[bareagent](https://npmjs.com/package/bare-agent)** — the think→act→observe loop. *Goal in → coordinated actions out.* Replaces LangChain, CrewAI, AutoGen.
-- **[bareguard](https://npmjs.com/package/bareguard)** — the single gate every action passes through. *Action in → allow / deny / ask-a-human out.* Replaces hand-rolled allowlists and scattered policy code.
-- **[litectx](https://npmjs.com/package/litectx)** — tree-sitter code + memory graph with activation decay, plus lightweight context engineering (write · select · compress · isolate). *Query in → ranked context out.*
+[WIP] — a proof of concept, not shipped. The classifier core is frozen
+while the remaining work is measured. Design and numbers live in
+`docs/product/prd.md`; every experiment is logged in
+`docs/logs/learnings.md`.
 
-**Optional reach** — give the agent hands.
-
-- **[barebrowse](https://npmjs.com/package/barebrowse)** — a real browser for agents. *URL in → pruned snapshot out.* Replaces Playwright, Selenium, Puppeteer.
-- **[baremobile](https://npmjs.com/package/baremobile)** — Android + iOS device control. *Screen in → pruned snapshot out.* Replaces Appium, Espresso, XCUITest.
-- **[beeperbox](https://github.com/hamr0/beeperbox)** — 50+ messaging networks via one MCP server (headless Beeper Desktop in Docker). *Chat in → unified message stream out.* Replaces Twilio, per-platform bot APIs.
-
-**What you can build:**
-
-- **Headless automation** — scrape sites, fill forms, extract data, monitor pages on a schedule
-- **QA & testing** — automated test suites for web and Android apps without heavyweight frameworks
-- **Personal AI assistants** — chatbots that browse the web or control your phone on your behalf
-- **Remote device control** — manage Android devices over WiFi, including on-device via Termux
-- **Agentic workflows** — multi-step tasks where an AI plans, browses, and acts across web and mobile
-
-**Why this exists:** Most automation stacks ship 200MB of opinions before you write a line of code. These don't. Install, import, go.
+`rwxmap@0.1.0` exists on npm, but only to reserve the name: the tarball
+ships this README, the changelog, and the license — no code, no entry
+point, nothing to `require` or `import`. The classifier stays a POC in
+`poc/flow/` until it graduates.
 
 ## License
 
-Apache License, Version 2.0 — LICENSE file to follow.
+Apache License, Version 2.0 — see [`LICENSE`](LICENSE).

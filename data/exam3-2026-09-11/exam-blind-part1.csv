@@ -1,0 +1,201 @@
+row_id,provider,method,path,operationId,summary,description
+1,1password.local,DELETE,/vaults/{vaultUuid}/items/{itemUuid},DeleteVaultItem,Delete an Item,
+2,1password.local,PATCH,/vaults/{vaultUuid}/items/{itemUuid},PatchVaultItem,Update a subset of Item attributes,"Applies a modified [RFC6902 JSON Patch](https://tools.ietf.org/html/rfc6902) document to an Item or ItemField. This endpoint only supports `add`, `remove` and `replace` operations. When modifying a specific ItemField, the ItemField's ID in the `path` attribute of the operation object: `/fields/{fieldId}`"
+3,6-dot-authentiqio.appspot.com,DELETE,/key,key_revoke_nosecret,,"Revoke an Authentiq ID using email & phone. If called with `email` and `phone` only, a verification code  will be sent by email. Do a second call adding `code` to  complete the revocation."
+4,6-dot-authentiqio.appspot.com,DELETE,/scope/{job},sign_delete,,delete a verification job
+5,6-dot-authentiqio.appspot.com,PUT,/key/{PK},key_bind,,"Update Authentiq ID by replacing the object. v4: `JWT(sub,email,phone)` to bind email/phone hash;  v5: POST issuer-signed email & phone scopes and PUT to update registration `JWT(sub, pk, devtoken, ...)` See: https://github.com/skion/authentiq/wiki/JWT-Examples"
+6,6-dot-authentiqio.appspot.com,PUT,/scope/{job},sign_update,,authority updates a JWT with its signature See: https://github.com/skion/authentiq/wiki/JWT-Examples
+7,ably.io,DELETE,/push/channelSubscriptions,deletePushDeviceDetails,Delete a registered device's update token,Delete a device details object.
+8,ably.io,DELETE,/push/deviceRegistrations,unregisterAllPushDevices,Unregister matching devices for push notifications,Unregisters devices. All their subscriptions for receiving push notifications through channels will also be deleted.
+9,ably.io,DELETE,/push/deviceRegistrations/{device_id},unregisterPushDevice,Unregister a single device for push notifications,Unregisters a single device by its device ID. All its subscriptions for receiving push notifications through channels will also be deleted.
+10,ably.io,PATCH,/push/deviceRegistrations/{device_id},patchPushDeviceDetails,Update a device registration,"Specific attributes of an existing registration can be updated. Only clientId, metadata and push.recipient are mutable."
+11,ably.io,PUT,/push/deviceRegistrations/{device_id},putPushDeviceDetails,Update a device registration,"Device registrations can be upserted (the existing registration is replaced entirely) with a PUT operation. Only clientId, metadata and push.recipient are mutable."
+12,ably.net,DELETE,/apps/{app_id}/namespaces/{namespace_id},,Deletes a namespace,"Deletes the namespace with the specified ID, for the specified application ID."
+13,ably.net,DELETE,/apps/{app_id}/queues/{queue_id},,Deletes a queue,"Delete the queue with the specified queue name, from the application with the specified application ID."
+14,ably.net,DELETE,/apps/{app_id}/rules/{rule_id},,Deletes a Reactor rule,
+15,ably.net,DELETE,/apps/{id},,Deletes an app,Deletes the application with the specified application ID.
+16,ably.net,PATCH,/apps/{app_id}/keys/{key_id},,Updates a key,"Update the API key with the specified key ID, for the application with the specified application ID."
+17,ably.net,PATCH,/apps/{app_id}/namespaces/{namespace_id},,Updates a namespace,"Updates the namespace with the specified ID, for the application with the specified application ID."
+18,ably.net,PATCH,/apps/{id},,Updates an app,Updates the application with the specified application ID.
+19,adafruit.com,DELETE,/{username}/activities,destroyActivities,All activities for current user,Delete all your activities.
+20,adafruit.com,DELETE,/{username}/feeds/{feed_key}/data/{id},destroyData,Delete existing Data,
+21,adafruit.com,DELETE,/{username}/tokens/{id},destroyToken,Delete an existing Token,
+22,adafruit.com,DELETE,/{username}/triggers/{id},destroyTrigger,Delete an existing Trigger,
+23,adafruit.com,PATCH,/{username}/{type}/{type_id}/acl/{id},updatePermission,Update properties of an existing Permission,
+24,adafruit.com,PATCH,/{username}/dashboards/{dashboard_id}/blocks/{id},updateBlock,Update properties of an existing Block,
+25,adafruit.com,PATCH,/{username}/feeds/{feed_key}/data/{id},updateData,Update properties of existing Data,
+26,adafruit.com,PATCH,/{username}/groups/{group_key},updateGroup,Update properties of an existing Group,
+27,adafruit.com,PATCH,/{username}/tokens/{id},updateToken,Update properties of an existing Token,
+28,adafruit.com,PATCH,/{username}/triggers/{id},updateTrigger,Update properties of an existing Trigger,
+29,adafruit.com,PUT,/{username}/dashboards/{dashboard_id}/blocks/{id},replaceBlock,Replace an existing Block,
+30,adafruit.com,PUT,/{username}/feeds/{feed_key},replaceFeed,Replace an existing Feed,
+31,adafruit.com,PUT,/{username}/feeds/{feed_key}/data/{id},replaceData,Replace existing Data,
+32,adafruit.com,PUT,/{username}/groups/{group_key},replaceGroup,Replace an existing Group,
+33,adafruit.com,PUT,/{username}/tokens/{id},replaceToken,Replace an existing Token,
+34,adafruit.com,PUT,/{username}/triggers/{id},replaceTrigger,Replace an existing Trigger,
+35,adobe.com,DELETE,/{path}/{name},deleteNode,,
+36,adobe.com,DELETE,/etc/replication/agents.{runmode}/{name},deleteAgent,,
+37,agco-ats.com,DELETE,/api/v2/AuthorizationCodeDefinitions/{id},AuthorizationCodeDefinitions_DeleteAuthorizationCodeDefinition,Disable an authorization code definition,No Documentation Found.
+38,agco-ats.com,DELETE,/api/v2/ContentSubmissionAttributes/{contentSubmissionAttributeID},ContentSubmissions_DeleteContentSubmissionAttribute,Remove an Attribute from a ContentSubmission,No Documentation Found.
+39,agco-ats.com,DELETE,/api/v2/Languages/{LocaleID},Languages_DeleteLanguage,Remove a Language from those supported for translations. Marks language as deleted.,No Documentation Found.
+40,agco-ats.com,DELETE,/api/v2/PriorityPackages/{ID},PriorityPackages_DeletePriorityPackages,Delete a Priority Package for a Client.,No Documentation Found.
+41,agco-ats.com,PUT,/api/v2/AftermarketServices/UserStatuses,AftermarketServices_UpdateUserStatus,Update the status of an EDT Kit Registration with AGCO Power Web Services,No Documentation Found.
+42,agco-ats.com,PUT,/api/v2/agents/{agentID},Agents_PutAgent,Update an Agent,"Updates an Agent.  The body of the PUT is the updated Agent.  When successful, the response is empty.             If unsuccessful, an appropriate ApiError is returned."
+43,agco-ats.com,PUT,/api/v2/AuthorizationCodeDefinitions/{id},AuthorizationCodeDefinitions_PutAuthorizationCodeDefinition,Update an authorization code definition,No Documentation Found.
+44,agco-ats.com,PUT,/api/v2/Clients/{ID},Clients_Put,Update a Client.,No Documentation Found.
+45,agco-ats.com,PUT,/api/v2/ContentDefinitions/{contentDefinitionID},ContentDefinitions_PutContentDefinition,Update a ContentDefinition,"Updates a ContentDefinition.  The body of the PUT is the updated ContentDefinition.               When successful, the response is empty.  If unsuccessful, an appropriate ApiError is returned."
+46,agco-ats.com,PUT,/api/v2/ContentSubmissionAttributes/Batch,ContentSubmissions_PutContentSubmissionAttributes,No Documentation Found.,No Documentation Found.
+47,agco-ats.com,PUT,/api/v2/GlobalImages/{ID},GlobalImages_PutGlobalImage,Update the metadata for an image.,Update the metadata for an image. Size may not be modified by the client.                  Set status to 'Available' to publish an image. Both the image and thumbnail must be uploaded.                 Set status to 'Created' to reset an image's contents and re-upload.                  A file may only be 'Removed' by the DELETE method.
+48,agco-ats.com,PUT,/api/v2/LicenseActivations/{ID},LicenseActivations_Put,Update a license activiation.,No Documentation Found.
+49,agco-ats.com,PUT,/api/v2/PackageTypetoBundles,PackageTypetoBundles_Put,Update a Package Type ID to Bundle Relationship.,No Documentation Found.
+50,agco-ats.com,PUT,/api/v2/Roles/{id},Roles_PutRole,Updates a User Role,No Documentation Found.
+51,agco-ats.com,PUT,/api/v2/StringTranslations/{stringId}/{languageId},StringTranslations_UpdateTranslation,Update a string value or a state for a string translation.,No Documentation Found.
+52,agco-ats.com,PUT,/api/v2/TranslationSets/{ID}/Strings,TranslationSets_UpdateTranslationSetStrings,No Documentation Found.,No Documentation Found.
+53,akeneo.com,DELETE,/api/rest/v1/products/{code},delete_products__code_,Delete a product,"This endpoint allows you to delete a given product. In the Enterprise Edition, since the 2.0, permissions based on your user groups are applied to the product you try to delete."
+54,akeneo.com,PATCH,/api/rest/v1/asset-families/{asset_family_code}/assets,patch_assets,Update/create several assets,"This endpoint allows you to update and/or create several assets of one given asset family at once. Learn more about the <a href=""/documentation/update.html#patch-asset-attribute-values"">Update behavior</a>. Note that if the asset does not already exist for the given asset family, it creates it. This endpoint is case sensitive on the asset family code."
+55,akeneo.com,PATCH,/api/rest/v1/asset-families/{asset_family_code}/assets/{code},patch_asset__code_,Update/create an asset,"This endpoint allows you to update a given asset of a given asset family. Learn more about the <a href=""/documentation/update.html#patch-asset-attribute-values"">Update behavior</a>. Note that if the asset does not already exist for the given asset family, it creates it. This endpoint is case sensitive on the asset family code."
+56,akeneo.com,PATCH,/api/rest/v1/asset-families/{asset_family_code}/attributes/{attribute_code}/options/{code},patch_asset_attributes__attribute_code__options__code_,Update/create an asset attribute option for a given asset family,"This endpoint allows you to update a given option for a given attribute and a given asset family. Learn more about the <a href=""/documentation/update.html#update-behavior"">Update behavior</a>. Note that if the option does not already exist for the given attribute of the given asset family, it creates it."
+57,akeneo.com,PATCH,/api/rest/v1/assets,patch_pam_assets,Update/create several PAM assets,This endpoint allows you to update several PAM assets at once.
+58,akeneo.com,PATCH,/api/rest/v1/association-types/{code},association_types_patch,Update/create an association type,"This endpoint allows you to update a given association type. Know more about <a href=""/documentation/update.html#update-behavior"">Update behavior</a>. Note that if no association type exists for the given code, it creates it."
+59,akeneo.com,PATCH,/api/rest/v1/attribute-groups,several_attribute_groups_patch,Update/create several attribute groups,This endpoint allows you to update and/or create several attribute groups at once.
+60,akeneo.com,PATCH,/api/rest/v1/attribute-groups/{code},attribute_groups_patch,Update/create an attribute group,"This endpoint allows you to update a given attribute group. Know more about <a href=""/documentation/update.html#update-behavior"">Update behavior</a>. Note that if no attribute group exists for the given code, it creates it."
+61,akeneo.com,PATCH,/api/rest/v1/attributes/{attribute_code}/options/{code},patch_attributes__attribute_code__options__code_,Update/create an attribute option,"This endpoint allows you to update a given attribute option. Know more about <a href=""/documentation/update.html#update-behavior"">Update behavior</a>. Note that if no attribute option exists for the given code, it creates it."
+62,akeneo.com,PATCH,/api/rest/v1/categories,patch_categories,Update/create several categories,This endpoint allows you to update several categories at once.
+63,akeneo.com,PATCH,/api/rest/v1/categories/{code},patch_categories__code_,Update/create a category,"This endpoint allows you to update a given category. Know more about <a href=""/documentation/update.html#update-behavior"">Update behavior</a>. Note that if no category exists for the given code, it creates it."
+64,akeneo.com,PATCH,/api/rest/v1/families,patch_families,Update/create several families,This endpoint allows you to update and/or create several families at once.
+65,akeneo.com,PATCH,/api/rest/v1/products-uuid,patch_products_uuid,Update/create several products,"This endpoint allows you to update and/or create several products at once. Learn more about <a href=""/documentation/update.html#update-behavior"">Update behavior</a>. Note that if no product exists for the given uuid, it creates it. In the Enterprise Edition, permissions based on your user groups are applied to the products you try to update. It may result in the creation of drafts if you only have edit rights through the product's categories."
+66,akeneo.com,PATCH,/api/rest/v1/products-uuid/{uuid},patch_products_uuid__uuid_,Update/create a product,"This endpoint allows you to update a given product. Learn more about <a href=""/documentation/update.html#update-behavior"">Update behavior</a>. Note that if no product exists for the given uuid, it creates it. In the Entreprise Edition, permissions based on your user groups are applied to the product you try to update. It may result in the creation of a draft if you only have edit rights through the product's categories."
+67,akeneo.com,PATCH,/api/rest/v1/reference-entities/{reference_entity_code}/attributes/{attribute_code}/options/{code},patch_reference_entity_attributes__attribute_code__options__code_,Update/create a reference entity attribute option,"This endpoint allows you to update a given option for a given attribute and a given reference entity. Learn more about <a href=""/documentation/update.html#patch-reference-entity-record-values"">Update behavior</a>. Note that if the option does not already exist for the given attribute of the given reference entity, it creates it."
+68,akeneo.com,PATCH,/api/rest/v1/reference-entities/{reference_entity_code}/attributes/{code},patch_reference_entity_attributes__code_,Update/create an attribute of a given reference entity,"This endpoint allows you to update a given attribute for a given renference entity. Note that if the attribute does not already exist for the given reference entity, it creates it."
+69,alertersystem.com,DELETE,/api/transport-alerta/{id},api_transport-alerta_id_delete,Removes the TransportAlerta resource.,Removes the TransportAlerta resource.
+70,alertersystem.com,DELETE,/api/transport-clickatell/{id},api_transport-clickatell_id_delete,Removes the TransportClickatell resource.,Removes the TransportClickatell resource.
+71,alertersystem.com,DELETE,/api/transport-esendex/{id},api_transport-esendex_id_delete,Removes the TransportEsendex resource.,Removes the TransportEsendex resource.
+72,alertersystem.com,DELETE,/api/transport-kaz-info-teh/{id},api_transport-kaz-info-teh_id_delete,Removes the TransportKazInfoTeh resource.,Removes the TransportKazInfoTeh resource.
+73,alertersystem.com,DELETE,/api/transport-light-sms/{id},api_transport-light-sms_id_delete,Removes the TransportLightSms resource.,Removes the TransportLightSms resource.
+74,alertersystem.com,DELETE,/api/transport-mattermost/{id},api_transport-mattermost_id_delete,Removes the TransportMattermost resource.,Removes the TransportMattermost resource.
+75,alertersystem.com,DELETE,/api/transport-plivo/{id},api_transport-plivo_id_delete,Removes the TransportPlivo resource.,Removes the TransportPlivo resource.
+76,alertersystem.com,DELETE,/api/transport-sms77/{id},api_transport-sms77_id_delete,Removes the TransportSms77 resource.,Removes the TransportSms77 resource.
+77,alertersystem.com,DELETE,/api/transport-telegram/{id},api_transport-telegram_id_delete,Removes the TransportTelegram resource.,Removes the TransportTelegram resource.
+78,alertersystem.com,DELETE,/api/transport-vonage/{id},api_transport-vonage_id_delete,Removes the TransportVonage resource.,Removes the TransportVonage resource.
+79,alertersystem.com,PUT,/api/transport-discord/{id},api_transport-discord_id_put,Replaces the TransportDiscord resource.,Replaces the TransportDiscord resource.
+80,alertersystem.com,PUT,/api/transport-email/{id},api_transport-email_id_put,Replaces the TransportEmail resource.,Replaces the TransportEmail resource.
+81,alertersystem.com,PUT,/api/transport-infobip/{id},api_transport-infobip_id_put,Replaces the TransportInfobip resource.,Replaces the TransportInfobip resource.
+82,alertersystem.com,PUT,/api/transport-linked-in/{id},api_transport-linked-in_id_put,Replaces the TransportLinkedIn resource.,Replaces the TransportLinkedIn resource.
+83,alertersystem.com,PUT,/api/transport-message-media/{id},api_transport-message-media_id_put,Replaces the TransportMessageMedia resource.,Replaces the TransportMessageMedia resource.
+84,alertersystem.com,PUT,/api/transport-octopush/{id},api_transport-octopush_id_put,Replaces the TransportOctopush resource.,Replaces the TransportOctopush resource.
+85,amadeus.com,DELETE,/booking/flight-orders/{flight-orderId},cancelFlightOrder,Cancel a given flight order,
+86,anchore.io,DELETE,/accounts/{accountname},delete_account,"Delete the specified account, only allowed if the account is in the disabled state. All users will be deleted along with the account and all resources will be garbage collected",
+87,anchore.io,DELETE,/archives/images/{imageDigest},delete_archived_analysis,,Performs a synchronous archive deletion
+88,anchore.io,DELETE,/archives/rules/{ruleId},delete_analysis_archive_rule,,
+89,anchore.io,DELETE,/events,delete_events,Delete Events,Delete all or a subset of events filtered using the optional query parameters
+90,anchore.io,DELETE,/images,delete_images_async,Bulk mark images for deletion,Delete analysis for image digests in the list asynchronously
+91,anchore.io,DELETE,/images/{imageDigest},delete_image,Delete an image analysis,
+92,anchore.io,DELETE,/imports/images/{operation_id},invalidate_operation,Invalidate operation ID so it can be garbage collected,
+93,anchore.io,DELETE,/policies/{policyId},delete_policy,Delete policy,Delete the specified policy
+94,anchore.io,DELETE,/registries/{registry},delete_registry,Delete a registry configuration,Delete a registry configuration record from the system. Does not remove any images.
+95,anchore.io,DELETE,/subscriptions/{subscriptionId},delete_subscription,Delete subscriptions of a specific type,
+96,anchore.io,DELETE,/system/feeds/{feed}/{group},delete_feed_group,,Delete the group data and disable the group itself
+97,anchore.io,PUT,/accounts/{accountname}/state,update_account_state,Update the state of an account to either enabled or disabled. For deletion use the DELETE route,
+98,anchore.io,PUT,/registries/{registry},update_registry,Update/replace a registry configuration,Replaces an existing registry record with the given record
+99,anchore.io,PUT,/subscriptions/{subscriptionId},update_subscription,Update an existing and specific subscription,
+100,anchore.io,PUT,/system/feeds/{feed},toggle_feed_enabled,,Disable the feed so that it does not sync on subsequent sync operations
+101,anchore.io,PUT,/system/feeds/{feed}/{group},toggle_group_enabled,,Disable a specific group within a feed to not sync
+102,apache.org,DELETE,/dags/{dag_id},delete_dag,Delete a DAG,"Deletes all metadata related to the DAG, including finished DAG Runs and Tasks. Logs are not deleted. This action cannot be undone. *New in version 2.2.0*"
+103,apache.org,DELETE,/dags/{dag_id}/dagRuns/{dag_run_id},delete_dag_run,Delete a DAG run,
+104,apache.org,DELETE,/pools/{pool_name},delete_pool,Delete a pool,
+105,apache.org,DELETE,/pools/{pool_name},delete_pool,Delete a pool,
+106,apache.org,DELETE,/queues/{queueName},deleteQueue,Delete Queue.,
+107,apache.org,DELETE,/users/{username},delete_user,Delete a user,Delete a user with a specific username. *New in version 2.2.0*
+108,apache.org,PATCH,/connections/{connection_id},patch_connection,Update a connection,
+109,apache.org,PATCH,/dags/{dag_id},patch_dag,Update a DAG,
+110,apache.org,PATCH,/dags/{dag_id}/dagRuns/{dag_run_id}/setNote,set_dag_run_note,Update the DagRun note.,Update the manual user note of a DagRun. *New in version 2.5.0*
+111,apache.org,PATCH,/dags/{dag_id}/dagRuns/{dag_run_id}/setNote,set_dag_run_note,Update the DagRun note.,Update the manual user note of a DagRun. *New in version 2.5.0*
+112,apache.org,PATCH,/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}/{map_index},patch_mapped_task_instance,Updates the state of a mapped task instance,Updates the state for single mapped task instance. *New in version 2.5.0*
+113,apache.org,PATCH,/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}/{map_index},patch_mapped_task_instance,Updates the state of a mapped task instance,Updates the state for single mapped task instance. *New in version 2.5.0*
+114,apache.org,PATCH,/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}/setNote,set_task_instance_note,Update the TaskInstance note.,Update the manual user note of a non-mapped Task Instance. *New in version 2.5.0*
+115,apache.org,PATCH,/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}/setNote,set_task_instance_note,Update the TaskInstance note.,Update the manual user note of a non-mapped Task Instance. *New in version 2.5.0*
+116,apache.org,PATCH,/roles/{role_name},patch_role,Update a role,Update a role. *New in version 2.1.0*
+117,apache.org,PATCH,/variables/{variable_key},patch_variable,Update a variable,Update a variable by key.
+118,apacta.com,DELETE,/companies_vendors/bulkDelete,bulkCompaniesVendors,Bulk delete companies vendors,
+119,apacta.com,DELETE,/companies/{company_id}/form_templates/{form_template_id},,Delete a form template company,
+120,apacta.com,DELETE,/expenses/sendEmails,sendEmailsExpenses,Bulk delete expenses,
+121,apacta.com,DELETE,/products/{product_id},,Delete a product,
+122,apacta.com,DELETE,/products/{product_id}/variants/{variant_type}/{variant_id},,Delete a product variant,
+123,apacta.com,DELETE,/project_statuses/bulkDelete,,Bulk delete project statuses,
+124,apacta.com,DELETE,/projects/{project_id},,Delete a project,
+125,apacta.com,DELETE,/projects/{project_id}/project_files/{project_file_id}/,,Delete project file,
+126,apacta.com,DELETE,/time_entry_rates/{time_entry_rate_id},,Delete time entry rate,
+127,apacta.com,PUT,/companies/{company_id}/companies_integration_feature_settings/{c_integration_feature_setting_id},,Edit a company integration feature setting,
+128,apacta.com,PUT,/contacts/{contact_id},,Edit a contact,
+129,apacta.com,PUT,/driving_types/{driving_type_id},put-driving_types-driving_type_id,Edit driving type,
+130,apacta.com,PUT,/events/{event_id},,Edit event,
+131,apacta.com,PUT,/forms/{form_id},,Edit a form,
+132,apacta.com,PUT,/projects/{project_id}/files/{file_id}/,,Edit file,Edit file uploaded to a project from wall post or form
+133,apacta.com,PUT,/users/{user_id}/integration_settings/{integration_settings_user_id},,Edit a user integration setting,
+134,api.ebay.com,DELETE,/fulfillment_policy/{fulfillmentPolicyId},deleteFulfillmentPolicy,,This method deletes a fulfillment policy. Supply the ID of the policy you want to delete in the <b>fulfillmentPolicyId</b> path parameter.
+135,api.ebay.com,DELETE,/sales_tax/{countryCode}/{jurisdictionId},deleteSalesTax,,This call deletes a sales tax table entry for a jurisdiction. Specify the jurisdiction to delete using the <b>countryCode</b> and <b>jurisdictionId</b> path parameters.
+136,api.ebay.com,PUT,/custom_policy/{custom_policy_id},updateCustomPolicy,,"This method updates an existing custom policy specified by the <b>custom_policy_id</b> path parameter for the selected marketplace. This method overwrites the policy's <b>Name</b>, <b>Label</b>, and <b>Description</b> fields. Therefore, the complete, current text of all three policy fields must be included in the request payload even when one or two of these fields will not actually be updated.<br/> <br/>For example, the value for the <b>Label</b> field is to be updated, but the <b>Name</b> and "
+137,api.ebay.com,PUT,/fulfillment_policy/{fulfillmentPolicyId},updateFulfillmentPolicy,,This method updates an existing fulfillment policy. Specify the policy you want to update using the <b>fulfillment_policy_id</b> path parameter. Supply a complete policy payload with the updates you want to make; this call overwrites the existing policy with the new details specified in the payload.
+138,api.video,DELETE,/live-streams/{liveStreamId},DELETE_live-streams-liveStreamId,Delete a live stream,
+139,api.video,DELETE,/live-streams/{liveStreamId}/thumbnail,DELETE_live-streams-liveStreamId-thumbnail,Delete a thumbnail,Send the unique identifier for a live stream to delete it from the system.
+140,api.video,DELETE,/players/{playerId},DELETE_players-playerId,Delete a player,Delete a player if you no longer need it. You can delete any player that you have the player ID for.
+141,api.video,DELETE,/players/{playerId}/logo,DELETE_players-playerId-logo,Delete logo,
+142,api.video,DELETE,/upload-tokens/{uploadToken},DELETE_upload-tokens-uploadToken,Delete an upload token,Delete an existing upload token. This is especially useful for tokens you may have created that do not expire.
+143,api.video,DELETE,/videos/{videoId},DELETE-video,Delete a video,"If you do not need a video any longer, you can send a request to delete it. All you need is the videoId. Tutorials using [video deletion](https://api.video/blog/endpoints/video-delete)."
+144,api.video,DELETE,/videos/{videoId}/captions/{language},DELETE_videos-videoId-captions-language,Delete a caption,Delete a caption in a specific language by providing the video ID for the video you want to delete the caption from and the language the caption is in.
+145,api.video,DELETE,/webhooks/{webhookId},DELETE-webhook,Delete a Webhook,This endpoint will delete the indicated webhook.
+146,api.video,PATCH,/live-streams/{liveStreamId},PATCH_live-streams-liveStreamId,Update a live stream,"Use this endpoint to update the player, or to turn recording on/off (saving a copy of the livestream). NOTE: If the livestream is actively streaming, changing the recording status will only affect the NEXT stream.    The public=false 'private livestream' is available as a BETA feature, and should be limited to livestreams of 3,000 viewers or fewer."
+147,api.video,PATCH,/players/{playerId},PATCH_players-playerId,Update a player,Use a player ID to update specific details for a player. NOTE: It may take up to 10 min before the new player configuration is available from our CDN.
+148,api.video,PATCH,/videos/{videoId},PATCH-video,Update a video,"Use this endpoint to update the parameters associated with your video. The video you are updating is determined by the video ID you provide in the path. For each parameter you want to update, include the update in the request body. NOTE: If you are updating an array, you must provide the entire array as what you provide here overwrites what is in the system rather than appending to it. Tutorials using [video update](https://api.video/blog/endpoints/video-update)."
+149,api.video,PATCH,/videos/{videoId}/captions/{language},PATCH_videos-videoId-captions-language,Update caption,"To have the captions on automatically, use this PATCH to set default: true."
+150,api.video,PATCH,/videos/{videoId}/thumbnail,PATCH_videos-videoId-thumbnail,Pick a thumbnail,"Pick a thumbnail from the given time code. If you'd like to upload an image for your thumbnail, use the [Upload a Thumbnail](https://docs.api.video/reference#post_videos-videoid-thumbnail) endpoint. There may be a short delay for the thumbnail to update. Tutorials using [Thumbnail picking](https://api.video/blog/endpoints/video-pick-a-thumbnail)."
+151,api2cart.com,DELETE,/basket.live_shipping_service.delete.json,BasketLiveShippingServiceDelete,,Delete live shipping rate service. (Beta)
+152,api2cart.com,DELETE,/cart.delete.json,CartDelete,,Remove store from API2Cart
+153,api2cart.com,DELETE,/cart.meta_data.unset.json,CartMetaDataUnset,,Unset meta data for a specific entity
+154,api2cart.com,DELETE,/category.image.delete.json,CategoryImageDelete,,Delete image
+155,api2cart.com,DELETE,/order.shipment.delete.json,OrderShipmentDelete,,Delete order's shipment.
+156,api2cart.com,DELETE,/product.image.delete.json,ProductImageDelete,,Delete image
+157,api2cart.com,DELETE,/product.price.delete.json,ProductPriceDelete,,Delete some prices of the product
+158,api2cart.com,DELETE,/product.variant.price.delete.json,ProductVariantPriceDelete,,Delete some prices of the product variant.
+159,api2cart.com,PUT,/account.config.update.json,AccountConfigUpdate,,Update configs in the API2Cart database.
+160,api2cart.com,PUT,/order.shipment.update.json,OrderShipmentUpdate,,Update order's shipment information.
+161,api2cart.com,PUT,/product.image.update.json,ProductImageUpdate,,Update details of image
+162,api2cart.com,PUT,/product.option.value.update.json,ProductOptionValueUpdate,,Update product option item from option.
+163,api2cart.com,PUT,/product.price.update.json,ProductPriceUpdate,,Update some prices of the product.
+164,api2cart.com,PUT,/product.update.json,ProductUpdate,,Update price and quantity for a specific product
+165,api2cart.com,PUT,/product.variant.update.json,ProductVariantUpdate,,Update variant.
+166,api2cart.com,PUT,/webhook.update.json,WebhookUpdate,,Update Webhooks parameters.
+167,apicurio.local,DELETE,/admin/config/properties/{propertyName},resetConfigProperty,Reset a configuration property,Resets the value of a single configuration property.  This will return the property to its default value (see external documentation for supported properties and their default values). This operation may fail for one of the following reasons: * Property not found or not configured (HTTP error `404`) * A server error occurred (HTTP error `500`)
+168,apicurio.local,DELETE,/admin/loggers/{logger},removeLogConfiguration,Removes logger configuration,Removes the configured logger configuration (if any) for the given logger.
+169,apicurio.local,DELETE,/admin/rules/{rule},deleteGlobalRule,Delete global rule,"Deletes a single global rule.  If this is the only rule configured, this is the same as deleting **all** rules. This operation can fail for the following reasons: * Invalid rule name/type (HTTP error `400`) * No rule with name/type `rule` exists (HTTP error `404`) * Rule cannot be deleted (HTTP error `409`) * A server error occurred (HTTP error `500`)"
+170,apicurio.local,DELETE,/groups/{groupId},deleteGroupById,Delete a group by the specified ID.,Deletes a group by identifier. This operation can fail for the following reasons: * A server error occurred (HTTP error `500`) * The group does not exist (HTTP error `404`)
+171,apicurio.local,DELETE,/groups/{groupId}/artifacts,deleteArtifactsInGroup,Delete artifacts in group,Deletes all of the artifacts that exist in a given group.
+172,apicurio.local,DELETE,/groups/{groupId}/artifacts/{artifactId},deleteArtifact,Delete artifact,"Deletes an artifact completely, resulting in all versions of the artifact also being deleted.  This may fail for one of the following reasons: * No artifact with the `artifactId` exists (HTTP error `404`) * A server error occurred (HTTP error `500`)"
+173,apicurio.local,DELETE,/groups/{groupId}/artifacts/{artifactId}/rules,deleteArtifactRules,Delete artifact rules,"Deletes all of the rules configured for the artifact.  After this is done, the global rules apply to the artifact again. This operation can fail for the following reasons: * No artifact with this `artifactId` exists (HTTP error `404`) * A server error occurred (HTTP error `500`)"
+174,apicurio.local,PUT,/admin/loggers/{logger},setLogConfiguration,Set a logger's configuration,Configures the logger referenced by the provided logger name with the given configuration.
+175,apicurio.local,PUT,/admin/rules/{rule},updateGlobalRuleConfig,Update global rule configuration,Updates the configuration for a globally configured rule. This operation can fail for the following reasons: * Invalid rule name/type (HTTP error `400`) * No rule with name/type `rule` exists (HTTP error `404`) * A server error occurred (HTTP error `500`)
+176,apicurio.local,PUT,/groups/{groupId}/artifacts/{artifactId},updateArtifact,Update artifact,"Updates an artifact by uploading new content.  The body of the request can be the raw content of the artifact or a JSON object containing both the raw content and a set of references to other artifacts..  This is typically in JSON format for *most* of the supported types, but may be in another format for a few (for example, `PROTOBUF`). The type of the content should be compatible with the artifact's type (it would be an error to update an `AVRO` artifact with new `OPENAPI` content, for example)"
+177,apicurio.local,PUT,/groups/{groupId}/artifacts/{artifactId}/owner,updateArtifactOwner,Update artifact owner,Changes the ownership of an artifact. This operation can fail for the following reasons: * No artifact with this `artifactId` exists (HTTP error `404`) * A server error occurred (HTTP error `500`)
+178,apicurio.local,PUT,/groups/{groupId}/artifacts/{artifactId}/rules/{rule},updateArtifactRuleConfig,Update artifact rule configuration,"Updates the configuration of a single rule for the artifact.  The configuration data is specific to each rule type, so the configuration of the `COMPATIBILITY` rule  is in a different format from the configuration of the `VALIDITY` rule. This operation can fail for the following reasons: * No artifact with this `artifactId` exists (HTTP error `404`) * No rule with this name/type is configured for this artifact (HTTP error `404`) * Invalid rule type (HTTP error `400`) * A server error occurred (H"
+179,apicurio.local,PUT,/groups/{groupId}/artifacts/{artifactId}/state,updateArtifactState,Update artifact state,"Updates the state of the artifact.  For example, you can use this to mark the latest version of an artifact as `DEPRECATED`.  The operation changes the state of the latest  version of the artifact.  If multiple versions exist, only the most recent is changed. This operation can fail for the following reasons: * No artifact with this `artifactId` exists (HTTP error `404`) * A server error occurred (HTTP error `500`)"
+180,apicurio.local,PUT,/groups/{groupId}/artifacts/{artifactId}/test,testUpdateArtifact,Test update artifact,"Tests whether an update to the artifact's content *would* succeed for the provided content. Ultimately, this applies any rules configured for the artifact against the given content to determine whether the rules would pass or fail, but without actually updating the artifact content. The body of the request should be the raw content of the artifact.  This is typically in  JSON format for *most* of the supported types, but may be in another format for a few  (for example, `PROTOBUF`). The update c"
+181,apicurio.local,PUT,/groups/{groupId}/artifacts/{artifactId}/versions/{version}/meta,updateArtifactVersionMetaData,Update artifact version metadata,"Updates the user-editable portion of the artifact version's metadata.  Only some of  the metadata fields are editable by the user.  For example, `description` is editable,  but `createdOn` is not. This operation can fail for the following reasons: * No artifact with this `artifactId` exists (HTTP error `404`) * No version with this `version` exists (HTTP error `404`) * A server error occurred (HTTP error `500`)"
+182,apicurio.local,PUT,/groups/{groupId}/artifacts/{artifactId}/versions/{version}/state,updateArtifactVersionState,Update artifact version state,"Updates the state of a specific version of an artifact.  For example, you can use  this operation to disable a specific version. This operation can fail for the following reasons: * No artifact with this `artifactId` exists (HTTP error `404`) * No version with this `version` exists (HTTP error `404`) * A server error occurred (HTTP error `500`)"
+183,apideck.com,DELETE,/accounting/credit-notes/{id},creditNotesDelete,Delete Credit Note,Delete Credit Note
+184,apideck.com,DELETE,/accounting/customers/{id},customersDelete,Delete Customer,Delete Customer
+185,apideck.com,DELETE,/accounting/invoices/{id},invoicesDelete,Delete Invoice,Delete Invoice
+186,apideck.com,DELETE,/accounting/journal-entries/{id},journalEntriesDelete,Delete Journal Entry,Delete Journal Entry
+187,apideck.com,DELETE,/crm/activities/{id},activitiesDelete,Delete activity,Delete activity
+188,apideck.com,DELETE,/customer-support/customers/{id},customersDelete,Delete Customer Support Customer,Delete Customer Support Customer
+189,apideck.com,DELETE,/file-storage/folders/{id},foldersDelete,Delete Folder,Delete Folder
+190,apideck.com,DELETE,/hris/employees/{id},employeesDelete,Delete Employee,Delete Employee
+191,apideck.com,DELETE,/issue-tracking/collections/{collection_id}/tickets/{ticket_id},collectionTicketsDelete,Delete Ticket,Delete Ticket
+192,apideck.com,DELETE,/pos/orders/{id},ordersDelete,Delete Order,Delete Order
+193,apideck.com,DELETE,/pos/tenders/{id},tendersDelete,Delete Tender,Delete Tender
+194,apideck.com,DELETE,/webhook/webhooks/{id},webhooksDelete,Delete webhook subscription,Delete a webhook subscription
+195,apideck.com,PATCH,/accounting/credit-notes/{id},creditNotesUpdate,Update Credit Note,Update Credit Note
+196,apideck.com,PATCH,/accounting/invoices/{id},invoicesUpdate,Update Invoice,Update Invoice
+197,apideck.com,PATCH,/crm/activities/{id},activitiesUpdate,Update activity,Update activity
+198,apideck.com,PATCH,/pos/modifiers/{id},modifiersUpdate,Update Modifier,Update Modifier
+199,apigee.local,DELETE,/v1/projects/{project}/locations/{location}/apis/{api},Registry_DeleteApi,,DeleteApi removes a specified API and all of the resources that it  owns.
+200,apigee.local,DELETE,/v1/projects/{project}/locations/{location}/apis/{api}/deployments/{deployment}:deleteRevision,Registry_DeleteApiDeploymentRevision,,DeleteApiDeploymentRevision deletes a revision of a deployment.
