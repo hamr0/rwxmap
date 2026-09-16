@@ -7,10 +7,11 @@ status: stable
 # Module ladder and arbiter shape
 
 This page holds the module ladder (M0-M4), the M1 go/no-go gate and
-its current status, the labelled sets, and the current per-method
+its current status, the labelled sets, and the superseded per-method
 arbiter shape (C15, D42-D44) with its floor table, its rules, its
-scores, and the wild reading over the APIs.guru corpus.
-(docs/archive/prd.md:146-477)
+scores, and the wild reading over the APIs.guru corpus. The current
+shape (poc/flow/, D65-D70) lives in docs/product/prd.md, "The three
+steps." (docs/archive/prd.md:146-477)
 
 ## Module ladder
 
@@ -102,7 +103,8 @@ past statuses are in `docs/logs/learnings.md`.
 | exam 1 (data/exam-2026-09-09/) | 200 (199 scorable) | 105 | blind exam, scored once — now burned, used to hand-pick C16/C17 words |
 | exam 2 (data/exam2-2026-09-10/) | 1000 (994 scorable) | 246 | blind exam, scored once — now burned, used to hand-pick C16/C17 words and swept in C20 |
 | exam 3 (data/exam3-2026-09-11/) | 3000 (2993 scorable) | 305 | blind exam, scored once — now burned, C19 admitted `owner` off it and C20 swept it |
-| exam 5 (data/exam5-2026-09-14/) | 1999 scorable | 267 (writes from 103 corpus vendors, row-disjoint; POST/GET from 164 unseen) | exam, scored once 2026-09-14 (D68); not in the tuning corpus |
+| exam 4 (data/exam4-2026-09-12/) | 4000 | 318 named, but 316 of 318 providers and 2702 of 4000 rows were already in the corpus (a make-exam4 name-matching bug) | never virgin — not a clean exam; frozen shape scored once on it and recorded, not adopted; no clean exam exists from this draw |
+| exam 5 (data/exam5-2026-09-14/) | 1999 scorable | 267 (writes from 103 corpus vendors, row-disjoint; POST/GET from 164 unseen) | exam, scored once 2026-09-14 (D68), POST relabelled and re-scored once 2026-09-15; not in the tuning corpus |
 
 Truth is model-read, blind, per D-series notes; "tuned" means code was
 changed while its scores were visible; "clean exam" means scored once

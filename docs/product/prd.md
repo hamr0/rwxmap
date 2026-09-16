@@ -204,7 +204,7 @@ M1, the informed arbiter, is a POC and has not graduated. The full
 module ladder, the M1 go/no-go gate, the labelled sets and the current
 arbiter shape with its scores live in
 [module ladder and arbiter shape](../wiki/module-ladder-and-shape.md).
-Decisions D1-D68 are in [the decisions log](../wiki/decisions-log.md).
+Decisions D1-D70 are in [the decisions log](../wiki/decisions-log.md).
 M0 is closed; its gate statement and results are in
 [go/no-go gate and M0 results](../logs/gate-and-m0-results.md). Notes
 carried from the original outline are in
