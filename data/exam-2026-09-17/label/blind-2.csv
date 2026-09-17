@@ -1,0 +1,664 @@
+row_id,provider,method,path,operationId,summary,description
+e0074,okta,GET,/api/v1/apps/{appId}/group-push/mappings,listGroupPushMappings,List all group push mappings,Lists all group push mappings with pagination support
+e1122,docusign,GET,/v2.1/accounts/{accountId}/workspaces/{workspaceId},Workspace_GetWorkspace,Get Workspace,Retrieves properties about a workspace given a unique workspaceId.
+e0011,okta,POST,/api/v1/agentPools/{poolId}/updates/settings,updateAgentPoolsUpdateSettings,Update an agent pool update settings,Updates an agent pool update instance settings
+e0143,okta,POST,/api/v1/authorizationServers/{authServerId}/lifecycle/deactivate,deactivateAuthorizationServer,Deactivate an authorization server,Deactivates an authorization server
+e0487,okta,GET,/api/v1/org/preferences,getOrgPreferences,Retrieve the org preferences,Retrieves preferences of your Okta org
+e0628,okta,GET,/api/v1/users/{userId}/authenticator-enrollments/{enrollmentId},getAuthenticatorEnrollment,Retrieve an authenticator enrollment,Retrieves a user's authenticator enrollment by `enrollmentId`
+e0391,okta,POST,/api/v1/identity-sources/{identitySourceId}/sessions/{sessionId}/bulk-group-memberships-delete,uploadIdentitySourceGroupMembershipsForDelete,Upload the group memberships to be deleted in Okta,Uploads the group memberships that need to be deleted in Okta from the identity source for the given session
+e0734,okta,POST,/webauthn-registration/api/v1/users/{userId}/enrollments/{authenticatorEnrollmentId}/mark-error,assignFulfillmentErrorWebAuthnPreregistrationFactor,Assign the fulfillment error status to a WebAuthn preregistration factor,Assigns the fulfillment error status to a WebAuthn preregistration factor for a user. The `/mark-error` path indicates that the specific `FULFILLMENT_ERRORED` AuthFactor status is set on the enrollment.
+e0368,okta,DELETE,/api/v1/iam/resource-sets/{resourceSetIdOrLabel}/resources/{resourceId},deleteResourceSetResource,Delete a resource set resource,Deletes a resource (identified by `resourceId`) from a resource set
+e0623,okta,GET,/api/v1/users/{userIdOrLogin}/linkedObjects/{relationshipName},listLinkedObjectsForUser,List the primary or all of the associated linked object values,"Lists either the `self` link for the primary user or all associated users in the relationship specified by `relationshipName`. If the specified user isn't associated in any relationship, an empty array is returned.
+
+Use `me` instead of `id` to specify the current session user."
+e1209,xero,PUT,/Contacts/{ContactID}/History,createContactHistory,Creates a new history record for a specific contact,
+e1348,xero,POST,/RepeatingInvoices,updateOrCreateRepeatingInvoices,Creates or deletes one or more repeating invoice templates,
+e1152,xero,POST,/Accounts/{AccountID},updateAccount,Updates a chart of accounts,
+e0762,docusign,DELETE,/v2.1/accounts/{accountId}/brands/{brandId}/logos/{logoType},BrandLogo_DeleteBrandLogo,Deletes a brand logo.,"This method deletes a single logo from an account brand.
+
+**Note:** Branding for either signing or sending must be enabled for the account (`canSelfBrandSend` , `canSelfBrandSign`, or both of these account settings must be **true**)."
+e0894,docusign,PUT,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/shares,EnvelopesShares_PutEnvelopesShares,,
+e1263,xero,PUT,/Items/{ItemID}/History,createItemHistory,Creates a history record for a specific item,
+e1125,docusign,GET,/v2.1/accounts/{accountId}/workspaces/{workspaceId}/folders/{folderId},WorkspaceFolder_GetWorkspaceFolder,List workspace folder contents,"This method returns the contents of a workspace folder, which can include sub-folders and files."
+e0270,okta,POST,/api/v1/domains/{domainId}/verify,verifyDomain,Verify a custom domain,"Verifies the custom domain and validity of DNS records by `domainId`. Verify your custom domain to confirm that you own or control the domain and that you have properly configured the required DNS records. Furthermore, if the `certificateSourceType` in the domain is `OKTA_MANAGED`, then an attempt is made to obtain and install a certificate. After a certificate is obtained and installed by Okta, Okta manages the certificate including certificate renewal.
+
+Verify your custom domain after you've [created it](https://developer.okta.com/docs/api/openapi/okta-management/management/tag/CustomDomain/#tag/CustomDomain/operation/createCustomDomain) and after you've added your DNS records to your domain provider. Okta doesn't verify your domain automatically. You must use the API to verify your custom domain if you change your DNS records or if you encounter issues with domain validation.
+
+> **Note:** DNS record changes can take time to propagate. If you recently updated your DNS records, you may need to wait before verifying your custom domain. If you encounter issues with domain verification, double-check your DNS records and ensure that they're correctly configured. See [Update your DNS records](https://developer.okta.com/docs/guides/custom-url-domain/main/#update-your-dns-txt)."
+e0091,okta,PUT,/api/v1/apps/{appId}/policies/{policyId},assignApplicationPolicy,Assign an app sign-in policy,"Assigns an app to an [app sign-in policy](/openapi/okta-management/management/tags/policy/), identified by `policyId`.
+If the app was previously assigned to another policy, this operation replaces that assignment with the updated policy identified by `policyId`.
+
+> **Note:** When you [merge duplicate app sign-in policies](https://help.okta.com/okta_help.htm?type=oie&id=ext-merge-auth-policies),
+the policy and mapping CRUD operations may be unavailable during the consolidation. When the consolidation is complete, you receive an email with merged results."
+e0147,okta,PUT,/api/v1/authorizationServers/{authServerId}/policies/{policyId},replaceAuthorizationServerPolicy,Replace a policy,Replaces a policy
+e0139,okta,GET,/api/v1/authorizationServers/{authServerId}/credentials/keys,listAuthorizationServerKeys,List all credential keys,"Lists all of the current, future, and expired Keys used by the Custom Authorization Server"
+e0302,okta,GET,/api/v1/groups,listGroups,List all groups,"Lists all groups with pagination support.
+
+> **Note:** To list all groups belonging to a member, use the [List all groups endpoint in the User Resources API](/openapi/okta-management/management/tags/userresources/other/listusergroups).
+
+The number of groups returned depends on the specified [`limit`](/openapi/okta-management/management/group/listgroups#group/listgroups/t=request&in=query&path=limit), if you have a search, filter, and/or query parameter set, and if that parameter is not null. We recommend using a limit less than or equal to 200.
+
+A subset of groups can be returned that match a supported filter expression, query, or search criteria.
+
+> **Note:** The `search` parameter results are sourced from an eventually consistent datasource and may not reflect the latest information."
+e0431,okta,GET,/api/v1/inlineHooks/{inlineHookId},getInlineHook,Retrieve an inline hook,Retrieves an inline hook by `inlineHookId`
+e0576,okta,GET,/api/v1/ssf/stream/status,getSsfStreamStatus,Retrieve the SSF stream status,Retrieves the status of an SSF stream. The status indicates whether the transmitter is able to transmit events over the stream.
+e0534,okta,GET,/api/v1/push-providers/{pushProviderId},getPushProvider,Retrieve a push provider,Retrieves a push provider by `pushProviderId`
+e0156,okta,POST,/api/v1/authorizationServers/{authServerId}/policies/{policyId}/rules/{ruleId}/lifecycle/activate,activateAuthorizationServerPolicyRule,Activate a policy rule,Activates an authorization server policy rule
+e0350,okta,GET,/api/v1/iam/resource-sets,listResourceSets,List all resource sets,Lists all resource sets with pagination support
+e0472,okta,GET,/api/v1/org,getOrgSettings,Retrieve the Org general settings,Retrieves the Org General Settings
+e0546,okta,POST,/api/v1/realm-assignments/operations,executeRealmAssignment,Execute a realm assignment,Executes a realm assignment
+e1052,docusign,PUT,/v2.1/accounts/{accountId}/templates/{templateId}/recipients/{recipientId}/document_visibility,Recipients_PutTemplateRecipientDocumentVisibility,Updates document visibility for a template recipient,"This method updates the document visibility for a template recipient.
+
+**Note:** A document cannot be hidden from a recipient if the recipient has tabs assigned to them on the document. Carbon Copy, Certified Delivery (Needs to Sign), Editor, and Agent recipients can always see all documents."
+e0471,okta,DELETE,/api/v1/meta/uischemas/{id},deleteUISchemas,Delete a UI schema,Deletes a UI Schema by `id`
+e0393,okta,POST,/api/v1/identity-sources/{identitySourceId}/sessions/{sessionId}/bulk-groups-delete,uploadIdentitySourceGroupsDataForDelete,Upload the group external IDs to be deleted in Okta,Uploads external IDs of groups that need to be deleted in Okta from the identity source for the given session
+e0049,okta,GET,/api/v1/apps/{appId}/credentials/keys/{keyId},getApplicationKey,Retrieve a key credential,Retrieves a specific application key credential by `kid`
+e1329,xero,GET,/Quotes/{QuoteID}/pdf,getQuoteAsPdf,Retrieves a specific quote as a PDF file using a unique quote Id,
+e1234,xero,GET,/ExpenseClaims,getExpenseClaims,Retrieves expense claims,
+e0232,okta,GET,/api/v1/captchas/{captchaId},getCaptchaInstance,Retrieve a CAPTCHA instance,Retrieves the properties of a specified CAPTCHA instance
+e0273,okta,GET,/api/v1/dr/status,getDRStatus,Retrieve the disaster recovery status for all domains,Retrieves the failover or failback status for all the domains for your org
+e1192,xero,GET,/BrandingThemes/{BrandingThemeID}/PaymentServices,getBrandingThemePaymentServices,Retrieves the payment services for a specific branding theme,
+e0937,docusign,GET,/v2.1/accounts/{accountId}/groups,Groups_GetGroups,Gets information about groups associated with the account.,"Gets information about groups associated with the account.
+
+
+<ds-inlinemessage kind=""information"" markdown=""1"">
+To get the users in a group:
+
+1. Use this endpoint to get the group ID.
+2. Use [listGroupUsers](/docs/esign-rest-api/reference/usergroups/groupusers/list/)
+   to get the list of users.
+</ds-inlinemessage>
+
+### Related topics
+
+- [How to set a permission profile](/docs/esign-rest-api/how-to/permission-profile-setting/)"
+e0160,okta,GET,/api/v1/authorizationServers/{authServerId}/resourceservercredentials/keys/{keyId},getOAuth2ResourceServerJsonWebKey,Retrieve a Custom Authorization Server Public JSON Web Key,Retrieves a custom authorization server public JSON web key by key `id`
+e0387,okta,POST,/api/v1/identity-sources/{identitySourceId}/sessions,createIdentitySourceSession,Create an identity source session,Creates an identity source session for the given identity source instance
+e0689,okta,GET,/attack-protection/api/v1/authenticator-settings,getAuthenticatorSettings,Retrieve the authenticator settings,Retrieves the Authenticator Settings for an org
+e0355,okta,GET,/api/v1/iam/resource-sets/{resourceSetIdOrLabel}/bindings,listBindings,List all role resource set bindings,"Lists all bindings for a resource set with pagination support.
+
+The returned `roles` array contains the roles for each binding associated with the specified resource set. If there are more than 100 bindings for the specified resource set, `links.next` provides the resource with pagination for the next list of bindings."
+e1376,xero,GET,/TrackingCategories/{TrackingCategoryID},getTrackingCategory,Retrieves specific tracking categories and options using a unique tracking category Id,
+e1161,xero,POST,/BatchPayments,deleteBatchPayment,Updates a specific batch payment for invoices and credit notes,
+e0633,okta,GET,/api/v1/users/{userId}/clients/{clientId}/grants,listGrantsForUserAndClient,List all grants for a client,Lists all grants for a specified user and client
+e1353,xero,GET,/RepeatingInvoices/{RepeatingInvoiceID}/Attachments/{FileName},getRepeatingInvoiceAttachmentByFileName,Retrieves a specific attachment from a specific repeating invoices by file name,
+e1127,docusign,POST,/v2.1/accounts/{accountId}/workspaces/{workspaceId}/folders/{folderId}/files,WorkspaceFile_PostWorkspaceFiles,Creates a workspace file.,This method adds a file to a workspace.
+e0407,okta,PUT,/api/v1/idps/credentials/keys/{kid},replaceIdentityProviderKey,Replace an IdP key credential,Replaces an identity provider (IdP) key credential by `kid`
+e0605,okta,PUT,/api/v1/users/{id},replaceUser,Replace a user,"Replaces a user's profile, credentials, or both using strict-update semantics.
+
+All profile properties must be specified when updating a user's profile with a `PUT` method. Any property not specified in the request is deleted.
+> **Important:** Don't use a `PUT` method for partial updates."
+e1123,docusign,PUT,/v2.1/accounts/{accountId}/workspaces/{workspaceId},Workspace_PutWorkspace,Update Workspace,Updates information about a specific workspace.
+e1343,xero,POST,/Receipts/{ReceiptID}/Attachments/{FileName},updateReceiptAttachmentByFileName,Updates a specific attachment on a specific expense claim receipts by file name,
+e1293,xero,GET,/Payments,getPayments,Retrieves payments for invoices and credit notes,
+e0438,okta,GET,/api/v1/logStreams,listLogStreams,List all log streams,Lists all log stream objects in your org. You can request a paginated list or a subset of log streams that match a supported filter expression.
+e0863,docusign,GET,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/form_data,FormData_GetFormData,Returns envelope tab data for an existing envelope.,"This method downloads the envelope and tab data (also called form data) from any in-process, completed, or canceled envelope that you sent or that is shared with you. Recipients who are also full administrators on an account can view form data for any envelopes that another user on the account has sent to them.
+
+**Note:** To use this feature, the Sending Setting ""Allow sender to download form data"" must be enabled for the account.
+
+### Related topics
+
+- [How to get envelope tab values](/docs/esign-rest-api/how-to/get-envelope-tab-values/)"
+e0976,docusign,PUT,/v2.1/accounts/{accountId}/settings/notification_defaults,NotificationDefaults_PutNotificationDefaults,Updates envelope notification default settings.,This method changes the default settings for the email notifications that signers and senders receive about envelopes.
+e1137,docusign,GET,/v2.1/current_user/notary/journals,NotaryJournals_GetNotaryJournals,Gets notary jurisdictions for a user.,
+e0096,okta,DELETE,/api/v1/apps/{appId}/tokens/{tokenId},revokeOAuth2TokenForApplication,Revoke an application token,Revokes the specified token for the specified app
+e0247,okta,GET,/api/v1/device-posture-checks/default,listDefaultDevicePostureChecks,List all default device posture checks,Lists all default device posture checks. Default device posture checks are defined by Okta. Their type will always be `BUILTIN`.
+e0998,docusign,PUT,/v2.1/accounts/{accountId}/signing_groups/{signingGroupId},SigningGroups_PutSigningGroup,Updates a signing group.,Updates signing group name and member information. You can also add new members to the signing group. A signing group can have a maximum of 50 members.
+e0528,okta,GET,/api/v1/principal-rate-limits,listPrincipalRateLimitEntities,List all principal rate limits,Lists all Principal Rate Limit entities considering the provided parameters
+e1044,docusign,GET,/v2.1/accounts/{accountId}/templates/{templateId}/notification,Notification_GetTemplatesTemplateIdNotification,Gets template notification information.,"Retrieves the envelope notification, reminders and expirations, information for an existing template."
+e0833,docusign,DELETE,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/custom_fields,CustomFields_DeleteCustomFields,Deletes envelope custom fields for draft and in-process envelopes.,Deletes envelope custom fields for draft and in-process envelopes.
+e0349,okta,POST,/api/v1/iam/governance/optOut,optOut,Opt out the Admin Console from entitlement management,Opts out the Admin Console from entitlement management
+e0681,okta,POST,/api/v1/users/{userId}/subscriptions/{notificationType}/unsubscribe,unsubscribeByNotificationTypeUser,Unsubscribe a user from a specific notification type,Unsubscribes the current user from a specified notification type. Returns an `AccessDeniedException` message if requests are made for another user.
+e0785,docusign,PUT,/v2.1/accounts/{accountId}/connect,Connect_PutConnectConfiguration,Updates a specified Connect configuration.,"Updates the specified Docusign Connect configuration in your account. To enable the configuration, set the `allowEnvelopePublish` property to **true.**
+
+After any updates, test your configuration to make sure it works as expected.
+
+<ds-inlinemessage>
+To use this method, you must be an account administrator
+and Connect must be enabled on your account.
+</ds-inlinemessage>"
+e1160,xero,PUT,/BatchPayments,createBatchPayment,Creates one or many batch payments for invoices,
+e1322,xero,GET,/Quotes,getQuotes,Retrieves sales quotes,
+e0445,okta,GET,/api/v1/logs,listLogEvents,List all System Log events,"Lists all System Log events
+
+See [System Log query](https://developer.okta.com/docs/reference/system-log-query/) for further details and examples, and [System Log filters and search](https://help.okta.com/okta_help.htm?type=oie&id=csh-syslog-filters) for common use cases.
+
+By default, 100 System Log events are returned. If there are more events, see the [header link](https://developer.okta.com/docs/api/#link-header) for the `next` link,
+or increase the number of returned objects using the `limit` parameter.
+
+>**Note:** The value of the `clientSecret` property in the System Log is secured by a hashing function, and isn't the value used during authentication."
+e0967,docusign,POST,/v2.1/accounts/{accountId}/settings/bcc_email_archives,BCCEmailArchive_PostBCCEmailArchive,Creates a BCC email archive configuration.,"This method creates a BCC email archive configuration for an account (adds a BCC email address to the account for archiving the emails that Docusign generates).
+
+The only property that you must set in the request body is the BCC email address that you want to use.
+
+**Note:** An account can have up to five active and pending email archive addresses combined, but you must use this method to add them to the account one at a time. Each email address is considered a separate BCC email archive configuration."
+e0549,okta,DELETE,/api/v1/realm-assignments/{assignmentId},deleteRealmAssignment,Delete a realm assignment,Deletes a realm assignment
+e0763,docusign,GET,/v2.1/accounts/{accountId}/brands/{brandId}/resources,BrandResources_GetBrandResourcesList,Returns metadata about the branding resources for an account.,"This method returns metadata about the branding resources that are associated with an account.
+
+**Note:** Branding for either signing or sending must be enabled for the account (`canSelfBrandSend` , `canSelfBrandSign`, or both of these account settings must be **true**)."
+e0155,okta,DELETE,/api/v1/authorizationServers/{authServerId}/policies/{policyId}/rules/{ruleId},deleteAuthorizationServerPolicyRule,Delete a policy rule,Deletes a Policy Rule defined in the specified Custom Authorization Server and Policy
+e0626,okta,POST,/api/v1/users/{userId}/authenticator-enrollments/phone,createAuthenticatorEnrollment,Create an auto-activated Phone authenticator enrollment,Creates a Phone authenticator enrollment that's automatically activated
+e0859,docusign,GET,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/email_settings,EmailSettings_GetEmailSettings,Gets the email setting overrides for an envelope.,Retrieves the email override settings for the specified envelope.
+e0606,okta,POST,/api/v1/users/{id},updateUser,Update a user,"Updates a user's profile or credentials with partial update semantics.
+
+> **Important:** Use the `POST` method for partial updates. Unspecified properties are set to null with `PUT`.
+
+`profile` and `credentials` can be updated independently or together with a single request.
+
+> **Notes:**
+> * Currently, the user type of a user can only be changed using a full replacement `PUT` operation. If the request parameters of a partial update include the `type` element from the user object,
+the value must match the existing type of the user. Only admins are permitted to change the user type of a user; end users are not allowed to change their own user type.
+>
+> * To update a current user's profile with partial semantics, you can use the `/api/v1/users/me` endpoint. But, a user can only update profile properties that they have write access for. Within the profile, if the user tries to update the primary or the secondary email IDs, verification emails are sent to those email IDs, and the fields are updated only upon verification.
+>
+> * You can update user profiles of users in the `DEPROVISIONED` status if you have the **Edit Deactivated User Profile Updates** option turned on in the Admin Console. See [deactivated user profiles](https://help.okta.com/okta_help.htm?type=oie&id=edit-deactivated-users).
+
+If you are using this endpoint to set a password, it sets a password without validating existing user credentials. This is an administrative operation. For operations that validate credentials, refer to the [Reset password](https://developer.okta.com/docs/api/openapi/okta-management/management/usercred/resetpassword), [Start forgot password flow](https://developer.okta.com/docs/api/openapi/okta-management/management/tag/UserCred/#tag/UserCred/operation/forgotPassword), and [Update password](https://developer.okta.com/docs/api/openapi/okta-management/management/tag/UserCred/#tag/UserCred/operation/changePassword) endpoints."
+e0093,okta,GET,/api/v1/apps/{appId}/tokens,listOAuth2TokensForApplication,List all application refresh tokens,"Lists all refresh tokens for an app
+
+> **Note:** The results are [paginated](/#pagination) according to the `limit` parameter.
+> If there are multiple pages of results, the Link header contains a `next` link that you need to use as an opaque value (follow it, don't parse it)."
+e0287,okta,GET,/api/v1/eventHooks,listEventHooks,List all event hooks,Lists all event hooks
+e0911,docusign,GET,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/workflow,EnvelopeWorkflowDefinitionV2_GetEnvelopeWorkflowDefinition,Returns the workflow definition for an envelope.,"Returns the workflow definition for the envelope specified by `envelopeId`. If the envelope does not have a workflow object, this method returns a 404."
+e0636,okta,DELETE,/api/v1/users/{userId}/clients/{clientId}/tokens,revokeTokensForUserAndClient,Revoke all refresh tokens for a client,Revokes all refresh tokens issued for the specified user and client
+e0298,okta,GET,/api/v1/features/{featureId}/dependents,listFeatureDependents,List all dependents,"Lists all feature dependents for the specified feature.
+
+A feature's dependents are the features that need to be disabled in order for the feature itself to be disabled."
+e1251,xero,GET,/Invoices/{InvoiceID}/OnlineInvoice,getOnlineInvoice,Retrieves a URL to an online invoice,
+e0525,okta,DELETE,/api/v1/policies/{policyId}/rules/{ruleId},deletePolicyRule,Delete a policy rule,Deletes a policy rule identified by `policyId` and `ruleId`
+e0193,okta,GET,/api/v1/brands/{brandId}/pages/sign-in/customized,getCustomizedSignInPage,Retrieve the customized sign-in page,Retrieves the customized sign-in page. The customized sign-in page appears in your live environment.
+e1165,xero,PUT,/BatchPayments/{BatchPaymentID}/History,createBatchPaymentHistoryRecord,Creates a history record for a specific batch payment,
+e1081,docusign,PUT,/v2.1/accounts/{accountId}/users/{userId},User_PutUser,Updates user information for the specified user.,"To update user information for a specific user, submit a [Users](#Users) object with updated field values in the request body of this operation."
+e0030,okta,DELETE,/api/v1/apps/{appId},deleteApplication,Delete an application,Deletes an inactive application
+e1277,xero,GET,/ManualJournals/{ManualJournalID}/Attachments,getManualJournalAttachments,Retrieves attachment for a specific manual journal,
+e1241,xero,PUT,/Invoices,createInvoices,Creates one or more sales invoices or purchase bills,
+e0870,docusign,PUT,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/notification,Notification_PutEnvelopesEnvelopeIdNotification,Sets envelope notifications for an existing envelope.,"This method sets the notifications (reminders and expirations) for an existing envelope. The request body sends a structure containing reminders and expirations settings. It also specifies whether to use the settings specified in the request, or the account default notification settings for the envelope.
+
+Note that this request only specifies when notifications are sent; it does not initiate sending of email messages."
+e1252,xero,POST,/Invoices/{InvoiceID}/Email,emailInvoice,Sends a copy of a specific invoice to related contact via email,
+e0708,okta,DELETE,/oauth2/v1/clients/{clientId}/roles/{roleAssignmentId}/targets/catalog/apps/{appName},removeAppTargetRoleFromClient,Unassign a client role app target,"Unassigns an OIN app target for a role assignment to a client app
+
+> **Note:** You can't remove the last OIN app target from a role assignment.
+> If you need a role assignment that applies to all apps, delete the role assignment with the target and create another one. See [Unassign a client role](/openapi/okta-management/management/tags/roleassignmentclient/other/deleterolefromclient)."
+e0782,docusign,DELETE,/v2.1/accounts/{accountId}/chunked_uploads/{chunkedUploadId},ChunkedUploads_DeleteChunkedUpload,Deletes a chunked upload.,"Deletes a chunked upload that has been committed but not yet consumed.
+
+This method cannot be used to delete the following types of chunked uploads, which the system deletes automatically:
+
+
+- Chunked uploads that have been consumed by use in another API call.
+- Expired chunked uploads.
+
+**Note:** If you are aware of a chunked upload that can be discarded, the best practice is to explicitly delete it. If you wait for the system to automatically delete it after it expires, the chunked upload will continue to count against your quota."
+e0077,okta,DELETE,/api/v1/apps/{appId}/group-push/mappings/{mappingId},deleteGroupPushMapping,Delete a group push mapping,Deletes a specific group push mapping. The group push mapping must be in an `INACTIVE` state.
+e1163,xero,POST,/BatchPayments/{BatchPaymentID},deleteBatchPaymentByUrlParam,Updates a specific batch payment for invoices and credit notes,
+e0275,okta,GET,/api/v1/email-domains,listEmailDomains,List all email domains,Lists all the Email Domains in your org
+e0332,okta,DELETE,/api/v1/groups/{groupId}/users/{userId},unassignUserFromGroup,Unassign a user from a group,"Unassigns a user from a group with the `OKTA_GROUP` type.
+> **Note:** You only can modify memberships for groups of the `OKTA_GROUP` type.
+>
+> App imports are responsible for managing group memberships for groups of the `APP_GROUP` type, such as Active Directory groups."
+e0848,docusign,GET,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/documents/{documentId}/pages/{pageNumber}/page_image,Pages_GetPageImage,Gets a page image from an envelope for display.,Returns an image of a page in a document for display.
+e0330,okta,GET,/api/v1/groups/{groupId}/users,listGroupUsers,List all member users,"Lists all users that are a member of a group.
+The default user limit is set to a very high number due to historical reasons that are no longer valid for most orgs. This will change in a future version of this API. The recommended page limit is now `limit=200`."
+e1240,xero,GET,/Invoices,getInvoices,Retrieves sales invoices or purchase bills,
+e0521,okta,GET,/api/v1/policies/{policyId}/rules,listPolicyRules,List all policy rules,Lists all policy rules
+e0704,okta,GET,/oauth2/v1/clients/{clientId}/roles/{roleAssignmentId},retrieveClientRole,Retrieve a client role,Retrieves a role assignment (identified by `roleAssignmentId`) for a client app (identified by `clientId`)
+e0067,okta,GET,/api/v1/apps/{appId}/federated-claims/{claimId},getFederatedClaim,Retrieve a federated claim,Retrieves a federated claim by `claimId`
+e1226,xero,POST,/CreditNotes/{CreditNoteID}/Attachments/{FileName},updateCreditNoteAttachmentByFileName,Updates attachments on a specific credit note by file name,
+e0167,okta,PUT,/api/v1/authorizationServers/{authServerId}/scopes/{scopeId},replaceOAuth2Scope,Replace a custom token scope,Replaces a custom token scope
+e1068,docusign,GET,/v2.1/accounts/{accountId}/templates/{templateId}/workflow/steps/{workflowStepId},TemplateWorkflowStep_GetTemplateWorkflowStepDefinition,Returns a specified workflow step for a specified envelope.,Returns a workflow step specified by `workflowStepId` for a template specified by `templateId`.
+e0165,okta,POST,/api/v1/authorizationServers/{authServerId}/scopes,createOAuth2Scope,Create a custom token scope,Creates a custom token scope
+e0488,okta,POST,/api/v1/org/preferences/hideEndUserFooter,setOrgHideOktaUIFooter,Set the hide dashboard footer preference,Sets the preference to hide the Okta End-User Dashboard footer for all end users of your org
+e0527,okta,POST,/api/v1/policies/{policyId}/rules/{ruleId}/lifecycle/deactivate,deactivatePolicyRule,Deactivate a policy rule,Deactivates a policy rule identified by `policyId` and `ruleId`
+e0456,okta,POST,/api/v1/meta/schemas/user/linkedObjects,createLinkedObjectDefinition,Create a linked object definition,Creates a Linked Object definition
+e0405,okta,POST,/api/v1/idps/credentials/keys,createIdentityProviderKey,Create an IdP key credential,"Creates a new X.509 certificate credential in the identity provider (IdP) key store
+> **Note:** RSA-based certificates are supported for all IdP types. Okta currently supports EC-based certificates only for the `X509` IdP type. For EC-based certificates we support only P-256, P-384, and P-521 curves."
+e0026,okta,GET,/api/v1/apps,listApplications,List all applications,"Lists all apps in the org with pagination. A subset of apps can be returned that match a supported filter expression or query. The results are [paginated](/#pagination) according to the `limit` parameter. If there are multiple pages of results, the header contains a `next` link. Treat the link as an opaque value (follow it, don't parse it).
+
+> **Note:** To list all of a member's assigned app links, use the [List all assigned app links endpoint in the User Resources API](https://developer.okta.com/docs/api/openapi/okta-management/management/tags/userresources/other/listapplinks)."
+e0267,okta,PUT,/api/v1/domains/{domainId},replaceCustomDomain,Replace a custom domain's brand,Replaces a custom domain's brand
+e1210,xero,GET,/ContactGroups,getContactGroups,Retrieves the contact Id and name of each contact group,
+e1243,xero,GET,/Invoices/{InvoiceID},getInvoice,Retrieves a specific sales invoice or purchase bill using a unique invoice Id,
+e0152,okta,POST,/api/v1/authorizationServers/{authServerId}/policies/{policyId}/rules,createAuthorizationServerPolicyRule,Create a policy rule,Creates a policy rule for the specified Custom Authorization Server and Policy
+e0732,okta,GET,/webauthn-registration/api/v1/users/{userId}/enrollments,listWebAuthnPreregistrationFactors,List all WebAuthn preregistration factors,Lists all WebAuthn preregistration factors for the specified user
+e0593,okta,GET,/api/v1/threats/configuration,getCurrentConfiguration,Retrieve the ThreatInsight configuration,Retrieves the ThreatInsight configuration for the org
+e0550,okta,POST,/api/v1/realm-assignments/{assignmentId}/lifecycle/activate,activateRealmAssignment,Activate a realm assignment,Activates a realm assignment
+e0871,docusign,GET,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/recipients,Recipients_GetRecipients,Gets the status of recipients for an envelope.,"Retrieves the status of all recipients in a single envelope and identifies the current recipient in the routing list. This method can also be used to retrieve the tab values.
+
+The `currentRoutingOrder` property of the response contains the `routingOrder` value of the current recipient indicating that the envelope has been sent to the recipient, but the recipient has not completed their actions.
+
+### Related topics
+
+- [How to list envelope recipients](/docs/esign-rest-api/how-to/get-envelope-recipients/)
+- [How to retrieve ID Evidence events](/docs/idevidence-api/how-to/retrieve-idevidence-events/)
+- [How to retrieve ID Evidence media](/docs/idevidence-api/how-to/retrieve-idevidence-media/)"
+e0142,okta,POST,/api/v1/authorizationServers/{authServerId}/lifecycle/activate,activateAuthorizationServer,Activate an authorization server,Activates an authorization server
+e0179,okta,POST,/api/v1/brands,createBrand,Create a brand,Creates a new brand in your org
+e0820,docusign,POST,/v2.1/accounts/{accountId}/envelopes,Envelopes_PostEnvelopes,Creates an envelope.,"Creates and sends an envelope or creates a draft envelope.
+Envelopes are fundamental resources in the Docusign platform.
+
+
+With this method you can:
+
+* Create and send an envelope
+  with [documents][], [recipients][], and [tabs][].
+* [Create and send an envelope from a template](/docs/esign-rest-api/esign101/concepts/templates/).
+* [Create and send an envelope from
+  a combination of documents and templates](/docs/esign-rest-api/esign101/concepts/templates/composite/).
+* Create a draft envelope.
+
+
+When you use this method
+to create and send an envelope
+in a single request,
+the following parameters in the request body (an [`envelopeDefinition`][envelopeDefinition] object) are required:
+
+| Parameter      | Description |
+| :--------      | :---------- |
+| `status`       | Set to `sent` to send the envelope to recipients.<br>Set to `created` (or don't set at all) to save the envelope as a draft. |
+| `emailSubject` | The subject of the email used to send the envelope. |
+| `documents`    | The [documents][] to be signed. |
+| `recipients`   | The email addresses of the envelope [recipients][]. |
+
+
+When you create an envelope by using a
+[composite template](/docs/esign-rest-api/esign101/concepts/templates/composite/),
+you should specify the envelope custom fields in the inline template.
+Any custom fields that you specify at the root level are ignored.
+
+If the envelope has a workflow definition
+and the `workflowStatus` is `paused`,
+the envelope will not be sent immediately,
+even if the envelope's `status` is `sent`.
+
+
+### Related topics
+
+[Envelope][envelopes] and [template][templates]
+objects along with [documents][documents],
+[recipients][recipients], and [tabs][tabs]
+are the five object models at the core of the eSignature API.
+The [eSignature concepts guide](/docs/esign-rest-api/esign101/concepts/)
+describes how the five object models work together.
+
+The following how-to articles contain
+practical examples that show you how to
+to
+configure this method's
+[`envelopeDefinition`][envelopeDefinition] request body
+to perform common tasks.
+
+Requesting a signature
+
+- [How to request a signature by email](/docs/esign-rest-api/how-to/request-signature-email-remote/)
+- [How to request a signature through your app](/docs/esign-rest-api/how-to/request-signature-in-app-embedded/)
+- [How to request a signature by email using a template](/docs/esign-rest-api/how-to/request-signature-template-remote/)
+- [How to request a signature using a composite template](/docs/esign-rest-api/how-to/request-signature-composite-template-embedded/)
+- [How to request a signature by SMS or WhatsApp delivery](/docs/esign-rest-api/how-to/request-signature-sms-whatsapp/)
+- [How to send a request for payment](/docs/esign-rest-api/how-to/request-a-payment/)
+- [How to send an envelope to an In Person Signer](/docs/esign-rest-api/how-to/send-envelope-to-in-person-signer/)
+- [How to request a signature by email using CORS](/docs/esign-rest-api/how-to/request-signature-email-browser-cors/)
+- [How to request a signature through your CORS-enabled browser app](/docs/esign-rest-api/how-to/request-signature-in-cors-app-embedded/)
+- [How to request a signature through your app (embedded signing) with a CFR Part 11 account](/docs/esign-rest-api/how-to/request-signature-in-app-embedded-cfrpart11/)
+
+Working with envelopes and templates
+
+- [How to get envelope information](/docs/esign-rest-api/how-to/get-envelope-information/)
+- [How to list envelope recipients](/docs/esign-rest-api/how-to/get-envelope-recipients/)
+- [How to list envelope status changes](/docs/esign-rest-api/how-to/list-envelope-status-changes/)
+- [How to create a template](/docs/esign-rest-api/how-to/create-template/)
+- [How to send an envelope via your app](/docs/esign-rest-api/how-to/embedded-sending/)
+- [How to bulk send envelopes](/docs/esign-rest-api/how-to/bulk-send-envelopes/)
+
+Working with advanced recipient routing
+
+- [How to pause a signature workflow](/docs/esign-rest-api/how-to/pause-workflow/)
+- [How to unpause a signature workflow](/docs/esign-rest-api/how-to/unpause-workflow/)
+- [How to use conditional recipients](/docs/esign-rest-api/how-to/use-conditional-recipients/)
+- [How to schedule an envelope](/docs/esign-rest-api/how-to/schedule-an-envelope/)
+- [How to send an envelope with delayed routing](/docs/esign-rest-api/how-to/send-envelope-with-delayed-routing/)
+
+Working with documents
+
+- [How to list envelope documents](/docs/esign-rest-api/how-to/list-envelope-documents/)
+- [How to download envelope documents](/docs/esign-rest-api/how-to/download-envelope-documents/)
+- [How to attach documents via binary transfer](/docs/esign-rest-api/how-to/send-binary/)
+- [How to create a signable HTML document](/docs/esign-rest-api/how-to/creating-signable-html/)
+- [How to convert a PDF file into a signable HTML document](/docs/esign-rest-api/how-to/converting-pdf/)
+- [How to set document visibility for envelope recipients](/docs/esign-rest-api/how-to/set-document-visibility/)
+- [How to request a signature by email with document generation](/docs/esign-rest-api/how-to/request-signature-email-document-generation/)
+
+Working with tabs
+
+- [How to get envelope tab values](/docs/esign-rest-api/how-to/get-envelope-tab-values/)
+- [How to get envelope custom tab values](/docs/esign-rest-api/how-to/get-envelope-custom-tab-values/)
+- [How to set envelope tab values](/docs/esign-rest-api/how-to/set-envelope-tab-values/)
+- [How to set tab values in a template](/docs/esign-rest-api/how-to/set-template-tab-values/)
+
+Working with brands
+
+- [How to create a brand](/docs/esign-rest-api/how-to/create-brand/)
+- [How to apply a brand to an envelope](/docs/esign-rest-api/how-to/apply-brand-to-envelope/)
+- [How to apply a brand and template to an envelope](/docs/esign-rest-api/how-to/apply-brand-and-template-to-envelope/)
+
+Working with permissions
+
+- [How to create a permission profile](/docs/esign-rest-api/how-to/permission-profile-creating/)
+- [How to update individual permission settings](/docs/esign-rest-api/how-to/permission-profile-updating/)
+- [How to set a permission profile](/docs/esign-rest-api/how-to/permission-profile-setting/)
+- [How to delete a permission profile](/docs/esign-rest-api/how-to/permission-profile-deleting/)
+
+Implementing multi-factor recipient (signer) authentication
+
+- [How to require ID verification (IDV) for a recipient](/docs/esign-rest-api/how-to/id-verification/)
+- [How to require knowledge-based authentication (KBA) for a recipient](/docs/esign-rest-api/how-to/knowledge-based-authentication/)
+- [How to require phone authentication for a recipient](/docs/esign-rest-api/how-to/phone-auth/)
+- [How to require access code authentication for a recipient](/docs/esign-rest-api/how-to/require-access-code-recipient/)
+
+<!-- this should mirror /docs/esign-rest-api/how-to/ -->
+
+
+
+[addingdocs]:           /docs/esign-rest-api/esign101/concepts/envelopes/
+[attachments]:          /docs/esign-rest-api/esign101/concepts/documents/attachments/
+[authcopies]:           /docs/esign-rest-api/esign101/concepts/documents/authoritative-copies/
+[conoverview]:          /docs/esign-rest-api/esign101/concepts/overview/
+[deleting]:             /docs/esign-rest-api/esign101/concepts/envelopes/
+[documents]:            /docs/esign-rest-api/esign101/concepts/documents/
+[envelopeDefinition]:   /docs/esign-rest-api/reference/envelopes/envelopes/create/#schema__envelopedefinition
+[envelopes]:            /docs/esign-rest-api/esign101/concepts/envelopes/
+[locking]:              /docs/esign-rest-api/esign101/concepts/envelopes/lock/
+[payments]:             /docs/esign-rest-api/esign101/concepts/tabs/payment/
+[purging]:              /docs/esign-rest-api/esign101/concepts/documents/purging/
+[recipients]:           /docs/esign-rest-api/esign101/concepts/recipients/
+[recipstatus]:          /docs/esign-rest-api/esign101/concepts/recipients/#recipient-status
+[reciptypes]:           /docs/esign-rest-api/esign101/concepts/recipients/#recipient-types
+[supdocs]:              /docs/esign-rest-api/esign101/concepts/documents/supplemental/
+[tabanchor]:            /docs/esign-rest-api/esign101/concepts/tabs/auto-place/
+[tabcustom]:            /docs/esign-rest-api/esign101/concepts/tabs/custom-tabs/
+[tabs]:                 /docs/esign-rest-api/esign101/concepts/tabs/
+[tabtypes]:             /docs/esign-rest-api/esign101/concepts/tabs/
+[templates]:            /docs/esign-rest-api/esign101/concepts/templates/
+[tracking]:             /docs/esign-rest-api/esign101/concepts/envelopes/"
+e0846,docusign,GET,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/documents/{documentId}/pages,Pages_GetPageImages,Returns document page images based on input.,Returns images of the pages in a document for display based on the parameters that you specify.
+e0172,okta,PUT,/api/v1/behaviors/{behaviorId},replaceBehaviorDetectionRule,Replace a behavior detection rule,Replaces a Behavior Detection Rule by `behaviorId`
+e0897,docusign,GET,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/shares/{shareId},EnvelopesShares_GetEnvelopesShare,,
+e0982,docusign,PUT,/v2.1/accounts/{accountId}/shared_access,SharedAccess_PutSharedAccess,Reserved: Sets the shared access information for users.,"This sets the shared access status for one or more users or templates.
+
+When setting user shared access, only users with account administration privileges can set shared access status for envelopes.
+
+When setting template shared access, only users who own a template and have sharing permission or with account administration privileges can set shared access for templates.
+
+Changes to the shared items status are not additive. The change always replaces the current status.
+
+To change template shared access, add the query parameter `item_type` = `templates` to the request. When this is set, the user and envelopes properties are not required.
+
+**Note:** This functionality is a newer version of the [Update Group Share](/docs/esign-rest-api/reference/templates/templates/updategroupshare/) functionality.
+
+### Related topics
+
+- [How to share access to a Docusign envelope inbox](/docs/esign-rest-api/how-to/shared-access/)"
+e0043,okta,GET,/api/v1/apps/{appId}/credentials/jwks/{keyId},getJwk,Retrieve an OAuth 2.0 client JSON Web Key,Retrieves an OAuth 2.0 client JSON Web Key by `keyId`
+e0276,okta,POST,/api/v1/email-domains,createEmailDomain,Create an email domain,Creates an Email Domain in your org
+e1191,xero,GET,/BrandingThemes/{BrandingThemeID},getBrandingTheme,Retrieves a specific branding theme using a unique branding theme Id,
+e0875,docusign,DELETE,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/recipients/{recipientId},Recipients_DeleteRecipient,Deletes a recipient from an envelope.,"Deletes a recipient from a `draft` or `sent` envelope.
+
+If the envelope is ""In Process"" (has been sent and is not completed or voided), recipients that have completed their actions cannot be deleted."
+e0729,okta,POST,/webauthn-registration/api/v1/enroll,enrollPreregistrationEnrollment,Enroll a preregistered WebAuthn factor,"Enrolls a preregistered WebAuthn factor. This WebAuthn factor has a longer challenge timeout period to accommodate the fulfillment request process. As part of this operation, Okta generates elliptic curve (EC) key-pairs used to encrypt the factor PIN and enrollment data sent by the fulfillment provider."
+e0855,docusign,DELETE,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/documents/{documentId}/tabs,Tabs_DeleteDocumentTabs,Deletes tabs from a document in an envelope.,"Deletes tabs from the document specified by `documentId` in the
+envelope specified by `envelopeId`."
+e0539,okta,GET,/api/v1/rate-limit-settings/per-client,getRateLimitSettingsPerClient,Retrieve the per-client rate limit settings,Retrieves the currently configured Per-Client Rate Limit Settings
+e0331,okta,PUT,/api/v1/groups/{groupId}/users/{userId},assignUserToGroup,Assign a user to a group,"Assigns a user to a group with the `OKTA_GROUP` type.
+> **Note:** You only can modify memberships for groups of the `OKTA_GROUP` type. App imports are responsible for managing group memberships for groups of the `APP_GROUP` type, such as Active Directory groups."
+e0177,okta,POST,/api/v1/bot-protection/configuration,updateBotProtectionConfiguration,Update the bot protection configuration,Updates the bot protection configuration for your org
+e0036,okta,GET,/api/v1/apps/{appId}/credentials/csrs,listCsrsForApplication,List all certificate signing requests,Lists all certificate signing requests for an app
+e0031,okta,GET,/api/v1/apps/{appId}/connections/default,getDefaultProvisioningConnectionForApplication,Retrieve the default provisioning connection,Retrieves the default provisioning connection for an app
+e1235,xero,PUT,/ExpenseClaims,createExpenseClaims,Creates expense claims,
+e0202,okta,PUT,/api/v1/brands/{brandId}/pages/sign-out/customized,replaceSignOutPageSettings,Replace the sign-out page settings,Replaces the sign-out page settings
+e1002,docusign,GET,/v2.1/accounts/{accountId}/supported_languages,SupportedLanguages_GetSupportedLanguages,Gets the supported languages for envelope recipients.,"Retrieves a list of supported languages that you can set for an individual recipient when creating an envelope, as well as their simple type enumeration values. These are the languages that you can set for the standard email format and signing view for each recipient.
+
+For example, in the recipient's email notification, this setting affects elements such as the standard introductory text describing the request to sign. It also determines the language used for buttons and tabs in both the email notification and the signing experience.
+
+**Note:** Setting a language for a recipient affects only the Docusign standard text. Any custom text that you enter for the `emailBody` and `emailSubject` of the notification is not translated, and appears exactly as you enter it.
+
+For more information, see [Set Recipient Language and Specify Custom Email Messages](https://support.docusign.com/s/document-item?bundleId=gbo1643332197980&topicId=wxf1578456494201.html)."
+e0663,okta,DELETE,/api/v1/users/{userId}/roles/{roleAssignmentId},unassignRoleFromUser,Unassign a user role,Unassigns a role assignment (identified by `roleAssignmentId`) from a user (identified by `userId`)
+e1000,docusign,PUT,/v2.1/accounts/{accountId}/signing_groups/{signingGroupId}/users,SigningGroups_PutSigningGroupUsers,Adds members to a signing group.,Adds one or more new members to a signing group. A signing group can have a maximum of 50 members.
+e0364,okta,POST,/api/v1/iam/resource-sets/{resourceSetIdOrLabel}/resources,addResourceSetResource,Add a resource set resource with conditions,Adds a resource with conditions for a resource set
+e0759,docusign,GET,/v2.1/accounts/{accountId}/brands/{brandId}/file,BrandExport_GetBrandExportFile,Exports a brand.,"This method exports information about a brand to an XML file.
+
+**Note:** Branding for either signing or sending must be enabled for the account (`canSelfBrandSend` , `canSelfBrandSign`, or both of these account settings must be **true**)."
+e0311,okta,GET,/api/v1/groups/{groupId},getGroup,Retrieve a group,Retrieves a specific group by `id` from your org
+e1054,docusign,PUT,/v2.1/accounts/{accountId}/templates/{templateId}/recipients/{recipientId}/tabs,Recipients_PutTemplateRecipientTabs,Updates the tabs for a recipient.,Updates one or more tabs for a recipient in a template.
+e0323,okta,PUT,/api/v1/groups/{groupId}/roles/{roleAssignmentId}/targets/catalog/apps/{appName},assignAppTargetToAdminRoleForGroup,Assign a group role app target,"Assigns an OIN app target to an `APP_ADMIN` role assignment to a group. When you assign the first OIN app target, you reduce the scope of the role assignment. The role no longer applies to all app targets, but applies only to the specified target. An OIN app target that's assigned to the role overrides any existing instance targets of the OIN app. For example, if a user is assigned to administer a specific Facebook instance, a successful request to add an OIN app with `facebook` for `appName` makes that user the administrator for all Facebook instances."
+e1218,xero,PUT,/CreditNotes,createCreditNotes,Creates a new credit note,
+e0553,okta,POST,/api/v1/realms,createRealm,Create a realm,Creates a new realm
+e1196,xero,GET,/Contacts,getContacts,Retrieves all contacts in a Xero organisation,
+e0133,okta,DELETE,/api/v1/authorizationServers/{authServerId}/claims/{claimId},deleteOAuth2Claim,Delete a custom token claim,Deletes a custom token Claim specified by the `claimId`
+e0958,docusign,PUT,/v2.1/accounts/{accountId}/powerforms/{powerFormId},PowerForms_PutPowerForm,Updates an existing PowerForm.,This method updates an existing PowerForm.
+e1206,xero,POST,/Contacts/{ContactID}/Attachments/{FileName},updateContactAttachmentByFileName,,
+e0773,docusign,GET,/v2.1/accounts/{accountId}/bulk_send_lists/{bulkSendListId},BulkSendV2CRUD_GetBulkSendList,Gets a specific bulk send list.,This method returns all of the details associated with a specific bulk send list that belongs to the current user.
+e1303,xero,GET,/Prepayments/{PrepaymentID},getPrepayment,Allows you to retrieve a specified prepayments,
+e1224,xero,GET,/CreditNotes/{CreditNoteID}/Attachments/{FileName},getCreditNoteAttachmentByFileName,Retrieves a specific attachment on a specific credit note by file name,
+e1230,xero,GET,/CreditNotes/{CreditNoteID}/History,getCreditNoteHistory,Retrieves history records of a specific credit note,
+e0072,okta,GET,/api/v1/apps/{appId}/grants/{grantId},getScopeConsentGrant,Retrieve an app grant,Retrieves a single scope consent Grant object for the app
+e0700,okta,POST,/integrations/api/v1/api-services/{apiServiceId}/credentials/secrets/{secretId}/lifecycle/activate,activateApiServiceIntegrationInstanceSecret,Activate an API service integration instance secret,Activates an API Service Integration instance Secret by `secretId`
+e0787,docusign,GET,/v2.1/accounts/{accountId}/connect/{connectId},Connect_GetConnectConfig,Gets the details about a Connect configuration.,"Retrieves the information for the specified Docusign Connect configuration.
+
+<ds-inlinemessage>
+To use this method, you must be an account administrator
+and Connect must be enabled on your account.
+</ds-inlinemessage>"
+e0233,okta,PUT,/api/v1/captchas/{captchaId},replaceCaptchaInstance,Replace a CAPTCHA instance,Replaces the properties for a specified CAPTCHA instance
+e0904,docusign,POST,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/views/correct,Views_PostEnvelopeCorrectView,Returns a URL to the envelope correction UI. Use after an envelope has been sent.,"Returns a URL that enables you to embed the envelope sender view of the Docusign UI. You can customize the appearance of the view via the settings request attribute. You can embed the view in an iframe. 
+
+**API request update**
+
+The request object for this API method was updated in June 2024. The new API request format is described below. Existing applications must update to the new version; it solves a security issue with the old version. The deprecation schedule has been announced in the [Docusign Core Release Notes](https://support.docusign.com/s/document-item?language=en_US&bundleId=adp1720620778794_24-2-02-00-demo&topicId=wcz1616195757589.html&_LANG=enus). While backwards compatibility will be provided for a while for existing applications, all applications must be updated to be secure. See below for migration information. 
+
+**Best practices**
+
+The returned URL expires after 10 minutes. Therefore, request the URL immediately before you redirect your user to it.
+
+Due to screen space issues, do not use an iframe for embedded operations on mobile devices. For mobile applications, use a [WebView](https://developer.android.com/reference/android/webkit/WebView) (Android) or [WKWebView](https://developer.apple.com/documentation/webkit/wkwebview) (iOS).
+
+## Customizing the user experience
+
+By default, the view includes two pages: the **Prepare** and **Tagger** pages. The settings object is used to control the user experience. For example, to limit the user to the **Tagger** page, and not allow the user to change the recipient information:
+
+* `""startingScreen"": ""Tagger""`
+* `""showBackButton"": ""false""`
+* `""showEditRecipients"": ""false""`
+
+
+Use the [Embedded Views Test Too](https://docusign.github.io/app-examples/embedded-views-v2/) to try the different UX controls. Some UI settings attributes are not yet implemented.
+
+### The envelope must be in the correct state for the Embedded View
+
+To use the Correct View, the envelope **must** be in the `sent` or `delivered` state. Otherwise, a 400 error will be returned with an error message in the response body:
+```
+{
+    ""errorCode"": ""ENVELOPE_INVALID_STATUS"",
+    ""message"": ""Invalid envelope status. Correct view cannot be created for an envelope in a Created state.""
+}
+```
+
+### Modifying the envelope after redirection
+If you set `""sendButtonAction"": ""redirect""` or `""backButtonAction"": ""redirect""`, and your app will modify the envelope before or after the view completes, you must lock the envelope before the API call and provide the lock as the lockToken attribute in the API request object.
+
+Delete the lock token after the browser has been redirected to your application.
+
+### Closing the view's iframe
+
+If you choose to embed the view in your application via an iframe, Docusign recommends this software pattern to close the iframe after the view has completed:
+
+* (One time) create a standalone âreturnâ page that you will use as the `returnUrl` target for the view. The view will redirect the iframe to this URL when it has completed. Here's an [example return page](https://github.com/docusign/docusign.github.io/blob/master/jsfiddleDsResponse.html). In this page, use JavaScript and the [postMessage](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) method to send a message to your application with the results of the view.
+* In your application, use `window.addEventListener(""message"", function_name)` to register a listener for incoming messages.
+* To show the view, use this API method, then set the iframe to load the URL from the API response.
+* In your application, receive the completion message, validate it, and then close the iframe.
+
+### Information security
+
+This view only has write access to the specific envelope referenced in the API call. It also has read access to templates and other secondary information that a user can access to modify the envelope. The read access corresponds to the access rights of the user associated with the access token used for the API call.
+
+>**Recommendations:**
+>* Use the access token of a service user who can access the templates appropriate for your use case.  
+>* Do not use the access token of a user with administrator privileges.
+
+## Migrating to the current version of the request object
+
+This section only applies to existing applications that use the older version of the request object.
+
+Migrating from the old API request object to the new version will take under a day of developer time.
+
+**Step 1.** Does your application set the `returnUrl` attribute?
+
+Yes: continue with step 2.
+
+No: In this case, your users first update the envelope, and then the Docusign eSignature home screen is shown. To accomplish this UI pattern with the new API request format:
+* Set the `returnUrl` to a new endpoint for your application. You can use query parameters or session data to manage state. Remember to authenticate the incoming requests. 
+* When the new endpoint is called, use the [EnvelopeViews:createConsole](/docs/esign-rest-api/reference/envelopes/envelopeviews/createconsole/) API call to obtain and then display the Docusign eSignature home page to your application's user.
+
+**Step 2.** Does your application modify the default UI of the view?
+
+No: continue with step 3.
+
+Yes: With the new API request object, UI controls for the view are now set when you make the API call via the `settings` attribute. 
+
+* Note the UI settings your application is currently modifying by adding and updating query parameters on the URL _returned_ by the API method.
+
+* Using the reference documentation below, create a settings object that accomplishes your UI goals. You can use the [Embedded Views Test tool](https://docusign.github.io/app-examples/embedded-views-v2/) to check your UI settings. Note that the `settings` object includes multiple objects and subobjects for various UI settings.
+
+* **Delete the code** in your application that modifies and adds query parameters to the URL returned by the API. With the new API format, your application will not make any changes to the returned URL. Exception: If you set the view's locale specifically, that is still accomplished by appending the `locale` query parameter.
+
+**Step 3.** Is the envelope always in the right state before you call the Embedded View?
+
+If your software may try to create the Embedded View when the envelope is not in the right state (see above), then you must add additional checks and logic to prevent this.
+
+**Step 4.** Check that these API attributes are set:
+* `""view"" = ""envelope""`
+* The `returnUrl` is set
+
+**Step 5.** All done! Test your application."
+e0922,docusign,PUT,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/workflow/steps/{workflowStepId}/delayedRouting,EnvelopeWorkflowDelayedRouting_PutEnvelopeDelayedRoutingDefinition,Updates the delayed routing rules for an envelope's workflow step definition.,"Updates the delayed routing rules for an envelope's workflow step definition.
+
+You can use this endpoint to add delayed routing to a draft envelope or a sent envelope (as long as the previous workflow step has not yet been completed). You can also update the delayed routing rule for an envelope, as long as the delay is not yet complete. If you update the delayed routing rule while the delay is already in progress, the countdown will reset."
+e0616,okta,POST,/api/v1/users/{id}/lifecycle/reactivate,reactivateUser,Reactivate a user,"Reactivates a user.
+
+Perform this operation only on users with a `PROVISIONED` or `RECOVERY` [status](/openapi/okta-management/management/user/listusers#user/listusers/t=response&c=200&path=status).
+This operation restarts the activation workflow if for some reason the user activation wasn't completed when using the `activationToken` from [Activate User](/openapi/okta-management/management/userlifecycle/activateuser).
+
+Users that don't have a password must complete the flow by completing the [Reset password](/openapi/okta-management/management/usercred/resetpassword) flow and MFA enrollment steps to transition the user to `ACTIVE` status.
+
+If `sendEmail` is `false`, returns an activation link for the user to set up their account. The activation token can be used to create a custom activation link."
+e0238,okta,GET,/api/v1/device-assurances/{deviceAssuranceId},getDeviceAssurancePolicy,Retrieve a device assurance policy,Retrieves a device assurance policy by `deviceAssuranceId`
+e0153,okta,GET,/api/v1/authorizationServers/{authServerId}/policies/{policyId}/rules/{ruleId},getAuthorizationServerPolicyRule,Retrieve a policy rule,Retrieves a policy rule by `ruleId`
+e1326,xero,POST,/Quotes/{QuoteID},updateQuote,Updates a specific quote,
+e0058,okta,POST,/api/v1/apps/{appId}/cwo/connections,createCrossAppAccessConnection,Create a Cross App Access connection,Creates a Cross App Access connection
+e1051,docusign,GET,/v2.1/accounts/{accountId}/templates/{templateId}/recipients/{recipientId}/document_visibility,Recipients_GetTemplateRecipientDocumentVisibility,Returns document visibility for a template recipient,This method returns information about document visibility for a template recipient.
+e0200,okta,GET,/api/v1/brands/{brandId}/pages/sign-in/widget-versions,listAllSignInWidgetVersions,List all Sign-In Widget versions,Lists all sign-in widget versions supported by the current org
+e0039,okta,DELETE,/api/v1/apps/{appId}/credentials/csrs/{csrId},revokeCsrFromApplication,Revoke a certificate signing request,Revokes a certificate signing request and deletes the key pair from the app
+e0650,okta,POST,/api/v1/users/{userId}/factors/{factorId}/lifecycle/activate,activateFactor,Activate a factor,"Activates a factor. Some factors (`call`, `email`, `push`, `sms`, `token:software:totp`, `u2f`, and `webauthn`) require activation to complete the enrollment process.
+
+Okta enforces a rate limit of five activation attempts within five minutes. After a user exceeds the rate limit, Okta returns an error message.
+
+> **Notes:**
+> * If the user exceeds their SMS, call, or email factor activation rate limit, then an [OTP resend request](./#tag/UserFactor/operation/resendEnrollFactor) isn't allowed for the same factor.
+> * You can't use the Factors API to activate Okta FastPass (`signed_nonce`) for a user. See [Configure Okta FastPass](https://help.okta.com/okta_help.htm?type=oie&id=ext-fp-configure)."
+e0682,okta,GET,/api/v1/zones,listNetworkZones,List all network zones,"Lists all Network Zones with pagination. A subset of zones can be returned that match a supported filter expression or query.
+
+This operation requires URL encoding. For example, `filter=(id eq ""nzoul0wf9jyb8xwZm0g3"" or id eq ""nzoul1MxmGN18NDQT0g3"")` is encoded as `filter=%28id+eq+%22nzoul0wf9jyb8xwZm0g3%22+or+id+eq+%22nzoul1MxmGN18NDQT0g3%22%29`.
+
+Okta supports filtering on the `id`, `usage`, and `system` properties. See [Filter](https://developer.okta.com/docs/api/#filter) for more information on the expressions that are used in filtering."
+e1121,docusign,POST,/v2.1/accounts/{accountId}/workspaces,Workspace_PostWorkspace,Create a Workspace,This method creates a new workspace.
+e1094,docusign,DELETE,/v2.1/accounts/{accountId}/users/{userId}/cloud_storage/{serviceId},CloudStorage_DeleteCloudStorage,Deletes the user authentication information for the specified cloud storage provider.,"Deletes the user authentication information for the specified cloud storage provider. The next time the user tries to access the cloud storage provider, they must pass normal authentication for this cloud storage provider."
+e0178,okta,GET,/api/v1/brands,listBrands,List all brands,Lists all the brands in your org
+e1080,docusign,GET,/v2.1/accounts/{accountId}/users/{userId},User_GetUser,"Gets the user information for a specified user using a userId (GUID). To find a user based on their email address, use the list endpoint.","Retrieves the user information for the specified user.  For example:
+
+```json
+{
+  ""userName"": ""Tania Morales"",
+  ""userId"": ""6b67a1ee-xxxx-xxxx-xxxx-385763624163"",
+  ""userType"": ""CompanyUser"",
+  ""isAdmin"": ""False"",
+  ""isNAREnabled"": ""false"",
+  ""userStatus"": ""Active"",
+  ""uri"": ""/users/6b67a1ee-xxxx-xxxx-xxxx-385763624163"",
+  ""email"": ""examplename42@orobia.net"",
+  ""createdDateTime"": ""2019-04-01T22:11:56.4570000Z"",
+  ""userAddedToAccountDateTime"": ""0001-01-01T08:00:00.0000000Z"",
+  ""firstName"": ""Tania"",
+  ""lastName"": ""Morales"",
+  ""jobTitle"": """",
+  ""company"": ""Company"",
+  ""permissionProfileId"": ""12345678"",
+  ""permissionProfileName"": ""DocuSign Viewer"",
+  ""userSettings"": {. . .},
+  ""sendActivationOnInvalidLogin"": ""false"",
+  ""enableConnectForUser"": ""false"",
+  ""groupList"": [. . .],
+  ""workAddress"": {. . .},
+  ""homeAddress"": {. . .},
+  ""signatureImageUri"": ""/users/6b67a1ee-xxxx-xxxx-xxxx-385763624163/signatures/0304c47b-xxxx-xxxx-xxxx-c9673963bb50/signature_image"",
+  ""initialsImageUri"": ""/users/6b67a1ee-xxxx-xxxx-xxxx-385763624163/signatures/0304c47b-xxxx-xxxx-xxxx-c9673963bb50/initials_image"",
+  ""defaultAccountId"": ""f636f297-xxxx-xxxx-xxxx-8e7a14715950""
+}
+```"
+e0511,okta,PUT,/api/v1/policies/{policyId},replacePolicy,Replace a policy,Replaces the properties of a policy identified by `policyId`
+e1062,docusign,PUT,/v2.1/accounts/{accountId}/templates/{templateId}/workflow,TemplateWorkflowDefinition_PutTemplateWorkflowDefinition,Updates the workflow definition for a template.,Updates the specified template's workflow definition.
+e0523,okta,GET,/api/v1/policies/{policyId}/rules/{ruleId},getPolicyRule,Retrieve a policy rule,Retrieves a policy rule
+e0342,okta,GET,/api/v1/iam/governance/bundles/{bundleId},getGovernanceBundle,Retrieve a governance bundle,Retrieves a governance bundle for the Admin Console
+e0971,docusign,PUT,/v2.1/accounts/{accountId}/settings/enote_configuration,ENoteConfiguration_PutENoteConfiguration,Updates configuration information for the eNote eOriginal integration.,
+e1373,xero,GET,/TaxRates/{TaxType},getTaxRateByTaxType,Retrieves a specific tax rate according to given TaxType code,
+e0216,okta,POST,/api/v1/brands/{brandId}/templates/email/{templateName}/test,sendTestEmail,Send a test email,"Sends a test email to the current user's primary and secondary email addresses. The email content is selected based on the following priority:
+1. The email customization for the language specified in the `language` query parameter
+<x-lifecycle class=""ea""></x-lifecycle> If Custom languages for Okta Email Templates is enabled and the `language` parameter is an additional language, the test email uses the customization corresponding to the language.
+2. The email template's default customization
+3. The email template's default content, translated to the current user's language
+
+You can only send customized test emails if you've configured a custom email domain. If you don't have a custom email domain, test emails use the Okta default template and are sent from the Okta email domain.
+
+> **Note:** Super admins can view customized email templates with the **Send a test email** request. However, when custom email templates are sent to super admins as part of actual email notification flows, the customizations aren't applied. Instead, the default email template is used. This only applies to super admins."
+e0211,okta,GET,/api/v1/brands/{brandId}/templates/email/{templateName}/customizations/{customizationId}/preview,getCustomizationPreview,Retrieve a preview of an email customization,"Retrieves a Preview of an Email Customization. All variable references are populated from the current user's context. For example, `${user.profile.firstName}`.
+
+<x-lifecycle class=""ea""></x-lifecycle> If Custom languages for Okta Email Templates is disabled, requests for the preview of an additional language customization by ID return a `404 Not Found` error response."
+e1093,docusign,GET,/v2.1/accounts/{accountId}/users/{userId}/cloud_storage/{serviceId},CloudStorage_GetCloudStorage,Gets the specified Cloud Storage Provider configuration for the User.,Retrieves the list of cloud storage providers enabled for the account and the configuration information for the user.
+e1369,xero,POST,/Setup,postSetup,"Sets the chart of accounts, the conversion date and conversion balances",
+e1259,xero,GET,/Items/{ItemID},getItem,Retrieves a specific item using a unique item Id,
+e0865,docusign,GET,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/lock,Lock_GetEnvelopeLock,Gets envelope lock information.,"Retrieves general information about an envelope lock.
+
+The user requesting the information must be the same user
+who locked the envelope.
+
+You can use this method to recover the lock information,
+including the `lockToken`,
+for a locked envelope.
+The `X-DocuSign-Edit` header is included in the response.
+
+See [EnvelopeLocks: create](/docs/esign-rest-api/reference/envelopes/envelopelocks/create/)
+for a description of the `X-DocuSign-Edit` header.
+
+### Related topics
+
+- [Common API Tasks: Locking and unlocking envelopes](https://www.docusign.com/blog/dsdev-common-api-tasks-locking-and-unlocking-envelopes)"
+e1278,xero,GET,/ManualJournals/{ManualJournalID}/Attachments/{AttachmentID},getManualJournalAttachmentById,Allows you to retrieve a specific attachment from a specific manual journal using a unique attachment Id,
+e0551,okta,POST,/api/v1/realm-assignments/{assignmentId}/lifecycle/deactivate,deactivateRealmAssignment,Deactivate a realm assignment,Deactivates a realm assignment
+e1274,xero,POST,/ManualJournals,updateOrCreateManualJournals,Updates or creates a single manual journal,
+e0767,docusign,GET,/v2.1/accounts/{accountId}/bulk_send_batch/{bulkSendBatchId},BulkSendV2Batch_GetBulkSendBatchStatus,Gets the status of a specific bulk send batch.,"Gets the general status of a specific bulk send batch such as:
+
+- number of successes
+- number pending
+- number of errors
+
+The `bulkErrors` property of the response object contains more information about the errors.
+
+### Related topics
+
+- [How to bulk send envelopes](/docs/esign-rest-api/how-to/bulk-send-envelopes/)"
+e0097,okta,GET,/api/v1/apps/{appId}/users,listApplicationUsers,List all application users,Lists all assigned users for an app
+e0045,okta,POST,/api/v1/apps/{appId}/credentials/jwks/{keyId}/lifecycle/activate,activateOAuth2ClientJsonWebKey,Activate an OAuth 2.0 client JSON Web Key,"Activates an OAuth 2.0 client JSON Web Key by `keyId`
+> **Note:** You can have only one active encryption key at any given time for an app. When you activate an inactive key, the current active key is automatically deactivated."
+e0926,docusign,GET,/v2.1/accounts/{accountId}/envelopes/transfer_rules,EnvelopeTransferRules_GetEnvelopeTransferRules,Gets envelope transfer rules.,"This method retrieves a list of envelope transfer rules associated with an account.
+
+**Note:** Only Administrators can create and use envelope transfer rules. In addition, to use envelope transfer rules, the **Transfer Custody** feature must be enabled for your account."
+e0180,okta,GET,/api/v1/brands/{brandId},getBrand,Retrieve a brand,Retrieves a brand by `brandId`
