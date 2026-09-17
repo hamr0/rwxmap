@@ -40,6 +40,15 @@ As of 2026-09-14 (D65) the M1 code is archived under `poc/archive/m1/`
 and the current classifier is `poc/flow/`; the numbers below in this
 page that cite `poc/m1/arbiter` files are history.
 
+As of 2026-09-17 the superseded POC code — `m0`, `flow`, `exam`,
+`desc-yours` and `provider-corpus` — is archived under
+`poc/archive/v2/`; the live classifier is the three frozen steps
+`poc/step1/`, `poc/step2/` and `poc/step3/` (D74, D75, D78). Doc
+citations elsewhere that name the old paths (`poc/flow/...`,
+`poc/m0/...`, `poc/exam/...`, `poc/desc-yours/...`) are history and
+are deliberately left as written, exactly as the D65 move left its
+own citations.
+
 **M2 — Shape rules, only if justified.** For each divergence class
 from M0/M1 that appears more than once, add one deterministic
 OpenAPI-shape rule (request body present, response schema, status
