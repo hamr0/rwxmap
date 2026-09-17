@@ -81,10 +81,15 @@ three steps. Each step takes the rows the step before left behind.
    `OTHER_PARTY`. Built and frozen 2026-09-17 (D75) — 1134 claimed,
    71 leaks, reaching 227 of the 380 truth-w POST rows. See learnings,
    "One-flow ladder".
-3. **Step 3, x.** x is where every row lands that steps 1 and 2 did
-   not claim — 985 rows today. Step 3 is not built, so nothing raises
-   a row to x on evidence yet; the 66 PUT / DELETE / PATCH rows
-   sitting at w whose truth is x are what step 3 exists to raise.
+3. **Step 3, x.** Two rules. `raise-word` scans the PUT / DELETE /
+   PATCH rows step 2 floored WITHOUT a word and raises them to x when
+   one of the 17 `RAISE_WORDS` nouns fires at any token position — 19
+   claimed, 19 right, 0 false alarms. `floor-post` is the named
+   leftover pile: every row steps 1 and 2 left, 985 of them, all POST,
+   called x because x is the tightest class and nothing spoke for the
+   row. Built and frozen 2026-09-17 (D78) — 1004 claimed, 818 right,
+   **0 leaks, structurally**, since x is the tightest class and there
+   is nothing looser for step 3 to be wrong toward.
 
 **Superseded 2026-09-16 — the core is reopened.** What follows describes
 the frozen shape that `poc/flow` still implements today. It stays until
@@ -196,7 +201,7 @@ One direction of travel per method (D43):
 - POST — lower only, `x -> r`.
 - PUT / DELETE / PATCH — raise only, `w -> x`.
 
-### The new core (steps 1 and 2 frozen, step 3 not built)
+### The new core (all three steps frozen)
 
 The user's model, 2026-09-16, corrected where the 2026-09-16 floor POC
 contradicts it; the gist and the structure are the user's. Three
@@ -205,8 +210,8 @@ row comes out with a class and a flag.
 
 1. **Step 1, r floor** = GET 99.9% (1958 of 1960) > POST 9.5% (124 of
    1309). **FROZEN 2026-09-16 (D74)** — no rule or word-list change
-   until the user lifts the freeze. Built and measured, `poc/step1/` —
-   this is the one step that is no longer "not built". How: the method
+   until the user lifts the freeze. Built and measured, `poc/step1/`.
+   How: the method
    floor (GET / HEAD / OPTIONS -> r; the corpus has no HEAD or OPTIONS
    rows, so those two are carried on principle, not on evidence), plus
    two read-verb rules on POST: the **lead token** of the operationId,
@@ -261,10 +266,20 @@ row comes out with a class and a flag.
    in openai and zoom account/user administration, and raising them is
    step 3's job, not something better words here can do. See
    `docs/logs/learnings.md`.
-3. **Step 3, x** = the fallback, not a floor. How: live verbs plus the
-   via-negativa yours noun; anything still unknown goes to the pile.
-   Step 3 runs no list today, because it is not built: the placeholder
-   floor is method-free and word-free. For PUT 7% / DELETE 8% / PATCH
+3. **Step 3, x** = the fallback, not a floor. **FROZEN 2026-09-17
+   (D78)** — built and measured, `poc/step3/`. How: `RAISE_WORDS`, 17
+   role/access nouns read at any token position, raising a row that
+   step 2 floored WITHOUT a word from w to x — 19 claimed, 19 right, 0
+   false alarms, fitted; 6 of 66 leave-one-vendor-out and all 6 the
+   single word `permission`. Then the named leftover pile for
+   everything still unclaimed. The via-negativa yours noun this plan
+   called for is deliberately NOT built, and step 3's README says so:
+   mining it was measured at 9 rows of 380 at 0 leaks, too weak to
+   adopt, because 15 providers yield only 36 nouns against the old
+   corpus's 439 from 332 vendors. What made step 3 work was not its
+   words but the wiring — step 2's wordless floor became a DEFAULT
+   that passes through, where before it returned and step 3 never saw
+   the rows it exists to fix. For PUT 7% / DELETE 8% / PATCH
    2% (Table 1, provider corpus) this is evidence-raised x. For POST,
    the 61% x lean is the measured truth on 15 complete APIs (Table 1)
    and holds under LOVO; the earlier reading that this lean inverts to
@@ -283,16 +298,17 @@ row comes out with a class and a flag.
 |---|---|---|---|
 | 1 — r | GET/HEAD/OPTIONS, and POST reads | `LEAD_MODIFIERS` (5, plumbing) → `READ_VERBS` (23, lead token only) → `SAFE_VERBS` (10, a subset of the 23, any token position) | lowers to r |
 | 2 — w | PUT/DELETE/PATCH, and POST edits | method floor (no list) → `MODIFY_VERBS` (24, lead token, or the summary's verb when the operationId lead is a bare method word) → `OTHER_PARTY` (21, blocks the lowering) | lowers to w |
-| 3 — x | everything left | not built; today a placeholder floor with no list | nothing looser than x to be wrong toward |
+| 3 — x | step 2's wordless floor rows, and everything left | `RAISE_WORDS` (17 nouns, any token position, and only on a row step 2 floored without a word) → the leftover pile (no list) | raises to x; nothing looser than x to be wrong toward |
 
-Five lists, about 83 words in total, and every list runs in exactly
-one step — no list is shared between steps, which is D57 still
-holding. Two of the five are plumbing (`LEAD_MODIFIERS`, and step 2's
-summary-skip words), two are verb lists that lower a row, and one is a
-noun list that blocks a lowering. Where each lives: `LEAD_MODIFIERS`
-in `poc/step1/words.mjs`, `READ_VERBS` and `SAFE_VERBS` in
-`poc/step1/step1.mjs`, `MODIFY_VERBS` and `OTHER_PARTY` in
-`poc/step2/step2.mjs`.
+Six lists, 100 words in total, and every list runs in exactly one
+step — no list is shared between steps, which is D57 still holding.
+One of the six is plumbing (`LEAD_MODIFIERS`), two are verb lists that
+lower a row, one is a noun list that blocks a lowering, and one is a
+noun list that raises a row. Where each lives: `LEAD_MODIFIERS` (5) in
+`poc/step1/words.mjs`, `READ_VERBS` (23) and `SAFE_VERBS` (10) in
+`poc/step1/step1.mjs`, `MODIFY_VERBS` (24) and `OTHER_PARTY` (21) in
+`poc/step2/step2.mjs`, and `RAISE_WORDS` (17) in
+`poc/step3/step3.mjs`.
 
 ### What the tool would say today
 
