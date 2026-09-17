@@ -584,6 +584,153 @@ and depends on how many tighten cases M0 finds. (docs/archive/prd.md:518-527)
 This is D4; see the [decisions log](../wiki/decisions-log.md) for the
 full ruling record.
 
+## The output shape (agreed 2026-09-17, D76)
+
+rwxmap does not publish a format for anyone to adopt. It keeps one small
+map of its own and fills the slot that each existing standard already
+leaves open for other people's data. Four carriers, one map, no new
+standards track — which is the same commitment CLAUDE.md makes about the
+draft: this is not a third standards track.
+
+The standards below were fetched and read on 2026-09-17, not recalled.
+Field names, defaults and schema constraints MUST be re-checked against
+the targeted revision before anything emits, because all four are moving.
+
+### The map (the one file rwxmap owns)
+
+One row per operation, keyed by method + path + operationId, five fields:
+
+```json
+{
+  "rwxmapVersion": "0.1",
+  "source": "stripe/spec3.json",
+  "operations": [
+    { "method": "GET",    "path": "/v1/customers/{customer}", "operationId": "GetCustomersCustomer",
+      "class": "r", "destructive": false, "evidence": "method",      "confident": true },
+    { "method": "POST",   "path": "/v1/customers/{customer}", "operationId": "PostCustomersCustomer",
+      "class": "w", "destructive": false, "evidence": "modify-verb", "confident": true },
+    { "method": "DELETE", "path": "/v1/accounts/{account}",   "operationId": "DeleteAccountsAccount",
+      "class": "x", "destructive": true,  "evidence": "floor-only",  "confident": false }
+  ]
+}
+```
+
+All three rows are real corpus rows from
+`data/provider-corpus-2026-09-16/`. `evidence` is the rule that claimed
+the row, and `"floor-only"` is the honesty flag the project already
+measured (no word fired; only the method is known) — the third row is
+in fact one of step 2's 66 floor leaks, truth `x`, which the tool calls
+`w` until step 3 exists.
+
+`destructive` is the separate axis of D28 and is never read off the
+class. `class` is `r < w < x` per the one invariant.
+
+### Carrier 1 — OpenAPI, per operation
+
+OpenAPI allows `x-` extension keys on any object, including an
+operation. rwxmap reads these files already; it writes back into the
+same file it read:
+
+```yaml
+/v1/accounts/{account}:
+  delete:
+    operationId: DeleteAccountsAccount
+    x-rwx:
+      class: x
+      destructive: true
+      evidence: floor-only
+```
+
+### Carrier 2 — MCP, per tool
+
+Two slots, both the spec's own. The four hints ride together in one
+`annotations` object (see the MCP hints entry under Open questions for
+what each hint is worth today); rwxmap's own three fields go in `_meta`,
+which the MCP 2026-07-28 specification names as the extension slot and
+where reverse-DNS key prefixes are the stated convention (prefixes whose
+second label is `modelcontextprotocol` or `mcp` are reserved):
+
+```json
+{ "name": "delete_account",
+  "annotations": { "readOnlyHint": false, "destructiveHint": true, "idempotentHint": false },
+  "_meta": { "io.github.hamr0.rwxmap/class": "x",
+             "io.github.hamr0.rwxmap/evidence": "floor-only" } }
+```
+
+### Carrier 3 — WebMCP, per tool
+
+WebMCP (W3C Web Machine Learning Community Group, Draft Community Group
+Report of 2026-04-23) has a page hand tools to the agent through
+`navigator.modelContext`. Its `ToolAnnotations` dictionary is NOT MCP's
+four; as read on 2026-09-17 it is `readOnlyHint`, `untrustedContentHint`,
+`consequentialHint` and `debugging`, and the IDL admits defined members
+only — no `_meta`, no extension slot. Nothing custom is needed, because
+the two flags that matter carry all three classes with nothing left
+over:
+
+| class | `readOnlyHint` | `consequentialHint` |
+|---|---|---|
+| `r` | true | false |
+| `w` | false | false |
+| `x` | false | true |
+
+`consequentialHint` is a closer fit to this project's `x` (reach beyond
+the caller, or not repeatable) than any MCP hint is: MCP's
+`destructiveHint` was measured and rejected as a reading of the class
+(D28), and `idempotentHint` cannot be read off the specs at all. This
+makes WebMCP the carrier where the r/w/x ladder maps cleanly, and it
+raises the value of step 3 — `consequentialHint` IS the x step.
+
+```js
+navigator.modelContext.registerTool({
+  name: "delete_account",
+  annotations: { readOnlyHint: false, consequentialHint: true },
+  execute: /* ... */
+});
+```
+
+### Carrier 4 — Agentic Resource Discovery, per domain
+
+ARD (Google and ten others, published 2026-06-17) has a domain serve
+`/.well-known/ai-catalog.json` with `specVersion`, `host` and `entries`,
+one entry per whole resource — an MCP server, an A2A agent, an OpenAPI
+document.
+
+Per-operation data cannot go inside an entry, and this is a schema fact,
+not a preference: the published entry schema sets
+`additionalProperties: false`, there is no `x-` support and no
+extensions object, and the one free slot, `metadata`, takes flat
+key-value pairs whose values are limited to string, number, boolean or
+null. A map of 1309 operations does not fit in a flat scalar.
+
+So the map is its own resource with its own URL, listed beside the
+OpenAPI document it describes:
+
+```json
+{ "identifier": "urn:stripe:rwxmap",
+  "displayName": "Stripe API — rwx map",
+  "type": "application/vnd.rwxmap+json",
+  "url": "https://stripe.com/.well-known/rwxmap.json",
+  "metadata": { "rwxmapVersion": "0.1", "operations": 1309 } }
+```
+
+### What this means for the work
+
+- rwxmap is a **build-time annotator**, not a runtime component. It runs
+  once over a spec and produces the map; the map feeds whichever carrier
+  the Resource Owner publishes. This keeps signing the Resource Owner's
+  act, per Out of scope.
+- Only two of the four slots are rwxmap's own: OpenAPI's `x-rwx` and
+  MCP's `_meta` keys. In the other two it sets fields the spec already
+  defines.
+- What is shippable today is unchanged by this decision: `readOnlyHint`
+  (and therefore WebMCP's `readOnlyHint`) is ready at 3 unsafe-wrong
+  rows in 4171 (0.07%); `consequentialHint` and `idempotentHint` both
+  wait on step 3.
+- The four carriers are an output contract, not code. Nothing emits yet;
+  no emitter is built before step 3, and the input-adapter question
+  under Open questions stays open.
+
 ## Open questions
 
 Non-blocking; never silently assumed.
@@ -611,10 +758,11 @@ Non-blocking; never silently assumed.
   `poc/desc-yours/`. The pile stays as the flag because it holds 155
   of 204 leaks.
 - MCP hints (future feature, M3; the user's end goal is to feed them).
-  Nothing emits hints yet. What follows is loosely specified on
-  purpose: the shape of the hint output is not being decided here,
-  only what is now known about each hint from the 4171-row provider
-  corpus with step 1 and step 2 as they stand.
+  Nothing emits hints yet. The shape of the hint output IS now decided
+  — see "The output shape (agreed 2026-09-17, D76)" above, which names
+  MCP's `annotations` plus `_meta` as one of four carriers. What
+  follows is only what is now known about each hint from the 4171-row
+  provider corpus with step 1 and step 2 as they stand.
   - **The four hints ride together.** An MCP tool carries one
     `annotations` object holding all four booleans at once — they are
     independent axes, not a choice between them. Omitting a field is
@@ -680,6 +828,16 @@ Non-blocking; never silently assumed.
     and never from the class; `poc/m0/destructive.json` exists from
     the M0 work and has never been measured against this corpus.
   - `openWorldHint`: no signal; MCP default `true`.
+- Closed 2026-09-17 (D76): the output file format. rwxmap keeps one map
+  of its own, one row per operation, and publishes nothing of its own —
+  it fills the extension slot each existing standard already leaves
+  open: OpenAPI's `x-rwx` per operation, MCP's `annotations` plus a
+  reverse-DNS `_meta` key per tool, WebMCP's `readOnlyHint` /
+  `consequentialHint` per tool, and one Agentic Resource Discovery
+  `ai-catalog.json` entry per domain pointing at the map file. See
+  "The output shape" above. This supersedes the archived bullet below
+  that offered the -02 declared menu's `{iss, menu}` shape or rwxmap's
+  own JSON with a converter.
 - Whether tightening enters the -02 argument, or stays a demonstration
   (D4, M4).
 - The exact confidence formula and line — M0 finds it.
