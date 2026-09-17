@@ -190,7 +190,7 @@ One direction of travel per method (D43):
 - POST — lower only, `x -> r`.
 - PUT / DELETE / PATCH — raise only, `w -> x`.
 
-### The new core (target shape; step 1 frozen, steps 2 and 3 not built)
+### The new core (step 1 frozen, step 2 built, step 3 not built)
 
 The user's model, 2026-09-16, corrected where the 2026-09-16 floor POC
 contradicts it; the gist and the structure are the user's. Three
@@ -204,59 +204,131 @@ row comes out with a class and a flag.
    floor (GET / HEAD / OPTIONS -> r; the corpus has no HEAD or OPTIONS
    rows, so those two are carried on principle, not on evidence), plus
    two read-verb rules on POST: the **lead token** of the operationId,
-   after skipping the modifier words `bulk` / `batch` / `deprecated` /
-   `beta` / `async`, matched stem-aware against a 23-word read-verb
-   list; and, on a POST the lead-token rule did not claim, a
-   `SAFE_VERBS` word — the 10 never-a-noun compute verbs, a subset of
-   the 23 — matched at any token position. Every other POST passes
-   down to step 2 unclaimed. Ledger over all 4171 rows: `method` 1960
-   claimed / 2 leaks; `read-verb` 87 claimed / 0 leaks;
-   `read-verb-anywhere` 5 claimed / 1 leak; total 2052 claimed / 3
-   leaks / 33 truth-r rows missed. Of the corpus's 2082 truth-r rows,
-   2049 are found (98.4%). Leave-one-vendor-out: 83 claimed / 1 leak.
-   Two of the 3 leaks are on the GET floor (`datadog
-   GetGraphSnapshot`, `intercom listContactBanners`, both labelled low
-   confidence) and are out of reach of a method floor by construction.
-   The lead-token rule is positional on purpose: the same 23-word list
-   read at any token position scores 31 leaks instead of 0, because
-   `list`, `get`, `count` and `check` are nouns in API names as often
-   as verbs — which is why only the safe subset may be read that way.
+   after skipping the `LEAD_MODIFIERS` words `bulk` / `batch` /
+   `deprecated` / `beta` / `async`, matched stem-aware against
+   `READ_VERBS`, the 23-word read-verb list; and, on a POST the
+   lead-token rule did not claim, a `SAFE_VERBS` word — the 10
+   never-a-noun compute verbs, a subset of the 23 — matched at any
+   token position. Every other POST passes down to step 2 unclaimed.
+   Ledger over all 4171 rows: `method` 1960 claimed / 2 leaks;
+   `read-verb` 87 claimed / 0 leaks; `read-verb-anywhere` 5 claimed /
+   1 leak; total 2052 claimed / 3 leaks / 33 truth-r rows missed. Of
+   the corpus's 2082 truth-r rows, 2049 are found (98.4%).
+   Leave-one-vendor-out: 83 claimed / 1 leak. Two of the 3 leaks are
+   on the GET floor (`datadog GetGraphSnapshot`, `intercom
+   listContactBanners`, both labelled low confidence) and are out of
+   reach of a method floor by construction. The lead-token rule is
+   positional on purpose: the same 23-word list read at any token
+   position scores 31 leaks instead of 0, because `list`, `get`,
+   `count` and `check` are nouns in API names as often as verbs —
+   which is why only the safe subset may be read that way.
    The third rule is the tool's first deliberate leak, adopted on the
    user's explicit decision 2026-09-16 at a priced cost of 4 right
    rows for 1 leak, with the gains in one vendor (digitalocean) and
    the leak in another (stripe), so LOVO expects the cost to
    generalize and the gain not to. See `docs/logs/learnings.md`.
-2. **Step 2, w floor** = PUT 93% (n=345) / DELETE 92% (n=473) / PATCH
-   98% (n=84) > POST 29%, all from Table 1 on the 4171-row provider
-   corpus. How: live verbs plus yours noun. PUT / DELETE / PATCH start
-   at w, and evidence raises them to x. A POST can reach w here too, but
-   only on evidence — a modify verb plus a yours noun — never by
-   default. Measured on the 4171-row provider corpus: 381 POST rows
-   have truth w, and the tool's current shape has no rule anywhere
-   that lowers a POST to w — it assigns w to 0 of 1309 POST rows. That
-   gap is 381 rows and 58% of the tool's total 658 over-tight rows on
-   this corpus.
+2. **Step 2, w** — **BUILT 2026-09-16**, `poc/step2/`; verified, not
+   frozen, and not yet a numbered decision. Two rules. (a)
+   `method-floor`: every PUT / DELETE / PATCH row starts at w, no
+   words involved. (b) On the POST rows step 1 left behind, a **modify
+   verb** from `MODIFY_VERBS` lowers x to w, where the verb is the
+   operationId's lead token, or — when that lead token is a bare HTTP
+   method word, as in stripe's `PostTaxCalculations` and mailchimp's
+   `postLists` — the lead verb of the summary instead (rule
+   `modify-verb-summary`). That lowering is BLOCKED if any word of the
+   row is in `OTHER_PARTY`. Two lists, both owned by step 2:
+   `MODIFY_VERBS` (24 verbs that act on a thing that already exists)
+   and `OTHER_PARTY` (21 role nouns naming someone who is not the
+   caller). Ledger over the 2119 rows step 1 left it: `method-floor`
+   902 claimed / 836 right / 66 leaks (7.3%); `modify-verb` 114 /
+   113 / 1; `modify-verb-summary` 118 / 114 / 4; total 1134 claimed /
+   1063 right / 71 leaks (6.3% of claims). It claims 53.5% of what it
+   inherits and passes on 985 rows (46.5%, truth r 33 / w 153 / x
+   799). Step 2 has zero over-tight rows. The POST rules reach 227 of
+   the 380 truth-w POST rows (59.7%), against zero before, at 232
+   claimed / 5 leaks — 2.2% fitted, and **3.2% leave-one-vendor-out
+   with both lists rebuilt per holdout**, which is the honest figure.
+   66 of its 71 leaks are the wordless method floor, not the lists:
+   they are PUT / DELETE / PATCH rows whose truth is x, they cluster
+   in openai and zoom account/user administration, and raising them is
+   step 3's job, not something better words here can do. See
+   `docs/logs/learnings.md`.
 3. **Step 3, x** = the fallback, not a floor. How: live verbs plus the
    via-negativa yours noun; anything still unknown goes to the pile.
-   For PUT 7% / DELETE 8% / PATCH 2% (Table 1, provider corpus) this
-   is evidence-raised x. For POST, the 61% x lean is the measured
-   truth on 15 complete APIs
-   (Table 1) and holds under LOVO; the earlier reading that this lean
-   inverts to 23% on unseen vendors was a property of exam 5's draw
+   Step 3 runs no list today, because it is not built: the placeholder
+   floor is method-free and word-free. For PUT 7% / DELETE 8% / PATCH
+   2% (Table 1, provider corpus) this is evidence-raised x. For POST,
+   the 61% x lean is the measured truth on 15 complete APIs (Table 1)
+   and holds under LOVO; the earlier reading that this lean inverts to
+   23% on unseen vendors was a property of exam 5's draw
    (89 vendors, median 1 POST row each, drawn from APIs.guru
    fragments), not of POST itself — see `docs/logs/learnings.md`. An
    unclaimed POST lands at x because x is the tightest class and the
    floor holds; the measured gap is not that the floor is wrong, it is
-   that nothing built today can move a POST off it toward w.
+   how many POSTs never get moved off it. Step 2 now moves 232 of them
+   to w (227 right, 5 leaks), reaching 227 of the 380 truth-w POST
+   rows; the other 153 are still on this x floor, over-tight.
+
+### Which list runs in which step
+
+| step | claims | lists it runs, in order | direction |
+|---|---|---|---|
+| 1 — r | GET/HEAD/OPTIONS, and POST reads | `LEAD_MODIFIERS` (5, plumbing) → `READ_VERBS` (23, lead token only) → `SAFE_VERBS` (10, a subset of the 23, any token position) | lowers to r |
+| 2 — w | PUT/DELETE/PATCH, and POST edits | method floor (no list) → `MODIFY_VERBS` (24, lead token, or the summary's verb when the operationId lead is a bare method word) → `OTHER_PARTY` (21, blocks the lowering) | lowers to w |
+| 3 — x | everything left | not built; today a placeholder floor with no list | nothing looser than x to be wrong toward |
+
+Five lists, about 83 words in total, and every list runs in exactly
+one step — no list is shared between steps, which is D57 still
+holding. Two of the five are plumbing (`LEAD_MODIFIERS`, and step 2's
+summary-skip words), two are verb lists that lower a row, and one is a
+noun list that blocks a lowering. Where each lives: `LEAD_MODIFIERS`
+in `poc/step1/words.mjs`, `READ_VERBS` and `SAFE_VERBS` in
+`poc/step1/step1.mjs`, `MODIFY_VERBS` and `OTHER_PARTY` in
+`poc/step2/step2.mjs`.
+
+### What the tool would say today
+
+| the tool says | rows | right | wrong in the loose direction |
+|---|---|---|---|
+| `r` | 2052 | 99.9% | 3 (0.1%) |
+| `w` | 1134 | 93.7% | 71 (6.3%) |
+| `x` | 985 | 81.1% | **0** |
+
+Whole flow — step 1 + step 2 + an x placeholder for the unbuilt step
+3 — over all 4171 corpus rows: **exact 93.8%, leaks 1.8% (74 rows),
+over-tight 4.5% (186 rows)**. The frozen old core `poc/flow` scored
+83.8 / 0.4 / 15.8 on the same corpus: better on exact and on
+over-tight, worse on leaks. The leaks rose because lowering rows to w
+is exactly what bought the other two — every row step 2 moves off the
+x floor is a row that can now be wrong in the loose direction, and 66
+of the 71 it got wrong are its wordless method floor.
+
+This is a guess tool that is mostly accurate and never claims
+certainty. The goal is 90%+ on a corpus of providers it has not seen.
+The `x` pile is wrong only by being too tight — 0 of its 985 rows is
+loose — which is the ladder working as designed: a row called x when
+it is really w costs the caller an extra ask, and nothing else. The
+only dangerous error is a row called looser than it is.
 
 The pile widens. Today only step 2 carries a sure/unsure flag, and
 2282 of 5465 rows (42%) carry none, including the 614 step 1 rows that
 hold all 17 GET leaks. In the new core every step flags every row.
 
-The riskiest piece, and the one the next POC targets: reaching w for
-POST. This step is not built — no design for it is proposed here —
-and the size of the prize is 381 rows (29% of all POST rows, 58% of
-the tool's total over-tightness on the provider corpus).
+Reaching w for POST was the riskiest piece, and it is now built
+(`poc/step2/`): it takes 227 of the 380 truth-w POST rows. The
+remaining 153 are the open part of that prize.
+
+The riskiest piece now is step 3: raising the 66 PUT / DELETE / PATCH
+rows that sit on step 2's method floor at w and are truth x. They are
+93% of step 2's 71 leaks, and they are the only part of the tool's
+error that is dangerous rather than merely tight — everything else it
+gets wrong, it gets wrong by being too tight. The obvious candidate
+was measured and rejected: running `OTHER_PARTY` as a raiser over
+those 902 floor rows closes 0.31 leaks per false alarm as built and
+0.50 trimmed, failing the project's 10-per-1 adoption bar by roughly
+20x — `user` flags 42 write rows of which only 13 are truth x. The
+single exception is the word `permission` (6 flags, 6 truth x, 0
+false alarms). So no design for step 3 is proposed here either.
 
 ## The three steps
 
@@ -513,13 +585,17 @@ Non-blocking; never silently assumed.
   (804 of 1309), close to the old corpus's 62%, not to exam 5's 23%;
   the inversion recorded 2026-09-14/15 is now read as a property of
   exam 5's draw (89 vendors, median 1 POST row each, drawn from
-  APIs.guru fragments) rather than of POST itself. The open question
-  is no longer whether the floor is wrong — it's how a POST row
-  reaches w: the tool assigns w to 0 of 1309 POST rows today, 381 POST
-  rows have truth w, and that gap is 58% of the tool's total
-  over-tight rows on the provider corpus. No design for closing it is
-  proposed here. Raised 2026-09-14, updated 2026-09-15, updated
-  2026-09-16 with the provider-corpus read.
+  APIs.guru fragments) rather than of POST itself. How a POST row
+  reaches w is no longer open either: step 2 (`poc/step2/`) answers it
+  with a modify verb plus the `OTHER_PARTY` block, reaching 227 of the
+  380 truth-w POST rows, against zero before. What stays open is the
+  remaining 153 POST rows that never get off the `x` floor, and step
+  3: the 66 PUT / DELETE / PATCH rows sitting on step 2's method floor
+  at `w` that are truth `x`, which are 93% of step 2's leaks and the
+  only dangerous part of the tool's error. See list item 2 of "The new
+  core" above and `docs/logs/learnings.md`. Raised 2026-09-14, updated
+  2026-09-15, updated 2026-09-16 with the provider-corpus read,
+  updated 2026-09-16 when step 2 was built.
 - Can the "I don't know" pile be shrunk by reading the description?
   Answer so far: no — mining the yours list from description text
   resolves at best 130 of 1972 rows (6.6%) and leaks 8; the safe
@@ -527,17 +603,74 @@ Non-blocking; never silently assumed.
   `poc/desc-yours/`. The pile stays as the flag because it holds 155
   of 204 leaks.
 - MCP hints (future feature, M3; the user's end goal is to feed them).
-  Nothing emits hints yet.
-  - `readOnlyHint`: true when class is `r`; GET follows its `r` floor
-    (D59).
-  - `idempotentHint`: two readings, not yet chosen. From the class: true
-    for `r` or `w`, since by D20 an operation you can't safely repeat is
-    `x`. From the method, per RFC 9110 §9.2.2: true for safe methods
-    plus PUT and DELETE (`docs/archive/prd.md:363`, §4.3). The method
-    reading disagrees with D20 on idempotent-but-`x` rows (D20 counted
-    20 such DELETE rows on its 499-row set).
-  - `destructiveHint`: a separate axis from r/w/x (D28), not built; MCP
-    default `true` until then.
+  Nothing emits hints yet. What follows is loosely specified on
+  purpose: the shape of the hint output is not being decided here,
+  only what is now known about each hint from the 4171-row provider
+  corpus with step 1 and step 2 as they stand.
+  - **The four hints ride together.** An MCP tool carries one
+    `annotations` object holding all four booleans at once — they are
+    independent axes, not a choice between them. Omitting a field is
+    not silence: the consumer assumes `readOnlyHint` false,
+    `destructiveHint` true, `idempotentHint` false, `openWorldHint`
+    true. Those defaults are all the tight reading, so partial
+    emission is safe by this project's own invariant.
+    `destructiveHint` is only meaningful when `readOnlyHint` is false,
+    so the `r` class settles two of the four at once. These annotation
+    names and defaults are from the MCP spec **as recalled, not from a
+    fetched copy**, and must be checked against the exact spec
+    revision targeted before anything emits.
+  - `readOnlyHint`: **the one that is ready.** True when the class is
+    `r`; GET follows its `r` floor (D59). 2052 rows, 3 wrong in the
+    unsafe direction (0.07% of all 4171 rows, 0.15% of the trues) —
+    the three being the known low-confidence GET rows `datadog
+    GetGraphSnapshot` and `intercom listContactBanners` plus one more.
+    33 further rows are marked not-read-only when they are read-only,
+    which is the safe direction. Step 3 cannot improve this hint at
+    all, because step 3 only raises `w` to `x` and `readOnlyHint` is
+    already false for both — so waiting for step 3 buys
+    `readOnlyHint` nothing.
+  - `idempotentHint`: **not ready, and step 3 is what would fix it.**
+    Two readings, not yet chosen. Reading A, from the class: true for
+    `r` or `w`, since by D20 an operation you can't safely repeat is
+    `x` — says true on 3186 rows, 72 unsafe-wrong (1.73% of all rows,
+    2.26% of the trues); the 2026-09-17 `OTHER_PARTY` trim grew the
+    `w` pile by 16 rows without adding one unsafe-wrong row, since all
+    16 are truth `w`. Reading B, from the method, per RFC 9110
+    §9.2.2: true for GET / HEAD / OPTIONS plus PUT and DELETE
+    (`docs/archive/prd.md:363`, §4.3) — says true on 2778 rows, 65
+    unsafe-wrong (1.56% of all rows, 2.34% of the trues), those 65
+    being GET 1, PUT 25, DELETE 39. The two readings disagree on
+    idempotent-but-`x` rows (D20 counted 20 such DELETE rows on its
+    499-row set). Reading A's gap is exactly the 71 rows step 2 now
+    calls `w` that are truth `x` — the rows step 3 exists to raise —
+    so step 3 closes it.
+  - **Idempotency cannot be read off the specs.** Measured across all
+    15 provider specs: 11 of the 15 never mention idempotency at all.
+    The four that do are paypal (103 mentions), square (16), openai
+    (6) and intercom (1), and even there it is prose in descriptions
+    plus an `Idempotency-Key` / `PayPal-Request-Id` request header,
+    not a machine-readable property. That header is a *capability* —
+    the API offering to make retries safe if the caller supplies a key
+    — not a declaration that the operation is idempotent. If anything
+    it is evidence the operation is NOT naturally idempotent, which
+    points toward `x`, so it is a candidate raiser for step 3 rather
+    than an idempotency source. It cannot be measured honestly on 4
+    vendors.
+  - `destructiveHint`: **the class cannot carry it, measured again.** A
+    separate axis from r/w/x (D28), not built; MCP default `true`
+    until then. D28 already rejected `destructiveHint = (class == x)`
+    as wrong on 352 of 719 rows. The broader reading "every non-`r`
+    row is destructive" was measured on this corpus: it would mark all
+    2119 non-`r` rows destructive, but only 584 of them (27.6%) carry
+    any wrecking signal at all — a DELETE method, or a verb such as
+    delete / remove / purge / revoke / expire / void / archive — while
+    1535 rows (72.4%) destroy nothing, being creates, updates, sends
+    and publishes. That reading is safe, because it is identical to
+    the MCP default, and it therefore emits no information. The useful
+    signal is the inverse: which of the non-reads are NOT destructive.
+    That is the second axis D28 named, derived from method plus verb
+    and never from the class; `poc/m0/destructive.json` exists from
+    the M0 work and has never been measured against this corpus.
   - `openWorldHint`: no signal; MCP default `true`.
 - Whether tightening enters the -02 argument, or stays a demonstration
   (D4, M4).
