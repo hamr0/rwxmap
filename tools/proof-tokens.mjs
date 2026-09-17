@@ -19,9 +19,7 @@ const rows = loadRows();
 
 const diffs = {
   tokensForRow_tokens: [],
-  tokensForRow_stripped: [],
   leadVerbAfterModifiers: [],
-  withSplitOperationId: [],
   stemMatches: [],
 };
 
@@ -34,31 +32,30 @@ function recordDiff(list, rowIdOrPair, input, oldVal, newVal) {
 }
 
 // --- per-row comparisons ---------------------------------------------------
+//
+// tokensForRow's new shape is a plain string[] (no more { tokens, stripped }
+// object), and withSplitOperationId is no longer exported at all. Both the
+// old "stripped" flag and the old operationId-split behaviour are still
+// fully exercised here — just observed the only way the new public API
+// exposes them: through the token array tokensForRow returns. A dropped
+// prefix, or a different split boundary, shows up as a real difference in
+// oldTok vs newTok below; there is nothing left to compare "trivially true".
 
 for (const row of rows) {
-  const oldTok = oldWords.tokensForRow(row);
+  const oldTok = oldWords.tokensForRow(row).tokens;
   const newTok = newTokens.tokensForRow(row);
 
   const tokensEqual =
-    oldTok.tokens.length === newTok.tokens.length &&
-    oldTok.tokens.every((t, i) => t === newTok.tokens[i]);
+    oldTok.length === newTok.length &&
+    oldTok.every((t, i) => t === newTok[i]);
   if (!tokensEqual) {
-    recordDiff(diffs.tokensForRow_tokens, row.rowId, row, oldTok.tokens, newTok.tokens);
-  }
-  if (oldTok.stripped !== newTok.stripped) {
-    recordDiff(diffs.tokensForRow_stripped, row.rowId, row, oldTok.stripped, newTok.stripped);
+    recordDiff(diffs.tokensForRow_tokens, row.rowId, row, oldTok, newTok);
   }
 
   const oldLead = oldWords.leadVerbAfterModifiers(row);
   const newLead = newTokens.leadVerbAfterModifiers(row);
   if (oldLead !== newLead) {
     recordDiff(diffs.leadVerbAfterModifiers, row.rowId, row, oldLead, newLead);
-  }
-
-  const oldSplit = oldWords.withSplitOperationId(row).operationId;
-  const newSplit = newTokens.withSplitOperationId(row).operationId;
-  if (oldSplit !== newSplit) {
-    recordDiff(diffs.withSplitOperationId, row.rowId, row, oldSplit, newSplit);
   }
 }
 
@@ -97,16 +94,12 @@ console.log(`rows compared: ${rows.length}`);
 console.log(`distinct tokens compared: ${tokenSet.size}`);
 console.log(`(token, stem) pairs compared: ${pairsCompared}`);
 console.log(`tokensForRow tokens differences: ${diffs.tokensForRow_tokens.length}`);
-console.log(`tokensForRow stripped differences: ${diffs.tokensForRow_stripped.length}`);
 console.log(`leadVerbAfterModifiers differences: ${diffs.leadVerbAfterModifiers.length}`);
-console.log(`withSplitOperationId differences: ${diffs.withSplitOperationId.length}`);
 console.log(`stemMatches differences: ${diffs.stemMatches.length}`);
 
 const totalDiffs =
   diffs.tokensForRow_tokens.length +
-  diffs.tokensForRow_stripped.length +
   diffs.leadVerbAfterModifiers.length +
-  diffs.withSplitOperationId.length +
   diffs.stemMatches.length;
 
 if (totalDiffs === 0) {

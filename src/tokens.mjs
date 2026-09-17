@@ -11,7 +11,7 @@
 // whitespace into '_' before anything reads operationId. A whitespace-only
 // operationId trims to '' first, so it still falls back to the path
 // exactly as before.
-export function withSplitOperationId(row) {
+function withSplitOperationId(row) {
   const trimmed = (row.operationId || '').trim();
   return { ...row, operationId: trimmed.replace(/[\/\s]+/g, '_') };
 }
@@ -21,11 +21,18 @@ export function withSplitOperationId(row) {
 // HTTP-method words that get stripped from lead position when the
 // operationId starts with the word followed by a separator.
 const METHOD_WORDS = new Set(['get', 'post', 'put', 'patch', 'delete', 'head', 'options']);
-// A separator or a digit right after the method word means it is a
+// An explicit separator right after the method word means it is a
 // redundant method-name prefix (post_ai_ask, post-cardDetails,
 // delete_files_id); an uppercase letter there means ordinary camelCase
 // (deleteDevice, getSession, updateDevice) and the word is a real verb.
-const METHOD_PREFIX_SEPARATOR = /^[_\-.0-9]/;
+// A digit is never the first character of `rest` on its own: splitTokens
+// (below) only inserts a boundary before an uppercase letter, never before
+// a digit, so a digit glued straight to the method word stays fused into
+// tokens[0] (get2x), which fails the tokens[0] === method check above
+// before this regex ever runs. A digit can still follow the method word,
+// but only after one of these separators (get_2fa), which is already
+// covered.
+const METHOD_PREFIX_SEPARATOR = /^[_\-.]/;
 
 // Lowercase all tokens of a string, split on camelCase boundaries and on
 // '_', '-', '.'.
@@ -48,12 +55,17 @@ function rawLeadStringForRow(row) {
   return segments.length ? segments[segments.length - 1] : '';
 }
 
-// Strip a leading method-word prefix ONLY when it is followed by a
-// separator or a digit in the raw string (post_ai_ask, post-cardDetails,
-// delete_files_id) — never on a camelCase continuation (deleteDevice,
-// getSession, updateDevice keep their verb as the lead). Returns
-// { tokens, stripped }; tokens is never empty unless the raw string
-// tokenizes to nothing at all.
+// Tokens for a row's lead string (operationId, or the last non-{param}
+// path segment when operationId is empty), with a leading method-word
+// prefix stripped ONLY when it is followed by an explicit separator in the
+// raw string (post_ai_ask, post-cardDetails, delete_files_id) — never on a
+// camelCase continuation (deleteDevice, getSession, updateDevice keep
+// their verb as the lead, since nothing separates it from the rest of the
+// word). The result is never empty unless the raw string tokenizes to
+// nothing at all. Whether the prefix was actually stripped is observable
+// in the returned array itself (['files','id'] vs ['delete','files','id']
+// for delete_files_id/deleteDevice-shaped input), so no separate flag is
+// returned.
 //
 // Applies withSplitOperationId to the row itself first, so callers never
 // have to.
@@ -61,13 +73,13 @@ export function tokensForRow(row) {
   const splitRow = withSplitOperationId(row);
   const raw = rawLeadStringForRow(splitRow);
   const tokens = splitTokens(raw);
-  if (!tokens.length) return { tokens, stripped: false };
+  if (!tokens.length) return tokens;
   const method = (splitRow.method || '').toLowerCase();
-  if (!METHOD_WORDS.has(method) || tokens[0] !== method) return { tokens, stripped: false };
+  if (!METHOD_WORDS.has(method) || tokens[0] !== method) return tokens;
   const rest = String(raw).slice(method.length);
-  if (!METHOD_PREFIX_SEPARATOR.test(rest)) return { tokens, stripped: false }; // camelCase continuation
-  if (tokens.length < 2) return { tokens, stripped: false }; // nothing to skip to
-  return { tokens: tokens.slice(1), stripped: true };
+  if (!METHOD_PREFIX_SEPARATOR.test(rest)) return tokens; // camelCase continuation
+  if (tokens.length < 2) return tokens; // nothing to skip to
+  return tokens.slice(1);
 }
 
 // --- verb-correct stem matching -----------------------------------------
@@ -143,7 +155,7 @@ export const LEAD_MODIFIERS = new Set(['bulk', 'batch', 'deprecated', 'beta', 'a
 // Lead verb of a row, skipping any run of LEAD_MODIFIERS at the front.
 // Returns '' when nothing is left.
 export function leadVerbAfterModifiers(row) {
-  const { tokens } = tokensForRow(row);
+  const tokens = tokensForRow(row);
   let i = 0;
   while (i < tokens.length && LEAD_MODIFIERS.has(tokens[i])) i += 1;
   return i < tokens.length ? tokens[i] : '';
