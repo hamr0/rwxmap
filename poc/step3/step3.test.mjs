@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { applyStep3, RAISE_WORDS, wordsForStep3 } from './step3.mjs';
+import { applyStep3, RAISE_WORDS, wordsForStep3, sourceForRule } from './step3.mjs';
 
 test('RAISE_WORDS is the 17-word list, verbatim', () => {
   assert.equal(RAISE_WORDS.size, 17);
@@ -65,4 +65,22 @@ test('applyStep3: an injected word set is used instead of RAISE_WORDS (LOVO)', (
 test('wordsForStep3: includes a raise word buried mid-path, not just the lead token', () => {
   const words = wordsForStep3({ method: 'PUT', operationId: 'updateUser', path: '/users/{id}/permissions/{permId}' });
   assert.equal(words.includes('permissions'), true);
+});
+
+test('sourceForRule: floor rules', () => {
+  assert.equal(sourceForRule('method'), 'floor');
+  assert.equal(sourceForRule('method-floor'), 'floor');
+  assert.equal(sourceForRule('floor-post'), 'floor');
+});
+
+test('sourceForRule: list rules', () => {
+  assert.equal(sourceForRule('read-verb'), 'list');
+  assert.equal(sourceForRule('read-verb-anywhere'), 'list');
+  assert.equal(sourceForRule('modify-verb'), 'list');
+  assert.equal(sourceForRule('modify-verb-summary'), 'list');
+  assert.equal(sourceForRule('raise-word'), 'list');
+});
+
+test('sourceForRule: an unknown rule throws instead of defaulting', () => {
+  assert.throws(() => sourceForRule('some-future-rule'));
 });

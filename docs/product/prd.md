@@ -296,47 +296,93 @@ in `poc/step1/words.mjs`, `READ_VERBS` and `SAFE_VERBS` in
 
 ### What the tool would say today
 
+Every answer the tool gives comes from exactly one of two sources, and
+the CSV names which in a `source` column beside the rule:
+
+- **floor** — the HTTP method alone. No word matched. A floor is a
+  *default*, so a later step's evidence may override it; that is exactly
+  how step 3's `raise-word` turns step 2's `method-floor` `w` into `x`.
+- **list** — a word list fired. A list claim is *evidence* and it is
+  final; nothing downstream overrides it.
+
+The full ledger over all 4171 corpus rows, both frozen steps plus step
+3, split by step and by source:
+
+| step | source | claims | right | right % | leaks | over-tight |
+|---|---|---|---|---|---|---|
+| **1** (r) | list | 92 | 91 | 98.9% | 1 | 0 |
+| | floor | 1960 | 1958 | 99.9% | 2 | 0 |
+| | **total** | **2052** | **2049** | **99.9%** | **3** | **0** |
+| **2** (w) | list | 232 | 227 | 97.8% | 5 | 0 |
+| | floor | 883 | 836 | 94.7% | **47** | 0 |
+| | **total** | **1115** | **1063** | **95.3%** | **52** | **0** |
+| **3** (x) | list | 19 | 19 | **100.0%** | 0 | 0 |
+| | floor | 985 | 799 | 81.1% | 0 | **186** |
+| | **total** | **1004** | **818** | **81.5%** | **0** | **186** |
+| **ALL** | list | 343 | 337 | 98.3% | 6 | 0 |
+| | floor | 3828 | 3593 | 93.9% | 49 | 186 |
+| | **TOTAL** | **4171** | **3930** | **94.2%** | **55** | **186** |
+
+Read per emitted class instead:
+
 | the tool says | rows | right | wrong in the loose direction |
 |---|---|---|---|
 | `r` | 2052 | 99.9% | 3 (0.1%) |
-| `w` | 1134 | 93.7% | 71 (6.3%) |
-| `x` | 985 | 81.1% | **0** |
+| `w` | 1115 | 95.3% | 52 (4.7%) |
+| `x` | 1004 | 81.5% | **0** |
 
-Whole flow — step 1 + step 2 + an x placeholder for the unbuilt step
-3 — over all 4171 corpus rows: **exact 93.8%, leaks 1.8% (74 rows),
-over-tight 4.5% (186 rows)**. The frozen old core `poc/flow` scored
-83.8 / 0.4 / 15.8 on the same corpus: better on exact and on
-over-tight, worse on leaks. The leaks rose because lowering rows to w
-is exactly what bought the other two — every row step 2 moves off the
-x floor is a row that can now be wrong in the loose direction, and 66
-of the 71 it got wrong are its wordless method floor.
+Whole flow: **exact 94.2%, leaks 1.3% (55 rows), over-tight 4.5% (186
+rows)**. The goal is 90%+ on providers it has not seen; there is no
+clean exam, so this corpus is a tuning set (D24) and 94.2% is a fitted
+number, not a generalization claim.
 
-This is a guess tool that is mostly accurate and never claims
-certainty. The goal is 90%+ on a corpus of providers it has not seen.
-The `x` pile is wrong only by being too tight — 0 of its 985 rows is
-loose — which is the ladder working as designed: a row called x when
-it is really w costs the caller an extra ask, and nothing else. The
-only dangerous error is a row called looser than it is.
+Four things this table says that no single accuracy number can:
 
-The pile widens. Today only step 2 carries a sure/unsure flag, and
-2282 of 5465 rows (42%) carry none, including the 614 step 1 rows that
-hold all 17 GET leaks. In the new core every step flags every row.
+1. **The tool is mostly an HTTP method table.** 3593 of its 3930 correct
+   answers — 91.4% — come from floors. Word lists are a thin layer of
+   evidence on top: excellent when they fire (98.3% right) but firing on
+   only 343 rows, 8% of the corpus.
+2. **Words are where the tool is confident, floors are where the risk
+   is.** 49 of the 55 leaks fired no word at all, and 47 of those 49 sit
+   in one cell: step 2's wordless PUT / DELETE / PATCH floor. That cell
+   is the whole remaining dangerous error.
+3. **All 186 over-tight rows sit in one other cell**, step 3's
+   `floor-post` pile. Safety errors and usability errors live in two
+   different boxes and never mix.
+4. **"Floor" does not mean "guess" everywhere.** GET → `r` is 99.9%
+   right and PUT / DELETE / PATCH → `w` is 94.7%; both are strong priors.
+   Only step 3's leftover-POST floor, at 81.1%, is a genuine shrug, and
+   it is the pile the output names rather than emitting a silent `x`.
 
-Reaching w for POST was the riskiest piece, and it is now built
-(`poc/step2/`): it takes 227 of the 380 truth-w POST rows. The
-remaining 153 are the open part of that prize.
+This is a guess tool that is mostly accurate and never claims certainty.
+It emits no confidence score — only the `source` column, which says
+whether a word was read or only the method was known. A row called `x`
+when it is really `w` costs the caller an extra ask and nothing else;
+the only dangerous error is a row called looser than it is, which is why
+the two directions are always counted and reported separately.
 
-The riskiest piece now is step 3: raising the 66 PUT / DELETE / PATCH
-rows that sit on step 2's method floor at w and are truth x. They are
-93% of step 2's 71 leaks, and they are the only part of the tool's
-error that is dangerous rather than merely tight — everything else it
-gets wrong, it gets wrong by being too tight. The obvious candidate
-was measured and rejected: running `OTHER_PARTY` as a raiser over
-those 902 floor rows closes 0.31 leaks per false alarm as built and
-0.50 trimmed, failing the project's 10-per-1 adoption bar by roughly
-20x — `user` flags 42 write rows of which only 13 are truth x. The
-single exception is the word `permission` (6 flags, 6 truth x, 0
-false alarms). So no design for step 3 is proposed here either.
+The open work, stated plainly:
+
+- **47 leaks** on step 2's remaining 883-row wordless floor. Words have
+  been measured out: every candidate list either failed the 10-per-1
+  adoption bar or collapsed under leave-one-vendor-out (relationship
+  nouns 22 closed / 11 false alarms; un-verbs 12 / 8; description-mined
+  words 10 / 37 under LOVO). What closed the last 19 was the wiring, not
+  the vocabulary.
+- **153 truth-w POST rows** that never get off step 3's x floor — the
+  remainder of step 2's prize, and where a via-negativa yours-noun rule
+  would pay if one could be mined. It cannot be, on 15 providers: 36
+  nouns against the old corpus's 439 from 332 vendors, best settings 9
+  rows of 380.
+- **33 truth-r POST rows** sitting in step 3's pile. These are step 1's
+  known misses, not step 3's to fix: only step 1 assigns `r`, and
+  anything → `r` is the loosening direction. Reaching them means
+  unfreezing step 1 (D74).
+
+Step 3's honest reach: its word list closes 19 of the 66 floor leaks
+fitted, 6 leave-one-vendor-out, at 0 false alarms in both readings — and
+all 6 LOVO closures are the single word `permission`, because the other
+16 words each appear in only one provider.
 
 ## The three steps
 

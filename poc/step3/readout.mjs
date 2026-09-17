@@ -9,7 +9,7 @@ import { loadRows } from '../step1/corpus.mjs';
 import { toCsv } from '../step1/csv.mjs';
 import { applyStep1 } from '../step1/step1.mjs';
 import { applyStep2 } from '../step2/step2.mjs';
-import { applyStep3, RAISE_WORDS, wordsForStep3 } from './step3.mjs';
+import { applyStep3, RAISE_WORDS, wordsForStep3, sourceForRule } from './step3.mjs';
 import { classifyRow } from './flow.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -140,7 +140,7 @@ console.log(table(
 
 // --- run-proof/step3.csv ---------------------------------------------------
 mkdirSync(path.dirname(OUT_CSV), { recursive: true });
-const header = ['provider', 'method', 'path', 'operationId', 'summary', 'truth', 'confidence', 'class', 'step', 'rule'];
+const header = ['provider', 'method', 'path', 'operationId', 'summary', 'truth', 'confidence', 'class', 'step', 'rule', 'source'];
 writeFileSync(OUT_CSV, toCsv(flow.map(({ row, hit }) => ({
   provider: row.provider,
   method: row.method,
@@ -152,5 +152,6 @@ writeFileSync(OUT_CSV, toCsv(flow.map(({ row, hit }) => ({
   class: hit.class,
   step: hit.step,
   rule: hit.rule,
+  source: sourceForRule(hit.rule),
 })), header));
 console.log(`\nwrote ${path.relative(REPO_ROOT, OUT_CSV)} (${flow.length} rows)`);

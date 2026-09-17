@@ -4,7 +4,7 @@
 import { loadRows } from '../step1/corpus.mjs';
 import { applyStep1 } from '../step1/step1.mjs';
 import { applyStep2 } from '../step2/step2.mjs';
-import { applyStep3, RAISE_WORDS, wordsForStep3 } from './step3.mjs';
+import { applyStep3, RAISE_WORDS, wordsForStep3, sourceForRule } from './step3.mjs';
 import { classifyRow } from './flow.mjs';
 
 const failures = [];
@@ -106,6 +106,30 @@ for (const held of new Set(rows.map((r) => r.provider))) {
   }
 }
 check('LOVO raise-word', { claimed: lc, right: lr }, { claimed: 6, right: 6 });
+
+// --- source split: floor (method-only default) vs list (a word fired) ------
+function sourceStats(pool) {
+  const exact = pool.filter(({ row, hit }) => hit.class === row.truth).length;
+  const leaksN = pool.filter(({ row, hit }) => ORDER[hit.class] < ORDER[row.truth]).length;
+  const overN = pool.filter(({ row, hit }) => ORDER[hit.class] > ORDER[row.truth]).length;
+  return { claims: pool.length, right: exact, leaks: leaksN, over: overN };
+}
+const bySource = { floor: [], list: [] };
+for (const entry of flow) bySource[sourceForRule(entry.hit.rule)].push(entry);
+
+check('source floor', sourceStats(bySource.floor), { claims: 3828, right: 3593, leaks: 49, over: 186 });
+check('source list', sourceStats(bySource.list), { claims: 343, right: 337, leaks: 6, over: 0 });
+
+function stepSourceStats(step, source) {
+  const pool = flow.filter(({ hit }) => hit.step === step && sourceForRule(hit.rule) === source);
+  return sourceStats(pool);
+}
+check('step 1 list', stepSourceStats(1, 'list'), { claims: 92, right: 91, leaks: 1, over: 0 });
+check('step 1 floor', stepSourceStats(1, 'floor'), { claims: 1960, right: 1958, leaks: 2, over: 0 });
+check('step 2 list', stepSourceStats(2, 'list'), { claims: 232, right: 227, leaks: 5, over: 0 });
+check('step 2 floor', stepSourceStats(2, 'floor'), { claims: 883, right: 836, leaks: 47, over: 0 });
+check('step 3 list', stepSourceStats(3, 'list'), { claims: 19, right: 19, leaks: 0, over: 0 });
+check('step 3 floor', stepSourceStats(3, 'floor'), { claims: 985, right: 799, leaks: 0, over: 186 });
 
 if (failures.length) {
   for (const f of failures) console.log('MISMATCH ' + f);

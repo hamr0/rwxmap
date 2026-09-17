@@ -30,6 +30,34 @@ export const RAISE_WORDS = new Set([
   'invitations', 'sso', 'password', 'grant', 'disassociate', 'reject',
 ]);
 
+// A row's `source` records WHY it was decided, not just what class it got.
+// A floor is a default: the HTTP method alone, applied when no word fired,
+// and a later step's evidence is free to override it (that is exactly how
+// raise-word turns step 2's method-floor w into x). A list claim is
+// evidence -- a word was read and matched -- and it is final; nothing
+// downstream overrides it. This split matters because the flow's failure
+// modes sit on opposite sides of it: all 49 of the flow's 55 leaks that
+// fired no word sit on floor rows, and all 186 over-tight rows sit on one
+// single floor, floor-post. Floors are where the risk lives; list claims
+// are not free of error but are not where these two failure modes cluster.
+export const FLOOR_RULES = new Set(['method', 'method-floor', 'floor-post']);
+const LIST_RULES = new Set([
+  'read-verb', 'read-verb-anywhere', 'modify-verb', 'modify-verb-summary', 'raise-word',
+]);
+
+/**
+ * Map a rule name to its source: 'floor' (method only, no word matched) or
+ * 'list' (a word list fired). Throws on an unknown rule so a future rule
+ * cannot silently become 'floor' by default.
+ * @param {string} rule
+ * @returns {'floor'|'list'}
+ */
+export function sourceForRule(rule) {
+  if (FLOOR_RULES.has(rule)) return 'floor';
+  if (LIST_RULES.has(rule)) return 'list';
+  throw new Error(`sourceForRule: unknown rule ${JSON.stringify(rule)}`);
+}
+
 /**
  * Every word step 3 looks at: step 2's wordsForRow (operationId/path lead
  * tokens plus summary words) PLUS the row's own path tokens -- the
