@@ -4,7 +4,7 @@ import {
   splitTokens,
   tokensForRow,
   stemMatches,
-  matchesAnyStem,
+  matchingMembers,
   leadVerbAfterModifiers,
 } from './tokens.js';
 
@@ -48,9 +48,22 @@ test('stemMatches: fix/fixing (literal suffix)', () => {
   assert.equal(stemMatches('fixing', 'fix'), true);
 });
 
-test('matchesAnyStem: matches against a set of stems', () => {
-  assert.equal(matchesAnyStem('cancelled', new Set(['terminate', 'cancel'])), true);
-  assert.equal(matchesAnyStem('reading', new Set(['terminate', 'cancel'])), false);
+test('matchingMembers: returns the matching stem when exactly one member matches', () => {
+  assert.deepEqual(matchingMembers('cancelled', new Set(['terminate', 'cancel'])), ['cancel']);
+});
+
+test('matchingMembers: returns an empty array when no member matches', () => {
+  assert.deepEqual(matchingMembers('reading', new Set(['terminate', 'cancel'])), []);
+});
+
+test('matchingMembers: returns every matching member, sorted ascending, when more than one matches', () => {
+  // No corpus row fires more than one member (0 of 4171 rows, checked while
+  // writing this), so this is constructed: 'created' matches both 'create'
+  // (via the -d suffix) and 'creat' (via startsWith + the -ed suffix), and
+  // the set is given in reverse-sorted iteration order, so a result that
+  // came out unsorted would read ['create', 'creat'] instead.
+  const hits = matchingMembers('created', new Set(['create', 'creat']));
+  assert.deepEqual(hits, ['creat', 'create']);
 });
 
 test('leadVerbAfterModifiers: no modifier -> the lead verb itself', () => {

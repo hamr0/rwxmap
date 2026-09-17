@@ -1,7 +1,7 @@
 // Step 1 — the r step. A standalone classifier: it claims the rows it can
 // call r and returns null for everything else, which passes down to step 2
 // untouched. It never assigns w or x, reads no files, and prints nothing.
-import { leadVerbAfterModifiers, tokensForRow, stemMatches } from './tokens.js';
+import { leadVerbAfterModifiers, tokensForRow, matchingMembers } from './tokens.js';
 
 /** @typedef {import('./types.js').Operation} Operation */
 /** @typedef {import('./types.js').Verdict} Verdict */
@@ -60,22 +60,6 @@ export const SAFE_VERBS = new Set([
   'validate', 'evaluate', 'analyse', 'analyze', 'parse', 'calculate',
   'introspect', 'suggest', 'sanitise', 'sanitize',
 ]);
-
-/**
- * Match `word` against every member of `stems`, returning the members that
- * actually matched, sorted ascending. There is no re-derivation elsewhere:
- * whoever calls this collects the match at the moment it happens.
- * @param {string} word
- * @param {Set<string>} stems
- * @returns {string[]}
- */
-function matchingMembers(word, stems) {
-  const hits = [];
-  for (const stem of stems) {
-    if (stemMatches(word, stem)) hits.push(stem);
-  }
-  return hits.sort();
-}
 
 /**
  * Apply step 1 to one row.

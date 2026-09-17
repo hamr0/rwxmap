@@ -20,7 +20,10 @@ function withSplitOperationId(row) {
 
 // HTTP-method words that get stripped from lead position when the
 // operationId starts with the word followed by a separator.
-const METHOD_WORDS = new Set(['get', 'post', 'put', 'patch', 'delete', 'head', 'options']);
+// Exported because step 2 also needs this exact vocabulary, to detect a
+// bare-method lead token that carries no verb — this is HTTP method
+// vocabulary shared by the tokeniser and step 2, not a classification list.
+export const METHOD_WORDS = new Set(['get', 'post', 'put', 'patch', 'delete', 'head', 'options']);
 // An explicit separator right after the method word means it is a
 // redundant method-name prefix (post_ai_ask, post-cardDetails,
 // delete_files_id); an uppercase letter there means ordinary camelCase
@@ -138,12 +141,22 @@ export function stemMatches(word, stem) {
   return false;
 }
 
-export function matchesAnyStem(word, stemSet) {
-  if (!word) return false;
-  for (const s of stemSet) {
-    if (stemMatches(word, s)) return true;
+/**
+ * Match `word` against every member of `stems`, returning the members that
+ * actually matched, sorted ascending. Returns the members themselves, not a
+ * boolean, precisely so a rule can report WHICH word fired without anything
+ * re-deriving it later. There is no re-derivation elsewhere: whoever calls
+ * this collects the match at the moment it happens.
+ * @param {string} word
+ * @param {Set<string>} stems
+ * @returns {string[]}
+ */
+export function matchingMembers(word, stems) {
+  const hits = [];
+  for (const stem of stems) {
+    if (stemMatches(word, stem)) hits.push(stem);
   }
-  return false;
+  return hits.sort();
 }
 
 // --- lead verb after modifiers -------------------------------------------
