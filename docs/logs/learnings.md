@@ -3862,3 +3862,54 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
 - Tried: rebuilt step 3 and the flow fresh against the rule rather than copying the POC, then proved equivalence row by row against the frozen code. The substance is what a clean rebuild exposed that the POC hides, four things. (a) `FLOOR_RULES` is an exported dead symbol in `poc/step3/step3.mjs` — nothing in the repo imports it; only `sourceForRule` three lines below reads it, while its sibling `LIST_RULES` is correctly private, so the `export` keyword was the dead part. (b) Two writers for one piece of state: `applyStep3` decides which raise word hit with `.some()`, and `matchedWordsForRule` re-decides it with `.filter()` — that duplication is precisely why D77 needed six proof pins to stop the two drifting apart. (c) That duplicate carried a latent bug: `matchedWordsForRule` ignores an injected LOVO word list and always reads module-level `RAISE_WORDS`. Demonstrated — with a rebuilt list of only `memberships`, the POC reports `membership+memberships`, a word the list does not contain. It is unreachable in the POC, since nothing asks for `matched` on a LOVO run, so it never produced a wrong published number; it is exactly the class of drift the new shape makes unrepresentable. (d) The step-3 verdict had two writers — `flow.mjs` hand-built the `floor-post` literal while `step3.mjs` owned `raise-word`; `src/step3.js` now exports `floorPost()` and `src/flow.js` calls it. Beyond the four: `matchedWordsForRule` and its six guard pins are DELETED, not ported, and the mechanism is worth naming plainly because it is the whole rewrite — the POC's helper asked "did anything match?", so it had to re-implement every rule a second time to recover which word; asking "which members matched?" once leaves nothing to re-derive. Step 3's coupling collapsed with it: `poc/step3` imports 9 symbols from steps 1 and 2, seven of them only to feed the re-derivation, while `src/step3.js` imports 2 (`splitTokens`, `wordsForRow`) and no longer knows step 1's word lists exist. The sort-order finding is recorded because it contradicts what steps 1 and 2 recorded: those two carry a KNOWN LIMIT that the corpus cannot see `matched`'s sort order, since 0 of 4171 rows fire more than one member. Step 3 is different — 17 of 4171 rows fire two `RAISE_WORDS` members, across five pairs: membership+memberships 8, grant+permission 3, panelist+panelists 2, watcher+watchers 2, invitation+invitations 2. Four of the five are singular/plural pairs sitting adjacent and already in declaration order, so they cannot tell a sort from insertion order; only `grant`+`permission` can, being declared 15th and 1st. So step 3's proof genuinely pins the sort where steps 1 and 2's cannot. Verification method is recorded too, since this project's rule is that an agent's "done" is not evidence: the orchestrator re-ran all seven checks independently, then broke `src/flow.js`'s precedence branch so step 3 could never raise, and watched `proof-flow.js` print 16 mismatches including exact 93.8% / leaks 1.8% — the pre-step-3 numbers — then restored the file and diffed it byte-identical.
 - Outcome: `src/step3.js`, `src/flow.js`, `src/index.js` and their tests, plus `tools/proof-step3.js` and `tools/proof-flow.js`. Equivalence to the frozen POC over all 4171 rows: 0 class / 0 rule / 0 source / 0 matched differences, `RAISE_WORDS` pinned set-equal at 17. 153 tests pass, typecheck clean, all five src proofs and all three poc proofs print "All pins hold.", `poc/` byte-untouched. No number moved: the flow is still 3930 exact (94.2%), 55 leaks (1.3%), 186 over-tight (4.5%) on 4171 rows, and the per-step-per-source ledger is unchanged — step 1 list 92/91/1 and floor 1960/1958/2; step 2 list 232/227/5 and floor 883/836/47; step 3 list 19/19/0 and floor 985/799/0 with 186 over-tight. The package fix was two bugs, not one: `exports` pointed at a nonexistent `./src/index.js`, and `files` was ["README.md","CHANGELOG.md","LICENSE"], so even a valid entry point would have shipped no code and 404'd for every adopter. Both closed; the tarball went from 4 files with no code to 23 files, 25.2 kB packed, with `src/` and `types/` in it, and the public surface is exactly one export, `classifyRow` — internals are sealed by the exports map, not merely undocumented. The published-map emitter (D76/D77's adopter-facing `evidence` field) is deliberately not built: the PRD puts it after step 3, in its own pass.
 - Lesson: the rewrite's value was not tidiness. Every defect found across all three passes was invisible in the POC precisely because the POC asked a weaker question and then patched around the answer — "did anything match?" forces a second implementation to recover the word, and a proof that guards a re-derivation is a proof guarding a design mistake rather than a behaviour. Two things worth carrying. A proof that cannot see a behaviour must not be what guards it: the sort order was pinned by construction in the tests, not by the corpus, and the corpus turned out to see it only by luck of one word pair. And the corpus's ability to see a behaviour differs step by step, so it must be checked per step and never inherited from the step before — steps 1 and 2 honestly recorded that their rows cannot see the sort, and carrying that limit forward to step 3 without re-checking would have recorded the opposite of the truth.
+
+### The clean exam is drawn, and the ladder's predictions are pre-registered on it before any label exists (2026-09-17)
+- Goal: draw a genuinely unseen exam for the three-step ladder and put the
+  classifier's verdicts on the record before truth exists, so the exam can be
+  scored once without anyone having to promise the rules were not fitted to it
+  (D24). No score was sought and none is reported here: this pass produces an
+  artefact and a parse-sanity check, nothing else.
+- Tried: fetched three complete official provider APIs — okta 734 rows,
+  docusign 414, xero 235, 1383 total — with overlap against the 15-provider
+  corpus, the M0-era tuning set and every earlier exam checked on both the raw
+  token and the registrable name, in both directions. Built `tools/predict-exam.js`,
+  which reads `data/exam-2026-09-17/ops.csv.gz` while the directory still carries
+  no truth column and no `label/` directory, runs `src/`'s frozen ladder over
+  every row, and writes `run-proof/exam-2026-09-17-predictions.csv`. It counts no
+  leaks and no over-tightness, and it deliberately does not print the r/w/x class
+  split — reading that split before the labels exist is the peek that tempts
+  fitting the rules to the exam's own rows. Committed as 66c68f1 together with
+  the corpus it was run on, since the predictions prove nothing apart from the
+  rows that produced them.
+- Outcome: predictions artefact sha256
+  80f3f37df9cb4e6e466e92be8c8896bf65f3725c4d7aa6defafcaeca9ba2f985, identical
+  across two runs, so the artefact is deterministic and citable. Parse sanity
+  holds on every provider: zero blank operationIds and zero blank paths in all
+  1383 rows; step-1 claims (okta 290, docusign 167, xero 126) equal each
+  provider's GET count exactly; empty summaries (0, 11, 4) match the README's
+  stated 734-of-734, 403-of-414 and 231-of-235. Step claims are okta
+  290/282/162, docusign 167/179/68, xero 126/105/4, summing to 583/566/234 =
+  1383. Source is the number that stands out: 1255 of 1383 rows (90.7%) reach a
+  wordless method floor and only 128 (9.3%) have a word list fire, and it is
+  wildly uneven by vendor — xero fires on 42 of 235 (17.9%), okta on 83 of 734
+  (11.3%), docusign on 3 of 414 (0.7%). xero's stated limit stands: 0 of its 235
+  rows carry description text, so any future rule needing the description is
+  blind on every xero row. The guards were proved able to fail rather than
+  asserted — a scratchpad copy with EXPECTED_ROWS at 1382 and another with xero
+  at 234 each exited 1 naming the disagreement. 72/72 tests pass, `tsc --noEmit`
+  is clean, and `src/` was not touched. One brief correction made by the writing
+  agent and kept: `description` is not passed into `classifyRow`, because
+  `src/types.js` says plainly it is not an Operation field (D78).
+- Lesson: pre-registration costs minutes and buys two separate things, and it is
+  worth being clear that they are separate. The timestamp is the cheap one — it
+  converts "we did not fit to the exam" from a promise into a fact git can
+  settle. The smoke test is the one that paid immediately: it caught that
+  docusign's Swagger 2.0 extract parses cleanly (zero blank operationIds, GET
+  counts matching to the row) before a single labelling hour was spent on rows
+  that might not have loaded. The third thing it surfaced was not asked for and
+  is the most useful: docusign fires a word list on 3 of 414 rows. Whatever this
+  exam eventually scores, docusign's number will be very close to a pure
+  method-floor number, and reading its result as evidence about the word lists
+  would be reading a rule that almost never ran. That is knowable now, without
+  truth, and it should be said out loud in advance rather than discovered as an
+  excuse afterwards.
