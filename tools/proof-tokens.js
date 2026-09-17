@@ -5,7 +5,9 @@
 // from every word list actually in the tree. Run with:
 //   node tools/proof-tokens.js
 // Prints "All pins hold." and exits 0 when every comparison is clean;
-// otherwise prints the first 10 differing cases per comparison and exits 1.
+// otherwise prints the TRUE total differing-case count per comparison
+// (every case is counted, not just the ones kept for display) plus a
+// sample of up to the first 10, and exits 1.
 import { loadRows } from './corpus.js';
 
 import * as oldWords from '../poc/step1/words.mjs';
@@ -17,17 +19,23 @@ import { RAISE_WORDS } from '../poc/step3/step3.mjs';
 
 const rows = loadRows();
 
+// Each entry holds `sample` (at most MAX_REPORT cases, for display) and
+// `count` (every differing case, uncapped) — the two must never be
+// conflated. `count` is what gets printed as "<name> differences: N"; a
+// reader judging severity reads that number, not the sample size, so it
+// must be the true total, never the capped sample size.
 const diffs = {
-  tokensForRow_tokens: [],
-  leadVerbAfterModifiers: [],
-  stemMatches: [],
+  tokensForRow_tokens: { sample: [], count: 0 },
+  leadVerbAfterModifiers: { sample: [], count: 0 },
+  stemMatches: { sample: [], count: 0 },
 };
 
 const MAX_REPORT = 10;
 
-function recordDiff(list, rowIdOrPair, input, oldVal, newVal) {
-  if (list.length < MAX_REPORT) {
-    list.push({ id: rowIdOrPair, input, old: oldVal, new: newVal });
+function recordDiff(entry, rowIdOrPair, input, oldVal, newVal) {
+  entry.count += 1;
+  if (entry.sample.length < MAX_REPORT) {
+    entry.sample.push({ id: rowIdOrPair, input, old: oldVal, new: newVal });
   }
 }
 
@@ -93,24 +101,27 @@ for (const token of tokenSet) {
 console.log(`rows compared: ${rows.length}`);
 console.log(`distinct tokens compared: ${tokenSet.size}`);
 console.log(`(token, stem) pairs compared: ${pairsCompared}`);
-console.log(`tokensForRow tokens differences: ${diffs.tokensForRow_tokens.length}`);
-console.log(`leadVerbAfterModifiers differences: ${diffs.leadVerbAfterModifiers.length}`);
-console.log(`stemMatches differences: ${diffs.stemMatches.length}`);
+console.log(`tokensForRow tokens differences: ${diffs.tokensForRow_tokens.count}`);
+console.log(`leadVerbAfterModifiers differences: ${diffs.leadVerbAfterModifiers.count}`);
+console.log(`stemMatches differences: ${diffs.stemMatches.count}`);
 
 const totalDiffs =
-  diffs.tokensForRow_tokens.length +
-  diffs.leadVerbAfterModifiers.length +
-  diffs.stemMatches.length;
+  diffs.tokensForRow_tokens.count +
+  diffs.leadVerbAfterModifiers.count +
+  diffs.stemMatches.count;
 
 if (totalDiffs === 0) {
   console.log('All pins hold.');
   process.exit(0);
 }
 
-for (const [name, list] of Object.entries(diffs)) {
-  if (list.length === 0) continue;
-  console.log(`\n--- first ${Math.min(MAX_REPORT, list.length)} differences: ${name} ---`);
-  for (const d of list) {
+for (const [name, entry] of Object.entries(diffs)) {
+  if (entry.count === 0) continue;
+  const heading = entry.count > MAX_REPORT
+    ? `first ${entry.sample.length} of ${entry.count} differences: ${name}`
+    : `differences: ${name}`;
+  console.log(`\n--- ${heading} ---`);
+  for (const d of entry.sample) {
     console.log(`id=${JSON.stringify(d.id)} input=${JSON.stringify(d.input)} old=${JSON.stringify(d.old)} new=${JSON.stringify(d.new)}`);
   }
 }
