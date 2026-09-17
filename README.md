@@ -54,22 +54,52 @@ itself as an MCP hint.
 
 ## Where it is today
 
-Measured on a labelled corpus of 5465 operations across 332 vendors.
-This is a tuning number, not a shipped one — see
-`docs/product/prd.md` and `docs/logs/learnings.md` for the full
-picture.
+Measured on 4171 operations from 15 complete official provider APIs.
 
-- Gets the class right on about 78% of operations.
-- Flags 36% as "I don't know" rather than guessing. Inside that pile,
-  91% are in fact the safe answer (`w`), 7.9% should have been marked
-  stricter, 1.1% too strict.
-- That pile is mostly the long tail. On well-known APIs it is a small
-  fraction of operations; on rarely-used ones it is most of them.
-- Under 1% of all operations (0.9%) come out too loose with no flag at
-  all — the number that matters for safety, and the one being worked
-  on now.
-- On a fresh exam of unseen rows, scored once: 70.2% exact, 3.2% too
-  loose.
+- Right on 3930 of those 4171 operations (94.2%).
+- Too loose on 55 of 4171 (1.3%). This is the direction that matters
+  for safety: it is the tool saying a call is tamer than it is.
+- Too strict on 186 of 4171 (4.5%) — annoying, never dangerous.
+
+Every answer comes from one of two places. **Known** means a word in the
+operation's name matched a word list — the tool read something. **Unknown**
+means nothing matched and the HTTP method alone decided it.
+
+| Step | Evidence | Rows | Right | Right % | Too loose | Loose % | Too strict | Strict % |
+|---|---|---|---|---|---|---|---|---|
+| **1 — r** | known | 92 | 91 | 98.9% | 1 | 1.1% | 0 | 0.0% |
+| **1 — r** | unknown | 1960 | 1958 | 99.9% | 2 | 0.1% | 0 | 0.0% |
+| **1 — r** | **total** | **2052** | **2049** | **99.9%** | **3** | **0.1%** | **0** | **0.0%** |
+| **2 — w** | known | 232 | 227 | 97.8% | 5 | 2.2% | 0 | 0.0% |
+| **2 — w** | unknown | 883 | 836 | 94.7% | 47 | 5.3% | 0 | 0.0% |
+| **2 — w** | **total** | **1115** | **1063** | **95.3%** | **52** | **4.7%** | **0** | **0.0%** |
+| **3 — x** | known | 19 | 19 | 100.0% | 0 | 0.0% | 0 | 0.0% |
+| **3 — x** | unknown | 985 | 799 | 81.1% | 0 | 0.0% | 186 | 18.9% |
+| **3 — x** | **total** | **1004** | **818** | **81.5%** | **0** | **0.0%** | **186** | **18.5%** |
+| all | known | 343 | 337 | 98.3% | 6 | 1.7% | 0 | 0.0% |
+| all | unknown | 3828 | 3593 | 93.9% | 49 | 1.3% | 186 | 4.9% |
+| **all** | **total** | **4171** | **3930** | **94.2%** | **55** | **1.3%** | **186** | **4.5%** |
+
+Four things that table says, and they are the whole shape of the tool:
+
+- **Words are rare, and nearly always right.** 343 of 4171 operations
+  (8%) match a word; those are right 337 of 343 times (98.3%). The other
+  92% are decided by the HTTP method alone.
+- **Almost every dangerous mistake is in one cell.** 47 of the 55
+  too-loose answers are step 2's unknown row — a PUT, DELETE or PATCH
+  with no word to read, called `w` where the truth was `x`. No other
+  cell leaks above 2.2%.
+- **Every too-strict answer is in one other cell.** All 186 are step 3's
+  unknown row: a POST nothing spoke for, left at `x`. That pile is right
+  799 of 985 times (81.1%); the rest is a usability cost, not a safety
+  one.
+- **Step 3 cannot leak.** It only ever assigns `x`, and there is nothing
+  looser than `x` for it to be wrong toward. That is structural, not luck.
+
+This is a tuning number, not a clean exam (D24): the rules were built
+from these same 4171 rows, so an API the tool has not seen will score
+worse. See `docs/product/prd.md` and `docs/logs/learnings.md` for the
+full picture.
 
 On doubt it picks the stricter class. It never loosens without
 evidence.
@@ -78,8 +108,10 @@ evidence.
 
 - **Agentic automation** — give an agent, or the arbiter watching it,
   an answer for every call before the call is made.
-- **Labelling your own API** — it does about three quarters of the job
-  in seconds with safe defaults; you correct the rest by hand.
+- **Labelling your own API** — it gets 3930 of 4171 operations right
+  (94.2%) in seconds, with safe defaults where it is unsure; you review
+  the rest by hand, mostly to loosen the 186 it left stricter than they
+  needed to be.
 - **MCP hints** — feed the class straight to the agents already
   calling your API.
 
@@ -90,10 +122,12 @@ while the remaining work is measured. Design and numbers live in
 `docs/product/prd.md`; every experiment is logged in
 `docs/logs/learnings.md`.
 
-`rwxmap@0.1.0` exists on npm, but only to reserve the name: the tarball
-ships this README, the changelog, and the license — no code, no entry
-point, nothing to `require` or `import`. The classifier stays a POC in
-`poc/flow/` until it graduates.
+`rwxmap@0.1.0` on npm is a name reservation: that tarball shipped this
+README, the changelog and the license — no code, nothing to `require` or
+`import`. The repo now has a real entry point, `src/index.js`, with a
+single export, `classifyRow`. It has not been published yet. `poc/` keeps
+the earlier step-by-step builds (`archive`, `step1`, `step2`, `step3`) as
+the frozen reference the current code is proved against.
 
 ## License
 

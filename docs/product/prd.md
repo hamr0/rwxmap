@@ -91,13 +91,14 @@ three steps. Each step takes the rows the step before left behind.
    **0 leaks, structurally**, since x is the tightest class and there
    is nothing looser for step 3 to be wrong toward.
 
-**Superseded 2026-09-16 — the core is reopened.** What follows describes
-the frozen shape that `poc/flow` still implements today. It stays until
-the POST POC below answers; the target shape is in "The new core"
-further down. Steps 1 and 2 are the exception: they are no longer
-waiting on the POST POC, they are built and frozen separately in
-`poc/step1/` (D74) and `poc/step2/` (D75), so what this note still
-covers is step 3 alone.
+**Superseded — what follows describes the retired core.** The shape that
+replaced it is in "The new core" further down, and it is what the code
+implements today. All three steps are now built, frozen and living in
+`src/`: step 1 (D74), step 2 (D75), step 3 (D78), graduated from `poc/`
+to `src/` on 2026-09-17 (D79). The freeze is on the rules and the word
+lists, not on where the files sit — `src/` reproduces them with 0 class
+/ 0 rule / 0 source / 0 matched differences over all 4171 corpus rows —
+so graduation re-housed the frozen core, it did not thaw it.
 
 **The build, step by step, in plain words (the user's ruling
 2026-09-14: keep it all as is, this is the best measured shape).**
@@ -187,7 +188,7 @@ The alternative (d → x, the yours-list-only shape A) is 37 leaks /
 On the 5465 rows PATCH is no longer the outlier it was on 42 rows (31%
 x); it sits with PUT and DELETE at 14-15% x, so it keeps the w floor.
 
-In code, poc/flow/flow.mjs runs step 1 -> step 2 -> floor x, one order
+In code, src/flow.js runs step 1 -> step 2 -> step 3, one order
 written once; there is no second lens.
 
 **Movement rule.** Raising is `w -> x` on PUT/DELETE/PATCH. Lowering is
@@ -210,7 +211,7 @@ row comes out with a class and a flag.
 
 1. **Step 1, r floor** = GET 99.9% (1958 of 1960) > POST 9.5% (124 of
    1309). **FROZEN 2026-09-16 (D74)** — no rule or word-list change
-   until the user lifts the freeze. Built and measured, `poc/step1/`.
+   until the user lifts the freeze. Built and measured, `src/step1.js`.
    How: the method
    floor (GET / HEAD / OPTIONS -> r; the corpus has no HEAD or OPTIONS
    rows, so those two are carried on principle, not on evidence), plus
@@ -239,7 +240,7 @@ row comes out with a class and a flag.
    the leak in another (stripe), so LOVO expects the cost to
    generalize and the gain not to. See `docs/logs/learnings.md`.
 2. **Step 2, w** — **FROZEN 2026-09-17 (D75)** — no rule or
-   word-list change until the user lifts the freeze. `poc/step2/`,
+   word-list change until the user lifts the freeze. `src/step2.js`,
    built and verified. Three rules. (a) `method-floor`: every PUT /
    DELETE / PATCH row starts at w, no words involved. (b)
    `modify-verb`: on the POST rows step 1 left behind, a **modify
@@ -267,7 +268,7 @@ row comes out with a class and a flag.
    step 3's job, not something better words here can do. See
    `docs/logs/learnings.md`.
 3. **Step 3, x** = the fallback, not a floor. **FROZEN 2026-09-17
-   (D78)** — built and measured, `poc/step3/`. How: `RAISE_WORDS`, 17
+   (D78)** — built and measured, `src/step3.js`. How: `RAISE_WORDS`, 17
    role/access nouns read at any token position, raising a row that
    step 2 floored WITHOUT a word from w to x — 19 claimed, 19 right, 0
    false alarms, fitted; 6 of 66 leave-one-vendor-out and all 6 the
@@ -305,10 +306,9 @@ step — no list is shared between steps, which is D57 still holding.
 One of the six is plumbing (`LEAD_MODIFIERS`), two are verb lists that
 lower a row, one is a noun list that blocks a lowering, and one is a
 noun list that raises a row. Where each lives: `LEAD_MODIFIERS` (5) in
-`poc/step1/words.mjs`, `READ_VERBS` (23) and `SAFE_VERBS` (10) in
-`poc/step1/step1.mjs`, `MODIFY_VERBS` (24) and `OTHER_PARTY` (21) in
-`poc/step2/step2.mjs`, and `RAISE_WORDS` (17) in
-`poc/step3/step3.mjs`.
+`src/tokens.js`, `READ_VERBS` (23) and `SAFE_VERBS` (10) in
+`src/step1.js`, `MODIFY_VERBS` (24) and `OTHER_PARTY` (21) in
+`src/step2.js`, and `RAISE_WORDS` (17) in `src/step3.js`.
 
 ### What the tool would say today
 
@@ -400,111 +400,65 @@ fitted, 6 leave-one-vendor-out, at 0 false alarms in both readings — and
 all 6 LOVO closures are the single word `permission`, because the other
 16 words each appear in only one provider.
 
-## The three steps
-
-The frozen core (`poc/flow`) was built and pinned on the old 5465-row
-corpus (those pins are unchanged and still live in `ledger.mjs`;
-history is in `docs/logs/learnings.md`). It was then scored once,
-unmodified, against the new 4171-row provider corpus — the harder
-test, since 14 of 15 providers are unseen (stripe is in the old corpus
-and was scored leave-one-vendor-out):
-
-Whole corpus, n=4171: **exact 83.8%, leaks 0.4% (17 rows), over-tight
-15.8%.** By method:
-
-| method | n | exact | leaks | over-tight |
-|---|---|---|---|---|
-| GET | 1960 | 99.9% | 0.1% | 0.0% |
-| POST | 1309 | 66.2% | 0.2% | 33.6% |
-| PUT | 345 | 74.2% | 2.0% | 23.8% |
-| DELETE | 473 | 75.1% | 1.1% | 23.9% |
-| PATCH | 84 | 72.6% | 0.0% | 27.4% |
-
-This beats the prior pins (78.8% exact / 3.7% leaks / 17.5% over-tight
-on the old corpus) on all three counts, on a harder unseen-vendor test.
-
-Per-rule, over the same 4171 rows — the important finding:
-
-| rule | n | exact | leaks | over-tight |
-|---|---|---|---|---|
-| method (GET → r) | 1960 | 100% | 2 | 0 |
-| floor | 1629 | 72% | 8 | 440 |
-| yours-noun | 245 | 98% | 4 | 0 |
-| other-noun | 241 | 19% | 0 | 195 |
-| read-verb | 65 | 95% | 3 | 0 |
-| live-verb | 31 | 26% | 0 | 23 |
-
-The two raising rules (other-noun, live-verb) together raise 218 rows
-wrongly and close zero leaks on this corpus. They were adopted on the
-old corpus because they closed leaks there. yours-noun, the one
-loosening rule, is 98% right. This is a measurement, not a decision —
-whether to drop or change either raising rule is open to the user.
-
-Evidence-vs-floor flag against truth:
-
-| flag | rows | leaks | over-tight |
-|---|---|---|---|
-| evidence | 245 | 4 | 0 |
-| x-pile | 385 | 8 | 0 |
-| no flag | 3541 | 5 | 658 |
-
-The x-pile flag holds 8 of 17 leaks in 9% of rows — weaker than the old
-corpus, where it held 155 of 187 (83%), because the leaks moved: the 17
-leaks on the new corpus cluster in jira roles/filters (6), "verify" on
-POST not being a read (3), two GET leaks the floor cannot reach by
-design (datadog GetGraphSnapshot, intercom listContactBanners), and
-singletons across stripe, zoom, digitalocean, intercom, paypal and
-spotify.
-
-Leaks stop at step 3 by construction, not by luck: a leak is a class
-looser than truth, step 3 only ever assigns `x`, and there is nothing
-looser than `x` to be wrong toward. Leaks can only be created where a
-step stops at a loose class — step 1's `r` and step 2's `w` — which is
-why the table above shows all 17 leaks sitting on `method`, `floor`,
-`yours-noun` and `read-verb`, never on the raising rules.
-
-### Where the code lives (poc/flow)
+### Where the code lives (src/)
 
 | file | owns |
 |---|---|
-| `corpus.mjs` | corpus loading |
-| `csv.mjs` | CSV read/write |
-| `words.mjs` | the splitter, tokenizer, verb stemmer, noun reader — readers only, no lists |
-| `floor.mjs` | the per-method floor |
-| `step1.mjs` | the read-verb rule (r) |
-| `step2.mjs` | the live-verb, other-noun and yours-noun rules (w/x) |
-| `flow.mjs` | the one classifier entry point, step order |
-| `ledger.mjs` | every pin, in one place |
-| `proof.mjs` | the one CSV + the one markdown report |
+| `src/tokens.js` | the splitter, tokenizer, verb stemmer — readers only, no classification list |
+| `src/step1.js` | step 1, the r step: `method`, `read-verb`, `read-verb-anywhere`; owns `READ_VERBS`, `SAFE_VERBS` |
+| `src/step2.js` | step 2, the w step: `method-floor`, `modify-verb`, `modify-verb-summary`; owns `MODIFY_VERBS`, `OTHER_PARTY` |
+| `src/step3.js` | step 3, the x step: `raise-word`, `floor-post`; owns `RAISE_WORDS` |
+| `src/flow.js` | the ladder — step order and precedence, written once |
+| `src/index.js` | the package entry point |
+| `src/types.js` | the shared `Operation` and `Verdict` typedefs |
+| `tools/corpus.js`, `tools/csv.js` | corpus loading and CSV read, test/dev only, never shipped |
+| `tools/proof-*.js` | the proofs (see below) |
 
-- One order, written once, in `flow.mjs`.
-- Each step owns its own word lists; `words.mjs` holds readers only,
-  never a list.
-- Every pin lives in `ledger.mjs` PINS and moves only with a logged
-  re-measure and the user's word.
-- The proof is one CSV, `run-proof/flow.csv`.
+- One order, written once, in `src/flow.js`.
+- Each step owns its own word lists; `src/tokens.js` holds readers
+  only, never a list.
+- Each rule returns its own `source` (floor/list) and `matched` (the
+  member that fired) at the moment it matches. Nothing re-derives them
+  afterwards, which is what let `sourceForRule` and
+  `matchedWordsForRule` be deleted rather than ported (D79).
+- `poc/` is retained deliberately, byte-untouched, as the FROZEN
+  REFERENCE the src code is proved against — not as live code and not
+  as a second implementation. `tools/proof-step1.js`,
+  `tools/proof-step2.js` and `tools/proof-step3.js` are the
+  equivalence proofs: they run both sides over all 4171 corpus rows and
+  compare class, rule, source and matched, row by row.
 
-Run: `node poc/flow/proof.mjs` (one CSV + one markdown report, exits 1
-if a pin moves); `node --test poc/flow/*.test.mjs` (the pins).
+The public surface is ONE export: `classifyRow`, from `src/index.js`,
+which returns a `Verdict` (`class`, `step`, `rule`, `source`,
+`matched`). The steps, the word lists, the tokeniser, `wordsForStep3`
+and `floorPost` are internals, sealed by the package's `exports` map
+rather than merely undocumented. The D76/D77 published map and its
+`evidence` field are NOT built: that emitter is the next pass, and
+nothing emits yet.
 
-Known limits: this is a tuning-corpus number under LOVO; exams 1-3 were
-used to tune and exam 4 was found to be drawn from
-already-burned providers; exam 5 (D68) is the first exam scored once on
-unseen rows — row-disjoint for writes, vendor-disjoint for POST and
-GET — and came out 70.2% exact / 3.2% leaks / 26.7% over-tight overall,
-writes 73.3 / 3.7 / 23.0, POST 36.8 / 0.3 / 62.9 (POST relabelled under
-the brief fixed 2026-09-15)
-(`docs/logs/learnings.md`, "Exam 5 scored once"); this is a POC, never shipped as one; the
-x-pile flag is reported in the CSV, not yet wired to any consumer;
-poc/m1 is archived at poc/archive/m1/ (D65). The core was FROZEN on
-2026-09-16 at these numbers on the old corpus: 78.8% exact / 3.7% leaks
-/ 17.5% over-tight under LOVO; exam 5 70.2 / 3.2 / 26.7; the x-pile
-held 1972 rows (36.1% of the corpus), 91.0% truth w, 7.9% flagged
-leaks, 1.1% over-tight, 49 leaks (0.9%) unflagged. No word list or rule
-change has happened since. The same frozen core, unmodified, was then
-scored once against the new 4171-row provider corpus — see "The three
-steps" above for the current numbers (83.8% exact / 0.4% leaks / 15.8%
-over-tight) and the per-rule and x-pile breakdown on that corpus.
+Run: `npm test` (153 tests); `npm run typecheck` (`tsc --noEmit` over
+`src/`); and the five proofs, each printing "All pins hold." and
+exiting 0 or printing its mismatches and exiting 1 —
+`node tools/proof-tokens.js`, `node tools/proof-step1.js`,
+`node tools/proof-step2.js`, `node tools/proof-step3.js` (the four
+equivalence proofs against frozen `poc/`) and
+`node tools/proof-flow.js` (every pinned flow number, recomputed from
+`src/` alone).
+
+Current shape, n=4171: **exact 3930 (94.2%), leaks 55 (1.3%),
+over-tight 186 (4.5%).** Per step and per source — step 1 list
+92/91/1 leak and floor 1960/1958/2; step 2 list 232/227/5 and floor
+883/836/47; step 3 list 19/19/0 and floor 985/799/0 with all 186
+over-tight rows. Known limits: there is NO CLEAN EXAM — all three steps
+were measured on the same 4171 rows they were tuned on, which under D24
+makes this corpus a tuning set, so an unseen vendor will score worse;
+47 of the 55 leaks sit on step 2's wordless PUT/DELETE/PATCH floor and
+all 186 over-tight rows on step 3's `floor-post` pile. Leaks can only
+be created where a step stops at a loose class — step 1's `r` and step
+2's `w` — which is why step 3's leak count is 0 by construction rather
+than by luck. `poc/m1` is archived at `poc/archive/m1/` (D65).
+Superseded shapes and their numbers are in `docs/logs/learnings.md`,
+not here.
 
 GET is last on the list; it runs no word rules by design. On the new
 provider corpus GET truth is 100% r (Table 1) and the frozen core
@@ -516,7 +470,10 @@ class).
 
 ## Where the work is
 
-M1, the informed arbiter, is a POC and has not graduated. The full
+M1, the informed arbiter, has graduated: the classifier lives in
+`src/` (D79) and the package exposes it as one export. What has not
+shipped is the published map — no emitter is built and nothing emits
+yet. The full
 module ladder, the M1 go/no-go gate, the labelled sets and the current
 arbiter shape with its scores live in
 [module ladder and arbiter shape](../wiki/module-ladder-and-shape.md).
@@ -814,11 +771,17 @@ OpenAPI document it describes:
   defines.
 - What is shippable today is unchanged by this decision: `readOnlyHint`
   (and therefore WebMCP's `readOnlyHint`) is ready at 3 unsafe-wrong
-  rows in 4171 (0.07%); `consequentialHint` and `idempotentHint` both
-  wait on step 3.
-- The four carriers are an output contract, not code. Nothing emits yet;
-  no emitter is built before step 3, and the input-adapter question
-  under Open questions stays open.
+  rows in 4171 (0.07%); `consequentialHint` follows directly from the
+  class, since WebMCP's two flags carry r/w/x with nothing left over
+  (carrier 3 above). Neither waits on step 3 any longer — it is built
+  (D78) and the classifier has graduated to `src/` (D79).
+  `idempotentHint` is blocked on something else entirely: its two
+  readings are still unchosen (see the hints section below for the
+  numbers on both), and step 3 does not decide between them.
+- The four carriers are an output contract, not code. Step 3 is now
+  built (D78) and the classifier has graduated to `src/` (D79), but
+  nothing emits yet: the emitter is the next pass, and the
+  input-adapter question under Open questions stays open.
 
 ## Open questions
 
@@ -830,7 +793,7 @@ Non-blocking; never silently assumed.
   the inversion recorded 2026-09-14/15 is now read as a property of
   exam 5's draw (89 vendors, median 1 POST row each, drawn from
   APIs.guru fragments) rather than of POST itself. How a POST row
-  reaches w is no longer open either: step 2 (`poc/step2/`) answers it
+  reaches w is no longer open either: step 2 (`src/step2.js`) answers it
   with a modify verb plus the `OTHER_PARTY` block, reaching 227 of the
   380 truth-w POST rows, against zero before. What stays open is the
   remaining 153 POST rows that never get off the `x` floor, and step
@@ -874,9 +837,11 @@ Non-blocking; never silently assumed.
     all, because step 3 only raises `w` to `x` and `readOnlyHint` is
     already false for both — so waiting for step 3 buys
     `readOnlyHint` nothing.
-  - `idempotentHint`: **not ready, and step 3 is what would fix it.**
-    Two readings, not yet chosen. Reading A, from the class: true for
-    `r` or `w`, since by D20 an operation you can't safely repeat is
+  - `idempotentHint`: **not ready, and step 3 is not what would fix
+    it.** Step 3 is built (D78), and the block is the choice below, not
+    the ladder. Two readings, still not chosen. Reading A, from the
+    class: true for `r` or `w`, since by D20 an operation you can't
+    safely repeat is
     `x` — says true on 3186 rows, 72 unsafe-wrong (1.73% of all rows,
     2.26% of the trues); the 2026-09-17 `OTHER_PARTY` trim grew the
     `w` pile by 16 rows without adding one unsafe-wrong row, since all

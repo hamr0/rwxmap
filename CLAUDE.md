@@ -21,14 +21,24 @@ is the Resource Owner's act, not this tool's.
 
 ## Test bed
 
-`data/camara-2026-09-01/` is the only test bed; experiments run against
-files in this tree, never against `justabit`. The known limits stay
-stated: the GET half was judged by template, not read operation by
-operation, and the 57-of-138 read-named-POST figure is a reader's
-judgement, not a rule output. The two negative controls — ClickToDial
-`DELETE /calls/{callId}` `terminateCall` and WebRTC
-`PUT /sessions/{mediaSessionId}/status` `updateSessionStatus` — must come
-out `x`.
+`data/provider-corpus-2026-09-16/` is the only measurement set — 4171
+operations across 15 complete official provider APIs. Every number that
+counts is scored against it; experiments run against files in this tree,
+never against `justabit`. The known limit stays stated: it is a tuning
+set, not a clean exam (D24). Steps 1 and 2 were tuned on the rows they
+are scored on and no clean exam exists for the current flow, so every
+figure reads better than an unseen vendor would.
+
+`data/camara-2026-09-01/` is the M0 test bed. It is historical: kept for
+the record, not scored against, and not a gate for any current work. Its
+limits belong with it — M0's GET half was judged by template, not read
+operation by operation, and its 57-of-138 read-named-POST figure was a
+reader's judgement, not a rule output. M0's two negative controls —
+ClickToDial `DELETE /calls/{callId}` `terminateCall` and WebRTC
+`PUT /sessions/{mediaSessionId}/status` `updateSessionStatus` — are
+retired with it. They came out `x` under M0's arbiter shape; the current
+word-list flow puts both at `w`, and that is measured and accepted, not
+an open defect to chase.
 
 ## How work runs here
 
