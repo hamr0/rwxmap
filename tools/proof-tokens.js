@@ -1,15 +1,15 @@
-// Equivalence proof: src/tokens.mjs vs. the frozen poc/step1/words.mjs.
-// This is the point of the whole "shared plumbing" piece — src/tokens.mjs
+// Equivalence proof: src/tokens.js vs. the frozen poc/step1/words.mjs.
+// This is the point of the whole "shared plumbing" piece — src/tokens.js
 // must behave IDENTICALLY to the frozen POC it was ported from, over every
 // row of the real 4171-row corpus and over every (token, stem) pair drawn
 // from every word list actually in the tree. Run with:
-//   node tools/proof-tokens.mjs
+//   node tools/proof-tokens.js
 // Prints "All pins hold." and exits 0 when every comparison is clean;
 // otherwise prints the first 10 differing cases per comparison and exits 1.
-import { loadRows } from './corpus.mjs';
+import { loadRows } from './corpus.js';
 
 import * as oldWords from '../poc/step1/words.mjs';
-import * as newTokens from '../src/tokens.mjs';
+import * as newTokens from '../src/tokens.js';
 
 import { READ_VERBS, SAFE_VERBS } from '../poc/step1/step1.mjs';
 import { MODIFY_VERBS, OTHER_PARTY } from '../poc/step2/step2.mjs';

@@ -6,7 +6,7 @@ import {
   stemMatches,
   matchesAnyStem,
   leadVerbAfterModifiers,
-} from './tokens.mjs';
+} from './tokens.js';
 
 // --- ported from poc/step1/words.test.mjs --------------------------------
 

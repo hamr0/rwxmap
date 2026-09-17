@@ -4,6 +4,19 @@
   "description": "Maps OpenAPI operations to r/w/x with an evidence-vs-floor flag, from HTTP-method semantics (RFC 9110) plus the verb in the path. [WIP: MCP tool-annotation hints not yet implemented]",
   "license": "Apache-2.0",
   "type": "module",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./src/index.js"
+    }
+  },
+  "scripts": {
+    "test": "node --test src/*.test.js poc/step1/*.test.mjs poc/step2/*.test.mjs poc/step3/*.test.mjs",
+    "typecheck": "tsc --noEmit",
+    "build:types": "tsc -p tsconfig.build.json",
+    "prepack": "npm run build:types"
+  },
   "engines": {
     "node": ">=22"
   },
@@ -36,6 +49,8 @@
     "LICENSE"
   ],
   "devDependencies": {
+    "@types/node": "^22.20.3",
+    "typescript": "^7.0.2",
     "yaml": "^2.5.1"
   }
 }
