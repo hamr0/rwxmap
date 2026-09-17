@@ -73,20 +73,26 @@ three steps. Each step takes the rows the step before left behind.
    (D74) — 2052 claimed, 3 leaks, 2049 of the corpus's 2082 truth-r
    rows found (98.4%).
 2. **Step 2, w.** Start every PUT / DELETE / PATCH row at w. Then look
-   at the POST rows step 1 left behind: a POST with a modify verb plus
-   a yours noun is w. (Measured 2026-09-13: 10 right, 4 wrong on 14
-   rows; the verb alone is a coin flip, 77 to 69. Not adopted today —
-   POST leftover stays x. See learnings, "One-flow ladder".)
-3. **Step 3, x.** Not a step of its own — x is the byproduct: every
-   POST / PUT / DELETE / PATCH row that step 1 and step 2 did not
-   claim. Step 2 gives a w row up (a live verb or a not-yours noun
-   fires) and it lands here.
+   at the POST rows step 1 left behind: a POST whose lead token is a
+   modify verb from `MODIFY_VERBS` is w, and so is one whose
+   operationId carries no verb at all (a bare `PostThing` name) but
+   whose summary leads with one. Either way the lowering is blocked
+   when the row names someone who is not the caller, from
+   `OTHER_PARTY`. Built and frozen 2026-09-17 (D75) — 1134 claimed,
+   71 leaks, reaching 227 of the 380 truth-w POST rows. See learnings,
+   "One-flow ladder".
+3. **Step 3, x.** x is where every row lands that steps 1 and 2 did
+   not claim — 985 rows today. Step 3 is not built, so nothing raises
+   a row to x on evidence yet; the 66 PUT / DELETE / PATCH rows
+   sitting at w whose truth is x are what step 3 exists to raise.
 
 **Superseded 2026-09-16 — the core is reopened.** What follows describes
 the frozen shape that `poc/flow` still implements today. It stays until
 the POST POC below answers; the target shape is in "The new core"
-further down. Step 1 is the exception: it is no longer waiting on the
-POST POC, it is built and frozen separately in `poc/step1/` (D74).
+further down. Steps 1 and 2 are the exception: they are no longer
+waiting on the POST POC, they are built and frozen separately in
+`poc/step1/` (D74) and `poc/step2/` (D75), so what this note still
+covers is step 3 alone.
 
 **The build, step by step, in plain words (the user's ruling
 2026-09-14: keep it all as is, this is the best measured shape).**
@@ -190,7 +196,7 @@ One direction of travel per method (D43):
 - POST — lower only, `x -> r`.
 - PUT / DELETE / PATCH — raise only, `w -> x`.
 
-### The new core (step 1 frozen, step 2 built, step 3 not built)
+### The new core (steps 1 and 2 frozen, step 3 not built)
 
 The user's model, 2026-09-16, corrected where the 2026-09-16 floor POC
 contradicts it; the gist and the structure are the user's. Three
@@ -227,16 +233,18 @@ row comes out with a class and a flag.
    rows for 1 leak, with the gains in one vendor (digitalocean) and
    the leak in another (stripe), so LOVO expects the cost to
    generalize and the gain not to. See `docs/logs/learnings.md`.
-2. **Step 2, w** — **BUILT 2026-09-16**, `poc/step2/`; verified, not
-   frozen, and not yet a numbered decision. Two rules. (a)
-   `method-floor`: every PUT / DELETE / PATCH row starts at w, no
-   words involved. (b) On the POST rows step 1 left behind, a **modify
-   verb** from `MODIFY_VERBS` lowers x to w, where the verb is the
-   operationId's lead token, or — when that lead token is a bare HTTP
-   method word, as in stripe's `PostTaxCalculations` and mailchimp's
-   `postLists` — the lead verb of the summary instead (rule
-   `modify-verb-summary`). That lowering is BLOCKED if any word of the
-   row is in `OTHER_PARTY`. Two lists, both owned by step 2:
+2. **Step 2, w** — **FROZEN 2026-09-17 (D75)** — no rule or
+   word-list change until the user lifts the freeze. `poc/step2/`,
+   built and verified. Three rules. (a) `method-floor`: every PUT /
+   DELETE / PATCH row starts at w, no words involved. (b)
+   `modify-verb`: on the POST rows step 1 left behind, a **modify
+   verb** from `MODIFY_VERBS` at the operationId's lead token lowers
+   x to w. (c) `modify-verb-summary`: the same list read against the
+   summary's lead verb instead, when the operationId's lead token is a
+   bare HTTP method word, as in stripe's `PostTaxCalculations` and
+   mailchimp's `postLists`. Both POST rules, (b) and (c), are BLOCKED
+   if any word of the row is in `OTHER_PARTY`. Two lists, both owned
+   by step 2:
    `MODIFY_VERBS` (24 verbs that act on a thing that already exists)
    and `OTHER_PARTY` (21 role nouns naming someone who is not the
    caller). Ledger over the 2119 rows step 1 left it: `method-floor`
