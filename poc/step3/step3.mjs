@@ -15,8 +15,9 @@
 // raise-word is built in flow.mjs, not here, because it needs to see step
 // 2's claim (and specifically which rule fired) before it can act. This
 // file only holds the word list and the match itself.
-import { splitTokens } from '../step1/words.mjs';
-import { wordsForRow } from '../step2/step2.mjs';
+import { splitTokens, stemMatches, leadVerbAfterModifiers, tokensForRow } from '../step1/words.mjs';
+import { READ_VERBS, SAFE_VERBS } from '../step1/step1.mjs';
+import { wordsForRow, MODIFY_VERBS, summaryVerb } from '../step2/step2.mjs';
 
 // RAISE_WORDS (17): role/access nouns, not verbs. The PRD calls the
 // mechanism "live verbs" but nothing here is a verb -- these are the nouns
@@ -85,4 +86,55 @@ export function wordsForStep3(row) {
 export function applyStep3(row, words = RAISE_WORDS) {
   const hit = wordsForStep3(row).some((w) => words.has(w));
   return hit ? { class: 'x', step: 3, rule: 'raise-word' } : null;
+}
+
+/**
+ * The word(s) that actually fired for a row's rule, RE-DERIVED from the
+ * frozen steps' own exported helpers rather than returned by them — steps 1
+ * and 2 hand back only class/step/rule, never which list member matched.
+ * Each branch below mirrors, verb for verb, exactly how the owning rule
+ * decides in step1.mjs / step2.mjs, so this cannot silently drift from what
+ * actually fired. Floor rules (method, method-floor, floor-post) match
+ * nothing and return '' — that is the honest reading, not a gap. When more
+ * than one list member matches, they are joined with '+' in sorted order for
+ * a deterministic result. Throws on an unknown rule, like sourceForRule does.
+ * @param {{method?:string, operationId?:string, path?:string, summary?:string}} row
+ * @param {string} rule
+ * @returns {string}
+ */
+export function matchedWordsForRule(row, rule) {
+  switch (rule) {
+    case 'method':
+    case 'method-floor':
+    case 'floor-post':
+      return '';
+    case 'read-verb': {
+      const verb = leadVerbAfterModifiers(row);
+      return [...READ_VERBS].filter((m) => stemMatches(verb, m)).sort().join('+');
+    }
+    case 'read-verb-anywhere': {
+      const { tokens } = tokensForRow(row);
+      const matched = new Set();
+      for (const t of tokens) {
+        for (const m of SAFE_VERBS) {
+          if (stemMatches(t, m)) matched.add(m);
+        }
+      }
+      return [...matched].sort().join('+');
+    }
+    case 'modify-verb': {
+      const verb = leadVerbAfterModifiers(row);
+      return [...MODIFY_VERBS].filter((m) => stemMatches(verb, m)).sort().join('+');
+    }
+    case 'modify-verb-summary': {
+      const verb = summaryVerb(row);
+      return [...MODIFY_VERBS].filter((m) => stemMatches(verb, m)).sort().join('+');
+    }
+    case 'raise-word': {
+      const rowWords = new Set(wordsForStep3(row));
+      return [...RAISE_WORDS].filter((w) => rowWords.has(w)).sort().join('+');
+    }
+    default:
+      throw new Error(`matchedWordsForRule: unknown rule ${JSON.stringify(rule)}`);
+  }
 }

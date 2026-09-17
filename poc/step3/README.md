@@ -51,6 +51,31 @@ The match itself is a plain **exact match at any token position** — no
 stemming, no lead-token restriction. These are nouns, not verbs to be
 inflected.
 
+## The `matched` column
+
+`run-proof/step3.csv` carries a `matched` column, immediately after `source`:
+the specific word-list member that fired for the row, so a reader can see
+*what* hit rather than only that something did. It is **empty on every
+`floor` row by design** -- a floor rule (`method`, `method-floor`,
+`floor-post`) matches nothing, so leaving it blank is the honest reading, not
+a gap. On a `list` row it holds the matching member of the rule's own list
+(`READ_VERBS`, `SAFE_VERBS`, `MODIFY_VERBS` or `RAISE_WORDS`), reported as it
+appears in the list (its stem), not as it appears in the row; when more than
+one member matches, they are joined with `+` in sorted order for a
+deterministic result.
+
+Steps 1 and 2 are frozen and hand back only class/step/rule -- neither one
+returns which list member matched. `matched` is therefore **re-derived** in
+`poc/step3/step3.mjs`'s `matchedWordsForRule(row, rule)`, using steps 1 and
+2's own exported helpers (`READ_VERBS`, `SAFE_VERBS`, `stemMatches`,
+`leadVerbAfterModifiers`, `tokensForRow` from step 1; `MODIFY_VERBS`,
+`summaryVerb` from step 2) so each branch mirrors, verb for verb, exactly how
+the owning rule decided -- never a copy that can quietly drift from what
+actually fired. `node poc/step3/proof.mjs` pins the re-derivation against
+drift: `matched` is non-empty for exactly the 343 rows whose `source` is
+`list` and empty for exactly the 3828 rows whose `source` is `floor`, with a
+per-rule non-empty count for each of the five list rules.
+
 ## Pins (measured against `loadRows()` from `../step1/corpus.mjs`, 4171 rows)
 
 - `raise-word`: 19 claimed, 19 truth `x`, 0 false alarms.

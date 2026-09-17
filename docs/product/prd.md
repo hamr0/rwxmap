@@ -644,7 +644,8 @@ the targeted revision before anything emits, because all four are moving.
 
 ### The map (the one file rwxmap owns)
 
-One row per operation, keyed by method + path + operationId, five fields:
+One row per operation, keyed by method + path + operationId, carrying
+three fields:
 
 ```json
 {
@@ -652,21 +653,47 @@ One row per operation, keyed by method + path + operationId, five fields:
   "source": "stripe/spec3.json",
   "operations": [
     { "method": "GET",    "path": "/v1/customers/{customer}", "operationId": "GetCustomersCustomer",
-      "class": "r", "destructive": false, "evidence": "method",      "confident": true },
+      "class": "r", "destructive": false, "evidence": "floor" },
     { "method": "POST",   "path": "/v1/customers/{customer}", "operationId": "PostCustomersCustomer",
-      "class": "w", "destructive": false, "evidence": "modify-verb", "confident": true },
-    { "method": "DELETE", "path": "/v1/accounts/{account}",   "operationId": "DeleteAccountsAccount",
-      "class": "x", "destructive": true,  "evidence": "floor-only",  "confident": false }
+      "class": "w", "destructive": false, "evidence": "list" },
+    { "method": "DELETE", "path": "/rest/api/2/filter/{id}/permission/{permissionId}", "operationId": "deleteSharePermission",
+      "class": "x", "destructive": true,  "evidence": "list" },
+    { "method": "POST",   "path": "/chat/completions", "operationId": "createChatCompletion",
+      "class": "x", "destructive": false, "evidence": "floor" }
   ]
 }
 ```
 
-All three rows are real corpus rows from
-`data/provider-corpus-2026-09-16/`. `evidence` is the rule that claimed
-the row, and `"floor-only"` is the honesty flag the project already
-measured (no word fired; only the method is known) — the third row is
-in fact one of step 2's 66 floor leaks, truth `x`, which the tool calls
-`w` until step 3 exists.
+All four rows are real corpus rows from
+`data/provider-corpus-2026-09-16/`, carrying what the tool actually
+emits for them today.
+
+`evidence` has exactly two values and they are the same floor/list axis
+the internal sheet records:
+
+- `list` — a word list fired. The tool read a word and claimed the row
+  on evidence. 343 of the 4171 corpus rows, 98.3% right.
+- `floor` — no word matched; only the HTTP method was known, and the
+  class is that method's default. 3828 rows, 93.9% right, and the
+  honesty flag the project already measured: every one of the 55 leaks
+  that fired no word, and all 186 over-tight rows, are `floor` rows.
+
+The fourth row above is a `floor` row from step 3's leftover pile and
+it is wrong: `createChatCompletion` is truth `r`, called `x` because
+nothing spoke for it. Showing it is the point — `evidence: "floor"` is
+how a consumer sees that for itself.
+
+What the map does NOT carry: the rule name (`method-floor`,
+`modify-verb-summary`, `raise-word`, …) and the specific word that
+matched. Those are rwxmap's internal vocabulary, they live in the
+debugging sheet `run-proof/step3.csv` alongside truth and the `matched`
+column, and they are deliberately unpublished — an adopter cannot act
+on them, and publishing them would freeze this project's own naming
+into someone else's contract.
+
+There is no `confident` field. `evidence` already carries it: `floor`
+IS the unconfident case, and two fields saying one thing can contradict
+each other.
 
 `destructive` is the separate axis of D28 and is never read off the
 class. `class` is `r < w < x` per the one invariant.
@@ -682,9 +709,9 @@ same file it read:
   delete:
     operationId: DeleteAccountsAccount
     x-rwx:
-      class: x
+      class: w
       destructive: true
-      evidence: floor-only
+      evidence: floor
 ```
 
 ### Carrier 2 — MCP, per tool
@@ -697,10 +724,10 @@ where reverse-DNS key prefixes are the stated convention (prefixes whose
 second label is `modelcontextprotocol` or `mcp` are reserved):
 
 ```json
-{ "name": "delete_account",
+{ "name": "delete_share_permission",
   "annotations": { "readOnlyHint": false, "destructiveHint": true, "idempotentHint": false },
   "_meta": { "io.github.hamr0.rwxmap/class": "x",
-             "io.github.hamr0.rwxmap/evidence": "floor-only" } }
+             "io.github.hamr0.rwxmap/evidence": "list" } }
 ```
 
 ### Carrier 3 — WebMCP, per tool

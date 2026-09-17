@@ -4,7 +4,9 @@
 import { loadRows } from '../step1/corpus.mjs';
 import { applyStep1 } from '../step1/step1.mjs';
 import { applyStep2 } from '../step2/step2.mjs';
-import { applyStep3, RAISE_WORDS, wordsForStep3, sourceForRule } from './step3.mjs';
+import { applyStep3, RAISE_WORDS, wordsForStep3, sourceForRule, matchedWordsForRule } from './step3.mjs';
+import { READ_VERBS, SAFE_VERBS } from '../step1/step1.mjs';
+import { MODIFY_VERBS } from '../step2/step2.mjs';
 import { classifyRow } from './flow.mjs';
 
 const failures = [];
@@ -130,6 +132,77 @@ check('step 2 list', stepSourceStats(2, 'list'), { claims: 232, right: 227, leak
 check('step 2 floor', stepSourceStats(2, 'floor'), { claims: 883, right: 836, leaks: 47, over: 0 });
 check('step 3 list', stepSourceStats(3, 'list'), { claims: 19, right: 19, leaks: 0, over: 0 });
 check('step 3 floor', stepSourceStats(3, 'floor'), { claims: 985, right: 799, leaks: 0, over: 186 });
+
+// --- matched column: the re-derived word that fired -------------------------
+// Guards against silent drift between what applyStep1/applyStep2/applyStep3
+// actually fired and what matchedWordsForRule re-derives after the fact.
+const matchedByRow = flow.map(({ row, hit }) => ({ row, hit, matched: matchedWordsForRule(row, hit.rule) }));
+const listMatched = matchedByRow.filter(({ hit }) => sourceForRule(hit.rule) === 'list');
+const floorMatched = matchedByRow.filter(({ hit }) => sourceForRule(hit.rule) === 'floor');
+check('matched is non-empty for every list row', {
+  n: listMatched.length,
+  nonEmpty: listMatched.filter(({ matched }) => matched !== '').length,
+}, { n: 343, nonEmpty: 343 });
+check('matched is empty for every floor row', {
+  n: floorMatched.length,
+  empty: floorMatched.filter(({ matched }) => matched === '').length,
+}, { n: 3828, empty: 3828 });
+
+function matchedCountForRule(rule) {
+  return matchedByRow.filter(({ hit, matched }) => hit.rule === rule && matched !== '').length;
+}
+check('matched count per rule', {
+  'read-verb': matchedCountForRule('read-verb'),
+  'read-verb-anywhere': matchedCountForRule('read-verb-anywhere'),
+  'modify-verb': matchedCountForRule('modify-verb'),
+  'modify-verb-summary': matchedCountForRule('modify-verb-summary'),
+  'raise-word': matchedCountForRule('raise-word'),
+}, {
+  'read-verb': 87,
+  'read-verb-anywhere': 5,
+  'modify-verb': 114,
+  'modify-verb-summary': 118,
+  'raise-word': 19,
+});
+
+// Every reported word (split on '+') is a member of the list its rule owns.
+const OWNING_LIST = {
+  'read-verb': READ_VERBS,
+  'read-verb-anywhere': SAFE_VERBS,
+  'modify-verb': MODIFY_VERBS,
+  'modify-verb-summary': MODIFY_VERBS,
+  'raise-word': RAISE_WORDS,
+};
+let allWordsOwned = true;
+for (const { hit, matched } of listMatched) {
+  const list = OWNING_LIST[hit.rule];
+  for (const w of matched.split('+')) {
+    if (!list.has(w)) allWordsOwned = false;
+  }
+}
+check('every reported word is a member of the list its rule owns', allWordsOwned, true);
+
+// All 19 raise-word rows report a member of RAISE_WORDS, and three named
+// rows report the exact pair given in the brief.
+const raiseWordMatched = matchedByRow.filter(({ hit }) => hit.rule === 'raise-word');
+check('raise-word rows all report RAISE_WORDS members', {
+  n: raiseWordMatched.length,
+  allOwned: raiseWordMatched.every(({ matched }) => matched.split('+').every((w) => RAISE_WORDS.has(w))),
+}, { n: 19, allOwned: true });
+
+function matchedFor(provider, operationId) {
+  const found = raiseWordMatched.find(({ row }) => row.provider === provider && row.operationId === operationId);
+  return found ? found.matched : undefined;
+}
+check('jira deleteSharePermission -> permission', matchedFor('jira', 'deleteSharePermission'), 'permission');
+check('zoom userPassword -> password', matchedFor('zoom', 'userPassword'), 'password');
+// asana updateMembership's path is /memberships/{membership_gid}: the plural
+// path segment "memberships" is itself a separate RAISE_WORDS member, and it
+// genuinely fires alongside "membership" -- wordsForStep3(row) contains both,
+// and applyStep3's own words.has() check would fire on either. Reporting
+// only "membership" here would be a silent drop of a real match, not a more
+// correct re-derivation. Pinned as observed, not as the brief's shorthand.
+check('asana updateMembership -> membership+memberships (see note above)', matchedFor('asana', 'updateMembership'), 'membership+memberships');
 
 if (failures.length) {
   for (const f of failures) console.log('MISMATCH ' + f);

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { applyStep3, RAISE_WORDS, wordsForStep3, sourceForRule } from './step3.mjs';
+import { applyStep3, RAISE_WORDS, wordsForStep3, sourceForRule, matchedWordsForRule } from './step3.mjs';
 
 test('RAISE_WORDS is the 17-word list, verbatim', () => {
   assert.equal(RAISE_WORDS.size, 17);
@@ -83,4 +83,32 @@ test('sourceForRule: list rules', () => {
 
 test('sourceForRule: an unknown rule throws instead of defaulting', () => {
   assert.throws(() => sourceForRule('some-future-rule'));
+});
+
+test('matchedWordsForRule: a floor rule returns empty, by design', () => {
+  const row = { method: 'DELETE', operationId: 'deleteThing', path: '/things/{id}' };
+  assert.equal(matchedWordsForRule(row, 'method-floor'), '');
+  assert.equal(matchedWordsForRule({ method: 'GET', operationId: 'listThings', path: '/things' }, 'method'), '');
+  assert.equal(matchedWordsForRule({ method: 'POST', operationId: 'createThing', path: '/things' }, 'floor-post'), '');
+});
+
+test('matchedWordsForRule: a raise-word row returns its word', () => {
+  assert.equal(
+    matchedWordsForRule({ method: 'DELETE', operationId: 'deleteMembership', path: '/teams/{id}/members/{userId}' }, 'raise-word'),
+    'membership',
+  );
+});
+
+test('matchedWordsForRule: a multi-match row joins with + in sorted order', () => {
+  // "membership" and "memberships" both appear among the row's words (path
+  // segment "memberships" plus operationId token "membership") and both are
+  // separate RAISE_WORDS members.
+  assert.equal(
+    matchedWordsForRule({ method: 'PUT', operationId: 'updateMembership', path: '/memberships/{membership_gid}' }, 'raise-word'),
+    'membership+memberships',
+  );
+});
+
+test('matchedWordsForRule: an unknown rule throws', () => {
+  assert.throws(() => matchedWordsForRule({ method: 'GET' }, 'some-future-rule'));
 });
