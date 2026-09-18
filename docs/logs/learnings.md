@@ -3913,3 +3913,48 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   would be reading a rule that almost never ran. That is knowable now, without
   truth, and it should be said out loud in advance rather than discovered as an
   excuse afterwards.
+
+### The exam is labelled, and one disputed family needed a ruling the classifier can never learn (2026-09-18)
+- Goal: produce truth for the 1383-row clean exam by blind labelling, under the
+  calibrated brief, without anyone seeing the predictions pre-registered at
+  66c68f1 — then settle whatever the labellers could not.
+- Tried: seven blind labellers, one per part, each opening only
+  `data/calibration-2026-09-14/BRIEF.md` and its own `blind-N.csv` and writing
+  only its own `labels-N.csv`, with no subagents and no git. Every returned file
+  was validated against its blind file by the orchestrator rather than from the
+  labellers' self-reports — header, row count, row_id order position for
+  position, class in r/w/x, confidence literally high or low, no duplicates —
+  and 36 rows were spot-checked against their real source rows. A first launch
+  of four labellers was killed by a weekly rate limit before writing anything;
+  the relaunch told each labeller to append in batches of about 40 rows so an
+  interruption would leave partial work on disk instead of nothing.
+- Outcome: 1383 rows, zero ids missing, zero duplicates across parts, no
+  labeller used `?`. Truth is r 594 / w 415 / x 374 after the ruling below. Every
+  method floor held: GET 583 of 583 r; POST 216 x / 120 w / 10 r; PUT 144 w /
+  98 x / 1 r; DELETE 142 w / 56 x; PATCH 9 w / 4 x. The exam's stated limit
+  showed up exactly where it was predicted and cost confidence rather than
+  correctness: xero, the provider carrying no description text at all, drew
+  25.5% low confidence against docusign's 15.5% and okta's 11.6%. Two families
+  of xero PUT rows whose summary says "Creates" behaved very differently. The 15
+  `PUT /{Resource}/{id}/History` rows were seen by six different labellers and
+  all fifteen came back x — independent agreement, never in dispute. The 11
+  `PUT /{Resource}/{id}/Attachments/{FileName}` rows, identical to each other in
+  shape and operationId form, split 7 w / 4 x purely by which labeller drew them.
+  The user ruled all 11 x (D80): the summary says "Creates", the brief makes a
+  create x by road 2 even for the caller's own file, and the overwrite-on-same-
+  filename reading is inferred from the path shape rather than stated, so the
+  tighter class wins. Confidence was deliberately left low on all 11 — the ruling
+  settles the class, not the evidence, and raising it would misrepresent what
+  xero's text actually says.
+- Lesson: the ruling is truth, not a rule, and the distinction is the whole
+  point. Whether `PUT .../{FileName}` overwrites or appends is a fact about one
+  vendor's implementation and is simply not present in the spec text, so no word
+  list and no method floor can ever learn it — a future vendor with the same path
+  shape has to be ruled on its own evidence, not by precedent from this one. That
+  is worth separating from the `/History` family, which needed no ruling at all
+  because six labellers reached the same answer alone. The split was also only
+  visible because identical rows were deliberately scattered across seven
+  labellers by the seeded shuffle; had one labeller taken all of xero in a block,
+  it would have been internally consistent, wrong or right, and nothing would
+  have flagged it. Spreading a provider across labellers is what turns a silent
+  convention into a measurable disagreement.
