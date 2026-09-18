@@ -3997,3 +3997,25 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   the word lists were built on and is the single most important thing the exam
   said. Finally, the exam is now burned: under D24 it is scored once, and any
   rule change from here needs a new exam, not a re-score of this one.
+
+### The build/exam split, pre-registered before any row was read (2026-09-18)
+- Goal: decide, before reading rows, which vendors may be mined for the
+  write-heavy specialized list and which are locked for the next exam, so
+  the next exam is virgin by construction rather than by promise.
+- Tried: counted apis-guru's 123,339 rows by vendor for write methods and
+  for access/credential/membership language; checked every candidate
+  against the 15-provider corpus, the 2026-09-17 exam, and exams 1-5;
+  checked ten proposed exam vendors for any appearance in apis-guru.
+- Outcome: every large apis-guru vendor is already burned by exams 1-5,
+  so apis-guru is build-only from now on and the next exam must come
+  from fresh official complete specs. Build pile is 13 vendors, github
+  capped at 300 and microsoft at 200 because github alone holds 5492 of
+  6454 access-ish write rows (85%), with azure dropped as same-family.
+  Exam pile is ten vendors — auth0, cloudflare, hubspot, zendesk,
+  pagerduty, dropbox, shopify, linear, miro, sentry — none of which
+  appears in apis-guru, the corpus, or any earlier exam.
+- Lesson: choosing the build pile by browsing every candidate would have
+  leaked information into the exam pile, because the leftovers would be
+  the vendors that looked unpromising. Committing the split first costs
+  one commit and no row reading, and it is the only way the next exam's
+  virginity is a fact rather than a claim.
