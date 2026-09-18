@@ -479,11 +479,23 @@ class).
 M1, the informed arbiter, has graduated: the classifier lives in
 `src/` (D79) and the package exposes it as one export. What has not
 shipped is the published map — no emitter is built and nothing emits
-yet. The clean exam that was owed is now drawn and fully labelled but
-unscored: `data/exam-2026-09-17/`, 1383 rows across three complete
-official provider APIs, with the classifier's predictions
-pre-registered before any truth existed. Scoring it is the next
-deliberate act. The full
+yet. The clean exam that was owed, `data/exam-2026-09-17/` (1383 rows
+across three complete official provider APIs: okta, docusign, xero),
+was scored once and is now burned: 85.3% exact, 12.4% leaks (171
+rows), 2.3% over-tight. Every one of the 171 leaks is truth x predicted
+w; step 1 scored 583/583 and all 171 belong to step 2, 30.2% of its
+claims. The M1 go/no-go gate fails its first condition — zero leaks
+among rows where a word fired, not the method floor — because there
+are 20 such rows. The current work is therefore a new write-heavy
+build set, `data/buildset-2026-09-18/`, 1819 rows across 13 vendors
+under a vendor split pre-registered before any row was read
+(`docs/logs/pre-registered-split-2026-09-18.md`), labelled blind by
+nine labellers, from which a specialized list is to be mined and then
+scored on a future exam drawn from the ten locked vendors. That set's
+key measured number: PUT+DELETE+PATCH carry 15.1% truth-x (169 of
+1120) against the corpus's 7.3%, and the per-vendor spread on those
+methods runs 0.9% (netbox) to 32.5% (keycloak), so the failure mode
+tracks what the vendor's API is about rather than the method. The full
 module ladder, the M1 go/no-go gate, the labelled sets and the current
 arbiter shape with its scores live in
 [module ladder and arbiter shape](../wiki/module-ladder-and-shape.md).

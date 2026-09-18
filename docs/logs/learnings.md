@@ -4019,3 +4019,55 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   the vendors that looked unpromising. Committing the split first costs
   one commit and no row reading, and it is the only way the next exam's
   virginity is a fact rather than a claim.
+
+### The write-heavy build set: 1819 rows labelled, and the failure mode is a property of the vendor, not the method (2026-09-18)
+- Goal: the burned exam showed step 2 leaking 30.2% of its claims, with
+  PUT at 39.5% and DELETE at 25.8%, while the 15-provider corpus held
+  only 7.3% truth-x on those methods — the measuring instrument barely
+  contained the failure mode. Build a write-heavy labelled set on
+  vendors never used for an exam, rich enough in the yours-versus-theirs
+  problem to mine a list on, and pre-register which vendors are locked
+  away for the next exam before reading a row.
+- Tried: pre-registered the build/exam vendor split and committed it
+  before any row was read (5ff1cbb). Built `poc/buildset/`, a draw with
+  seven gates and six proofs that can fail (f6e53c3), and proved two
+  things measurement alone could show: apis-guru repeats the same
+  endpoint across spec variants, so github.com's 7136 write rows are
+  only 544 unique endpoints carried across 20 specs (api.github.com,
+  ghec, ghes-2.18 through 3.8, github.ae) and microsoft.com's 16878 are
+  11866, while the eleven small vendors carry no duplicates at all; and
+  a bare-substring vendor-overlap check wrongly flagged build vendor
+  box.com against locked exam vendor dropbox, fixed to whole-dot-label
+  matching. Amended the caps to a uniform 150 per vendor, which removes
+  github and microsoft dominance by construction and gives
+  leave-one-vendor-out equal weight per vendor. Drew 1819 rows across 13
+  vendors, cut them into 9 blind parts, and had 9 blind labellers label
+  them under the calibrated brief; every returned file was validated in
+  the main session for row count, row order, id uniqueness and legal
+  class/confidence values rather than trusted.
+- Outcome: truth is r 42, w 1094, x 681, with 2 `?` rows and 218
+  low-confidence (12.0%). By method POST is 73.2% x (512 of 699), PUT
+  15.7% (72 of 460), DELETE 16.4% (83 of 505), PATCH 9.0% (14 of 155).
+  PUT+DELETE+PATCH combined carry 169 truth-x of 1120 = 15.1%, against
+  the corpus's 7.3% and the burned exam's roughly 40%. The per-vendor
+  read is the real finding: on PUT/DELETE/PATCH the truth-x share runs
+  keycloak 32.5% (26/80), box 25.3% (21/83), github 23.8% (24/101),
+  dracoon 23.7% (22/93), appcenter 17.8%, gitea 14.0%, clearblade 13.9%,
+  trello 12.3%, microsoft 12.1%, gitlab 7.4%, atlassian 7.1%,
+  launchdarkly 6.7%, netbox 0.9% (1/117) — a 36-fold spread across
+  thirteen vendors drawn under one rule.
+- Lesson: the failure mode is not a property of the write methods, it is
+  a property of what the vendor's API is about. Identity (keycloak) and
+  file sharing (box, dracoon) behave like okta and docusign, the
+  vendors that broke the exam; network inventory (netbox) and issue
+  tracking (atlassian) barely have the problem. That explains the whole
+  history of this project's write-method rules pricing as worthless:
+  the sets they were priced on were dominated by vendors whose APIs
+  rarely reach another party, so a rule that is right could not show a
+  profit. It also means the 15.1% headline is the wrong number to plan
+  with, since it is an average over a population whose members differ
+  by 36x. The mining question changes shape with it: the signal being
+  hunted is what kind of OBJECT an operation touches — an identity, a
+  share, a credential, a membership — rather than which verb it uses,
+  and with 13 vendors and 169 positive rows, leave-one-vendor-out is
+  finally a real test instead of a two-vendor guess.
