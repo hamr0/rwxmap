@@ -3958,3 +3958,42 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   it would have been internally consistent, wrong or right, and nothing would
   have flagged it. Spreading a provider across labellers is what turns a silent
   convention into a measurable disagreement.
+
+### The clean exam scored once: 12.4% leaks, seven times the fitted figure (2026-09-18)
+- Goal: score the frozen three-step ladder against the clean exam, once, and
+  find out what the core is actually worth on vendors it has never seen. This is
+  the first honest generalization number the project has ever had.
+- Tried: joined `run-proof/exam-2026-09-17-predictions.csv` (pre-registered at
+  66c68f1 before any truth existed) to the 1383 labelled rows. The join is by
+  index, so it was re-checked on method, operationId, path and provider for every
+  row — zero disagreements — and the orchestrator recomputed the whole score
+  independently in the main session rather than trusting the scorer, reaching the
+  same three numbers. No rule, word list or `src/` file was touched.
+- Outcome: exact 85.3% (1180/1383), leaks 12.4% (171/1383), over-tight 2.3%
+  (32/1383), against the tuning set's 93.8% / 1.8% / 4.5%. Leaks are about seven
+  times the fitted figure. Every single one of the 171 leaks is truth x predicted
+  w — there is not one r-direction leak in the exam, so step 1 and the r class
+  are untouched by this result. Step 1 scored 583 of 583 exact with zero leaks.
+  Step 3 took zero leaks and paid 31 over-tight rows. All 171 leaks belong to
+  step 2, which is 30.2% of its 566 claims. By method, PUT is the worst at 39.5%
+  leaks (96/243), then PATCH 30.8% (4/13), DELETE 25.8% (51/198), POST 5.8%
+  (20/346), GET 0%. By provider, xero 26.8% (63/235), okta 9.8% (72/734),
+  docusign 8.7% (36/414). 151 of the 171 leaks fired no word at all; 20 fired a
+  word list and leaked anyway, 10 of them on the verb `update`.
+- Lesson: the M1 go/no-go gate's first condition is zero leaks among ASSIGNED
+  rows — rows where a word fired rather than the method floor decided. There are
+  20. The gate fails on its own terms, and it fails on the strongest kind of
+  evidence the tool has, not on its shrugs. Two further things are worth separating
+  because they are different problems wearing one number. xero's 63 leaks are
+  almost all PUT-as-create: xero uses PUT where most vendors use POST, so a
+  method floor that reads PUT as w is structurally blind there, and no word list
+  is involved. okta's and docusign's 108 are the yours-versus-theirs problem in
+  its purest form — assign, unassign, revoke, share, document_visibility — which
+  is the signal the project has already measured three separate times as not
+  transferable by vocabulary. The prior belief that nearly all leaks are wordless
+  floor rows survives on share (88.3% of leaks) but NOT on rate: evidence rows
+  leak at 15.6% (20/128) against the floor's 12.0% (151/1255), so on this exam a
+  fired word was slightly worse than no word at all. That inverts the assumption
+  the word lists were built on and is the single most important thing the exam
+  said. Finally, the exam is now burned: under D24 it is scored once, and any
+  rule change from here needs a new exam, not a re-score of this one.
