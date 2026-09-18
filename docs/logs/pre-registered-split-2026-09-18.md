@@ -78,3 +78,31 @@ they are the valuable exam rows and the most tempting to peek at.
 
 This split is pre-registered and not yet drawn. No row of either
 pile has been read at the time of this commit.
+
+## Amendment — 2026-09-18, after measuring the pool
+
+The original draw of "cap github 300, microsoft 200, everyone else
+whole, roughly 1450 rows" measured at 2722 rows, and measurement
+found two things the pre-registration could not have known.
+
+First, apis-guru carries the same endpoint many times over under
+different spec variants — github.com's 7136 write rows are only 544
+unique endpoints, repeated across api.github.com, ghec and the
+ghes-N releases, and microsoft.com's 16878 are 11866 unique; the 11
+small vendors carry no duplicates at all. The draw now dedupes on
+provider+method+path+operationId before capping.
+
+Second, the caps are amended to a UNIFORM 150 rows per vendor for
+all 13 vendors, giving 1819 rows. Reason: a uniform cap removes
+github and microsoft dominance by construction rather than by a
+share bar, and it gives every vendor equal weight, which is the only
+way leave-one-vendor-out scores mean the same thing for each vendor
+left out.
+
+All four write methods stay in: PUT/DELETE/PATCH carry 151 of the
+burned exam's 171 leaks, but step 2 also claims POST rows, and a
+list mined without POST present cannot be priced for false alarms on
+the method it fires on most.
+
+The vendor membership of neither pile changed — only the per-vendor
+row cap and the dedupe. No exam-pile row has been read.
