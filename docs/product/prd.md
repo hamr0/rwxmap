@@ -348,9 +348,15 @@ Read per emitted class instead:
 | `x` | 1004 | 81.5% | **0** |
 
 Whole flow: **exact 94.2%, leaks 1.3% (55 rows), over-tight 4.5% (186
-rows)**. The goal is 90%+ on providers it has not seen; there is no
-clean exam, so this corpus is a tuning set (D24) and 94.2% is a fitted
-number, not a generalization claim.
+rows)**. The goal is 90%+ on providers it has not seen; this corpus is
+a tuning set (D24) and 94.2% is a fitted number, not a generalization
+claim. What has changed is that a clean exam now exists —
+`data/exam-2026-09-17/`, 1383 rows across okta, docusign and xero,
+labelled blind on 2026-09-18 — and it has not been scored. The
+classifier's predictions on those rows were pre-registered at commit
+66c68f1 before any truth existed, so the exam can be scored once
+without anyone having to promise the rules were not fitted to it.
+Scoring it is a single deliberate act still to be taken (D24).
 
 Four things this table says that no single accuracy number can:
 
@@ -473,7 +479,11 @@ class).
 M1, the informed arbiter, has graduated: the classifier lives in
 `src/` (D79) and the package exposes it as one export. What has not
 shipped is the published map — no emitter is built and nothing emits
-yet. The full
+yet. The clean exam that was owed is now drawn and fully labelled but
+unscored: `data/exam-2026-09-17/`, 1383 rows across three complete
+official provider APIs, with the classifier's predictions
+pre-registered before any truth existed. Scoring it is the next
+deliberate act. The full
 module ladder, the M1 go/no-go gate, the labelled sets and the current
 arbiter shape with its scores live in
 [module ladder and arbiter shape](../wiki/module-ladder-and-shape.md).
