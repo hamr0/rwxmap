@@ -549,7 +549,9 @@ menu, or has none. (docs/archive/prd.md:37-48)
 
 ## Out of scope
 
-- A model/LLM tier. There is no tier 2 and no tier 3 in this design.
+- A model/LLM tier in the core. The deterministic flow is the product
+  and works fully on its own. An optional last-mile tier is parked,
+  not built — see D82 and Open questions.
 - A default of `r`, or any guess path.
 - Signing. Output stops at a candidate map; a signature is the Resource
   Owner's act.
@@ -809,6 +811,16 @@ OpenAPI document it describes:
 
 Non-blocking; never silently assumed.
 
+- The last mile: can a model read what words cannot? Parked (D82).
+  Step 2 is closed at the D75 shape (D81), which scored 85.3% exact
+  on the clean exam, blind; every word list mined since has collapsed
+  under leave-one-vendor-out, because the same noun means different
+  things at different vendors. The candidate is TypeSafe Jev, a
+  calibrated decision model, used optionally and only to raise step
+  2's wordless floor rows from w to x — never to lower. Blocked on
+  API access; the user will say when a key exists. The build set
+  (`data/buildset-2026-09-18/`, 1817 scoreable rows) is the ready
+  harness for its first measurement. Raised 2026-09-19.
 - Is the POST floor (x) wrong? No — on the 4171-row provider corpus of
   15 complete official APIs the POST floor holds: truth x is 61%
   (804 of 1309), close to the old corpus's 62%, not to exam 5's 23%;

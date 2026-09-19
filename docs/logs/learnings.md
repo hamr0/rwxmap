@@ -4071,3 +4071,54 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   share, a credential, a membership — rather than which verb it uses,
   and with 13 vendors and 169 positive rows, leave-one-vendor-out is
   finally a real test instead of a two-vendor guess.
+
+### Mining the build set, and a per-document steer: neither beats the D75 flow, and step 2 is closed (2026-09-19)
+- Goal: mine a specialized list on the 1817 scoreable build-set rows to
+  move step 2's wordless PUT/DELETE/PATCH floor rows to x, and failing
+  that, test a per-document steer that moves a whole spec's
+  PUT/DELETE/PATCH floor when the spec's own text leans toward
+  identity and access.
+- Tried: (a) mined tokens from path, operationId and summary of the
+  1120 PUT/DELETE/PATCH rows, keeping words with at least 3 truth-x
+  hits, 70% precision and 2 vendors; (b) the same miner on POST rows
+  for comparison; (c) `poc/vendorprofile/`, a steer that scores each
+  document by the share of its operations carrying a hand-written
+  vocabulary of identity, access, credential and sharing nouns —
+  computed from spec text only, never truth — and sets that document's
+  PUT/DELETE/PATCH floor to x above a threshold, leaving the method
+  floor untouched and recoverable; (d) every shape scored on the
+  burned clean exam as reference only.
+- Outcome: the mined PUT/DELETE/PATCH list scored 49 leaks closed for
+  6 false alarms fitted (8.17) and 35 for 42 under leave-one-vendor-out
+  (0.83), against a bar of 10. POST held up far better (x: 3.53
+  fitted, 2.91 LOVO). The cause is visible per vendor: `user` is
+  truth-x on 1 of 20 microsoft rows and 12 of 16 keycloak rows; `key`
+  on 2 of 27 atlassian and 6 of 52 clearblade; `members` on 9 of 33
+  trello rows (card assignment) and 4 of 4 gitea (repo access);
+  `groups` 0 of 10 netbox, 0 of 11 appcenter, 4 of 9 keycloak. The
+  profile steer lost under LOVO: 77.5% exact / 7.8% leaks / 14.7%
+  over-tight against the method floor's 80.5 / 9.3 / 10.2; its best
+  trade was 28 leaks closed for 82 over-tight added (0.34 against the
+  bar of 10), and 11 of 13 held-out vendors were never steered. The
+  profile tracks truth only at the extremes (keycloak score 1.000 /
+  32.5% truth-x, netbox 0.180 / 0.9%) and not in the middle (microsoft
+  0.613 / 12.1%). On the build set the D75 flow scores 83.2% exact /
+  8.1% leaks / 8.6% over-tight; 144 of step 2's 147 leaks sit on its
+  wordless method floor, and its word rules, which barely fire there
+  (22 claims), leak 3. On the burned exam, as reference: D75 flow
+  85.3% exact / 12.4% leaks / 2.3% over-tight, method floor only 79.1
+  / 11.4 / 9.5, D75 plus the steer 77.7 / 9.8 / 12.6, the steer alone
+  71.5 / 8.7 / 19.8. Nothing beats D75. The exam's profile scores were
+  docusign 0.976, okta 0.569, xero 0.089 — the steer points away from
+  xero, the worst leaker.
+- Lesson: a word's meaning is a property of the vendor using it, so
+  any list mined from labelled rows transfers only to vendors that use
+  the word the same way — that is the fifth measurement of the same
+  wall, and the per-vendor table shows the mechanism directly rather
+  than inferring it. Narrow hand-written lists survive where mined
+  ones die: step 3's 17 RAISE_WORDS scored 25 right, 4 over-tight and
+  0 leaks on these unseen vendors. The D75 flow is the best shape this
+  project has measured and further word work on step 2 would be
+  fitting noise, so step 2 is closed (D81). What spec text cannot do
+  is read meaning; that last mile is parked for an optional model
+  tier (D82).
