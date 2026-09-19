@@ -114,7 +114,7 @@ M1 is CLOSED as the mechanical offering (D83): the D75 flow in `src/` (D79), ste
 | exam 3 (data/exam3-2026-09-11/) | 3000 (2993 scorable) | 305 | blind exam, scored once — now burned, C19 admitted `owner` off it and C20 swept it |
 | exam 4 (data/exam4-2026-09-12/) | 4000 | 318 named, but 316 of 318 providers and 2702 of 4000 rows were already in the corpus (a make-exam4 name-matching bug) | never virgin — not a clean exam; frozen shape scored once on it and recorded, not adopted; no clean exam exists from this draw |
 | exam 5 (data/exam5-2026-09-14/) | 1999 scorable | 267 (writes from 103 corpus vendors, row-disjoint; POST/GET from 164 unseen) | exam, scored once 2026-09-14 (D68), POST relabelled and re-scored once 2026-09-15; not in the tuning corpus |
-| exam 6 (data/exam-2026-09-17/) | 1383 | 3 complete official APIs — okta 734, docusign 414, xero 235 | clean exam, labelled blind 2026-09-18, predictions pre-registered at 66c68f1 before truth existed — not yet scored |
+| exam 6 (data/exam-2026-09-17/) | 1383 | 3 complete official APIs — okta 734, docusign 414, xero 235 | clean exam, labelled blind 2026-09-18, predictions pre-registered at 66c68f1 before truth existed — scored once 2026-09-19: 85.3% exact, 12.4% leaks, 2.3% over-tight; now burned |
 
 Truth is model-read, blind, per D-series notes; "tuned" means code was
 changed while its scores were visible; "clean exam" means scored once
@@ -124,7 +124,8 @@ six original sets, each as a separate blind paper plus answer key,
 labellers forbidden to open any classifier and free to answer '?'
 (D46). Exams 1-3 remain burned as blind material for step 3, and the
 clean exam they owed now exists as exam 6 (data/exam-2026-09-17/),
-drawn 2026-09-17 and labelled 2026-09-18, still unscored.
+drawn 2026-09-17, labelled 2026-09-18, and scored once 2026-09-19
+(85.3% exact, 12.4% leaks, 2.3% over-tight; now burned).
 Combined with the original six sets the labelled corpus reaches 5465
 rows across 332 providers. Canonical file for the original six:
 data/corpus/labelled.csv (D45). (docs/archive/prd.md:219-233)
@@ -209,8 +210,10 @@ not been edited to match, so the C20 layer never sees a row those
 words would otherwise resolve; and every exam (1, 2, 3) is now burned
 as blind material for this rule, so a fresh exam was owed before the
 next change could be scored honestly; that exam now exists as exam 6
-(data/exam-2026-09-17/), drawn 2026-09-17 and labelled blind
-2026-09-18, still unscored. See docs/logs/learnings.md
+(data/exam-2026-09-17/), drawn 2026-09-17, labelled blind
+2026-09-18, and scored once 2026-09-19 (85.3% exact, 12.4% leaks,
+2.3% over-tight; now burned) — this superseded C20 POC itself was
+not rescored against it. See docs/logs/learnings.md
 (M1-C16 through M1-C20) for the full run, including the two deleted
 passes (C16, C17) and the C18/C19 derivation that preceded it.
 

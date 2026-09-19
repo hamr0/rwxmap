@@ -101,6 +101,14 @@ from these same 4171 rows, so an API the tool has not seen will score
 worse. See `docs/product/prd.md` and `docs/logs/learnings.md` for the
 full picture.
 
+The clean-exam number, scored once and burned: `data/exam-2026-09-17/`
+(1383 operations from three complete official APIs the rules never
+saw — okta, docusign, xero) came out 85.3% exact, 12.4% leaks (171
+rows), 2.3% too strict. Step 1 scored 583/583; every one of the 171
+leaks belongs to step 2 (30.2% of its claims), all truth `x` called
+`w`. Leave-one-vendor-out is the only honest generalization number —
+the tuning number above looks far better and does not survive it.
+
 On doubt it picks the stricter class. It never loosens without
 evidence.
 
