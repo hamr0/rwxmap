@@ -95,9 +95,9 @@ measured leak lives. Go means all of:
 
 (docs/archive/prd.md:187-202)
 
-M1 is a POC, not graduated. The D30 gate is not met. Current per-step
-numbers and status live in `docs/product/prd.md`, "The three steps";
-past statuses are in `docs/logs/learnings.md`.
+**Amended 2026-09-19 (D83).** Condition 1 is measured on the mechanical tool plus the opt-in Jev tier together, and "sent to review" means "sent to Jev" — every row step 2 labels w, raise-only. Conditions 2-5 stand. The mechanical tool alone is stated, not gated: 85.3% exact / 12.4% leaks / 2.3% over-tight on the clean exam, blind.
+
+M1 is CLOSED as the mechanical offering (D83): the D75 flow in `src/` (D79), step 2 closed (D81). The amended gate cannot be scored until the Jev tier exists (D82). Current per-step numbers live in `docs/product/prd.md`; past statuses are in `docs/logs/learnings.md`.
 
 ## Labelled sets
 

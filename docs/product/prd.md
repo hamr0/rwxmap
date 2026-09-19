@@ -484,14 +484,18 @@ across three complete official provider APIs: okta, docusign, xero),
 was scored once and is now burned: 85.3% exact, 12.4% leaks (171
 rows), 2.3% over-tight. Every one of the 171 leaks is truth x predicted
 w; step 1 scored 583/583 and all 171 belong to step 2, 30.2% of its
-claims. The M1 go/no-go gate fails its first condition — zero leaks
-among rows where a word fired, not the method floor — because there
-are 20 such rows. The current work is therefore a new write-heavy
-build set, `data/buildset-2026-09-18/`, 1819 rows across 13 vendors
-under a vendor split pre-registered before any row was read
-(`docs/logs/pre-registered-split-2026-09-18.md`), labelled blind by
-nine labellers, from which a specialized list is to be mined and then
-scored on a future exam drawn from the ten locked vendors. That set's
+claims. M1 is closed as the mechanical offering (D83): the gate's
+first condition is now measured on the mechanical tool plus the
+opt-in Jev tier together, since the 20 rows it failed on are the
+rows Jev is placed to review. A write-heavy build set,
+`data/buildset-2026-09-18/`, 1819 rows across 13 vendors under a
+vendor split pre-registered before any row was read
+(`docs/logs/pre-registered-split-2026-09-18.md`) and labelled blind by
+nine labellers, was built to mine a specialized list; every list mined
+on it collapsed under leave-one-vendor-out, so step 2 is closed (D81)
+and the set is now the ready harness for Jev's first measurement, with
+any score that counts taken once on a fresh exam drawn from the ten
+locked vendors. That set's
 key measured number: PUT+DELETE+PATCH carry 15.1% truth-x (169 of
 1120) against the corpus's 7.3%, and the per-vendor spread on those
 methods runs 0.9% (netbox) to 32.5% (keycloak), so the failure mode
@@ -816,11 +820,15 @@ Non-blocking; never silently assumed.
   on the clean exam, blind; every word list mined since has collapsed
   under leave-one-vendor-out, because the same noun means different
   things at different vendors. The candidate is TypeSafe Jev, a
-  calibrated decision model, used optionally and only to raise step
-  2's wordless floor rows from w to x — never to lower. Blocked on
-  API access; the user will say when a key exists. The build set
-  (`data/buildset-2026-09-18/`, 1817 scoreable rows) is the ready
-  harness for its first measurement. Raised 2026-09-19.
+  calibrated decision model, used as an opt-in, sent every row step
+  2 labels w (its floor rows and its word claims, D83), and only
+  ever raising w to x. Blocked on API access; the user will say
+  when a key exists. The build set (`data/buildset-2026-09-18/`,
+  1817 scoreable rows) is the ready harness for its first
+  measurement. The promise to adopters is near-complete answers at
+  a fraction of a model's usual cost, read against the truth
+  ceiling (85.3% labeller agreement), never claimed as 100%.
+  Raised 2026-09-19.
 - Is the POST floor (x) wrong? No — on the 4171-row provider corpus of
   15 complete official APIs the POST floor holds: truth x is 61%
   (804 of 1309), close to the old corpus's 62%, not to exam 5's 23%;
