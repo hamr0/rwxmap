@@ -21,13 +21,28 @@ is the Resource Owner's act, not this tool's.
 
 ## Test bed
 
-`data/provider-corpus-2026-09-16/` is the only measurement set — 4171
-operations across 15 complete official provider APIs. Every number that
-counts is scored against it; experiments run against files in this tree,
-never against `justabit`. The known limit stays stated: it is a tuning
-set, not a clean exam (D24). Steps 1 and 2 were tuned on the rows they
-are scored on and no clean exam exists for the current flow, so every
-figure reads better than an unseen vendor would.
+`data/provider-corpus-2026-09-16/` is the tuning set — 4171 operations
+across 15 complete official provider APIs. Experiments run against
+files in this tree, never against `justabit`. The known limit stays
+stated: it is a tuning set, not a clean exam (D24), and steps 1 and 2
+were tuned on the rows they are scored on, so every figure it gives
+reads better than an unseen vendor would.
+
+`data/exam-2026-09-17/` is the clean exam — 1383 operations across
+okta, docusign and xero, three complete official APIs the rules never
+saw, labelled blind by seven labellers. It was scored once and is
+BURNED (D24): 85.3% exact, 12.4% leaks, 2.3% over-tight. That is the
+project's only honest generalization number and the one to quote. Any
+rule change from here needs a new exam, never a re-score of this one.
+The ten vendors locked away for that next exam are named in
+`docs/logs/pre-registered-split-2026-09-18.md`; nobody reads or mines
+them.
+
+`data/buildset-2026-09-18/` is a write-heavy tuning set — 1819
+operations across 13 vendors, labelled blind by nine labellers, built
+to mine a specialized list. Every list mined on it collapsed under
+leave-one-vendor-out, so step 2 is closed (D81) and the set is now the
+harness for the parked Jev tier's first measurement (D82).
 
 `data/camara-2026-09-01/` is the M0 test bed. It is historical: kept for
 the record, not scored against, and not a gate for any current work. Its
