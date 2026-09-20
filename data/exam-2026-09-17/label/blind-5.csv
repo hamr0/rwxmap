@@ -1,0 +1,770 @@
+row_id,provider,method,path,operationId,summary,description
+e0316,okta,POST,/api/v1/groups/{groupId}/owners,assignGroupOwner,Assign a group owner,Assigns a group owner
+e0299,okta,POST,/api/v1/features/{featureId}/{lifecycle},updateFeatureLifecycle,Update a feature lifecycle,"Updates a feature's lifecycle status. Use this endpoint to enable or disable a feature for your org.
+
+Use the `mode=force` parameter to override dependency restrictions for a particular feature. Normally, you can't enable a feature if it has one or more dependencies that aren't enabled.
+
+When you use the `mode=force` parameter while enabling a feature, Okta first tries to enable any disabled features that this feature may have as dependencies. If you don't pass the `mode=force` parameter and the feature has dependencies that need to be enabled before the feature is enabled, a 400 error is returned.
+
+When you use the `mode=force` parameter while disabling a feature, Okta first tries to disable any enabled features that this feature may have as dependents. If you don't pass the `mode=force` parameter and the feature has dependents that need to be disabled before the feature is disabled, a 400 error is returned.
+
+The following chart shows the different state transitions for a feature.
+
+<img alt=""Example"" src=""https://developer.okta.com/docs/api/images/features/update-ssfeat-flowchart.png"" width=""1000""/>"
+e0630,okta,GET,/api/v1/users/{userId}/classification,getUserClassification,Retrieve a user's classification,Retrieves a user's classification
+e0272,okta,POST,/api/v1/dr/failover,startOrgFailover,Start the failover of your org,Starts the failover of your org
+e0028,okta,GET,/api/v1/apps/{appId},getApplication,Retrieve an application,Retrieves an application from your Okta organization by `id`
+e0568,okta,GET,/api/v1/sessions/{sessionId},getSession,Retrieve a session,Retrieves information about the session specified by the given session ID
+e0482,okta,GET,/api/v1/org/factors/yubikey_token/tokens,listYubikeyOtpTokens,List all YubiKey OTP tokens,Lists all YubiKey OTP tokens
+e0800,docusign,GET,/v2.1/accounts/{accountId}/connect/oauth,ConnectOAuthConfig_GetConnectOAuthConfig,Retrieves the Connect OAuth information for the account.,"Gets the Connect OAuth configuration for the specified account.
+
+<ds-inlinemessage>
+To use this method, you must be an account administrator
+and Connect must be enabled on your account.
+</ds-inlinemessage>
+
+## Related topics:
+- [OAuth for Docusign Connect](/platform/webhooks/connect/validation-and-security/oauth-connect/)"
+e0951,docusign,GET,/v2.1/accounts/{accountId}/permission_profiles/{permissionProfileId},PermissionProfiles_GetPermissionProfile,Returns a permission profile for an account.,"This method returns information about a specific permission profile that is associated with an account.
+
+### Related topics
+
+- [How to set a permission profile](/docs/esign-rest-api/how-to/permission-profile-setting/)"
+e0517,okta,GET,/api/v1/policies/{policyId}/mappings,listPolicyMappings,List all resources mapped to a policy,Lists all resources mapped to a policy identified by `policyId`
+e0159,okta,POST,/api/v1/authorizationServers/{authServerId}/resourceservercredentials/keys,addOAuth2ResourceServerJsonWebKey,Add a JSON Web Key,"Adds a new JSON Web Key to the custom authorization server`s JSON web keys.
+> **Note:** This API doesn't allow you to add a key if the existing key doesn't have a `kid`. Use the [Replace an Authorization Server](/openapi/okta-management/management/authorizationserver/replaceauthorizationserver) operation to update the JWKS or [Delete a Custom Authorization Server Public JSON Web Key](/openapi/okta-management/management/oauth2resourceservercredentialskeys/deleteoauth2resourceserverjsonwebkey) and re-add the key with a `kid`.
+> **Note:** This API doesn't allow you to add a key with an ACTIVE status. You need to add an INACTIVE key first, and then ACTIVATE the key."
+e1344,xero,GET,/Receipts/{ReceiptID}/History,getReceiptHistory,Retrieves a history record for a specific receipt,
+e1219,xero,POST,/CreditNotes,updateOrCreateCreditNotes,Updates or creates one or more credit notes,
+e0398,okta,GET,/api/v1/identity-sources/{identitySourceId}/users/{externalId},getIdentitySourceUser,Retrieve an identity source user,Retrieves a user by external ID in an identity source for the given identity source instance
+e0799,docusign,DELETE,/v2.1/accounts/{accountId}/connect/logs/{logId},ConnectLog_DeleteConnectLog,Deletes a specified Connect log entry.,"Deletes a specified entry from the Connect Log.
+
+<ds-inlinemessage>
+To use this method, you must be an account administrator
+and Connect must be enabled on your account.
+</ds-inlinemessage>"
+e0396,okta,POST,/api/v1/identity-sources/{identitySourceId}/sessions/{sessionId}/start-import,startImportFromIdentitySource,Start the import from the identity source,Starts the import from the identity source described by the uploaded bulk operations
+e0984,docusign,GET,/v2.1/accounts/{accountId}/signatures,AccountSignatures_GetAccountSignatures,Returns a list of stamps available in the account.,Returns a list of stamps available in the account.
+e1292,xero,PUT,/Overpayments/{OverpaymentID}/History,createOverpaymentHistory,Creates a history record for a specific overpayment,
+e0965,docusign,PUT,/v2.1/accounts/{accountId}/settings,Settings_PutSettings,Updates the account settings for an account.,"Updates the account settings for the specified account.
+
+Although the request body for this method
+is a complete
+`accountSettingsInformation` object,
+you only need to provide
+the properties that
+you are updating."
+e0446,okta,GET,/api/v1/mappings,listProfileMappings,List all profile mappings,"Lists all profile mappings in your org with [pagination](https://developer.okta.com/docs/api/#pagination). You can return a subset of profile mappings that match a supported `sourceId` and/or `targetId`.
+
+The results are [paginated](/#pagination) according to the `limit` parameter. If there are multiple pages of results, the Link header contains a `next` link that you should treat as an opaque value (follow it, don't parse it). See [Link Header](https://developer.okta.com/docs/api/#link-header).
+
+The response is a collection of profile mappings that include a subset of the profile mapping object's parameters. The profile mapping object describes
+the properties mapping between an Okta user and an app user profile using [JSON Schema Draft 4](https://datatracker.ietf.org/doc/html/draft-zyp-json-schema-04)."
+e0566,okta,POST,/api/v1/security-events-providers/{securityEventProviderId}/lifecycle/activate,activateSecurityEventsProviderInstance,Activate a security events provider,"Activates a security events provider instance by setting its status to `ACTIVE`.
+This operation resumes the flow of events from the security events provider to Okta."
+e0296,okta,GET,/api/v1/features/{featureId},getFeature,Retrieve a feature,Retrieves a feature by ID
+e0132,okta,PUT,/api/v1/authorizationServers/{authServerId}/claims/{claimId},replaceOAuth2Claim,Replace a custom token claim,Replaces a custom token Claim specified by the `claimId`
+e0720,okta,DELETE,/privileged-access/api/v1/okta-service-accounts/{id},deleteOktaManagedUserAccount,Delete an Okta managed user account,"Deletes an Okta managed user account specified by ID.
+
+This operation removes the service account management for the Okta user, suspends the underlying Okta user account,
+but doesn't delete the user from Universal Directory."
+e0847,docusign,DELETE,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/documents/{documentId}/pages/{pageNumber},Pages_DeletePage,Deletes a page from a document in an envelope.,Deletes a page from a document in an envelope based on the page number.
+e0175,okta,POST,/api/v1/behaviors/{behaviorId}/lifecycle/deactivate,deactivateBehaviorDetectionRule,Deactivate a behavior detection rule,Deactivates a behavior detection rule
+e0661,okta,POST,/api/v1/users/{userId}/roles,assignRoleToUser,Assign a user role,"Assigns a [standard role](/openapi/okta-management/guides/roles/#standard-roles) to a user.
+
+You can also assign a custom role to a user, but the preferred method to assign a custom role to a user is to create a binding between the custom role, the resource set, and the user. See [Create a role resource set binding](/openapi/okta-management/management/roledresourcesetbinding/createresourcesetbinding).
+
+> **Notes:**
+> * The request payload is different for standard and custom role assignments.
+> * For IAM-based standard role assignments, use the request payload for standard roles. However, the response payload for IAM-based role assignments is similar to the custom role's assignment response."
+e0727,okta,POST,/security/api/v1/security-events,publishSecurityEventTokens,Publish a security event token,"Publishes a security event token (SET) sent by a security events provider. After the token is verified, Okta ingests the event and performs any appropriate action."
+e0025,okta,DELETE,/api/v1/api-tokens/{apiTokenId},revokeApiToken,Revoke an API token,Revokes an API token by `apiTokenId`
+e0010,okta,GET,/api/v1/agentPools/{poolId}/updates/settings,getAgentPoolsUpdateSettings,Retrieve an agent pool update's settings,Retrieves the current state of the agent pool update instance settings
+e1113,docusign,GET,/v2.1/accounts/{accountId}/users/{userId}/signatures/{signatureId}/{imageType},UserSignatures_GetUserSignatureImage,Retrieves the user initials image or the  user signature image for the specified user.,"Retrieves the specified initials image or signature image for the specified user. The image is returned in the same format in which it was uploaded. In the request you can specify if the chrome (the added line and identifier around the initial image) is returned with the image.
+
+The userId property specified in the endpoint must match the authenticated user's user ID and the user must be a member of the account.
+
+The `signatureId` parameter accepts a signature ID or a signature name. Docusign recommends you use signature ID (`signatureId`), since some names contain characters that do not properly encode into a URL. If you use the user name, it is likely that the name includes spaces. In that case, URL encode the name before using it in the endpoint.
+
+For example encode ""Bob Smith"" as ""Bob%20Smith"".
+
+**Note:** Older envelopes might only have chromed images. If getting the non-chromed image fails, try getting the chromed image."
+e1147,docusign,GET,/v2.1/diagnostics/settings,APIRequestLog_GetRequestLogSettings,Gets the API request logging settings.,"Retrieves the current API request logging setting for the user and remaining log entries.
+
+**Response**
+The response includes the current API request logging setting for the user, along with the maximum log entries and remaining log entries."
+e1244,xero,POST,/Invoices/{InvoiceID},updateInvoice,Updates a specific sales invoices or purchase bills,
+e0494,okta,POST,/api/v1/org/privacy/oktaCommunication/optIn,optInUsersToOktaCommunicationEmails,Opt in to Okta user communication emails,Opts in all users of this org to Okta communication emails
+e0779,docusign,POST,/v2.1/accounts/{accountId}/chunked_uploads,ChunkedUploads_PostChunkedUploads,Initiate a new chunked upload.,This method initiates a new chunked upload with the first part of the content.
+e1291,xero,GET,/Overpayments/{OverpaymentID}/History,getOverpaymentHistory,Retrieves history records of a specific overpayment,
+e1300,xero,GET,/PaymentServices,getPaymentServices,Retrieves payment services,
+e0240,okta,DELETE,/api/v1/device-assurances/{deviceAssuranceId},deleteDeviceAssurancePolicy,Delete a device assurance policy,"Deletes a device assurance policy by `deviceAssuranceId`. If the device assurance policy is currently being used in the org Authentication Policies, the delete will not be allowed."
+e1012,docusign,PUT,/v2.1/accounts/{accountId}/templates/{templateId},Templates_PutTemplate,Updates an existing template.,Updates an existing template.
+e0715,okta,GET,/okta-personal-settings/api/v1/export-blocklists,listPersonalAppsExportBlockList,List all blocked email domains,Lists all blocked email domains which are excluded from app migration
+e0443,okta,POST,/api/v1/logStreams/{logStreamId}/lifecycle/activate,activateLogStream,Activate a log stream,Activates a log stream by `logStreamId`
+e0513,okta,GET,/api/v1/policies/{policyId}/app,listPolicyApps,List all apps mapped to a policy,"Lists all applications mapped to a policy identified by `policyId`
+
+> **Note:** Use [List all resources mapped to a policy](https://developer.okta.com/docs/api/openapi/okta-management/management/tags/policy/#tag/Policy/operation/listPolicyMappings) to list all applications mapped to a policy."
+e0942,docusign,PUT,/v2.1/accounts/{accountId}/groups/{groupId}/brands,Brands_PutGroupBrands,Adds an existing brand to a group.,This method adds one or more existing brands to a group based on the `groupId`.
+e0970,docusign,GET,/v2.1/accounts/{accountId}/settings/enote_configuration,ENoteConfiguration_GetENoteConfiguration,Returns the configuration information for the eNote eOriginal integration.,
+e0657,okta,DELETE,/api/v1/users/{userId}/grants/{grantId},revokeUserGrant,Revoke a user grant,Revokes one grant for a specified user
+e0186,okta,PUT,/api/v1/brands/{brandId}/pages/error/customized,replaceCustomizedErrorPage,Replace the customized error page,Replaces the customized error page. The customized error page appears in your live environment.
+e1111,docusign,PUT,/v2.1/accounts/{accountId}/users/{userId}/signatures/{signatureId},UserSignatures_PutUserSignatureById,Updates the user signature for a specified user.,"Creates, or updates, the signature font and initials for the specified user. When creating a signature, you use this resource to create the signature name and then add the signature and initials images into the signature.
+
+**Note:** This will also create a default signature for the user when one does not exist.
+
+The userId property specified in the endpoint must match the authenticated user's user ID and the user must be a member of the account.
+
+The `signatureId` parameter accepts a signature ID. Docusign recommends you use signature ID (`signatureId`), since some names contain characters that do not properly encode into a URL. If you use the user name, it is likely that the name includes spaces. In that case, URL encode the name before using it in the endpoint.
+
+For example encode ""Bob Smith"" as ""Bob%20Smith""."
+e0652,okta,GET,/api/v1/users/{userId}/factors/{factorId}/transactions/{transactionId},getFactorTransactionStatus,Retrieve a factor transaction status,"Retrieves the status of a `push` factor verification transaction
+
+ > **Note:**
+ > The response body for a number matching push challenge to an Okta Verify `push` factor enrollment is different from the response body of a standard push challenge.
+ > The number matching push challenge [response body](https://developer.okta.com/docs/api/openapi/okta-management/management/tags/userfactor/other/getfactortransactionstatus!c=200&path=1/_embedded&t=response) contains the correct answer for the challenge.
+ > Use [Verify a factor](/openapi/okta-management/management/userfactor/verifyfactor) to configure which challenge is sent."
+e0459,okta,GET,/api/v1/meta/schemas/user/{schemaId},getUserSchema,Retrieve a user schema,Retrieves the schema for a user type
+e0961,docusign,GET,/v2.1/accounts/{accountId}/powerforms/senders,PowerForms_GetPowerFormsSenders,Gets PowerForm senders.,This method returns a list of users who have sent PowerForms.
+e0389,okta,DELETE,/api/v1/identity-sources/{identitySourceId}/sessions/{sessionId},deleteIdentitySourceSession,Delete an identity source session,Deletes an identity source session for a given identity source ID and session Id
+e1092,docusign,DELETE,/v2.1/accounts/{accountId}/users/{userId}/cloud_storage,CloudStorage_DeleteCloudStorageProviders,Deletes the user authentication information for one or more cloud storage providers.,"Deletes the user authentication information for one or more cloud storage providers. The next time the user tries to access the cloud storage provider, they must pass normal authentication."
+e0087,okta,GET,/api/v1/apps/{appId}/interclient-target-apps,listInterclientTargetApplications,List all target apps for an allowed app,Lists all the target apps that allow this app to request interclient SSO using an interclient token
+e0465,okta,POST,/api/v1/meta/types/user/{typeId},updateUserType,Update a user type,"Updates an existing user type. This operation is a partial update.
+> **Note**: You can only update the `displayName` and `description` elements. The `name` of an existing user type can't be changed."
+e1195,xero,GET,/Budgets/{BudgetID},getBudget,"Retrieves a specific budget, which includes budget lines",
+e0792,docusign,POST,/v2.1/accounts/{accountId}/connect/envelopes/publish/historical,HistoricalEnvelopePublish_PostHistoricalEnvelopePublishTransaction,Submits a batch of historical envelopes for republish to a webhook.,"This endpoint submits a batch of existing envelopes to a webhook of your choice. Set the webhook address with the `urlToPublishTo` request body parameter.
+
+This endpoint does not call an existing Connect configuration or create a new Connect listener to monitor new activity. It simply uses an ad hoc configuration to submit existing envelopes. You must include all the configuration data in the request body.
+
+The envelope data will always be transmitted in JSON format. XML, Salesforce, and eOriginal configuration types are not supported.
+
+Your request should match the following format:
+
+```
+{
+    ""envelopes"": [""4280f274-xxxx-xxxx-xxxx-b218b7eeda08"", ""8373a938-xxxx-xxxx-xxxx-e992a2abae01""],
+    ""config"": {
+        ""configurationType"":""custom"",
+        ""name"": ""Test"",
+        ""urlToPublishTo"":""YOUR-WEBHOOK-URL"",
+        ""allowEnvelopePublish"": ""true"",
+        ""enableLog"": ""true"",
+        ""requiresAcknowledgement"": ""true"",
+        ""IncludeHMAC"": ""true"",
+        ""SignMessageWithX509Cert"": ""true"",
+        ""deliveryMode"": ""SIM"",
+        ""eventData"": {
+            ""version"": ""restv2.1"",
+            ""format"": ""json"",
+            ""includedata"": [""tabs"",""payment_tabs"",""custom_fields"",""powerform"",""recipients"",""folders"",""extensions"",""attachments"", ""prefill_tabs"", ""documents""]
+        }
+    }
+}
+```
+
+If the request succeeds, it returns a 201 (Created) HTTP response code and the response body property `processingStatus` will be set to `processing`. You can then view the status of each historical republish request in the [Bulk Actions Log](https://support.docusign.com/s/document-item?bundleId=pik1583277475390&topicId=nvf1648497452396.html)."
+e0304,okta,GET,/api/v1/groups/rules,listGroupRules,List all group rules,Lists all group rules for your org
+e0831,docusign,PUT,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/custom_fields,CustomFields_PutCustomFields,Updates envelope custom fields in an envelope.,"Updates the envelope custom fields in draft and in-process envelopes.
+
+Each custom field used in an envelope must have a unique name."
+e0170,okta,POST,/api/v1/behaviors,createBehaviorDetectionRule,Create a behavior detection rule,Creates a new behavior detection rule
+e0406,okta,GET,/api/v1/idps/credentials/keys/{kid},getIdentityProviderKey,Retrieve an IdP key credential,Retrieves a specific identity provider (IdP) key credential by `kid`
+e0451,okta,GET,/api/v1/meta/schemas/group/default,getGroupSchema,Retrieve the default group schema,"Retrieves the group schema
+
+The [User Types](https://developer.okta.com/docs/api/openapi/okta-management/management/tag/UserType/) feature does not extend to groups. All groups use the same group schema. Unlike user schema operations, group schema operations all specify `default` and don't accept a schema ID."
+e0839,docusign,GET,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/documents/{documentId},Documents_GetDocument,Retrieves a single document or all documents from an envelope.,"Retrieves a single document or all documents from an envelope.
+
+To retrieve a single document, provide the ID of the document in the `documentId` path parameter.
+Alternatively, by setting the `documentId` parameter to special keyword values,
+you can retrieve all the documents (as a combined PDF, portfolio PDF, or ZIP archive)
+or just the certificate of completion. See the `documentId` description for how to retrieve each format.
+
+
+The response body of this method
+is a file. If you request multiple documents,
+the result is a ZIP archive
+that contains all of the documents.
+
+In all other cases, the response is a PDF
+file or PDF portfolio.
+
+
+You can get the file name and document ID from the response's `Content-Disposition` header:
+
+```
+Content-Disposition: file; filename=""NDA.pdf""; documentid=""1
+```
+
+By default, the response is the PDF file
+as a byte stream.
+For example a request/response in `curl` looks like this:
+
+```
+$ curl --request GET 'https://demo.docusign.net/restapi/v2/accounts/0cdb3ff3-xxxx-xxxx-xxxx-e43af011006d/envelopes/ea4cc25b-xxxx-xxxx-xxxx-a67a0a2a4f6c/documents/1/' \
+       --header 'Authorization: Bearer eyJ...bqg'
+
+
+HTTP/1.1 200 OK
+Content-Length: 167539
+Content-Type: application/pdf
+. . .
+Content-Disposition: file; filename=""Lorem_Ipsum.pdf""; documentid=""1""
+Date: Tue, 23 Aug 2022 01:13:15 GMT
+
+%PDF-1.4
+%˚¸˝˛
+6 0 obj
+<</Length 14>>stream
+. . .
+```
+
+By using the `Content-Transfer-Encoding`
+header in the request, you can obtain the PDF file
+encoded in base64. The same `curl` request with
+the base64 header would look like this:
+
+```
+$ curl --request GET 'https://demo.docusign.net/restapi/v2/accounts/0cdb3ff3-xxxx-xxxx-xxxx-e43af011006d/envelopes/ea4cc25b-xxxx-xxxx-xxxx-a67a0a2a4f6c/documents/1/' \
+       --header 'Authorization: Bearer eyJ...bqg' \
+       --header 'Content-Transfer-Encoding: base64'
+
+
+HTTP/1.1 200 OK
+Content-Length: 223384
+Content-Type: application/pdf
+. . .
+Content-Disposition: file; filename=""Lorem_Ipsum.pdf""; documentid=""1""
+Content-Transfer-Encoding: base64
+Date: Tue, 23 Aug 2022 01:12:30 GMT
+
+JVBERi0xLjQKJfv8/f4KNiAwIG9iago8PC9MZW. . .==
+```
+
+
+(In an actual `curl` request you would use the `--output` switch to
+save the byte stream into a file.)
+
+### Related topics
+
+- [How to download envelope documents](/docs/esign-rest-api/how-to/download-envelope-documents/)"
+e0688,okta,POST,/api/v1/zones/{zoneId}/lifecycle/deactivate,deactivateNetworkZone,Deactivate a network zone,Deactivates a Network Zone by `zoneId`
+e0123,okta,GET,/api/v1/authorizationServers/{authServerId},getAuthorizationServer,Retrieve an authorization server,Retrieves an authorization server
+e0440,okta,GET,/api/v1/logStreams/{logStreamId},getLogStream,Retrieve a log stream,Retrieves a log stream object by ID
+e1349,xero,GET,/RepeatingInvoices/{RepeatingInvoiceID},getRepeatingInvoice,Retrieves a specific repeating invoice by using a unique repeating invoice Id,
+e0841,docusign,GET,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/documents/{documentId}/fields,DocumentFields_GetDocumentFields,Gets the custom document fields from an  existing envelope document.,Retrieves the custom document field information from an existing envelope document.
+e1032,docusign,PUT,/v2.1/accounts/{accountId}/templates/{templateId}/documents/{documentId}/pages/{pageNumber}/page_image,Pages_PutTemplatePageImage,Rotates page image from a template for display.,Rotates page image from a template for display. The page image can be rotated to the left or right.
+e0223,okta,DELETE,/api/v1/brands/{brandId}/themes/{themeId}/favicon,deleteBrandThemeFavicon,Delete the favicon,Deletes a theme favicon. The theme will use the default Okta favicon.
+e1364,xero,GET,/Reports/BudgetSummary,getReportBudgetSummary,Retrieves report for budget summary,
+e0988,docusign,PUT,/v2.1/accounts/{accountId}/signatures/{signatureId},AccountSignatures_PutAccountSignatureById,Updates an account stamp by ID.,Updates an account stamp specified by the `signatureId` query parameter.
+e0106,okta,PUT,/api/v1/authenticators/{authenticatorId},replaceAuthenticator,Replace an authenticator,Replaces the properties for an authenticator identified by `authenticatorId`
+e0524,okta,PUT,/api/v1/policies/{policyId}/rules/{ruleId},replacePolicyRule,Replace a policy rule,Replaces the properties for a policy rule identified by `policyId` and `ruleId`
+e1115,docusign,DELETE,/v2.1/accounts/{accountId}/users/{userId}/signatures/{signatureId}/{imageType},UserSignatures_DeleteUserSignatureImage,Deletes the user initials image or the  user signature image for the specified user.,"Deletes the specified initials image or signature image for the specified user.
+
+The function deletes one or the other of the image types, to delete both the initials image and signature image you must call the endpoint twice.
+
+The userId parameter specified in the endpoint must match the authenticated user's user ID and the user must be a member of the account.
+
+The `signatureId` parameter accepts a signature ID or a signature name. Docusign recommends you use signature ID (`signatureId`), since some names contain characters that do not properly encode into a URL. If you use the user name, it is likely that the name includes spaces. In that case, URL encode the name before using it in the endpoint. 
+
+For example encode ""Bob Smith"" as ""Bob%20Smith""."
+e0277,okta,GET,/api/v1/email-domains/{emailDomainId},getEmailDomain,Retrieve an email domain,Retrieves an Email Domain by `emailDomainId`
+e1157,xero,PUT,/Accounts/{AccountID}/Attachments/{FileName},createAccountAttachmentByFileName,Creates an attachment on a specific account,
+e0879,docusign,PUT,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/recipients/{recipientId}/document_visibility,Recipients_PutRecipientDocumentVisibility,Updates document visibility for a recipient,"This method updates document visibility for a recipient.
+
+**Note:** A document cannot be hidden from a recipient if the recipient has tabs assigned to them on the document. Carbon Copy, Certified Delivery (Needs to Sign), Editor, and Agent recipients can always see all documents."
+e1352,xero,GET,/RepeatingInvoices/{RepeatingInvoiceID}/Attachments/{AttachmentID},getRepeatingInvoiceAttachmentById,Retrieves a specific attachment from a specific repeating invoice,
+e1245,xero,GET,/Invoices/{InvoiceID}/pdf,getInvoiceAsPdf,Retrieves invoices or purchase bills as PDF files,
+e0811,docusign,POST,/v2.1/accounts/{accountId}/contacts,Contacts_PostContacts,Add contacts to a contacts list.,This method adds multiple contacts into a contacts list.
+e1346,xero,GET,/RepeatingInvoices,getRepeatingInvoices,Retrieves repeating invoices,
+e0174,okta,POST,/api/v1/behaviors/{behaviorId}/lifecycle/activate,activateBehaviorDetectionRule,Activate a behavior detection rule,Activates a behavior detection rule
+e0053,okta,GET,/api/v1/apps/{appId}/credentials/secrets/{secretId},getOAuth2ClientSecret,Retrieve an OAuth 2.0 client secret,Retrieves an OAuth 2.0 client secrets by `secretId`
+e0775,docusign,DELETE,/v2.1/accounts/{accountId}/bulk_send_lists/{bulkSendListId},BulkSendV2CRUD_DeleteBulkSendList,Deletes a bulk send list.,This method deletes a bulk send list.
+e0052,okta,POST,/api/v1/apps/{appId}/credentials/secrets,createOAuth2ClientSecret,Create an OAuth 2.0 client secret,"Creates an OAuth 2.0 client secret object with a new active client secret. You can create up to two secret objects. An error is returned if you attempt to create more than two secret objects.
+> **Note:** This API lets you bring your own secret. If [token_endpoint_auth_method](/openapi/okta-oauth/oauth/client/createclient#client/createclient/t=request&path=token_endpoint_auth_method) of the app is `client_secret_jwt`, then the minimum length of `client_secret` is 32 characters. If no secret is specified in the request, Okta adds a new system-generated secret."
+e0201,okta,GET,/api/v1/brands/{brandId}/pages/sign-out/customized,getSignOutPageSettings,Retrieve the sign-out page settings,Retrieves the sign-out page settings
+e0648,okta,GET,/api/v1/users/{userId}/factors/{factorId},getFactor,Retrieve a factor,Retrieves an existing factor for the specified user
+e0716,okta,PUT,/okta-personal-settings/api/v1/export-blocklists,replaceBlockedEmailDomains,Replace the blocked email domains,Replaces the list of blocked email domains which are excluded from app migration
+e1142,docusign,DELETE,/v2.1/current_user/notary/jurisdictions/{jurisdictionId},NotaryJurisdictions_DeleteNotaryJurisdiction,Deletes the specified jurisdiction.,Deletes the specified jurisdiction.
+e0457,okta,GET,/api/v1/meta/schemas/user/linkedObjects/{linkedObjectName},getLinkedObjectDefinition,Retrieve a linked object definition,Retrieves a Linked Object definition
+e0320,okta,GET,/api/v1/groups/{groupId}/roles/{roleAssignmentId},getGroupAssignedRole,Retrieve a group role assignment,Retrieves a role assigned to a group (identified by the `groupId`). The `roleAssignmentId` is the unique identifier for either a standard role group assignment object or a custom role resource set binding object.
+e0888,docusign,POST,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/recipients/{recipientId}/tabs,Recipients_PostRecipientTabs,Adds tabs for a recipient.,Adds one or more tabs for a recipient.
+e1061,docusign,GET,/v2.1/accounts/{accountId}/templates/{templateId}/workflow,TemplateWorkflowDefinition_GetTemplateWorkflowDefinition,Returns the workflow definition for a template.,"Returns the workflow definition for the template specified by `templateId`. If the template does not have a workflow object, this method returns a 404."
+e0281,okta,GET,/api/v1/email-servers,listEmailServers,List all enrolled SMTP servers,Lists all the enrolled custom SMTP server configurations
+e0375,okta,GET,/api/v1/iam/roles/{roleIdOrLabel}/permissions/{permissionType},getRolePermission,Retrieve a custom role permission,Retrieves a permission (identified by `permissionType`) for a custom role
+e0248,okta,GET,/api/v1/device-posture-checks/{postureCheckId},getDevicePostureCheck,Retrieve a device posture check,Retrieves a device posture check by `postureCheckId`
+e0279,okta,DELETE,/api/v1/email-domains/{emailDomainId},deleteEmailDomain,Delete an email domain,Deletes an Email Domain by `emailDomainId`
+e0838,docusign,DELETE,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/documents,Documents_DeleteDocuments,Deletes documents from a draft envelope.,"Deletes one or more documents from an existing envelope that has not yet been completed.
+
+To delete a document, use only the relevant parts of the [`envelopeDefinition`](#envelopeDefinition).
+For example, this request body specifies that you want to delete the document whose `documentId` is ""1"".
+
+
+```text
+{
+  ""documents"": [
+    {
+      ""documentId"": ""1""
+    }
+  ]
+}
+```
+
+The envelope status must be one of:
+
+- `created`
+- `sent`
+- `delivered`"
+e0543,okta,GET,/api/v1/realm-assignments,listRealmAssignments,List all realm assignments,Lists all realm assignments
+e1257,xero,PUT,/Items,createItems,Creates one or more items,
+e0173,okta,DELETE,/api/v1/behaviors/{behaviorId},deleteBehaviorDetectionRule,Delete a behavior detection rule,Deletes a Behavior Detection Rule by `behaviorId`
+e0844,docusign,DELETE,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/documents/{documentId}/fields,DocumentFields_DeleteDocumentFields,Deletes custom document fields from an existing envelope document.,Deletes custom document fields from an existing envelope document.
+e0481,okta,POST,/api/v1/org/email/bounces/remove-list,bulkRemoveEmailAddressBounces,Remove bounced emails,"Removes emails from an email service bounce list.
+
+The emails submitted in this operation are removed from the bounce list by an asynchronous job.
+Any email address that passes validation is accepted for the removal process, even if there are other email addresses in the request that failed validation.
+
+> **Note:** If there are validation errors for all email addresses, a `200 OK` HTTP status is still returned."
+e0291,okta,DELETE,/api/v1/eventHooks/{eventHookId},deleteEventHook,Delete an event hook,"Deletes the event hook that matches the provided `id`. After deletion, the event hook is unrecoverable.
+As a safety precaution, you can only delete event hooks with a status of `INACTIVE`."
+e0234,okta,POST,/api/v1/captchas/{captchaId},updateCaptchaInstance,Update a CAPTCHA instance,Partially updates the properties of a specified CAPTCHA instance
+e0541,okta,GET,/api/v1/rate-limit-settings/warning-threshold,getRateLimitSettingsWarningThreshold,Retrieve the rate limit warning threshold percentage,Retrieves the currently configured threshold for warning notifications when the API's rate limit is exceeded
+e1350,xero,POST,/RepeatingInvoices/{RepeatingInvoiceID},updateRepeatingInvoice,Deletes a specific repeating invoice template,
+e0144,okta,GET,/api/v1/authorizationServers/{authServerId}/policies,listAuthorizationServerPolicies,List all policies,Lists all policies
+e1280,xero,PUT,/ManualJournals/{ManualJournalID}/Attachments/{FileName},createManualJournalAttachmentByFileName,Creates a specific attachment for a specific manual journal by file name,
+e0678,okta,GET,/api/v1/users/{userId}/subscriptions,listSubscriptionsUser,List all subscriptions for a user,Lists all subscriptions available to a specified user. Returns an `AccessDeniedException` message if requests are made for another user.
+e0907,docusign,POST,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/views/recipient,Views_PostEnvelopeRecipientView,"Returns a URL to the recipient view UI. For signer recipients, returns the embedded signing view. Can also be used for other recipient types.","Returns a URL that enables you to
+[embed the recipient view](/docs/esign-rest-api/esign101/concepts/embedding/)
+of the
+DocuSign UI in your applications. If the recipient is a signer,
+then the view will provide the signing ceremony.
+
+This method is only used with envelopes in the `sent` status.
+
+<ds-inlinemessage kind=""information"" markdown=""1"">
+Due to screen space issues,
+do not use an <code>&lt;iframe&gt;</code> for embedded operations on mobile devices.
+For iOS devices, Docusign recommends using a WebView.
+</ds-inlinemessage>
+
+
+### The returned URL
+
+The URL returned in this method's response is intended to be used
+immediately to redirect the signer to the recipient view.
+You can open the recipient view
+in the current browser or in a new tab.
+After the signer is redirected to the
+recipient view, they must interact with the Docusign system
+periodically or their session will time out.
+
+<ds-inlinemessage kind=""warning"" markdown=""1"">
+The returned URL can be used only once and
+expires after 5 minutes.
+Do not store or email the returned URL.
+</ds-inlinemessage>
+
+If you want to invite someone to an embedded signing session via
+email, the email invitation's URL must be to your application.
+When invoked, your app should request a `recipientView` URL from
+Docusign and then redirect the signer to that URL.
+
+### How to specify the default language
+
+You can append the `locale`
+query parameter
+to the URL returned by this method
+to specify a language.
+
+The language for the recipient view
+follows this order or precedence:
+
+- The language specified by the sender for the recipient.
+- The `locale` parameter appended to the URL.
+- The account language if the signer has a Docusign account.
+- The language used in a previous signing if the signer is return signer.
+- The browser language.
+
+For example, to set the default language
+to Canadian French, you would add this query parameter
+to the returned URL:
+
+```
+...&locale=fr_CA
+```
+
+
+## Authentication
+
+Your application is responsible for authenticating the identity
+of the recipient or signer when you use this method. Use the
+following parameters to record how the recipient
+was authenticated.
+
+- `assertionId`
+- `authenticationInstant`
+- `authenticationMethod`
+- `clientUserId`
+- `securityDomain`
+
+At a minimum, `authenticationMethod` and `clientUserId` are
+required. The information that you provide is included in the
+envelope's certificate of completion.
+
+## Sending to a remote signer
+
+You can request a signing session for a remote recipient
+who has a Docusign account.
+
+Authenticate the request using the recipient's
+credentials, and do not specify a  `clientUserId`.
+This differs from the typical behavior where the
+request is authenticated using the sender's credentials,
+and the recipient has a `clientUserId` defined.
+
+
+
+## Redirecting back to returnUrl
+After the signer completes or ends the signing ceremony, Docusign
+redirects the user's browser back to your app via the
+`returnUrl` that you supplied in the request.
+
+The signer may be redirected through various Docusign
+subdomains, depending on the region of the account sending the
+envelope. Please consult [Allowlists for Docusign eSignature service](https://www.docusign.com/trust/security/esignature#allowlists-for-docusign-esignature-service)
+in **Security for Docusign eSignature**
+when setting up your allowlists
+
+
+### The event status parameter
+
+Docusign appends an `event` query parameter to the `returnUrl` with the
+outcome of the signing ceremony. Your app can use this event
+parameter to determine the next step for the envelope.
+Do not fetch the envelope status by using
+[Envelopes: get](/docs/esign-rest-api/reference/envelopes/envelopes/get/)
+or a similar method because doing so
+will probably hit [request and polling limits](/docs/esign-rest-api/esign101/rules-and-limits/).
+
+
+| event query parameter | Meaning                                                                                  |
+| :------------------- | :--------------------------------------------------------------------------------------- |
+| signing_complete     | The recipient has signed the document.                                                   |
+| cancel               | The recipient decided to finish later.                                                   |
+| decline              | The recipient declined to sign the document.                                             |
+| exception            | An exception has occurred on the server during the signing session.                      |
+| fax_pending          | Recipient has a fax pending.                                                             |
+| session_timeout      | The recipient did not sign the document in time. The timeout is set to 20 minutes.       |
+| ttl_expired          | The token was not used within the timeout period or the token has already been accessed. |
+| viewing_complete     | The recipient did not need to sign but has completed the viewing ceremony.               |
+
+
+
+<ds-inlinemessage kind=""information"" markdown=""1"">
+Because a user can cancel redirection, close their
+browser after signing, or spoof the landing URL,
+you should not rely on the <code>returnUrl</code>
+alone as the single source of truth for envelope
+status for your integration.
+</ds-inlinemessage>
+
+### Maintaining State
+After the recipient completes the recipient view (or signing
+ceremony), they are redirected to your application. Your
+application can recover state information about the transaction
+by storing information in a cookie, or by including query
+parameters in the `returnUrl` field. For example.
+`https://myapp.example.com/docusign_return?myState=12345` When the
+user is redirected to your app, the `event` query parameter will
+be appended. In this example, prevent spoofing by not using a
+guessable value as the state value.
+
+
+### Related topics
+
+- [How to request a signature through your app](/docs/esign-rest-api/how-to/request-signature-in-app-embedded/)
+- [How to request a signature using a composite template](/docs/esign-rest-api/how-to/request-signature-composite-template-embedded/)
+- [How to send an envelope via your app](/docs/esign-rest-api/how-to/embedded-sending/)
+- [How to set envelope tab values](/docs/esign-rest-api/how-to/set-envelope-tab-values/)
+- [How to set tab values in a template](/docs/esign-rest-api/how-to/set-template-tab-values/)
+- [How to request a signature using focused view](/docs/esign-rest-api/how-to/request-signature-focused-view/)"
+e0061,okta,PATCH,/api/v1/apps/{appId}/cwo/connections/{connectionId},updateCrossAppAccessConnection,Update a Cross App Access connection,Updates the Cross App Access connection with the specified ID
+e0675,okta,DELETE,/api/v1/users/{userId}/roles/{roleAssignmentId}/targets/groups/{groupId},unassignGroupTargetFromUserAdminRole,Unassign an admin role group target,"Unassigns a group target from a `USER_ADMIN`, `HELP_DESK_ADMIN`, or `GROUP_MEMBERSHIP_ADMIN` role assignment to an admin user.
+
+> **Note:** You can't remove the last group target from a role assignment since this causes an exception.
+> If you need a role assignment that applies to all groups, delete the role assignment to the user and recreate a new one."
+e1248,xero,GET,/Invoices/{InvoiceID}/Attachments/{FileName},getInvoiceAttachmentByFileName,Retrieves an attachment from a specific invoice or purchase bill by filename,
+e1345,xero,PUT,/Receipts/{ReceiptID}/History,createReceiptHistory,Creates a history record for a specific receipt,
+e1124,docusign,DELETE,/v2.1/accounts/{accountId}/workspaces/{workspaceId},Workspace_DeleteWorkspace,Delete Workspace,Deletes an existing workspace (logically).
+e0536,okta,DELETE,/api/v1/push-providers/{pushProviderId},deletePushProvider,Delete a push provider,"Deletes a push provider by `pushProviderId`. If the push provider is currently being used in the org by a custom authenticator, the delete will not be allowed."
+e0698,okta,POST,/integrations/api/v1/api-services/{apiServiceId}/credentials/secrets,createApiServiceIntegrationInstanceSecret,Create an API service integration instance secret,Creates an API Service Integration instance Secret object with a new active client secret. You can create up to two Secret objects. An error is returned if you attempt to create more than two Secret objects.
+e0643,okta,GET,/api/v1/users/{userId}/devices,listUserDevices,List all devices for an enrolled user,"Lists all devices enrolled by a user
+
+> **Note:** To list all devices registered to an org, use the [List all devices endpoint in the Devices API](/openapi/okta-management/management/tags/device/other/listdevices)."
+e0908,docusign,POST,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/views/recipient_preview,Views_PostEnvelopeRecipientPreview,Creates an envelope recipient preview.,"Returns a URL to preview the recipients' view of a draft envelope or template. You can embed this view in your application to enable the sender to preview the recipients' experience.
+
+You must specify a `returnUrl` value in the request body.
+
+For more information, see [Preview and Send](https://support.docusign.com/s/document-item?bundleId=ulp1643236876813&topicId=oeg1578456408976.html)."
+e0941,docusign,GET,/v2.1/accounts/{accountId}/groups/{groupId}/brands,Brands_GetGroupBrands,Gets the brand information for a group.,This method returns information about the brands associated with a group.
+e0899,docusign,DELETE,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/shares/{shareId},EnvelopesShares_DeleteEnvelopesShare,,
+e0214,okta,GET,/api/v1/brands/{brandId}/templates/email/{templateName}/settings,getEmailSettings,Retrieve the email template settings,Retrieves an email template's settings
+e0335,okta,GET,/api/v1/hook-keys/public/{keyId},getPublicKey,Retrieve a public key,"Retrieves a public key by `keyId`
+
+>**Note:** keyId is the alias of the public key."
+e0580,okta,GET,/api/v1/telephony-providers/{customTelephonyProviderId},getCustomTelephonyProviderCredential,Retrieve a custom telephony provider,Retrieves the details of a custom telephony provider by its ID
+e0968,docusign,GET,/v2.1/accounts/{accountId}/settings/bcc_email_archives/{bccEmailArchiveId},BCCEmailArchive_GetBCCEmailArchiveHistoryList,Gets a BCC email archive configuration and its history.,"This method returns a specific BCC email archive configuration for an account, as well as the history of changes to the email address."
+e0477,okta,DELETE,/api/v1/org/captcha,deleteOrgCaptchaSettings,Delete the org-wide CAPTCHA settings,Deletes the CAPTCHA settings object for your organization
+e1281,xero,POST,/ManualJournals/{ManualJournalID}/Attachments/{FileName},updateManualJournalAttachmentByFileName,Updates a specific attachment from a specific manual journal by file name,
+e0029,okta,PUT,/api/v1/apps/{appId},replaceApplication,Replace an application,"Replaces properties for an application
+> **Notes:**
+> * All required properties must be specified in the request body
+> * You can't modify system-assigned properties, such as `id`, `name`, `status`, `created`, and `lastUpdated`. The values for these properties in the PUT request body are ignored."
+e1340,xero,GET,/Receipts/{ReceiptID}/Attachments/{AttachmentID},getReceiptAttachmentById,Retrieves a specific attachments from a specific expense claim receipts by using a unique attachment Id,
+e0101,okta,DELETE,/api/v1/apps/{appId}/users/{userId},unassignUserFromApplication,Unassign an application user,"Unassigns a user from an app
+
+For directories like Active Directory and LDAP, they act as the owner of the user's credential with Okta delegating authentication (DelAuth) to that directory.
+If this request is successful for a user when DelAuth is enabled, then the user is in a state with no password. You can then reset the user's password.
+
+> **Important:** This is a destructive operation. You can't recover the user's app profile. If the app is enabled for provisioning and configured to deactivate users, the user is also deactivated in the target app."
+e0359,okta,GET,/api/v1/iam/resource-sets/{resourceSetIdOrLabel}/bindings/{roleIdOrLabel}/members,listMembersOfBinding,List all role resource set binding members,Lists all members of a role resource set binding with pagination support
+e1194,xero,GET,/Budgets,getBudgets,Retrieve a list of budgets,
+e1338,xero,POST,/Receipts/{ReceiptID},updateReceipt,Updates a specific draft expense claim receipts,
+e1179,xero,PUT,/BankTransfers,createBankTransfer,Creates a bank transfer,
+e0343,okta,PUT,/api/v1/iam/governance/bundles/{bundleId},replaceGovernanceBundle,Replace a governance bundle,Replaces the properties of a governance bundle for the Admin Console
+e0966,docusign,GET,/v2.1/accounts/{accountId}/settings/bcc_email_archives,BCCEmailArchive_GetBCCEmailArchiveList,Gets the BCC email archive configurations for an account.,This method retrieves all of the BCC email archive configurations associated with an account.
+e0738,docusign,GET,/v2.1/accounts/{accountId},Accounts_GetAccount,Retrieves the account information for the specified account.,Retrieves the account information for the specified account.
+e0479,okta,GET,/api/v1/org/contacts/{contactType},getOrgContactUser,Retrieve the contact type user,Retrieves the ID and the user resource associated with the specified contact type
+e0736,docusign,GET,/v2.1,ServiceInformation_GetResourceInformation,Lists resources for REST version specified,"Retrieves the base resources available for the eSignature REST API.
+
+You do not need an integrator key to view the REST API versions and resources."
+e0436,okta,POST,/api/v1/inlineHooks/{inlineHookId}/lifecycle/activate,activateInlineHook,Activate an inline hook,Activates the inline hook by `inlineHookId`
+e0308,okta,DELETE,/api/v1/groups/rules/{groupRuleId},deleteGroupRule,Delete a group rule,Deletes a specific group rule by `groupRuleId`
+e1166,xero,GET,/BankTransactions,getBankTransactions,Retrieves any spent or received money transactions,
+e0458,okta,DELETE,/api/v1/meta/schemas/user/linkedObjects/{linkedObjectName},deleteLinkedObjectDefinition,Delete a linked object definition,"Deletes the Linked Object definition specified by either the `primary` or `associated` name. The entire definition is removed, regardless of which name that you specify."
+e0493,okta,GET,/api/v1/org/privacy/oktaCommunication,getOktaCommunicationSettings,Retrieve the Okta communication settings,Retrieves Okta Communication Settings of your org
+e0691,okta,GET,/attack-protection/api/v1/user-lockout-settings,getUserLockoutSettings,Retrieve the user lockout settings,Retrieves the User Lockout Settings for an org
+e0401,okta,PATCH,/api/v1/identity-sources/{identitySourceId}/users/{externalId},updateIdentitySourceUsers,Update an identity source user,Updates a user to an identity source for the given identity source instance and external ID
+e0397,okta,POST,/api/v1/identity-sources/{identitySourceId}/users,createIdentitySourceUser,Create an identity source user,Creates a user in an identity source for the given identity source instance
+e0896,docusign,DELETE,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/shares,EnvelopesShares_DeleteEnvelopesShares,,
+e0264,okta,GET,/api/v1/domains,listCustomDomains,List all custom domains,Lists all verified custom domains for the org
+e0415,okta,DELETE,/api/v1/idps/{idpId}/credentials/csrs/{idpCsrId},revokeCsrForIdentityProvider,Revoke a certificate signing request,Revokes a certificate signing request (CSR) and deletes the key pair from the identity provider (IdP)
+e1208,xero,GET,/Contacts/{ContactID}/History,getContactHistory,Retrieves history records for a specific contact,
+e0713,okta,DELETE,/oauth2/v1/clients/{clientId}/roles/{roleAssignmentId}/targets/groups/{groupId},removeGroupTargetRoleFromClient,Unassign a client role group target,"Unassigns a Group target from a `USER_ADMIN`, `HELP_DESK_ADMIN`, or `GROUP_MEMBERSHIP_ADMIN` role assignment to a client app.
+
+> **Note:** You can't remove the last group target from a role assignment. If you need a role assignment that applies to all groups, delete the role assignment with the target and create another one. See [Unassign a client role](/openapi/okta-management/management/tags/roleassignmentclient/other/deleterolefromclient)."
+e1091,docusign,POST,/v2.1/accounts/{accountId}/users/{userId}/cloud_storage,CloudStorage_PostCloudStorage,Configures the redirect URL information  for one or more cloud storage providers for the specified user.,Configures the redirect URL information  for one or more cloud storage providers for the specified user. The redirect URL is added to the authentication URL to complete the return route.
+e0869,docusign,GET,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/notification,Notification_GetEnvelopesEnvelopeIdNotification,Gets envelope notification information.,"Retrieves the envelope notification, reminders and expirations, information for an existing envelope."
+e1035,docusign,GET,/v2.1/accounts/{accountId}/templates/{templateId}/documents/{documentId}/tabs,Tabs_GetTemplateDocumentTabs,Returns tabs on a template.,"Returns the tabs on the document specified by `documentId` in the
+template specified by `templateId`."
+e1250,xero,POST,/Invoices/{InvoiceID}/Attachments/{FileName},updateInvoiceAttachmentByFileName,Updates an attachment from a specific invoices or purchase bill by filename,
+e0417,okta,GET,/api/v1/idps/{idpId}/credentials/keys,listIdentityProviderSigningKeys,List all signing key credentials for IdP,Lists all signing key credentials for an identity provider (IdP)
+e1131,docusign,GET,/v2.1/accounts/provisioning,Accounts_GetProvisioning,Retrieves the account provisioning information for the account.,Retrieves the account provisioning information for the account.
+e0506,okta,POST,/api/v1/orgs,createChildOrg,Create an org,"Creates an org (child org) that has the same features as the current requesting org (parent org).
+A child org inherits any new features added to the parent org, but new features added to the child org aren't propagated back to the parent org.
+> **Notes:**
+> * Some features associated with products, such as Atspoke, Workflows, and Okta Identity Governance, aren't propagated to the child org.
+> * Wait at least 30 seconds after a 201-Created response before you make API requests to the new child org.
+> * For rate limits, see [Org creation rate limits](https://developer.okta.com/docs/reference/rl-additional-limits/#org-creation-rate-limits)."
+e0114,okta,POST,/api/v1/authenticators/{authenticatorId}/lifecycle/deactivate,deactivateAuthenticator,Deactivate an authenticator,Deactivates an authenticator by `authenticatorId`
+e0420,okta,GET,/api/v1/idps/{idpId}/credentials/keys/{kid},getIdentityProviderSigningKey,Retrieve a signing key credential for IdP,Retrieves a specific identity provider (IdP) key credential by `kid`
+e1205,xero,PUT,/Contacts/{ContactID}/Attachments/{FileName},createContactAttachmentByFileName,,
+e0803,docusign,DELETE,/v2.1/accounts/{accountId}/connect/oauth,ConnectOAuthConfig_DeleteConnectOAuthConfig,Delete the Connect OAuth configuration.,"Deletes the Connect OAuth configuration for the specified account.
+
+<ds-inlinemessage>
+To use this method, you must be an account administrator
+and Connect must be enabled on your account.
+</ds-inlinemessage>
+
+## Related topics:
+- [OAuth for Docusign Connect](/platform/webhooks/connect/validation-and-security/oauth-connect/)"
+e0829,docusign,GET,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/comments/transcript,Comments_GetCommentsTranscript,Gets a PDF transcript of all of the comments in an envelope.,"Retrieves a PDF file containing all of the comments that senders and recipients have added to the documents in an envelope.
+
+The response body of this method is the PDF file as a byte
+stream.
+
+
+**Note:** Comments are disabled by default. To use the comments feature, an account administrator must enable comments on the account (in the `accountSettingsInformation` object, set the `enableSigningExtensionComments` property to **true**)."
+e0557,okta,GET,/api/v1/roles/{roleRef}/subscriptions,listSubscriptionsRole,List all subscriptions for a role,Lists all subscriptions available to a specified Role
+e0092,okta,GET,/api/v1/apps/{appId}/sso/saml/metadata,previewSAMLmetadataForApplication,Preview the application SAML metadata,Previews the SSO SAML metadata for an application
+e0706,okta,GET,/oauth2/v1/clients/{clientId}/roles/{roleAssignmentId}/targets/catalog/apps,listAppTargetRoleToClient,List all client role app targets,Lists all OIN app targets for an `APP_ADMIN` role that's assigned to a client (by `clientId`).
+e1074,docusign,PUT,/v2.1/accounts/{accountId}/templates/auto_match,TemplatesAutoMatch_PutTemplates,,
+e0780,docusign,GET,/v2.1/accounts/{accountId}/chunked_uploads/{chunkedUploadId},ChunkedUploads_GetChunkedUpload,Retrieves metadata about a chunked upload.,"Returns the details (but not the content) about a chunked upload.
+
+**Note:** You cannot obtain details about a chunked upload that has expired, been deleted, or consumed by other actions."
+e1212,xero,GET,/ContactGroups/{ContactGroupID},getContactGroup,Retrieves a specific contact group by using a unique contact group Id,
+e0876,docusign,GET,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/recipients/{recipientId}/consumer_disclosure,ConsumerDisclosure_GetConsumerDisclosureEnvelopeIdRecipientId,Gets the default Electronic Record and Signature Disclosure for an envelope.,"Retrieves the default, HTML-formatted Electronic Record and Signature Disclosure (ERSD) for the envelope that you specify. 
+
+This is the default ERSD disclosure that Docusign provides for the convenience of U.S.-based customers only. This default disclosure is only valid for transactions between U.S.-based parties.
+
+To set the language of the disclosure that you want to retrieve, use the optional `langCode` query parameter."
+e0500,okta,POST,/api/v1/org/privacy/oktaSupport/grant,grantOktaSupport,Grant Okta Support access,"Grants Okta Support temporary access to your org as an administrator for eight hours
+
+> **Note:** This resource is deprecated. Use the [Update an Okta Support case](/openapi/okta-management/management/tags/orgsettingsupport/other/updateoktasupportcase) resource to grant Okta Support access for a support case.
+> For the corresponding Okta Admin Console feature, see [Give access to Okta Support](https://help.okta.com/okta_help.htm?type=oie&id=settings-support-access)."
+e0425,okta,GET,/api/v1/idps/{idpId}/users/{userId},getIdentityProviderApplicationUser,Retrieve a user for IdP,Retrieves a linked identity provider (IdP) user by ID
+e1079,docusign,DELETE,/v2.1/accounts/{accountId}/users,Users_DeleteUsers,Closes one or more users in the account.,"Closes one or more users in the account,
+preventing them from accessing account features.
+Users are not permanently deleted.
+
+The request body requires only
+the IDs of the users to close:
+
+```json
+{
+    ""users"": [
+        { ""userId"": ""6b67a1ee-xxxx-xxxx-xxxx-385763624163"" },
+        { ""userId"": ""b6c74c52-xxxx-xxxx-xxxx-457a81d88926"" },
+        { ""userId"": ""464f7988-xxxx-xxxx-xxxx-781ee556ab7a"" }
+    ]
+}
+```
+
+You can use [`Users:update`](/docs/esign-rest-api/reference/users/users/update/)
+to re-open a closed user."
+e1175,xero,POST,/BankTransactions/{BankTransactionID}/Attachments/{FileName},updateBankTransactionAttachmentByFileName,Updates a specific attachment from a specific bank transaction by filename,
+e0938,docusign,PUT,/v2.1/accounts/{accountId}/groups,Groups_PutGroups,Updates the group information for a group.,"Updates the group name and modifies, or sets, the permission profile for the group.
+
+### Related topics
+
+- [How-To Set Up a Permission Profile](/docs/esign-rest-api/how-to/permission-profile-setting/)"
+e1314,xero,GET,/PurchaseOrders/{PurchaseOrderNumber},getPurchaseOrderByNumber,Retrieves a specific purchase order using purchase order number,
+e0725,okta,DELETE,/privileged-access/api/v1/service-accounts/{id},deleteAppServiceAccount,Delete an app service account,Deletes an app service account specified by ID
+e0037,okta,POST,/api/v1/apps/{appId}/credentials/csrs,generateCsrForApplication,Generate a certificate signing request,"Generates a new key pair and returns the certificate signing request (CSR) for it. The information in a CSR is used by the Certificate Authority (CA) to verify and create your certificate. It also contains the public key that's included in your certificate.
+
+Returns CSR in `pkcs#10` format if the `Accept` media type is `application/pkcs10` or a CSR object if the `Accept` media type is `application/json`.
+> **Note:** The key pair isn't listed in the key credentials for the app until it's published."
+e0413,okta,POST,/api/v1/idps/{idpId}/credentials/csrs,generateCsrForIdentityProvider,Generate a certificate signing request,"Generates a new key pair and returns a certificate signing request (CSR) for it
+> **Note:** The private key isn't listed in the [signing key credentials for the identity provider (IdP)](https://developer.okta.com/docs/api/openapi/okta-management/management/tag/IdentityProviderSigningKeys/#tag/IdentityProviderSigningKeys/operation/listIdentityProviderSigningKeys) until it's published."
+e0162,okta,POST,/api/v1/authorizationServers/{authServerId}/resourceservercredentials/keys/{keyId}/lifecycle/activate,activateOAuth2ResourceServerJsonWebKey,Activate a Custom Authorization Server Public JSON Web Key,"Activates a custom authorization server public JSON web key by key `id`.
+> **Note:** You can have only one active key at any given time for the authorization server. When you activate an inactive key, Okta automatically deactivates the current active key."
+e1086,docusign,GET,/v2.1/accounts/{accountId}/users/{userId}/authorizations,UserAuthorizations_GetPrincipalUserAuthorizations,Returns the authorizations for which the specified user is the principal user.,"Returns the user authorizations for which the user specified by `userId` is the principal user.
+
+To call this endpoint, you must be an account administrator or you must be the specified principal user."
+e0035,okta,POST,/api/v1/apps/{appId}/connections/default/lifecycle/deactivate,deactivateDefaultProvisioningConnectionForApplication,Deactivate the default provisioning connection,Deactivates the default provisioning connection for an app
+e0285,okta,PATCH,/api/v1/email-servers/{emailServerId},updateEmailServer,Update an SMTP server configuration,"Updates the specified custom SMTP server configuration
+
+> **Note:** When you update an SMTP server configuration that uses OAuth 2.0 authentication, the [`authType`](#components/schemas/BaseEmailServer/properties/authType) property is required in the request body."
+e0514,okta,POST,/api/v1/policies/{policyId}/clone,clonePolicy,Clone an existing policy,Clones an existing policy
+e0098,okta,POST,/api/v1/apps/{appId}/users,assignUserToApplication,Assign an application user,"Assigns a user to an app for:
+
+  * SSO only<br>
+    Assignments to SSO apps typically don't include a user profile.
+    However, if your SSO app requires a profile but doesn't have provisioning enabled, you can add profile attributes in the request body.
+
+  * SSO and provisioning<br>
+    Assignments to SSO and provisioning apps typically include credentials and an app-specific profile.
+    Profile mappings defined for the app are applied first before applying any profile properties that are specified in the request body.
+    > **Notes:**
+    > * When Universal Directory is enabled, you can only specify profile properties that aren't defined in profile mappings.
+    > * Omit mapped properties during assignment to minimize assignment errors."
+e0783,docusign,PUT,/v2.1/accounts/{accountId}/chunked_uploads/{chunkedUploadId}/{chunkedUploadPartSeq},ChunkedUploads_PutChunkedUploadPart,Add a chunk to an existing chunked upload.,"Adds a chunk or part to an existing chunked upload. After you use the Create method to initiate a new chunked upload and upload the first part, 
+use this method to upload subsequent parts.
+
+For simplicity, Docusign recommends that you upload the parts in their sequential order ( 1,2, 3, 4, etc.). The Create method adds the first part and assigns it the `sequence` value `0`. As a result, Docusign recommends that you start with a `sequence` value of `1` when you use this method, and continue uploading parts contiguously until you have uploaded the entirety of the original content to Docusign.
+
+Example:
+
+
+```
+PUT /v2.1/accounts/{accountId}/chunked_uploads/{chunkedUploadId}/1
+PUT /v2.1/accounts/{accountId}/chunked_uploads/{chunkedUploadId}/2
+PUT /v2.1/accounts/{accountId}/chunked_uploads/{chunkedUploadId}/3
+```
+
+**Note:** You cannot replace a part that Docusign has already received, or add parts to a chunked upload that is already successfully committed."
+e0432,okta,PUT,/api/v1/inlineHooks/{inlineHookId},replaceInlineHook,Replace an inline hook,"Replaces an inline hook by `inlineHookId`. The submitted inline hook properties replace the existing properties after passing validation.
+
+>**Note:** Some properties are immutable and can't be updated."
+e0083,okta,PATCH,/api/v1/apps/{appId}/groups/{groupId},updateGroupAssignmentToApplication,Update an application group,Updates a group assignment to an app
+e0936,docusign,PUT,/v2.1/accounts/{accountId}/folders/{folderId},Folders_PutFolderById,Moves a set of envelopes from their current folder to another folder.,"Moves a set of envelopes from their current folder to another folder.
+
+The `folderId` path parameter is the destination folder.
+The request body has an array of envelope IDs and the
+ID of the source folder.
+
+<ds-inlinemessage kind=""warning""  markdown=""1"">
+Do not use the <code>folders</code> property in the request body.
+
+</ds-inlinemessage>
+
+If `folderId` is the special value **`recyclebin`**
+the envelopes are moved to the Deleted folder.
+Moving an in-process envelope
+(envelope status of `sent` or `delivered`)
+to the **`recyclebin`**
+voids the envelope.
+
+
+### Related topics
+
+- [Searching for envelopes](/docs/esign-rest-api/esign101/concepts/envelopes/search/)
+- [Sharing templates](/docs/esign-rest-api/esign101/concepts/templates/sharing/)"
+e0512,okta,DELETE,/api/v1/policies/{policyId},deletePolicy,Delete a policy,Deletes a policy
+e0710,okta,DELETE,/oauth2/v1/clients/{clientId}/roles/{roleAssignmentId}/targets/catalog/apps/{appName}/{appId},removeAppTargetInstanceRoleForClient,Unassign a client role app instance target,"Unassigns an app instance target from a role assignment to a client app
+
+> **Note:** You can't remove the last app instance target from a role assignment.
+> If you need a role assignment that applies to all the apps, delete the role assignment with the instance target and create another one.  See [Unassign a client role](/openapi/okta-management/management/tags/roleassignmentclient/other/deleterolefromclient)."
+e0461,okta,GET,/api/v1/meta/types/user,listUserTypes,List all user types,Lists all user types in your org
+e1141,docusign,PUT,/v2.1/current_user/notary/jurisdictions/{jurisdictionId},NotaryJurisdictions_PutNotaryJurisdiction,Updates the jurisdiction information about a notary.,"Updates the jurisdiction information about a notary.
+
+The following restrictions apply:
+
+- The current user must be a notary.
+- The `jurisdictionId` path parameter must be a jurisdiction that the notary is registered for.
+- The `jurisdictionId` path parameter must match the request body's `jurisdiction.jurisdictionId`.
+
+The request body must have a full `jurisdiction` object for the jurisdiction property.
+The best way to do this is to use `getNotaryJurisdiction` to obtain the current values and update the properties you want to change.
+
+For example, assume `getNotaryJurisdiction` returns this:
+
+```
+{
+    ""jurisdiction"": {
+        ""jurisdictionId"": ""15"",
+        ""name"": ""Iowa"",
+        ""county"": """",
+        ""enabled"": ""true"",
+        ""countyInSeal"": ""false"",
+        ""commissionIdInSeal"": ""true"",
+        ""stateNameInSeal"": ""true"",
+        ""notaryPublicInSeal"": ""true"",
+        ""allowSystemCreatedSeal"": ""true"",
+        ""allowUserUploadedSeal"": ""false""
+    },
+    ""commissionId"": ""123456"",
+    ""commissionExpiration"": ""2020-08-31T07:00:00.0000000Z"",
+    ""registeredName"": ""Bob Notary"",
+    ""county"": ""Adams"",
+    ""sealType"": ""system_created""
+}
+```
+
+If you want to change the name of the notary from ""Bob Notary"" to ""Robert Notary"", your request body would be:
+
+```
+{
+    ""jurisdiction"": {
+        ""jurisdictionId"": ""15"",
+        ""name"": ""Iowa"",
+        ""county"": """",
+        ""enabled"": ""true"",
+        ""countyInSeal"": ""false"",
+        ""commissionIdInSeal"": ""true"",
+        ""stateNameInSeal"": ""true"",
+        ""notaryPublicInSeal"": ""true"",
+        ""allowSystemCreatedSeal"": ""true"",
+        ""allowUserUploadedSeal"": ""false""
+    },
+    ""commissionId"": ""123456"",
+    ""commissionExpiration"": ""2020-08-31T07:00:00.0000000Z"",
+    ""registeredName"": ""Robert Notary"",
+    ""county"": ""Adams"",
+    ""sealType"": ""system_created""
+}
+```"
+e1378,xero,DELETE,/TrackingCategories/{TrackingCategoryID},deleteTrackingCategory,Deletes a specific tracking category,
+e1089,docusign,GET,/v2.1/accounts/{accountId}/users/{userId}/authorizations/agent,UserAgentAuthorizations_GetAgentUserAuthorizations,Returns the authorizations for which the specified user is the agent user.,"Returns the user authorizations for which the user specified by `userId` is the agent user.
+
+If the calling user is an account administrator, the full results will be returned. Otherwise, only authorizations for which the calling user is the principal user will be returned."
+e0065,okta,GET,/api/v1/apps/{appId}/federated-claims,listFederatedClaims,List all configured federated claims,Lists all federated claims for your app

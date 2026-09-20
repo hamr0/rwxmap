@@ -7,7 +7,7 @@ with `node poc/flow/proof.mjs`.
 
 ## Corpus
 
-5465 rows, 332 vendors. Truth split: r 646 (11.8%), w 3883 (71.1%), x 936 (17.1%). Leave-one-vendor-out. Mining bars: other-party nouns admitted at >= 2 vendors and x-share >= 0.3 over PUT/DELETE/PATCH; yours nouns admitted at n >= 2 and w-share >= 0.8 over write rows (every method but GET/HEAD/OPTIONS). Run date: 2026-09-16.
+5465 rows, 332 vendors. Truth split: r 646 (11.8%), w 3883 (71.1%), x 936 (17.1%). Leave-one-vendor-out. Mining bars: other-party nouns admitted at >= 2 vendors and x-share >= 0.3 over PUT/DELETE/PATCH; yours nouns admitted at n >= 2 and w-share >= 0.8 over write rows (every method but GET/HEAD/OPTIONS). Run date: 2026-09-17.
 
 ## How the flow runs
 

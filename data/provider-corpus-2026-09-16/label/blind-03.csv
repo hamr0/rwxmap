@@ -1,0 +1,770 @@
+row_id,provider,method,path,operationId,summary,description
+r2927,jira,GET,/rest/api/2/user,getUser,Get user,"Returns a user.
+
+Privacy controls are applied to the response based on the user's preferences. This could mean, for example, that the user's email address is hidden. See the [Profile visibility overview](https://developer.atlassian.com/cloud/jira/platform/profile-visibility/) for more details.
+
+**[Permissions](#permissions) required:** *Browse users and groups* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r2628,jira,GET,/rest/api/2/issue/{issueIdOrKey}/comment/{id},getComment,Get comment,"Returns a comment.
+
+This operation can be accessed anonymously.
+
+**[Permissions](#permissions) required:**
+
+ *  *Browse projects* [project permission](https://confluence.atlassian.com/x/yodKLg) for the project containing the comment.
+ *  If [issue-level security](https://confluence.atlassian.com/x/J4lKLg) is configured, issue-level security permission to view the issue.
+ *  If the comment has visibility restrictions, the user belongs to the group or has the role visibility is restricted to."
+r1566,meta-whatsapp,DELETE,/{Version}/{Phone-Number-ID}/message_qrdls/{QR-Code-ID},deleteIndividualQrCode,Delete Individual Message QR Code,"Permanently delete a specific QR code. Once deleted, the QR code and deep link become invalid.
+Deletion cannot be undone and affects any existing marketing materials using the QR code."
+r0941,square,POST,/oauth2/revoke,RevokeToken,RevokeToken,"Revokes an access token generated with the OAuth flow.
+
+If an account has more than one OAuth access token for your application, this
+endpoint revokes all of them, regardless of which token you specify. 
+
+__Important:__ The `Authorization` header for this endpoint must have the
+following format:
+
+```
+Authorization: Client APPLICATION_SECRET
+```
+
+Replace `APPLICATION_SECRET` with the application secret on the **OAuth**
+page for your application in the Developer Dashboard."
+r1496,paypal,GET,/v1/notifications/webhooks,webhooks.list,List webhooks,Lists webhooks for an app.
+r0949,square,POST,/v2/bank-accounts,CreateBankAccount,CreateBankAccount,Store a bank account on file for a square account
+r2087,digitalocean,GET,/v2/monitoring/metrics/database/mysql/memory_usage,monitoring_get_database_mysql_memory_usage,Get Database MySQL Memory Usage Metrics,"Retrieve memory usage (percent) for a MySQL cluster. Use **aggregate** (avg, max, or min) over the time range."
+r0869,openai,GET,/skills/{skill_id},GetSkill,Get Skill,Get a skill by its ID.
+r2471,jira,POST,/rest/api/2/config/fieldschemes,createFieldAssociationScheme,Create field scheme,"Endpoint for creating a new field association scheme.
+
+A new scheme is **not** copied from, or based on, any existing field association scheme. Instead, it is initialised with a minimal default set of critical fields sourced from the instance's own *system* and *product* fields (the fields returned by the product's field API), rather than from a scheme you specify.
+
+To create a scheme that is based on an existing one, use the *Clone field scheme* endpoint instead.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r2257,digitalocean,PATCH,/v2/vpcs/{vpc_id}/peerings/{vpc_peering_id},vpcs_patch_peerings,Update a VPC Peering,"To update the name of a VPC peering in a particular VPC, send a PATCH request 
+to `/v2/vpcs/$VPC_ID/peerings/$VPC_PEERING_ID` with the new `name` in the 
+request body."
+r3024,jira,GET,/rest/api/2/workflowscheme/{workflowSchemeId}/projectUsages,getProjectUsagesForWorkflowScheme,Get projects which are using a given workflow scheme,Returns a page of projects using a given workflow scheme.
+r1120,square,POST,/v2/locations/custom-attribute-definitions,CreateLocationCustomAttributeDefinition,CreateLocationCustomAttributeDefinition,"Creates a location-related [custom attribute definition](entity:CustomAttributeDefinition) for a Square seller account.
+Use this endpoint to define a custom attribute that can be associated with locations.
+A custom attribute definition specifies the `key`, `visibility`, `schema`, and other properties
+for a custom attribute. After the definition is created, you can call
+[UpsertLocationCustomAttribute](api-endpoint:LocationCustomAttributes-UpsertLocationCustomAttribute) or
+[BulkUpsertLocationCustomAttributes](api-endpoint:LocationCustomAttributes-BulkUpsertLocationCustomAttributes)
+to set the custom attribute for locations."
+r4104,canva,POST,/v1/folders/move,moveFolderItem,,"Moves an item to another folder. You must specify the folder ID of the destination folder, as well as the ID of the item you want to move.
+
+NOTE: In some situations, a single item can exist in multiple folders. If you attempt to move an item that exists in multiple folders, the API returns an `item_in_multiple_folders` error. In this case, you must use the Canva UI to move the item to another folder."
+r0300,stripe,GET,/v1/payment_intents,GetPaymentIntents,List all PaymentIntents,<p>Returns a list of PaymentIntents.</p>
+r3069,mailchimp,DELETE,/automations/{workflow_id}/emails/{workflow_email_id},deleteAutomationsIdEmailsId,Delete workflow email,"Removes an individual classic automation workflow email. Emails from certain workflow types, including the Abandoned Cart Email (abandonedCart) and Product Retargeting Email (abandonedBrowse) Workflows, cannot be deleted."
+r3807,datadog,GET,/api/v1/usage/network_flows,GetUsageNetworkFlows,get hourly usage for network flows,"Get hourly usage for network flows.
+**Note:** This endpoint has been deprecated. Hourly usage data for all products is now available in the [Get hourly usage by product family API](https://docs.datadoghq.com/api/latest/usage-metering/#get-hourly-usage-by-product-family). Refer to [Migrating from the V1 Hourly Usage APIs to V2](https://docs.datadoghq.com/account_management/guide/hourly-usage-migration/) for the associated migration guide."
+r0553,stripe,GET,/v1/transfers/{transfer},GetTransfersTransfer,Retrieve a transfer,"<p>Retrieves the details of an existing transfer. Supply the unique transfer ID from either a transfer creation request or the transfer list, and Stripe will return the corresponding transfer information.</p>"
+r0094,stripe,POST,/v1/charges/{charge},PostChargesCharge,Update a charge,<p>Updates the specified charge by setting the values of the parameters passed. Any parameters not provided will be left unchanged.</p>
+r0278,stripe,GET,/v1/issuing/personalization_designs/{personalization_design},GetIssuingPersonalizationDesignsPersonalizationDesign,Retrieve a personalization design,<p>Retrieves a personalization design object.</p>
+r1552,meta-whatsapp,POST,/{Version}/{Business-ID}/share_preverified_numbers,sharePreVerifiedPhoneNumber,Share Pre-Verified Phone Number with Another Business,"Share a pre-verified phone number with another business entity, granting specified
+permissions for collaborative WhatsApp Business messaging operations.
+
+
+**Use Cases:**
+- Enable partner businesses to use your pre-verified phone numbers for messaging
+- Share phone number resources between parent and subsidiary businesses
+- Facilitate multi-business WhatsApp integrations with shared phone number access
+- Establish temporary or permanent phone number sharing relationships
+
+
+**Business Logic:**
+- Only businesses with appropriate ownership or sharing rights can share phone numbers
+- Shared phone numbers maintain original ownership while granting usage permissions
+- Multiple businesses can have access to the same phone number with different permission levels
+- Sharing relationships can be time-limited with automatic expiration
+
+
+**Rate Limiting:**
+Standard Graph API rate limits apply. Use appropriate retry logic with exponential backoff.
+
+
+**Validation:**
+- Pre-verified phone number must exist and be accessible to the requesting business
+- Target business must be a valid and accessible business entity
+- Requested permissions must be valid and within the scope of allowed sharing permissions
+- Sharing operation must comply with business relationship and access control policies"
+r0743,openai,GET,/organization/projects/{project_id}/users,list-project-users,List project users,Returns a list of users in the project.
+r2916,jira,POST,/rest/api/2/task/{taskId}/cancel,cancelTask,Cancel task,"Cancels a task.
+
+**[Permissions](#permissions) required:** either of:
+
+ *  *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg).
+ *  Creator of the task."
+r3761,datadog,GET,/api/v1/synthetics/tests/browser/{public_id},GetBrowserTest,Get a browser test,"Get the detailed configuration (including steps) associated with
+a Synthetic browser test."
+r1381,zoom,DELETE,/users/{userId}/assistants/{assistantId},userAssistantDelete,Delete a user's assistant,Delete one of a user's assistants
+r1533,paypal,GET,/v1/shipping/trackers,trackers-batch.get,List tracking information,Lists tracking information that meet search criteria. The tracking ID is required but the tracking number is optional.
+r1885,digitalocean,DELETE,/v2/databases/{database_cluster_uuid}/logsink/{logsink_id},databases_delete_logsink,Delete Logsink for a Database Cluster,"To delete a logsink for a database cluster, send a DELETE request to
+`/v2/databases/$DATABASE_ID/logsink/$LOGSINK_ID`."
+r2769,jira,GET,/rest/api/2/plans/plan/{planId}/team/atlassian/{atlassianTeamId},getAtlassianTeam,Get Atlassian team in plan,"Returns planning settings for an Atlassian team in a plan.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r2568,jira,DELETE,/rest/api/2/fieldconfigurationscheme/{id},deleteFieldConfigurationScheme,Delete field configuration scheme,"Deprecated, use [ Field schemes](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-field-schemes/#api-group-field-schemes) which supports field association schemes.
+
+Deletes a field configuration scheme.
+
+This operation can only delete field configuration schemes used in company-managed (classic) projects.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r3637,datadog,POST,/api/v1/host/{host_name}/mute,MuteHost,Mute a host,Mute a host. **Note:** This creates a [Downtime V2](https://docs.datadoghq.com/api/latest/downtimes/#schedule-a-downtime) for the host.
+r2602,jira,POST,/rest/api/2/issue,createIssue,Create issue,"Creates an issue or, where the option to create subtasks is enabled in Jira, a subtask. A transition may be applied, to move the issue or subtask to a workflow step other than the default start step, and issue properties set.
+
+The content of the issue or subtask is defined using `update` and `fields`. The fields that can be set in the issue or subtask are determined using the [ Get create issue metadata](#api-rest-api-2-issue-createmeta-get). These are the same fields that appear on the issue's create screen.
+
+Creating a subtask differs from creating an issue as follows:
+
+ *  `issueType` must be set to a subtask issue type (use [ Get create issue metadata](#api-rest-api-2-issue-createmeta-get) to find subtask issue types).
+ *  `parent` must contain the ID or key of the parent issue.
+
+**[Permissions](#permissions) required:** *Browse projects* and *Create issues* [project permissions](https://confluence.atlassian.com/x/yodKLg) for the project in which the issue or subtask is created."
+r0813,openai,GET,/threads/{thread_id}/runs,listRuns,List runs,Returns a list of runs belonging to a thread.
+r2857,jira,POST,/rest/api/2/resolution,createResolution,Create resolution,"Creates an issue resolution.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r4150,figma,PUT,/v2/webhooks/{webhook_id},putWebhook,Update a webhook,Update a webhook by ID.
+r0490,stripe,POST,/v1/terminal/readers/{reader}/collect_inputs,PostTerminalReadersReaderCollectInputs,Collect inputs using a Reader,"<p>Initiates an <a href=""/docs/terminal/features/collect-inputs"">input collection flow</a> on a Reader to display input forms and collect information from your customers.</p>"
+r1389,zoom,PUT,/users/{userId}/password,userPassword,Update a user's password,Update a user's password
+r2378,digitalocean,POST,/v2/gen-ai/oauth2/dropbox/tokens,genai_create_oauth2_dropbox_tokens,Get Oauth2 Dropbox Tokens,"To obtain the refresh token, needed for creation of data sources, send a GET request to `/v2/gen-ai/oauth2/dropbox/tokens`. Pass the code you obtrained from the oauth flow in the field 'code'"
+r1013,square,GET,/v2/customers/groups,ListCustomerGroups,ListCustomerGroups,Retrieves the list of customer groups of a business.
+r0948,square,GET,/v2/bank-accounts,ListBankAccounts,ListBankAccounts,Returns a list of [BankAccount](entity:BankAccount) objects linked to a Square account.
+r1059,square,POST,/v2/gift-cards/{gift_card_id}/unlink-customer,UnlinkCustomerFromGiftCard,UnlinkCustomerFromGiftCard,"Unlinks a customer from a gift card, which is also referred to as removing a card on file."
+r1921,digitalocean,PATCH,/v2/domains/{domain_name}/records/{domain_record_id},domains_patch_record,Update a Domain Record,"To update an existing record, send a PATCH request to
+`/v2/domains/$DOMAIN_NAME/records/$DOMAIN_RECORD_ID`. Any attribute valid for
+the record type can be set to a new value for the record.
+
+See the [attribute table](#tag/Domain-Records) for details regarding record
+types and their respective attributes."
+r2785,jira,GET,/rest/api/2/priorityscheme,getPrioritySchemes,Get priority schemes,"Returns a [paginated](#pagination) list of priority schemes.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r3000,jira,DELETE,/rest/api/2/workflowscheme/{id},deleteWorkflowScheme,Delete workflow scheme,"Deletes a workflow scheme. Note that a workflow scheme cannot be deleted if it is active (that is, being used by at least one project).
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r2679,jira,GET,/rest/api/2/issuesecurityschemes/{id},getIssueSecurityScheme,Get issue security scheme,"Returns an issue security scheme along with its security levels.
+
+**[Permissions](#permissions) required:**
+
+ *  *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg).
+ *  *Administer Projects* [project permission](https://confluence.atlassian.com/x/yodKLg) for a project that uses the requested issue security scheme."
+r1691,spotify,DELETE,/playlists/{playlist_id}/items,remove-items-playlist,Remove Playlist Items,Remove one or more items from a user's playlist.
+r3669,datadog,POST,/api/v1/integration/pagerduty/configuration/services,CreatePagerDutyIntegrationService,Create a new service object,Create a new service object in the PagerDuty integration.
+r1427,zoom,PATCH,/webhooks/{webhookId},webhookUpdate,Update a webhook,Update a webhook
+r0686,openai,GET,/organization/certificates/{certificate_id},getCertificate,Get certificate,"Get a certificate that has been uploaded to the organization.
+
+You can get a certificate regardless of whether it is active or not."
+r2325,digitalocean,POST,/v2/gen-ai/evaluation_runs,genai_run_evaluation_test_case,Run an Evaluation Test Case,"To run an evaluation test case, send a POST request to `/v2/gen-ai/evaluation_runs`."
+r1173,square,PUT,/v2/online-checkout/payment-links/{id},UpdatePaymentLink,UpdatePaymentLink,"Updates a payment link. You can update the `payment_link` fields such as
+`description`, `checkout_options`, and  `pre_populated_data`.
+You cannot update other fields such as the `order_id`, `version`, `URL`, or `timestamp` field."
+r0998,square,GET,/v2/channels,ListChannels,ListChannels,
+r3459,asana,GET,/workspaces/{workspace_gid}/projects,getProjectsForWorkspace,Get all projects in a workspace,"<b>Required scope: </b><code>projects:read</code>
+
+Returns the compact project records for all projects in the workspace.
+*Note: This endpoint may timeout for large domains. To fetch projects shared with a specific team, use `GET /memberships` with `member` set to the team GID and `resource_subtype` set to `project_membership`.*"
+r2664,jira,DELETE,/rest/api/2/issueLink/{linkId},deleteIssueLink,Delete issue link,"Deletes an issue link.
+
+This operation can be accessed anonymously.
+
+**[Permissions](#permissions) required:**
+
+ *  Browse project [project permission](https://confluence.atlassian.com/x/yodKLg) for all the projects containing the issues in the link.
+ *  *Link issues* [project permission](https://confluence.atlassian.com/x/yodKLg) for at least one of the projects containing issues in the link.
+ *  If [issue-level security](https://confluence.atlassian.com/x/J4lKLg) is configured, permission to view both of the issues."
+r2062,digitalocean,GET,/v2/monitoring/metrics/load_balancer/frontend_nlb_tcp_network_throughput,monitoring_get_lb_frontend_nlb_tcp_network_throughput,Get Network Load Balancer Frontend TCP Throughput Metrics,"To retrieve frontend TCP throughput in bytes per second for a given load balancer, send a GET request to `/v2/monitoring/metrics/load_balancer/frontend_nlb_tcp_network_throughput`."
+r2597,jira,POST,/rest/api/2/group/user,addUserToGroup,Add user to group,"Adds a user to a group.
+
+**[Permissions](#permissions) required:** Site administration (that is, member of the *site-admin* [group](https://confluence.atlassian.com/x/24xjL))."
+r3435,asana,GET,/project_memberships/{project_membership_gid},getProjectMembership,Get a project membership,Returns the complete project record for a single project membership.
+r0605,openai,GET,/audio/voice_consents/{consent_id},getVoiceConsent,Retrieve voice consent,Retrieves a voice consent recording.
+r0439,stripe,GET,/v1/subscriptions,GetSubscriptions,List subscriptions,"<p>By default, returns a list of subscriptions that have not been canceled. In order to list canceled subscriptions, specify <code>status=canceled</code>.</p>"
+r2807,jira,PUT,/rest/api/2/project/{projectIdOrKey},updateProject,Update project,"Updates the [project details](https://confluence.atlassian.com/x/ahLpNw) of a project.
+
+All parameters are optional in the body of the request. Schemes will only be updated if they are included in the request, any omitted schemes will be left unchanged.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg). is only needed when changing the schemes or project key. Otherwise you will only need *Administer Projects* [project permission](https://confluence.atlassian.com/x/yodKLg)"
+r2442,jira,PUT,/rest/api/2/app/field/{fieldIdOrKey}/value,updateCustomFieldValue,Update custom field value,"Updates the value of a custom field on one or more issues.
+
+Apps can only perform this operation on [custom fields](https://developer.atlassian.com/platform/forge/manifest-reference/modules/jira-custom-field/) and [custom field types](https://developer.atlassian.com/platform/forge/manifest-reference/modules/jira-custom-field-type/) declared in their own manifests.
+
+**[Permissions](#permissions) required:** Only the app that owns the custom field or custom field type can update its values with this operation.
+
+The new `write:app-data:jira` OAuth scope is 100% optional now, and not using it won't break your app. However, we recommend adding it to your app's scope list because we will eventually make it mandatory."
+r3939,intercom,POST,/contacts/{contact_id}/block,BlockContact,Block contact,Block a single contact.<br>**Note:** conversations of the contact will also be archived during the process.<br>More details in [FAQ How do I block Inbox spam?](https://www.intercom.com/help/en/articles/8838656-inbox-faqs)
+r1792,digitalocean,GET,/v2/apps/{app_id}/events/{event_id},apps_get_event,Get an Event,Get a single event for an app.
+r0834,openai,GET,/vector_stores/{vector_store_id}/files,listVectorStoreFiles,List vector store files,Returns a list of vector store files.
+r2905,jira,GET,/rest/api/2/statuscategory/{idOrKey},getStatusCategory,Get status category,"Returns a status category. Status categories provided a mechanism for categorizing [statuses](#api-rest-api-2-status-idOrName-get).
+
+**[Permissions](#permissions) required:** Permission to access Jira."
+r3889,intercom,GET,/help_center/collections/{collection_id},retrieveCollection,Retrieve a collection,You can fetch the details of a single collection by making a GET request to `https://api.intercom.io/help_center/collections/<id>`.
+r0663,openai,POST,/fine_tuning/jobs/{fine_tuning_job_id}/resume,resumeFineTuningJob,Resume fine-tuning,Resume a fine-tune job.
+r3293,mailchimp,DELETE,/ecommerce/stores/{store_id}/orders/{order_id}/lines/{line_id},deleteEcommerceStoresIdOrdersIdLinesId,Delete order line item,Delete a specific order line item.
+r3536,asana,POST,/tasks/{task_gid}/removeFollowers,removeFollowerForTask,Remove followers from a task,"<b>Required scope: </b><code>tasks:write</code>
+
+Removes each of the specified followers from the task if they are following. Returns the complete, updated record for the affected task."
+r2855,jira,GET,/rest/api/2/redact/status/{jobId},getRedactionStatus,Get redaction status,"Retrieves the current status of a redaction job ID.
+
+The jobStatus will be one of the following:
+
+ *  IN\_PROGRESS - The redaction job is currently in progress
+ *  COMPLETED - The redaction job has completed successfully.
+ *  PENDING - The redaction job has not started yet"
+r0639,openai,GET,/evals/{eval_id}/runs,getEvalRuns,Get eval runs,Get a list of runs for an evaluation.
+r3891,intercom,DELETE,/help_center/collections/{collection_id},deleteCollection,Delete a collection,You can delete a single collection by making a DELETE request to `https://api.intercom.io/collections/<id>`.
+r3701,datadog,GET,/api/v1/metrics,ListActiveMetrics,Get active metrics list,Get the list of actively reporting metrics from a given time until now.
+r1186,square,POST,/v2/orders/search,SearchOrders,SearchOrders,"Search all orders for one or more locations. Orders include all sales,
+returns, and exchanges regardless of how or when they entered the Square
+ecosystem (such as Point of Sale, Invoices, and Connect APIs).
+
+`SearchOrders` requests need to specify which locations to search and define a
+[SearchOrdersQuery](entity:SearchOrdersQuery) object that controls
+how to sort or filter the results. Your `SearchOrdersQuery` can:
+
+  Set filter criteria.
+  Set the sort order.
+  Determine whether to return results as complete `Order` objects or as
+[OrderEntry](entity:OrderEntry) objects.
+
+Note that details for orders processed with Square Point of Sale while in
+offline mode might not be transmitted to Square for up to 72 hours. Offline
+orders have a `created_at` value that reflects the time the order was
+transmitted to Square and created server-side, not the time the order was
+created on the Point of Sale device."
+r3060,mailchimp,GET,/authorized-apps/{app_id},getAuthorizedAppsId,Get authorized app info,Get information about a specific authorized application.
+r1022,square,PUT,/v2/customers/{customer_id},UpdateCustomer,UpdateCustomer,"Updates a customer profile. This endpoint supports sparse updates, so only new or changed fields are required in the request.
+To add or update a field, specify the new value. To remove a field, specify `null`.
+
+To update a customer profile that was created by merging existing profiles, you must use the ID of the newly created profile."
+r3470,asana,GET,/rates,getRates,Get multiple rates,"Returns a list of `rate` records. The possible types for `parent` in this request are `project`. An additional `resource` (`user` GID or `placeholder` GID) can be passed in to filter to a specific rate.
+
+Modifying placeholder rates is only available for Enterprise and Enterprise+ users."
+r0984,square,POST,/v2/catalog/batch-delete,BatchDeleteCatalogObjects,BatchDeleteCatalogObjects,"Deletes a set of [CatalogItem](entity:CatalogItem)s based on the
+provided list of target IDs and returns a set of successfully deleted IDs in
+the response. Deletion is a cascading event such that all children of the
+targeted object are also deleted. For example, deleting a CatalogItem will
+also delete all of its [CatalogItemVariation](entity:CatalogItemVariation)
+children.
+
+`BatchDeleteCatalogObjects` succeeds even if only a portion of the targeted
+IDs can be deleted. The response will only include IDs that were
+actually deleted.
+
+To ensure consistency, only one delete request is processed at a time per seller account.
+While one (batch or non-batch) delete request is being processed, other (batched and non-batched)
+delete requests are rejected with the `429` error code."
+r2917,jira,GET,/rest/api/2/uiModifications,getUiModifications,Get UI modifications,"Gets UI modifications. UI modifications can only be retrieved by Forge apps.
+
+**[Permissions](#permissions) required:** None.
+
+The new `read:app-data:jira` OAuth scope is 100% optional now, and not using it won't break your app. However, we recommend adding it to your app's scope list because we will eventually make it mandatory."
+r3458,asana,POST,/teams/{team_gid}/projects,createProjectForTeam,Create a project in a team,"<b>Required scope: </b><code>projects:write</code>
+
+Creates a project shared with the given team.
+
+Returns the full record of the newly created project."
+r1243,square,POST,/v2/terminals/checkouts/{checkout_id}/cancel,CancelTerminalCheckout,CancelTerminalCheckout,Cancels a Terminal checkout request if the status of the request permits it.
+r0459,stripe,POST,/v1/tax/transactions/create_reversal,PostTaxTransactionsCreateReversal,Create a reversal Transaction,<p>Partially or fully reverses a previously created <code>Transaction</code>.</p>
+r2994,jira,POST,/rest/api/2/workflowscheme/project/switch,switchWorkflowSchemeForProject,Switch workflow scheme for project,"Switches a workflow scheme for a project.
+
+Workflow schemes can only be assigned to classic projects.
+
+**Calculating required mappings:** If statuses from the current workflow scheme won't exist in the target workflow scheme, you must provide `mappingsByIssueTypeOverride` to specify how issues with those statuses should be migrated. Use [the required workflow scheme mappings API](#api-rest-api-3-workflowscheme-update-mappings-post) to determine which statuses and issue types require mappings.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r3919,intercom,POST,/contacts/{contact_id}/notes,createNote,Create a note,You can add a note to a single contact.
+r1428,paypal,GET,/v1/billing/plans,plans.list,List plans,Lists billing plans.
+r2613,jira,POST,/rest/api/2/issue/properties,bulkSetIssuesPropertiesList,Bulk set issues properties by list,"Sets or updates a list of entity property values on issues. A list of up to 10 entity properties can be specified along with up to 10,000 issues on which to set or update that list of entity properties.
+
+The value of the request body must be a [valid](http://tools.ietf.org/html/rfc4627), non-empty JSON. The maximum length of single issue property value is 32768 characters. This operation can be accessed anonymously.
+
+This operation is:
+
+ *  transactional, either all properties are updated in all eligible issues or, when errors occur, no properties are updated.
+ *  [asynchronous](#async). Follow the `location` link in the response to determine the status of the task and use [Get task](#api-rest-api-2-task-taskId-get) to obtain subsequent updates.
+
+**[Permissions](#permissions) required:**
+
+ *  *Browse projects* and *Edit issues* [project permissions](https://confluence.atlassian.com/x/yodKLg) for the project containing the issue.
+ *  If [issue-level security](https://confluence.atlassian.com/x/J4lKLg) is configured, issue-level security permission to view the issue."
+r0098,stripe,POST,/v1/charges/{charge}/dispute/close,PostChargesChargeDisputeClose,,
+r2003,digitalocean,GET,/v2/kubernetes/clusters/{cluster_id}/kubeconfig,kubernetes_get_kubeconfig,Retrieve the kubeconfig for a Kubernetes Cluster,"This endpoint returns a kubeconfig file in YAML format. It can be used to
+connect to and administer the cluster using the Kubernetes command line tool,
+`kubectl`, or other programs supporting kubeconfig files (e.g., client libraries).
+
+The resulting kubeconfig file uses token-based authentication for clusters
+supporting it, and certificate-based authentication otherwise. For a list of
+supported versions and more information, see ""[How to Connect to a DigitalOcean
+Kubernetes Cluster](https://docs.digitalocean.com/products/kubernetes/how-to/connect-to-cluster/)"".
+
+To retrieve a kubeconfig file for use with a Kubernetes cluster, send a GET
+request to `/v2/kubernetes/clusters/$K8S_CLUSTER_ID/kubeconfig`.
+
+Clusters supporting token-based authentication may define an expiration by
+passing a duration in seconds as a query parameter to
+`/v2/kubernetes/clusters/$K8S_CLUSTER_ID/kubeconfig?expiry_seconds=$DURATION_IN_SECONDS`.
+If not set or 0, then the token will have a 7 day expiry. The query parameter
+has no impact for other kubeconfig types.
+
+Using an `sso` kubeconfig type requires `doctl` to be installed to handle the client side
+of the OAuth2 flow.
+
+Kubernetes Roles granted to a user are derived from that user's
+DigitalOcean role. Predefined roles (Owner, Member, Modifier etc.) have an automatic mapping
+to Kubernetes roles. Custom roles are not automatically mapped to any Kubernetes roles,
+and require [additional configuration](https://docs.digitalocean.com/products/kubernetes/how-to/set-up-custom-rolebindings/)
+by a cluster administrator."
+r1925,digitalocean,GET,/v2/droplets/{droplet_id},droplets_get,Retrieve an Existing Droplet,"To show information about an individual Droplet, send a GET request to
+`/v2/droplets/$DROPLET_ID`."
+r0306,stripe,POST,/v1/payment_intents/{intent}/apply_customer_balance,PostPaymentIntentsIntentApplyCustomerBalance,Reconcile a customer_balance PaymentIntent,<p>Manually reconcile the remaining amount for a <code>customer_balance</code> PaymentIntent.</p>
+r3412,asana,POST,/ooo_entries,createOooEntry,Create an OOO entry,"<b>Required scope: </b><code>ooo_entries:write</code>
+
+Creates a new OOO entry.
+
+Returns the full record of the newly created OOO entry."
+r0930,openai,DELETE,/webhook_endpoints/{webhook_endpoint_id},DeleteWebhookEndpoint,Delete Webhook Endpoint,Deletes a webhook endpoint for the authenticated project.
+r0320,stripe,POST,/v1/payment_method_configurations/{configuration},PostPaymentMethodConfigurationsConfiguration,Update payment method configuration,<p>Update payment method configuration</p>
+r1658,spotify,GET,/albums/{id}/tracks,get-an-albums-tracks,Get Album Tracks,"Get Spotify catalog information about an album’s tracks.
+Optional parameters can be used to limit the number of tracks returned."
+r1086,square,POST,/v2/invoices/{invoice_id}/attachments,CreateInvoiceAttachment,CreateInvoiceAttachment,"Uploads a file and attaches it to an invoice. This endpoint accepts HTTP multipart/form-data file uploads
+with a JSON `request` part and a `file` part. The `file` part must be a `readable stream` that contains a file
+in a supported format: GIF, JPEG, PNG, TIFF, BMP, or PDF.
+
+Invoices can have up to 10 attachments with a total file size of 25 MB. Attachments can be added only to invoices
+in the `DRAFT`, `SCHEDULED`, `UNPAID`, or `PARTIALLY_PAID` state.
+
+__NOTE:__ When testing in the Sandbox environment, the total file size is limited to 1 KB."
+r2993,jira,PUT,/rest/api/2/workflowscheme/project,assignSchemeToProject,Assign workflow scheme to project,"Assigns a workflow scheme to a project. This operation is performed only when there are no issues in the project.
+
+Workflow schemes can only be assigned to classic projects.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r1334,zoom,DELETE,/meetings/{meetingId}/polls/{pollId},meetingPollDelete,Delete a meeting's Poll,Delete a meeting's Poll
+r2371,digitalocean,GET,/v2/gen-ai/models/routers,genai_list_model_routers,List Model Routers,"To list model routers, send a GET request to `/v2/gen-ai/models/routers`."
+r0254,stripe,POST,/v1/invoices/{invoice}/remove_lines,PostInvoicesInvoiceRemoveLines,Bulk remove invoice line items,<p>Removes multiple line items from an invoice. This is only possible when an invoice is still a draft.</p>
+r2995,jira,POST,/rest/api/2/workflowscheme/read,readWorkflowSchemes,Bulk get workflow schemes,"Returns a list of workflow schemes by providing workflow scheme IDs or project IDs.
+
+**[Permissions](#permissions) required:**
+
+ *  *Administer Jira* global permission to access all, including project-scoped, workflow schemes
+ *  *Administer projects* project permissions to access project-scoped workflow schemes"
+r3615,datadog,DELETE,/api/v1/dashboard/lists/manual/{list_id},DeleteDashboardList,Delete a dashboard list,Delete a dashboard list.
+r2871,jira,POST,/rest/api/2/role/{id}/actors,addProjectRoleActorsToRole,Add default actors to project role,"Adds [default actors](#api-rest-api-2-resolution-get) to a role. You may add groups or users, but you cannot add groups and users in the same request.
+
+Changing a project role's default actors does not affect project role members for projects already created.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r1605,meta-whatsapp,POST,/{Version}/{Pre-Verified-Phone-Number-ID}/request_code,requestPreVerifiedPhoneNumberCode,Request Verification Code for Pre-Verified Phone Number,"Request a verification code for a pre-verified phone number via SMS or voice call.
+This is part of the WhatsApp Business Account onboarding process where pre-approved
+phone numbers must be verified before they can be used for messaging.
+
+
+**Process Flow:**
+1. Call this endpoint to request a verification code
+2. User receives code via SMS or voice call
+3. Use the verify_code endpoint to complete verification
+4. Phone number becomes active for messaging
+
+
+**Rate Limiting:**
+- Limited number of code requests per phone number per time period
+- Exponential backoff recommended for retry attempts
+- Voice calls may have additional restrictions
+
+
+**Language Support:**
+Verification messages are sent in the specified language when available.
+Falls back to English (en_US) if the requested language is not supported.
+
+
+**Security Considerations:**
+- Codes expire after a short time period
+- Limited number of verification attempts allowed
+- Phone number must be pre-verified and owned by requesting business"
+r0635,openai,POST,/evals,createEval,Create eval,"Create the structure of an evaluation that can be used to test a model's performance.
+An evaluation is a set of testing criteria and the config for a data source, which dictates the schema of the data used in the evaluation. After creating an evaluation, you can run it on different models and model parameters. We support several types of graders and datasources.
+For more information, see the [Evals guide](https://developers.openai.com/api/docs/guides/evals)."
+r3358,asana,DELETE,/attachments/{attachment_gid},deleteAttachment,Delete an attachment,"<b>Required scope: </b><code>attachments:delete</code>
+
+Deletes a specific, existing attachment.
+
+Returns an empty data record."
+r3562,asana,DELETE,/time_tracking_entries/{time_tracking_entry_gid},deleteTimeTrackingEntry,Delete a time tracking entry,"A specific, existing time tracking entry can be deleted by making a `DELETE` request on
+the URL for that time tracking entry.
+
+Returns an empty data record.
+
+#### Access requirements
+
+This endpoint is available only when time tracking is available through the domain's
+plan or add-ons. A request from a domain without time tracking access returns a
+`402 Payment Required` error."
+r2642,jira,DELETE,/rest/api/2/issue/{issueIdOrKey}/remotelink/{linkId},deleteRemoteIssueLinkById,Delete remote issue link by ID,"Deletes a remote issue link from an issue.
+
+This operation requires [issue linking to be active](https://confluence.atlassian.com/x/yoXKM).
+
+This operation can be accessed anonymously.
+
+**[Permissions](#permissions) required:**
+
+ *  *Browse projects*, *Edit issues*, and *Link issues* [project permission](https://confluence.atlassian.com/x/yodKLg) for the project that the issue is in.
+ *  If [issue-level security](https://confluence.atlassian.com/x/J4lKLg) is configured, issue-level security permission to view the issue."
+r0963,square,POST,/v2/bookings/custom-attributes/bulk-delete,BulkDeleteBookingCustomAttributes,BulkDeleteBookingCustomAttributes,"Bulk deletes bookings custom attributes.
+
+To call this endpoint with buyer-level permissions, set `APPOINTMENTS_WRITE` for the OAuth scope.
+To call this endpoint with seller-level permissions, set `APPOINTMENTS_ALL_WRITE` and `APPOINTMENTS_WRITE` for the OAuth scope.
+
+For calls to this endpoint with seller-level permissions to succeed, the seller must have subscribed to *Appointments Plus*
+or *Appointments Premium*."
+r3058,mailchimp,POST,/audiences/{audience_id}/contacts/{contact_id}/actions/forget,postAudiencesContactsActionsForget,Forget Contact,Forgets a Contact.
+r0333,stripe,POST,/v1/payment_records/report_payment,PostPaymentRecordsReportPayment,Report a payment,"<p>Report a new Payment Record. You may report a Payment Record as it is
+ initialized and later report updates through the other report_* methods, or report Payment
+ Records in a terminal state directly, through this method.</p>"
+r0078,stripe,GET,/v1/billing/meters,GetBillingMeters,List billing meters,<p>Retrieve a list of billing meters.</p>
+r2425,digitalocean,POST,/v1/images/generations,inference_create_image,Generate images from text prompts,"Creates a high-quality image from a text prompt using GPT-IMAGE-1, the latest image generation model with automatic prompt optimization and enhanced visual capabilities."
+r3866,intercom,DELETE,/articles/{article_id}/tags/{id},detachTagFromArticle,Remove a tag from an article,"Remove a tag from an article. Returns the tag that was removed, with null
+`applied_at` and `applied_by`.
+
+The authenticating teammate must have the `manage_knowledge_base_content`
+permission.
+
+Requires the `read_write_articles_scope` OAuth scope."
+r1184,square,POST,/v2/orders/custom-attributes/bulk-delete,BulkDeleteOrderCustomAttributes,BulkDeleteOrderCustomAttributes,"Deletes order [custom attributes](entity:CustomAttribute) as a bulk operation.
+
+Use this endpoint to delete one or more custom attributes from one or more orders.
+A custom attribute is based on a custom attribute definition in a Square seller account.  (To create a
+custom attribute definition, use the [CreateOrderCustomAttributeDefinition](api-endpoint:OrderCustomAttributes-CreateOrderCustomAttributeDefinition) endpoint.)
+
+This `BulkDeleteOrderCustomAttributes` endpoint accepts a map of 1 to 25 individual delete
+requests and returns a map of individual delete responses. Each delete request has a unique ID
+and provides an order ID and custom attribute. Each delete response is returned with the ID
+of the corresponding request.
+
+To delete a custom attribute owned by another application, the `visibility` setting
+must be `VISIBILITY_READ_WRITE_VALUES`. Note that seller-defined custom attributes
+(also known as custom fields) are always set to `VISIBILITY_READ_WRITE_VALUES`."
+r1674,spotify,DELETE,/me/audiobooks,remove-audiobooks-user,Remove User's Saved Audiobooks,"Remove one or more audiobooks from the Spotify user's library.
+
+**Note:** This endpoint is deprecated. Use [Remove Items from Library](/documentation/web-api/reference/remove-library-items) instead."
+r3401,asana,POST,/goals/{goal_gid}/removeCustomFieldSetting,removeCustomFieldSettingForGoal,Remove a custom field from a goal,"<b>Required scope: </b><code>goals:write</code>
+
+Removes a custom field setting from a goal."
+r4004,intercom,GET,/news/news_items/{news_item_id},retrieveNewsItem,Retrieve a news item,You can fetch the details of a single news item.
+r0535,stripe,POST,/v1/test_helpers/treasury/outbound_payments/{id}/return,PostTestHelpersTreasuryOutboundPaymentsIdReturn,Test mode: Return an OutboundPayment,<p>Transitions a test mode created OutboundPayment to the <code>returned</code> status. The OutboundPayment must already be in the <code>processing</code> state.</p>
+r0115,stripe,GET,/v1/climate/products,GetClimateProducts,List products,<p>Lists all available Climate product objects.</p>
+r2162,digitalocean,POST,/v2/registry,registry_create,Create Container Registry,"**Note: This endpoint is deprecated. Please use the `/v2/registries` endpoint instead.**
+
+To create your container registry, send a POST request to `/v2/registry`.
+
+The `name` becomes part of the URL for images stored in the registry. For
+example, if your registry is called `example`, an image in it will have the
+URL `registry.digitalocean.com/example/image:tag`."
+r3430,asana,POST,/portfolios/{portfolio_gid}/duplicate,duplicatePortfolio,Duplicate a portfolio,"<b>Required scope: </b><code>portfolios:write</code>
+
+Creates and returns a job that will asynchronously handle the duplication."
+r2924,jira,GET,/rest/api/2/universal_avatar/view/type/{type},getAvatarImageByType,Get avatar image by type,"Returns the default project, issue type or priority avatar image.
+
+This operation can be accessed anonymously.
+
+**[Permissions](#permissions) required:** None."
+r3795,datadog,GET,/api/v1/usage/dbm,GetUsageDBM,Get hourly usage for database monitoring,"Get hourly usage for database monitoring
+**Note:** This endpoint has been deprecated. Hourly usage data for all products is now available in the [Get hourly usage by product family API](https://docs.datadoghq.com/api/latest/usage-metering/#get-hourly-usage-by-product-family). Refer to [Migrating from the V1 Hourly Usage APIs to V2](https://docs.datadoghq.com/account_management/guide/hourly-usage-migration/) for the associated migration guide."
+r1091,square,POST,/v2/labor/break-types,CreateBreakType,CreateBreakType,"Creates a new `BreakType`.
+
+A `BreakType` is a template for creating `Break` objects.
+You must provide the following values in your request to this
+endpoint:
+
+- `location_id`
+- `break_name`
+- `expected_duration`
+- `is_paid`
+
+You can only have three `BreakType` instances per location. If you attempt to add a fourth
+`BreakType` for a location, an `INVALID_REQUEST_ERROR` ""Exceeded limit of 3 breaks per location.""
+is returned."
+r0159,stripe,GET,/v1/customers/{customer}/cash_balance_transactions,GetCustomersCustomerCashBalanceTransactions,List cash balance transactions,"<p>Returns a list of transactions that modified the customer’s <a href=""/docs/payments/customer-balance"">cash balance</a>.</p>"
+r1077,square,GET,/v2/inventory/physical-counts/{physical_count_id},RetrieveInventoryPhysicalCount,RetrieveInventoryPhysicalCount,"Returns the [InventoryPhysicalCount](entity:InventoryPhysicalCount)
+object with the provided `physical_count_id`."
+r2555,jira,POST,/rest/api/2/field/{id}/trash,trashCustomField,Move custom field to trash,"Moves a custom field to trash. See [Edit or delete a custom field](https://confluence.atlassian.com/x/Z44fOw) for more information on trashing and deleting custom fields.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r2132,digitalocean,PATCH,/v2/projects/default,projects_patch_default,Patch the Default Project,"To update only specific attributes of your default project, send a PATCH request to `/v2/projects/default`. At least one of the following attributes needs to be sent."
+r1720,spotify,GET,/browse/categories,get-categories,Get Several Browse Categories,"Get a list of categories used to tag items in Spotify (on, for example, the Spotify player’s “Browse” tab)."
+r2575,jira,GET,/rest/api/2/filter/my,getMyFilters,Get my filters,"Returns the filters owned by the user. If `includeFavourites` is `true`, the user's visible favorite filters are also returned.
+
+**[Permissions](#permissions) required:** Permission to access Jira, however, a favorite filters is only visible to the user where the filter is:
+
+ *  owned by the user.
+ *  shared with a group that the user is a member of.
+ *  shared with a private project that the user has *Browse projects* [project permission](https://confluence.atlassian.com/x/yodKLg) for.
+ *  shared with a public project.
+ *  shared with the public.
+
+For example, if the user favorites a public filter that is subsequently made private that filter is not returned by this operation."
+r0034,stripe,GET,/v1/apple_pay/domains,GetApplePayDomains,,<p>List apple pay domains.</p>
+r2862,jira,PUT,/rest/api/2/resolution/{id},updateResolution,Update resolution,"Updates an issue resolution.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r0953,square,GET,/v2/bookings,ListBookings,ListBookings,"Retrieve a collection of bookings.
+
+To call this endpoint with buyer-level permissions, set `APPOINTMENTS_READ` for the OAuth scope.
+To call this endpoint with seller-level permissions, set `APPOINTMENTS_ALL_READ` and `APPOINTMENTS_READ` for the OAuth scope."
+r1130,square,GET,/v2/locations/{location_id}/custom-attributes/{key},RetrieveLocationCustomAttribute,RetrieveLocationCustomAttribute,"Retrieves a [custom attribute](entity:CustomAttribute) associated with a location.
+You can use the `with_definition` query parameter to also retrieve the custom attribute definition
+in the same call.
+To retrieve a custom attribute owned by another application, the `visibility` setting must be
+`VISIBILITY_READ_ONLY` or `VISIBILITY_READ_WRITE_VALUES`."
+r0782,openai,GET,/projects/{project_id}/roles/{role_id},retrieve-project-role,Retrieve project role,Retrieves a project role.
+r2285,digitalocean,PUT,/v2/gen-ai/agents/{agent_uuid}/api_keys/{api_key_uuid}/regenerate,genai_regenerate_agent_api_key,Regenerate API Key for an Agent,"To regenerate an agent API key, send a PUT request to `/v2/gen-ai/agents/{agent_uuid}/api_keys/{api_key_uuid}/regenerate`."
+r0453,stripe,POST,/v1/tax/registrations,PostTaxRegistrations,Create a registration,<p>Creates a new Tax <code>Registration</code> object.</p>
+r2196,digitalocean,PATCH,/v2/byoip_prefixes/{byoip_prefix_uuid},byoipPrefixes_patch,Update a BYOIP Prefix,"To update a BYOIP prefix, send a PATCH request to `/v2/byoip_prefixes/$byoip_prefix_uuid`.
+
+Currently, you can update the advertisement status of the prefix.
+The response will include the updated details of the prefix."
+r2361,digitalocean,PUT,/v2/gen-ai/model_evaluation_runs/{eval_run_uuid}/cancel,genai_cancel_model_evaluation_run,Cancel Model Evaluation Run,"To cancel an in-progress model evaluation run, send a PUT request to `/v2/gen-ai/model_evaluation_runs/{eval_run_uuid}/cancel`."
+r0525,stripe,POST,/v1/test_helpers/test_clocks,PostTestHelpersTestClocks,Create a test clock,<p>Creates a new test clock that can be attached to new customers and quotes.</p>
+r2289,digitalocean,POST,/v2/gen-ai/agents/{agent_uuid}/guardrails,genai_attach_agent_guardrails,Attach Guardrails to an Agent,"To attach guardrails to an agent, send a POST request to `/v2/gen-ai/agents/{agent_uuid}/guardrails`."
+r0412,stripe,POST,/v1/setup_intents/{intent}/confirm,PostSetupIntentsIntentConfirm,Confirm a SetupIntent,"<p>Confirm that your customer intends to set up the current or
+provided payment method. For example, you would confirm a SetupIntent
+when a customer hits the “Save” button on a payment method management
+page on your website.</p>
+
+<p>If the selected payment method does not require any additional
+steps from the customer, the SetupIntent will transition to the
+<code>succeeded</code> status.</p>
+
+<p>Otherwise, it will transition to the <code>requires_action</code> status and
+suggest additional actions via <code>next_action</code>. If setup fails,
+the SetupIntent will transition to the
+<code>requires_payment_method</code> status or the <code>canceled</code> status if the
+confirmation limit is reached.</p>"
+r3028,jira,GET,/rest/atlassian-connect/1/addons/{addonKey}/properties,AddonPropertiesResource.getAddonProperties_get,Get app properties,"Gets all the properties of an app. The reserved key `connect_client_key_019cdff3-8bfb-71fe-9628-875b700aebb8` is not returned.
+
+**[Permissions](#permissions) required:** Only a Connect app whose key matches `addonKey` can make this request.
+Additionally, Forge apps can access Connect app properties (stored against the same `app.connect.key`)."
+r0844,openai,DELETE,/conversations/{conversation_id},deleteConversation,Delete a conversation,Delete a conversation. Items in the conversation will not be deleted.
+r0794,openai,POST,/realtime/client_secrets,create-realtime-client-secret,Create client secret,"Create a Realtime client secret with an associated session configuration.
+
+Client secrets are short-lived tokens that can be passed to a client app,
+such as a web frontend or mobile client, which grants access to the Realtime API without
+leaking your main API key. You can configure a custom TTL for each client secret.
+
+You can also attach session configuration options to the client secret, which will be
+applied to any sessions created using that client secret, but these can also be overridden
+by the client connection.
+
+[Learn more about authentication with client secrets over WebRTC](https://developers.openai.com/api/docs/guides/realtime-webrtc).
+
+Returns the created client secret and the effective session object. The client secret is a string that looks like `ek_1234`."
+r1474,paypal,GET,/v2/invoicing/invoices,invoices.list,List invoices,"Lists invoices. To filter the invoices that appear in the response, you can specify one or more optional query parameters."
+r2633,jira,GET,/rest/api/2/issue/{issueIdOrKey}/properties,getIssuePropertyKeys,Get issue property keys,"Returns the URLs and keys of an issue's properties.
+
+This operation can be accessed anonymously.
+
+**[Permissions](#permissions) required:** Property details are only returned where the user has:
+
+ *  *Browse projects* [project permission](https://confluence.atlassian.com/x/yodKLg) for the project containing the issue.
+ *  If [issue-level security](https://confluence.atlassian.com/x/J4lKLg) is configured, issue-level security permission to view the issue."
+r2588,jira,GET,/rest/api/2/filter/{id}/permission/{permissionId},getSharePermission,Get share permission,"Returns a share permission for a filter. A filter can be shared with groups, projects, all logged-in users, or the public. Sharing with all logged-in users or the public is known as a global share permission.
+
+This operation can be accessed anonymously.
+
+**[Permissions](#permissions) required:** None, however, a share permission is only returned for:
+
+ *  filters owned by the user.
+ *  filters shared with a group that the user is a member of.
+ *  filters shared with a private project that the user has *Browse projects* [project permission](https://confluence.atlassian.com/x/yodKLg) for.
+ *  filters shared with a public project.
+ *  filters shared with the public."
+r0830,openai,POST,/vector_stores/{vector_store_id}/file_batches,createVectorStoreFileBatch,Create vector store file batch,Create a vector store file batch.
+r3526,asana,POST,/tasks/{task_gid}/addDependencies,addDependenciesForTask,Set dependencies for a task,"<b>Required scope: </b><code>tasks:write</code>
+
+Marks a set of tasks as dependencies of this task, if they are not already dependencies. *A task can have at most 30 dependents and dependencies combined*."
+r1984,digitalocean,POST,/v2/images,images_create_custom,Create a Custom Image,"To create a new custom image, send a POST request to /v2/images.
+The body must contain a url attribute pointing to a Linux virtual machine
+image to be imported into DigitalOcean.
+The image must be in the raw, qcow2, vhdx, vdi, or vmdk format.
+It may be compressed using gzip or bzip2 and must be smaller than 100 GB after
+ being decompressed."
+r3098,mailchimp,GET,/campaigns,getCampaigns,List campaigns,Get all campaigns in an account.
+r3251,mailchimp,GET,/templates/{template_id}/default-content,getTemplatesIdDefaultContent,View default content,"Get the sections that you can edit in a template, including each section's default content."
+r3031,jira,DELETE,/rest/atlassian-connect/1/addons/{addonKey}/properties/{propertyKey},AddonPropertiesResource.deleteAddonProperty_delete,Delete app property,"Deletes an app's property.
+
+**[Permissions](#permissions) required:** Only a Connect app whose key matches `addonKey` can make this request.
+Additionally, Forge apps can access Connect app properties (stored against the same `app.connect.key`)."
+r2197,digitalocean,GET,/v2/byoip_prefixes/{byoip_prefix_uuid}/ips,byoipPrefixes_list_resources,List BYOIP Prefix Resources,"To list resources associated with BYOIP prefixes, send a GET request to `/v2/byoip_prefixes/{byoip_prefix_uuid}/ips`.
+
+A successful response will return a list of resources associated with the specified BYOIP prefix."
+r0702,openai,POST,/organization/groups/{group_id}/users,add-group-user,Add group user,Adds a user to a group.
+r2107,digitalocean,GET,/v2/nfs/{nfs_id},nfs_get,Get an NFS share,"To get an NFS share, send a GET request to `/v2/nfs/{nfs_id}?region=${region}`.
+
+A successful request will return the NFS share."
+r2780,jira,PUT,/rest/api/2/priority/move,movePriorities,Move priorities,"Changes the order of issue priorities.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r1753,digitalocean,POST,/v2/1-clicks/kubernetes,oneClicks_install_kubernetes,Install Kubernetes 1-Click Applications,"To install a Kubernetes 1-Click application on a cluster, send a POST request to
+`/v2/1-clicks/kubernetes`. The `addon_slugs` and `cluster_uuid` must be provided as body
+parameter in order to specify which 1-Click application(s) to install. To list all available
+1-Click Kubernetes applications, send a request to `/v2/1-clicks?type=kubernetes`."
+r2233,digitalocean,POST,/v2/vector-databases/{id}/resize,vectorDatabases_post_resize,Resize a Vector Database,"To resize a vector database, send a POST request to `/v2/vector-databases/{id}/resize`. This changes the database's resource tier. The response body contains a JSON object with the updated vector database."
+r3566,asana,GET,/timesheet_approval_statuses,getTimesheetApprovalStatuses,Get multiple timesheet approval statuses,"<b>Required scope: </b><code>timesheet_approval_statuses:read</code>
+
+Returns a list of timesheet approval statuses filtered by workspace and optionally by user, date range, or approval status."
+r2764,jira,PUT,/rest/api/2/plans/plan/{planId},updatePlan,Update plan,"Updates any of the following details of a plan using [JSON Patch](https://datatracker.ietf.org/doc/html/rfc6902).
+
+ *  name
+ *  leadAccountId
+ *  scheduling
+    
+     *  estimation with StoryPoints, Days or Hours as possible values
+     *  startDate
+        
+         *  type with DueDate, TargetStartDate, TargetEndDate or DateCustomField as possible values
+         *  dateCustomFieldId
+     *  endDate
+        
+         *  type with DueDate, TargetStartDate, TargetEndDate or DateCustomField as possible values
+         *  dateCustomFieldId
+     *  inferredDates with None, SprintDates or ReleaseDates as possible values
+     *  dependencies with Sequential or Concurrent as possible values
+ *  issueSources
+    
+     *  type with Board, Project or Filter as possible values
+     *  value
+ *  exclusionRules
+    
+     *  numberOfDaysToShowCompletedIssues
+     *  issueIds
+     *  workStatusIds
+     *  workStatusCategoryIds
+     *  issueTypeIds
+     *  releaseIds
+ *  crossProjectReleases
+    
+     *  name
+     *  releaseIds
+ *  customFields
+    
+     *  customFieldId
+     *  filter
+ *  permissions
+    
+     *  type with View or Edit as possible values
+     *  holder
+        
+         *  type with Group or AccountId as possible values
+         *  value
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg).
+
+*Note that ""add"" operations do not respect array indexes in target locations. Call the ""Get plan"" endpoint to find out the order of array elements.*"
+r2276,digitalocean,GET,/v2/uptime/checks/{check_id}/alerts/{alert_id},uptime_get_alert,Retrieve an Existing Alert,"To show information about an existing alert, send a GET request to `/v2/uptime/checks/$CHECK_ID/alerts/$ALERT_ID`."
+r0110,stripe,GET,/v1/climate/orders,GetClimateOrders,List orders,"<p>Lists all Climate order objects. The orders are returned sorted by creation date, with the
+most recently created orders appearing first.</p>"
+r0355,stripe,GET,/v1/prices/{price},GetPricesPrice,Retrieve a price,<p>Retrieves the price with the given ID.</p>
+r2237,digitalocean,DELETE,/v2/volumes,volumes_delete_byName,Delete a Block Storage Volume by Name,"Block storage volumes may also be deleted by name by sending a DELETE request with the volume's **name** and the **region slug** for the region it is located in as query parameters to `/v2/volumes?name=$VOLUME_NAME&region=nyc1`.
+No response body will be sent back, but the response code will indicate success. Specifically, the response code will be a 204, which means that the action was successful with no returned body data."
+r3787,datadog,DELETE,/api/v1/tags/hosts/{host_name},DeleteHostTags,Remove host tags,"This endpoint allows you to remove all tags
+for a single host. If no source is specified, only deletes from the source ""User""."
+r1795,digitalocean,GET,/v2/apps/tiers/instance_sizes,apps_list_instanceSizes,List Instance Sizes,"List all instance sizes for `service`, `worker`, and `job` components."
+r2739,jira,PUT,/rest/api/2/mypreferences/locale,setLocale,Set locale,"Deprecated, use [ Update a user profile](https://developer.atlassian.com/cloud/admin/user-management/rest/#api-users-account-id-manage-profile-patch) from the user management REST API instead.
+
+Sets the locale of the user. The locale must be one supported by the instance of Jira.
+
+**[Permissions](#permissions) required:** Permission to access Jira."
+r0253,stripe,POST,/v1/invoices/{invoice}/pay,PostInvoicesInvoicePay,Pay an invoice,"<p>Stripe automatically creates and then attempts to collect payment on invoices for customers on subscriptions according to your <a href=""https://dashboard.stripe.com/account/billing/automatic"">subscriptions settings</a>. However, if you’d like to attempt payment on an invoice out of the normal collection schedule or for some other reason, you can do so.</p>"
+r2396,digitalocean,DELETE,/v2/gen-ai/scenario_sets/{scenario_set_uuid},genai_delete_scenario_set,Delete Scenario Set,"To delete a scenario set, send a DELETE request to `/v2/gen-ai/scenario_sets/{scenario_set_uuid}`. A scenario set that is referenced by a simulation run cannot be deleted."
+r3022,jira,PUT,/rest/api/2/workflowscheme/{id}/workflow,updateWorkflowMapping,Set issue types for workflow in workflow scheme,"Sets the issue types for a workflow in a workflow scheme. The workflow can also be set as the default workflow for the workflow scheme. Unmapped issues types are mapped to the default workflow.
+
+Note that active workflow schemes cannot be edited. If the workflow scheme is active, set `updateDraftIfNeeded` to `true` in the request body and a draft workflow scheme is created or updated with the new workflow-issue types mappings. The draft workflow scheme can be published in Jira.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r2491,jira,GET,/rest/api/2/customFieldOption/{id},getCustomFieldOption,Get custom field option,"Returns a custom field option. For example, an option in a select list.
+
+Note that this operation **only works for issue field select list options created in Jira or using operations from the [Issue custom field options](#api-group-Issue-custom-field-options) resource**, it cannot be used with issue field select list options created by Connect apps.
+
+This operation can be accessed anonymously.
+
+**[Permissions](#permissions) required:** The custom field option is returned as follows:
+
+ *  if the user has the *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg).
+ *  if the user has the *Browse projects* [project permission](https://confluence.atlassian.com/x/yodKLg) for at least one project the custom field is used in, and the field is visible in at least one layout the user has permission to view."
+r3850,intercom,PUT,/ai/content_import_sources/{source_id},updateContentImportSource,Update a content import source,You can update an existing content import source.
+r0045,stripe,GET,/v1/apps/secrets,GetAppsSecrets,List secrets,<p>List all secrets stored on the given scope.</p>
+r3091,mailchimp,DELETE,/template-folders/{folder_id},deleteTemplateFoldersId,Delete template folder,"Delete a specific template folder, and mark all the templates in the folder as 'unfiled'."
+r3457,asana,GET,/teams/{team_gid}/projects,getProjectsForTeam,Get a team's projects,"<b>Required scope: </b><code>projects:read</code>
+
+Returns the compact project records for all projects in the team."
+r2967,jira,DELETE,/rest/api/2/webhook,deleteWebhookById,Delete webhooks by ID,"Removes webhooks by ID. Only webhooks registered by the calling app are removed. If webhooks created by other apps are specified, they are ignored.
+
+**[Permissions](#permissions) required:** Only [Connect](https://developer.atlassian.com/cloud/jira/platform/#connect-apps) and [OAuth 2.0](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps) apps can use this operation."
+r2747,jira,DELETE,/rest/api/2/notificationscheme/{notificationSchemeId},deleteNotificationScheme,Delete notification scheme,"Deletes a notification scheme.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+r1007,square,GET,/v2/customers/custom-attribute-definitions,ListCustomerCustomAttributeDefinitions,ListCustomerCustomAttributeDefinitions,"Lists the customer-related [custom attribute definitions](entity:CustomAttributeDefinition) that belong to a Square seller account.
+
+When all response pages are retrieved, the results include all custom attribute definitions
+that are visible to the requesting application, including those that are created by other
+applications and set to `VISIBILITY_READ_ONLY` or `VISIBILITY_READ_WRITE_VALUES`. Note that
+seller-defined custom attributes (also known as custom fields) are always set to `VISIBILITY_READ_WRITE_VALUES`."
+r2156,digitalocean,GET,/v2/registries/{registry_name}/repositories/{repository_name}/tags,registries_list_repositoryTags,List All Container Registry Repository Tags,"To list all tags in one of your container registry's repository, send a GET
+request to `/v2/registries/$REGISTRY_NAME/repositories/$REPOSITORY_NAME/tags`.
+
+Note that if your repository name contains `/` characters, it must be
+URL-encoded in the request URL. For example, to list tags for
+`registry.digitalocean.com/example/my/repo`, the path would be
+`/v2/registry/example/repositories/my%2Frepo/tags`. 
+
+It is similar to GET `/v2/registry/$REGISTRY_NAME/repositories/$REPOSITORY_NAME/tags`."
+r1366,zoom,GET,/report/webinars/{webinarId}/participants,reportWebinarParticipants,Retrieve webinar participants report,Retrieve ended webinar participants report
+r1032,square,GET,/v2/devices,ListDevices,ListDevices,"List devices associated with the merchant. Currently, only Terminal API
+devices are supported."
+r1919,digitalocean,PUT,/v2/domains/{domain_name}/records/{domain_record_id},domains_update_record,Update a Domain Record,"To update an existing record, send a PUT request to
+`/v2/domains/$DOMAIN_NAME/records/$DOMAIN_RECORD_ID`. Any attribute valid for
+the record type can be set to a new value for the record.
+
+See the [attribute table](#tag/Domain-Records) for details regarding record
+types and their respective attributes."
+r3993,intercom,POST,/events/summaries,dataEventSummaries,Create event summaries,"Create event summaries for a user. Event summaries are used to track the number of times an event has occurred, the first time it occurred and the last time it occurred."
+r3204,mailchimp,GET,/lists/{list_id}/signup-forms,getListsIdSignupForms,List signup forms,Get signup forms for a specific list.
+r1968,digitalocean,POST,/v2/floating_ips/{floating_ip}/actions,floatingIPsAction_post,Initiate a Floating IP Action,"To initiate an action on a floating IP send a POST request to
+`/v2/floating_ips/$FLOATING_IP/actions`. In the JSON body to the request,
+set the `type` attribute to on of the supported action types:
+
+| Action     | Details
+|------------|--------
+| `assign`   | Assigns a floating IP to a Droplet
+| `unassign` | Unassign a floating IP from a Droplet"
+r3750,datadog,GET,/api/v1/synthetics/locations,ListLocations,Get all locations (public and private),"Get the list of public and private locations available for Synthetic
+tests. No arguments required."
+r4165,figma,GET,/v1/analytics/libraries/{file_key}/component/actions,getLibraryAnalyticsComponentActions,Get library analytics component action data.,Returns a list of library analytics component actions data broken down by the requested dimension.
+r2088,digitalocean,GET,/v2/monitoring/metrics/database/mysql/disk_usage,monitoring_get_database_mysql_disk_usage,Get Database MySQL Disk Usage Metrics,"Retrieve disk usage (percent) for a MySQL cluster. Use **aggregate** (avg, max, or min) over the time range."
+r4144,figma,GET,/v1/teams/{team_id}/styles,getTeamStyles,Get team styles,Get a paginated list of published styles within a team library.
+r0357,stripe,GET,/v1/products,GetProducts,List all products,"<p>Returns a list of your products. The products are returned sorted by creation date, with the most recently created products appearing first.</p>"
+r3462,asana,POST,/projects/{project_gid}/addCustomFieldSetting,addCustomFieldSettingForProject,Add a custom field to a project,"<b>Required scope: </b><code>projects:write</code>
+
+Custom fields are associated with projects by way of custom field settings.  This method creates a setting for the project."
+r2441,jira,PUT,/rest/api/2/app/field/{fieldIdOrKey}/context/configuration,updateCustomFieldConfiguration,Update custom field configurations,"Update the configuration for contexts of a custom field of a [type](https://developer.atlassian.com/platform/forge/manifest-reference/modules/jira-custom-field-type/) created by a [Forge app](https://developer.atlassian.com/platform/forge/).
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg). Jira permissions are not required for the Forge app that created the custom field type."
+r3789,datadog,GET,/api/v1/usage/audit_logs,GetUsageAuditLogs,Get hourly usage for audit logs,"Get hourly usage for audit logs.
+**Note:** This endpoint has been deprecated."
+r3498,asana,GET,/goals/{goal_gid}/stories,getStoriesForGoal,Get stories from a goal,"<b>Required scope: </b><code>stories:read</code>
+
+Returns the compact records for all stories on the goal."
+r0442,stripe,GET,/v1/subscriptions/{subscription_exposed_id},GetSubscriptionsSubscriptionExposedId,Retrieve a subscription,<p>Retrieves the subscription with the given ID.</p>
+r4125,figma,GET,/v1/projects/{project_id}/files,getProjectFiles,[Deprecated] Get files in a project,"Deprecated in favor of [Get files in a folder](https://developers.figma.com/docs/rest-api/folders-endpoints/). Get a list of all the Files within the specified project (now called a ""folder"")."
+r0718,openai,POST,/organization/projects/{project_id}/certificates/activate,activateProjectCertificates,Activate certificates for project,"Activate certificates at the project level.
+
+You can atomically and idempotently activate up to 10 certificates at a time."
+r1723,spotify,GET,/playlists/{playlist_id}/images,get-playlist-cover,Get Playlist Cover Image,Get the current image associated with a specific playlist.
+r2909,jira,DELETE,/rest/api/2/statuses,deleteStatusesById,Bulk delete Statuses,"Deletes statuses by ID.
+
+**[Permissions](#permissions) required:**
+
+ *  *Administer projects* [project permission.](https://confluence.atlassian.com/x/yodKLg)
+ *  *Administer Jira* [project permission.](https://confluence.atlassian.com/x/yodKLg)"
