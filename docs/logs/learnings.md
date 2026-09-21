@@ -4182,3 +4182,61 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   makes the build set a tuning set for this tier from now on, so the
   number that counts must still come from a fresh exam drawn from the
   ten locked vendors.
+
+### Clean exam 2026-09-20 scored once: Jev raises, it cannot replace (2026-09-21)
+- Goal: score the Jev tier on data it has never seen, since the build
+  set became a tuning set for it when the threshold was swept.
+- Tried: drew 1003 rows from five vendors never seen by any prior set
+  — auth0 250, hubspot 250, zendesk 250, klaviyo 141, miro 112 — write
+  methods only, POST 339 / DELETE 280 / PATCH 206 / PUT 178.
+  cloudflare, pagerduty and sentry were dropped because they are
+  M0-era holdouts in `data/corpus/labelled.csv`. Jev's predictions
+  (frozen criteria, questionsA and questionsB unchanged, two separate
+  calls) and the frozen flow's own predictions were committed with
+  sha256s in 597191d before any row was labelled. Nine blind labellers
+  then labelled all 1003 rows under
+  `data/calibration-2026-09-14/BRIEF.md`. Three constructs came back
+  split between labellers — id-keyed upsert, CRM list membership, POST
+  verify/test — and the user ruled them before any score was seen:
+  upsert keyed on an id is w unless it creates a user account or
+  starts a job; CRM list membership is w; verify/test follows its
+  text. 13 rows changed (12 x->w, 1 r->x), recorded in
+  `data/exam-2026-09-20/label/rulings.csv` with the raw labeller files
+  left untouched. The threshold was fixed in advance at 0.70, the
+  value POC A picked. Scored once by
+  `tools/score-exam-2026-09-20.js`.
+- Outcome: truth over the 1003 rows is r 29 / w 633 / x 341 / ? 0,
+  with 13 rulings applied. The 12 x->w rulings loosened truth, so they
+  could only move flow rows from exact to over-tight, never hide a
+  leak. Whole exam, each over 1003 rows: the frozen flow scored exact
+  841 (83.8%) / leaks 82 (8.2%) / over-tight 80 (8.0%); Jev-B cold
+  scored exact 796 (79.4%) / leaks 207 (20.6%) / over-tight 0 (0.0%);
+  flow+Jev-A scored exact 872 (86.9%) / leaks 51 (5.1%) / over-tight
+  80 (8.0%). The flow per method: POST 263 / 339 exact (77.6%), 10
+  leaks (2.9%), 66 over-tight (19.5%); PUT 153 / 178 (86.0%), 18
+  (10.1%), 7 (3.9%); DELETE 230 / 280 (82.1%), 45 (16.1%), 5 (1.8%);
+  PATCH 195 / 206 (94.7%), 9 (4.4%), 2 (1.0%). Flow+Jev-A per method:
+  POST 263 / 339 exact (77.6%), 10 leaks (2.9%), 66 over-tight
+  (19.5%); PUT 161 / 178 (90.4%), 10 (5.6%), 7 (3.9%); DELETE 249 /
+  280 (88.9%), 26 (9.3%), 5 (1.8%); PATCH 199 / 206 (96.6%), 5 (2.4%),
+  2 (1.0%). Jev-A alone on the 654 rows the flow calls w, of which 82
+  (12.5%) are truth x, closed 31 of the 82 leaks (37.8%) for 0 false
+  alarms. Per provider: auth0 closed 8 of 34 (23.5%) over 171 flow-w
+  rows; hubspot 2 of 4 (50.0%) over 181; zendesk 9 of 22 (40.9%) over
+  163; klaviyo 0 of 8 (0.0%) over 69; miro 12 of 14 (85.7%) over 70.
+  0 false alarms on every provider.
+- Lesson: the raise-only tier held on unseen vendors: 31 of 82 flow
+  leaks closed for 0 false alarms, taking whole-exam leaks from 82 to
+  51 of 1003 with over-tight unchanged at 80. That is the same shape
+  as the build set (51 fitted, 43 LOVO) — a partial fix at clean
+  precision. Jev cannot replace the flow: alone it leaks 207 of 1003
+  (20.6%), 179 of them on POST's 339 rows, where it calls truth-x
+  creates w — 205 of the 341 truth-x rows are called w overall — and
+  it is never over-tight (0 of 1003). That is POC B's single-cell
+  weakness again, on new vendors: high x precision, poor x recall. The
+  flow's POST floor of x is what catches those rows, which is why Jev
+  only works on top of it. Klaviyo is the tier's blind spot here, 0 of
+  8 flow-w leaks closed; miro is its best, 12 of 14. This exam is now
+  burned (D24). The brief needs an addendum for the three split
+  constructs before the next exam; `BRIEF.md` itself stays verbatim as
+  calibrated, and the addendum goes alongside it.
