@@ -4122,3 +4122,63 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   fitting noise, so step 2 is closed (D81). What spec text cannot do
   is read meaning; that last mile is parked for an optional model
   tier (D82).
+
+### Jev measured twice: a raise-only tier that survives LOVO, and a cold read of the whole corpus (2026-09-20)
+- Goal: the Jev tier parked as D82 became testable when an API key
+  arrived, so run two POCs. (A) Jev as the raise-only tier sitting over
+  the rows step 2 labels w, measured on the build set. (B) Jev doing
+  the whole r/w/x job cold on the 4171-row 15-provider corpus, to see
+  how good or bad it is unaided.
+- Tried: the criteria were transcribed from
+  `data/calibration-2026-09-14/BRIEF.md` — the same calibrated brief the
+  nine human labellers used to make the build set's truth — into Jev's
+  structured Noul/Choice criteria format: instructions carrying
+  question, inspect, focus and ignore, and two-sided criteria carrying
+  the two roads on the true side and the twelve rules on the false
+  side, with the brief's "rules that trip people up" as the ignore
+  list. Nothing was written by reading the leak pile, and the brief
+  predates both sets. POC A asked one Noul, "is this operation x",
+  deliberately cold: step 2's own verdict was kept out of the state,
+  because naming it would anchor Jev toward w, which is the fail-open
+  direction. Two further Nouls, road1 and road2, rode along in the same
+  call as free diagnostics. POC B asked one Choice over r/w/x carrying
+  the three class definitions and the brief's method guidance. Raw
+  fetch, no SDK. The criteria were written once and run once; there was
+  no tuning loop.
+- Outcome: POC A ran over the 1113 rows the D75 flow labels w on the
+  build set, of which 147 are truth x and 966 truth w. At threshold
+  0.70 it closed 51 of the 147 leaks for 1 false alarm in 966, a ratio
+  of 51.0 against the bar of 10. The full sweep: t=0.50 closed 84 for
+  27 false (3.11), t=0.60 closed 69 for 13 (5.31), t=0.70 closed 51 for
+  1 (51.0), t=0.80 closed 34 for 0. Under leave-one-vendor-out across
+  the 13 build-set vendors, with the threshold picked on the other 12
+  each fold, it closed 43 of 147 for 1 false alarm, a ratio of 43.0,
+  and every one of the 13 folds picked 0.70 or 0.80. The single false
+  alarm was a gitlab.com row. Of the 52 rows raised at t=0.70, road 1
+  led on all 52 and road 2 on none. POC B read all 4171 corpus rows
+  cold and scored 88.2% exact (3679), 11.0% leaks (459), 0.8%
+  over-tight (33). The confusion: truth r, 2082 rows, went r=2077, w=2,
+  x=3; truth w, 1218 rows, went r=4, w=1186, x=28; truth x, 871 rows,
+  went r=3, w=452, x=416. Per provider, exact ran from 84.3% (asana) to
+  96.3% (figma) and leaks from 3.7% (figma) to 15.3% (asana). The fair
+  comparison is not the mechanical tool's fitted 93.8 / 1.8 / 4.5 on
+  these same rows, which were tuned on them, but the mechanical tool on
+  data it had never seen — the burned clean exam's 85.3 / 12.4 / 2.3.
+  Cost: POC A was 1113 rows in 36.7 seconds for 3,756,386 input tokens,
+  about $0.16; POC B was 4171 rows in 131.5 seconds for 10,817,638
+  input tokens, about $0.45. Zero failed calls across both.
+- Lesson: Jev's error is concentrated in a single cell — 452 of the 871
+  truth-x rows called w — so its x recall is poor at 47.8% while its x
+  precision is high, 416 of the 447 rows it calls x being truth x, 93%.
+  That asymmetry is exactly the shape a raise-only tier wants: believe
+  the positive, ignore the negative. It is also the first thing
+  measured in this project that does not collapse under
+  leave-one-vendor-out. D81's mined lists went 8.17 fitted to 0.83
+  LOVO; this goes 51.0 fitted to 43.0 LOVO, and the per-fold threshold
+  was stable at 0.70-0.80 in all 13 folds, which is the property every
+  mined word list lacked. The honest limit is that it closes only 29%
+  of the leaks under LOVO: a partial fix that clears the bar several
+  times over, not a solve. And sweeping a threshold on those 1113 rows
+  makes the build set a tuning set for this tier from now on, so the
+  number that counts must still come from a fresh exam drawn from the
+  ten locked vendors.

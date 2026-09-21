@@ -1,0 +1,576 @@
+row_id,provider,method,path,operationId,summary,description
+e0052,auth0,DELETE,/rate-limit-policies/{id},delete_rate-limit-policies_by_id,Delete a rate limit policy,
+e0465,hubspot,PUT,/crm/objects/2026-09-beta/{fromObjectType}/{fromObjectId}/associations/default/{toObjectType}/{toObjectId},put-/crm/objects/2026-09-beta/{fromObjectType}/{fromObjectId}/associations/default/{toObjectType}/{toObjectId}_/crm/objects/2026-09-beta/{fromObjectType}/{fromObjectId}/associations/default/{toObjectType}/{toObjectId},,
+e0885,zendesk,POST,/api/v2/organizations/create_many,CreateManyOrganizations,Create Many Organizations,"Accepts an array of up to 100 organization objects.
+
+#### Response
+
+This endpoint returns a `job_status` [JSON object](/api-reference/ticketing/ticket-management/job_statuses/#json-format) and queues a background job to do the work. Use the [Show Job Status](/api-reference/ticketing/ticket-management/job_statuses/#show-job-status) endpoint to check for the job's completion. Only a certain number of jobs can be queued or running at the same time. See [Job limit](/api-reference/introduction/rate-limits/#job-limit) for more information.
+
+#### Allowed For
+
+* Agents, with restrictions applying on certain actions"
+e0662,miro,DELETE,/v2/boards/{board_id}/sticky_notes/{item_id},delete-sticky-note-item,Delete sticky note item,"Deletes a sticky note item from the board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 3</a><br/>"
+e0787,zendesk,DELETE,/api/v2/organization_memberships/{organization_membership_id},DeleteOrganizationMembership,Delete Membership,"Immediately removes a user from an organization and schedules a job to unassign all working tickets currently assigned to the user and organization combination. The `organization_id` of the unassigned tickets is set to null.
+
+#### Allowed for
+
+* Admins
+* Agents when deleting an organization membership for an end user"
+e0583,klaviyo,POST,/api/conversation-messages,create_conversation_message,Create Conversation Message,"Send an outbound message to a conversation.
+
+Requires account-level enablement. To request access, reach out in the [developer community](https://community.klaviyo.com/groups/developer-group-64).<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`conversations:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/create_conversation_message.json)"
+e0057,auth0,DELETE,/roles/{id}/permissions,delete_role_permission_assignment,Remove permissions from a role,Remove one or more [permissions](https://auth0.com/docs/manage-users/access-control/configure-core-rbac/manage-permissions) from a specified user role.
+e0290,hubspot,DELETE,/feature-flags/v3/{appId}/flags/{flagName},delete-/feature-flags/v3/{appId}/flags/{flagName},Delete an app's feature flag,"Delete a feature flag in an app.  For example, delete the `hs-release-app-cards` flag after all accounts have been migrated."
+e0825,zendesk,DELETE,/api/v2/users/{user_id}/sessions/{session_id},DeleteSession,Delete Session,"#### Allowed For
+
+* Admins, Agents, End users"
+e0732,miro,POST,/v2/oauth/revoke,revoke-token-v2,Revoke token (v2),"Revoke the current access token. Revoking an access token means that the access token will no longer work. When an access token is revoked, the refresh token is also revoked and no longer valid. This does not uninstall the application for the user."
+e0447,hubspot,PUT,/cms/v3/blogs/tags/multi-language/set-new-lang-primary,put-/cms/v3/blogs/tags/multi-language/set-new-lang-primary_setLangPrimary,Set a new primary language,Set a Blog Tag as the primary language of a multi-language group.
+e0231,auth0,PUT,/guardian/factors/push-notification/providers/apns,put_apns,Update APNS configuration,Overwrite all configuration details of the multi-factor authentication APNS provider associated with your tenant.
+e0065,auth0,DELETE,/user-blocks/{id},delete_user-blocks_by_id,Unblock a user,"Remove all [Brute-force Protection](https://auth0.com/docs/secure/attack-protection/brute-force-protection) blocks for the user with the given ID.
+
+Note: This endpoint does not unblock users that were [blocked by a tenant administrator](https://auth0.com/docs/user-profile#block-and-unblock-a-user)."
+e0364,hubspot,PATCH,/crm/v3/properties/{objectType}/{propertyName},patch-/crm/v3/properties/{objectType}/{propertyName}_update,Update a property,Perform a partial update of a property identified by '{propertyName}'. Provided fields will be overwritten.
+e0763,zendesk,DELETE,/api/v2/custom_objects/{custom_object_key}/fields/{custom_object_field_key_or_id},DeleteCustomObjectField,Delete Custom Object Field,"Deletes a field with the specified key. Note: You can't delete standard fields.
+#### Allowed For
+* Admins"
+e0140,auth0,PATCH,/token-exchange-profiles/{id},patch_token-exchange-profiles_by_id,Update an existing token exchange profile,"Update a Token Exchange Profile within your tenant.
+
+By using this feature, you agree to the applicable Free Trial terms in [Okta's Master Subscription Agreement](https://www.okta.com/legal/). It is your responsibility to securely validate the user's subject_token. See [User Guide](https://auth0.com/docs/authenticate/custom-token-exchange) for more details."
+e0468,hubspot,PUT,/crm/objects/2026-09/{objectType}/{objectId}/associations/{toObjectType}/{toObjectId},put-/crm/objects/2026-09/{objectType}/{objectId}/associations/{toObjectType}/{toObjectId}_/crm/objects/2026-09-beta/{objectType}/{objectId}/associations/{toObjectType}/{toObjectId},Create association,"Set association labels between two records in the CRM. This endpoint allows you to define relationships between different object types by specifying association labels. It is useful for linking related records, such as associating a contact with a company or a deal with a contact."
+e0299,hubspot,DELETE,/marketing/v3/marketing-events/associations/{externalAccountId}/{externalEventId}/lists/{listId},delete-/marketing/v3/marketing-events/associations/{externalAccountId}/{externalEventId}/lists/{listId}_disassociateByExternalAccountAndEventIds,Disassociate a list from a marketing event,"Disassociates a list from a marketing event by external account id, external event id, and ILS list id"
+e0576,klaviyo,POST,/api/catalog-item-bulk-update-jobs,bulk_update_catalog_items,Bulk Update Catalog Items,"Create a catalog item bulk update job to update a batch of catalog items.
+
+Accepts up to 100 catalog items per request. The maximum allowed payload size is 5MB.
+The maximum number of jobs in progress at one time is 500.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`catalogs:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/bulk_update_catalog_items.json)"
+e0544,klaviyo,PATCH,/api/flows/{id},update_flow,Update Flow Status,"Update the status of a flow with the given flow ID, and all actions in that flow.<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`flows:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/update_flow.json)"
+e0858,zendesk,POST,/api/v2/custom_objects,CreateCustomObject,Create Custom Object,"Creates an object describing all the properties required to create a custom object record
+#### Allowed For
+* Admins"
+e0438,hubspot,PUT,/analytics/reporting/2027-03-beta/dashboards/{dashboardId}/widgets/{reportId},put-/analytics/reporting/2027-03-beta/dashboards/{dashboardId}/widgets/{reportId},Add report to dashboard,"Adds a single report to a dashboard. The report widget is appended to the end of the existing dashboard layout. If the report is already on the dashboard, does not exist, or the requesting user doesn't have permission to access it, does nothing. Check the dashboard in the response to determine whether the report was successfully added.
+
+Dashboards cannot have more than 50 reports on them; attempting to add beyond that limit will fail."
+e0039,auth0,DELETE,/log-streams/{id},delete_log-streams_by_id,Delete log stream,Delete a log stream.
+e0213,auth0,POST,/token-exchange-profiles,post_token-exchange-profiles,Create a token exchange profile,"Create a new Token Exchange Profile within your tenant.
+
+By using this feature, you agree to the applicable Free Trial terms in [Okta’s Master Subscription Agreement](https://www.okta.com/legal/). It is your responsibility to securely validate the user’s subject_token. See [User Guide](https://auth0.com/docs/authenticate/custom-token-exchange) for more details."
+e0499,hubspot,PUT,/settings/users/2026-09/{userId},put-/settings/users/2026-09/{userId},Modifies a user,"Modifies a user identified by `userId`. `userId` refers to the user's ID by default, or optionally email as specified by the `IdProperty` query param."
+e0151,auth0,POST,/branding/phone/providers,create_phone_provider,Configure the phone provider,"Create a [phone provider](https://auth0.com/docs/customize/phone-messages/configure-phone-messaging-providers).
+The `credentials` object requires different properties depending on the phone provider (which is specified using the `name` property)."
+e0818,zendesk,DELETE,/api/v2/users/destroy_many,DestroyManyUsers,Bulk Delete Users,"Accepts a comma-separated list of up to 100 user ids.
+
+The request takes an `ids` or an `external_ids` query parameter.
+
+#### Allowed for
+
+* Admins
+
+#### Response
+
+This endpoint returns a `job_status` [JSON object](/api-reference/ticketing/ticket-management/job_statuses/#json-format) and queues a background job to do the work. Use the [Show Job Status](/api-reference/ticketing/ticket-management/job_statuses/#show-job-status) endpoint to check for the job's completion. Only a certain number of jobs can be queued or running at the same time. See [Job limit](/api-reference/introduction/rate-limits/#job-limit) for more information."
+e0088,auth0,PATCH,/branding/phone/providers/{id},update_phone_provider,Update the phone provider,"Update a [phone provider](https://auth0.com/docs/customize/phone-messages/configure-phone-messaging-providers).
+The `credentials` object requires different properties depending on the phone provider (which is specified using the `name` property)."
+e0916,zendesk,POST,/api/v2/users/create_many,CreateManyUsers,Create Many Users,"Accepts an array of up to 100 user objects.
+
+**Note**: To protect the data in your Zendesk account, bulk user imports are not enabled by default in Zendesk accounts. The account owner or an admin must contact [Zendesk Customer Support](https://support.zendesk.com/hc/en-us/articles/4408843597850) to enable the imports. A 403 Forbidden
+error is returned if data imports are not enabled.
+
+#### Allowed For
+
+* Admins and [agents in custom roles with permission](https://support.zendesk.com/hc/en-us/articles/4408882153882#topic_cxn_hig_bd) to manage end users or team members
+
+#### Specifying an organization
+
+You can assign a user to an existing organization by setting an
+`organization_id` property in the user object.
+
+#### Response
+
+This endpoint returns a `job_status` [JSON object](/api-reference/ticketing/ticket-management/job_statuses/#json-format) and queues a background job to do the work. Use the [Show Job Status](/api-reference/ticketing/ticket-management/job_statuses/#show-job-status) endpoint to check for the job's completion. Only a certain number of jobs can be queued or running at the same time. See [Job limit](/api-reference/introduction/rate-limits/#job-limit) for more information."
+e0685,miro,PATCH,/v2/boards/{board_id}/cards/{item_id},update-card-item,Update card item,"Updates a card item on a board based on the data and style properties provided in the request body.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+e0047,auth0,DELETE,/organizations/{id}/invitations/{invitation_id},delete_invitations_by_invitation_id,Delete an invitation to an Organization,
+e0031,auth0,DELETE,/grants/{id},delete_grants_by_id,Delete a grant by id,Delete a grant associated with your account.
+e0650,miro,DELETE,/v2/boards/{board_id}/cards/{item_id},delete-card-item,Delete card item,"Deletes a card item from the board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 3</a><br/>"
+e0770,zendesk,DELETE,/api/v2/deleted_tickets/destroy_many,BulkPermanentlyDeleteTickets,Delete Multiple Tickets Permanently,"Permanently deletes up to 100 soft-deleted tickets. See [Soft delete](https://support.zendesk.com/hc/en-us/articles/4408834005530#topic_zrm_wbj_1db)
+in the Zendesk GDPR docs. To soft delete tickets, use the [Bulk Delete Tickets](#bulk-delete-tickets) endpoint.
+
+This endpoint accepts a comma-separated list of up to 100 ticket ids. It enqueues
+a ticket deletion job and returns a payload with the jobs status.
+
+If one ticket fails to be deleted, the endpoint still attempts to delete the others. If the job succeeds,
+the tickets that were successfully deleted are permanently deleted. This operation can't be undone.
+
+This endpoint returns a `job_status` [JSON object](/api-reference/ticketing/ticket-management/job_statuses/#json-format) and queues a background job to do the work. Use the [Show Job Status](/api-reference/ticketing/ticket-management/job_statuses/#show-job-status) endpoint to check for the job's completion. Only a certain number of jobs can be queued or running at the same time. See [Job limit](/api-reference/introduction/rate-limits/#job-limit) for more information.
+
+#### Allowed For
+
+* Agents"
+e0412,hubspot,POST,/crm/v3/objects/companies/batch/create,post-/crm/v3/objects/companies/batch/create_create,Create a batch of companies,"Create a batch of companies. The `inputs` array can contain a `properties` object to define property values for each company, along with an `associations` array to define [associations](https://developers.hubspot.com/docs/guides/api/crm/associations/associations-v4) with other CRM records."
+e0078,auth0,PATCH,/actions/modules/{id},patch_action_module,Update a specific Actions Module,"Update properties of an existing Actions Module, such as code, dependencies, or secrets."
+e0801,zendesk,DELETE,/api/v2/targets/{target_id},DeleteTarget,Delete Target,"#### Allowed For
+* Admins"
+e0110,auth0,PATCH,/flows/{id},patch_flows_by_id,Update a flow,
+e0637,klaviyo,POST,/client/profiles,create_client_profile,Create or Update Client Profile,"Create or update properties about a profile without tracking an associated event.
+
+This endpoint is specifically designed to be called from publicly-browseable, client-side environments only and requires a [public API key (site ID)](https://www.klaviyo.com/settings/account/api-keys). Never use a private API key with our client-side endpoints.
+
+Do not use this endpoint from server-side applications.
+To create or update profiles from server-side applications, instead use [POST /api/profile-import](https://developers.klaviyo.com/en/reference/create_or_update_profile).
+
+Note that to update a profile's existing identifiers (e.g., email), you must use a server-side endpoint authenticated by a private API key. Attempts to do so via client-side endpoints will return a 202, however the identifier field(s) will not be updated.<br><br>*Rate limits*:<br>Burst: `350/s`<br>Steady: `3500/m`
+
+**Scopes:**
+`profiles:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/create_client_profile.json)"
+e0161,auth0,POST,/connection-profiles,post_connection-profiles,Create a connection profile,Create a Connection Profile.
+e0217,auth0,POST,/users/{id}/permissions,post_permissions,Assign Permissions to a User,Assign permissions to a user.
+e0978,zendesk,PUT,/api/v2/tickets/{ticket_id},UpdateTicket,Update Ticket,
+e0402,hubspot,POST,/crm/v3/imports,post-/crm/v3/imports_/crm/v3/imports,,
+e0857,zendesk,POST,/api/v2/channels/voice/tickets,CreateTicketOrVoicemailTicket,Create Ticket or Voicemail Ticket,"#### Allowed For
+* Agents
+
+### Creating tickets
+
+#### Introduction
+
+Creating tickets using Talk Partner Edition follows the same conventions as the Create Ticket endpoint. See [Create Ticket](/api-reference/ticketing/tickets/tickets/#create-ticket).
+
+#### Request parameters
+
+The POST request takes a mandatory `ticket` object that lists the values to set when the ticket is created.
+You may also include an optional `display_to_agent` value such as the ID of the agent that will see the newly created ticket.
+The `display_to_agent` is validated before creating the ticket, returning a 422 error if it is invalid.
+
+Tickets created using this endpoint must have a `via_id` parameter. See the following
+section for possible values.
+
+#### Zendesk Talk Integration Via IDs
+
+Tickets created using this endpoint must have one of the following `via_id` parameters:
+
+| ID       | Description
+| ---------| -------------
+| 44       | Voicemail
+| 45       | Phone call (inbound)
+| 46       | Phone call (outbound)
+
+### Creating voicemail tickets
+#### Request parameters
+
+The POST request takes a mandatory `ticket` object that lists the values to set when the ticket is created.
+The ticket must have a `voice_comment` with the following values:
+
+| Name               | Type                  | Comment
+| ------------------ | ----------------------| -------
+| from               | string                | Incoming phone number
+| to                 | string                | Dialed phone number
+| recording_url      | string                | URL of the recording
+| recording_type     | string                | Type of recording (call, voicemail, or ai)
+| started_at         | date                  | [ISO 8601](http://en.wikipedia.org/wiki/ISO_8601) timestamp of the call starting time
+| call_duration      | integer               | Duration in seconds of the call
+| answered_by_id     | integer               | The agent who answered the call
+| transcription_text | string                | Transcription of the call (optional)
+| location           | string                | Location of the caller (optional)"
+e0016,auth0,DELETE,/connections/{id}/scim-configuration/tokens/{tokenId},delete_tokens_by_tokenId,Delete a connection's SCIM token,Deletes a scim token by its connection `id` and `tokenId`.
+e0507,klaviyo,DELETE,/api/coupon-codes/{id},delete_coupon_code,Delete Coupon Code,"Deletes a coupon code specified by the given identifier synchronously. If a profile has been assigned to the
+coupon code, an exception will be raised<br><br>*Rate limits*:<br>Burst: `350/s`<br>Steady: `3500/m`
+
+**Scopes:**
+`coupon-codes:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/delete_coupon_code.json)"
+e0012,auth0,DELETE,/connections/{id},delete_connections_by_id,Delete a connection,"Removes a specific [connection](https://auth0.com/docs/authenticate/identity-providers) from your tenant. This action cannot be undone. Once removed, users can no longer use this connection to authenticate.
+
+**Note:** If your connection has a large amount of users associated with it, please be aware that this operation can be long running after the response is returned and may impact concurrent [create connection](https://auth0.com/docs/api/management/v2/connections/post-connections) requests, if they use an identical connection name."
+e0894,zendesk,POST,/api/v2/routing/agents/instance_values/jobs,BulkSetAgentAttributeValuesJob,Bulk Set Agent Attribute Values Jobs,"Adds, replaces or removes multiple attributes for up to 100 agents.
+
+#### Allowed For
+* Admins
+* [Agents in custom role with permission to manage skills](https://support.zendesk.com/hc/en-us/articles/4408882153882)
+
+#### Available Parameters
+
+The request takes a data object with the following properties:
+| Name       | Type   | Required | Description                                                                                                                                                                                                                                       |
+| ---------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| action     | string | true     | The action to perform on the attribute values. One of the following: ""upsert"", ""update"", ""delete""                                                                                                                                                 |
+| attributes | object | true     | The attribute values to update. See [Attribute Values](#attribute-values). `agent_skill_priority` is optional. If not provided, it keeps the current priority or defaults to `NORMAL` when adding new attribute values.                           |
+| items      | array  | true     | The list of agent ids                                                                                                                                                                                                                             |
+
+Action can be one of the following:
+  * upsert: Adds new attribute values to the agents
+  * update: Replaces all the current attribute values of the agents with the new values
+  * delete: Removes specified attribute values from the agents
+
+This endpoint returns a `job_status` [JSON object](/api-reference/ticketing/ticket-management/job_statuses/#json-format) and queues a background job to do the work. Use the [Show Job Status](/api-reference/ticketing/ticket-management/job_statuses/#show-job-status) endpoint to check for the job's completion."
+e0871,zendesk,POST,/api/v2/imports/tickets,TicketImport,Ticket Import,"#### Allowed For
+
+* Admins"
+e0716,miro,POST,/v2/boards/{board_id_Platformcreateitemsinbulkusingfilefromdevice}/items/bulk,create-items-in-bulk-using-file-from-device,Create items in bulk using file from device,"Adds different types of items to a board using files from a device. You can add up to 20 items of the same or different type per create call. For example, you can create 5 document items and 5 images in one create call.  The bulk create operation is transactional. If any item's create operation fails, the create operation for all the remaining items also fails, and none of the items will be created.
+To try out this API in our documentation:
+1. In the **BODY PARAMS** section, select **ADD FILE**, and then upload a local file. Repeat for each item that you want to add.
+2. Upload a JSON file that contains the bulk data for the items you want to create.
+
+<h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/> <h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a> per item<br/>"
+e0967,zendesk,PUT,/api/v2/suspended_tickets/recover_many,RecoverSuspendedTickets,Recover Multiple Suspended Tickets,"Accepts up to 100 ids (the auto-generated id, not the ticket id.) Note that suspended tickets that fail to be recovered are still included in the response.
+
+#### Allowed For
+
+* Admins and [agents in custom roles with permission](https://support.zendesk.com/hc/en-us/articles/4408882153882#topic_cxn_hig_bd) to manage suspended tickets on Enterprise plans
+* Unrestricted agents on all other plans"
+e0258,hubspot,DELETE,/cms/v3/hubdb/tables/{tableIdOrName}/rows/{rowId}/draft,delete-/cms/v3/hubdb/tables/{tableIdOrName}/rows/{rowId}/draft_purgeDraftTableRow,Permanently deletes a row,Permanently deletes a row from a table's draft version.
+e0134,auth0,PATCH,/roles/{id},patch_roles_by_id,Update a role,Modify the details of a specific [user role](https://auth0.com/docs/manage-users/access-control/rbac) specified by ID.
+e0883,zendesk,POST,/api/v2/organization_subscriptions,CreateOrganizationSubscription,Create Organization Subscription,"#### Allowed For:
+
+* Agents
+* End users
+
+End users can only subscribe to shared organizations in which they're members."
+e0417,hubspot,POST,/crm/v3/objects/orders,post-/crm/v3/objects/orders,Create,"Create a order with the given properties and return a copy of the object, including the ID. Documentation and examples for creating standard orders is provided."
+e0861,zendesk,POST,/api/v2/custom_objects/{custom_object_key}/records/{record_id}/attachments,CreateCustomObjectRecordAttachment,Create Custom Object Record Attachment,"Creates a new attachment associated with a custom object record. The custom object must have the ""allows_attachments"" setting enabled.
+
+#### Allowed For
+* Agents"
+e0582,klaviyo,POST,/api/catalog-variants,create_catalog_variant,Create Catalog Variant,"Create a new variant for a related catalog item.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`catalogs:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/create_catalog_variant.json)"
+e0076,auth0,DELETE,/verifiable-credentials/verification/templates/{id},delete_vc_templates_by_id,Delete a verifiable credential template by ID.,Delete a verifiable credential template.
+e0645,miro,DELETE,/v2-experimental/boards/{board_id}/mindmap_nodes/{item_id},delete-mindmap-node-experimental,Delete mind map node,"Deletes a mind map node item and its child nodes from the board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 3</a><br/>"
+e0433,hubspot,POST,/marketing/v3/marketing-events/{objectId}/attendance/{subscriberState}/create,post-/marketing/v3/marketing-events/{objectId}/attendance/{subscriberState}/create_recordByContactId,Record Participants by ContactId with Marketing Event Object Id,"Records the participation of multiple HubSpot contacts in a Marketing Event using their HubSpot contact IDs.
+
+Additional Functionality:
+- Adds a timeline event to the contacts.
+
+Allowed Properties:
+For the state ""attend"":
+- joinedAt
+- leftAt"
+e0350,hubspot,PATCH,/crm/v3/objects/companies/{companyId},patch-/crm/v3/objects/companies/{companyId}_update,Update a company,Update a company by ID (`companyId`) or unique property value (`idProperty`). Provided property values will be overwritten. Read-only and non-existent properties will result in an error. Properties values can be cleared by passing an empty string.
+e0753,miro,PUT,/v2/orgs/{org_id}/cases/{case_id}/legal-holds/{legal_hold_id},edit-legal-hold,Edit legal hold,"Editing a legal hold allows eDiscovery Admins to adjust and refine ongoing legal preservation efforts as case requirements evolve. Whether new custodians are identified, additional Miro boards become relevant, or existing boards or users are no longer in scope, editing a legal hold ensures that the correct data remains preserved and defensible throughout the legal process. Admins can update the legal hold’s name or description and add or remove users and boards as needed. This flexibility supports dynamic legal workflows and ensures that preservation stays precise, up to date, and aligned with the scope of the legal matter—maintaining compliance while avoiding unnecessary data retention.<br/><br/>When a legal hold is edited, boards newly added to the hold will begin having their versions preserved from that point forward, boards or users removed from the hold will stop being preserved, and their versions will no longer be preserved as part of that legal hold, boards that remain under hold will continue to have all versions preserved, including any deletions that occur after the hold was applied. This approach ensures organizations can respond to legal demands with accuracy and accountability as a case evolves.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>organization:cases:management</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/docs/miro-rest-api-introduction#rate-limiting"">Level 3</a> <br/><h3>Enterprise Guard only</h3> <p>This API is available only for Enterprise plan users with the <a target=_blank href=""https://help.miro.com/hc/en-us/articles/15699815402514-Enterprise-Guard-overview"">Enterprise Guard add-on</a>. You can only use this endpoint if you have both the Company Admin and <a target=_blank href=""https://help.miro.com/hc/en-us/articles/15695755655954-Understand-admin-roles-and-their-privileges#01JARF6KM8ATNT6YDMGD7GMYJN"">eDiscovery Admin</a> roles."
+e0037,auth0,DELETE,/keys/encryption/{kid},delete_encryption_key,Delete the encryption key by its key id,Delete the custom provided encryption key with the given ID and move back to using native encryption key.
+e0239,auth0,PUT,/guardian/factors/{name},put_factors_by_name,Update multi-factor authentication type,"Update the status (i.e., enabled or disabled) of a specific multi-factor authentication factor."
+e0562,klaviyo,POST,/api/back-in-stock-subscriptions,create_back_in_stock_subscription,Create Back In Stock Subscription,"Subscribe a profile to receive back in stock notifications. Check out [our Back in Stock API guide](https://developers.klaviyo.com/en/docs/how_to_set_up_custom_back_in_stock) for more details.
+
+This endpoint is specifically designed to be called from server-side applications. To create subscriptions from client-side contexts, use [POST /client/back-in-stock-subscriptions](https://developers.klaviyo.com/en/reference/create_client_back_in_stock_subscription).<br><br>*Rate limits*:<br>Burst: `350/s`<br>Steady: `3500/m`
+
+**Scopes:**
+`catalogs:write`
+`profiles:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/create_back_in_stock_subscription.json)"
+e0573,klaviyo,POST,/api/catalog-category-bulk-update-jobs,bulk_update_catalog_categories,Bulk Update Catalog Categories,"Create a catalog category bulk update job to update a batch of catalog categories.
+
+Accepts up to 100 catalog categories per request. The maximum allowed payload size is 5MB.
+The maximum number of jobs in progress at one time is 500.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`catalogs:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/bulk_update_catalog_categories.json)"
+e0690,miro,PATCH,/v2/boards/{board_id}/images/{item_id},update-image-item-using-url,Update image item using URL,"Updates an image item on a board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+e0709,miro,POST,/v2-experimental/boards/{board_id}/code_widgets,create-code-widget-item,Create code widget item,"Adds a code widget item to a board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+e0432,hubspot,POST,/marketing/v3/marketing-events/events/upsert,post-/marketing/v3/marketing-events/events/upsert_upsert,Create or Update Multiple Marketing Events,"Upserts multiple Marketing Events. If a Marketing Event with the specified ID already exists, it will be updated; otherwise, a new event will be created.
+
+Only Marketing Events originally created by the same app can be updated."
+e0676,miro,PATCH,/Groups/{id},patchGroup,Patch group,"Updates an existing group resource, i.e. a team, overwriting values for specified attributes. Patch operation for group can be used to add, remove, or replace team members and to update the display name of the group (team). <br><br> To add a user to the group (team), use add operation. <br> To remove a user from a group (team), use remove operation. <br> To update a user resource, use the replace operation. <br> The last team admin cannot be removed from the team. <br><br> Note: Attributes that are not provided will remain unchanged. PATCH operation only updates the fields provided. <br><br> Team members removal specifics: <br> For remove or replace operations, the team member is removed from the team and from all team boards. The ownership of boards that belong to the removed team member is transferred to the oldest team member who currently has an admin role. After you remove a team member, adding the team member again to the team does not automatically restore their previous ownership of the boards. If the user is not registered fully in Miro and is not assigned to any other team, the user is also removed from the organization. <br><br> Add team members specifics: <br> All added team members are reactivated or recreated if they were deactivated or deleted earlier. <br><br> External users specifics: <br> When adding existing users with the role ORGANIZATION_EXTERNAL_USER or ORGANIZATION_TEAM_GUEST_USER to a team, we set FULL license and ORGANIZATION_INTERNAL_USER roles."
+e0625,klaviyo,POST,/api/tags/{id}/relationships/flows,tag_flows,Tag Flows,"Associate a tag with one or more flows. Any flow cannot be associated with more than **100** tags.
+
+
+Use the request body to pass in the ID(s) of the flow(s) that will be associated with the tag.<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`flows:write`
+`tags:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/tag_flows.json)"
+e0165,auth0,POST,/connections/{id}/keys,post_keys,Create connection keys,"Provision initial connection keys for Okta or OIDC connection strategies. This endpoint allows you to create keys before configuring the connection to use Private Key JWT authentication, enabling zero-downtime transitions."
+e0177,auth0,POST,/event-streams/{id}/test,post_test_event,Send a test event to an event stream,
+e0096,auth0,PATCH,/connections/{id},patch_connections_by_id,Update a connection,"Update details for a specific [connection](https://auth0.com/docs/authenticate/identity-providers), including option properties for identity provider configuration.
+
+**Note**: If you use the `options` parameter, the entire `options` object is overridden. To avoid partial data or other issues, ensure all parameters are present when using this option. If any options are unspecified, the default will be used, even if it differs from the existing value."
+e0524,klaviyo,DELETE,/api/tags/{id}/relationships/flows,remove_tag_from_flows,Remove Tag from Flows,"Remove a tag's association with one or more flows.
+
+
+Use the request body to pass in the ID(s) of the flows(s) whose association with the tag
+will be removed.<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`flows:write`
+`tags:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/remove_tag_from_flows.json)"
+e0405,hubspot,POST,/crm/v3/objects/bucket_test111s/batch/create,post-/crm/v3/objects/bucket_test111s/batch/create,Create a batch of bucket_test111s,
+e0954,zendesk,PUT,/api/v2/organizations/update_many,UpdateManyOrganizations,Update Many Organizations,"Bulk or batch updates up to 100 organizations.
+
+#### Bulk update
+
+To make the same change to multiple organizations, use the following endpoint and data format:
+
+`https://{subdomain}.zendesk.com/api/v2/organizations/update_many?ids=1,2,3`
+
+```js
+{
+  ""organization"": {
+    ""notes"": ""Priority""
+  }
+}
+```
+
+#### Batch update
+
+To make different changes to multiple organizations, use the following endpoint and data format:
+
+`https://{subdomain}.zendesk.com/api/v2/organizations/update_many`
+
+```js
+{
+  ""organizations"": [
+    { ""id"": 1, ""notes"": ""Priority"" },
+    { ""id"": 2, ""notes"": ""Normal"" }
+  ]
+}
+```
+
+#### Response
+
+This endpoint returns a `job_status` [JSON object](/api-reference/ticketing/ticket-management/job_statuses/#json-format) and queues a background job to do the work. Use the [Show Job Status](/api-reference/ticketing/ticket-management/job_statuses/#show-job-status) endpoint to check for the job's completion. Only a certain number of jobs can be queued or running at the same time. See [Job limit](/api-reference/introduction/rate-limits/#job-limit) for more information.
+
+#### Allowed For
+
+* Admins
+* Agents
+
+Agents with no permissions restrictions can only update ""notes"" on organizations."
+e0649,miro,DELETE,/v2/boards/{board_id}/app_cards/{item_id},delete-app-card-item,Delete app card item,"Deletes an app card item from a board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 3</a><br/>"
+e0935,zendesk,PUT,/api/v2/custom_objects/{custom_object_key}/records/{record_id}/attachments/{id},UpdateCustomObjectRecordAttachment,Update Custom Object Record Attachment for Malware,"Updates malware access settings for the specified attachment. This is typically used to allow access to attachments that were flagged as containing malware.
+
+#### Allowed For
+* Admins"
+e0846,zendesk,POST,/api/v2/accounts,CreateTrialAccount,Create Trial Account,
+e0794,zendesk,DELETE,/api/v2/routing/attributes/{attribute_id},DeleteAttribute,Delete Attribute,"Deletes an attribute.
+
+#### Allowed For
+
+* Admins
+* [Agents in custom role with permission to manage skills](https://support.zendesk.com/hc/en-us/articles/4408882153882)"
+e0874,zendesk,POST,/api/v2/it_asset_management/assets,CreateItamAsset,Create Asset,"Creates an asset.
+
+#### Allowed For
+
+* Admins"
+e0210,auth0,POST,/sessions/{id}/revoke,revoke_session,Revokes a session,Revokes a session by ID and all associated refresh tokens.
+e0351,hubspot,PATCH,/crm/v3/objects/contacts/{contactId},patch-/crm/v3/objects/contacts/{contactId}_update,Update a contact,"Update an existing contact, identified by ID or email/unique property value. To identify a contact by ID, include the ID in the request URL path. To identify a contact by their email or other unique property, include the email/property value in the request URL path, and add the `idProperty` query parameter (`/crm/v3/objects/contacts/jon@website.com?idProperty=email`). Provided property values will be overwritten. Read-only and non-existent properties will result in an error. Properties values can be cleared by passing an empty string."
+e0292,hubspot,DELETE,/files/2026-09/folders/{folderId},delete-/files/2026-09/folders/{folderId},Delete folder by ID,Delete a folder in your HubSpot account using its ID. This operation deletes the folder and its contents recursively.
+e0624,klaviyo,POST,/api/tags/{id}/relationships/campaigns,tag_campaigns,Tag Campaigns,"Associate a tag with one or more campaigns. Any campaign cannot be associated with more than **100** tags.
+
+
+Use the request body to pass in the ID(s) of the campaign(s) that will be associated with the tag.<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`campaigns:write`
+`tags:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/tag_campaigns.json)"
+e0687,miro,PATCH,/v2/boards/{board_id}/documents/{item_id},update-document-item-using-url,Update document item using URL,"Updates a document item on a board<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+e0908,zendesk,POST,/api/v2/tickets/{ticket_id}/task_lists,CreateTaskList,Create Task List,"Adds a task list to the specified ticket. There are two ways to create a task list:
+
+**Create from a template:** Include `task_list_template_id` in the request body. The new task list will inherit the template's name, description, and task items.
+
+**Create a custom task list:** Include `name` (and optionally `description`) instead of `task_list_template_id`. Custom task lists have no template and allow you to add, update, and delete task items individually.
+
+#### Allowed For
+
+* Agents"
+e0937,zendesk,PUT,/api/v2/custom_roles/{custom_role_id},UpdateCustomRoleById,Update Custom Role,"#### Availability
+
+* Accounts on the Enterprise plan or above
+
+#### Allowed for
+
+* Administrators
+Agents with the `manage_roles` permission"
+e0804,zendesk,DELETE,/api/v2/ticket_content_pins/{content_pin_id},DeleteTicketContentPin,Delete Content Pin from Ticket,"Deletes a specific content pin from a ticket.
+
+#### Allowed For
+
+* Agents"
+e0849,zendesk,POST,/api/v2/any_channel/validate_token,ValidateToken,Validate Token,"#### Allowed For
+
+* Admins
+
+#### Request parameters
+
+The POST request takes a JSON object parameter which contains the token to be validated.
+
+| Name               | Type      | Required  | Comments
+| ------------------ | ----------| --------- | -------------------
+| instance_push_id   | string    | yes       | The ID of the account to which data will be pushed. This was passed to the integration service when the administrator set up the account
+| request_id         | string    | no        | A unique identifier for the push request
+
+#### Response format
+
+The response body is empty."
+e0614,klaviyo,POST,/api/profile-subscription-bulk-delete-jobs,bulk_unsubscribe_profiles,Bulk Unsubscribe Profiles,"> 🚧
+>
+> Profiles not in the specified list will be globally unsubscribed. Always verify profile list membership before calling this endpoint to avoid unintended global unsubscribes.
+
+Unsubscribe one or more profiles from email marketing, SMS marketing, push marketing, or a combination. Learn more about [consent in this guide](https://developers.klaviyo.com/en/docs/collect_email_and_sms_consent_via_api).
+
+Push tokens provided in `subscriptions.push.tokens` will be removed for the specified profiles.
+
+To remove someone from a list without changing their subscription status, use [Remove Profiles from List](https://developers.klaviyo.com/en/reference/remove_profiles_from_list).
+
+Maximum number of profiles per call: 100<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`lists:write`
+`profiles:write`
+`subscriptions:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/bulk_unsubscribe_profiles.json)"
+e0572,klaviyo,POST,/api/catalog-category-bulk-delete-jobs,bulk_delete_catalog_categories,Bulk Delete Catalog Categories,"Create a catalog category bulk delete job to delete a batch of catalog categories.
+
+Accepts up to 100 catalog categories per request. The maximum allowed payload size is 5MB.
+The maximum number of jobs in progress at one time is 500.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`catalogs:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/bulk_delete_catalog_categories.json)"
+e0887,zendesk,POST,/api/v2/organizations/{organization_id}/merge,CreateOrganizationMerge,Merge Organization With Another Organization,"Merges two organizations by moving all users, tickets, and domain names from the organization specified by `{organization_id}` to the organization specified by `winner_id`. After the merge:
+
+- The ""losing"" organization will be deleted.
+- Other organization fields and their values will not be carried over to the ""winning"" organization.
+- The merge operation creates an `Organization Merge` record which contains a status indicating the progress of the merge.
+
+**Note**: This operation is irreversible.
+
+#### Merge Statuses
+
+| Status | Description |
+|--------|-------------|
+| new | A job has been queued to merge the two organizations. |
+| in progress | The job to merge the two organizations has started. |
+| error | An error occurred during the merge job. The merge can be retried by repeating the API call. | 
+| complete | The merge has been completed successfully. |
+
+#### Allowed For
+
+* Admins"
+e0600,klaviyo,POST,/api/image-upload,upload_image_from_file,Upload Image From File,"Upload an image from a file.
+
+If you want to import an image from an existing url or a data uri, use the Upload Image From URL endpoint instead.<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `100/m`<br>Daily: `500/d`
+
+**Scopes:**
+`images:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/upload_image_from_file.json)"
+e0550,klaviyo,PATCH,/api/object-schemas/{id}/relationships/profile-object-schemas,update_profile_schema_relationship,Update Profile Schema Relationship,"Update a relationship between an object schema and a profile<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`custom-objects:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/update_profile_schema_relationship.json)"
+e0806,zendesk,DELETE,/api/v2/ticket_fields/{ticket_field_id}/options/{ticket_field_option_id},DeleteTicketFieldOption,Delete Ticket Field Option,"#### Allowed for
+* Admins"
+e0072,auth0,DELETE,/users/{id}/permissions,delete_permissions,Remove Permissions from a User,Remove permissions from a user.
+e0384,hubspot,POST,/cms/v3/hubdb/tables/{tableIdOrName}/rows/{rowId}/draft/clone,post-/cms/v3/hubdb/tables/{tableIdOrName}/rows/{rowId}/draft/clone_cloneDraftTableRow,Clone a row,Clones a single row in the draft version of a table.
+e0322,hubspot,PATCH,/cms/v3/pages/landing-pages/folders/{objectId},patch-/cms/v3/pages/landing-pages/folders/{objectId}_updateFolder,Update a landing page folder,"Partially update a landing page folder, specified by the folder ID. You only need to specify the details values that you are modifying."
+e0948,zendesk,PUT,/api/v2/groups/{group_id},UpdateGroup,Update Group,"#### Allowed For
+
+* Admins"
+e0766,zendesk,DELETE,/api/v2/custom_objects/{custom_object_key}/triggers/destroy_many,DeleteManyObjectTriggers,Delete Many Object Triggers,"Deletes the object triggers corresponding to the provided comma-separated list of ids. 
+
+**Note**: You can only bulk-delete triggers associated with one object at a time, specified by the `custom_object_key` in the request.
+
+#### Allowed For
+
+* Administrators
+* Agents in custom roles with the `manage_triggers` permission (Enterprise only)
+
+#### Request Parameters
+
+The DELETE request takes an `ids` object that lists the
+object triggers to delete. All of the specified object trigger `ids` must be associated with a single object.
+
+| Name | Description
+| ---- | -----------
+| ids  | The ids of the triggers to delete
+
+#### Example request
+
+```js
+{
+  ""ids"": ""25,23,27,22""
+}
+```"
+e0876,zendesk,POST,/api/v2/it_asset_management/locations,CreateItamLocation,Create Asset Location,"Creates a location.
+
+#### Allowed For
+
+* Admins"
+e0809,zendesk,DELETE,/api/v2/tickets/destroy_many,BulkDeleteTickets,Bulk Delete Tickets,"Accepts a comma-separated list of up to 100 ticket ids.
+
+#### Allowed For
+
+* Admins
+* Agents with permission to delete tickets
+
+Agent delete permissions are set in Support. See
+[Deleting tickets](https://support.zendesk.com/hc/en-us/articles/4408883872538)
+in the Support Help Center.
+
+This endpoint returns a `job_status` [JSON object](/api-reference/ticketing/ticket-management/job_statuses/#json-format) and queues a background job to do the work. Use the [Show Job Status](/api-reference/ticketing/ticket-management/job_statuses/#show-job-status) endpoint to check for the job's completion. Only a certain number of jobs can be queued or running at the same time. See [Job limit](/api-reference/introduction/rate-limits/#job-limit) for more information."
+e0837,zendesk,PATCH,/api/v2/custom_objects/{custom_object_key}/records/{custom_object_record_id},UpdateCustomObjectRecord,Update Custom Object Record,"Updates an individual custom object record. The updating rules are as follows:
+* Takes a `custom_object_record` object that specifies the properties to update
+* The custom object fields should be nested inside a `custom_object_fields` object
+#### Allowed For
+* Agents"
+e0024,auth0,DELETE,/experimentation/feature-flags/{id}/variations/{vid},delete_variation,Delete a variation.,Delete a variation by ID. Returns 204 if the variation does not exist. Returns 404 if the parent feature flag does not exist.
+e0250,auth0,PUT,/users/{id}/authentication-methods,put_authentication-methods,Update all authentication methods by replacing them with the given ones,"Replace the specified user <a href=""https://auth0.com/docs/secure/multi-factor-authentication/multi-factor-authentication-factors""> authentication methods</a> with supplied values.
+
+    <b>Note</b>: Authentication methods supplied through this action do not iterate on existing methods. Instead, any methods passed will overwrite the user&#8217s existing settings."
+e0896,zendesk,POST,/api/v2/routing/tickets/{ticket_id}/instance_values,SetTicketAttributeValues,Set Ticket Attribute Values,"Adds the specified attributes if no attributes exists, or replaces all existing attributes with the specified attributes.
+
+Invalid or deleted attributes are ignored.
+
+#### Allowed For
+
+* Admins
+* [Agents in custom role with permission to manage skills](https://support.zendesk.com/hc/en-us/articles/4408882153882)
+* Agents, when the account setting for editing ticket skills is enabled for all agents"
+e0911,zendesk,POST,/api/v2/uploads,UploadFiles,Upload Files,"Uploads a file that can be attached to a ticket comment. It doesn't attach the file to the comment. For details and examples, see [Attaching ticket comments with the API](/documentation/ticketing/managing-tickets/adding-ticket-attachments-with-the-api/).
+
+The endpoint has a required `filename` query parameter. The parameter specifies what the file will be named when attached to the ticket comment (to give the agent more context about the file). The parameter does not specify the file on the local system to be uploaded. While the two names can be different, their file extensions must be the same. If they don't match, the agent's browser or file reader could give an error when attempting to open the attachment.
+
+The `Content-Type` header must contain a recognized MIME type that correctly describes the type of the uploaded file. Failing to send a recognized, correct type may cause undesired behavior. For example, in-browser audio playback may be interrupted by the browser's security mechanisms for MP3s uploaded with an incorrect type.
+
+Adding multiple files to the same upload is handled by splitting requests and passing the API token received from the first request to each subsequent request. The token is valid for 60 minutes.
+
+**Note**: Even if [private attachments](https://support.zendesk.com/hc/en-us/articles/8435939957914) are enabled in the Zendesk Support instance, uploaded files are visible to any authenticated user at the `content_URL` specified in the [JSON response](#json-format) until the upload token is consumed. Once a file is associated with a ticket or post, visibility is restricted to users with access to the ticket or post with the attachment.
+
+#### Allowed For
+
+* End users"
+e0001,auth0,DELETE,/actions/actions/{id},delete_action,Delete an action,Deletes an action and all of its associated versions. An action must be unbound from all triggers before it can be deleted.
+e0408,hubspot,POST,/crm/v3/objects/communications/batch/archive,post-/crm/v3/objects/communications/batch/archive_archive,Archive a batch of communications by ID,Delete a batch of messages by ID. A deleted message can be restored within 90 days of being deleted. Learn more about [restoring activity records](https://knowledge.hubspot.com/records/restore-deleted-activity-in-a-record).

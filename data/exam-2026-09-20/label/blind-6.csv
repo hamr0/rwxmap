@@ -1,0 +1,553 @@
+row_id,provider,method,path,operationId,summary,description
+e0430,hubspot,POST,/marketing/v3/emails,post-/marketing/v3/emails_/marketing/v3/emails,,
+e0559,klaviyo,PATCH,/api/tracking-settings/{id},update_tracking_setting,Update Tracking Setting,"Update the UTM tracking setting with the given account ID.
+
+More information about UTM tracking settings can be found [here](https://help.klaviyo.com/hc/en-us/articles/115005247808).<br><br>*Rate limits*:<br>Burst: `10/s`<br>Steady: `150/m`
+
+**Scopes:**
+`tracking-settings:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/update_tracking_setting.json)"
+e0509,klaviyo,DELETE,/api/custom-metrics/{id},delete_custom_metric,Delete Custom Metric,"Delete a custom metric with the given custom metric ID.<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`metrics:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/delete_custom_metric.json)"
+e0663,miro,DELETE,/v2/boards/{board_id}/tags/{tag_id},delete-tag,Delete tag,"Deletes the specified tag from the board. The tag is also removed from all cards and sticky notes on the board. <br><blockquote><strong>Note:</strong> Updates to tags made via the REST API  will not be reflected on the board in realtime. To see REST API updates to tags on a board,  you need to refresh the board. This applies to the following endpoints:  [Attach tag to item](https://developers.miro.com/reference/attach-tag-to-item),  [Remove tag from item](https://developers.miro.com/reference/remove-tag-from-item),  [Update tag](https://developers.miro.com/reference/update-tag).</blockquote><br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 1</a><br/>"
+e0634,klaviyo,POST,/client/back-in-stock-subscriptions,create_client_back_in_stock_subscription,Create Client Back In Stock Subscription,"Subscribe a profile to receive back in stock notifications. Check out [our Back in Stock API guide](https://developers.klaviyo.com/en/docs/how_to_set_up_custom_back_in_stock) for more details.
+
+This endpoint is specifically designed to be called from publicly-browseable, client-side environments only and requires a [public API key (site ID)](https://www.klaviyo.com/settings/account/api-keys). Never use a private API key with our client-side endpoints.
+
+Do not use this endpoint from server-side applications.
+To create back in stock subscriptions from server-side applications, instead use [POST /api/back-in-stock-subscriptions](https://developers.klaviyo.com/en/reference/create_back_in_stock_subscription).<br><br>*Rate limits*:<br>Burst: `350/s`<br>Steady: `3500/m`
+
+**Scopes:**
+`catalogs:write`
+`profiles:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/create_client_back_in_stock_subscription.json)"
+e0987,zendesk,PUT,/api/v2/user_fields/reorder,ReorderUserField,Reorder User Field,"#### Allowed For
+
+* Admins"
+e0362,hubspot,PATCH,/crm/v3/objects/{objectType}/{objectId},patch-/crm/v3/objects/{objectType}/{objectId}_update,Update,"Perform a partial update of an Object identified by `{objectId}`or optionally a unique property value as specified by the `idProperty` query param. `{objectId}` refers to the internal object ID by default, and the `idProperty` query param refers to a property whose values are unique for the object. Provided property values will be overwritten. Read-only and non-existent properties will result in an error. Properties values can be cleared by passing an empty string."
+e0724,miro,POST,/v2/boards/{board_id}/groups,createGroup,Create group,"Creates a group of items on a board. The group is created with the items that are passed in the request body.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+e0980,zendesk,PUT,/api/v2/tickets/{ticket_id}/comments/{comment_id}/attachments/{attachment_id}/redact,RedactCommentAttachment,Redact Comment Attachment,"Redaction allows you to permanently remove attachments from an existing comment on a ticket. Once removed from a comment, the attachment is replaced with an empty ""redacted.txt"" file.
+
+The redaction is permanent. It is not possible to undo redaction or see what was removed. Once a ticket is closed, redacting its attachments is no longer possible.
+
+Also, if you want to redact an inline attachment, you can use the `include_inline_images` parameter in the [List Comments](/api-reference/ticketing/tickets/ticket_comments/#list-comments) operation to obtain the inline attachment ID, and use it in the request URL.
+
+#### Allowed For
+
+* Admins
+* Agents when [deleting tickets is enabled for agents on professional accounts](https://support.zendesk.com/hc/en-us/articles/4408832689818)
+* Agents assigned to a custom role with permissions to redact ticket content (Enterprise only)"
+e0148,auth0,POST,/actions/modules,post_action_module,Create a new Actions Module,Create a new Actions Module for reusable code across actions.
+e0530,klaviyo,DELETE,/api/webhooks/{id},delete_webhook,Delete Webhook,"Delete a webhook with the given ID.<br><br>*Rate limits*:<br>Burst: `1/s`<br>Steady: `15/m`
+
+**Scopes:**
+`webhooks:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/delete_webhook.json)"
+e0890,zendesk,POST,/api/v2/push_notification_devices/destroy_many,PushNotificationDevices,Bulk Unregister Push Notification Devices,"Unregisters the mobile devices that are receiving push notifications. Specify the devices as an array of mobile device tokens.
+
+#### Allowed for
+
+* Admins"
+e0156,auth0,POST,/clients,post_clients,Create a client,"Create a new client (application or SSO integration). For more information, read [Create Applications](https://www.auth0.com/docs/get-started/auth0-overview/create-applications)
+[API Endpoints for Single Sign-On](https://www.auth0.com/docs/authenticate/single-sign-on/api-endpoints-for-single-sign-on).
+
+Notes: 
+- We recommend leaving the `client_secret` parameter unspecified to allow the generation of a safe secret.
+- The `client_authentication_methods` and `token_endpoint_auth_method` properties are mutually exclusive. Use 
+`client_authentication_methods` to configure the client with Private Key JWT authentication method. Otherwise, use `token_endpoint_auth_method`
+to configure the client with client secret (basic or post) or with no authentication method (none).
+- When using `client_authentication_methods` to configure the client with Private Key JWT authentication method, specify fully defined credentials. 
+These credentials will be automatically enabled for Private Key JWT authentication on the client. 
+- To configure `client_authentication_methods`, the `create:client_credentials` scope is required.
+- To configure `client_authentication_methods`, the property `jwt_configuration.alg` must be set to RS256.
+
+SSO Integrations created via this endpoint will accept login requests and share user profile information."
+e0515,klaviyo,DELETE,/api/lists/{id}/relationships/profiles,remove_profiles_from_list,Remove Profiles from List,"Remove a profile from a list with the given list ID.
+
+The provided profile will no longer receive marketing from this particular list once removed.
+
+Removing a profile from a list will not impact the profile's [consent](https://developers.klaviyo.com/en/docs/collect_email_and_sms_consent_via_api) status or subscription status in general.
+To update a profile's subscription status, please use the [Unsubscribe Profiles endpoint](https://developers.klaviyo.com/en/reference/unsubscribe_profiles).
+
+This endpoint accepts a maximum of 1000 profiles per call.<br><br>*Rate limits*:<br>Burst: `10/s`<br>Steady: `150/m`
+
+**Scopes:**
+`lists:write`
+`profiles:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/remove_profiles_from_list.json)"
+e1003,zendesk,PUT,/api/v2/workspaces/{workspace_id},UpdateWorkspace,Update Workspace,"#### Allowed For
+* Admins"
+e0194,auth0,POST,/keys/network-acls,create_keys_network_acls,Create a Network ACL key,Create a new key used to verify HTTP Message Signatures on Network ACL rules.
+e0255,hubspot,DELETE,/automation/v4/flows/{flowId},delete-/automation/v4/flows/{flowId},Delete a workflow,Delete an automation flow identified by its flow ID.
+e0308,hubspot,DELETE,/settings/teams/2026-09/{teamId},delete-/settings/teams/2026-09/{teamId},Delete team,Delete a specific team from your HubSpot account using the team's unique identifier. This operation will remove the team and its associated data. Ensure that you have the necessary permissions to perform this action.
+e0373,hubspot,PATCH,/settings/teams/2026-09/{teamId},patch-/settings/teams/2026-09/{teamId},Update team,"Update the details of a specific team in your HubSpot account. This endpoint allows you to modify the team's information, such as its name or parent team ID. Ensure that the teamId provided in the path is correct, as it identifies the team to be updated."
+e0144,auth0,PATCH,/verifiable-credentials/verification/templates/{id},patch_vc_templates_by_id,Update a verifiable credential template by ID.,Update a verifiable credential template.
+e0252,hubspot,DELETE,/app-webhooks/2027-03-beta/{appId}/settings,delete-/app-webhooks/2027-03-beta/{appId}/settings_/app-webhooks/2027-03-beta/{appId}/settings,,
+e0725,miro,POST,/v2/boards/{board_id}/images,create-image-item-using-url,Create image item using URL,"Adds an image item to a board by specifying an image URL.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+e0424,hubspot,POST,/crm/v3/objects/tickets,post-/crm/v3/objects/tickets_create,Create,"Create a ticket with the given properties and return a copy of the object, including the ID. Documentation and examples for creating standard tickets is provided."
+e0548,klaviyo,PATCH,/api/object-schemas/{id},update_object_schema,Update Object Schema,"Update the object schema with the given ID.<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`custom-objects:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/update_object_schema.json)"
+e0073,auth0,DELETE,/users/{id}/roles,delete_user_roles,Remove roles from a user,"Remove one or more specified user roles assigned to a user.
+
+**Note**: This action removes a role from a user in the context of your whole tenant. If you want to unassign a role from a user in the context of a specific Organization, use the following endpoint: [Delete user roles from an Organization member](https://auth0.com/docs/api/management/v2/organizations/delete-organization-member-roles)."
+e0953,zendesk,PUT,/api/v2/organization_fields/{organization_field_id},UpdateOrganizationField,Update Organization Field,"#### Updating a Dropdown (Tagger) or Multiselect Field
+
+Dropdown and multiselect fields return an array of `custom_field_options` which specify the name, value, and order of dropdown or multiselect options. When updating a dropdown or multiselect field, note the following information:
+
+- All options must be passed on update. Options that are not passed will be removed. As a result, these values will be removed from any organizations
+- To create a new option, pass a null `id` along with the `name` and `value`
+- To update an existing option, pass its `id` along with the `name` and `value`
+- To reorder an option, reposition it in the `custom_field_options` array relative to the other options
+- To remove an option, omit it from the list of options upon update
+
+#### Example Request
+
+```bash
+curl https://{subdomain}.zendesk.com/api/v2/organization_fields/{organization_field_id} \
+  -H ""Content-Type: application/json"" -X PUT \
+  -d '{""organization_field"": {""custom_field_options"": [{""id"": 124, ""name"": ""Option 2"", ""value"": ""option_2""}, {""id"": 123, ""name"": ""Option 1"", ""value"": ""option_1""}, {""id"": 125, ""name"": ""Option 3"", ""value"": ""option_3""}]}}' \
+  -v -u {email_address}/token:{api_token}
+```
+#### Allowed for
+
+* Admins"
+e0644,miro,DELETE,/v2-experimental/boards/{board_id}/items/{item_id},delete-item-experimental,Delete item,"Deletes an item from a board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 3</a><br/>"
+e0019,auth0,DELETE,/device-credentials/{id},delete_device-credentials_by_id,Delete a device credential,Permanently delete a device credential (such as a refresh token or public key) with the given ID.
+e0810,zendesk,DELETE,/api/v2/tickets/{ticket_id},DeleteTicket,Delete Ticket,"#### Allowed For
+
+* Admins
+* Agents with permission to delete tickets
+
+Agent delete permissions are set in Support. See
+[Deleting tickets](https://support.zendesk.com/hc/en-us/articles/4408883872538)
+in the Support Help Center.
+
+#### Ticket deletion rate limit
+
+You can delete 400 tickets every 1 minute using this endpoint.
+The rate limiting mechanism behaves as described in
+[Rate limits](/api-reference/introduction/rate-limits/) in the API introduction.
+Zendesk recommends that you obey the Retry-After header values.
+To delete many tickets, you may use [Bulk Delete Tickets](/api-reference/ticketing/tickets/tickets/#bulk-delete-tickets)."
+e0357,hubspot,PATCH,/crm/v3/objects/partner_services/{partnerServiceId},patch-/crm/v3/objects/partner_services/{partnerServiceId},Update,"Perform a partial update of an Object identified by `{partnerServiceId}`or optionally a unique property value as specified by the `idProperty` query param. `{partnerServiceId}` refers to the internal object ID by default, and the `idProperty` query param refers to a property whose values are unique for the object. Provided property values will be overwritten. Read-only and non-existent properties will result in an error. Properties values can be cleared by passing an empty string."
+e0396,hubspot,POST,/crm/objects/2026-09-beta/{objectType},post-/crm/objects/2026-09-beta/{objectType}_/crm/objects/2026-09-beta/{objectType},Create,"Create a CRM object with the given properties and return a copy of the object, including the ID. Documentation and examples for creating standard objects is provided."
+e0263,hubspot,DELETE,/conversations/conversations/v3/threads/{threadId}/assignee,delete-/conversations/conversations/v3/threads/{threadId}/assignee_/conversations/conversations/v3/threads/{threadId}/assignee,,
+e0129,auth0,PATCH,/rate-limit-policies/{id},patch_rate-limit-policies_by_id,Update a rate limit policy,
+e0631,klaviyo,POST,/api/templates,create_template,Create Template,"Create a new HTML or drag-and-drop template.
+
+If there are 1,000 or more templates in an account, creation will fail as there is a limit of 1,000 templates
+that can be created via the API.
+
+Request specific fields using [sparse fieldsets](https://developers.klaviyo.com/en/reference/api_overview#sparse-fieldsets).<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`templates:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/create_template.json)"
+e0483,hubspot,PUT,/feature-flags/v3/{appId}/flags/{flagName}/portals/{portalId},put-/feature-flags/v3/{appId}/flags/{flagName}/portals/{portalId},Set an account flag state,Specify an account-level flag state for a specific HubSpot account.
+e0133,auth0,PATCH,/risk-assessments/settings/new-device,patch_new-device,Update new device assessor,Updates the risk assessment settings for the new device assessor
+e0956,zendesk,PUT,/api/v2/organizations/{organization_id}/tags,AddOrganizationTags,Add Organization Tags,"#### Allowed For
+
+* Agents"
+e0394,hubspot,POST,/crm/lists/2026-09/records/memberships/batch/read,post-/crm/lists/2026-09/records/memberships/batch/read,Batch read memberships,"Retrieve batch membership information for records within specified lists. This endpoint is useful for obtaining membership details in bulk, allowing for efficient data retrieval when dealing with multiple records."
+e0693,miro,PATCH,/v2/boards/{board_id}/shapes/{item_id},update-shape-item,Update shape item,"Updates a shape item on a board based on the data and style properties provided in the request body.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+e0603,klaviyo,POST,/api/lists/{id}/relationships/profiles,add_profiles_to_list,Add Profiles to List,"Add a profile to a list with the given list ID.
+
+It is recommended that you use the [Subscribe Profiles endpoint](https://developers.klaviyo.com/en/reference/subscribe_profiles) if you're trying to give a profile [consent](https://developers.klaviyo.com/en/docs/collect_email_and_sms_consent_via_api) to receive email marketing, SMS marketing, or both.
+
+This endpoint accepts a maximum of 1000 profiles per call.<br><br>*Rate limits*:<br>Burst: `10/s`<br>Steady: `150/m`
+
+**Scopes:**
+`lists:write`
+`profiles:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/add_profiles_to_list.json)"
+e0892,zendesk,POST,/api/v2/requests,CreateRequest,Create Request,"Accepts a `request` object that sets one or more properties.
+
+#### Allowed for
+
+* End users
+* Anonymous users (rate limit of 5 requests per hour for [trial accounts](/documentation/developer-tools/getting-started/getting-a-trial-or-sponsored-account-for-development/))
+
+#### Additional properties
+
+In addition to the writable request properties in the [JSON Format table](#json-format) above, you can set the following properties when creating a request.
+
+| Name                | Type   | Mandatory | Comment
+| ----------------    | -------| --------- | -------
+| comment             | object | yes       | Describes the problem, incident, question, or task. See [Request comments](#request-comments)
+| collaborators       | array  | no        | Adds collaborators (cc's) to the request. An email notification is sent to them when the ticket is created. See [Setting collaborators](/documentation/ticketing/managing-tickets/creating-and-managing-requests#setting-collaborators)
+| requester           | object | yes*      | \*Required for anonymous requests. Specifies the requester of the anonymous request. See [Creating anonymous requests](/documentation/ticketing/managing-tickets/creating-and-managing-requests#creating-anonymous-requests)
+
+#### Creating follow-up requests
+
+Once a ticket is closed (as distinct from solved), it can't be reopened. However, you can create a new request that references the closed ticket. To create the follow-up request, include a `via_followup_source_id` property in the `request` object that specifies the closed ticket. The parameter only works with closed tickets. It has no effect with other tickets."
+e0070,auth0,DELETE,/users/{id}/identities/{provider}/{user_id},delete_user_identity_by_user_id,Unlink a User Identity,"Unlink a specific secondary account from a target user. This action requires the ID of both the target user and the secondary account. 
+
+Unlinking the secondary account removes it from the identities array of the target user and creates a new standalone profile for the secondary account. To learn more, review [Unlink User Accounts](https://auth0.com/docs/manage-users/user-accounts/user-account-linking/unlink-user-accounts)."
+e0363,hubspot,PATCH,/crm/v3/properties/{objectType}/groups/{groupName},patch-/crm/v3/properties/{objectType}/groups/{groupName}_update,Update a property group,Perform a partial update of a property group identified by {groupName}. Provided fields will be overwritten.
+e0352,hubspot,PATCH,/crm/v3/objects/discounts/{discountId},patch-/crm/v3/objects/discounts/{discountId},Update,"Perform a partial update of an Object identified by `{discountId}`or optionally a unique property value as specified by the `idProperty` query param. `{discountId}` refers to the internal object ID by default, and the `idProperty` query param refers to a property whose values are unique for the object. Provided property values will be overwritten. Read-only and non-existent properties will result in an error. Properties values can be cleared by passing an empty string."
+e0781,zendesk,DELETE,/api/v2/it_asset_management/statuses/{status_id},DeleteItamStatus,Delete Asset Status,"Deletes a status with the specified id. Standard (system-defined) statuses cannot be deleted.
+Statuses assigned to assets cannot be deleted.
+
+#### Allowed For
+
+* Admins"
+e0337,hubspot,PATCH,/conversations/v3/custom-channels/{channelId},patch-/conversations/v3/custom-channels/{channelId},Update a custom channel,Update the capabilities for an existing. You can also use it to update the channel's webhookUri and its channelAccountConnectionRedirectUrl.
+e0437,hubspot,POST,/webhooks-journal/journal-local/2027-03-beta/batch/read,post-/webhooks-journal/journal-local/2027-03-beta/batch/read_/webhooks-journal/journal-local/2027-03-beta/batch/read,Batch read,"Execute a batch read operation on the webhooks journal. This endpoint allows you to retrieve a batch of webhook journal entries by providing the necessary input data. It is useful for processing multiple records in a single request, streamlining data retrieval tasks."
+e0958,zendesk,PUT,/api/v2/recipient_addresses/{support_address_id},UpdateSupportAddress,Update Support Address,"Updates an existing support address for your account.
+
+You can't use this endpoint to update a support address's `email` property.
+Instead, you can create a new address using the [Create Support
+Address](#create-support-address) endpoint.
+
+#### Allowed For
+
+* Admins
+* Agents with permission to manage channels and extensions. See the system permissions in [Creating custom agent roles](https://support.zendesk.com/hc/en-us/articles/4408882153882#topic_cxn_hig_bd) in Zendesk help"
+e0314,hubspot,PATCH,/automation/email-templates/2026-09/{templateId},patch-/automation/email-templates/2026-09/{templateId}_/automation/email-templates/2026-09-beta/{templateId},Update template,"Update an existing email template in your HubSpot account. This endpoint allows you to modify the template's properties such as name, subject, body, and folderId. Ensure that the templateId provided corresponds to an existing template. Please note: the scopes for these endpoints require user-level access and will not work for existing apps with portal-level access."
+e1002,zendesk,PUT,/api/v2/workspaces/reorder,ReorderWorkspaces,Reorder Workspaces,"#### Allowed For
+* Admins"
+e0560,klaviyo,PATCH,/api/web-feeds/{id},update_web_feed,Update Web Feed,"Update the web feed with the given ID.<br><br>*Rate limits*:<br>Burst: `1/s`<br>Steady: `15/m`
+
+**Scopes:**
+`web-feeds:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/update_web_feed.json)"
+e0506,klaviyo,DELETE,/api/catalog-variants/{id},delete_catalog_variant,Delete Catalog Variant,"Delete a catalog item variant with the given variant ID.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`catalogs:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/delete_catalog_variant.json)"
+e0944,zendesk,PUT,/api/v2/end_users/{user_id}/identities/{user_identity_id}/make_primary,MakeEndUserIdentityPrimary,Make End User Identity Primary,"Sets the specified identity as primary for the end user. This is a collection-level operation and the correct behavior for an API client is to subsequently reload the entire collection.
+
+An end user can only make an email identity primary if the email is verified.
+
+#### Allowed For
+
+* Verified end users"
+e0609,klaviyo,POST,/api/object-types,create_object_type,Create Object Type,"Create an object type.<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`custom-objects:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/create_object_type.json)"
+e0830,zendesk,DELETE,/api/v2/workspaces/destroy_many,DestroyManyWorkspaces,Bulk Delete Workspaces,"#### Allowed For
+* Admins"
+e0104,auth0,PATCH,/event-streams/{id},patch_event-streams_by_id,Update an event stream,
+e0187,auth0,POST,/forms,create_form,Create a form,
+e0780,zendesk,DELETE,/api/v2/it_asset_management/locations/{location_id},DeleteItamLocation,Delete Asset Location,"Deletes a location with the specified id.
+
+#### Allowed For
+
+* Admins"
+e0789,zendesk,DELETE,/api/v2/organizations/destroy_many,DeleteManyOrganizations,Bulk Delete Organizations,"Accepts a comma-separated list of up to 100 organization ids or external ids.
+
+#### Response
+
+This endpoint returns a `job_status` [JSON object](/api-reference/ticketing/ticket-management/job_statuses/#json-format) and queues a background job to do the work. Use the [Show Job Status](/api-reference/ticketing/ticket-management/job_statuses/#show-job-status) endpoint to check for the job's completion. Only a certain number of jobs can be queued or running at the same time. See [Job limit](/api-reference/introduction/rate-limits/#job-limit) for more information.
+
+#### Allowed For
+
+* Admins
+* Agents assigned to a custom role with permissions to manage organizations (Enterprise only)"
+e0627,klaviyo,POST,/api/tags/{id}/relationships/segments,tag_segments,Tag Segments,"Associate a tag with one or more segments. Any segment cannot be associated with more than **100** tags.
+
+
+Use the request body to pass in the ID(s) of the segments(s) that will be associated with the tag.<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`segments:write`
+`tags:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/tag_segments.json)"
+e0034,auth0,DELETE,/hooks/{id},delete_hooks_by_id,Delete a hook,Delete a hook.
+e0448,hubspot,PUT,/cms/v3/hubdb/tables/{tableIdOrName}/rows/{rowId}/draft,put-/cms/v3/hubdb/tables/{tableIdOrName}/rows/{rowId}/draft_replaceDraftTableRow,Replace an existing row,"Replace a single row in the draft version of a table. All column values must be specified. If a column has a value in the target table and this request doesn't define that value, it will be deleted.
+See the ""Create a row"" endpoint for instructions on how to format the JSON row definitions."
+e0310,hubspot,DELETE,/webhooks-journal/subscriptions/2027-03-beta/filters/{filterId},delete-/webhooks-journal/subscriptions/2027-03-beta/filters/{filterId}_/webhooks-journal/subscriptions/2027-03-beta/filters/{filterId},Delete filter,"Remove a specific filter from the webhooks journal subscriptions. This operation is useful for managing and cleaning up filters that are no longer needed. Once deleted, the filter cannot be recovered."
+e0615,klaviyo,POST,/api/profile-suppression-bulk-create-jobs,bulk_suppress_profiles,Bulk Suppress Profiles,"Manually suppress profiles by email address or specify a segment/list ID to suppress all current members of a segment/list.
+
+Suppressed profiles cannot receive email marketing, independent of their consent status. To learn more, see our guides on [email suppressions](https://help.klaviyo.com/hc/en-us/articles/115005246108#what-is-a-suppressed-profile-1) and [collecting consent](https://developers.klaviyo.com/en/docs/collect_email_and_sms_consent_via_api).
+
+Email address per request limit: 100<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`profiles:write`
+`subscriptions:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/bulk_suppress_profiles.json)"
+e0306,hubspot,DELETE,/public/api/versioning/test/2026-09/widgets/{widgetId},delete-/public/api/versioning/test/2026-09/widgets/{widgetId},,
+e0101,auth0,PATCH,/custom-domains/{id},patch_custom-domains_by_id,Update custom domain configuration,"Update a custom domain.
+
+These are the attributes that can be updated:
+
+- custom_client_ip_header
+- tls_policy
+
+**Updating CUSTOM_CLIENT_IP_HEADER for a custom domain**
+
+To update the `custom_client_ip_header` for a domain, the body to
+send should be:
+
+```json
+{ ""custom_client_ip_header"": ""cf-connecting-ip"" }
+```
+
+**Updating TLS_POLICY for a custom domain**
+
+To update the `tls_policy` for a domain, the body to send should be:
+
+```json
+{ ""tls_policy"": ""recommended"" }
+```
+
+TLS Policies:
+
+- recommended - for modern usage this includes TLS 1.2 only
+
+Some considerations:
+
+- The TLS ciphers and protocols available in each TLS policy follow industry recommendations, and may be updated occasionally.
+- The `compatible` TLS policy is no longer supported."
+e0126,auth0,PATCH,/prompts,patch_prompts,Update prompt settings,"Update the Universal Login configuration of your tenant. This includes the <a href=""https://auth0.com/docs/authenticate/login/auth0-universal-login/identifier-first"">Identifier First Authentication</a> and <a href=""https://auth0.com/docs/secure/multi-factor-authentication/fido-authentication-with-webauthn/configure-webauthn-device-biometrics-for-mfa"">WebAuthn with Device Biometrics for MFA</a> features."
+e0541,klaviyo,PATCH,/api/coupons/{id},update_coupon,Update Coupon,"*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`coupons:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/update_coupon.json)"
+e0992,zendesk,PUT,/api/v2/users/{user_id}/group_memberships/{group_membership_id}/make_default,GroupMembershipSetDefault,Set Membership as Default,"#### Allowed For:
+
+* Agents"
+e0879,zendesk,POST,/api/v2/macros/{macro_id}/attachments,CreateAssociatedMacroAttachment,Create Macro Attachment,"Allows an attachment to be uploaded and associated with a macro at the same time.
+
+**Note:** A macro can be associated with up to five attachments.
+
+#### Allowed For
+
+* Agents"
+e0907,zendesk,POST,/api/v2/tickets/{ticket_id}/tags,SetTagsTicket,Set Tags,"#### Allowed For
+
+* Agents"
+e0422,hubspot,POST,/crm/v3/objects/subscriptions/batch/read,post-/crm/v3/objects/subscriptions/batch/read,"Read a batch of subscriptions by internal ID, or unique property values",Retrieve records by record ID or include the `idProperty` parameter to retrieve records by a custom unique value property.
+e0262,hubspot,DELETE,/commerce/price-books/2026-09/price-books/{priceBookId}/items/{priceBookItemId},delete-/commerce/price-books/2026-09/price-books/{priceBookId}/items/{priceBookItemId},Delete price book item,Remove a specific item from a price book in your HubSpot account. This operation is irreversible and will permanently delete the item identified by the given priceBookItemId from the price book specified by priceBookId.
+e0888,zendesk,POST,/api/v2/organizations/{organization_id}/tags,SetOrganizationTags,Set Organization Tags,"#### Allowed For
+
+* Agents"
+e0086,auth0,PATCH,/attack-protection/suspicious-ip-throttling,patch_suspicious-ip-throttling,Update Suspicious IP Throttling settings,Update the details of the Suspicious IP Throttling configuration of your tenant.
+e0910,zendesk,POST,/api/v2/trigger_categories/jobs,BatchOperateTriggerCategories,Create Batch Job for Ticket Trigger Categories,Creates a job that performs a batch operation for the given ticket trigger categories.
+e0720,miro,POST,/v2/boards/{board_id}/docs,create-doc-format-item,Create doc format item,"Adds a doc format item to a board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+e0091,auth0,PATCH,/branding/themes/{themeId},patch_branding_theme,Update branding theme,Update branding theme.
+e0537,klaviyo,PATCH,/api/catalog-items/{id},update_catalog_item,Update Catalog Item,"Update a catalog item with the given item ID.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`catalogs:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/update_catalog_item.json)"
+e0604,klaviyo,POST,/api/metric-aggregates,query_metric_aggregates,Query Metric Aggregates,"Query and aggregate event data associated with a metric, including native Klaviyo metrics, integration-specific metrics, and custom events (not to be confused with [custom metrics](https://developers.klaviyo.com/en/reference/custom_metrics_api_overview), which are not supported at this time). Queries must be passed in the JSON body of your `POST` request.
+
+To request campaign and flow performance data that matches the data shown in Klaviyo's UI, we recommend the [Reporting API](https://developers.klaviyo.com/en/reference/reporting_api_overview).
+
+Results can be filtered and grouped by time, event, or profile dimensions.
+
+To learn more about how to use this endpoint, check out our new [Using the Query Metric Aggregates Endpoint guide](https://developers.klaviyo.com/en/docs/using-the-query-metric-aggregates-endpoint).
+
+For a comprehensive list of request body parameters, native Klaviyo metrics, and their associated attributes for grouping and filtering, please refer to the [metrics attributes guide](https://developers.klaviyo.com/en/docs/supported_metrics_and_attributes).<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`metrics:read`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/query_metric_aggregates.json)"
+e0547,klaviyo,PATCH,/api/mapped-metrics/{id},update_mapped_metric,Update Mapped Metric,"Update the mapped metric with the given ID.<br><br>*Rate limits*:<br>Burst: `1/s`<br>Steady: `15/m`<br>Daily: `30/d`
+
+**Scopes:**
+`metrics:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/update_mapped_metric.json)"
+e0571,klaviyo,POST,/api/catalog-category-bulk-create-jobs,bulk_create_catalog_categories,Bulk Create Catalog Categories,"Create a catalog category bulk create job to create a batch of catalog categories.
+
+Accepts up to 100 catalog categories per request. The maximum allowed payload size is 5MB.
+The maximum number of jobs in progress at one time is 500.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`catalogs:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/bulk_create_catalog_categories.json)"
+e0984,zendesk,PUT,/api/v2/triggers/reorder,ReorderTriggers,Reorder Ticket Triggers,"Alters the firing order of ticket triggers in the account. See
+[Reordering and sorting triggers](https://support.zendesk.com/hc/en-us/articles/10356973691546)
+in the Zendesk Help Center. The firing order is set in a `trigger_ids` array in the request body.
+
+You must include every ticket trigger id in your account to reorder the ticket triggers. If not, the endpoint will return 404 Forbidden.
+
+Reordering ticket triggers via the API is not permitted if you have more than one ticket trigger category. If there is more than one
+ticket trigger category, the endpoint will return a `LimitOneCategory` error.
+
+#### Allowed For
+
+* Agents"
+e0293,hubspot,DELETE,/integrators/timeline/v3/{appId}/event-templates/{eventTemplateId},delete-/integrators/timeline/v3/{appId}/event-templates/{eventTemplateId}_archive,Delete an event template,Delete an event type template by ID.
+e0754,zendesk,DELETE,/api/v2/api_tokens/{id},DeleteApiToken,Delete API Token,"Permanently deletes an API token. An active token can't be deleted — it must be deactivated
+first by setting `active` to false on the Update API Token request.
+
+**Deprecated.** API tokens are being removed as a supported authentication method for API
+requests. This endpoint is scheduled for removal on April 30, 2027.
+
+#### Allowed For
+
+* Admins
+* Agents with the [Manage APIs](https://support.zendesk.com/hc/en-us/articles/4408882153882) permission"
+e0361,hubspot,PATCH,/crm/v3/objects/taxes/{taxId},patch-/crm/v3/objects/taxes/{taxId}_update,Update,"Perform a partial update of an Object identified by `{taxId}`or optionally a unique property value as specified by the `idProperty` query param. `{taxId}` refers to the internal object ID by default, and the `idProperty` query param refers to a property whose values are unique for the object. Provided property values will be overwritten. Read-only and non-existent properties will result in an error. Properties values can be cleared by passing an empty string."
+e0128,auth0,PATCH,/prompts/{prompt}/screen/{screen}/rendering,patch_rendering,Update render settings for a screen,Learn more about [configuring render settings](https://auth0.com/docs/customize/login-pages/advanced-customizations/getting-started/configure-acul-screens) for advanced customization.
+e0028,auth0,DELETE,/flows/{id},delete_flows_by_id,Delete a flow,
+e0488,hubspot,PUT,/marketing/campaigns/2026-09/{campaignGuid}/budget/{budgetId},put-/marketing/campaigns/2026-09/{campaignGuid}/budget/{budgetId},Update budget item,"Update a specific budget item by ID within a marketing campaign. This endpoint allows you to modify the details of a budget item associated with a campaign, identified by its unique campaignGuid and budgetId. Use this to adjust budget allocations or update budget-related information for a campaign."
+e0225,auth0,PUT,/guardian/factors/email/settings,set_email_factor_settings,Set the Email Factor Settings,TODO: Link this endpoint to relevant documentation when available.
+e0211,auth0,POST,/tickets/email-verification,post_email-verification,Create an email verification ticket,Create an email verification ticket for a given user. An email verification ticket is a generated URL that the user can consume to verify their email address.
+e0461,hubspot,PUT,/crm/lists/2026-09/{listId}/schedule-conversion,put-/crm/lists/2026-09/{listId}/schedule-conversion,Schedule Conversion,Schedule a conversion for a specific list in your HubSpot account. This operation allows you to set a conversion time for the list identified by the listId. Use this endpoint to manage the conversion schedule of your lists effectively.
+e0714,miro,POST,/v2/boards/{board_id_PlatformFileUpload}/images,create-image-item-using-local-file,Create image item using file from device,"Adds an image item to a board by specifying a file from device.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+e0108,auth0,PATCH,/experimentation/segments/{id},update_segment,Update a segment.,Partially update a segment by ID. Only provided fields are updated. Sending rules replaces the entire rules array.
+e0176,auth0,POST,/event-streams/{id}/redeliver/{event_id},post_redeliver_by_event_id,Redeliver a single failed event by ID,
+e0045,auth0,DELETE,/organizations/{id}/discovery-domains/{discovery_domain_id},delete_discovery-domains_by_discovery_domain_id,Delete an organization discovery domain,Remove a discovery domain from an organization. This action cannot be undone.
+e0139,auth0,PATCH,/tenants/settings,patch_settings,Update tenant settings,Update settings for a tenant.
+e0739,miro,POST,/v2/orgs/{org_id}/groups/{group_id}/members,enterprise-create-group-member,Create user group member,"Adds a member to a user group in an organization.<br/> <h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>organizations:groups:write</a><br/> <h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 1</a><br/> <h3>Enterprise only</h3> <p>This API is available only for <a target=_blank href=""/reference/api-reference#enterprise-plan"">Enterprise plan</a> users. You can only use this endpoint if you have the role of a Company Admin. You can request temporary access to Enterprise APIs using <a target=_blank href=""https://q2oeb0jrhgi.typeform.com/to/BVPTNWJ9"">this form</a>.</p>"
+e0742,miro,POST,/v2/orgs/{org_id}/teams/{team_id}/boards/{board_id}/data-classification,enterprise-dataclassification-board-set,Update board classification,"Updates board classification for an existing board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a> <br/><h3>Enterprise only</h3> <p>This API is available only for <a target=_blank href=""/reference/api-reference#enterprise-plan"">Enterprise plan</a> users. You can only use this endpoint if you have the role of a Company Admin. You can request temporary access to Enterprise APIs using <a target=_blank href=""https://q2oeb0jrhgi.typeform.com/to/BVPTNWJ9"">this form</a>.</p>"
+e0587,klaviyo,POST,/api/custom-metrics,create_custom_metric,Create Custom Metric,"Create a new custom metric.
+
+Custom metric objects must include a `name` and `definition`.<br><br>*Rate limits*:<br>Burst: `1/s`<br>Steady: `15/m`<br>Daily: `15/d`
+
+**Scopes:**
+`metrics:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/create_custom_metric.json)"
+e0546,klaviyo,PATCH,/api/lists/{id},update_list,Update List,"Update the name of a list with the given list ID.<br><br>*Rate limits*:<br>Burst: `10/s`<br>Steady: `150/m`
+
+**Scopes:**
+`lists:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/update_list.json)"
+e0759,zendesk,DELETE,/api/v2/brands/{brand_id},DeleteBrand,Delete a Brand,"Deletes a brand.
+
+#### Allowed for
+- Admins"
+e0750,miro,PUT,/v2/boards/{board_id}/groups/{group_id},updateGroup,Updates a group with new items,"This endpoint updates an existing group by replacing it entirely with a new group.  When the update is made, the original group is completely replaced, and a new group ID is assigned. <br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+e0574,klaviyo,POST,/api/catalog-item-bulk-create-jobs,bulk_create_catalog_items,Bulk Create Catalog Items,"Create a catalog item bulk create job to create a batch of catalog items.
+
+Accepts up to 100 catalog items per request. The maximum allowed payload size is 5MB.
+The maximum number of jobs in progress at one time is 500.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`catalogs:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/bulk_create_catalog_items.json)"
+e0775,zendesk,DELETE,/api/v2/group_slas/policies/{group_sla_policy_id},DeleteGroupSLAPolicy,Delete Group SLA Policy,"#### Allowed For
+
+* Admins"
+e0674,miro,DELETE,/v2/orgs/{org_id}/teams/{team_id}/projects/{project_id},enterprise-delete-project,Delete project,"Deletes a project. After a project is deleted, all boards and users that belong to the project remain in the team.<h4>Note</h4> <em>Projects</em> have been renamed to <em>Spaces</em>, and the terms can be used interchangeably.<h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>projects:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 4</a> <br/><h3>Enterprise only</h3> <p>This API is available only for <a target=_blank href=""/reference/api-reference#enterprise-plan"">Enterprise plan</a> users. You can only use this endpoint if you have the role of a Company Admin. You can request temporary access to Enterprise APIs using <a target=_blank href=""https://q2oeb0jrhgi.typeform.com/to/BVPTNWJ9"">this form</a>.</p>"
+e0393,hubspot,POST,/crm-object-schemas/v3/schemas/{objectType}/associations,post-/crm-object-schemas/v3/schemas/{objectType}/associations_createAssociation,Create an association for a specified object type.,"Create a new association between the specified object type and another object type. This operation requires the definition of the association attributes, such as the primary and target object type IDs."
+e0114,auth0,PATCH,/guardian/factors/push-notification/providers/fcm,patch_fcm,Updates FCM configuration,Modify configuration details of the multi-factor authentication FCM provider associated with your tenant.
+e0042,auth0,DELETE,/organizations/{id}/client-grants/{grant_id},delete_client-grants_by_grant_id,Remove a client grant from an organization,
+e0848,zendesk,POST,/api/v2/any_channel/push,PushContentToSupport,Push Content to Support,"Pushes Channel framework content to Zendesk.
+
+#### Allowed For
+
+* Admins
+
+#### Request parameters
+
+The POST request takes a JSON object parameter which contains data about all
+the resources that the client is pushing.
+
+| Name               | Type      | Required  | Comments
+| ------------------ | ----------| --------- | -------------------
+| instance_push_id   | string    | yes       | The account ID where data will be pushed. This was passed to the integration service when the administrator set up the account
+| request_id         | string    | no        | A unique identifier for the push request
+| external_resources | array     | yes       | The [resources](#external_resource-object) to push
+
+#### external_resource object
+
+| Name               | Type                               | Max length | Mandatory | Comments
+|------------------- | ---------------------------------- |------------| --------- | ----------
+| external_id        | string                             | 255        | yes       | Unique identifier of the external resource. Must be ASCII characters
+| internal_note      | boolean                            |            | no        | If true creates a new internal note comment
+| message            | string                             | 65535      | yes       | Text to be converted to a ticket or comment
+| html_message       | string                             | 65535      | no        | HTML version of message
+| parent_id          | string                             | 511        | no        | Unique identifier of the external resource for which this is a response. Used to choose the correct thread. Responses may include `parent_id` or `thread_id`, but not both. See [Conversation threads](/documentation/channel_framework/understanding-the-channel-framework/pull_endpoint/#conversation-threads)
+| thread_id          | string                             | 255        | no        | Arbitrary identifier of the thread to which this item should belong. Responses may include `parent_id` or `thread_id`, but not both. See [Conversation threads](/documentation/channel_framework/understanding-the-channel-framework/pull_endpoint/#conversation-threads)
+| created_at         | string                             |            | yes       | When the resource was created in the origin system, as an ISO 8601 extended format date-time. Example: '2015-09-08T22:48:09Z'
+| author             | object                             |            | yes       | See [author object](#author-object) below
+| display_info       | array                              |            | no        | Array of integration-specific data used by apps to modify the agent UI. See [display_info object](#display_info-object) below
+| allow_channelback  | boolean                            |            | no        | If false, prevents the agent from making additional comments on the message in the Zendesk interface
+| fields             | array                              |            | no        | Array of ticket fields to set in Zendesk and their values. See [fields array](#fields-array)
+| file_urls          | array                              | 10         | no        | Array of files to be imported into Zendesk. See [file urls](/documentation/channel_framework/understanding-the-channel-framework/pull_endpoint/#file-urls) in the Channel framework docs
+
+#### author object
+
+| Name        | Type   | Max chars | Mandatory | Comments
+|------------ | ------ |---------- |---------- |-----------
+| external_id | string | 255       | yes       | Unique identifier of the user in the origin service
+| name        | string | 255       | no        | If not supplied, defaults to external id
+| image_url   | string | 255       | no        | URL to an image for the user
+| locale      | String | 255       | no        | The user's locale. Must be one of the supported [locales](/api-reference/ticketing/account-configuration/locales/#list-available-public-locales) in Zendesk
+| fields      | array  |           | no        | Array of items containing user field identifier ('id') and value of field ('value'.)  For system fields ('notes' or 'details'), the identifier is the English name. For custom fields, the identifier may be the ID or the name
+
+#### display_info object
+
+| Name | Type   | Max chars | Mandatory | Comments
+|----- | ------ |---------- |---------- |-----------
+| type | string | 255       | yes       | Globally unique type identifier defined by the integration origin service. Examples: a GUID or URI
+| data | string | 65535     | yes       | JSON data containing display hints
+
+#### fields array
+
+The `fields` array lists ticket fields to set in Zendesk and their values. Each item consists of a field identifier (`id`) and a value (`value`) for the field. For Zendesk system fields such as `subject`, the identifier is the English name. For custom fields, the identifier may be a field ID or a name. See [Ticket Fields](/api-reference/ticketing/tickets/ticket_fields/).
+
+The `fields` array can only set ticket values on ticket creation, not on ticket updates.
+
+#### Response format
+
+The response is a JSON object containing a single key:
+
+| Name      | Type     | Comments
+| --------- | -------- | -------------------
+| results   | array    | An array of [result objects](#result-object)
+
+The `results` array contains an entry for each item in the incoming `external_resources` array, in the
+same order.  For example, if you call `push` with 3 external resources, a successful response will include
+`results` with three entries, corresponding to your 3 resources.
+
+#### result object
+
+| Name                 | Type                           | Comments
+| -------------------- | ------------------------------ | -------------------
+| external_resource_id | string                         | The external ID of the resource, as passed in
+| status               | object                         | The status of the import for the indicated resource. See [status object](#status-object)
+
+#### status object
+
+| Name        | Type   | Comments
+| ----------- | ------ | -------------------
+| code        | string | A code indicating the status of the import of the resource, as described in [status codes](#status-codes)
+| description | string | In the case of an exception, a description of the exception. Otherwise, not present.
+
+#### status codes
+
+| Key                                       | Description
+| ----------------------------------------- | ----------------
+| success                                   | The external resource was successfully converted to a ticket or comment
+| already_imported                          | Reimport of the external resource was skipped due to a pre-existing ticket or comment for the resource
+| could_not_locate_parent_external_resource | The parent resource, as identified by parent_id in the [request](#request-parameters), could not be found. The unrecognized parent ID is returned in the description of the [status](#status-object)
+| processing_error                          | An internal exception occurred while processing the resource. See `description` in the [status object](#status-object)
+| halted                                    | This resource was not processed because processing of previous resources failed"
+e0700,miro,PATCH,/v2/orgs/{org_id}/teams/{team_id}/data-classification,enterprise-dataclassification-team-boards-bulk,Bulk update boards classification,"Updates board classification for not-classified only or all boards in an existing team.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 4</a> <br/><h3>Enterprise only</h3> <p>This API is available only for <a target=_blank href=""/reference/api-reference#enterprise-plan"">Enterprise plan</a> users. You can only use this endpoint if you have the role of a Company Admin. You can request temporary access to Enterprise APIs using <a target=_blank href=""https://q2oeb0jrhgi.typeform.com/to/BVPTNWJ9"">this form</a>.</p>"
