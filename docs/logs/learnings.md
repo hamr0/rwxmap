@@ -4240,3 +4240,73 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   burned (D24). The brief needs an addendum for the three split
   constructs before the next exam; `BRIEF.md` itself stays verbatim as
   calibrated, and the addendum goes alongside it.
+
+### Combined diagnostic set: each step does one kind of wrong; stop guessing on the floor (2026-09-21)
+- Goal: see each step, the whole flow and Jev scored together on every
+  row we pulled and labelled ourselves, and weigh Jev against step 2
+  head to head.
+- Tried: built `data/combined-2026-09-21/` — 6557 rows across 23
+  providers from three sources (provider corpus 4171, exam 2026-09-17
+  1383, exam 2026-09-20 1003), ids prefixed `pc-` / `x17-` / `x20-`
+  because both exams used `e0001...`. The build set was left out
+  because its specs came from apis-guru; camara was deleted the same
+  day (a2571b1). Ran Jev A and B fresh over all 6557 rows, 0 failed
+  calls: A in 238.8s for about $0.9384, B in 239.6s for about $0.7151.
+  Scored with `tools/score-combined-2026-09-21.js`. The x20 slice
+  reproduced the exam scorer exactly (841 exact / 82 leaks / 80
+  over-tight of 1003), which cross-checks the scorer. The LOVO section
+  as first written picked each fold's threshold by the maximum
+  closed/false ratio, which always picks 0.90 and closed only 14 of
+  305 for 0 false alarms — an artifact of the selection rule. It was
+  recomputed with the project's bar (the lowest threshold whose
+  training closed/false clears 10, which is the one that closes most
+  subject to the bar). Then measured the D84 shape.
+- Outcome: truth over the 6557 rows is r 2705 / w 2266 / x 1586. The
+  flow, over all 6557 rows: exact 5951 (90.8%), leaks 308 (4.7%),
+  over-tight 298 (4.5%). Per step, each over only the rows whose final
+  verdict it produced: step 1, 2645 claims, exact 2642 (99.9%), leaks
+  3 (0.1%), over-tight 0. Step 2, 2335 claims, exact 2029 (86.9%),
+  leaks 305 (13.1%), over-tight 1 (0.0%); its word rules
+  (`modify-verb` + `modify-verb-summary`), 366 claims, exact 331
+  (90.4%), leaks 35 (9.6%), over-tight 0; its method floor, 1969
+  claims, exact 1698 (86.2%), leaks 270 (13.7%), over-tight 1 (0.1%).
+  Step 3, 1577 claims, exact 1280 (81.2%), leaks 0, over-tight 297
+  (18.8%); `raise-word`, 51 claims, exact 36 (70.6%), leaks 0,
+  over-tight 15 (29.4%); `floor-post`, 1526 claims, exact 1244
+  (81.5%), leaks 0, over-tight 282 (18.5%). Jev-B cold, over 6557:
+  exact 5625 (85.8%), leaks 893 (13.6%), over-tight 39 (0.6%).
+  Flow+Jev-A at 0.70, over 6557: exact 6045 (92.2%), leaks 205
+  (3.1%), over-tight 307 (4.7%). Jev-A alone on the 2335 flow-w rows,
+  of which 305 (13.1%) are truth x: closed 103 of 305 (33.8%) for 9
+  false alarms, 11.44, fitted at 0.70. Step 2 head to head, each over
+  the same 2335 rows: step 2 exact 2029 (86.9%), leaks 305 (13.1%),
+  over-tight 1 (0.0%); Jev-B exact 2155 (92.3%), leaks 161 (6.9%),
+  over-tight 19 (0.8%); flow+Jev-A exact 2123 (90.9%), leaks 202
+  (8.7%), over-tight 10 (0.4%). Step 2 and Jev-B disagree on 167 of
+  2335 rows (7.2%): truth x, step 2 w, Jev x — 145 rows, Jev right;
+  truth w, step 2 w, Jev x — 19 rows, step 2 right; truth w, Jev r — 1
+  row, step 2 right; truth r, step 2 w, Jev r — 1 row, Jev right;
+  truth x, Jev r — 1 row, neither. The fitted sweep over flow-w rows:
+  t=0.50 closed 170 for 53 false (3.21), 0.60 135 for 24 (5.63), 0.70
+  103 for 9 (11.44), 0.80 66 for 4 (16.50), 0.90 14 for 0. The
+  corrected leave-one-vendor-out: 86 of 305 closed (28.2%) for 9 false
+  alarms, ratio 9.56, just under the bar of 10, with threshold 0.70 in
+  21 folds and 0.80 in 2 (docusign, okta). The D84 shape, each over
+  6557 rows: today's flow exact 5951 (90.8%) / leaks 308 (4.7%) /
+  over-tight 298 (4.5%); D84, w only with a word, exact 4523 (69.0%) /
+  leaks 38 (0.6%) / over-tight 1996 (30.4%); every write x, r against
+  not-r only, exact 4227 (64.5%) / leaks 3 (0.0%) / over-tight 2327
+  (35.5%). The review queue, step 2's floor rows, is 1969 of 6557 rows,
+  of which 270 are truth x. Leaks remaining after flow+Jev-A, by
+  provider: xero 60, okta 42, auth0 26, docusign 22, jira 12, zendesk
+  12, klaviyo 8, zoom 6, and 1-2 each at datadog, digitalocean,
+  hubspot, intercom, miro, openai, paypal, spotify, square and stripe.
+- Lesson: each step does exactly one kind of wrong. Step 1 is solved.
+  Step 2 holds the leaks, 305 of 308, 270 of them on its wordless
+  floor. Step 3 holds the over-tightness, 297 of 298, 282 of them on
+  its wordless POST floor. The wordless floor is where specs do not
+  state the answer, and neither mined lists nor a model fixes it; the
+  honest move is to stop guessing there and publish it as a review
+  queue (D84). Also: a threshold picked by maximizing a ratio always
+  drifts to the most conservative setting — select by "most closed
+  subject to the bar" instead.
