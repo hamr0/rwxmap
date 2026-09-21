@@ -563,7 +563,7 @@ menu, or has none. (docs/archive/prd.md:37-48)
 - A third standards track.
 - A mandated conformance harness.
 - A CLI, packaging, or UI before M3 passes.
-- A claim of coverage outside the CAMARA test bed.
+- A claim of coverage beyond the vendors actually measured.
 
 (docs/archive/prd.md:133-145)
 

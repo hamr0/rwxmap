@@ -44,16 +44,7 @@ to mine a specialized list. Every list mined on it collapsed under
 leave-one-vendor-out, so step 2 is closed (D81) and the set is now the
 harness for the parked Jev tier's first measurement (D82).
 
-`data/camara-2026-09-01/` is the M0 test bed. It is historical: kept for
-the record, not scored against, and not a gate for any current work. Its
-limits belong with it — M0's GET half was judged by template, not read
-operation by operation, and its 57-of-138 read-named-POST figure was a
-reader's judgement, not a rule output. M0's two negative controls —
-ClickToDial `DELETE /calls/{callId}` `terminateCall` and WebRTC
-`PUT /sessions/{mediaSessionId}/status` `updateSessionStatus` — are
-retired with it. They came out `x` under M0's arbiter shape; the current
-word-list flow puts both at `w`, and that is measured and accepted, not
-an open defect to chase.
+The CAMARA set that was M0's test bed was deleted on 2026-09-21: it is not a live API, and only complete official APIs we pulled are used from here. It survives only in git history and in the archived M0 code under poc/archive/, which no longer runs.
 
 ## How work runs here
 
