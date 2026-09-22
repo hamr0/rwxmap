@@ -81,3 +81,18 @@ test('classifyRow: no "whose" gate anywhere — a POST reaching another party wi
     { class: 'w', step: 3, rule: 'modify-verb', source: 'list', matched: ['remove'] },
   );
 });
+
+test('classifyRow: a rebuilt words override reaches every step — an emptied keepW makes a POST fall through to floor-post x', () => {
+  const row = { method: 'POST', operationId: 'updateThing', path: '/things/{id}' };
+  assert.deepEqual(
+    classifyRow(row, { keepW: new Set() }),
+    { class: 'x', step: 2, rule: 'floor-post', source: 'floor', matched: [] },
+  );
+});
+
+test('classifyRow: passing nothing is unchanged — the same POST still claims w via KEEP_W', () => {
+  assert.deepEqual(
+    classifyRow({ method: 'POST', operationId: 'updateThing', path: '/things/{id}' }),
+    { class: 'w', step: 3, rule: 'modify-verb', source: 'list', matched: ['update'] },
+  );
+});

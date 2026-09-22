@@ -26,16 +26,20 @@ import { step3 } from './step3.js';
 /**
  * Classify one row through the whole ladder.
  * @param {Operation} row
+ * @param {{readVerbs?: Set<string>, safeVerbs?: Set<string>, cantUndo?: Set<string>, removes?: Set<string>, keepW?: Set<string>}} [words]
+ *   Word lists to use in place of each step's own — the lists are the
+ *   module's own unless a caller passes rebuilt ones (leave-N-vendor-out
+ *   measurement); an adopter never passes it.
  * @returns {Verdict} always a verdict — this function never returns null.
  */
-export function classifyRow(row) {
-  const one = step1(row);
+export function classifyRow(row, words = {}) {
+  const one = step1(row, words);
   if (one) return one;
 
-  const two = step2(row);
+  const two = step2(row, words);
   if (two) return two;
 
-  const three = step3(row);
+  const three = step3(row, words);
   if (three) return three;
 
   return floorPost();

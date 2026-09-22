@@ -4531,3 +4531,13 @@ Every row still gets a judgement — there is no "no answer" outcome —
 and where the judge is unsure it moves in the safer direction (tighter
 class).
 
+### Leave three vendors out at once: the lists hold (2026-09-22)
+
+- Question: the fresh exam is blocked (the pre-registered exam vendors turned out unusable or burned), so how does the graduated flow read when it loses three vendors' worth of tuning signal at once? poc/d87/lovo3.mjs scores every one of the C(23,3) = 1771 triples: lists rebuilt from the other 20 providers by the same adoption rules as the leave-one-out section, then only the three held-out providers' rows scored. Each of the 6557 rows is held out in 231 folds, so the pooled total is 1514667 row-fold classifications. Runtime about 8s.
+- Mechanical: exact 81.8%, leaks 1.0%, over-tight 17.3%. With Jev at t=0.10: exact 93.3%, leaks 1.1%, over-tight 5.6%.
+- Against leave-ONE-out (82.2% / 1.0% / 16.8%) and fitted (82.6% / 1.0% / 16.4%), losing three vendors at once costs 0.4 points of exactness and no measurable leak rate. The lists are not carried by any single vendor: CANT_UNDO keeps 23.9 of 29 members per fold on average, KEEP_W 13.6 of 14.
+- Spread over folds, mechanical: leaks min 0.0% / median 1.0% / max 2.3%; over-tight min 2.3% / median 17.3% / max 31.0%. With Jev: leaks 0.2 / 1.1 / 2.4%; over-tight 0.5 / 5.2 / 17.6%.
+- The worst folds are the same few vendors in different combinations, not unlucky pairings: klaviyo (2.1% leaks, 36.9% over-tight mechanical), spotify 2.1%, auth0 2.0%, zoom 1.9%, figma 1.9%. paypal, openai, meta-whatsapp and canva leak 0.0% mechanically.
+- Fragile list members, dropped when their supporting vendors leave: execute, run and void fall out of CANT_UNDO in 87% of folds; complete, capture, dismiss, expire, pay, refund, resend, reset, simulate and trigger in 24%; remove leaves KEEP_W in 24% and attach in 12%. update and add hold in over 95% of folds.
+- Jev's answers exist only for the rows the fitted flow floored, so when a fold's rebuilt lists floor a row that was not floored before, there is no answer and the row stays x, fail closed: 21467 of 1514667 classifications, 365 distinct rows.
+- Limit, stated plainly: these are the same 6557 tuning rows re-split 1771 ways, so it is a harder read of tuning data, not a clean exam (D24). It says the lists do not depend on any three vendors; it cannot say what happens on a vendor no labeller has ever read. No rule shape is picked from this file.
