@@ -163,12 +163,13 @@ charged to the rule that owns the row; a combined line is labelled
 combined. Under- and over-classification are always reported
 separately with counts and the denominator.
 
-**Gate (proposed, pending the user's ruling).** On the fresh exam
+**Gate (user ruling 2026-09-22, D89).** On the fresh exam
 (dropbox, shopify, linear, drawn after the exposure check, labelled
 blind under v3, scored once):
-1. Zero leaks on `evidence: list` rows.
-2. Leaks overall at or under 5% of rows, every one on a floor row,
-   listed.
+1. Leaks on `evidence: list` rows at or under 2 per 100 list rows,
+   every one listed. (Zero was proposed first; no lowering list
+   reaches zero on the tuning truth — 22 of 673 list rows leak.)
+2. Leaks overall at or under 5% of rows, every one listed.
 3. Over-tight at or under 20% of rows, reported, never traded against
    1 or 2.
 4. LOVO on the tuning set within 2 points of the fitted number for
@@ -182,7 +183,7 @@ pending, D82/D83).
 
 **The story (user, 2026-09-22).** The words settle r and w for most rows; whatever the words cannot settle goes to x. On the 6557 tuning rows that leaves 1075 over-tight (16.4%) for 64 leaks (1.0%). Jev, asked only about the rows that reach the POST floor, moves a row from x to w only when it is at least 90% sure the row is w (t=0.10, D88): over-tight falls to 309 (4.7%) for 72 leaks (1.1%).
 
-**Results (poc/d87, tuning data, fitted, 2026-09-22).** v3 truth over the 6557 rows: r 2712 / w 2378 / x 1467. Flow: exact 5418 (82.6%), leaks 64 (1.0%), over-tight 1075 (16.4%). LOVO over 23 providers: leaks 1.0% (0.0 points off), over-tight 16.8% (0.4 points off). Leaks: 23 on list rows (22 from KEEP_W lowerings, 1 step 1), 41 on floor rows (39 the PUT/PATCH w floor). Over-tight: 1036 of 1075 on the POST floor. Lists as built: CANT_UNDO 29 (REMOVES 6), KEEP_W 14; deactivate, change, swap, archive and disable left the lowering list below the bar, pending the user's ruling. create fails the bar (6.99 fitted; kept on 0 of 23 LOVO folds; with a can't-undo-word guard 9.24 fitted, 2 of 23 folds) and is not adopted. Against the proposed gate, item 1 (zero list leaks) cannot be met by any lowering list on this truth; items 3 and 4 pass. Detail in learnings, "M3 POC under D87".
+**Results (poc/d87, tuning data, fitted, 2026-09-22).** v3 truth over the 6557 rows: r 2712 / w 2378 / x 1467. Flow: exact 5418 (82.6%), leaks 64 (1.0%), over-tight 1075 (16.4%). LOVO over 23 providers: leaks 1.0% (0.0 points off), over-tight 16.8% (0.4 points off). Leaks: 23 on list rows (22 from KEEP_W lowerings, 1 step 1), 41 on floor rows (39 the PUT/PATCH w floor). Over-tight: 1036 of 1075 on the POST floor. Lists as built: CANT_UNDO 29 (REMOVES 6), KEEP_W 14; deactivate, change, swap, archive and disable left the lowering list below the bar (user ruling 2026-09-22, D89: they stay off, those rows floor at x). create fails the bar (6.99 fitted; kept on 0 of 23 LOVO folds; with a can't-undo-word guard 9.24 fitted, 2 of 23 folds) and is not adopted. Against the gate as ruled (D89): item 1 reads 22 lowering leaks of 673 list rows (3.3 per 100) on the tuning truth, over the bar of 2; items 2, 3 and 4 pass. Detail in learnings, "M3 POC under D87".
 
 ## Truth by provider (new — the old corpus could not give this)
 
