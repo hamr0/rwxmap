@@ -581,11 +581,17 @@ The core in `src/` is the D87 ladder (M3), graduated 2026-09-22 and
 proved equal to `poc/d87/` on all 6557 combined rows, with the
 optional D88 Jev tier lowering `floor-post` rows only when Jev is at
 least 90% sure the row is w. It is not released yet: npm still ships
-v0.3.0 (the D75/D78 flow) until the M3 release. Next, in order (D89):
-the fresh exam (dropbox, shopify, linear), labelled blind under
-BRIEF-v3 and scored once with and without Jev against the gate; then
-the bareguard exporter and the M3 release. D84 stays rejected (D85);
-the consumption policy in the following section stands.
+v0.3.0 (the D75/D78 flow) until the M3 release. Next, in order (D92
+supersedes D89's naming): the fresh exam is cloudflare, pagerduty and
+sentry — the other three of the pre-registered ten still unspent,
+dropbox, shopify and linear, turned out unusable (dropbox publishes a
+Stone spec, not OpenAPI; shopify has no official OpenAPI, only
+community mirrors; linear is GraphQL-only with no REST/OpenAPI), and
+the locked pile was deliberately NOT widened with a replacement
+vendor (user ruling, D92) — labelled blind under BRIEF-v3 and scored
+once with and without Jev against the gate; then the bareguard
+exporter and the M3 release. D84 stays rejected (D85); the
+consumption policy in the following section stands.
 
 D87 was adopted 2026-09-22: the definition collapses to the chmod
 reading and "touches others" leaves the class (see "The shared
@@ -678,21 +684,54 @@ before deploy; `evidence: list` rows carry a word the tool read. The
 policy is NOT carried in the map JSON; it is how a consumer reads the
 three fields, and the README states it the same way.
 
-bareguard alignment (agreed with the bareguard session 2026-09-22,
-in principle, pending the user on both sides). bareguard owns the
-gate, the file format (one letter per row), agent grants such as
-`r--` / `rw-` / `rwx`, child ≤ parent, deny-by-absence and no runtime
-asks. rwxmap owns the labels and the carriers, and gains one offline
-exporter (an M3 item): spec → draft `tools` section of
-`bareguard.rwx.json`, keyed by operationId, letter = class (identity
-under D87), NEVER the `agents` section. Floor PUT/PATCH rows are LEFT
-OUT: deny-by-absence forces a human letter, so a missed row is a loud
-deny, never a leak. A sidecar review report lists every omitted row
-with its class and evidence; `evidence` never enters the gate file.
+bareguard alignment (SETTLED with the bareguard session 2026-09-22,
+D91; bareguard's rwx support is approved but not yet built — their
+branch `feat/rwx`, target release 0.17.0, so this is a
+settled-but-unshipped contract; their file shape is authoritatively
+specced in their repo's `docs/product/bareguard-prd.md`, Part 1 §23 —
+if their spec and this paragraph ever disagree, theirs governs and
+this is the stale copy). bareguard owns the gate, the file
+format (one letter per row), agent grants such as `r--` / `rw-` /
+`rwx`, child ≤ parent, deny-by-absence and no runtime asks. A `tools`
+entry's value is a BARE SINGLE LETTER (`"r"`, `"w"` or `"x"`); the
+three-letter form is for the `agents` map only, and an object-valued
+tool entry is a config-shape error in bareguard — anything beyond the
+letter belongs in rwxmap's sidecar, never the gate file. rwxmap owns
+the labels and the carriers, and gains one offline exporter (an M3
+item): spec → draft `tools` section of `bareguard.rwx.json`, keyed
+`<vendor>.<operationId>` (dot-separated: bareguard matches a `tools`
+key literally against the harness's action `type` and does no
+namespacing, so a bare operationId would collide across vendors),
+letter = class (identity under D87), NEVER the `agents` section.
+Floor PUT/PATCH rows are LEFT OUT: deny-by-absence forces a human
+letter, so a missed row is a loud deny, never a leak. bareguard has
+no `destructive` concept, now or planned; its deny mechanism is the
+`flags` primitive (e.g. `flags: { type: { "deleteUser": "deny" } }`,
+rule id `flags.type`, or `"ask"` to route to a human), which lives in
+the gate config, not in `bareguard.rwx.json` or on a tool entry, and
+fires before the allowlist/rwx check. The exporter MUST NOT emit
+`flags` — denial is the human's call at grant time, and an
+agent-authored deny rule would cross bareguard's authorship boundary.
+A sidecar review report lists every omitted row with its class and
+evidence, and MAY list rows where `destructive` is true as a
+clearly-labelled SUGGESTION for the reviewer, never as config;
+`evidence` and `destructive` never enter the gate file. The sidecar
+is HUMAN-FACING ONLY — bareguard never reads it, since an unlisted
+tool already denies at runtime with `rwx.unlisted` telling the
+operator to add it as r, w or x, so rwxmap is free to shape the
+sidecar for its reviewer and must not design it as a bareguard input.
 A human reviews the sidecar and commits the file; nothing writes at
 runtime. D28's motivating case, "read and reply, never delete", is
-expressed in bareguard as a grant of `r-x` plus a deny flag on the
-delete action, so nothing is lost by folding `destructive` into x.
+expressed in bareguard as a grant of `r-x` plus a `flags.type: deny`
+rule on the delete action in the gate config — separate from the
+letters — so nothing is lost by folding `destructive` into x; the
+exporter never emits that deny rule, only the sidecar's suggestion.
+bareguard confirmed both of our follow-up consequences on 2026-09-22:
+the sidecar may name `flags.type` inside a clearly-labelled
+suggestions block provided it does not pre-write the operator's
+config text, and the exporter emitting fewer keys than the spec has
+operations (the omitted PUT/PATCH floor rows) is the intended shape,
+not a gap, because `rwx.unlisted` is already a loud named deny.
 
 Vendor-to-vendor inconsistency in how methods are used is structural
 (D81: mined lists do not transfer), and the tool reports it through
@@ -1193,8 +1232,11 @@ Non-blocking; never silently assumed.
   `destructive` is no longer a separate axis — `destructive: true` ⇒
   `x`, and it is a refinement flag inside x. A consumer wanting "`x`,
   non-destructive only" says so in bareguard as a grant of `r-x` plus
-  a deny flag on the destructive action; the scale itself needs no
-  new word. Raised 2026-09-07.
+  a `flags.type: deny` rule on the destructive action, in bareguard's
+  gate config, separate from the letters in `bareguard.rwx.json` —
+  the exporter never emits that rule, only a labelled suggestion in
+  the sidecar; the scale itself needs no new word (D91). Raised
+  2026-09-07.
 - Closed 2026-09-07 (D32): a read whose result arrives by callback is
   `r`; the caller named the sink, so it reaches no one else. Callbacks
   raise only when the lead verb is not a read (M1-C7).

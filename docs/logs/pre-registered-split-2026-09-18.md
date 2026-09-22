@@ -106,3 +106,22 @@ the method it fires on most.
 
 The vendor membership of neither pile changed — only the per-vendor
 row cap and the dedupe. No exam-pile row has been read.
+
+## Outcome of the locked pile (D92, 2026-09-22)
+
+Of the ten locked vendors, four were spent into the combined tuning
+corpus before the exam draw: auth0, hubspot, zendesk, miro.
+
+Of the six that remained unspent, three cannot be pulled at all:
+dropbox publishes a Stone spec, not OpenAPI; shopify publishes no
+official OpenAPI, only community mirrors; linear is GraphQL-only,
+with no REST/OpenAPI surface. The project's bar is complete OFFICIAL
+APIs only, so all three fail it and D89's naming of them as the exam
+is superseded.
+
+The other three became the exam: cloudflare, pagerduty, sentry.
+
+User ruling (2026-09-22, D92): the locked pile is not widened with
+freshly chosen vendors to replace dropbox/shopify/linear; the three
+that remain unspent and pullable suffice, so no new selection
+information enters the exam.

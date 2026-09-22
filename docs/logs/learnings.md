@@ -4553,3 +4553,67 @@ class).
 - The real cost is evidence, not accuracy: list rows fall from 673 to 633, so 40 rows stop carrying word evidence and become floor rows. Floor is where nearly all leaks live and it is what a human reads before deploy, so dropping the 13 buys 40 more rows of manual reading and no accuracy.
 - Ruling (D90, user, 2026-09-22): all 13 stay on CANT_UNDO. They cost zero over-tightness, removing them adds a leak, and they are the only word evidence on 40 rows. Leaning on one vendor makes a verb useless on an unseen vendor; it does not make it harmful. This follows the standing rule that a word is never dropped without being measured first and that an unfired word costs nothing to keep.
 - Limit, stated plainly: this is the same 6557 tuning rows, so it prices the 13 on tuning data only (D24). It cannot say whether these verbs would fire on a vendor no labeller has read — the leave-three-out result says they would mostly not.
+
+### The locked exam pile, cashed in (D91/D92, 2026-09-22)
+
+- Question: the pre-registered exam pile (2026-09-18) locked ten
+  vendors; four (auth0, hubspot, zendesk, miro) have since been spent
+  into the combined tuning corpus, and D89 named dropbox, shopify and
+  linear as the exam. Checking those three, and the availability of
+  the six still-unspent locked vendors, turned up a problem: is the
+  exam still drawable, and what does the bareguard exporter contract
+  look like now that bareguard has answered on their side?
+- Availability check across all six unspent locked vendors: dropbox
+  publishes a Stone spec, not OpenAPI; shopify publishes no official
+  OpenAPI, only community mirrors; linear is GraphQL-only, with no
+  REST/OpenAPI surface — all three fail the project's complete
+  official-API bar and D89's naming of them is superseded. cloudflare,
+  pagerduty and sentry are pullable, complete, official OpenAPI specs.
+- The 4279-operation count, pulled and hashed 2026-09-22:
+
+  | vendor | ops | GET | POST | PUT | DELETE | PATCH |
+  |---|---|---|---|---|---|---|
+  | cloudflare | 3575 | 1758 | 750 | 350 | 450 | 267 |
+  | pagerduty | 465 | 211 | 105 | 77 | 71 | 1 |
+  | sentry | 239 | 130 | 37 | 33 | 37 | 2 |
+  | total | 4279 | | | | | |
+
+  Every operation carries an operationId and no method+path pair
+  repeats within a spec, so no dedupe is needed before scoring.
+- User rulings (D92, 2026-09-22): (1) the locked pile is not widened
+  with freshly chosen vendors to replace dropbox/shopify/linear — the
+  three that remain unspent and pullable (cloudflare, pagerduty,
+  sentry) suffice, so no new selection information leaks into the
+  exam. (2) all three are taken COMPLETE with no per-vendor cap,
+  because capping would break the complete-official-API rule.
+  cloudflare is 3575 of 4279 rows (84%), so a pooled score is largely
+  a cloudflare score; scores are reported PER VENDOR alongside pooled,
+  and a pooled number is never quoted on its own.
+- The bareguard exporter contract is now SETTLED (D91), not merely
+  "agreed in principle": bareguard's rwx support is approved but not
+  built — specced on their branch `feat/rwx`, target 0.17.0, so rwxmap
+  is building against a settled-but-unshipped contract. Two corrections
+  to what the PRD had said: a `tools` entry's value is a bare single
+  letter, not the three-letter form (that's agent grants only, in the
+  `agents` map); and the key is `<vendor>.<operationId>`, dot-separated,
+  not a bare operationId — bareguard matches a `tools` key literally
+  against the harness's action `type` with no namespacing, so a bare
+  operationId would collide across vendors. bareguard has no
+  `destructive` concept; its deny mechanism is the `flags` primitive in
+  the gate config (`flags: { type: { "deleteUser": "deny" } }`, rule id
+  `flags.type`), separate from `bareguard.rwx.json` and firing before
+  the allowlist/rwx check. The exporter must not emit `flags` — denial
+  is the human's call at grant time, and an agent-authored deny rule
+  crosses bareguard's authorship boundary — so the sidecar may only
+  suggest `destructive: true` rows, never write config. The sidecar is
+  human-facing only; bareguard never reads it, since an unlisted tool
+  already denies at runtime with `rwx.unlisted`.
+- Limit, stated plainly: this exam is scored once and then burned
+  (D24) — no re-score, no config picked from it. cloudflare dominates
+  it at 84% of rows, so per-vendor reporting is mandatory or the
+  pooled number is just a cloudflare number wearing a three-vendor
+  label. Three vendors is the same width as the burned 2026-09-17
+  exam (okta/docusign/xero), not wider — the locked pile's shrinkage
+  from ten to three unspent-and-pullable vendors is a real cost of
+  spending four into tuning and losing three to spec format, not
+  something this pass tried to fix.
