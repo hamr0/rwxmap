@@ -52,6 +52,25 @@ itself as an MCP hint.
 - **x** — execute. Reaches beyond you (a third party), or isn't
   repeatable: running it twice is not the same as running it once.
 
+## The shared definition
+
+Since 2026-09-22 rwxmap and bareguard — the author's agent gate,
+which reads one r/w/x letter per tool — use one meaning of the three
+letters:
+
+- **r** = changes nothing.
+- **w** = changes only the caller's own stuff, AND can be undone, AND
+  is safe to repeat.
+- **x** = any change that fails one of those: reaches another party,
+  OR can't be undone, OR isn't safe to repeat.
+- Unsure → **x**.
+
+That is one clause tighter than the definition above it ("can't be
+undone" now sits in x, not beside it). It only ever moves a row from
+w to x, never the other way. Every number below was measured before
+this change and predates it; the rows are not yet relabelled for
+reversibility, so the folded number is not known honestly yet.
+
 ## Where it is today
 
 Measured on 4171 operations from 15 complete official provider APIs.
@@ -127,24 +146,24 @@ evidence.
 
 Every verdict carries three fields: `class` (`r`, `w` or `x`, the
 tool's best guess), `destructive` (true when the call cannot be
-undone, whatever the class) and `evidence` (`list` when a word
-fired, `floor` when only the HTTP method decided). The recommended
-reading:
+undone — always inside class `x`, never on an `r` or `w` row) and
+`evidence` (`list` when a word fired, `floor` when only the HTTP
+method decided). The recommended reading:
 
-| verdict | agent does |
-|---|---|
-| `r` | allow |
-| `w`, evidence `list` | allow |
-| `w`, evidence `floor` | ask once, then remember the answer for that operation |
-| `x` | ask every time |
-| `destructive: true` | ask every time, whatever the class |
+- The letter is the answer. A gate such as bareguard reads the letter
+  and never asks at runtime; `destructive: true` is a refinement of
+  `x` for MCP's `destructiveHint`, not a fourth class.
+- `evidence: floor` rows are reviewed once by a human before the map
+  is deployed. They are the rows the tool guessed from the method
+  alone, and the leaks live there.
+- The exporter (planned) writes a draft `tools` section for bareguard
+  keyed by operationId, one letter per row, and leaves floor rows out
+  so a missed row is a loud deny, never a leak; a sidecar report lists
+  every omitted row with its class and evidence for the reviewer.
 
-The class stays accurate by default; `evidence: floor` marks the guess
-so the agent asks about it; `x` and `destructive` are the reach-beyond
-and can't-undo cases, always asked. This policy is the recommended
-reading and is not carried in the map itself — the map holds only the
-three fields. The tool cannot know which operations you call heavily;
-it gives the head start and you tighten from traffic.
+This reading is not carried in the map itself — the map holds only
+the three fields. The tool cannot know which operations you call
+heavily; it gives the head start and you tighten from traffic.
 
 ## Status
 

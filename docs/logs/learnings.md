@@ -4335,3 +4335,49 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   guess as x is not a better classifier. The honesty D84 wanted
   already exists in `evidence: floor` on every verdict, so the safety
   decision belongs in the consumer's policy, not in the class.
+
+### D86: one shared r/w/x definition with bareguard; the fold measured under a proxy (2026-09-22)
+- Goal: give rwxmap and bareguard (the user's agent gate: one file of
+  r/w/x letters per tool, agent grants like `r--`/`rw-`/`rwx`, child
+  ≤ parent, not-in-file = denied, no runtime asks) ONE meaning of the
+  three letters, and decide whether the class can absorb "can't be
+  undone" without breaking the one invariant.
+- Tried: folded reversibility into the class — r = changes nothing;
+  w = own stuff AND undoable AND safe to repeat; x = fails any one of
+  those; unsure → x — and measured it on `data/combined-2026-09-21/`
+  (6557 rows, 23 providers, tuning data) with a PROXY for "can't be
+  undone": the DELETE method, or a lead verb in the 23-word list at
+  `poc/archive/v2/m0/destructive.json`. The proxy was applied
+  identically to truth and prediction. Option 2, relabelling the 6557
+  rows for reversibility with nine labellers, was priced and deferred.
+- Outcome: adopted as D86 (user ruling). Truth w rows that become x:
+  888 of 2266 (39%); truth becomes r 2705 / w 1378 / x 2474 (w falls
+  from 35% to 21% of rows); tool w rows that become x: 999 of 2335.
+  Ledger today: exact 5951 (90.8%) / leaks 308 (4.7%) / over-tight
+  298 (4.5%). Folded under the proxy: exact 6088 (92.8%) / leaks 184
+  (2.8%) / over-tight 285 (4.3%). CAVEAT: reversibility was never
+  labelled; the proxy flips truth and prediction with the same rule,
+  so where it applies it cannot disagree with itself; these are NOT
+  accuracy numbers and are never quoted as an exam. D28's two-axes
+  ruling is superseded: `destructive: true` ⇒ x, kept as a flag inside
+  x for `destructiveHint`; `evidence` unchanged. D85's runtime table
+  (ask once on w-floor, ask every time on x) is replaced by
+  review-once: floor rows are reviewed by a human before deploy, the
+  gate never asks. The wordless floor loses DELETE (now evidence for
+  x) and shrinks from 1969 PUT/DELETE/PATCH rows to roughly 1000
+  PUT/PATCH rows; step 2 must be rebuilt as M3 (DELETE floors at x,
+  the destructive list becomes a w→x raise, PUT/PATCH floor stays w)
+  together with a bareguard exporter (draft `tools` section keyed by
+  operationId, floor rows left out, sidecar review report, `evidence`
+  never in the gate file) and a brief v2 with a reversibility clause
+  (`data/calibration-2026-09-14/BRIEF.md` stays verbatim). Jev keeps
+  its raise-only role; on the combined set it closes 94 for 3 false
+  on the wordless floor (ratio 31) against 5 / 4 on modify-verb rows
+  (1.25) and 4 / 2 on modify-verb-summary rows, so it earns its place
+  only where the tool read nothing. Relabel is owed before the next
+  fresh exam (dropbox, shopify, linear after the exposure check).
+- Lesson: folding reversibility into the class only tightens — rows
+  move w→x, never the other way — so it is safe to adopt before it is
+  honestly measured. But the proxy number is the proxy agreeing with
+  itself, not an accuracy figure, and the relabel is owed before any
+  exam is scored under the fold.
