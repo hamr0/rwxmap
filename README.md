@@ -123,6 +123,29 @@ evidence.
 - **MCP hints** — feed the class straight to the agents already
   calling your API.
 
+## How an agent should read the output
+
+Every verdict carries three fields: `class` (`r`, `w` or `x`, the
+tool's best guess), `destructive` (true when the call cannot be
+undone, whatever the class) and `evidence` (`list` when a word
+fired, `floor` when only the HTTP method decided). The recommended
+reading:
+
+| verdict | agent does |
+|---|---|
+| `r` | allow |
+| `w`, evidence `list` | allow |
+| `w`, evidence `floor` | ask once, then remember the answer for that operation |
+| `x` | ask every time |
+| `destructive: true` | ask every time, whatever the class |
+
+The class stays accurate by default; `evidence: floor` marks the guess
+so the agent asks about it; `x` and `destructive` are the reach-beyond
+and can't-undo cases, always asked. This policy is the recommended
+reading and is not carried in the map itself — the map holds only the
+three fields. The tool cannot know which operations you call heavily;
+it gives the head start and you tighten from traffic.
+
 ## Status
 
 [WIP] — a proof of concept, not shipped. The classifier core is frozen

@@ -4310,3 +4310,28 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   queue (D84). Also: a threshold picked by maximizing a ratio always
   drifts to the most conservative setting — select by "most closed
   subject to the bar" instead.
+
+### D84 rejected against the bar; the runtime policy replaces it (D85) (2026-09-22)
+- Goal: decide whether to build the D84 POC (`poc/unreviewed/`): w
+  only on word evidence, every wordless write published as x.
+- Tried: D84 was measured on paper on the combined 6557-row set,
+  each over all rows, against today's flow and the every-write-x
+  reference, and priced at the project's standing adoption bar of 10
+  leaks closed per false alarm.
+- Outcome: D84 moves step 2's 1969 wordless PUT/DELETE/PATCH floor
+  rows from w to x. That closes 270 leaks (308 to 38) and adds 1698
+  over-tight rows (298 to 1996): 0.16 leaks closed per false alarm,
+  about 60x under the bar. The floor guess is right 1698 of 1969 times
+  (86.2%). Rejected 2026-09-22 by the user's ruling before any POC
+  code was written; D85 replaces it. The class stays the best guess,
+  `evidence` and `destructive` are published as they already are, and
+  the README and PRD carry a recommended consumption policy: r allow;
+  w on a list allow; w on the floor ask once and remember; x ask every
+  time; destructive ask every time. Jev returns to the D82/D83
+  raise-only role, pending at 86 of 305 for 9 under LOVO (9.56).
+  `src/` unchanged.
+- Lesson: a leak count bought below the adoption bar is fitting to
+  pass, whichever direction it fits; relabelling the same wordless
+  guess as x is not a better classifier. The honesty D84 wanted
+  already exists in `evidence: floor` on every verdict, so the safety
+  decision belongs in the consumer's policy, not in the class.

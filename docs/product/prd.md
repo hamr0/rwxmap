@@ -476,11 +476,13 @@ class).
 
 ## Where the work is
 
-The core is PARKED at v0.3.0 (D84): the D75/D78 three-step flow in
-`src/` stays frozen and shipped as it is, with no more word-list
-mining and no more model tuning. M1 is closed as the mechanical
-offering (D83) and step 2 is closed (D81). The next shape is tried as
-a POC while the core stays parked — see the next section.
+The core is frozen at v0.3.0: the D75/D78 three-step flow in `src/`
+stays as it is, shipped, with no more word-list mining and no more
+model tuning. M1 is closed as the mechanical offering (D83) and step
+2 is closed (D81). D84 — publish every wordless write as x — was
+tried on paper and rejected against the adoption bar (D85). The next
+shape is the consumption policy in the following section, plus the
+pending Jev raise tier.
 
 A second clean exam, `data/exam-2026-09-20/`, was drawn from five
 vendors no prior set had seen — auth0, hubspot, zendesk, klaviyo,
@@ -498,7 +500,9 @@ A combined diagnostic set, `data/combined-2026-09-21/`, puts every row
 we pulled and labelled ourselves in one place: 6557 rows across 23
 providers (the provider corpus's 4171, the 2026-09-17 exam's 1383, the
 2026-09-20 exam's 1003). It is tuning data, not an exam; every number
-it gives is a diagnostic. Next: the D84 POC.
+it gives is a diagnostic. Next: a fresh exam for the Jev raise tier,
+drawn from the last unused locked vendors (dropbox, shopify, linear)
+after the full exposure check.
 
 The full module ladder, the M1 go/no-go gate, the labelled sets and
 the current arbiter shape with its scores live in
@@ -509,127 +513,68 @@ M0 is closed; its gate statement and results are in
 carried from the original outline are in
 [design notes](../logs/design-notes.md).
 
-## Next shape: say unreviewed instead of guessing (D84, POC)
+## How to consume the map: the runtime policy (D85)
 
-D84 (2026-09-21): core parked at v0.3.0; next shape tried as a POC —
-w only on word evidence, every wordless write published as x with
-evidence floor (the review queue), lists frozen and kept, Jev orders
-the queue and never decides.
+D84 (2026-09-21) proposed publishing every wordless write row as x
+with `evidence: floor`, so the tool would stop guessing w against x
+where no word fired. It was rejected 2026-09-22 (user ruling, D85)
+before its POC was built. On the combined set the move trades 270
+fewer leaks for 1698 more over-tight rows: 0.16 leaks closed per false
+alarm against the project's standing adoption bar of 10, about 60x
+under it. It is not a better classifier — it is the same wordless
+guess relabelled — and it fails the project's own bar. The honesty it
+wanted already exists: `evidence: floor` is published on every
+verdict (D76/D77), so the safety decision belongs in the adopter's
+runtime policy, not in the class.
 
-The tool stops guessing w against x on a write row where no word
-fired. Every class is read off the verdict `classifyRow` already
-returns — its `class` and its `source`, where `source` is `list` when
-a word fired and `floor` when only the method default applied:
-
-- **r** — step 1, unchanged: the GET method floor and the read-verb
-  lists. Solved: 2642 of its 2645 claims on the combined set are
-  right, 3 leaks.
-- **w** — only when a step 2 word fired (`modify-verb`,
-  `modify-verb-summary`; `source` `list`). 331 of those 366 claims are
-  right, 35 leaks.
-- **x** — a step 3 raise word, or any write row with no word. Step 2's
-  method-floor rows (PUT / DELETE / PATCH, `w` today) now go to x, and
-  step 3's POST floor stays x as today.
-- **unreviewed** — NOT a new output class. It is published as class
-  `x` with `evidence: floor`, the tighter class on doubt per the one
-  invariant. Every carrier (OpenAPI `x-rwx`, MCP `_meta` and hints,
-  WebMCP, ARD) is unchanged, and MCP's tightest-when-omitted default
-  already agrees with it.
-
-The review queue is every write-method row whose evidence is `floor`.
-The rows this shape moves, and the queue measured below, are step 2's
-wordless floor: 1969 of 6557 rows (30.0%), of which 270 are truth x.
-Step 3's POST floor, 1526 of 6557 rows (23.3%), already publishes as x
-with `evidence: floor` today; it holds 0 leaks and 282 over-tight
-rows, so it is in the queue only for an owner who wants a row looser.
-
-A guard or consumer treats an unreviewed row as x — ask a human —
-until someone who knows the API marks the operation. That marking is
-the Resource Owner's declared menu the problem statement already
-describes: rwxmap produces the draft and the queue, never the
-signature.
-
-Measured on the combined set, 6557 rows across 23 providers, each over
-all 6557 rows. A diagnostic over tuning data, not an exam:
+The record of why. Measured on the combined set, 6557 rows across 23
+providers, each over all 6557 rows; a diagnostic over tuning data,
+not an exam:
 
 | shape | exact | leaks | over-tight |
 |---|---|---|---|
 | today's flow (v0.3.0) | 5951 (90.8%) | 308 (4.7%) | 298 (4.5%) |
-| D84: w only with a word | 4523 (69.0%) | 38 (0.6%) | 1996 (30.4%) |
+| D84: w only with a word (rejected) | 4523 (69.0%) | 38 (0.6%) | 1996 (30.4%) |
 | every write x (r against not-r only), reference | 4227 (64.5%) | 3 (0.0%) | 2327 (35.5%) |
 
-Why this shape. Each step does one kind of wrong. Every leak in the
-flow is step 2's except 3: 305 of the 308, and 270 of those 305 sit on
-its wordless method floor; step 3 has 0. Every over-tight row is step
-3's except 1: 297 of the 298, and 282 of those 297 sit on its wordless
-POST floor. The wordless floor is exactly where specs do not state the
-answer, so no rule and no model has fixed it: mined lists collapse
-under leave-one-vendor-out (D81), and Jev closes about a third. The
-shape stops pretending and hands those rows to the one party who
-knows. After today's flow plus the Jev raise, the leaks that remain sit
-at xero 60, okta 42, auth0 26 and docusign 22 — identity and
-document-signing vendors.
+The rows D84 would have moved are step 2's wordless PUT / DELETE /
+PATCH floor, 1969 of 6557: a floor PUT says w and is right 1698 of
+1969 times (86.2%), 270 are truth x.
 
-The honest cost: over-tight rises from 298 to 1996 of 6557 rows
-(30.4%). It is a usability cost, never a silent wrong action. It is
-paid once per API and shrinks as the owner reviews, and what that
-costs per API is for the POC to measure.
+What stands instead. The class is the tool's best guess and stays
+accurate by default. The map carries exactly the three fields D76/D77
+already name — `class`, `destructive` and `evidence` (`list` when a
+word fired, `floor` when only the method decided) — and a consumer
+reads them under this recommended policy:
 
-What does NOT change:
+| verdict | agent does |
+|---|---|
+| `r` | allow |
+| `w`, evidence `list` | allow |
+| `w`, evidence `floor` | ask once, then remember the answer for that operation |
+| `x` | ask every time |
+| `destructive: true` | ask every time, whatever the class |
 
-- `src/` stays frozen, and the POC modifies nothing in it.
-- The word lists are kept as they are, because they are the evidence,
-  and frozen: no additions, no removals.
-- The POST floor stays x.
-- The output shape and its carriers (D76/D77) are unchanged; there is
-  no new class value.
+`evidence: floor` marks the guess so the agent asks about it; `x` and
+`destructive` are the reach-beyond and can't-undo cases and are
+always asked. The policy is NOT carried in the map JSON; it is how a
+consumer reads the three fields, and the README states it the same
+way. Vendor-to-vendor inconsistency in how methods are used is
+structural (D81: mined lists do not transfer), and the tool reports it
+through the floor flag rather than chasing it. The tool cannot know
+which operations an adopter actually calls heavily — a spec does not
+say — so it gives the head start and the adopter tightens from
+traffic.
 
-Jev's role is to order the queue, never to decide a class. At most it
-sorts the queue likely-x first, so a reviewer sees the dangerous rows
-first. The measured basis: on the 2335 rows step 2 decides, Jev-B
-alone leaks 161 against step 2's 305; as a raise it closes 86 of those
-305 leaks for 9 false alarms under leave-one-vendor-out with the
-project's bar-of-10 selection (ratio 9.56, just under the bar of 10);
-on the 2026-09-20 clean exam it closed 31 of 82 for 0 false alarms.
-Jev alone cannot replace the flow: it leaks 893 of 6557 rows (13.6%)
-on the combined set and 207 of 1003 (20.6%) on the exam, mostly POST
-creates called w.
-
-**The POC** (`poc/unreviewed/`) reads `src/` verdicts and modifies
-nothing in `src/`. What it must prove, and how each can fail:
-
-- (a) Reproduce 38 leaks / 1996 over-tight on the combined set, and
-  read the 38 surviving leaks row by row — 3 are step 1's, 35 are step
-  2 word claims — to see whether any word claim is systematically
-  wrong. It fails if the counts do not reproduce.
-- (b) The per-provider queue size: how many rows an owner of each of
-  the 23 APIs would have to review, and what share of that API it is,
-  with step 2's floor rows and step 3's POST floor rows counted
-  separately.
-- (c) The queue ordering: sort the queue by Jev's `isX` score and
-  report how many of the 270 truth-x rows fall in the top 10%, 25% and
-  50% of the queue. The baseline is a random order, which puts 10%,
-  25% and 50% of them there (27, 67.5 and 135 rows expected). The
-  ordering earns its place only if the top of the queue is materially
-  richer in x than that; if it is not, Jev has no role.
-- (d) The go/no-go claim can only come from a fresh exam, per D24.
-  Three of the ten locked vendors in
-  `docs/logs/pre-registered-split-2026-09-18.md` are still unused:
-  dropbox, shopify and linear. auth0, hubspot, zendesk and miro were
-  used by the 2026-09-20 exam, and cloudflare, pagerduty and sentry are
-  burned by name as M0-era holdouts in `data/corpus/labelled.csv`. A
-  first check on 2026-09-21 finds 0 rows for dropbox, shopify or linear
-  in `data/corpus/labelled.csv` and in the provider and api_key columns
-  of `data/corpus/apis-guru-ops.csv.gz`; the draw must repeat the full
-  check against every prior set, by raw token and registrable name,
-  before any row is read. The POC's gate is leaks under 1% of rows on
-  that fresh exam, with over-tight reported next to it, never
-  collapsed.
-
-(a) to (c) run over tuning data. They are diagnostics, not claims.
-
-What the POC is not: not a new classifier, not a new list, not a model
-tier.
+What stays frozen: `src/` is unchanged, the word lists are kept as
+they are, the POST floor stays x, and the output shape and its
+carriers (D76/D77) are unchanged. `poc/unreviewed/` is never created.
+Jev returns to D82/D83's role: an optional raise-only tier (w to x,
+never lower), measured at 31 of 82 leaks closed for 0 false alarms on
+the 2026-09-20 exam and 86 of 305 for 9 under leave-one-vendor-out on
+the combined set (ratio 9.56, just under the bar of 10). It is
+pending against the bar, not adopted; its next number comes from a
+fresh exam per D24.
 
 ## Problem & goal
 
@@ -677,8 +622,8 @@ menu, or has none. (docs/archive/prd.md:37-48)
 
 - A model/LLM tier in the core. The deterministic flow is the product
   and works fully on its own. An optional model tier was measured
-  (D82/D83); under D84 a model never decides a class and at most
-  orders the review queue.
+  (D82/D83); if adopted it may only raise w to x and never lower, and
+  the core works without it.
 - A default of `r`, or any guess path.
 - Signing. Output stops at a candidate map; a signature is the Resource
   Owner's act.
@@ -950,9 +895,10 @@ Non-blocking; never silently assumed.
   bar-of-10 selection (ratio 9.56, just under the bar). It raises; it
   cannot replace: alone it leaks 893 of 6557 rows (13.6%) on the
   combined set and 207 of 1003 (20.6%) on the exam, mostly POST
-  creates called w. Under D84 it is demoted: it never decides a class
-  and at most orders the review queue, likely-x first. See "Next
-  shape" above. Raised 2026-09-19. Answered 2026-09-21 (D84).
+  creates called w. The answer given 2026-09-21 by D84 (Jev only orders
+  a review queue) is withdrawn 2026-09-22 by D85: Jev stands as the
+  D82/D83 optional raise-only tier, pending against the bar of 10.
+  Raised 2026-09-19.
 - Is the POST floor (x) wrong? No — on the 4171-row provider corpus of
   15 complete official APIs the POST floor holds: truth x is 61%
   (804 of 1309), close to the old corpus's 62%, not to exam 5's 23%;
@@ -968,16 +914,18 @@ Non-blocking; never silently assumed.
   only dangerous part of the tool's error. See list item 2 of "The new
   core" above and `docs/logs/learnings.md`. Raised 2026-09-14, updated
   2026-09-15, updated 2026-09-16 with the provider-corpus read,
-  updated 2026-09-16 when step 2 was built. Under D84 the POST floor
-  stays x, published with `evidence: floor`.
+  updated 2026-09-16 when step 2 was built. The D84 answer of
+  2026-09-21 is withdrawn by D85 (2026-09-22); the POST floor stays x,
+  published with `evidence: floor`, unchanged.
 - Can the "I don't know" pile be shrunk by reading the description?
   Answer so far: no — mining the yours list from description text
   resolves at best 130 of 1972 rows (6.6%) and leaks 8; the safe
   settings clear 2-5%. Rejected 2026-09-16, POC kept at
   `poc/desc-yours/`. The pile stays as the flag because it holds 155
-  of 204 leaks. Under D84 the pile is not shrunk but published: the
-  wordless write rows are the review queue, x with `evidence: floor`
-  until the owner marks them.
+  of 204 leaks. D84's answer of 2026-09-21 (publish the pile as x) is
+  withdrawn 2026-09-22 by D85: the pile keeps its best-guess class,
+  marked `evidence: floor`, and the consumer's policy asks about it
+  once per operation.
 - MCP hints (future feature, M3; the user's end goal is to feed them).
   Nothing emits hints yet. The shape of the hint output IS now decided
   — see "The output shape (agreed 2026-09-17, D76)" above, which names
