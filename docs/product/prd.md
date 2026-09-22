@@ -90,7 +90,9 @@ otherwise floor at w; POST lowers to w on a modify verb or, if it
 passes the adoption bar of 10, a create verb, else floors at x so an
 unknown create fails safe. `destructive` stays a refinement flag
 inside x (D86's ruling on D28 stands); `evidence` (`list` / `floor`)
-is unchanged.
+is unchanged. The step numbering is in "M3 spec (D87)" below: step 2
+is x by evidence, step 3 is w; the old naming (step 2 = w, step 3 =
+x) is history in learnings.
 
 Brief v3 and the relabel. The change is not one-directional (truth x
 can become w), so the relabel covers every non-r row of the combined
@@ -102,6 +104,83 @@ disputes, holdback scored once. Brief v2, its practice run and the
 calibrated brief every existing label was made under — so v3 is a
 new file, an M3 item, calibrated before any exam relies on it. The
 floor table above predates D87 and is read under the v1 brief.
+
+## M3 spec (D87): the ladder rebuilt
+
+This is the specification the M3 POC is tested against. Results are
+left blank on purpose and filled in only when measured; the spec does
+not move to meet a number.
+
+**The ladder.** Three standalone steps, named by run order, each
+owning one letter, each with its own word lists and its own ledger.
+The flow file decides only the order.
+
+- step 1, r. Unchanged from src/step1.js (D74): GET/HEAD/OPTIONS
+  floor r; a read lead verb lowers POST to r; the 10-word safe-verb
+  list at any position. 2642 of 2645 claims right on the combined
+  set; reused as is.
+- step 2, x by evidence. Claims x on (a) method DELETE, always, and
+  (b) a can't-undo lead verb on any write method (POST, PUT, PATCH).
+  The verdict carries `destructive: true` when the verb or method
+  removes, else no destructive field. The list is written by reading
+  the relabelled pile (delete remove purge revoke expire void send
+  publish trigger run execute charge pay refund … as candidates) and
+  every member is priced; nothing is in it before the labels land.
+- step 3, w. PUT/PATCH floor w. POST lowered to w by a modify lead
+  verb (the survivors of the frozen MODIFY_VERBS after the can't-undo
+  members leave) and, only if it clears the bar, by a create lead
+  verb (create add register upload insert …). No OTHER_PARTY gate:
+  "whose" is not a class test under D87.
+- floor. Anything unclaimed is a POST with no word: x, `evidence:
+  floor`. The floor function belongs to step 2 and the flow calls it
+  last.
+
+Precedence runs on evidence strength: method DELETE beats every word;
+a word beats a floor; the flow orders 1, 2, 3, floor so this falls
+out of the order alone. Step 2's and step 3's verb lists are disjoint
+by construction and measured jointly; a verb that both steps want
+(cancel, reset, disable) is settled by the relabelled pile, not by
+argument. The reader change: `delete` leaves METHOD_WORDS so a
+`deleteThing` lead is read as a verb on any method.
+
+**What deprecates.** OTHER_PARTY (step 2 today) and RAISE_WORDS
+(step 3 today, 17 nouns) answer "whose"; they have no job under D87
+and are not carried over. MODIFY_VERBS splits between step 3 (stays w)
+and step 2 (becomes x) by measurement. The frozen src/ stays shipped
+at v0.3.0 until M3 graduates.
+
+**Truth.** The relabel of all 3852 non-r rows of the combined set
+under BRIEF-v3.md, nine labellers, every file validated directly
+(header, order, classes, confidence). v1 r rows stand. Practice:
+97 of 100 agreed, three disputes ruled (calib/practice-rulings.csv).
+Holdback: measured once, recorded in the brief. This is tuning data.
+
+**Pricing.** Every list member and every rule is priced alone and
+jointly against the relabelled truth: leaks closed per false alarm,
+adoption bar 10, and leave-one-vendor-out across the 23 providers as
+the only generalization number. Each step keeps its own ledger,
+charged to the rule that owns the row; a combined line is labelled
+combined. Under- and over-classification are always reported
+separately with counts and the denominator.
+
+**Gate (proposed, pending the user's ruling).** On the fresh exam
+(dropbox, shopify, linear, drawn after the exposure check, labelled
+blind under v3, scored once):
+1. Zero leaks on `evidence: list` rows.
+2. Leaks overall at or under 5% of rows, every one on a floor row,
+   listed.
+3. Over-tight at or under 20% of rows, reported, never traded against
+   1 or 2.
+4. LOVO on the tuning set within 2 points of the fitted number for
+   every adopted list, or the list is not adopted.
+
+**Deliverables.** poc/d87/ (steps 1-3, flow, tests, readout, proof
+against src/ for step 1 only), then graduation to src/ as the M3
+release; the bareguard exporter with its sidecar (D86, unchanged);
+Jev's criteria text replaced by the D87 definition (raise-only,
+pending, D82/D83).
+
+**Results.** Not yet measured.
 
 ## Truth by provider (new — the old corpus could not give this)
 
@@ -553,18 +632,18 @@ pending Jev raise tier.
 
 D87 was adopted 2026-09-22: the definition collapses to the chmod
 reading and "touches others" leaves the class (see "The shared
-definition (D87)" above). M3 = step 2 rebuilt under D87 + brief v3 +
-the relabel of all 3852 write rows of the combined set + the
-bareguard exporter. Step 2 under D87: DELETE → x by method; a
-can't-undo lead verb → x on any write method; PUT/PATCH otherwise →
-w by floor; POST → w on a modify verb or, above the bar, a create
-verb, else x by floor. That is new `src/` code, not a patch; the
-burned exams cannot re-score it (D24). The M3 groundwork under D86 —
-brief v2, the 2266-row draw, `poc/step2v2` — was built, measured for
-mechanics (1030 rows moved, all w→x, 918 of them by DELETE) and
-superseded before use; its numbers are in learnings. Jev keeps its
-D82/D83 role; its criteria text becomes the D87 definition, a
-criteria edit inside M3.
+definition (D87)" above). M3 = the ladder rebuilt under D87 + brief
+v3 + the relabel of all 3852 write rows of the combined set + the
+bareguard exporter. The ladder under D87: step 1 r unchanged; step 2
+x by evidence (DELETE method, can't-undo lead verb); step 3 w
+(PUT/PATCH floor, POST lowered by modify or, above the bar, create
+verb); unclaimed POST floors at x (see "M3 spec (D87)" above). That
+is new `src/` code, not a patch; the burned exams cannot re-score it
+(D24). The M3 groundwork under D86 — brief v2, the 2266-row draw,
+`poc/step2v2` — was built, measured for mechanics (1030 rows moved,
+all w→x, 918 of them by DELETE) and superseded before use; its
+numbers are in learnings. Jev keeps its D82/D83 role; its criteria
+text becomes the D87 definition, a criteria edit inside M3.
 
 A second clean exam, `data/exam-2026-09-20/`, was drawn from five
 vendors no prior set had seen — auth0, hubspot, zendesk, klaviyo,

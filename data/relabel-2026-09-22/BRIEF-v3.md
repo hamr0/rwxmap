@@ -8,10 +8,14 @@ become a v3 w (a change that reaches another person but can be set
 back) and a v1 w can become a v3 x (a delete). So every non-r row is
 relabelled under v3; v1 r labels stand.
 
-Calibration status: DRAFT until calibrated blind on
-`calib/practice-blind.csv` (two labellers, disagreements read row by
-row, disputed rows ruled by the user), then measured once on
-`calib/holdback-blind.csv`.
+Calibration status: practice measured 2026-09-22 — two blind
+labellers agreed 97 of 100 (A: w 63 / x 36 / ? 1; B: w 64 / x 35 /
+? 1). The three disputes all sat on one seam, a DELETE that removes a
+membership; the user ruled the method wins (x), and the membership
+bullet below was narrowed to non-DELETE methods. Holdback measured
+once: two fresh labellers agreed 98 of 100 (C: w 50 / x 50; D: w 48 /
+x 52), both disputes low confidence, both x by tighter-on-doubt.
+BRIEF-v3 is ADOPTED 2026-09-22 for the relabel and later exams.
 
 ## The brief, verbatim
 
@@ -119,8 +123,10 @@ What can be set back (w), even when it touches another person:
     bin, is soft-deleted, or can be restored or undeleted;
   - removing one item from a list, set or membership where adding it
     back is one more call (remove a tag from a contact, remove a
-    track from a playlist). Removing the list or the item itself is
-    x by (a);
+    track from a playlist) — on POST, PUT or PATCH only. On DELETE
+    the method wins: a DELETE is x unless a trash or restore is named,
+    even when what it removes is a membership, an assignment or a
+    role. Removing the list or the item itself is x by (a);
   - stopping or pausing something that can be started again: stop own
     transcoder, pause a campaign, stop a server;
   - a plain create, per (ii).

@@ -55,6 +55,15 @@ OpenAPI-shape rule (request body present, response schema, status
 codes); re-run. Riskiest assumption: coverage without a new wrong
 loosening. (docs/archive/prd.md:296-299)
 
+**M3 — The ladder rebuilt under D87 (2026-09-22).** Steps renumbered
+by run order: 1 r, 2 x by evidence (DELETE method, can't-undo lead
+verb), 3 w (PUT/PATCH floor, POST lowered by modify/create verb),
+unclaimed POST floors at x. Truth is the v3 relabel of all 3852 non-r
+rows of the combined set; lists are written from that pile and priced
+alone, jointly and LOVO; graduates to src/ only above the bar. Spec
+and gate: PRD "M3 spec (D87)". The earlier M3 ("Output contract +
+vectors") was absorbed by D76/D77 (output shape) and is superseded.
+
 **M3 — Output contract + vectors.** The per-operation output (§4.3)
 with MCP fields; a frozen labelled vector set including a negative
 control (the two destructive read-named operations) so a consumer can
