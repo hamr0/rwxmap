@@ -36,6 +36,46 @@ vendor-by-vendor recheck are recorded in `docs/logs/learnings.md` and
 are not repeated here since this table supersedes them as the current
 per-method truth read.
 
+## The shared definition (D86)
+
+Adopted 2026-09-22 (user ruling): rwxmap and bareguard — the user's
+agent gate, one hand-written file of r/w/x letters per tool or
+command — use ONE meaning of the three letters:
+
+- r = changes nothing.
+- w = changes only the caller's OWN stuff, AND can be undone, AND is
+  safe to repeat.
+- x = any change that fails one of those: reaches another party, OR
+  can't be undone, OR isn't safe to repeat.
+- Unsure → x.
+
+This is D20's x-definition plus one more disjunct, "can't be undone",
+folded INTO the class. It is strictly tighter than before: rows move
+w→x and never the other way, so the one invariant holds. Until the
+rows are relabelled, "can't be undone" is read through a PROXY: the
+DELETE method, or a lead verb in the 23-word destructive list
+(`poc/archive/v2/m0/destructive.json`). `destructive` stops being an
+axis of its own (D28 superseded): `destructive: true` ⇒ class x,
+always, and it is kept as a refinement flag inside x — x+destructive
+against x non-destructive — so MCP `destructiveHint` can still be
+fed. `evidence` (`list` / `floor`) is unchanged.
+
+The floor table above predates the fold. Under the proxy, over the
+combined 6557-row set (tuning data), truth w rows that become x are
+888 of 2266 (39%); truth becomes r 2705 / w 1378 / x 2474, so w falls
+from 35% to 21% of rows. The caveat travels with every such number:
+reversibility was never labelled, and the proxy flips truth and
+prediction with the same rule, so where it applies it cannot disagree
+with itself. These are not accuracy numbers and are never quoted as
+an exam; the honest number needs the relabel (option 2, nine
+labellers, owed before the next fresh exam).
+
+The labelling brief needs a v2 with a reversibility clause.
+`data/calibration-2026-09-14/BRIEF.md` stays verbatim — it is the
+calibrated brief every existing label was made under — so the v2 is
+a new file, an M3 item, calibrated blind before any exam relies on
+it.
+
 ## Truth by provider (new — the old corpus could not give this)
 
 No single-corpus provider had enough rows to read a per-provider truth
@@ -476,38 +516,134 @@ class).
 
 ## Where the work is
 
-M1, the informed arbiter, has graduated: the classifier lives in
-`src/` (D79) and the package exposes it as one export. What has not
-shipped is the published map — no emitter is built and nothing emits
-yet. The clean exam that was owed, `data/exam-2026-09-17/` (1383 rows
-across three complete official provider APIs: okta, docusign, xero),
-was scored once and is now burned: 85.3% exact, 12.4% leaks (171
-rows), 2.3% over-tight. Every one of the 171 leaks is truth x predicted
-w; step 1 scored 583/583 and all 171 belong to step 2, 30.2% of its
-claims. M1 is closed as the mechanical offering (D83): the gate's
-first condition is now measured on the mechanical tool plus the
-opt-in Jev tier together, since the 20 rows it failed on are the
-rows Jev is placed to review. A write-heavy build set,
-`data/buildset-2026-09-18/`, 1819 rows across 13 vendors under a
-vendor split pre-registered before any row was read
-(`docs/logs/pre-registered-split-2026-09-18.md`) and labelled blind by
-nine labellers, was built to mine a specialized list; every list mined
-on it collapsed under leave-one-vendor-out, so step 2 is closed (D81)
-and the set is now the ready harness for Jev's first measurement, with
-any score that counts taken once on a fresh exam drawn from the ten
-locked vendors. That set's
-key measured number: PUT+DELETE+PATCH carry 15.1% truth-x (169 of
-1120) against the corpus's 7.3%, and the per-vendor spread on those
-methods runs 0.9% (netbox) to 32.5% (keycloak), so the failure mode
-tracks what the vendor's API is about rather than the method. The full
-module ladder, the M1 go/no-go gate, the labelled sets and the current
-arbiter shape with its scores live in
+The core is frozen at v0.3.0: the D75/D78 three-step flow in `src/`
+stays as it is, shipped, with no more word-list mining and no more
+model tuning. M1 is closed as the mechanical offering (D83) and step
+2 is closed (D81). D84 — publish every wordless write as x — was
+tried on paper and rejected against the adoption bar (D85). The next
+shape is the consumption policy in the following section, plus the
+pending Jev raise tier.
+
+D86 was adopted 2026-09-22: one shared r/w/x definition with
+bareguard, reversibility folded into the class (see "The shared
+definition (D86)" above). Its effect on the code: the wordless floor
+loses DELETE — the method is now evidence for x — so the floor
+becomes wordless PUT/PATCH, roughly 1000 rows instead of 1969. Step 2
+must be rebuilt, not patched: DELETE floors at x, the destructive
+verb list becomes a raise (w→x), the PUT/PATCH floor stays w. That is
+new `src/` code and a new module, M3 = step 2 rebuilt under the fold
++ the bareguard exporter + brief v2. The burned exams cannot re-score
+it (D24). Jev keeps its D82/D83 role; its pile shrinks with the floor
+and its criteria text changes to the three-clause definition, a
+criteria edit inside M3.
+
+A second clean exam, `data/exam-2026-09-20/`, was drawn from five
+vendors no prior set had seen — auth0, hubspot, zendesk, klaviyo,
+miro — 1003 write-method rows. Jev's predictions were committed before
+any row was labelled, and the exam was scored once and is burned
+(D24). Each over 1003 rows: the flow scored exact 841 (83.8%), leaks
+82 (8.2%), over-tight 80 (8.0%); flow plus the Jev raise scored leaks
+51 (5.1%), over-tight 80 (8.0%); Jev alone leaked 207 (20.6%). This is
+now the project's latest honest generalization number, standing
+beside the 2026-09-17 exam's 85.3% exact / 12.4% leaks / 2.3%
+over-tight over 1383 rows. The two are not comparable head to head:
+different vendors, and the 2026-09-20 exam holds write methods only.
+
+A combined diagnostic set, `data/combined-2026-09-21/`, puts every row
+we pulled and labelled ourselves in one place: 6557 rows across 23
+providers (the provider corpus's 4171, the 2026-09-17 exam's 1383, the
+2026-09-20 exam's 1003). It is tuning data, not an exam; every number
+it gives is a diagnostic. Next: M3 (step 2 rebuilt under D86, the
+bareguard exporter, brief v2), then the reversibility relabel of the
+6557 rows, then a fresh exam drawn from the last unused locked
+vendors (dropbox, shopify, linear) after the full exposure check.
+
+The full module ladder, the M1 go/no-go gate, the labelled sets and
+the current arbiter shape with its scores live in
 [module ladder and arbiter shape](../wiki/module-ladder-and-shape.md).
 Decisions D1-D70 are in [the decisions log](../wiki/decisions-log.md).
 M0 is closed; its gate statement and results are in
 [go/no-go gate and M0 results](../logs/gate-and-m0-results.md). Notes
 carried from the original outline are in
 [design notes](../logs/design-notes.md).
+
+## How to consume the map (D85, revised by D86)
+
+D84 (2026-09-21) proposed publishing every wordless write row as x
+with `evidence: floor`, so the tool would stop guessing w against x
+where no word fired. It was rejected 2026-09-22 (user ruling, D85)
+before its POC was built. On the combined set the move trades 270
+fewer leaks for 1698 more over-tight rows: 0.16 leaks closed per false
+alarm against the project's standing adoption bar of 10, about 60x
+under it. It is not a better classifier — it is the same wordless
+guess relabelled — and it fails the project's own bar. The honesty it
+wanted already exists: `evidence: floor` is published on every
+verdict (D76/D77), so the safety decision belongs in the adopter's
+runtime policy, not in the class.
+
+The record of why. Measured on the combined set, 6557 rows across 23
+providers, each over all 6557 rows; a diagnostic over tuning data,
+not an exam:
+
+| shape | exact | leaks | over-tight |
+|---|---|---|---|
+| today's flow (v0.3.0) | 5951 (90.8%) | 308 (4.7%) | 298 (4.5%) |
+| D84: w only with a word (rejected) | 4523 (69.0%) | 38 (0.6%) | 1996 (30.4%) |
+| every write x (r against not-r only), reference | 4227 (64.5%) | 3 (0.0%) | 2327 (35.5%) |
+
+The rows D84 would have moved are step 2's wordless PUT / DELETE /
+PATCH floor, 1969 of 6557: a floor PUT says w and is right 1698 of
+1969 times (86.2%), 270 are truth x.
+
+What stands instead. The class is the tool's best guess and stays
+accurate by default. The map carries exactly the three fields D76/D77
+already name — `class`, `destructive` and `evidence` (`list` when a
+word fired, `floor` when only the method decided). D85 first read
+them as a runtime policy (ask once on a w-floor row, ask every time
+on x). D86 (2026-09-22) replaces that with review-once: floor rows
+are reviewed once by a human before the map is deployed, and the
+gate never asks at runtime.
+
+The reading under D86. `destructive: true` always sits inside class
+x, so the two "ask every time" rows of the old table collapse into
+one letter. `evidence: floor` marks the rows a human has to read
+before deploy; `evidence: list` rows carry a word the tool read. The
+policy is NOT carried in the map JSON; it is how a consumer reads the
+three fields, and the README states it the same way.
+
+bareguard alignment (agreed with the bareguard session 2026-09-22,
+in principle, pending the user on both sides). bareguard owns the
+gate, the file format (one letter per row), agent grants such as
+`r--` / `rw-` / `rwx`, child ≤ parent, deny-by-absence and no runtime
+asks. rwxmap owns the labels and the carriers, and gains one offline
+exporter (an M3 item): spec → draft `tools` section of
+`bareguard.rwx.json`, keyed by operationId, letter = class (identity
+under D86), NEVER the `agents` section. Floor PUT/PATCH rows are LEFT
+OUT: deny-by-absence forces a human letter, so a missed row is a loud
+deny, never a leak. A sidecar review report lists every omitted row
+with its class and evidence; `evidence` never enters the gate file.
+A human reviews the sidecar and commits the file; nothing writes at
+runtime. D28's motivating case, "read and reply, never delete", is
+expressed in bareguard as a grant of `r-x` plus a deny flag on the
+delete action, so nothing is lost by folding `destructive` into x.
+
+Vendor-to-vendor inconsistency in how methods are used is structural
+(D81: mined lists do not transfer), and the tool reports it through
+the floor flag rather than chasing it. The tool cannot know which
+operations an adopter actually calls heavily — a spec does not say —
+so it gives the head start and the adopter tightens from traffic.
+
+What stays frozen: `src/` is unchanged today, the word lists are kept
+as they are, the POST floor stays x, and the output shape and its
+carriers (D76/D77) are unchanged. `poc/unreviewed/` is never created.
+D86 reopens step 2 for the M3 rebuild (see "Where the work is");
+nothing in `src/` has changed yet.
+Jev returns to D82/D83's role: an optional raise-only tier (w to x,
+never lower), measured at 31 of 82 leaks closed for 0 false alarms on
+the 2026-09-20 exam and 86 of 305 for 9 under leave-one-vendor-out on
+the combined set (ratio 9.56, just under the bar of 10). It is
+pending against the bar, not adopted; its next number comes from a
+fresh exam per D24.
 
 ## Problem & goal
 
@@ -554,8 +690,9 @@ menu, or has none. (docs/archive/prd.md:37-48)
 ## Out of scope
 
 - A model/LLM tier in the core. The deterministic flow is the product
-  and works fully on its own. An optional last-mile tier is parked,
-  not built — see D82 and Open questions.
+  and works fully on its own. An optional model tier was measured
+  (D82/D83); if adopted it may only raise w to x and never lower, and
+  the core works without it.
 - A default of `r`, or any guess path.
 - Signing. Output stops at a candidate map; a signature is the Resource
   Owner's act.
@@ -563,7 +700,7 @@ menu, or has none. (docs/archive/prd.md:37-48)
 - A third standards track.
 - A mandated conformance harness.
 - A CLI, packaging, or UI before M3 passes.
-- A claim of coverage outside the CAMARA test bed.
+- A claim of coverage beyond the vendors actually measured.
 
 (docs/archive/prd.md:133-145)
 
@@ -667,7 +804,8 @@ three fields:
 
 All four rows are real corpus rows from
 `data/provider-corpus-2026-09-16/`, carrying what the tool actually
-emits for them today.
+emits for them today. Under D86 `destructive: true` always coincides
+with `class: x`, as the third row already shows.
 
 `evidence` has exactly two values and they are the same floor/list axis
 the internal sheet records:
@@ -696,8 +834,10 @@ There is no `confident` field. `evidence` already carries it: `floor`
 IS the unconfident case, and two fields saying one thing can contradict
 each other.
 
-`destructive` is the separate axis of D28 and is never read off the
-class. `class` is `r < w < x` per the one invariant.
+`destructive` was D28's separate axis; under D86 it is a refinement
+flag inside x — `destructive: true` ⇒ `class: x`, always, while an x
+row need not be destructive — derived from the method and the lead
+verb. `class` is `r < w < x` per the one invariant.
 
 ### Carrier 1 — OpenAPI, per operation
 
@@ -815,19 +955,21 @@ OpenAPI document it describes:
 
 Non-blocking; never silently assumed.
 
-- The last mile: can a model read what words cannot? Parked (D82).
-  Step 2 is closed at the D75 shape (D81), which scored 85.3% exact
-  on the clean exam, blind; every word list mined since has collapsed
-  under leave-one-vendor-out, because the same noun means different
-  things at different vendors. The candidate is TypeSafe Jev, a
-  calibrated decision model, used as an opt-in, sent every row step
-  2 labels w (its floor rows and its word claims, D83), and only
-  ever raising w to x. Blocked on API access; the user will say
-  when a key exists. The build set (`data/buildset-2026-09-18/`,
-  1817 scoreable rows) is the ready harness for its first
-  measurement. The promise to adopters is near-complete answers at
-  a fraction of a model's usual cost, read against the truth
-  ceiling (85.3% labeller agreement), never claimed as 100%.
+- The last mile: can a model read what words cannot? Partly, and not
+  enough to decide a class. TypeSafe Jev was measured three times. On
+  the build set, as a raise over the 1113 rows the flow calls w, it
+  closed 51 of 147 leaks for 1 false alarm fitted and 43 for 1 under
+  leave-one-vendor-out. On the 2026-09-20 clean exam, scored once, it
+  closed 31 of 82 flow leaks for 0 false alarms, taking leaks from 82
+  to 51 of 1003 rows with over-tight unchanged at 80. On the combined
+  6557-row set, over the 2335 rows step 2 decides, it closes 86 of 305
+  leaks for 9 false alarms under leave-one-vendor-out with the
+  bar-of-10 selection (ratio 9.56, just under the bar). It raises; it
+  cannot replace: alone it leaks 893 of 6557 rows (13.6%) on the
+  combined set and 207 of 1003 (20.6%) on the exam, mostly POST
+  creates called w. The answer given 2026-09-21 by D84 (Jev only orders
+  a review queue) is withdrawn 2026-09-22 by D85: Jev stands as the
+  D82/D83 optional raise-only tier, pending against the bar of 10.
   Raised 2026-09-19.
 - Is the POST floor (x) wrong? No — on the 4171-row provider corpus of
   15 complete official APIs the POST floor holds: truth x is 61%
@@ -844,13 +986,18 @@ Non-blocking; never silently assumed.
   only dangerous part of the tool's error. See list item 2 of "The new
   core" above and `docs/logs/learnings.md`. Raised 2026-09-14, updated
   2026-09-15, updated 2026-09-16 with the provider-corpus read,
-  updated 2026-09-16 when step 2 was built.
+  updated 2026-09-16 when step 2 was built. The D84 answer of
+  2026-09-21 is withdrawn by D85 (2026-09-22); the POST floor stays x,
+  published with `evidence: floor`, unchanged.
 - Can the "I don't know" pile be shrunk by reading the description?
   Answer so far: no — mining the yours list from description text
   resolves at best 130 of 1972 rows (6.6%) and leaks 8; the safe
   settings clear 2-5%. Rejected 2026-09-16, POC kept at
   `poc/desc-yours/`. The pile stays as the flag because it holds 155
-  of 204 leaks.
+  of 204 leaks. D84's answer of 2026-09-21 (publish the pile as x) is
+  withdrawn 2026-09-22 by D85: the pile keeps its best-guess class,
+  marked `evidence: floor`, and the consumer's policy asks about it
+  once per operation.
 - MCP hints (future feature, M3; the user's end goal is to feed them).
   Nothing emits hints yet. The shape of the hint output IS now decided
   — see "The output shape (agreed 2026-09-17, D76)" above, which names
@@ -908,9 +1055,10 @@ Non-blocking; never silently assumed.
     points toward `x`, so it is a candidate raiser for step 3 rather
     than an idempotency source. It cannot be measured honestly on 4
     vendors.
-  - `destructiveHint`: **the class cannot carry it, measured again.** A
-    separate axis from r/w/x (D28), not built; MCP default `true`
-    until then. D28 already rejected `destructiveHint = (class == x)`
+  - `destructiveHint`: **the class cannot carry it, measured again.**
+    A flag inside x under D86 (`destructive` ⇒ x, but x does not ⇒
+    `destructive`), not built; MCP default `true` until then. D28
+    already rejected `destructiveHint = (class == x)`
     as wrong on 352 of 719 rows. The broader reading "every non-`r`
     row is destructive" was measured on this corpus: it would mark all
     2119 non-`r` rows destructive, but only 584 of them (27.6%) carry
@@ -920,9 +1068,10 @@ Non-blocking; never silently assumed.
     and publishes. That reading is safe, because it is identical to
     the MCP default, and it therefore emits no information. The useful
     signal is the inverse: which of the non-reads are NOT destructive.
-    That is the second axis D28 named, derived from method plus verb
-    and never from the class; `poc/m0/destructive.json` exists from
-    the M0 work and has never been measured against this corpus.
+    That is the flag D28 named and D86 keeps inside x, derived from
+    method plus verb and implying x rather than read off it;
+    `poc/m0/destructive.json` exists from the M0 work and has never
+    been measured against this corpus.
   - `openWorldHint`: no signal; MCP default `true`.
 - Closed 2026-09-17 (D76): the output file format. rwxmap keeps one map
   of its own, one row per operation, and publishes nothing of its own —
@@ -964,10 +1113,12 @@ Non-blocking; never silently assumed.
 - Closed 2026-09-07 (D31): queryAssistant is truth `r`; ask-an-assistant
   reads back an answer and reaches no one. It is not a negative
   control.
-- Does the ordered r < w < x scale still hold once `destructive` is a
-  separate axis? A grant of `x` currently implies `w`; with two axes a
-  consumer may want "`x`, non-destructive only." The draft's scope
-  grammar needs a word for that. Raised 2026-09-07.
+- Closed 2026-09-22 (D86): the ordered r < w < x scale holds because
+  `destructive` is no longer a separate axis — `destructive: true` ⇒
+  `x`, and it is a refinement flag inside x. A consumer wanting "`x`,
+  non-destructive only" says so in bareguard as a grant of `r-x` plus
+  a deny flag on the destructive action; the scale itself needs no
+  new word. Raised 2026-09-07.
 - Closed 2026-09-07 (D32): a read whose result arrives by callback is
   `r`; the caller named the sink, so it reaches no one else. Callbacks
   raise only when the lead verb is not a read (M1-C7).

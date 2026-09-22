@@ -4122,3 +4122,262 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   fitting noise, so step 2 is closed (D81). What spec text cannot do
   is read meaning; that last mile is parked for an optional model
   tier (D82).
+
+### Jev measured twice: a raise-only tier that survives LOVO, and a cold read of the whole corpus (2026-09-20)
+- Goal: the Jev tier parked as D82 became testable when an API key
+  arrived, so run two POCs. (A) Jev as the raise-only tier sitting over
+  the rows step 2 labels w, measured on the build set. (B) Jev doing
+  the whole r/w/x job cold on the 4171-row 15-provider corpus, to see
+  how good or bad it is unaided.
+- Tried: the criteria were transcribed from
+  `data/calibration-2026-09-14/BRIEF.md` — the same calibrated brief the
+  nine human labellers used to make the build set's truth — into Jev's
+  structured Noul/Choice criteria format: instructions carrying
+  question, inspect, focus and ignore, and two-sided criteria carrying
+  the two roads on the true side and the twelve rules on the false
+  side, with the brief's "rules that trip people up" as the ignore
+  list. Nothing was written by reading the leak pile, and the brief
+  predates both sets. POC A asked one Noul, "is this operation x",
+  deliberately cold: step 2's own verdict was kept out of the state,
+  because naming it would anchor Jev toward w, which is the fail-open
+  direction. Two further Nouls, road1 and road2, rode along in the same
+  call as free diagnostics. POC B asked one Choice over r/w/x carrying
+  the three class definitions and the brief's method guidance. Raw
+  fetch, no SDK. The criteria were written once and run once; there was
+  no tuning loop.
+- Outcome: POC A ran over the 1113 rows the D75 flow labels w on the
+  build set, of which 147 are truth x and 966 truth w. At threshold
+  0.70 it closed 51 of the 147 leaks for 1 false alarm in 966, a ratio
+  of 51.0 against the bar of 10. The full sweep: t=0.50 closed 84 for
+  27 false (3.11), t=0.60 closed 69 for 13 (5.31), t=0.70 closed 51 for
+  1 (51.0), t=0.80 closed 34 for 0. Under leave-one-vendor-out across
+  the 13 build-set vendors, with the threshold picked on the other 12
+  each fold, it closed 43 of 147 for 1 false alarm, a ratio of 43.0,
+  and every one of the 13 folds picked 0.70 or 0.80. The single false
+  alarm was a gitlab.com row. Of the 52 rows raised at t=0.70, road 1
+  led on all 52 and road 2 on none. POC B read all 4171 corpus rows
+  cold and scored 88.2% exact (3679), 11.0% leaks (459), 0.8%
+  over-tight (33). The confusion: truth r, 2082 rows, went r=2077, w=2,
+  x=3; truth w, 1218 rows, went r=4, w=1186, x=28; truth x, 871 rows,
+  went r=3, w=452, x=416. Per provider, exact ran from 84.3% (asana) to
+  96.3% (figma) and leaks from 3.7% (figma) to 15.3% (asana). The fair
+  comparison is not the mechanical tool's fitted 93.8 / 1.8 / 4.5 on
+  these same rows, which were tuned on them, but the mechanical tool on
+  data it had never seen — the burned clean exam's 85.3 / 12.4 / 2.3.
+  Cost: POC A was 1113 rows in 36.7 seconds for 3,756,386 input tokens,
+  about $0.16; POC B was 4171 rows in 131.5 seconds for 10,817,638
+  input tokens, about $0.45. Zero failed calls across both.
+- Lesson: Jev's error is concentrated in a single cell — 452 of the 871
+  truth-x rows called w — so its x recall is poor at 47.8% while its x
+  precision is high, 416 of the 447 rows it calls x being truth x, 93%.
+  That asymmetry is exactly the shape a raise-only tier wants: believe
+  the positive, ignore the negative. It is also the first thing
+  measured in this project that does not collapse under
+  leave-one-vendor-out. D81's mined lists went 8.17 fitted to 0.83
+  LOVO; this goes 51.0 fitted to 43.0 LOVO, and the per-fold threshold
+  was stable at 0.70-0.80 in all 13 folds, which is the property every
+  mined word list lacked. The honest limit is that it closes only 29%
+  of the leaks under LOVO: a partial fix that clears the bar several
+  times over, not a solve. And sweeping a threshold on those 1113 rows
+  makes the build set a tuning set for this tier from now on, so the
+  number that counts must still come from a fresh exam drawn from the
+  ten locked vendors.
+
+### Clean exam 2026-09-20 scored once: Jev raises, it cannot replace (2026-09-21)
+- Goal: score the Jev tier on data it has never seen, since the build
+  set became a tuning set for it when the threshold was swept.
+- Tried: drew 1003 rows from five vendors never seen by any prior set
+  — auth0 250, hubspot 250, zendesk 250, klaviyo 141, miro 112 — write
+  methods only, POST 339 / DELETE 280 / PATCH 206 / PUT 178.
+  cloudflare, pagerduty and sentry were dropped because they are
+  M0-era holdouts in `data/corpus/labelled.csv`. Jev's predictions
+  (frozen criteria, questionsA and questionsB unchanged, two separate
+  calls) and the frozen flow's own predictions were committed with
+  sha256s in 597191d before any row was labelled. Nine blind labellers
+  then labelled all 1003 rows under
+  `data/calibration-2026-09-14/BRIEF.md`. Three constructs came back
+  split between labellers — id-keyed upsert, CRM list membership, POST
+  verify/test — and the user ruled them before any score was seen:
+  upsert keyed on an id is w unless it creates a user account or
+  starts a job; CRM list membership is w; verify/test follows its
+  text. 13 rows changed (12 x->w, 1 r->x), recorded in
+  `data/exam-2026-09-20/label/rulings.csv` with the raw labeller files
+  left untouched. The threshold was fixed in advance at 0.70, the
+  value POC A picked. Scored once by
+  `tools/score-exam-2026-09-20.js`.
+- Outcome: truth over the 1003 rows is r 29 / w 633 / x 341 / ? 0,
+  with 13 rulings applied. The 12 x->w rulings loosened truth, so they
+  could only move flow rows from exact to over-tight, never hide a
+  leak. Whole exam, each over 1003 rows: the frozen flow scored exact
+  841 (83.8%) / leaks 82 (8.2%) / over-tight 80 (8.0%); Jev-B cold
+  scored exact 796 (79.4%) / leaks 207 (20.6%) / over-tight 0 (0.0%);
+  flow+Jev-A scored exact 872 (86.9%) / leaks 51 (5.1%) / over-tight
+  80 (8.0%). The flow per method: POST 263 / 339 exact (77.6%), 10
+  leaks (2.9%), 66 over-tight (19.5%); PUT 153 / 178 (86.0%), 18
+  (10.1%), 7 (3.9%); DELETE 230 / 280 (82.1%), 45 (16.1%), 5 (1.8%);
+  PATCH 195 / 206 (94.7%), 9 (4.4%), 2 (1.0%). Flow+Jev-A per method:
+  POST 263 / 339 exact (77.6%), 10 leaks (2.9%), 66 over-tight
+  (19.5%); PUT 161 / 178 (90.4%), 10 (5.6%), 7 (3.9%); DELETE 249 /
+  280 (88.9%), 26 (9.3%), 5 (1.8%); PATCH 199 / 206 (96.6%), 5 (2.4%),
+  2 (1.0%). Jev-A alone on the 654 rows the flow calls w, of which 82
+  (12.5%) are truth x, closed 31 of the 82 leaks (37.8%) for 0 false
+  alarms. Per provider: auth0 closed 8 of 34 (23.5%) over 171 flow-w
+  rows; hubspot 2 of 4 (50.0%) over 181; zendesk 9 of 22 (40.9%) over
+  163; klaviyo 0 of 8 (0.0%) over 69; miro 12 of 14 (85.7%) over 70.
+  0 false alarms on every provider.
+- Lesson: the raise-only tier held on unseen vendors: 31 of 82 flow
+  leaks closed for 0 false alarms, taking whole-exam leaks from 82 to
+  51 of 1003 with over-tight unchanged at 80. That is the same shape
+  as the build set (51 fitted, 43 LOVO) — a partial fix at clean
+  precision. Jev cannot replace the flow: alone it leaks 207 of 1003
+  (20.6%), 179 of them on POST's 339 rows, where it calls truth-x
+  creates w — 205 of the 341 truth-x rows are called w overall — and
+  it is never over-tight (0 of 1003). That is POC B's single-cell
+  weakness again, on new vendors: high x precision, poor x recall. The
+  flow's POST floor of x is what catches those rows, which is why Jev
+  only works on top of it. Klaviyo is the tier's blind spot here, 0 of
+  8 flow-w leaks closed; miro is its best, 12 of 14. This exam is now
+  burned (D24). The brief needs an addendum for the three split
+  constructs before the next exam; `BRIEF.md` itself stays verbatim as
+  calibrated, and the addendum goes alongside it.
+
+### Combined diagnostic set: each step does one kind of wrong; stop guessing on the floor (2026-09-21)
+- Goal: see each step, the whole flow and Jev scored together on every
+  row we pulled and labelled ourselves, and weigh Jev against step 2
+  head to head.
+- Tried: built `data/combined-2026-09-21/` — 6557 rows across 23
+  providers from three sources (provider corpus 4171, exam 2026-09-17
+  1383, exam 2026-09-20 1003), ids prefixed `pc-` / `x17-` / `x20-`
+  because both exams used `e0001...`. The build set was left out
+  because its specs came from apis-guru; camara was deleted the same
+  day (a2571b1). Ran Jev A and B fresh over all 6557 rows, 0 failed
+  calls: A in 238.8s for about $0.9384, B in 239.6s for about $0.7151.
+  Scored with `tools/score-combined-2026-09-21.js`. The x20 slice
+  reproduced the exam scorer exactly (841 exact / 82 leaks / 80
+  over-tight of 1003), which cross-checks the scorer. The LOVO section
+  as first written picked each fold's threshold by the maximum
+  closed/false ratio, which always picks 0.90 and closed only 14 of
+  305 for 0 false alarms — an artifact of the selection rule. It was
+  recomputed with the project's bar (the lowest threshold whose
+  training closed/false clears 10, which is the one that closes most
+  subject to the bar). Then measured the D84 shape.
+- Outcome: truth over the 6557 rows is r 2705 / w 2266 / x 1586. The
+  flow, over all 6557 rows: exact 5951 (90.8%), leaks 308 (4.7%),
+  over-tight 298 (4.5%). Per step, each over only the rows whose final
+  verdict it produced: step 1, 2645 claims, exact 2642 (99.9%), leaks
+  3 (0.1%), over-tight 0. Step 2, 2335 claims, exact 2029 (86.9%),
+  leaks 305 (13.1%), over-tight 1 (0.0%); its word rules
+  (`modify-verb` + `modify-verb-summary`), 366 claims, exact 331
+  (90.4%), leaks 35 (9.6%), over-tight 0; its method floor, 1969
+  claims, exact 1698 (86.2%), leaks 270 (13.7%), over-tight 1 (0.1%).
+  Step 3, 1577 claims, exact 1280 (81.2%), leaks 0, over-tight 297
+  (18.8%); `raise-word`, 51 claims, exact 36 (70.6%), leaks 0,
+  over-tight 15 (29.4%); `floor-post`, 1526 claims, exact 1244
+  (81.5%), leaks 0, over-tight 282 (18.5%). Jev-B cold, over 6557:
+  exact 5625 (85.8%), leaks 893 (13.6%), over-tight 39 (0.6%).
+  Flow+Jev-A at 0.70, over 6557: exact 6045 (92.2%), leaks 205
+  (3.1%), over-tight 307 (4.7%). Jev-A alone on the 2335 flow-w rows,
+  of which 305 (13.1%) are truth x: closed 103 of 305 (33.8%) for 9
+  false alarms, 11.44, fitted at 0.70. Step 2 head to head, each over
+  the same 2335 rows: step 2 exact 2029 (86.9%), leaks 305 (13.1%),
+  over-tight 1 (0.0%); Jev-B exact 2155 (92.3%), leaks 161 (6.9%),
+  over-tight 19 (0.8%); flow+Jev-A exact 2123 (90.9%), leaks 202
+  (8.7%), over-tight 10 (0.4%). Step 2 and Jev-B disagree on 167 of
+  2335 rows (7.2%): truth x, step 2 w, Jev x — 145 rows, Jev right;
+  truth w, step 2 w, Jev x — 19 rows, step 2 right; truth w, Jev r — 1
+  row, step 2 right; truth r, step 2 w, Jev r — 1 row, Jev right;
+  truth x, Jev r — 1 row, neither. The fitted sweep over flow-w rows:
+  t=0.50 closed 170 for 53 false (3.21), 0.60 135 for 24 (5.63), 0.70
+  103 for 9 (11.44), 0.80 66 for 4 (16.50), 0.90 14 for 0. The
+  corrected leave-one-vendor-out: 86 of 305 closed (28.2%) for 9 false
+  alarms, ratio 9.56, just under the bar of 10, with threshold 0.70 in
+  21 folds and 0.80 in 2 (docusign, okta). The D84 shape, each over
+  6557 rows: today's flow exact 5951 (90.8%) / leaks 308 (4.7%) /
+  over-tight 298 (4.5%); D84, w only with a word, exact 4523 (69.0%) /
+  leaks 38 (0.6%) / over-tight 1996 (30.4%); every write x, r against
+  not-r only, exact 4227 (64.5%) / leaks 3 (0.0%) / over-tight 2327
+  (35.5%). The review queue, step 2's floor rows, is 1969 of 6557 rows,
+  of which 270 are truth x. Leaks remaining after flow+Jev-A, by
+  provider: xero 60, okta 42, auth0 26, docusign 22, jira 12, zendesk
+  12, klaviyo 8, zoom 6, and 1-2 each at datadog, digitalocean,
+  hubspot, intercom, miro, openai, paypal, spotify, square and stripe.
+- Lesson: each step does exactly one kind of wrong. Step 1 is solved.
+  Step 2 holds the leaks, 305 of 308, 270 of them on its wordless
+  floor. Step 3 holds the over-tightness, 297 of 298, 282 of them on
+  its wordless POST floor. The wordless floor is where specs do not
+  state the answer, and neither mined lists nor a model fixes it; the
+  honest move is to stop guessing there and publish it as a review
+  queue (D84). Also: a threshold picked by maximizing a ratio always
+  drifts to the most conservative setting — select by "most closed
+  subject to the bar" instead.
+
+### D84 rejected against the bar; the runtime policy replaces it (D85) (2026-09-22)
+- Goal: decide whether to build the D84 POC (`poc/unreviewed/`): w
+  only on word evidence, every wordless write published as x.
+- Tried: D84 was measured on paper on the combined 6557-row set,
+  each over all rows, against today's flow and the every-write-x
+  reference, and priced at the project's standing adoption bar of 10
+  leaks closed per false alarm.
+- Outcome: D84 moves step 2's 1969 wordless PUT/DELETE/PATCH floor
+  rows from w to x. That closes 270 leaks (308 to 38) and adds 1698
+  over-tight rows (298 to 1996): 0.16 leaks closed per false alarm,
+  about 60x under the bar. The floor guess is right 1698 of 1969 times
+  (86.2%). Rejected 2026-09-22 by the user's ruling before any POC
+  code was written; D85 replaces it. The class stays the best guess,
+  `evidence` and `destructive` are published as they already are, and
+  the README and PRD carry a recommended consumption policy: r allow;
+  w on a list allow; w on the floor ask once and remember; x ask every
+  time; destructive ask every time. Jev returns to the D82/D83
+  raise-only role, pending at 86 of 305 for 9 under LOVO (9.56).
+  `src/` unchanged.
+- Lesson: a leak count bought below the adoption bar is fitting to
+  pass, whichever direction it fits; relabelling the same wordless
+  guess as x is not a better classifier. The honesty D84 wanted
+  already exists in `evidence: floor` on every verdict, so the safety
+  decision belongs in the consumer's policy, not in the class.
+
+### D86: one shared r/w/x definition with bareguard; the fold measured under a proxy (2026-09-22)
+- Goal: give rwxmap and bareguard (the user's agent gate: one file of
+  r/w/x letters per tool, agent grants like `r--`/`rw-`/`rwx`, child
+  ≤ parent, not-in-file = denied, no runtime asks) ONE meaning of the
+  three letters, and decide whether the class can absorb "can't be
+  undone" without breaking the one invariant.
+- Tried: folded reversibility into the class — r = changes nothing;
+  w = own stuff AND undoable AND safe to repeat; x = fails any one of
+  those; unsure → x — and measured it on `data/combined-2026-09-21/`
+  (6557 rows, 23 providers, tuning data) with a PROXY for "can't be
+  undone": the DELETE method, or a lead verb in the 23-word list at
+  `poc/archive/v2/m0/destructive.json`. The proxy was applied
+  identically to truth and prediction. Option 2, relabelling the 6557
+  rows for reversibility with nine labellers, was priced and deferred.
+- Outcome: adopted as D86 (user ruling). Truth w rows that become x:
+  888 of 2266 (39%); truth becomes r 2705 / w 1378 / x 2474 (w falls
+  from 35% to 21% of rows); tool w rows that become x: 999 of 2335.
+  Ledger today: exact 5951 (90.8%) / leaks 308 (4.7%) / over-tight
+  298 (4.5%). Folded under the proxy: exact 6088 (92.8%) / leaks 184
+  (2.8%) / over-tight 285 (4.3%). CAVEAT: reversibility was never
+  labelled; the proxy flips truth and prediction with the same rule,
+  so where it applies it cannot disagree with itself; these are NOT
+  accuracy numbers and are never quoted as an exam. D28's two-axes
+  ruling is superseded: `destructive: true` ⇒ x, kept as a flag inside
+  x for `destructiveHint`; `evidence` unchanged. D85's runtime table
+  (ask once on w-floor, ask every time on x) is replaced by
+  review-once: floor rows are reviewed by a human before deploy, the
+  gate never asks. The wordless floor loses DELETE (now evidence for
+  x) and shrinks from 1969 PUT/DELETE/PATCH rows to roughly 1000
+  PUT/PATCH rows; step 2 must be rebuilt as M3 (DELETE floors at x,
+  the destructive list becomes a w→x raise, PUT/PATCH floor stays w)
+  together with a bareguard exporter (draft `tools` section keyed by
+  operationId, floor rows left out, sidecar review report, `evidence`
+  never in the gate file) and a brief v2 with a reversibility clause
+  (`data/calibration-2026-09-14/BRIEF.md` stays verbatim). Jev keeps
+  its raise-only role; on the combined set it closes 94 for 3 false
+  on the wordless floor (ratio 31) against 5 / 4 on modify-verb rows
+  (1.25) and 4 / 2 on modify-verb-summary rows, so it earns its place
+  only where the tool read nothing. Relabel is owed before the next
+  fresh exam (dropbox, shopify, linear after the exposure check).
+- Lesson: folding reversibility into the class only tightens — rows
+  move w→x, never the other way — so it is safe to adopt before it is
+  honestly measured. But the proxy number is the proxy agreeing with
+  itself, not an accuracy figure, and the relabel is owed before any
+  exam is scored under the fold.
