@@ -754,7 +754,11 @@ never lower), measured at 31 of 82 leaks closed for 0 false alarms on
 the 2026-09-20 exam and 86 of 305 for 9 under leave-one-vendor-out on
 the combined set (ratio 9.56, just under the bar of 10). It is
 pending against the bar, not adopted; its next number comes from a
-fresh exam per D24.
+fresh exam per D24. Under D88 (2026-09-22) Jev may also lower x to w
+on the D87 POST floor rows only, at a threshold still to be chosen;
+measured on the tuning set at t=0.10 as 8 new leaks for 796 rows
+fixed, flow 94.2% exact / 1.1% leaks / 4.7% over-tight (learnings,
+"Jev lowers the D87 POST floor").
 
 ## Problem & goal
 
