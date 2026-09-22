@@ -1,0 +1,884 @@
+row_id,provider,method,path,operationId,summary,description
+x20-e0832,zendesk,PATCH,/api/v2/custom_objects/{custom_object_key},UpdateCustomObject,Update Custom Object,"Updates an individual custom object. The updating rules are as follows:
+* Takes a `custom_object` object that specifies the properties to update
+* The `key` property cannot be updated
+#### Allowed For
+* Admins"
+pc-r3427,asana,POST,/portfolios/{portfolio_gid}/removeCustomFieldSetting,removeCustomFieldSettingForPortfolio,Remove a custom field from a portfolio,"<b>Required scope: </b><code>portfolios:write</code>
+
+Removes a custom field setting from a portfolio."
+x20-e0372,hubspot,PATCH,/scheduler/2027-03-beta/meetings/meeting-links/{meetingLinkSlug},patch-/scheduler/2027-03-beta/meetings/meeting-links/{meetingLinkSlug}_/scheduler/2026-09-beta/meetings/meeting-links/{meetingLinkSlug},Update meeting link,Update the details of a specific meeting link using its unique slug. This operation allows you to modify the settings or metadata associated with a meeting link in your HubSpot account.
+pc-r1901,digitalocean,PATCH,/v2/dedicated-inferences/{dedicated_inference_id},dedicatedInferences_patch,Update a Dedicated Inference,"Update an existing Dedicated Inference. Send a PATCH request to
+`/v2/dedicated-inferences/{dedicated_inference_id}` with updated `spec` and/or
+`access_tokens`. Status will move to updating and return to active when done."
+x17-e0861,docusign,POST,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/email_settings,EmailSettings_PostEmailSettings,Adds email setting overrides to an envelope.,"Adds email override settings, changing the email address to reply to an email address, name, or the BCC for email archive information, for the envelope. Note that adding email settings will only affect email communications that occur after the addition was made.
+
+The BCC Email address feature is designed to provide a copy of all email communications for external archiving purposes.
+To send a copy of the envelope to a recipient who does not need to sign, use a Carbon Copy or Certified Delivery recipient type.
+
+**Note:** Docusign recommends that envelopes sent using the BCC for Email Archive feature, including the BCC Email Override option, include additional signer authentication options."
+x17-e1041,docusign,PUT,/v2.1/accounts/{accountId}/templates/{templateId}/lock,Lock_PutTemplateLock,Updates a template lock.,"Updates the lock information for a locked template.
+
+You must include the `X-DocuSign-Edit` header
+as described in
+[TemplateLocks: create](/docs/esign-rest-api/reference/templates/templatelocks/create/).
+
+
+Use this method to change the duration
+of the lock (`lockDurationInSeconds`)
+or the `lockedByApp` string.
+
+The request body is a full `lockRequest` object,
+but you only need to specify the
+properties that you are updating. For example:
+
+```
+{
+  ""lockDurationInSeconds"": ""3600"",
+  ""lockedByApp"": ""My Application""
+}
+```"
+pc-r1396,zoom,PATCH,/users/{userId}/tsp/{tspId},userTSPUpdate,Update a TSP account,Update a user's TSP account
+pc-r0324,stripe,POST,/v1/payment_method_domains/{payment_method_domain},PostPaymentMethodDomainsPaymentMethodDomain,Update a payment method domain,<p>Updates an existing payment method domain.</p>
+pc-r1774,digitalocean,DELETE,/v2/apps/{id},apps_delete,Delete an App,"Delete an existing app. Once deleted, all active deployments will be permanently shut down and the app deleted. If needed, be sure to back up your app specification so that you may re-create it at a later time."
+pc-r0289,stripe,POST,/v1/issuing/transactions/{transaction},PostIssuingTransactionsTransaction,Update a transaction,<p>Updates the specified Issuing <code>Transaction</code> object by setting the values of the parameters passed. Any parameters not provided will be left unchanged.</p>
+x17-e0061,okta,PATCH,/api/v1/apps/{appId}/cwo/connections/{connectionId},updateCrossAppAccessConnection,Update a Cross App Access connection,Updates the Cross App Access connection with the specified ID
+pc-r1540,paypal,DELETE,/v3/vault/payment-tokens/{id},payment-tokens.delete,Delete payment token,Delete the payment token associated with the payment token id.
+pc-r2207,digitalocean,DELETE,/v2/security/settings/suppressions/{suppression_uuid},security_delete_suppression,Delete Suppression,"To remove a suppression, send a DELETE request to `/v2/security/settings/suppressions/{suppression_uuid}`."
+pc-r3004,jira,DELETE,/rest/api/2/workflowscheme/{id}/default,deleteDefaultWorkflow,Delete default workflow,"Resets the default workflow for a workflow scheme. That is, the default workflow is set to Jira's system workflow (the *jira* workflow).
+
+Note that active workflow schemes cannot be edited. If the workflow scheme is active, set `updateDraftIfNeeded` to `true` and a draft workflow scheme is created or updated with the default workflow reset. The draft workflow scheme can be published in Jira.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+pc-r2233,digitalocean,POST,/v2/vector-databases/{id}/resize,vectorDatabases_post_resize,Resize a Vector Database,"To resize a vector database, send a POST request to `/v2/vector-databases/{id}/resize`. This changes the database's resource tier. The response body contains a JSON object with the updated vector database."
+x17-e0933,docusign,DELETE,/v2.1/accounts/{accountId}/favorite_templates,FavoriteTemplates_UnFavoriteTemplate,Remove one or more templates from the account favorites.,"Remove one or more templates from the account favorites. 
+
+Your request should include each template to remove as a separate `favoriteTemplatesContentItem` JSON object, like this:
+```
+{
+    ""favoriteTemplates"": [
+        {
+            ""templateId"": ""6bc0584f-xxxx-xxxx-xxxx-35ab28cc44e1""
+        },
+        {
+            ""templateId"": ""8ae9b3452-xxxx-xxxx-xxx-ac0de23fa57f""
+        }
+    ]
+}
+```
+
+The response includes the IDs of the templates that were successfully removed from your favorites. To get the account's remaining favorite templates, use the [getFavoriteTemplates](/docs/esign-rest-api/reference/accounts/favoritetemplates/getfavoritetemplates/) endpoint."
+x20-e0230,auth0,PUT,/guardian/factors/phone/templates,put_factor_phone_templates,Update Enrollment and Verification Phone Templates,Customize the messages sent to complete phone enrollment and verification (subscription required).
+pc-r1773,digitalocean,PUT,/v2/apps/{id},apps_update,Update an App,"Update an existing app by submitting a new app specification. For documentation on app specifications (`AppSpec` objects), please refer to [the product documentation](https://docs.digitalocean.com/products/app-platform/reference/app-spec/)."
+x20-e0352,hubspot,PATCH,/crm/v3/objects/discounts/{discountId},patch-/crm/v3/objects/discounts/{discountId},Update,"Perform a partial update of an Object identified by `{discountId}`or optionally a unique property value as specified by the `idProperty` query param. `{discountId}` refers to the internal object ID by default, and the `idProperty` query param refers to a property whose values are unique for the object. Provided property values will be overwritten. Read-only and non-existent properties will result in an error. Properties values can be cleared by passing an empty string."
+x20-e0941,zendesk,PUT,/api/v2/dynamic_content/items/{dynamic_content_item_id},UpdateDynamicContentItem,Update Item,"The only attribute you can change is the name.
+
+To add a variant to the item, or to update or delete the variants of the item, use the [Item Variants API](/api-reference/ticketing/ticket-management/dynamic_content_item_variants/#update-many-variants).
+
+#### Allowed For
+
+* Admins, Agents"
+x17-e0235,okta,DELETE,/api/v1/captchas/{captchaId},deleteCaptchaInstance,Delete a CAPTCHA instance,"Deletes a specified CAPTCHA instance
+> **Note:** If your CAPTCHA instance is still associated with your org, the request fails. You must first update your Org-wide CAPTCHA settings to remove the CAPTCHA instance."
+x20-e0638,klaviyo,POST,/client/push-token-unregister,unregister_client_push_token,Unregister Client Push Token,"Unregister a push token.
+
+This endpoint is specifically designed to be called from our mobile SDKs ([iOS](https://github.com/klaviyo/klaviyo-swift-sdk) and [Android](https://github.com/klaviyo/klaviyo-android-sdk)) and requires a [public API key (site ID)](https://www.klaviyo.com/settings/account/api-keys). Never use a private API key with our client-side endpoints.
+You must have push notifications enabled to use this endpoint.<br><br>*Rate limits*:<br>Burst: `10/s`<br>Steady: `150/m`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/unregister_client_push_token.json)"
+pc-r4037,intercom,POST,/tickets/{ticket_id}/linked_conversations,linkConversationToTicket,Link a conversation to a ticket,"Link a conversation to an existing tracker ticket. The conversation can be
+a regular conversation or one that has been converted into a customer ticket.
+
+Use this when related conversations surface after a tracker ticket has
+already been created. The ticket in the path must be a tracker ticket, and
+`conversation_id` in the body is the conversation (or customer ticket) to
+link to it. This returns the linked conversation.
+
+A tracker ticket can have up to 2,500 linked conversations; once that
+limit is reached, further requests return `linked_conversation_limit_exceeded`.
+
+Requires the `write_tickets` OAuth scope."
+pc-r0642,openai,POST,/evals/{eval_id}/runs/{run_id},cancelEvalRun,Cancel eval run,Cancel an ongoing evaluation run.
+pc-r3367,asana,DELETE,/budgets/{budget_gid},deleteBudget,Delete a budget,"A specific, existing budget can be deleted by making a DELETE request on the URL for that budget.
+
+Returns an empty data record."
+x20-e0134,auth0,PATCH,/roles/{id},patch_roles_by_id,Update a role,Modify the details of a specific [user role](https://auth0.com/docs/manage-users/access-control/rbac) specified by ID.
+x17-e0969,docusign,DELETE,/v2.1/accounts/{accountId}/settings/bcc_email_archives/{bccEmailArchiveId},BCCEmailArchive_DeleteBCCEmailArchive,Deletes a BCC email archive configuration.,"This method deletes a BCC email archive configuration from an account.
+
+When you use this method, the status of the BCC email archive configuration switches to `closed` and the BCC email address is no longer used to archive Docusign-generated email messages."
+pc-r2296,digitalocean,DELETE,/v2/gen-ai/agents/{parent_agent_uuid}/child_agents/{child_agent_uuid},genai_detach_agent,Delete Agent Route for an Agent,"To delete an agent route from a parent agent, send a DELETE request to `/v2/gen-ai/agents/{parent_agent_uuid}/child_agents/{child_agent_uuid}`."
+x17-e0699,okta,DELETE,/integrations/api/v1/api-services/{apiServiceId}/credentials/secrets/{secretId},deleteApiServiceIntegrationInstanceSecret,Delete an API service integration instance secret,Deletes an API Service Integration instance Secret by `secretId`. You can only delete an inactive Secret.
+x20-e0757,zendesk,DELETE,/api/v2/bookmarks/{bookmark_id},DeleteBookmark,Delete Bookmark,"#### Allowed For
+- Agents (own bookmarks only)
+
+If the bookmark already exists with a specified ticket id, the response status will be `http Status: 200 OK`."
+pc-r2211,digitalocean,DELETE,/v2/snapshots/{snapshot_id},snapshots_delete,Delete a Snapshot,"Both Droplet and volume snapshots are managed through the `/v2/snapshots/`
+endpoint. To delete a snapshot, send a DELETE request to
+`/v2/snapshots/$SNAPSHOT_ID`.
+
+A status of 204 will be given. This indicates that the request was processed
+successfully, but that no response body is needed."
+pc-r0599,openai,DELETE,/assistants/{assistant_id},deleteAssistant,Delete assistant,Delete an assistant.
+pc-r1260,square,PUT,/v2/vendors/bulk-update,BulkUpdateVendors,BulkUpdateVendors,Updates one or more of existing [Vendor](entity:Vendor) objects as suppliers to a seller.
+pc-r0507,stripe,POST,/v1/test_helpers/issuing/cards/{card}/shipping/deliver,PostTestHelpersIssuingCardsCardShippingDeliver,Deliver a testmode card,<p>Updates the shipping status of the specified Issuing <code>Card</code> object to <code>delivered</code>.</p>
+x17-e0797,docusign,DELETE,/v2.1/accounts/{accountId}/connect/logs,ConnectLog_DeleteConnectLogs,Deletes a list of Connect log entries.,"Deletes a list of Connect log entries for your account.
+
+<ds-inlinemessage>
+To use this method, you must be an account administrator
+and Connect must be enabled on your account.
+</ds-inlinemessage>"
+x20-e0112,auth0,PATCH,/guardian/factors/duo/settings,patch_factor_duo_settings,Update the DUO Configuration,
+pc-r0199,stripe,POST,/v1/external_accounts/{id},PostExternalAccountsId,Update a bank account,"<p>Updates the metadata, account holder name, account holder type of a bank account belonging to
+a connected account and optionally sets it as the default for its currency. Other bank account
+details are not editable by design.</p>
+
+<p>You can only update bank accounts when <a href=""/api/accounts/object#account_object-controller-requirement_collection"">account.controller.requirement_collection</a> is <code>application</code>, which includes <a href=""/connect/custom-accounts"">Custom accounts</a>.</p>
+
+<p>You can re-enable a disabled bank account by performing an update call without providing any
+arguments or changes.</p>"
+pc-r3930,intercom,POST,/contacts/merge,MergeContact,Merge a lead and a user,"You can merge a contact with a `role` of `lead` into a contact with a `role` of `user`.
+
+{% admonition type=""warning"" name=""Merged contacts are not retrievable via the API"" %}
+  Once a merge is completed, the source contact (`from`) is permanently removed from the active contact list. This means:
+  - **GET /contacts/{id}** — Requesting the source contact by its original ID will return a `404 Not Found` error.
+  - **POST /contacts/search** — The source contact will not appear in search results, including queries filtered by `updated_at`.
+  - **GET /contacts** — The source contact will not appear in list results.
+
+  Only the target contact (`into`) remains accessible. If your application stores contact IDs, update them to use the target contact's ID after a merge.
+{% /admonition %}"
+x20-e0381,hubspot,POST,/cms/v3/blogs/tags/multi-language/detach-from-lang-group,post-/cms/v3/blogs/tags/multi-language/detach-from-lang-group_detachFromLangGroup,Detach a Blog Tag from a multi-language group,Detach a Blog Tag from a multi-language group.
+pc-r0431,stripe,POST,/v1/subscription_items/{item},PostSubscriptionItemsItem,Update a subscription item,<p>Updates the plan or quantity of an item on a current subscription.</p>
+pc-r0817,openai,POST,/threads/{thread_id}/runs/{run_id}/cancel,cancelRun,Cancel a run,Cancels a run that is `in_progress`.
+pc-r3582,asana,PUT,/webhooks/{webhook_gid},updateWebhook,Update a webhook,"<b>Required scope: </b><code>webhooks:write</code>
+
+An existing webhook's filters can be updated by making a PUT request on the URL for that webhook. Note that the webhook's previous `filters` array will be completely overwritten by the `filters` sent in the PUT request."
+pc-r3392,asana,DELETE,/goals/{goal_gid},deleteGoal,Delete a goal,"A specific, existing goal can be deleted by making a DELETE request on the URL for that goal.
+
+Returns an empty data record."
+x20-e0513,klaviyo,DELETE,/api/forms/{id},delete_form,Delete Form,"Delete a given form.<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`forms:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/delete_form.json)"
+pc-r1248,square,POST,/v2/terminals/refunds/{terminal_refund_id}/cancel,CancelTerminalRefund,CancelTerminalRefund,Cancels an Interac Terminal refund request by refund request ID if the status of the request permits it.
+pc-r2996,jira,POST,/rest/api/2/workflowscheme/update,updateSchemes,Update workflow scheme,"Updates company-managed and team-managed project workflow schemes. This API doesn't have a concept of draft, so any changes made to a workflow scheme are immediately available. When changing the available statuses for issue types, an [asynchronous task](#async) migrates the issues as defined in the provided mappings.
+
+**[Permissions](#permissions) required:**
+
+ *  *Administer Jira* project permission to update all, including global-scoped, workflow schemes.
+ *  *Administer projects* project permission to update project-scoped workflow schemes."
+pc-r2999,jira,PUT,/rest/api/2/workflowscheme/{id},updateWorkflowScheme,Classic update workflow scheme,"Updates a company-manged project workflow scheme, including the name, default workflow, issue type to project mappings, and more. If the workflow scheme is active (that is, being used by at least one project), then a draft workflow scheme is created or updated instead, provided that `updateDraftIfNeeded` is set to `true`.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+pc-r3874,intercom,PUT,/audiences/{id},updateAudience,Update an audience,You can update the details of a single audience by making a PUT request to `https://api.intercom.io/audiences/{id}`.
+x20-e0026,auth0,DELETE,/flows/vault/connections/{id},delete_flows_vault_connections_by_id,Delete a Flows Vault connection,
+pc-r2452,jira,DELETE,/rest/api/2/attachment/{id},removeAttachment,Delete attachment,"Deletes an attachment from an issue.
+
+This operation can be accessed anonymously.
+
+**[Permissions](#permissions) required:** For the project holding the issue containing the attachment:
+
+ *  *Delete own attachments* [project permission](https://confluence.atlassian.com/x/yodKLg) to delete an attachment created by the calling user.
+ *  *Delete all attachments* [project permission](https://confluence.atlassian.com/x/yodKLg) to delete an attachment created by any user."
+x17-e1047,docusign,PUT,/v2.1/accounts/{accountId}/templates/{templateId}/recipients,Recipients_PutTemplateRecipients,Updates recipients in a template.,"Updates recipients in a template. 
+
+You can edit the following properties: `email`, `userName`, `routingOrder`, `faxNumber`, `deliveryMethod`, `accessCode`, and `requireIdLookup`."
+pc-r4102,canva,PATCH,/v1/folders/{folderId},updateFolder,,"Updates a folder's details using its `folderID`.
+Currently, you can only update a folder's name."
+x20-e0697,miro,PATCH,/v2/orgs/{org_id}/groups/{group_id},enterprise-update-group,Update user group,"Updates a user group in an organization.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>organizations:groups:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 1</a> <br/><h3>Enterprise only</h3> <p>This API is available only for <a target=_blank href=""/reference/api-reference#enterprise-plan"">Enterprise plan</a> users. You can only use this endpoint if you have the role of a Company Admin. You can request temporary access to Enterprise APIs using <a target=_blank href=""https://q2oeb0jrhgi.typeform.com/to/BVPTNWJ9"">this form</a>.</p>"
+pc-r0192,stripe,POST,/v1/entitlements/features/{id},PostEntitlementsFeaturesId,Updates a feature,<p>Update a feature’s metadata or permanently deactivate it.</p>
+pc-r0169,stripe,POST,/v1/customers/{customer}/sources/{id},PostCustomersCustomerSourcesId,Update a card,<p>Update a specified source for a given customer.</p>
+pc-r1122,square,PUT,/v2/locations/custom-attribute-definitions/{key},UpdateLocationCustomAttributeDefinition,UpdateLocationCustomAttributeDefinition,"Updates a location-related [custom attribute definition](entity:CustomAttributeDefinition) for a Square seller account.
+Use this endpoint to update the following fields: `name`, `description`, `visibility`, or the
+`schema` for a `Selection` data type.
+Only the definition owner can update a custom attribute definition."
+pc-r1249,square,POST,/v2/terminals/refunds/{terminal_refund_id}/dismiss,DismissTerminalRefund,DismissTerminalRefund,Dismisses a Terminal refund request if the status and type of the request permits it.
+pc-r2554,jira,POST,/rest/api/2/field/{id}/restore,restoreCustomField,Restore custom field from trash,"Restores a custom field from trash. See [Edit or delete a custom field](https://confluence.atlassian.com/x/Z44fOw) for more information on trashing and deleting custom fields.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+pc-r1758,digitalocean,PUT,/v2/account/keys/{ssh_key_identifier},sshKeys_update,Update an SSH Key's Name,"To update the name of an SSH key, send a PUT request to either `/v2/account/keys/$SSH_KEY_ID` or `/v2/account/keys/$SSH_KEY_FINGERPRINT`. Set the `name` attribute to the new name you want to use."
+x17-e0774,docusign,PUT,/v2.1/accounts/{accountId}/bulk_send_lists/{bulkSendListId},BulkSendV2CRUD_PutBulkSendList,Updates a bulk send list.,This method replaces the definition of an existing bulk send list.
+pc-r1718,spotify,DELETE,/playlists/{playlist_id}/followers,unfollow-playlist,Unfollow Playlist,"Remove the current user as a follower of a playlist.
+
+**Note:** This endpoint is deprecated. Use [Remove Items from Library](/documentation/web-api/reference/remove-library-items) instead."
+x20-e0307,hubspot,DELETE,/public/api/versioning/test/2027-03-beta/widgets/{widgetId},delete-/public/api/versioning/test/2027-03-beta/widgets/{widgetId},,
+pc-r1437,paypal,PATCH,/v1/billing/subscriptions/{id},subscriptions.patch,Update subscription,"Updates a subscription which could be in <code>ACTIVE</code> or <code>SUSPENDED</code> status. You can override plan level default attributes by providing customised values for plan path in the patch request.<br /> <ul> <li>You cannot update attributes that have already completed (Example - trial cycles can’t be updated if completed).</li> <li>Once overridden, changes to plan resource will not impact subscription.</li> <li>Any price update will not impact billing cycles within next 10 days (Applicable only for subscriptions funded by PayPal account).</li> </ul> Following are the fields eligible for patch.<table><thead><tr><th>Attribute or object</th><th>Operations</th></tr></thead><tbody><tr><td><code>billing_info.outstanding_balance</code></td><td>replace</td></tr><tr><td><code>custom_id</code></td><td>add,replace</td></tr><tr><td><code>plan.billing_cycles[@sequence==n].<br/>pricing_scheme.fixed_price</code></td><td>add,replace</td></tr><tr><td><code>plan.billing_cycles[@sequence==n].<br/>pricing_scheme.tiers</code></td><td>replace</td></tr><tr><td><code>plan.billing_cycles[@sequence==n].<br/>total_cycles</code></td><td>replace</td></tr><tr><td><code>plan.payment_preferences.<br/>auto_bill_outstanding</code></td><td>replace</td></tr><tr><td><code>plan.payment_preferences.<br/>payment_failure_threshold</code></td><td>replace</td></tr><tr><td><code>plan.taxes.inclusive</code></td><td>add,replace</td></tr><tr><td><code>plan.taxes.percentage</code></td><td>add,replace</td></tr><tr><td><code>shipping_amount</code></td><td>add,replace</td></tr><tr><td><code>start_time</code></td><td>replace</td></tr><tr><td><code>subscriber.shipping_address</code></td><td>add,replace</td></tr><tr><td><code>subscriber.payment_source (for subscriptions funded<br/>by card payments)</code></td><td>replace</td></tr></tbody></table>"
+x20-e0503,klaviyo,DELETE,/api/catalog-categories/{id}/relationships/items,remove_items_from_catalog_category,Remove Items from Catalog Category,"Delete item relationships for the given category ID.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`catalogs:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/remove_items_from_catalog_category.json)"
+x20-e0125,auth0,PATCH,/organizations/{id}/enabled_connections/{connectionId},patch_enabled_connections_by_connectionId,Update the Connection of an Organization,Modify the details of a specific connection currently enabled for an Organization.
+pc-r1312,zoom,DELETE,/im/groups/{groupId}/members/{memberId},imGroupMembersDelete,Delete an IM Group member,Delete a member from an IM Group under your account
+x17-e0411,okta,DELETE,/api/v1/idps/{idpId},deleteIdentityProvider,Delete an IdP,"Deletes an identity provider (IdP) integration by `idpId`
+* All existing IdP users are unlinked with the highest order profile source taking precedence for each IdP user.
+* Unlinked users keep their existing authentication provider such as `FEDERATION` or `SOCIAL`."
+pc-r2029,digitalocean,POST,/v2/load_balancers/{lb_id}/droplets,loadBalancers_add_droplets,Add Droplets to a Load Balancer,"To assign a Droplet to a load balancer instance, send a POST request to
+`/v2/load_balancers/$LOAD_BALANCER_ID/droplets`. In the body of the request,
+there should be a `droplet_ids` attribute containing a list of Droplet IDs.
+Individual Droplets can not be added to a load balancer configured with a
+Droplet tag. Attempting to do so will result in a ""422 Unprocessable Entity""
+response from the API.
+
+No response body will be sent back, but the response code will indicate
+success. Specifically, the response code will be a 204, which means that the
+action was successful with no returned body data."
+x20-e0759,zendesk,DELETE,/api/v2/brands/{brand_id},DeleteBrand,Delete a Brand,"Deletes a brand.
+
+#### Allowed for
+- Admins"
+x20-e0966,zendesk,PUT,/api/v2/slas/policies/reorder,ReorderSLAPolicies,Reorder SLA Policies,"#### Availability
+
+* Accounts on the Support Professional or Suite Growth plan or above
+
+#### Allowed For
+
+* Admins"
+pc-r2901,jira,PUT,/rest/api/2/settings/columns,setIssueNavigatorDefaultColumns,Set issue navigator default columns,"Sets the default issue navigator columns.
+
+The `columns` parameter accepts a navigable field value and is expressed as HTML form data. To specify multiple columns, pass multiple `columns` parameters. For example, in curl:
+
+`curl -X PUT -d columns=summary -d columns=description https://your-domain.atlassian.net/rest/api/2/settings/columns`
+
+If no column details are sent, then all default columns are removed.
+
+A navigable field is one that can be used as a column on the issue navigator. Find details of navigable issue columns using [Get fields](#api-rest-api-2-field-get).
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+pc-r3007,jira,DELETE,/rest/api/2/workflowscheme/{id}/draft,deleteWorkflowSchemeDraft,Delete draft workflow scheme,"Deletes a draft workflow scheme.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+pc-r2355,digitalocean,DELETE,/v2/gen-ai/model_evaluation_presets/{eval_preset_uuid},genai_delete_model_evaluation_preset,Delete Model Evaluation Preset,"To delete a saved model evaluation preset, send a DELETE request to `/v2/gen-ai/model_evaluation_presets/{eval_preset_uuid}`."
+x20-e0018,auth0,DELETE,/custom-domains/{id},delete_custom-domains_by_id,Delete custom domain configuration,Delete a custom domain and stop serving requests for it.
+x17-e0167,okta,PUT,/api/v1/authorizationServers/{authServerId}/scopes/{scopeId},replaceOAuth2Scope,Replace a custom token scope,Replaces a custom token scope
+pc-r2294,digitalocean,PUT,/v2/gen-ai/agents/{parent_agent_uuid}/child_agents/{child_agent_uuid},genai_update_attached_agent,Update Agent Route for an Agent,"To update an agent route for an agent, send a PUT request to `/v2/gen-ai/agents/{parent_agent_uuid}/child_agents/{child_agent_uuid}`."
+x20-e0770,zendesk,DELETE,/api/v2/deleted_tickets/destroy_many,BulkPermanentlyDeleteTickets,Delete Multiple Tickets Permanently,"Permanently deletes up to 100 soft-deleted tickets. See [Soft delete](https://support.zendesk.com/hc/en-us/articles/4408834005530#topic_zrm_wbj_1db)
+in the Zendesk GDPR docs. To soft delete tickets, use the [Bulk Delete Tickets](#bulk-delete-tickets) endpoint.
+
+This endpoint accepts a comma-separated list of up to 100 ticket ids. It enqueues
+a ticket deletion job and returns a payload with the jobs status.
+
+If one ticket fails to be deleted, the endpoint still attempts to delete the others. If the job succeeds,
+the tickets that were successfully deleted are permanently deleted. This operation can't be undone.
+
+This endpoint returns a `job_status` [JSON object](/api-reference/ticketing/ticket-management/job_statuses/#json-format) and queues a background job to do the work. Use the [Show Job Status](/api-reference/ticketing/ticket-management/job_statuses/#show-job-status) endpoint to check for the job's completion. Only a certain number of jobs can be queued or running at the same time. See [Job limit](/api-reference/introduction/rate-limits/#job-limit) for more information.
+
+#### Allowed For
+
+* Agents"
+x17-e0725,okta,DELETE,/privileged-access/api/v1/service-accounts/{id},deleteAppServiceAccount,Delete an app service account,Deletes an app service account specified by ID
+x17-e0293,okta,POST,/api/v1/eventHooks/{eventHookId}/lifecycle/deactivate,deactivateEventHook,Deactivate an event hook,Deactivates the event hook that matches the provided `id`
+pc-r4135,figma,POST,/v1/files/{file_key}/comments/{comment_id}/reactions,postCommentReaction,Add a reaction to a comment,Posts a new comment reaction on a file comment.
+x17-e0011,okta,POST,/api/v1/agentPools/{poolId}/updates/settings,updateAgentPoolsUpdateSettings,Update an agent pool update settings,Updates an agent pool update instance settings
+pc-r1431,paypal,PATCH,/v1/billing/plans/{id},plans.patch,Update plan,"Updates a plan with the `CREATED` or `ACTIVE` status. For an `INACTIVE` plan, you can make only status updates.<br/>You can patch these attributes and objects:<table><thead><tr><th>Attribute or object</th><th>Operations</th></tr></thead><tbody><tr><td><code>description</code></td><td>replace</td></tr><tr><td><code>payment_preferences.auto_bill_outstanding</code></td><td>replace</td></tr><tr><td><code>taxes.percentage</code></td><td>replace</td></tr><tr><td><code>payment_preferences.payment_failure_threshold</code></td><td>replace</td></tr><tr><td><code>payment_preferences.setup_fee</code></td><td>replace</td></tr><tr><td><code>payment_preferences.setup_fee_failure_action</code></td><td>replace</td></tr><tr><td><code>name</code></td><td>replace</td></tr></tbody></table>"
+pc-r2131,digitalocean,PUT,/v2/projects/default,projects_update_default,Update the Default Project,"To update you default project, send a PUT request to `/v2/projects/default`. All of the following attributes must be sent."
+pc-r1628,meta-whatsapp,POST,/{Version}/{Flow-ID}/assets,updateFlowJson,Update Flow JSON,"Used to upload a flow JSON file with the flow content. Refer to flow JSON documentation here [https://developers.facebook.com/docs/whatsapp/flows/reference/flowjson](https://developers.facebook.com/docs/whatsapp/flows/reference/flowjson)
+
+The file must be attached as from data. The response will include any validation errors in the JSON file"
+x20-e0268,hubspot,DELETE,/crm/objects/2026-09-beta/{objectType}/{objectId},delete-/crm/objects/2026-09-beta/{objectType}/{objectId}_/crm/objects/2026-09-beta/{objectType}/{objectId},Archive,Move an Object identified by `{objectId}` to the recycling bin.
+x20-e0473,hubspot,PUT,/crm/pipelines/2026-09/{objectType}/{pipelineId}/stages/{stageId},put-/crm/pipelines/2026-09/{objectType}/{pipelineId}/stages/{stageId},Update stage,"Update a specific stage within a pipeline for a given object type in HubSpot. This endpoint allows you to modify the details of a stage, such as its label, display order, and metadata. Use this to keep your pipeline stages up-to-date and aligned with your business processes."
+x20-e0475,hubspot,PUT,/crm/v3/objects/partner_services/{partnerServiceId}/associations/{toObjectType}/{toObjectId}/{associationType},put-/crm/v3/objects/partner_services/{partnerServiceId}/associations/{toObjectType}/{toObjectId}/{associationType},Associate a partner service with another object,Create an association between a partner service and another specified object.
+x17-e1045,docusign,PUT,/v2.1/accounts/{accountId}/templates/{templateId}/notification,Notification_PutTemplatesTemplateIdNotification,Updates the notification  structure for an existing template.,Updates the notification structure for an existing template. Use this endpoint to set reminder and expiration notifications.
+pc-r1858,digitalocean,DELETE,/v2/databases/{database_cluster_uuid}/users/{username},databases_delete_user,Remove a Database User,"To remove a specific database user, send a DELETE request to
+`/v2/databases/$DATABASE_ID/users/$USERNAME`.
+
+A status of 204 will be given. This indicates that the request was processed
+successfully, but that no response body is needed.
+
+Note: User management is not supported for Caching or Valkey clusters."
+pc-r0410,stripe,POST,/v1/setup_intents/{intent},PostSetupIntentsIntent,Update a SetupIntent,<p>Updates a SetupIntent object.</p>
+pc-r2010,digitalocean,PUT,/v2/kubernetes/clusters/{cluster_id}/node_pools/{node_pool_id},kubernetes_update_nodePool,Update a Node Pool in a Kubernetes Cluster,"To update the name of a node pool, edit the tags applied to it, or adjust its
+number of nodes, send a PUT request to
+`/v2/kubernetes/clusters/$K8S_CLUSTER_ID/node_pools/$NODE_POOL_ID` with the
+following attributes."
+pc-r3865,intercom,POST,/articles/{article_id}/tags,attachTagToArticle,Add a tag to an article,"Apply an existing tag to an article. Returns the tag that was applied.
+
+The tag must already exist in the workspace (create tags with the Tags API),
+and the authenticating teammate must have the `manage_knowledge_base_content`
+permission.
+
+Requires the `read_write_articles_scope` OAuth scope."
+x17-e1226,xero,POST,/CreditNotes/{CreditNoteID}/Attachments/{FileName},updateCreditNoteAttachmentByFileName,Updates attachments on a specific credit note by file name,
+pc-r1842,digitalocean,PUT,/v2/databases/{database_cluster_uuid}/firewall,databases_update_firewall_rules,Update Firewall Rules (Trusted Sources) for a Database,"To update a database cluster's firewall rules (known as ""trusted sources"" in the control panel), send a PUT request to `/v2/databases/$DATABASE_ID/firewall` specifying which resources should be able to open connections to the database. You may limit connections to specific Droplets, Kubernetes clusters, or IP addresses. When a tag is provided, any Droplet or Kubernetes node with that tag applied to it will have access. The firewall is limited to 100 rules (or trusted sources). You cannot add IPv6 addresses as trusted sources. For additional limits, see your database engine's limits page. When possible, we recommend [placing your databases into a VPC network](https://docs.digitalocean.com/products/networking/vpc/) to limit access to them instead of using a firewall.
+A successful request returns a 204 status code with no content."
+pc-r2809,jira,POST,/rest/api/2/project/{projectIdOrKey}/archive,archiveProject,Archive project,"Archives a project. You can't delete a project if it's archived. To delete an archived project, restore the project and then delete it. To restore a project, use the Jira UI.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+x20-e0082,auth0,PATCH,/attack-protection/breached-password-detection,patch_breached-password-detection,Update Breached Password Detection settings,Update details of the Breached Password Detection configuration of your tenant.
+x20-e0706,miro,PATCH,/v2/orgs/{org_id}/teams/{team_id}/settings,enterprise-update-team-settings,Update team settings,"Updates team settings of an existing team.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>organizations:teams:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a> <br/><h3>Enterprise only</h3> <p>This API is available only for <a target=_blank href=""/reference/api-reference#enterprise-plan"">Enterprise plan</a> users. You can only use this endpoint if you have the role of a Company Admin. You can request temporary access to Enterprise APIs using <a target=_blank href=""https://q2oeb0jrhgi.typeform.com/to/BVPTNWJ9"">this form</a>.</p>"
+x17-e0775,docusign,DELETE,/v2.1/accounts/{accountId}/bulk_send_lists/{bulkSendListId},BulkSendV2CRUD_DeleteBulkSendList,Deletes a bulk send list.,This method deletes a bulk send list.
+x20-e0044,auth0,DELETE,/organizations/{id}/connections/{connection_id},delete_organization_connection,Delete a connection from an organization,
+x17-e1104,docusign,DELETE,/v2.1/accounts/{accountId}/users/{userId}/profile/image,UserProfileImage_DeleteUserProfileImage,Deletes the user profile image for the specified user.,"Deletes the user profile image from the  specified user's profile.
+
+The userId parameter specified in the endpoint must match the authenticated user's user ID and the user must be a member of the specified account."
+x20-e0646,miro,DELETE,/v2-experimental/boards/{board_id}/shapes/{item_id},delete-shape-item-flowchart,Delete shape item,"Deletes a flowchart shape item from the board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 3</a><br/>"
+pc-r1023,square,DELETE,/v2/customers/{customer_id},DeleteCustomer,DeleteCustomer,"Deletes a customer profile from a business.
+
+To delete a customer profile that was created by merging existing profiles, you must use the ID of the newly created profile."
+pc-r3012,jira,PUT,/rest/api/2/workflowscheme/{id}/draft/issuetype/{issueType},setWorkflowSchemeDraftIssueType,Set workflow for issue type in draft workflow scheme,"Sets the workflow for an issue type in a workflow scheme's draft.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+pc-r3651,datadog,DELETE,/api/v1/integration/aws/filtering,DeleteAWSTagFilter,Delete a tag filtering entry,Delete a tag filtering entry.
+pc-r3629,datadog,POST,/api/v1/downtime/cancel/by_scope,CancelDowntimesByScope,Cancel downtimes by scope,Delete all downtimes that match the scope of `X`. **Note:** This only interacts with Downtimes created using v1 endpoints. This endpoint has been deprecated and will not be replaced. Please use v2 endpoints to find and cancel downtimes.
+pc-r2747,jira,DELETE,/rest/api/2/notificationscheme/{notificationSchemeId},deleteNotificationScheme,Delete notification scheme,"Deletes a notification scheme.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+pc-r3536,asana,POST,/tasks/{task_gid}/removeFollowers,removeFollowerForTask,Remove followers from a task,"<b>Required scope: </b><code>tasks:write</code>
+
+Removes each of the specified followers from the task if they are following. Returns the complete, updated record for the affected task."
+pc-r0167,stripe,POST,/v1/customers/{customer}/sources,PostCustomersCustomerSources,Create a card,"<p>When you create a new credit card, you must specify a customer or recipient on which to create it.</p>
+
+<p>If the card’s owner has no default card, then the new card will become the default.
+However, if the owner already has a default, then it will not change.
+To change the default, you should <a href=""/api/customers/update"">update the customer</a> to have a new <code>default_source</code>.</p>"
+x17-e0223,okta,DELETE,/api/v1/brands/{brandId}/themes/{themeId}/favicon,deleteBrandThemeFavicon,Delete the favicon,Deletes a theme favicon. The theme will use the default Okta favicon.
+x17-e0267,okta,PUT,/api/v1/domains/{domainId},replaceCustomDomain,Replace a custom domain's brand,Replaces a custom domain's brand
+x17-e1077,docusign,PUT,/v2.1/accounts/{accountId}/users,Users_PutUsers,Changes one or more users in the specified account.,This method updates the information about one or more account users.
+pc-r1325,zoom,PATCH,/meetings/{meetingId}/livestream,meetingLiveStreamUpdate,Update a meeting live stream,Update a meeting's live stream
+x17-e0078,okta,PATCH,/api/v1/apps/{appId}/group-push/mappings/{mappingId},updateGroupPushMapping,Update a group push mapping,Updates the status of a group push mapping
+pc-r1024,square,POST,/v2/customers/{customer_id}/cards,CreateCustomerCard,CreateCustomerCard,"Adds a card on file to an existing customer.
+
+As with charges, calls to `CreateCustomerCard` are idempotent. Multiple
+calls with the same card nonce return the same card record that was created
+with the provided nonce during the _first_ call."
+x20-e0703,miro,PATCH,/v2/orgs/{org_id}/teams/{team_id}/projects/{project_id},enterprise-update-project,Update project,"Update information about a project, such as the project name.<h4>Note</h4> <em>Projects</em> have been renamed to <em>Spaces</em>, and the terms can be used interchangeably.<h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>projects:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 1</a> <br/><h3>Enterprise only</h3> <p>This API is available only for <a target=_blank href=""/reference/api-reference#enterprise-plan"">Enterprise plan</a> users. You can only use this endpoint if you have the role of a Company Admin. You can request temporary access to Enterprise APIs using <a target=_blank href=""https://q2oeb0jrhgi.typeform.com/to/BVPTNWJ9"">this form</a>.</p>"
+x20-e0443,hubspot,PUT,/automation/v4/flows/{flowId},put-/automation/v4/flows/{flowId},Update a workflow,Update the details of an existing automation flow by providing the necessary information in the request body.
+pc-r2227,digitalocean,PUT,/v2/vector-databases/{id},vectorDatabases_update,Update a Vector Database,"To update an existing vector database, send a PUT request to `/v2/vector-databases/{id}`. The response body contains a JSON object with a `vector_db` key holding the updated vector database."
+pc-r0984,square,POST,/v2/catalog/batch-delete,BatchDeleteCatalogObjects,BatchDeleteCatalogObjects,"Deletes a set of [CatalogItem](entity:CatalogItem)s based on the
+provided list of target IDs and returns a set of successfully deleted IDs in
+the response. Deletion is a cascading event such that all children of the
+targeted object are also deleted. For example, deleting a CatalogItem will
+also delete all of its [CatalogItemVariation](entity:CatalogItemVariation)
+children.
+
+`BatchDeleteCatalogObjects` succeeds even if only a portion of the targeted
+IDs can be deleted. The response will only include IDs that were
+actually deleted.
+
+To ensure consistency, only one delete request is processed at a time per seller account.
+While one (batch or non-batch) delete request is being processed, other (batched and non-batched)
+delete requests are rejected with the `429` error code."
+pc-r0251,stripe,POST,/v1/invoices/{invoice}/lines/{line_item_id},PostInvoicesInvoiceLinesLineItemId,Update an invoice's line item,"<p>Updates an invoice’s line item. Some fields, such as <code>tax_amounts</code>, only live on the invoice line item,
+so they can only be updated through this endpoint. Other fields, such as <code>amount</code>, live on both the invoice
+item and the invoice line item, so updates on this endpoint will propagate to the invoice item as well.
+Updating an invoice’s line item is only possible before the invoice is finalized.</p>"
+pc-r3366,asana,PUT,/budgets/{budget_gid},updateBudget,Update a budget,"An existing budget can be updated by making a PUT request on the URL for
+that budget. Only the fields provided in the `data` block will be updated;
+any unspecified fields will remain unchanged."
+pc-r0936,openai,DELETE,/responses/{response_id}?beta=true,beta_deleteResponse,Delete a model response,Deletes a model response with the given ID.
+pc-r0800,openai,DELETE,/responses/{response_id},deleteResponse,Delete a model response,Deletes a model response with the given ID.
+pc-r2552,jira,DELETE,/rest/api/2/field/{fieldKey}/option/{optionId}/issue,replaceIssueFieldOption,Replace issue field option,"Deselects an issue-field select-list option from all issues where it is selected. A different option can be selected to replace the deselected option. The update can also be limited to a smaller set of issues by using a JQL query.
+
+Connect and Forge app users with *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg) can override the screen security configuration using `overrideScreenSecurity` and `overrideEditableFlag`.
+
+This is an [asynchronous operation](#async). The response object contains a link to the long-running task.
+
+Note that this operation **only works for issue field select list options added by Connect apps**, it cannot be used with issue field select list options created in Jira or using operations from the [Issue custom field options](#api-group-Issue-custom-field-options) resource.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg). Jira permissions are not required for the app providing the field."
+pc-r0246,stripe,DELETE,/v1/invoices/{invoice},DeleteInvoicesInvoice,Delete a draft invoice,"<p>Permanently deletes a one-off invoice draft. This cannot be undone. Attempts to delete invoices that are no longer in a draft state will fail; once an invoice has been finalized or if an invoice is for a subscription, it must be <a href=""/api/invoices/void"">voided</a>.</p>"
+x17-e0489,okta,POST,/api/v1/org/preferences/showEndUserFooter,setOrgShowOktaUIFooter,Set the show dashboard footer preference,Sets the preference to show the Okta UI footer for all end users of your org
+pc-r3658,datadog,POST,/api/v1/integration/aws/logs/services,EnableAWSLogServices,Enable an AWS Logs integration,Enable automatic log collection for a list of services. This should be run after running `CreateAWSLambdaARN` to save the configuration.
+x17-e0117,okta,PUT,/api/v1/authenticators/{authenticatorId}/methods/{methodType},replaceAuthenticatorMethod,Replace an authenticator method,Replaces a method of `methodType` for an authenticator identified by `authenticatorId`
+x20-e0680,miro,PATCH,/v2-experimental/boards/{board_id}/shapes/{item_id},update-shape-item-flowchart,Update shape item,"Updates a flowchart shape item on a board based on the data and style properties provided in the request body.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+x17-e1237,xero,POST,/ExpenseClaims/{ExpenseClaimID},updateExpenseClaim,Updates a specific expense claims,
+pc-r3277,mailchimp,DELETE,/ecommerce/stores/{store_id}/promo-rules/{promo_rule_id},deleteEcommerceStoresIdPromorulesId,Delete promo rule,Delete a promo rule from a store.
+x17-e1334,xero,POST,/Quotes/{QuoteID}/Attachments/{FileName},updateQuoteAttachmentByFileName,Updates a specific attachment from a specific quote by filename,
+x20-e0101,auth0,PATCH,/custom-domains/{id},patch_custom-domains_by_id,Update custom domain configuration,"Update a custom domain.
+
+These are the attributes that can be updated:
+
+- custom_client_ip_header
+- tls_policy
+
+**Updating CUSTOM_CLIENT_IP_HEADER for a custom domain**
+
+To update the `custom_client_ip_header` for a domain, the body to
+send should be:
+
+```json
+{ ""custom_client_ip_header"": ""cf-connecting-ip"" }
+```
+
+**Updating TLS_POLICY for a custom domain**
+
+To update the `tls_policy` for a domain, the body to send should be:
+
+```json
+{ ""tls_policy"": ""recommended"" }
+```
+
+TLS Policies:
+
+- recommended - for modern usage this includes TLS 1.2 only
+
+Some considerations:
+
+- The TLS ciphers and protocols available in each TLS policy follow industry recommendations, and may be updated occasionally.
+- The `compatible` TLS policy is no longer supported."
+pc-r1049,square,PUT,/v2/events/disable,DisableEvents,DisableEvents,"Disables events to prevent them from being searchable.
+All events are disabled by default. You must enable events to make them searchable.
+Disabling events for a specific time period prevents them from being searchable, even if you re-enable them later."
+pc-r3742,datadog,PATCH,/api/v1/slo/correction/{slo_correction_id},UpdateSLOCorrection,Update an SLO correction,Update the specified SLO correction object.
+pc-r2257,digitalocean,PATCH,/v2/vpcs/{vpc_id}/peerings/{vpc_peering_id},vpcs_patch_peerings,Update a VPC Peering,"To update the name of a VPC peering in a particular VPC, send a PATCH request 
+to `/v2/vpcs/$VPC_ID/peerings/$VPC_PEERING_ID` with the new `name` in the 
+request body."
+x20-e0639,klaviyo,POST,/client/push-tokens,create_client_push_token,Create or Update Client Push Token,"Create or update a push token.
+
+This endpoint is specifically designed to be called from our mobile SDKs ([iOS](https://github.com/klaviyo/klaviyo-swift-sdk) and [Android](https://github.com/klaviyo/klaviyo-android-sdk)) and requires a [public API key (site ID)](https://www.klaviyo.com/settings/account/api-keys). Never use a private API key with our client-side endpoints.
+You must have push notifications enabled to use this endpoint.
+
+To migrate push tokens from another platform to Klaviyo, please use our server-side [POST /api/push-tokens](https://developers.klaviyo.com/en/reference/create_push_token) endpoint instead.<br><br>*Rate limits*:<br>Burst: `150/s`<br>Steady: `1400/m`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/create_client_push_token.json)"
+pc-r3283,mailchimp,PATCH,/ecommerce/stores/{store_id}/promo-rules/{promo_rule_id}/promo-codes/{promo_code_id},patchEcommerceStoresIdPromocodesId,Update promo code,Update a promo code.
+pc-r2916,jira,POST,/rest/api/2/task/{taskId}/cancel,cancelTask,Cancel task,"Cancels a task.
+
+**[Permissions](#permissions) required:** either of:
+
+ *  *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg).
+ *  Creator of the task."
+pc-r4162,figma,PUT,/v1/dev_resources,putDevResources,Update dev resources,"Bulk update dev resources across multiple files.
+
+Ids for dev resources that are successfully updated will show up in the `links_updated` array in the response.
+
+If there are any dev resources that cannot be updated, you may still get a 200 response. These resources will show up in the `errors` array."
+pc-r1619,meta-whatsapp,POST,/{Version}/{Phone-Number-ID}/conversational_automation,configureConversationalAutomation,Configure Conversational Automation,"Configure conversational automation settings for a WhatsApp Business Account phone number,
+including welcome messages, conversation prompts (ice breakers), and bot commands.
+
+
+**Use Cases:**
+- Set up automated welcome messages for new customer conversations
+- Configure conversation prompts to guide customer interactions
+- Define bot commands for common customer service scenarios
+- Update existing automation settings
+- Enable or disable specific automation features
+
+
+**Rate Limiting:**
+Standard Graph API rate limits apply. Use appropriate retry logic with exponential backoff.
+
+
+**Validation:**
+- Command names must be unique within the same phone number
+- Prompts and command descriptions must comply with WhatsApp Business policies
+- Maximum limits are enforced for prompts and commands"
+pc-r0234,stripe,POST,/v1/invoice_rendering_templates/{template}/unarchive,PostInvoiceRenderingTemplatesTemplateUnarchive,Unarchive an invoice rendering template,<p>Unarchive an invoice rendering template so it can be used on new Stripe objects again.</p>
+pc-r2616,jira,DELETE,/rest/api/2/issue/properties/{propertyKey},bulkDeleteIssueProperty,Bulk delete issue property,"Deletes a property value from multiple issues. The issues to be updated can be specified by filter criteria.
+
+The criteria the filter used to identify eligible issues are:
+
+ *  `entityIds` Only issues from this list are eligible.
+ *  `currentValue` Only issues with the property set to this value are eligible.
+
+If both criteria is specified, they are joined with the logical *AND*: only issues that satisfy both criteria are considered eligible.
+
+If no filter criteria are specified, all the issues visible to the user and where the user has the EDIT\_ISSUES permission for the issue are considered eligible.
+
+This operation is:
+
+ *  transactional, either the property is deleted from all eligible issues or, when errors occur, no properties are deleted.
+ *  [asynchronous](#async). Follow the `location` link in the response to determine the status of the task and use [Get task](#api-rest-api-2-task-taskId-get) to obtain subsequent updates.
+
+**[Permissions](#permissions) required:**
+
+ *  *Browse projects* [ project permission](https://confluence.atlassian.com/x/yodKLg) for each project containing issues.
+ *  If [issue-level security](https://confluence.atlassian.com/x/J4lKLg) is configured, issue-level security permission to view the issue.
+ *  *Edit issues* [project permission](https://confluence.atlassian.com/x/yodKLg) for each issue."
+pc-r0266,stripe,POST,/v1/issuing/cardholders/{cardholder},PostIssuingCardholdersCardholder,Update a cardholder,<p>Updates the specified Issuing <code>Cardholder</code> object by setting the values of the parameters passed. Any parameters not provided will be left unchanged.</p>
+pc-r4036,intercom,DELETE,/tickets/{ticket_id}/tags/{tag_id},detachTagFromTicket,Remove tag from a ticket,You can remove tag from a specific ticket. This will return a tag object for the tag that was removed from the ticket.
+pc-r2748,jira,DELETE,/rest/api/2/notificationscheme/{notificationSchemeId}/notification/{notificationId},removeNotificationFromNotificationScheme,Remove notification from notification scheme,"Removes a notification from a notification scheme.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+x20-e0523,klaviyo,DELETE,/api/tags/{id}/relationships/campaigns,remove_tag_from_campaigns,Remove Tag from Campaigns,"Remove a tag's association with one or more campaigns.
+
+
+Use the request body to pass in the ID(s) of the campaign(s) whose association with the tag
+will be removed.<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`campaigns:write`
+`tags:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/remove_tag_from_campaigns.json)"
+pc-r1966,digitalocean,DELETE,/v2/floating_ips/{floating_ip},floatingIPs_delete,Delete a Floating IP,"To delete a floating IP and remove it from your account, send a DELETE request
+to `/v2/floating_ips/$FLOATING_IP_ADDR`.
+
+A successful request will receive a 204 status code with no body in response.
+This indicates that the request was processed successfully."
+pc-r1066,square,PUT,/v2/inventory/adjustment-reasons/update,UpdateInventoryAdjustmentReason,UpdateInventoryAdjustmentReason,Updates a custom inventory adjustment reason.
+x20-e0560,klaviyo,PATCH,/api/web-feeds/{id},update_web_feed,Update Web Feed,"Update the web feed with the given ID.<br><br>*Rate limits*:<br>Burst: `1/s`<br>Steady: `15/m`
+
+**Scopes:**
+`web-feeds:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/update_web_feed.json)"
+pc-r0691,openai,POST,/organization/data_retention,update-organization-data-retention,Update organization data retention,Updates organization data retention controls.
+pc-r3266,mailchimp,DELETE,/ecommerce/stores/{store_id}/carts/{cart_id}/lines/{line_id},deleteEcommerceStoresIdCartsLinesId,Delete cart line item,Delete a specific cart line item.
+x20-e0537,klaviyo,PATCH,/api/catalog-items/{id},update_catalog_item,Update Catalog Item,"Update a catalog item with the given item ID.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`catalogs:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/update_catalog_item.json)"
+pc-r1085,square,DELETE,/v2/invoices/{invoice_id},DeleteInvoice,DeleteInvoice,"Deletes the specified invoice. When an invoice is deleted, the 
+associated order status changes to CANCELED. You can only delete a draft 
+invoice (you cannot delete a published invoice, including one that is scheduled for processing)."
+pc-r2614,jira,POST,/rest/api/2/issue/properties/multi,bulkSetIssuePropertiesByIssue,Bulk set issue properties by issue,"Sets or updates entity property values on issues. Up to 10 entity properties can be specified for each issue and up to 100 issues included in the request.
+
+The value of the request body must be a [valid](http://tools.ietf.org/html/rfc4627), non-empty JSON.
+
+This operation is:
+
+ *  [asynchronous](#async). Follow the `location` link in the response to determine the status of the task and use [Get task](#api-rest-api-2-task-taskId-get) to obtain subsequent updates.
+ *  non-transactional. Updating some entities may fail. Such information will available in the task result.
+
+**[Permissions](#permissions) required:**
+
+ *  *Browse projects* and *Edit issues* [project permissions](https://confluence.atlassian.com/x/yodKLg) for the project containing the issue.
+ *  If [issue-level security](https://confluence.atlassian.com/x/J4lKLg) is configured, issue-level security permission to view the issue."
+x20-e0970,zendesk,PUT,/api/v2/task_lists/{task_list_id},UpdateCustomTaskList,Update Custom Task List,"Updates the name or description of a custom task list. Only custom task lists (those without a template) can be updated.
+
+#### Allowed For
+
+* Agents"
+x20-e0340,hubspot,PATCH,/crm/objects/2026-09-beta/{objectType}/{objectId},patch-/crm/objects/2026-09-beta/{objectType}/{objectId}_/crm/objects/2026-09-beta/{objectType}/{objectId},Update,"Perform a partial update of an Object identified by `{objectId}`. `{objectId}` refers to the internal object ID by default, or optionally any unique property value as specified by the `idProperty` query param. Provided property values will be overwritten. Read-only and non-existent properties will be ignored. Properties values can be cleared by passing an empty string."
+pc-r1737,spotify,PUT,/me/player,transfer-a-users-playback,Transfer Playback,Transfer playback to a new device and optionally begin playback. This API only works for users who have Spotify Premium. The order of execution is not guaranteed when you use this API with other Player API endpoints.
+pc-r3304,mailchimp,PUT,/ecommerce/stores/{store_id}/products/{product_id}/variants/{variant_id},putEcommerceStoresIdProductsIdVariantsId,Add or update product variant,Add or update a product variant.
+pc-r0871,openai,DELETE,/skills/{skill_id},DeleteSkill,Delete Skill,Delete a skill by its ID.
+pc-r0351,stripe,DELETE,/v1/plans/{plan},DeletePlansPlan,Delete a plan,<p>Deleting plans means new subscribers can’t be added. Existing subscribers aren’t affected.</p>
+pc-r2540,jira,DELETE,/rest/api/2/field/{fieldId}/context/{contextId}/option/{optionId}/issue,replaceCustomFieldOption,Replace custom field options,"Replaces the options of a custom field.
+
+Note that this operation **only works for issue field select list options created in Jira or using operations from the [Issue custom field options](#api-group-Issue-custom-field-options) resource**, it cannot be used with issue field select list options created by Connect or Forge apps.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+pc-r3949,intercom,DELETE,/content_snippets/{content_snippet_id}/tags/{id},detachTagFromContentSnippet,Remove a tag from a content snippet,"Remove a tag from a content snippet. Returns the tag that was removed, with
+null `applied_at` and `applied_by`.
+
+The authenticating teammate must have the `manage_knowledge_base_content`
+permission.
+
+Requires the `read_write_content_snippets` OAuth scope."
+x17-e0512,okta,DELETE,/api/v1/policies/{policyId},deletePolicy,Delete a policy,Deletes a policy
+pc-r1432,paypal,POST,/v1/billing/plans/{id}/activate,plans.activate,Activate plan,"Activates a plan, by ID."
+pc-r1185,square,POST,/v2/orders/custom-attributes/bulk-upsert,BulkUpsertOrderCustomAttributes,BulkUpsertOrderCustomAttributes,"Creates or updates order [custom attributes](entity:CustomAttribute) as a bulk operation.
+
+Use this endpoint to delete one or more custom attributes from one or more orders.
+A custom attribute is based on a custom attribute definition in a Square seller account.  (To create a
+custom attribute definition, use the [CreateOrderCustomAttributeDefinition](api-endpoint:OrderCustomAttributes-CreateOrderCustomAttributeDefinition) endpoint.)
+
+This `BulkUpsertOrderCustomAttributes` endpoint accepts a map of 1 to 25 individual upsert
+requests and returns a map of individual upsert responses. Each upsert request has a unique ID
+and provides an order ID and custom attribute. Each upsert response is returned with the ID
+of the corresponding request.
+
+To create or update a custom attribute owned by another application, the `visibility` setting
+must be `VISIBILITY_READ_WRITE_VALUES`. Note that seller-defined custom attributes
+(also known as custom fields) are always set to `VISIBILITY_READ_WRITE_VALUES`."
+pc-r3731,datadog,PATCH,/api/v1/security_analytics/signals/{signal_id}/assignee,EditSecurityMonitoringSignalAssignee,Modify the triage assignee of a security signal,This endpoint is deprecated - Modify the triage assignee of a security signal.
+x17-e1229,xero,DELETE,/CreditNotes/{CreditNoteID}/Allocations/{AllocationID},deleteCreditNoteAllocations,Deletes an Allocation from a Credit Note,
+pc-r3861,intercom,DELETE,/articles/{article_id},deleteArticle,Delete an article,You can delete a single article by making a DELETE request to `https://api.intercom.io/articles/<id>`.
+x17-e0437,okta,POST,/api/v1/inlineHooks/{inlineHookId}/lifecycle/deactivate,deactivateInlineHook,Deactivate an inline hook,Deactivates the inline hook by `inlineHookId`
+x17-e0154,okta,PUT,/api/v1/authorizationServers/{authServerId}/policies/{policyId}/rules/{ruleId},replaceAuthorizationServerPolicyRule,Replace a policy rule,Replaces the configuration of the Policy Rule defined in the specified Custom Authorization Server and Policy
+pc-r2863,jira,DELETE,/rest/api/2/resolution/{id},deleteResolution,Delete resolution,"Deletes an issue resolution.
+
+This operation is [asynchronous](#async). Follow the `location` link in the response to determine the status of the task and use [Get task](#api-rest-api-2-task-taskId-get) to obtain subsequent updates.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+pc-r2377,digitalocean,DELETE,/v2/gen-ai/models/routers/{uuid},genai_delete_model_router,Delete a Model Router,"To delete a model router, send a DELETE request to `/v2/gen-ai/models/routers/{uuid}`."
+x20-e0502,klaviyo,DELETE,/api/catalog-categories/{id},delete_catalog_category,Delete Catalog Category,"Delete a catalog category using the given category ID.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`catalogs:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/delete_catalog_category.json)"
+pc-r3561,asana,PUT,/time_tracking_entries/{time_tracking_entry_gid},updateTimeTrackingEntry,Update a time tracking entry,"A specific, existing time tracking entry can be updated by making a `PUT` request on
+the URL for that time tracking entry. Only the fields provided in the `data` block
+will be updated; any unspecified fields will remain unchanged.
+
+When using this method, it is best to specify only those fields you wish
+to change, or else you may overwrite changes made by another user since
+you last retrieved the task.
+
+Returns the complete updated time tracking entry record.
+
+#### Access requirements
+
+Access to this endpoint has two levels:
+
+- **Endpoint access** requires time tracking to be available through the domain's plan
+or add-ons. A request from a domain without time tracking access returns a
+`402 Payment Required` error for every request to this endpoint.
+
+- **Field access** for some request fields requires the Timesheets and Budgets add-on.
+Fields with this requirement are noted in the request schema. Including one of these
+fields without the add-on returns a `402 Payment Required` error, even when the rest of
+the request is valid.
+
+Because the field-level requirement is separate, the same endpoint may return `200` or
+`402` for the same domain depending on which fields are sent: a request that only uses
+fields available with endpoint access succeeds on any domain that meets the endpoint
+requirement, while a request that includes a field requiring the add-on also requires
+the add-on."
+pc-r1689,spotify,PUT,/playlists/{playlist_id}/items,reorder-or-replace-playlists-items,Update Playlist Items,"Either reorder or replace items in a playlist depending on the request's parameters.
+To reorder items, include `range_start`, `insert_before`, `range_length` and `snapshot_id` in the request's body.
+To replace items, include `uris` as either a query parameter or in the request's body.
+Replacing items in a playlist will overwrite its existing items. This operation can be used for replacing or clearing items in a playlist.
+<br/>
+**Note**: Replace and reorder are mutually exclusive operations which share the same endpoint, but have different parameters.
+These operations can't be applied together in a single request."
+x17-e0473,okta,PUT,/api/v1/org,replaceOrgSettings,Replace the Org general settings,Replaces the Org General Settings for your Okta org
+x20-e0990,zendesk,PUT,/api/v2/users/update_many,UpdateManyUsers,Update Many Users,
+pc-r1817,digitalocean,DELETE,/v2/certificates/{certificate_id},certificates_delete,Delete a Certificate,"To delete a specific certificate, send a DELETE request to
+`/v2/certificates/$CERTIFICATE_ID`."
+pc-r2472,jira,PUT,/rest/api/2/config/fieldschemes/fields,updateFieldsAssociatedWithSchemes,Update fields associated with field schemes,"Update fields associated with field association schemes.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+pc-r1212,square,POST,/v2/subscriptions/bulk-swap-plan,BulkSwapPlan,BulkSwapPlan,"Schedules a plan variation change for all active subscriptions under a given plan
+variation. For more information, see [Swap Subscription Plan Variations](https://developer.squareup.com/docs/subscriptions-api/swap-plan-variations)."
+x20-e0664,miro,DELETE,/v2/boards/{board_id}/texts/{item_id},delete-text-item,Delete text item,"Deletes a text item from the board<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 3</a><br/>"
+pc-r2783,jira,PUT,/rest/api/2/priority/{id},updatePriority,Update priority,"Updates an issue priority.
+
+At least one request body parameter must be defined.
+
+**Deprecation notice:** The `iconUrl` parameter was sunset on 16th Mar 2025, and replaced with `avatarId`. See [CHANGE-1525](https://developer.atlassian.com/changelog/#CHANGE-1525).
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+pc-r0876,openai,DELETE,/skills/{skill_id}/versions/{version},DeleteSkillVersion,Delete Skill Version,Delete a skill version.
+pc-r0971,square,PUT,/v2/bookings/{booking_id},UpdateBooking,UpdateBooking,"Updates a booking.
+
+To call this endpoint with buyer-level permissions, set `APPOINTMENTS_WRITE` for the OAuth scope.
+To call this endpoint with seller-level permissions, set `APPOINTMENTS_ALL_WRITE` and `APPOINTMENTS_WRITE` for the OAuth scope.
+
+For calls to this endpoint with seller-level permissions to succeed, the seller must have subscribed to *Appointments Plus*
+or *Appointments Premium*."
+pc-r2923,jira,DELETE,/rest/api/2/universal_avatar/type/{type}/owner/{owningObjectId}/avatar/{id},deleteAvatar,Delete avatar,"Deletes an avatar from a project, issue type or priority.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+x20-e0834,zendesk,PATCH,/api/v2/custom_objects/{custom_object_key}/fields/{custom_object_field_key_or_id},UpdateCustomObjectField,Update Custom Object Field,"Updates individual custom object fields. The updating rules are as follows:
+* Takes a `custom_object_field` object that specifies the properties to update.
+* The `key` property cannot be updated.
+* If updating a standard field, only the `title`, `description`, and `properties` attributes can be updated.
+* Standard name field is always required. Therefore, the `required` property for standard name field isn't editable.
+* The `properties` parameter is comprised of four parts and can't be changed if any records exist for the object.
+    * `autoincrement_enabled`: A Boolean that enables and disables autonumbering. Must be false if is_unique is true.
+    * `autoincrement_prefix`: A string value that is used as a prefix to the autogenerated numbers. It can't exceed 30 characters.
+    * `autoincrement_padding`: An integer specifying the starting number of digits in the autogenerated numbers. This value may be between 0-9. However, if you create records in excess of of these digits, additional digits are added as necessary.
+    * `autoincrement_next_sequence`: An integer that will be used as the next number in the autonumbering sequence. It can't be negative or less than the current autonumbering value.
+    * `is_unique`: A Boolean that enforces uniqueness for manually entered record names. When true, custom object record names must be unique. Must be false if autoincrement_enabled is true.
+
+#### Updating drop-down field options
+
+You can also use the update endpoint to add, update, or remove options in a drop-down custom field. Updating field options for multi-select fields works exactly the same as drop-down field options.
+
+**Important**: Unless you want to remove some options, you must specify all existing options in any update request. Omitting an option removes it from the drop-down field, which removes its values from any tickets or macros.
+
+Use the `custom_field_options` attribute to update the options. The attribute consists of an array of option objects, with each object consisting of an `id`, `name`, and `value` property. The name and value properties correspond to the ""Title"" and ""Tag"" text boxes in the admin interface respectively. For new drop-down options, specify `""id"":""null""`. Example request body:
+
+```json
+{""custom_object_field"": {
+    ""custom_field_options"": [
+      {""id"": ""null"", ""name"": ""Apple Pie"", ""value"": ""apple""},
+      {""id"": ""null"", ""name"": ""Pecan Pie"", ""value"": ""pecan""}
+    ]
+  }
+}
+```
+
+#### Example Request
+
+```bash
+curl https://{subdomain}.zendesk.com/api/v2/custom_objects/{custom_object_key}/fields/{custom_object_field_key_or_id}
+  -d '{""ticket_field"": {""custom_field_options"": [{""name"": ""Apple Pie"", ""value"": ""apple""}, {""name"": ""Pecan Pie"", ""value"": ""pecan""}]}}' \
+  -H ""Content-Type: application/json"" -X PUT \
+  -v -u {email_address}/token:{api_token}
+```
+#### Allowed For
+* Admins"
+pc-r3168,mailchimp,POST,/lists/{list_id}/segments/{segment_id},postListsIdSegmentsId,Batch add or remove members,Batch add/remove list members to static segment
+x20-e0972,zendesk,PUT,/api/v2/ticket_fields/reorder,ReorderTicketFields,Reorder Ticket Fields,"#### Allowed For
+* Admins
+
+#### Request Parameters
+
+You can pass in the following parameter in the payload:
+
+| Name                | Type   | Comment
+| ------------------- | ------ | --------
+| ticket_field_ids    | array  | An array of ticket field ids. Example: ""[2, 23, 46, 50]"". Not all ticket_field_ids are necessary in the payload; only those provided will be assigned to the first positions. Missing IDs will be assigned incremental positions automatically."
+x17-e0659,okta,PUT,/api/v1/users/{userId}/risk,upsertUserRisk,Upsert the user's risk,"Upserts (creates or updates) the user risk object for a user ID. You can optionally provide a `riskReason` to describe why the risk level is being changed. If `riskReason` isn't provided, the reason defaults to `override.by.admin`."
+x20-e0524,klaviyo,DELETE,/api/tags/{id}/relationships/flows,remove_tag_from_flows,Remove Tag from Flows,"Remove a tag's association with one or more flows.
+
+
+Use the request body to pass in the ID(s) of the flows(s) whose association with the tag
+will be removed.<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `60/m`
+
+**Scopes:**
+`flows:write`
+`tags:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/remove_tag_from_flows.json)"
+pc-r0012,stripe,DELETE,/v1/accounts/{account}/bank_accounts/{id},DeleteAccountsAccountBankAccountsId,Delete an external account,<p>Delete a specified external account for a given account.</p>
+x20-e0551,klaviyo,PATCH,/api/profiles/{id},update_profile,Update Profile,"Update the profile with the given profile ID.
+
+Use the `additional-fields` parameter to include subscriptions and predictive analytics data in your response.
+
+Note that setting a field to `null` will clear out the field, whereas not including a field in your request will leave it unchanged.
+
+The maximum allowed payload size is 100KB.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`profiles:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/update_profile.json)"
+pc-r0514,stripe,POST,/v1/test_helpers/issuing/personalization_designs/{personalization_design}/reject,PostTestHelpersIssuingPersonalizationDesignsPersonalizationDesignReject,Reject a testmode personalization design,<p>Updates the <code>status</code> of the specified testmode personalization design object to <code>rejected</code>.</p>
+pc-r3759,datadog,PUT,/api/v1/synthetics/tests/api/{public_id},UpdateAPITest,Edit an API test,Edit the configuration of a Synthetic API test.
+pc-r1703,spotify,DELETE,/me/tracks,remove-tracks-user,Remove User's Saved Tracks,"Remove one or more tracks from the current user's 'Your Music' library.
+
+**Note:** This endpoint is deprecated. Use [Remove Items from Library](/documentation/web-api/reference/remove-library-items) instead."
+x17-e1313,xero,POST,/PurchaseOrders/{PurchaseOrderID},updatePurchaseOrder,Updates a specific purchase order,
+x17-e1135,docusign,PUT,/v2.1/current_user/notary,Notary_PutNotary,Updates notary information for the current user.,Updates notary information for the current user.
+x17-e0758,docusign,DELETE,/v2.1/accounts/{accountId}/brands/{brandId},Brand_DeleteBrand,Deletes a brand.,"This method deletes a [brand](/docs/esign-rest-api/esign101/concepts/branding/) from an account.
+
+**Note:** Branding for either signing or sending must be enabled for the account (`canSelfBrandSend` , `canSelfBrandSign`, or both of these account settings must be **true**)."
+pc-r1947,digitalocean,PUT,/v2/droplets/autoscale/{autoscale_pool_id},autoscalepools_update,Update Autoscale Pool,"To update the configuration of an existing autoscale pool, send a PUT request to
+`/v2/droplets/autoscale/$AUTOSCALE_POOL_ID`. The request must contain a full representation
+of the autoscale pool including existing attributes."
+x20-e0679,miro,PATCH,/v2-experimental/boards/{board_id}/code_widgets/{item_id}/position,move-code-widget-item,Move code widget item,"Updates the position of a code widget item on a board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+pc-r1894,digitalocean,PUT,/v2/databases/{database_cluster_uuid}/schema-registry/config/{subject_name},databases_update_kafka_schema_subject_config,Update Schema Registry Configuration for a Subject of kafka Cluster,"To update the Schema Registry configuration for a Subject of a Kafka cluster, send a PUT request to
+`/v2/databases/$DATABASE_ID/schema-registry/config/$SUBJECT_NAME`.
+The response is a JSON object with a `compatibility_level` key, which is set to an object
+containing any database configuration parameters."
+pc-r3988,intercom,PATCH,/data_connectors/{id},updateDataConnector,Update a data connector,Update an existing data connector. Only provided fields are changed. Set `state` to `live` or `draft` to change the connector's state.
+x20-e0106,auth0,PATCH,/experimentation/feature-flags/{id},update_feature_flag,Update a feature flag.,Partially update a feature flag by ID. Only provided fields are updated.
+x20-e0539,klaviyo,PATCH,/api/catalog-variants/{id},update_catalog_variant,Update Catalog Variant,"Update a catalog item variant with the given variant ID.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`catalogs:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/update_catalog_variant.json)"
+pc-r1450,paypal,PATCH,/v2/checkout/orders/{id},orders.patch,Update order,"Updates an order with a `CREATED` or `APPROVED` status. You cannot update an order with the `COMPLETED` status.<br/><br/>To make an update, you must provide a `reference_id`. If you omit this value with an order that contains only one purchase unit, PayPal sets the value to `default` which enables you to use the path: <code>\""/purchase_units/@reference_id=='default'/{attribute-or-object}\""</code>. Merchants and partners can add Level 2 and 3 data to payments to reduce risk and payment processing costs. For more information about processing payments, see <a href=""https://developer.paypal.com/docs/checkout/advanced/processing/"">checkout</a> or <a href=""https://developer.paypal.com/docs/multiparty/checkout/advanced/processing/"">multiparty checkout</a>.<blockquote><strong>Note:</strong> For error handling and troubleshooting, see <a href=""https://developer.paypal.com/api/rest/reference/orders/v2/errors/#patch-order"">Orders v2 errors</a>.</blockquote>Patchable attributes or objects:<br/><br/><table><thead><th>Attribute</th><th>Op</th><th>Notes</th></thead><tbody><tr><td><code>intent</code></td><td>replace</td><td></td></tr><tr><td><code>payer</code></td><td>replace, add</td><td>Using replace op for <code>payer</code> will replace the whole <code>payer</code> object with the value sent in request.</td></tr><tr><td><code>purchase_units</code></td><td>replace, add</td><td></td></tr><tr><td><code>purchase_units[].custom_id</code></td><td>replace, add, remove</td><td></td></tr><tr><td><code>purchase_units[].description</code></td><td>replace, add, remove</td><td></td></tr><tr><td><code>purchase_units[].payee.email</code></td><td>replace</td><td></td></tr><tr><td><code>purchase_units[].shipping.name</code></td><td>replace, add</td><td></td></tr><tr><td><code>purchase_units[].shipping.email_address</code></td><td>replace, add</td><td></td></tr><tr><td><code>purchase_units[].shipping.phone_number</code></td><td>replace, add</td><td></td></tr><tr><td><code>purchase_units[].shipping.options</code></td><td>replace, add</td><td></td></tr><tr><td><code>purchase_units[].shipping.address</code></td><td>replace, add</td><td></td></tr><tr><td><code>purchase_units[].shipping.type</code></td><td>replace, add</td><td></td></tr><tr><td><code>purchase_units[].soft_descriptor</code></td><td>replace, remove</td><td></td></tr><tr><td><code>purchase_units[].amount</code></td><td>replace</td><td></td></tr><tr><td><code>purchase_units[].items</code></td><td>replace, add, remove</td><td></td></tr><tr><td><code>purchase_units[].invoice_id</code></td><td>replace, add, remove</td><td></td></tr><tr><td><code>purchase_units[].payment_instruction</code></td><td>replace</td><td></td></tr><tr><td><code>purchase_units[].payment_instruction.disbursement_mode</code></td><td>replace</td><td>By default, <code>disbursement_mode</code> is <code>INSTANT</code>.</td></tr><tr><td><code>purchase_units[].payment_instruction.payee_receivable_fx_rate_id</code></td><td>replace, add, remove</td><td></td></tr><tr><td><code>purchase_units[].payment_instruction.platform_fees</code></td><td>replace, add, remove</td><td></td></tr><tr><td><code>purchase_units[].supplementary_data.airline</code></td><td>replace, add, remove</td><td></td></tr><tr><td><code>purchase_units[].supplementary_data.card</code></td><td>replace, add, remove</td><td></td></tr><tr><td><code>application_context.client_configuration</code></td><td>replace, add</td><td></td></tr></tbody></table>"
+pc-r1493,paypal,DELETE,/v2/invoicing/templates/{template_id},templates.delete,Delete template,"Deletes a template, by ID."
+pc-r0026,stripe,DELETE,/v1/accounts/{account}/people/{person},DeleteAccountsAccountPeoplePerson,Delete a person,"<p>Deletes an existing person’s relationship to the account’s legal entity. Any person with a relationship for an account can be deleted through the API, except if the person is the <code>representative</code>. If your integration is using the <code>executive</code> parameter, you cannot delete the only verified <code>executive</code> on file.</p>"
+pc-r0607,openai,DELETE,/audio/voice_consents/{consent_id},deleteVoiceConsent,Delete voice consent,Deletes a voice consent recording.
+pc-r0108,stripe,POST,/v1/checkout/sessions/{session}/expire,PostCheckoutSessionsSessionExpire,Expire a Checkout Session,"<p>A Checkout Session can be expired when it is in one of these statuses: <code>open</code> </p>
+
+<p>After it expires, a customer can’t complete a Checkout Session and customers loading the Checkout Session see a message saying the Checkout Session is expired.</p>"
+pc-r2886,jira,DELETE,/rest/api/2/screens/{screenId}/tabs/{tabId}/fields/{id},removeScreenTabField,Remove screen tab field,"Removes a field from a screen tab.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+pc-r1299,zoom,PATCH,/h323/devices/{deviceId},deviceUpdate,Update a H.323/SIP Device,Update a H.323/SIP Device on your Zoom account
+pc-r0270,stripe,POST,/v1/issuing/cards/{card},PostIssuingCardsCard,Update a card,<p>Updates the specified Issuing <code>Card</code> object by setting the values of the parameters passed. Any parameters not provided will be left unchanged.</p>
+x20-e0661,miro,DELETE,/v2/boards/{board_id}/shapes/{item_id},delete-shape-item,Delete shape item,"Deletes a shape item from the board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 3</a><br/>"
+pc-r3838,intercom,DELETE,/office_hours_schedules/{office_hours_schedule_id}/office_hours_exceptions/{id},deleteOfficeHoursException,Delete an office hours exception,You can delete a single office hours exception.
+x20-e0054,auth0,DELETE,/resource-servers/{id},delete_resource-servers_by_id,Delete a resource server,"Delete an existing API by ID. For more information, read <a href=""https://www.auth0.com/docs/get-started/apis/api-settings"">API Settings</a>."
+pc-r2251,digitalocean,PUT,/v2/vpcs/{vpc_id},vpcs_update,Update a VPC,"To update information about a VPC, send a PUT request to `/v2/vpcs/$VPC_ID`."
+x20-e0289,hubspot,DELETE,/crm/v4/objects/{objectType}/{objectId}/associations/{toObjectType}/{toObjectId},delete-/crm/v4/objects/{objectType}/{objectId}/associations/{toObjectType}/{toObjectId},Delete,deletes all associations between two records.
+pc-r0812,openai,DELETE,/threads/{thread_id}/messages/{message_id},deleteMessage,Delete message,Deletes a message.
+pc-r2669,jira,DELETE,/rest/api/2/issueLinkType/{issueLinkTypeId},deleteIssueLinkType,Delete issue link type,"Deletes an issue link type.
+
+To use this operation, the site must have [issue linking](https://confluence.atlassian.com/x/yoXKM) enabled.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+x20-e0294,hubspot,DELETE,/integrators/timeline/v3/{appId}/event-templates/{eventTemplateId}/tokens/{tokenName},delete-/integrators/timeline/v3/{appId}/event-templates/{eventTemplateId}/tokens/{tokenName}_archive,Delete a template token,Delete an existing token from a specific event type template.
+pc-r1998,digitalocean,PUT,/v2/kubernetes/clusters/{cluster_id},kubernetes_update_cluster,Update a Kubernetes Cluster,"To update a Kubernetes cluster, send a PUT request to
+`/v2/kubernetes/clusters/$K8S_CLUSTER_ID` and specify one or more of the
+attributes below."
+x20-e0839,zendesk,PATCH,/api/v2/it_asset_management/asset_types/{asset_type_id}/fields/{asset_type_field_id},UpdateItamAssetTypeField,Update Asset Field,"Updates an existing asset field with the specified id.
+
+#### Allowed For
+
+* Admins"
+x17-e0348,okta,POST,/api/v1/iam/governance/optIn,optIn,Opt in the Admin Console to entitlement management,Opts in the Admin Console to entitlement management
+pc-r2909,jira,DELETE,/rest/api/2/statuses,deleteStatusesById,Bulk delete Statuses,"Deletes statuses by ID.
+
+**[Permissions](#permissions) required:**
+
+ *  *Administer projects* [project permission.](https://confluence.atlassian.com/x/yodKLg)
+ *  *Administer Jira* [project permission.](https://confluence.atlassian.com/x/yodKLg)"
+x20-e0330,hubspot,PATCH,/commerce/payment-methods/2027-03-beta/settings,patch-/commerce/payment-methods/2027-03-beta/settings,Update payment method settings,"Update the payment method settings for commerce transactions. This operation allows you to modify the configuration of payment methods, including setting defaults and managing supported currencies. Use this endpoint to ensure your payment methods align with your business requirements."
+pc-r0488,stripe,DELETE,/v1/terminal/readers/{reader},DeleteTerminalReadersReader,Delete a Reader,<p>Deletes a <code>Reader</code> object.</p>
+x17-e1023,docusign,PUT,/v2.1/accounts/{accountId}/templates/{templateId}/documents/{documentId},Documents_PutTemplateDocument,Updates a template document.,This methods updates an existing template document.
+x20-e0797,zendesk,DELETE,/api/v2/sharing_agreements/{sharing_agreement_id},DeleteSharingAgreement,Delete a Sharing Agreement,"Deletes a sharing agreement.
+
+#### Allowed For
+
+* Admins"
+x17-e1119,docusign,PUT,/v2.1/accounts/{accountId}/watermark/preview,WatermarkPreview_PutWatermarkPreview,Get watermark preview.,"Update the watermark for the account.
+
+**Note:** Many of the request fields must be set to specific values. If you use an invalid value for one of these fields, the endpoint may return 200 OK but set the field to a default value. See the request body for more information."
+pc-r1867,digitalocean,PUT,/v2/databases/{database_cluster_uuid}/pools/{pool_name},databases_update_connectionPool,Update Connection Pools (PostgreSQL),"To update a connection pool for a PostgreSQL database cluster, send a PUT request to  `/v2/databases/$DATABASE_ID/pools/$POOL_NAME`."
+pc-r2132,digitalocean,PATCH,/v2/projects/default,projects_patch_default,Patch the Default Project,"To update only specific attributes of your default project, send a PATCH request to `/v2/projects/default`. At least one of the following attributes needs to be sent."
+x17-e0739,docusign,DELETE,/v2.1/accounts/{accountId},Accounts_DeleteAccount,Deletes the specified account.,"This closes the specified account. You must be an account admin to close your account. Once closed, an account must be reopened by Docusign."
+x17-e0191,okta,DELETE,/api/v1/brands/{brandId}/pages/error/preview,deletePreviewErrorPage,Delete the preview error page,Deletes the preview error page. The preview error page contains unpublished changes and isn't shown in your live environment. Preview it at `${yourOktaDomain}/error/preview`.
+pc-r2027,digitalocean,DELETE,/v2/load_balancers/{lb_id},loadBalancers_delete,Delete a Load Balancer,"To delete a load balancer instance, disassociating any Droplets assigned to it
+and removing it from your account, send a DELETE request to
+`/v2/load_balancers/$LOAD_BALANCER_ID`.
+
+A successful request will receive a 204 status code with no body in response.
+This indicates that the request was processed successfully."
+x20-e0038,auth0,DELETE,/keys/network-acls/{id},delete_keys_network_acls,Delete a Network ACL key,Delete a key used to verify HTTP Message Signatures on Network ACL rules
+pc-r1960,digitalocean,DELETE,/v2/firewalls/{firewall_id}/tags,firewalls_delete_tags,Remove Tags from a Firewall,"To remove a tag representing a group of Droplets from a firewall, send a
+DELETE request to `/v2/firewalls/$FIREWALL_ID/tags`. In the body of the
+request, there should be a `tags` attribute containing a list of tag names.
+
+No response body will be sent back, but the response code will indicate
+success. Specifically, the response code will be a 204, which means that the
+action was successful with no returned body data."
+pc-r1515,paypal,PUT,/v1/payment-experience/web-profiles/{id},web-profile.update,Update web experience profile,"Updates a web experience profile, by ID. In the JSON request body, specify the profile details. If your request omits any profile parameters, any previously set values for those parameters are removed."
+pc-r2622,jira,PUT,/rest/api/2/issue/{issueIdOrKey}/assignee,assignIssue,Assign issue,"Assigns an issue to a user. Use this operation when the calling user does not have the *Edit Issues* permission but has the *Assign issue* permission for the project that the issue is in.
+
+If `name` or `accountId` is set to:
+
+ *  `""-1""`, the issue is assigned to the default assignee for the project.
+ *  `null`, the issue is set to unassigned.
+
+This operation can be accessed anonymously.
+
+**[Permissions](#permissions) required:**
+
+ *  *Browse Projects* and *Assign Issues* [ project permission](https://confluence.atlassian.com/x/yodKLg) for the project that the issue is in.
+ *  If [issue-level security](https://confluence.atlassian.com/x/J4lKLg) is configured, issue-level security permission to view the issue."
+x20-e0483,hubspot,PUT,/feature-flags/v3/{appId}/flags/{flagName}/portals/{portalId},put-/feature-flags/v3/{appId}/flags/{flagName}/portals/{portalId},Set an account flag state,Specify an account-level flag state for a specific HubSpot account.
+pc-r1058,square,POST,/v2/gift-cards/{gift_card_id}/link-customer,LinkCustomerToGiftCard,LinkCustomerToGiftCard,"Links a customer to a gift card, which is also referred to as adding a card on file."
+pc-r1844,digitalocean,PUT,/v2/databases/{database_cluster_uuid}/do_settings,databases_update_do_settings,Update DO Settings for a Database Cluster,"To update the DigitalOcean-specific settings for a database cluster, send a PUT request to `/v2/databases/$DATABASE_ID/do_settings`.
+Currently, the only supported setting is `service_cnames`, which allows you to specify custom DNS names (CNAMEs) to be included in the TLS certificate Subject Alternative Names (SANs) for the database cluster nodes. This enables TLS verification when connecting via a custom hostname.
+After updating, the database nodes will be replaced to apply the new certificate. This process is performed as a rolling replacement and does not cause downtime.
+To clear all custom CNAMEs, send an empty array or omit the field."
+x20-e0808,zendesk,DELETE,/api/v2/ticket_forms/{ticket_form_id}/ticket_form_statuses/{ticket_form_status_id},DeleteTicketFormStatusById,Delete Ticket Form Status By Id,"Deletes a ticket form status by id.
+
+#### Allowed For
+
+* Admins"
+pc-r1920,digitalocean,DELETE,/v2/domains/{domain_name}/records/{domain_record_id},domains_delete_record,Delete a Domain Record,"To delete a record for a domain, send a DELETE request to
+`/v2/domains/$DOMAIN_NAME/records/$DOMAIN_RECORD_ID`.
+
+The record will be deleted and the response status will be a 204. This
+indicates a successful request with no body returned."
+x20-e0732,miro,POST,/v2/oauth/revoke,revoke-token-v2,Revoke token (v2),"Revoke the current access token. Revoking an access token means that the access token will no longer work. When an access token is revoked, the refresh token is also revoked and no longer valid. This does not uninstall the application for the user."
+x17-e0133,okta,DELETE,/api/v1/authorizationServers/{authServerId}/claims/{claimId},deleteOAuth2Claim,Delete a custom token claim,Deletes a custom token Claim specified by the `claimId`
+pc-r1334,zoom,DELETE,/meetings/{meetingId}/polls/{pollId},meetingPollDelete,Delete a meeting's Poll,Delete a meeting's Poll
+pc-r2559,jira,DELETE,/rest/api/2/fieldconfiguration/{id},deleteFieldConfiguration,Delete field configuration,"Deprecated, use [ Field schemes](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-field-schemes/#api-group-field-schemes) which supports field association schemes.
+
+Deletes a field configuration.
+
+This operation can only delete configurations used in company-managed (classic) projects.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+pc-r2237,digitalocean,DELETE,/v2/volumes,volumes_delete_byName,Delete a Block Storage Volume by Name,"Block storage volumes may also be deleted by name by sending a DELETE request with the volume's **name** and the **region slug** for the region it is located in as query parameters to `/v2/volumes?name=$VOLUME_NAME&region=nyc1`.
+No response body will be sent back, but the response code will indicate success. Specifically, the response code will be a 204, which means that the action was successful with no returned body data."
+x17-e0477,okta,DELETE,/api/v1/org/captcha,deleteOrgCaptchaSettings,Delete the org-wide CAPTCHA settings,Deletes the CAPTCHA settings object for your organization
+x20-e0971,zendesk,PUT,/api/v2/task_lists/{task_list_id}/task_items/{task_item_id},UpdateTaskItem,Update Task Item,"Updates a task item. Available fields depend on the item type:
+
+**Any task item:** Use `completed` to mark the item complete (`true`) or incomplete (`false`). This is reflected as `is_completed` in the response. Completing all task items in a task list automatically marks the task list as completed.
+
+**Custom task items only:** Also supports updating `name` and `description`. Template-based task items cannot be renamed.
+
+#### Allowed For
+
+* Agents"
+pc-r2888,jira,POST,/rest/api/2/screens/{screenId}/tabs/{tabId}/move/{pos},moveScreenTab,Move screen tab,"Moves a screen tab.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
