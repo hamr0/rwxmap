@@ -1,21 +1,22 @@
 #!/usr/bin/env node
-// Built under D86; D87 (2026-09-22) supersedes the definition — to be rebuilt in the next pass.
-// Prepares blind RELABEL files so the 2266 v1 truth-w rows of the combined
-// set (data/combined-2026-09-21/rows.json.gz, 6557 rows across 23
-// providers) can be relabelled under data/relabel-2026-09-22/BRIEF-v2.md,
-// the D86 definition ("cannot be undone" is a third road to x).
+// Prepares blind RELABEL files so every non-r row of the combined set
+// (data/combined-2026-09-21/rows.json.gz, 6557 rows across 23 providers)
+// can be relabelled under data/relabel-2026-09-22/BRIEF-v3.md, the D87
+// definition (the chmod reading: w = can be set back by a later call,
+// x = cannot; "whose thing it is" leaves the class).
 //
-// Under v2 a row can only move w->x, never the other way, so v1 truth-r
-// and truth-x rows stand and only the v1 truth-w rows are relabelled.
+// v3 is NOT one-directional against v1: a v1 x can become a v3 w and a
+// v1 w can become a v3 x. So every v1 truth-w AND truth-x row is
+// relabelled; only v1 truth-r labels stand.
 //
-// Two draws come out of ONE seeded shuffle of the 2266 rows:
+// Two draws come out of ONE seeded shuffle of the 3852 non-r rows:
 //   - calibration: shuffled rows 1-100 -> calib/practice-blind.csv,
 //     rows 101-200 -> calib/holdback-blind.csv (disjoint by construction,
 //     asserted anyway). Practice is labelled by two labellers and read row
 //     by row; holdback is measured once, then burned.
-//   - relabel: ALL 2266 shuffled rows (calibration rows included) cut into
-//     9 parts (8 of 251, 1 of 258 -> 8*251 + 258 = 2266) as
-//     label/blind-1.csv .. blind-9.csv.
+//   - relabel: ALL 3852 shuffled rows (calibration rows included) cut into
+//     9 parts (9 of 428 -> 8*428 + 428 = 3852) as label/blind-1.csv ..
+//     blind-9.csv.
 //
 // row_ids are kept exactly as the combined set has them (pc-r0001,
 // x17-e0001, x20-e0001); nothing is renumbered.
@@ -23,7 +24,8 @@
 // This is TUNING DATA. Every source in the combined set is either the
 // tuning corpus or a burned exam (D24); relabelling burned exam rows does
 // not unburn them. The classifier's predictions are never read or joined
-// here. These files carry no r/w/x information of any kind.
+// here. The written files carry no r/w/x information of any kind; the
+// per-part v1-truth balance is printed to stdout ONLY, never written.
 //
 // Determinism: same seed, same rows.json.gz -> byte-identical output
 // files, every run.
@@ -47,24 +49,22 @@ const LABEL_DIR = path.join(OUT_DIR, 'label');
 const KEY_OUT = path.join(LABEL_DIR, 'key.csv');
 const README_OUT = path.join(OUT_DIR, 'README.md');
 
-const BRIEF_PATH = 'data/relabel-2026-09-22/BRIEF-v2.md';
+const BRIEF_PATH = 'data/relabel-2026-09-22/BRIEF-v3.md';
 
 const SEED = 20260922;
 const EXPECTED_COMBINED_ROWS = 6557;
-const EXPECTED_W_ROWS = 2266;
+const EXPECTED_NON_R_ROWS = 3852;
+const EXPECTED_V1_W_ROWS = 2266;
+const EXPECTED_V1_X_ROWS = 1586;
 const EXPECTED_ROWS_SHA256 = '3d07a5a410c91d2ef10494d8d91bcb01290acb1e67f7a89d85866781d1d38c5f';
 const NUM_PARTS = 9;
 const CALIB_SIZE = 100;
 
-// Hard expectations for the v1 truth-w rows by method. Any drift is an
-// escalation, not a number to quietly adopt.
-const EXPECTED_METHODS = {
-  POST: 552,
-  DELETE: 803,
-  PUT: 624,
-  PATCH: 286,
-  GET: 1,
-};
+// Methods and sources are reported, not asserted: the row-count and
+// class-count assertions above pin the set; these are printed so the
+// orchestrator can verify them by eye.
+const METHOD_NAMES = ['POST', 'PUT', 'DELETE', 'PATCH', 'GET'];
+const SOURCE_NAMES = ['pc', 'x17', 'x20'];
 
 const BLIND_HEADER = ['row_id', 'provider', 'method', 'path', 'operationId', 'summary', 'description'];
 const CALIB_KEY_HEADER = ['row_id', 'provider', 'method', 'path', 'operationId'];
@@ -143,6 +143,19 @@ function byRowIdAsc(a, b) {
   return a.row_id < b.row_id ? -1 : a.row_id > b.row_id ? 1 : 0;
 }
 
+function sourceOf(r) {
+  return r.row_id.split('-')[0];
+}
+
+function countBy(rows, keyFn) {
+  const counts = new Map();
+  for (const r of rows) {
+    const k = keyFn(r);
+    counts.set(k, (counts.get(k) || 0) + 1);
+  }
+  return counts;
+}
+
 // --- main --------------------------------------------------------------------
 
 function main() {
@@ -154,26 +167,36 @@ function main() {
     escalate(`expected exactly ${EXPECTED_COMBINED_ROWS} combined rows, got ${combined.length}.`);
   }
 
-  // Step 1: keep only the v1 truth-w rows. row_ids stay as they are.
-  const rows = combined.filter((r) => r.truth === 'w');
-  if (rows.length !== EXPECTED_W_ROWS) {
-    escalate(`expected exactly ${EXPECTED_W_ROWS} truth-w rows, got ${rows.length}.`);
+  // Step 1: keep every non-r row (v1 truth-w and truth-x). row_ids stay
+  // as they are.
+  const rows = combined.filter((r) => r.truth !== 'r');
+  if (rows.length !== EXPECTED_NON_R_ROWS) {
+    escalate(`expected exactly ${EXPECTED_NON_R_ROWS} non-r rows, got ${rows.length}.`);
+  }
+  const truthCounts = countBy(rows, (r) => r.truth);
+  for (const t of truthCounts.keys()) {
+    if (t !== 'w' && t !== 'x') escalate(`unexpected truth "${t}" among non-r rows.`);
+  }
+  if ((truthCounts.get('w') || 0) !== EXPECTED_V1_W_ROWS) {
+    escalate(`expected ${EXPECTED_V1_W_ROWS} v1 truth-w rows, got ${truthCounts.get('w') || 0}.`);
+  }
+  if ((truthCounts.get('x') || 0) !== EXPECTED_V1_X_ROWS) {
+    escalate(`expected ${EXPECTED_V1_X_ROWS} v1 truth-x rows, got ${truthCounts.get('x') || 0}.`);
   }
   const sourceIds = new Set(rows.map((r) => r.row_id));
   if (sourceIds.size !== rows.length) {
     escalate(`source row_ids are not unique: ${sourceIds.size} distinct for ${rows.length} rows.`);
   }
 
-  // Step 2: per-method counts must be exactly what this set is known to
-  // hold, and no unexpected method may appear.
-  const methodCounts = new Map();
-  for (const r of rows) methodCounts.set(r.method, (methodCounts.get(r.method) || 0) + 1);
+  // Step 2: method and source counts are reported, not asserted. An
+  // unknown method or source prefix is still an escalation.
+  const methodCounts = countBy(rows, (r) => r.method);
   for (const name of methodCounts.keys()) {
-    if (!Object.hasOwn(EXPECTED_METHODS, name)) escalate(`unexpected method "${name}" among truth-w rows.`);
+    if (!METHOD_NAMES.includes(name)) escalate(`unexpected method "${name}" among non-r rows.`);
   }
-  for (const [name, expected] of Object.entries(EXPECTED_METHODS)) {
-    const got = methodCounts.get(name) || 0;
-    if (got !== expected) escalate(`method ${name} has ${got} truth-w rows, expected ${expected}.`);
+  const sourceCounts = countBy(rows, sourceOf);
+  for (const name of sourceCounts.keys()) {
+    if (!SOURCE_NAMES.includes(name)) escalate(`unexpected row_id source prefix "${name}" among non-r rows.`);
   }
 
   // Step 3: derive the split from the real row count, then check the
@@ -189,7 +212,7 @@ function main() {
     escalate(`too few rows (${rows.length}) for two calibration draws of ${CALIB_SIZE}.`);
   }
 
-  // Step 4: ONE seeded shuffle of the full truth-w row set.
+  // Step 4: ONE seeded shuffle of the full non-r row set.
   const rng = mulberry32(SEED);
   const shuffled = seededShuffle(rows, rng);
 
@@ -292,8 +315,8 @@ function main() {
   }
   if (!roundTripOk) escalate('round-trip assertion failed (see rows above).');
 
-  // Step 12: per-part reports (vendor spread, empty text, method counts).
-  const methodNames = Object.keys(EXPECTED_METHODS);
+  // Step 12: per-part reports (vendor spread, empty text, method counts,
+  // v1-truth balance). The v1-truth balance goes to stdout ONLY.
   const providerSpreadReport = parts.map((part, i) => ({
     part: i + 1,
     n: part.length,
@@ -307,9 +330,15 @@ function main() {
   }));
   const methodReport = parts.map((part, i) => {
     const counts = {};
-    for (const m of methodNames) counts[m] = part.filter((r) => r.method === m).length;
+    for (const m of METHOD_NAMES) counts[m] = part.filter((r) => r.method === m).length;
     return { part: i + 1, n: part.length, counts };
   });
+  const truthBalanceReport = parts.map((part, i) => ({
+    part: i + 1,
+    n: part.length,
+    w: part.filter((r) => r.truth === 'w').length,
+    x: part.filter((r) => r.truth === 'x').length,
+  }));
 
   // Step 13: per-provider report (total rows, how many parts it spans).
   const byProvider = new Map();
@@ -325,8 +354,9 @@ function main() {
   // --- report ---
   console.log(`=== source ===`);
   console.log(`rows.json sha256 ${sha}`);
-  console.log(`${combined.length} combined rows, ${rows.length} truth-w rows kept`);
-  console.log(`truth-w by method: ${methodNames.map((m) => `${m} ${methodCounts.get(m)}`).join(', ')}`);
+  console.log(`${combined.length} combined rows, ${rows.length} non-r rows kept (v1 truth-w ${truthCounts.get('w')}, v1 truth-x ${truthCounts.get('x')})`);
+  console.log(`non-r by method: ${METHOD_NAMES.map((m) => `${m} ${methodCounts.get(m) || 0}`).join(', ')}`);
+  console.log(`non-r by source: ${SOURCE_NAMES.map((s) => `${s} ${sourceCounts.get(s) || 0}`).join(', ')}`);
 
   console.log('\n=== calibration draws ===');
   console.log(`practice: ${practice.length} rows (shuffled 1-${CALIB_SIZE}), holdback: ${holdback.length} rows (shuffled ${CALIB_SIZE + 1}-${2 * CALIB_SIZE}), disjoint OK`);
@@ -355,7 +385,12 @@ function main() {
 
   console.log('\n=== method per part ===');
   for (const r of methodReport) {
-    console.log(`part ${r.part}: ${methodNames.map((m) => `${m} ${r.counts[m]}`).join(', ')}`);
+    console.log(`part ${r.part}: ${METHOD_NAMES.map((m) => `${m} ${r.counts[m]}`).join(', ')}`);
+  }
+
+  console.log('\n=== v1-truth balance per part (stdout only, never written) ===');
+  for (const r of truthBalanceReport) {
+    console.log(`part ${r.part}: w ${r.w}, x ${r.x} (of ${r.n})`);
   }
 
   console.log(`\nWrote 4 calibration files to ${CALIB_DIR}`);
@@ -367,18 +402,20 @@ function main() {
 }
 
 function writeReadme(numProviders, numCombined, numRows, partSize, lastPartSize, sha) {
-  const readme = `# data/relabel-2026-09-22 — relabel of the v1 truth-w rows under BRIEF-v2
+  const readme = `# data/relabel-2026-09-22 — relabel of every non-r row under BRIEF-v3 (D87)
 
 ## What this is
 
 Blind relabelling files for the ${numRows} rows of the combined set
 (\`data/combined-2026-09-21/rows.json.gz\`, ${numCombined} rows across
-${numProviders} providers) whose v1 truth is \`w\`, to be relabelled under
-\`${BRIEF_PATH}\` — the D86 definition, where "cannot be
-undone" is a third road to x.
+${numProviders} providers) whose v1 truth is \`w\` or \`x\`, to be relabelled
+under \`${BRIEF_PATH}\` — the D87 definition (the chmod
+reading: w if a later call of the same API can set it back, x if it
+cannot; "whose thing it is" leaves the class).
 
-Only the v1 truth-w rows are relabelled. v2 moves a row w->x and never
-the other way, so v1 truth-r and truth-x labels stand as they are.
+v3 is bidirectional against v1: a v1 x can become a v3 w and a v1 w
+can become a v3 x. So both v1 truth-w and v1 truth-x rows are in here.
+v1 truth-r labels stand as they are and are not relabelled.
 
 **This stays TUNING DATA.** Every source in the combined set is either
 the tuning corpus (\`pc-\`) or a burned exam (\`x17-\`, \`x20-\`; D24).
@@ -396,11 +433,11 @@ path; no other version of the brief may be used.
 
 ## Calibration (\`calib/\`)
 
-BRIEF-v2 is a DRAFT until it is calibrated. Two draws off the front of
+BRIEF-v3 is a DRAFT until it is calibrated. Two draws off the front of
 the one seeded shuffle:
 
 - \`practice-blind.csv\` (${CALIB_SIZE} rows, shuffled positions 1-${CALIB_SIZE}): two
-  labellers label it blind under BRIEF-v2; their disagreements are read
+  labellers label it blind under BRIEF-v3; their disagreements are read
   row by row and ruled by the user; the brief is revised if a ruling
   shows a gap.
 - \`holdback-blind.csv\` (${CALIB_SIZE} rows, shuffled positions ${CALIB_SIZE + 1}-${2 * CALIB_SIZE}): measured
@@ -438,7 +475,7 @@ relabel below: the calibration rows get relabelled in the main run too.
   brief specifies: \`truth_class\` is r, w, x or ?; \`confidence\` is EXACTLY
   \`high\` or \`low\` (there is no medium, and any other value means the file
   is rejected); \`reason\` is a short phrase under 15 words with no commas
-  (or the whole reason double-quoted) naming the rule or road applied. One
+  (or the whole reason double-quoted) naming the clause applied. One
   line per input row, same order, no rows skipped, no extras.
 - Do not look at any other labeller's blind or output file.
 
