@@ -48,28 +48,32 @@ agent is about to do, and so the same label can be handed to the agent
 itself as an MCP hint.
 
 - **r** — read. Nothing changes.
-- **w** — write. Changes your own stuff.
-- **x** — execute. Reaches beyond you (a third party), or isn't
-  repeatable: running it twice is not the same as running it once.
+- **w** — write. Changes something a later write can set back.
+- **x** — execute. Cannot be undone.
 
 ## The shared definition
 
-Since 2026-09-22 rwxmap and bareguard — the author's agent gate,
-which reads one r/w/x letter per tool — use one meaning of the three
-letters:
+Since 2026-09-22 (D87) rwxmap and bareguard — the author's agent
+gate, which reads one r/w/x letter per tool — use one meaning of the
+three letters, and it is the one chmod already taught you:
 
-- **r** = changes nothing.
-- **w** = changes only the caller's own stuff, AND can be undone, AND
-  is safe to repeat.
-- **x** = any change that fails one of those: reaches another party,
-  OR can't be undone, OR isn't safe to repeat.
+- **r** = read: changes nothing.
+- **w** = write: changes things — yours or anyone else's — in a way
+  a later write can set back. Sets, edits, creates, toggles,
+  archives, pauses, cancels of something that can be resumed.
+- **x** = execute: cannot be undone. Deletes and removals, revokes,
+  expires, voids, sends, publishes, charges, pays, refunds, triggers
+  a run. `destructive: true` when it removes.
 - Unsure → **x**.
 
-That is one clause tighter than the definition above it ("can't be
-undone" now sits in x, not beside it). It only ever moves a row from
-w to x, never the other way. Every number below was measured before
-this change and predates it; the rows are not yet relabelled for
-reversibility, so the folded number is not known honestly yet.
+One caveat: whether a call touches someone other than you is not a
+class test. It cannot be read reliably from a spec (the words for
+"whose" mean different things in every API), so it stays out of the
+letter. It may come back as an evidence-only flag beside
+`destructive`, set only when there is evidence and never emitted as
+false; today there is none. Every number below was measured under the
+earlier definition and predates this one; the rows are being
+relabelled, and the honest number under it is not known yet.
 
 ## Where it is today
 
@@ -172,10 +176,9 @@ while the remaining work is measured. Design and numbers live in
 `docs/product/prd.md`; every experiment is logged in
 `docs/logs/learnings.md`.
 
-`rwxmap@0.1.0` on npm is a name reservation: that tarball shipped this
-README, the changelog and the license — no code, nothing to `require` or
-`import`. The repo now has a real entry point, `src/index.js`, with a
-single export, `classifyRow`. It has not been published yet. `poc/` keeps
+`rwxmap@0.3.0` is on npm with one real export, `classifyRow`, from
+`src/index.js` (the 0.1.0 tarball was a name reservation that shipped
+only this README, the changelog and the license). `poc/` keeps
 the earlier step-by-step builds (`archive`, `step1`, `step2`, `step3`) as
 the frozen reference the current code is proved against.
 

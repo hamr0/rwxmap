@@ -1,3 +1,4 @@
+// Built under D86; D87 (2026-09-22) supersedes the definition — to be rebuilt in the next pass.
 // poc/step2v2 — step 2 rebuilt under D86 (M3). POC, not shipped.
 //
 // D86 folds "cannot be undone" into class x. Until the rows are relabelled

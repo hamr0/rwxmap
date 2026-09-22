@@ -1,3 +1,4 @@
+// Built under D86; D87 (2026-09-22) supersedes the definition — to be rebuilt in the next pass.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { step2v2, DESTRUCTIVE_VERBS, MODIFY_VERBS, OTHER_PARTY } from './step2.mjs';

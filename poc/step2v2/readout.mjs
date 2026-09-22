@@ -1,3 +1,4 @@
+// Built under D86; D87 (2026-09-22) supersedes the definition — to be rebuilt in the next pass.
 // Readout for step 2 v2 (D86) — run with: node poc/step2v2/readout.mjs [--rows]
 //
 // A comparison harness, not module code: it MAY import the frozen src/ flow

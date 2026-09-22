@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Built under D86; D87 (2026-09-22) supersedes the definition — to be rebuilt in the next pass.
 // Prepares blind RELABEL files so the 2266 v1 truth-w rows of the combined
 // set (data/combined-2026-09-21/rows.json.gz, 6557 rows across 23
 // providers) can be relabelled under data/relabel-2026-09-22/BRIEF-v2.md,

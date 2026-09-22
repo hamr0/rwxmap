@@ -4381,3 +4381,52 @@ Retired: corpus lookup at score time, the CAMARA verb table, per-operation scope
   honestly measured. But the proxy number is the proxy agreeing with
   itself, not an accuracy figure, and the relabel is owed before any
   exam is scored under the fold.
+
+### D87: the definition collapses to chmod; "touches others" leaves the class (2026-09-22)
+- Goal: decide whether the D86 fold — r / own-undoable-repeatable w /
+  everything-else x — is a definition a mechanical classifier can
+  read, before spending nine labellers on a relabel under it.
+- Retired from the PRD (D86 proxy, tuning data, not accuracy): under
+  the DELETE-or-destructive-verb proxy applied identically to truth
+  and prediction, 888 of 2266 (39%) truth-w rows flipped to x; truth
+  became r 2705 / w 1378 / x 2474; the folded ledger read 6088 exact /
+  184 leaks / 285 over-tight against today's 5951 / 308 / 298. All
+  proxy: where the rule applies it cannot disagree with itself.
+- M3 groundwork built under D86, measured for mechanics only, then
+  superseded before use (kept in history at bad0c89): brief v2 and a
+  2266-row draw of every v1 truth-w row (`data/relabel-2026-09-22/`,
+  now deleted); practice calibration with two blind labellers agreed
+  100 of 100 (each w 54 / x 46; 14 and 11 marked low confidence).
+  `poc/step2v2` (DELETE floors at x, destructive lead verb raises on
+  any write method, PUT/PATCH floor w) moved 1030 rows against the
+  frozen flow, all w→x: method-delete 918, destructive-verb 74,
+  destructive-verb-summary 38. 108 POST rows are where the frozen
+  modify-verb lowering and the destructive list collide (cancel 37,
+  deactivate 33, remove 15, delete 11, expire 6, disable 3, suspend 2,
+  detach 1; v1 truth w 96 / x 12). A reader gap: `delete` sits in
+  METHOD_WORDS, so only 11 rows reach x by `delete` on a non-DELETE
+  method, all via the summary. The POC read the proxy flip as 912,
+  not the 888 the PRD carried. 11 of the 23 destructive verbs never
+  fire on a truth-w row.
+- What it taught: every list that failed leave-one-vendor-out here
+  was a noun list answering "whose thing is it" — user, member, role,
+  permission, and the description mining behind them — because nouns
+  for "whose" mean different things per vendor (D81). Every list that
+  held was a verb list at the lead token answering "what does the
+  call do": step 1's read verbs at 98-100%, step 2's modify verbs at
+  88-94% per rule. D86 folded reversibility in but kept "reaches
+  another party" as a road to x, so the wordless floor still carried
+  the unreadable question and 270 of 308 leaks. The 96-of-108 POST
+  collision rows (cancel, deactivate, remove …, truth w) show the same
+  thing from the other side: the destructive list was not a
+  reversibility list either.
+- Decision (D87, user ruling): r = changes nothing; w = changes
+  things, anyone's, in a way a later write can set back; x = cannot be
+  undone; unsure → x. "Touches others" leaves the class (openWorldHint
+  is its slot, evidence-only, absent today); "not safe to repeat"
+  folds into "cannot be undone", so a plain create is w. The relabel
+  covers all 3852 non-r rows of the combined set under a brief v3
+  calibrated blind; brief v2 and its practice run are discarded. This
+  is a definition change with its own number, not a fix — the
+  "relabel your way out" pattern D85 rejected for D84 — and is named
+  as such.

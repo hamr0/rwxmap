@@ -1,5 +1,8 @@
 # poc/step2v2 — step 2 rebuilt under D86 (M3 POC, not shipped)
 
+Built under D86; D87 (2026-09-22) supersedes the definition — to be
+rebuilt in the next pass.
+
 D86 folds "cannot be undone" into class `x`. The frozen `src/step2.js`
 floors PUT/DELETE/PATCH at `w` and lowers a POST to `w` on a modify verb.
 Under D86 that is wrong for DELETE (the method is evidence the change can't
