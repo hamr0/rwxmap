@@ -559,79 +559,33 @@ all 6 LOVO closures are the single word `permission`, because the other
 
 | file | owns |
 |---|---|
-| `src/tokens.js` | the splitter, tokenizer, verb stemmer — readers only, no classification list |
-| `src/step1.js` | step 1, the r step: `method`, `read-verb`, `read-verb-anywhere`; owns `READ_VERBS`, `SAFE_VERBS` |
-| `src/step2.js` | step 2, the w step: `method-floor`, `modify-verb`, `modify-verb-summary`; owns `MODIFY_VERBS`, `OTHER_PARTY` |
-| `src/step3.js` | step 3, the x step: `raise-word`, `floor-post`; owns `RAISE_WORDS` |
-| `src/flow.js` | the ladder — step order and precedence, written once |
-| `src/index.js` | the package entry point |
+| `src/tokens.js` | the splitter, tokenizer, verb stemmer and `verbForRow` (lead verb, or the summary verb when the lead is a bare method word) — readers only, no classification list |
+| `src/step1.js` | step 1, r: `method`, `read-verb`, `read-verb-anywhere`; owns `READ_VERBS`, `SAFE_VERBS` (D74, unchanged) |
+| `src/step2.js` | step 2, x by evidence: `method-delete`, `cant-undo-verb`, `cant-undo-verb-summary`, and the `floor-post` floor; owns `CANT_UNDO` (29) and `REMOVES` (6) |
+| `src/step3.js` | step 3, w: `method-floor` (PUT/PATCH), `modify-verb`, `modify-verb-summary`; owns `KEEP_W` (14) |
+| `src/flow.js` | the ladder: step 1, step 2, step 3, then step 2's floor — order written once |
+| `src/jev.js` | the optional Jev tier (D82/D88): `applyJev` lowers a `floor-post` row to w only when p(x) <= 0.10 and the answer carries a model version; any bad answer leaves x. No network code: the adopter makes the call |
+| `src/index.js` | the package entry: `classifyRow`, plus `applyJev`, `needsJev`, `jevState`, `jevQuestions`, `JEV_THRESHOLD` |
 | `src/types.js` | the shared `Operation` and `Verdict` typedefs |
 | `tools/corpus.js`, `tools/csv.js` | corpus loading and CSV read, test/dev only, never shipped |
-| `tools/proof-*.js` | the proofs (see below) |
 
-- One order, written once, in `src/flow.js`.
-- Each step owns its own word lists; `src/tokens.js` holds readers
-  only, never a list.
-- Each rule returns its own `source` (floor/list) and `matched` (the
-  member that fired) at the moment it matches. Nothing re-derives them
-  afterwards, which is what let `sourceForRule` and
-  `matchedWordsForRule` be deleted rather than ported (D79).
-- `poc/` is retained deliberately, byte-untouched, as the FROZEN
-  REFERENCE the src code is proved against — not as live code and not
-  as a second implementation. `tools/proof-step1.js`,
-  `tools/proof-step2.js` and `tools/proof-step3.js` are the
-  equivalence proofs: they run both sides over all 4171 corpus rows and
-  compare class, rule, source and matched, row by row.
+Each step owns its own lists; `src/tokens.js` holds readers only. Each rule returns its own `source` (floor, list, or jev) and `matched` at the moment it matches. `poc/d87/` is the reference the src code is proved against: `node poc/d87/proof-src.mjs` runs both over all 6557 combined rows and must print 0 differences (checked to fail when broken), and replays the recorded Jev answers through `applyJev` (804 lowered). Step 1 keeps its own proof, `node tools/proof-step1.js`.
 
-The public surface is ONE export: `classifyRow`, from `src/index.js`,
-which returns a `Verdict` (`class`, `step`, `rule`, `source`,
-`matched`). The steps, the word lists, the tokeniser, `wordsForStep3`
-and `floorPost` are internals, sealed by the package's `exports` map
-rather than merely undocumented. The D76/D77 published map and its
-`evidence` field are NOT built: that emitter is the next pass, and
-nothing emits yet.
+Run: `npm test`, `npm run typecheck`, `node poc/d87/proof-src.mjs`, `node tools/proof-step1.js`.
 
-Run: `npm test` (153 tests); `npm run typecheck` (`tsc --noEmit` over
-`src/`); and the five proofs, each printing "All pins hold." and
-exiting 0 or printing its mismatches and exiting 1 —
-`node tools/proof-tokens.js`, `node tools/proof-step1.js`,
-`node tools/proof-step2.js`, `node tools/proof-step3.js` (the four
-equivalence proofs against frozen `poc/`) and
-`node tools/proof-flow.js` (every pinned flow number, recomputed from
-`src/` alone).
-
-Current shape, n=4171: **exact 3930 (94.2%), leaks 55 (1.3%),
-over-tight 186 (4.5%).** Per step and per source — step 1 list
-92/91/1 leak and floor 1960/1958/2; step 2 list 232/227/5 and floor
-883/836/47; step 3 list 19/19/0 and floor 985/799/0 with all 186
-over-tight rows. Known limits: there is NO CLEAN EXAM — all three steps
-were measured on the same 4171 rows they were tuned on, which under D24
-makes this corpus a tuning set, so an unseen vendor will score worse;
-47 of the 55 leaks sit on step 2's wordless PUT/DELETE/PATCH floor and
-all 186 over-tight rows on step 3's `floor-post` pile. Leaks can only
-be created where a step stops at a loose class — step 1's `r` and step
-2's `w` — which is why step 3's leak count is 0 by construction rather
-than by luck. `poc/m1` is archived at `poc/archive/m1/` (D65).
-Superseded shapes and their numbers are in `docs/logs/learnings.md`,
-not here.
-
-GET is last on the list; it runs no word rules by design. On the new
-provider corpus GET truth is 100% r (Table 1) and the frozen core
-scores 99.9% exact with 2 leaks (0.1%) on GET's 1960 rows.
-
-Every row still gets a judgement — there is no "no answer" outcome —
-and where the judge is unsure it moves in the safer direction (tighter
-class).
+Current shape: the numbers are the M3 results above ("M3 spec (D87)", Results and The story). Superseded shapes and their numbers are in `docs/logs/learnings.md`, not here.
 
 ## Where the work is
 
-The core is frozen at v0.3.0: the D75/D78 three-step flow in `src/`
-stays as it is, shipped, with no more word-list mining and no more
-model tuning. M1 is closed as the mechanical offering (D83) and step
-2 is closed (D81). D84 — publish every wordless write as x — was
-tried on paper and rejected against the adoption bar (D85). The next
-shape is the consumption policy in the following section, plus the
-pending Jev raise tier.
+The core in `src/` is the D87 ladder (M3), graduated 2026-09-22 and
+proved equal to `poc/d87/` on all 6557 combined rows, with the
+optional D88 Jev tier lowering `floor-post` rows only when Jev is at
+least 90% sure the row is w. It is not released yet: npm still ships
+v0.3.0 (the D75/D78 flow) until the M3 release. Next, in order (D89):
+the fresh exam (dropbox, shopify, linear), labelled blind under
+BRIEF-v3 and scored once with and without Jev against the gate; then
+the bareguard exporter and the M3 release. D84 stays rejected (D85);
+the consumption policy in the following section stands.
 
 D87 was adopted 2026-09-22: the definition collapses to the chmod
 reading and "touches others" leaves the class (see "The shared

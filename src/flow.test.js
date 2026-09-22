@@ -16,44 +16,68 @@ test('classifyRow: a POST read verb comes back from step 1, reporting the word i
   );
 });
 
-test('classifyRow: an ordinary DELETE with no raise word is claimed w by step 2\'s method floor', () => {
+test('classifyRow: DELETE beats every word — always x, destructive, even with a KEEP_W verb in the name', () => {
   assert.deepEqual(
-    classifyRow({ method: 'DELETE', operationId: 'deleteThing', path: '/things/{id}' }),
-    { class: 'w', step: 2, rule: 'method-floor', source: 'floor', matched: [] },
+    classifyRow({ method: 'DELETE', operationId: 'updateThing', path: '/things/{id}' }),
+    { class: 'x', step: 2, rule: 'method-delete', source: 'floor', matched: [], destructive: true },
   );
 });
 
-test('classifyRow: a DELETE whose path names a raise word is raised w -> x by step 3', () => {
+test('classifyRow: an ordinary PUT with no word evidence is claimed w by step 3\'s method floor', () => {
   assert.deepEqual(
-    classifyRow({ method: 'DELETE', operationId: 'deleteMembership', path: '/teams/{id}/membership' }),
-    { class: 'x', step: 3, rule: 'raise-word', source: 'list', matched: ['membership'] },
+    classifyRow({ method: 'PUT', operationId: 'updateThing', path: '/things/{id}' }),
+    { class: 'w', step: 3, rule: 'method-floor', source: 'floor', matched: [] },
   );
 });
 
-test('classifyRow: step 2\'s modify-verb word claim is FINAL — step 3 never overrides it, even with a raise word present', () => {
-  // "password" is a RAISE_WORDS member and sits right there in the path,
-  // but step 2 claimed this row on a word of its own ("rotate"), so step 3
-  // is never offered it. A word beats no word.
+test('classifyRow: a PUT with a CANT_UNDO verb is claimed x by step 2 before step 3 ever runs', () => {
+  // "revoke" is also a REMOVES member, so this comes back destructive too.
   assert.deepEqual(
-    classifyRow({
-      method: 'POST',
-      operationId: 'rotatePassword',
-      path: '/accounts/{id}/password/rotate',
-    }),
-    { class: 'w', step: 2, rule: 'modify-verb', source: 'list', matched: ['rotate'] },
+    classifyRow({ method: 'PUT', operationId: 'revokeCertificate', path: '/certs/{id}' }),
+    { class: 'x', step: 2, rule: 'cant-undo-verb', source: 'list', matched: ['revoke'], destructive: true },
   );
 });
 
-test('classifyRow: an unclaimed POST falls to step 3\'s floor-post pile', () => {
+test('classifyRow: a POST with a KEEP_W verb is claimed w by step 3 (step 2 has nothing to say)', () => {
+  assert.deepEqual(
+    classifyRow({ method: 'POST', operationId: 'restoreThing', path: '/things/{id}/restore' }),
+    { class: 'w', step: 3, rule: 'modify-verb', source: 'list', matched: ['restore'] },
+  );
+});
+
+test('classifyRow: a POST with a CANT_UNDO verb is claimed x by step 2, not offered to step 3', () => {
+  assert.deepEqual(
+    classifyRow({ method: 'POST', operationId: 'cancelSubscription', path: '/subscriptions/{id}/cancel' }),
+    { class: 'x', step: 2, rule: 'cant-undo-verb', source: 'list', matched: ['cancel'] },
+  );
+});
+
+test('classifyRow: summary fallback works through the whole ladder for both step 2 and step 3', () => {
+  const twoFallback = classifyRow({
+    method: 'POST', operationId: 'PostTaxCalculations', path: '/tax/calculations', summary: 'Void a tax calculation',
+  });
+  assert.deepEqual(twoFallback, {
+    class: 'x', step: 2, rule: 'cant-undo-verb-summary', source: 'list', matched: ['void'], destructive: true,
+  });
+
+  const threeFallback = classifyRow({
+    method: 'POST', operationId: 'PostLists', path: '/lists', summary: 'Update a list',
+  });
+  assert.deepEqual(threeFallback, {
+    class: 'w', step: 3, rule: 'modify-verb-summary', source: 'list', matched: ['update'],
+  });
+});
+
+test('classifyRow: an unclaimed POST falls to step 2\'s floor-post pile', () => {
   assert.deepEqual(
     classifyRow({ method: 'POST', operationId: 'createThing', path: '/things' }),
-    { class: 'x', step: 3, rule: 'floor-post', source: 'floor', matched: [] },
+    { class: 'x', step: 2, rule: 'floor-post', source: 'floor', matched: [] },
   );
 });
 
-test('classifyRow: an OTHER_PARTY-blocked POST also falls to floor-post', () => {
+test('classifyRow: no "whose" gate anywhere — a POST reaching another party with no evidence still just floors', () => {
   assert.deepEqual(
     classifyRow({ method: 'POST', operationId: 'removeUserForTeam', path: '/teams/{t}/users/{u}' }),
-    { class: 'x', step: 3, rule: 'floor-post', source: 'floor', matched: [] },
+    { class: 'w', step: 3, rule: 'modify-verb', source: 'list', matched: ['remove'] },
   );
 });
