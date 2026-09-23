@@ -112,8 +112,9 @@ left blank on purpose and filled in only when measured; the spec does
 not move to meet a number.
 
 **The ladder.** Three standalone steps, named by run order, each
-owning one letter, each with its own word lists and its own ledger.
-The flow file decides only the order.
+owning one letter, each with its own word lists and its own ledger,
+plus a fourth stage — step 2's floor, called last by the flow — which
+is not a step of its own. The flow file decides only the order.
 
 - step 1, r. Unchanged from src/step1.js (D74): GET/HEAD/OPTIONS
   floor r; a read lead verb lowers POST to r; the 10-word safe-verb
@@ -595,7 +596,16 @@ flow's fall from 93.8% fitted to 85.3% exam. Per vendor (cloudflare is
 84% of the rows, so the pooled line above is never quoted alone):
 cloudflare n=3575 exact 81.8% leaks 1.0% over-tight 17.3%; pagerduty
 n=465 exact 83.2% leaks 0.4% over-tight 16.3%; sentry n=239 exact
-87.4% leaks 0.4% over-tight 12.1%. D89 gate item 1 FAILS:
+87.4% leaks 0.4% over-tight 12.1%. Per method: GET n=2099 exact 2094
+(99.8%) leaks 5 (0.2%) over-tight 0 (0.0%); POST n=892 exact 179
+(20.1%) leaks 6 (0.7%) over-tight 707 (79.3%); PUT n=460 exact 443
+(96.3%) leaks 14 (3.0%) over-tight 3 (0.7%); DELETE n=558 exact 548
+(98.2%) leaks 0 (0.0%) over-tight 10 (1.8%); PATCH n=270 exact 256
+(94.8%) leaks 12 (4.4%) over-tight 2 (0.7%). 707 of the 722 over-tight
+rows are POST, because an unclaimed POST floors at x by design — that
+is the pile the optional Jev tier exists to lower; PUT (3.0%) and
+PATCH (4.4%) carry 26 of the 37 leaks, all on the wordless floor.
+D89 gate item 1 FAILS:
 6 leaks on 93 list rows = 6.45 per 100, against a bar of at most 2 per
 100 (five of the six are step 1's read-verb list matching a trailing
 noun — `list` in `lists-create-a-list`, `query` in `queries.post` —
