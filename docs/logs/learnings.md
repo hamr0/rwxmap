@@ -4684,3 +4684,72 @@ class).
 - Step 2 in order (measured 2026-09-13, the chosen shape B plus a flag; the money-noun raiser added 2026-09-14, D66). A PUT / DELETE / PATCH row is checked in this order; the first hit decides and the rest are not consulted: a. a live verb (send, cancel, pay, ...) → give up, x. b. a someone-else's noun (the mined 3p blocklist) → give up, x. b2. a money noun (payment) → give up, x. c. every noun on the yours list → keep, w, flagged "evidence". d. none of the above → keep, w, flagged "x-pile". Both mined noun lists have a bar: a noun is "yours" when it was seen on 2+ other-vendor rows over write rows (every method but GET/HEAD/OPTIONS) and was safe 80%+ of the time — GET is truth r no matter whose thing it touches, so it carries no yours signal and only dilutes the w-share; it is "someone else's" when 2+ other vendors used it over PUT/DELETE/PATCH rows and it was dangerous 30%+ of the time. A noun that meets neither bar is on no mined list, and its row lands in d unless it is on the hand-picked money-noun list (payment).
 - Step 2 group table on the 4406 PUT/DELETE/PATCH rows (group / rows / truly w / truly x): a. live verb → x: 184 / 84 / 100. b. other-party or money noun → x: 1039 / 721 / 318. c. every noun yours → w: 1211 / 1176 / 32. d. neither → w, x-pile: 1972 / 1795 / 155. Of group b's 1039 rows, 5 are money-noun rows (rule money-noun), all truth x. Why a row lands in d, measured on this 1972-row pile (reason / rows / truly x / what it means): between bars 1046 / 104 / the noun had enough other-vendor rows but its w-share fell short of 0.8; too few rows 240 / 16 / fewer than 2 other-vendor write rows carried the noun; vendor-only 670 / 35 / no other vendor ever wrote the noun on a write row; no noun 16 / 0 / the row carries no noun at all. Group d is 91% safe and holds 155 of step 2's 187 leaks; it is the pile a human or a per-API hint sorts later (D44), not a list problem.
 - Lesson: none new beyond what the corresponding "Shape B chosen" and "confirm and payment adopted" episodes above already teach; this entry exists only to keep the final numeric tables from being lost when the PRD section describing them was retired.
+
+### The buildset relabelled under BRIEF-v3: D87's inversions reproduce on 13 unseen vendors (2026-09-23)
+
+- Question: D87 rewrote what r/w/x means, and the 6557-row combined set
+  was relabelled under it — but every vendor in that set had already
+  informed the definition. `data/buildset-2026-09-18/` (1819 write-only
+  rows across 13 apis-guru vendors: github, microsoft, gitea, appcenter,
+  netbox, atlassian, dracoon, trello, gitlab, keycloak, box, clearblade,
+  launchdarkly) was labelled on 2026-09-18 under BRIEF v1, four days
+  before D87, and none of its 13 vendors appear in the 23-vendor combined
+  tuning set or the 3-vendor burned exam. Relabelling it under BRIEF-v3
+  asks whether D87's two inversions are a property of the definition or
+  an artefact of the rows the definition was written against.
+- What was done: nine blind labellers, brief
+  `data/relabel-2026-09-22/BRIEF-v3.md`, the nine existing blind splits
+  from `data/buildset-2026-09-18/label/blind-*.csv` reused VERBATIM —
+  same rows, same order, same parts; only the brief and the output
+  filenames changed. Output `data/relabel-buildset-2026-09-23/label/
+  v3-labels-N.csv`, 1819 rows, no row skipped.
+- Headline: 51.8% of labels changed — 943 of 1819.
+- Per method, v1 → v3:
+
+  | method | n | v1 | v3 |
+  |---|---|---|---|
+  | POST | 699 | r 42 / w 143 / x 512 (+2 `?`) | r 43 / w 527 / x 129 |
+  | DELETE | 505 | w 422 / x 83 | w 5 / x 500 |
+  | PUT | 460 | w 388 / x 72 | w 440 / x 20 |
+  | PATCH | 155 | w 141 / x 14 | w 153 / x 2 |
+
+- Flip matrix: w→w 641, x→w 483, w→x 453, x→x 195, r→r 40, x→r 3,
+  r→x 2, ?→w 1, ?→x 1. (The two v1 `?` rows are both POST; they are why
+  the POST v1 row above sums to 697 of 699.)
+- Final v3 truth: r 43 / w 1125 / x 651.
+- Significance: both D87 inversions reproduce at the same magnitudes on
+  vendors that never informed the definition — DELETE goes from mostly-w
+  to almost entirely x (83 → 500 of 505), POST goes from mostly-x to
+  mostly-w (512 → 129 x, 143 → 527 w). On the combined set the same flip
+  read 777 of 803 DELETE rows moving w→x and 930 POST rows moving x→w.
+  This is independent confirmation of D87 itself, not a re-reading of the
+  rows D87 was written from. Recorded as D97.
+- Process defect, found and fixed mid-pass: the orchestrator's labeller
+  brief wrongly offered "high/medium/low" for the confidence column,
+  while BRIEF-v3 line 161 specifies EXACTLY high or low and says a file
+  containing any other value is rejected. Three of the nine labellers
+  followed the orchestrator's wording and emitted "medium"; two spotted
+  the conflict and followed the brief. All three were sent back to
+  RE-DECIDE each affected row individually — not bulk-remapped to high or
+  low, which would have invented a confidence nobody held. The nine
+  final files carry only high and low.
+- Lesson: a delegated labelling brief must state that the
+  version-controlled brief OUTRANKS the task prompt. An agent will
+  otherwise reason that the task prompt defines its output contract, and
+  a prompt-vs-brief conflict silently changes what the labels mean.
+- Open seam, NOT yet ruled: POST comment/reaction rows split 4 x / 4 w /
+  1 r across the nine labellers, because BRIEF-v3 clause (c) — "sends,
+  delivers, notifies, publishes, posts or exposes something to a person
+  or to the public" — can be read to cover posting a comment. Roughly 108
+  comment/reaction rows exist in the buildset (41 POST, 30 DELETE, 29
+  PUT, 8 PATCH). Recorded as open and awaiting the user's ruling; nothing
+  in this pass resolved it either way.
+- Consequence worth flagging, as an OBSERVATION ONLY: step 2's word
+  lists were mined on this exact set under D81, against truth that has
+  now changed on 51.8% of its rows. That weakens D81's stated reason for
+  closing step 2 — the mining was priced against labels that no longer
+  hold. Step 2 stays CLOSED; reopening it needs the user's explicit
+  approval and is not proposed here.
+- Limit: this set was and remains a TUNING set, never an exam, because
+  step 2's word lists were mined on it (D81). Nothing scored against it
+  is a generalization number.
