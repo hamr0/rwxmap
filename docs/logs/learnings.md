@@ -4740,10 +4740,15 @@ class).
 - Open seam, NOT yet ruled: POST comment/reaction rows split 4 x / 4 w /
   1 r across the nine labellers, because BRIEF-v3 clause (c) — "sends,
   delivers, notifies, publishes, posts or exposes something to a person
-  or to the public" — can be read to cover posting a comment. Roughly 108
-  comment/reaction rows exist in the buildset (41 POST, 30 DELETE, 29
-  PUT, 8 PATCH). Recorded as open and awaiting the user's ruling; nothing
-  in this pass resolved it either way.
+  or to the public" — can be read to cover posting a comment. 40 comment/reaction
+  rows exist in the buildset — rows whose path, operationId or summary
+  actually names one (POST 18, DELETE 12, PUT 5, PATCH 5). Recorded as
+  open and awaiting the user's ruling; nothing in this pass resolved it
+  either way. (CORRECTION, same day: this bullet first read "roughly 108
+  (41 POST, 30 DELETE, 29 PUT, 8 PATCH)". That count matched the words
+  anywhere in the row INCLUDING the description text, and also matched
+  "note", so it swept in endpoints that are not comment endpoints at
+  all. 40 is the right denominator; the ruling that followed is D98.)
 - Consequence worth flagging, as an OBSERVATION ONLY: step 2's word
   lists were mined on this exact set under D81, against truth that has
   now changed on 51.8% of its rows. That weakens D81's stated reason for
@@ -4753,3 +4758,61 @@ class).
 - Limit: this set was and remains a TUNING set, never an exam, because
   step 2's word lists were mined on it (D81). Nothing scored against it
   is a generalization number.
+
+### The plural-noun guard: step 1's read-verb rule stops reading resource nouns as verbs (2026-09-23)
+
+- Question: on the M3 exam (cloudflare/pagerduty/sentry, burned), the
+  `list/read-verb/r` pile leaked 5 of its 22 rows — 23%, the worst leak
+  rate anywhere in the system — all of them on the known lead-verb-
+  matches-a-noun blind spot. Is that blind spot fixable structurally, or
+  is it another fitted word problem?
+- Diagnosis: `stemMatches` in `src/tokens.js` accepts `-s`, `-es` and
+  consonant+y → `-ies` when matching a lead token against a word list, so
+  a plural RESOURCE NOUN at lead position (`lists`, `queries`, `checks`)
+  reaches a READ_VERBS member and `read-verb` claims the row as r. An
+  operationId names its action in the imperative (createList,
+  listAccounts), never the third person, so a plural-only match is
+  structurally a noun, not a verb.
+- What was measured: four variants over the 8376-row tuning pool
+  (`data/combined-2026-09-21/labelled.csv` 6557 rows +
+  `data/relabel-buildset-2026-09-23/labelled.csv` 1819 rows), with
+  leave-one-fold-out over 35 folds — atlassian and jira merged into one
+  fold per the user's ruling, since they are the same vendor.
+
+  | variant | exact | leaks | over-tight |
+  |---|---|---|---|
+  | A baseline | 6727 (80.3%) | 83 (0.99%) | 1566 (18.7%) |
+  | B plural-noun guard | 6728 | 82 | 1566 |
+  | C drop `evaluate` | 6724 | 83 | 1569 |
+  | D both | 6725 | 82 | 1569 |
+
+- The `read-verb` ledger per variant (n / exact / leak): A 109 / 108 / 1,
+  B 108 / 108 / 0, C 107 / 106 / 1, D 106 / 106 / 0.
+- Decision: B ADOPTED as D99 — it closes 1 leak at exactly 0 cost, 0 of
+  35 folds are made worse and 1 is better, and the argument is structural
+  (imperative naming) rather than a fitted word. C REJECTED: dropping
+  `evaluate` closes 0 leaks and costs 3 over-tight rows on tuning, and
+  its only supporting evidence was 2 rows from a single vendor
+  (cloudflare) on the burned exam — fitting to an exam, not a real fix.
+- The single row is b0127, github POST `checks/rerequest-suite`
+  ("Rerequest a check suite", truth x): lead token `checks` reaches stem
+  `check`, while the real action is `rerequest`. A full no-regression
+  proof over all 8376 rows shows exactly one differing verdict,
+  `r/read-verb` → `x/floor-post`.
+- Proof gap, worth more than the fix: `tools/proof-step1.js` compares
+  `src/step1` against the frozen `poc/step1/step1.mjs` over the 4171
+  provider-corpus rows, and it STILL passes with 0 differences after the
+  guard shipped — because no row in that corpus has a plural-only lead
+  match. The proof is blind to a deliberate divergence it was written to
+  catch, and can no longer be read as pinning step 1's full behaviour.
+- Lesson: a corpus's ability to OBSERVE a given rule change differs per
+  rule and must be re-checked every time, never assumed inherited from
+  the day the proof was written. A green proof is evidence only about the
+  rows it can see.
+- Second observation, recorded because it prices the whole rule: the
+  8376-row tuning pool exercises `read-verb` on only 109 rows (1.3%),
+  while the M3 exam exercised it on 93 list rows of 4279 and leaked 6 of
+  them. This rule is therefore priced against thin evidence on tuning —
+  the same instrument problem recorded on 2026-09-18 for the
+  write-method rules, where the tuning corpus held ~5x less of the real
+  failure than the exam did.
