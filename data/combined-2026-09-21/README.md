@@ -60,3 +60,35 @@ bytes. The builder hard-fails on any per-source truth total other than the
 recorded one, a non-1:1 ops/key join, a total other than 6557, a provider
 count other than 23, a provider in two sources, a repeated prefixed
 row_id, or a duplicate operation with conflicting truth.
+
+## The single labelled CSV
+
+`labelled.csv` is the single flat CSV for the D87 tuning truth over this
+set — one row per corpus row (6557), columns `row_id, provider, method,
+path, operationId, summary, description, truth_class, confidence, reason,
+source_set`.
+
+It exists because D87 truth otherwise lives scattered across two places:
+`rows.json.gz` (the v1 truth this README describes above) and the nine
+`data/relabel-2026-09-22/label/labels-*.csv` files (the v3 relabel of the
+3852 non-r rows, with `rulings.csv` overriding `truth_class` on a handful
+of disputed rows). `labelled.csv` joins them with the exact same semantics
+as `poc/d87/readout.mjs`'s `loadRows`/`loadV3Truth`/`attachTruth`: a row
+whose v1 truth is `r` keeps `r` unchanged (no relabel exists for r rows,
+and `confidence`/`reason` are left empty for it); every non-r row takes its
+v3 label, with `truth_class` further overridden by a `rulings.csv` ruling
+where one exists (`confidence`/`reason` for those rows still come from the
+original `labels-*.csv` entry — `rulings.csv` carries no confidence column
+and its reason documents the dispute ruling, not the read). `source_set`
+is derived from the `row_id` prefix (`pc-` / `x17-` / `x20-`) into the
+three source directory names.
+
+Built by `tools/make-combined-labelled.js` (`node
+tools/make-combined-labelled.js [outPath]`); deterministic, verified by
+diffing two independent runs.
+
+**This is TUNING DATA (D24) — never an exam, never a generalization
+claim.** The burned M3 exam lives separately in
+`data/exam-2026-09-22/labelled.csv`. The two must NEVER be concatenated:
+one file holding both would let a future scorer mix burned exam rows into
+a tuning number unnoticed.
