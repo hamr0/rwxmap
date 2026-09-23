@@ -581,17 +581,33 @@ The core in `src/` is the D87 ladder (M3), graduated 2026-09-22 and
 proved equal to `poc/d87/` on all 6557 combined rows, with the
 optional D88 Jev tier lowering `floor-post` rows only when Jev is at
 least 90% sure the row is w. It is not released yet: npm still ships
-v0.3.0 (the D75/D78 flow) until the M3 release. Next, in order (D92
-supersedes D89's naming): the fresh exam is cloudflare, pagerduty and
-sentry — the other three of the pre-registered ten still unspent,
-dropbox, shopify and linear, turned out unusable (dropbox publishes a
-Stone spec, not OpenAPI; shopify has no official OpenAPI, only
-community mirrors; linear is GraphQL-only with no REST/OpenAPI), and
-the locked pile was deliberately NOT widened with a replacement
-vendor (user ruling, D92) — labelled blind under BRIEF-v3 and scored
-once with and without Jev against the gate; then the bareguard
-exporter and the M3 release. D84 stays rejected (D85); the
-consumption policy in the following section stands.
+v0.3.0 (the D75/D78 flow) until the M3 release.
+
+The M3 clean exam (cloudflare, pagerduty, sentry, the three
+unspent-and-pullable vendors of the locked pile, D92) was drawn,
+labelled blind under BRIEF-v3, and scored once on 2026-09-23. It is
+now BURNED (D24) — no re-score, no rule change evaluated against these
+rows again. Mechanical only, no Jev (this exam has no Jev answers of
+its own yet): 4279 rows, exact 3520 (82.3%), leaks 37 (0.9%),
+over-tight 722 (16.9%) — essentially unchanged from the 6557-row
+tuning set's own read of 82.6% / 1.0% / 16.4%, unlike the D75/D78
+flow's fall from 93.8% fitted to 85.3% exam. Per vendor (cloudflare is
+84% of the rows, so the pooled line above is never quoted alone):
+cloudflare n=3575 82.3% became — exact 81.8% leaks 1.0% over-tight
+17.3%; pagerduty n=465 exact 83.2% leaks 0.4% over-tight 16.3%; sentry
+n=239 exact 87.4% leaks 0.4% over-tight 12.1%. D89 gate item 1 FAILS:
+6 leaks on 93 list rows = 6.45 per 100, against a bar of at most 2 per
+100 (five of the six are step 1's read-verb list matching a trailing
+noun — `list` in `lists-create-a-list`, `query` in `queries.post` —
+the known noun/verb blind spot, now confirmed on unseen vendors). Full
+per-method, evidence-split and row-level detail is in
+`docs/logs/learnings.md` ("The M3 clean exam", 2026-09-23).
+
+Next, in order: the with-Jev pass over this exam's floor rows —
+Jev answer collection is pending, not yet run; then a decision on the
+gate item 1 failure; then the bareguard exporter and the M3 release.
+D84 stays rejected (D85); the consumption policy in the following
+section stands.
 
 D87 was adopted 2026-09-22: the definition collapses to the chmod
 reading and "touches others" leaves the class (see "The shared

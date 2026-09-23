@@ -4617,3 +4617,63 @@ class).
   from ten to three unspent-and-pullable vendors is a real cost of
   spending four into tuning and losing three to spec format, not
   something this pass tried to fix.
+
+### The M3 clean exam: the ladder holds on unseen vendors, gate item 1 fails (2026-09-23)
+
+- Question: with the D87 ladder graduated to `src/` and the exam pile
+  cashed in as cloudflare, pagerduty and sentry (D91/D92), how does the
+  mechanical flow read on 4279 rows across three vendors none of the
+  rules were ever tuned on, and does it clear D89's gate item 1 (at
+  most 2 list-row leaks per 100)? `node tools/score-exam-2026-09-22.js`
+  scored the blind-labelled set once against `src/flow.js`, no Jev (this
+  exam has no Jev answers of its own yet). Scored once and now BURNED
+  (D24) — the numbers below are not re-derivable by re-running the
+  scorer, only readable from this record and the run log.
+- Headline, 4279 rows: exact 3520 (82.3%), leaks 37 (0.9%), over-tight
+  722 (16.9%).
+- Fitted-vs-exam, and why it matters: the same flow on the 6557-row
+  tuning set reads 82.6% / 1.0% / 16.4%; on the three unseen vendors it
+  reads 82.3% / 0.9% / 16.9% — essentially unchanged. This is the
+  opposite of the D75/D78 flow's history, which fell from 93.8% fitted
+  to 85.3% on its own exam (2026-09-17). The D87 ladder does not fall
+  off a cliff on vendors it has never read.
+- Per vendor (cloudflare is 84% of the rows, so the pooled line above
+  is never quoted alone): cloudflare n=3575 exact 2924 (81.8%) leaks 34
+  (1.0%) over-tight 617 (17.3%); pagerduty n=465 exact 387 (83.2%) leaks
+  2 (0.4%) over-tight 76 (16.3%); sentry n=239 exact 209 (87.4%) leaks 1
+  (0.4%) over-tight 29 (12.1%).
+- Per method: GET n=2099 exact 99.8% leaks 5 over-tight 0; POST n=892
+  exact 179 (20.1%) leaks 6 over-tight 707 (79.3%); PUT n=460 exact
+  96.3% leaks 14 (3.0%) over-tight 3; DELETE n=558 exact 98.2% leaks 0
+  over-tight 10; PATCH n=270 exact 94.8% leaks 12 (4.4%) over-tight 2.
+- Evidence split: list rows 93 (exact 69, leaks 6, over-tight 18);
+  floor rows 4186 (exact 3451, leaks 31, over-tight 704). 31 of the 37
+  leaks are wordless floor rows; only 6 are evidence (list) rows.
+- D89 gate item 1: FAIL. 6 leaks on 93 list rows = 6.45 per 100,
+  against the bar of at most 2 per 100. The six, named: x22-0929
+  EvaluateNewWebhook and x22-0934 EvaluateExistingWebhook (cloudflare
+  POST, matched read-verb `evaluate`, predicted r, truth x); x22-2015
+  lists-create-a-list and x22-2021 lists-create-list-items (cloudflare
+  POST, matched read-verb `list`, predicted r, truth w); x22-2389
+  queries.post (cloudflare POST, matched read-verb `query`, predicted
+  r, truth w); x22-4084 addOrganizationMember (sentry POST, matched
+  modify-verb `add`, predicted w, truth x because it invites).
+- Two leak causes, kept separate: (1) the dominant cause on evidence
+  rows — five of the six leaks are step 1's read-verb list firing on a
+  token that is a NOUN, not the verb: `list` in `lists-create-a-list`,
+  `query` in `queries.post`. This is the known trailing-verb / noun
+  blind spot, now confirmed on unseen vendors, not a new failure mode.
+  (2) the dominant cause of over-tightness — 707 of 722 over-tight rows
+  are POST floor rows, which floor at x by design; that is exactly the
+  pile the optional Jev tier exists to lower, so the with-Jev pass is
+  expected to move this number and little else.
+- Limits, stated plainly: scored once and burned (D24), no re-score
+  ever evaluates a rule change against these rows. cloudflare is 84% of
+  the rows, so per-vendor reporting is mandatory, not optional. The
+  with-Jev half is not yet measured — this exam has no Jev answers of
+  its own. And the brief's method defaults mean truth and prediction
+  agree by construction on every wordless row where the floor happens
+  to be right, so the 82.3% exact figure is inflated by that
+  construction; the honest reads are the evidence-row leak rate (6 of
+  93, 6.45%) and the rows where truth actually departs from the
+  method floor — 47 such rows in this exam.

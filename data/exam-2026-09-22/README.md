@@ -126,3 +126,97 @@ per-provider, per-method counts in the table above and exits 1 on any
 mismatch, on any (path, method) duplicate within a provider, on any row
 missing an `operationId`, or on any operation present under a method
 outside GET/POST/PUT/DELETE/PATCH.
+
+## Calibration (calib/)
+
+BRIEF-v3 (`data/relabel-2026-09-22/BRIEF-v3.md`) was calibrated only on the 3852 non-r rows of
+the 2026-09-22 relabel (`data/relabel-2026-09-22/`). This exam is 1758 of
+its 4279 rows GET (41%), so the brief has never been calibrated on the r
+class it is about to be judged on here. The standing project rule is that
+a brief is calibrated per method it covers before an exam relies on it.
+
+This calibration draw does **not** come from the exam -- scoring it would
+burn exam rows before they are ever labelled. It is drawn instead from
+the TUNING corpus (`data/combined-2026-09-21/rows.json.gz`, 2705 rows
+whose v1 truth is `r`), where v1 truth already stands as truth for r rows
+(see `poc/d87/readout.mjs`'s `attachTruth`: a `row.truth === 'r'` row
+keeps its v1 label directly, only non-r rows are relabelled under v3).
+
+- `r-practice-blind.csv` (100 rows, seeded shuffle over the 2705-row
+  v1-truth-r pool, independent of the exam's own shuffle): labelled blind
+  under BRIEF-v3 to check the brief holds on the r class before the exam
+  is scored.
+- `r-practice-key.csv`: `row_id,provider,method,path,operationId` -- no
+  class column.
+- The existing v1 truth for these rows is used only inside
+  `tools/make-exam-2026-09-22.js`'s own assertion/report path (to draw
+  the r-truth pool and to print the disjointness check); it is never
+  written to `r-practice-blind.csv` or `r-practice-key.csv`, and the
+  script asserts neither file's header contains a truth/class/confidence
+  column before it will report success.
+- Disjoint from the exam by construction (different corpus entirely) and
+  asserted anyway, on row_id and on provider.
+
+## Split (label/)
+
+- Seed: 20260923 (mulberry32, one shuffle over all 4279 exam rows).
+- 4279 rows split into 10 parts: parts 1-9 have 428 rows each, part 10
+  has 427 rows (9*428 + 427 = 4279).
+- Rows are shuffled across all three providers before splitting, so no
+  labeller receives one provider's rows in a block. Per-part provider mix:
+  - part 1: cloudflare 358, pagerduty 46, sentry 24 (428 rows)
+  - part 2: cloudflare 351, pagerduty 50, sentry 27 (428 rows)
+  - part 3: cloudflare 366, pagerduty 41, sentry 21 (428 rows)
+  - part 4: cloudflare 359, pagerduty 42, sentry 27 (428 rows)
+  - part 5: cloudflare 353, pagerduty 43, sentry 32 (428 rows)
+  - part 6: cloudflare 348, pagerduty 54, sentry 26 (428 rows)
+  - part 7: cloudflare 363, pagerduty 42, sentry 23 (428 rows)
+  - part 8: cloudflare 351, pagerduty 49, sentry 28 (428 rows)
+  - part 9: cloudflare 359, pagerduty 52, sentry 17 (428 rows)
+  - part 10: cloudflare 367, pagerduty 46, sentry 14 (427 rows)
+- `blind-1.csv` … `blind-10.csv`: one file per labeller. Columns:
+  `row_id,provider,method,path,operationId,summary,description`. No
+  truth, class, confidence, part number, or classifier output.
+- `key.csv`: `row_id,part,provider,method,path,operationId`, sorted by
+  row_id -- no class column.
+- Row ids are kept exactly as `ops.csv` has them (`x22-0001` …); nothing
+  is renumbered.
+
+## Rules for labellers
+
+- Open only your own `blind-N.csv` file.
+- Write only your own output file, named `labels-N.csv` (same N as your
+  blind file), and use your own uniquely-named scratch files -- never a
+  name another labeller might also use.
+- Output columns are exactly `row_id,truth_class,confidence,reason`, as
+  the brief specifies: `truth_class` is r, w, x or ?; `confidence` is
+  EXACTLY `high` or `low` (there is no medium, and any other value means
+  the file is rejected); `reason` is a short phrase under 15 words with
+  no commas (or the whole reason double-quoted) naming the clause
+  applied. One line per input row, same order, no rows skipped, no
+  extras.
+- Append output in batches of about 50 rows rather than holding all rows
+  in memory, so a kill mid-run loses only the unflushed batch.
+- Do not look at any other labeller's blind or output file.
+
+## Reproduce (split + calibration)
+
+```
+node tools/make-exam-2026-09-22.js
+```
+
+Deterministic: same seed (20260923), same `ops.csv` and same
+`data/combined-2026-09-21/rows.json.gz` -> byte-identical output files,
+every run.
+
+## Scored (2026-09-23)
+
+Scored **once** via `node tools/score-exam-2026-09-22.js`. This set is
+now **BURNED** (D24): no rule change may be evaluated by re-scoring
+these rows, ever — a rule change needs a new exam.
+
+Mechanical only (no Jev — this exam has no Jev answers of its own
+yet), 4279 rows: exact 3520 (82.3%), leaks 37 (0.9%), over-tight 722
+(16.9%). Full per-vendor, per-method, evidence-split and gate-item-1
+detail is in `docs/logs/learnings.md` ("The M3 clean exam", 2026-09-23)
+and `docs/product/prd.md` ("Where the work is").
