@@ -27,6 +27,16 @@
 // source, and an adopter re-deriving it by hand would be duplicating the one
 // writer of that field.
 //
+// Also exported: the bareguard exporter (exporter.js) — operationsFrom,
+// exportGate and exportSidecar. These are the carrier half of the project,
+// and they are a promise worth making because the contract they implement
+// is agreed with another repo (D91, amended by D103): an adopter turns a
+// parsed OpenAPI document into a draft `tools` section of
+// `bareguard.rwx.json` plus a human-facing sidecar, and must be able to do
+// that without re-deriving the key shape, the marker or the collision rule
+// by hand. operationsFrom does no I/O and no parsing — the caller reads
+// and parses the file, which is what keeps this package dependency-free.
+//
 // The published map emitter (D76/D77's adopter-facing `evidence` floor/list
 // map) is deliberately not here yet: the PRD puts it after the ladder, in
 // its own pass, and this entry point ships the classifier as it stands
@@ -49,3 +59,4 @@ export {
   JEV_RAISE_WX_THRESHOLD,
   JEV_RAISE_GET_THRESHOLD,
 } from './jev.js';
+export { operationsFrom, exportGate, exportSidecar } from './exporter.js';
