@@ -176,7 +176,9 @@ v3, scored once):
 
 **Deliverables.** poc/d87/ (steps 1-3, flow, tests, readout, proof
 against src/ for step 1 only), then graduation to src/ as the M3
-release; the bareguard exporter with its sidecar (D86, unchanged);
+release; the bareguard exporter with its sidecar (contract now D91 as
+amended by D103 — every row exported, letter or letter-plus-marker;
+not built yet);
 Jev's criteria text replaced by the D87 definition (raise-only,
 pending, D82/D83).
 
@@ -451,14 +453,18 @@ the chmod reading — see "The shared definition (D87)" above; letter
 = class is unchanged by it. `destructive: true` always sits inside
 class x, so the two "ask every time" rows of the old table collapse
 into one letter. `review` marks the rows a human should read before
-deploy — `tight` first, then `loose` (D101); `evidence` says only
+deploy — `tight` first, then `loose` (D101). Under D103 `review` is
+also published INTO THE BAREGUARD GATE FILE as a tool entry's
+`marker`, not only into rwxmap's own map and sidecar. `evidence` says only
 whether a word fired or the method alone decided, and is not a
 reliability signal. The policy is NOT carried in the map JSON; it is
 how a consumer reads the four fields, and the README states it the
 same way.
 
 bareguard alignment (SETTLED with the bareguard session 2026-09-22,
-D91; bareguard's rwx support is approved but not yet built — their
+D91, AMENDED 2026-09-24 by D103 — the omission policy below is dead,
+the exporter emits every row, and a letter may now carry a marker;
+bareguard's rwx support is approved but not yet built — their
 branch `feat/rwx`, target release 0.17.0, so this is a
 settled-but-unshipped contract; their file shape is authoritatively
 specced in their repo's `docs/product/bareguard-prd.md`, Part 1 §23 —
@@ -466,18 +472,27 @@ if their spec and this paragraph ever disagree, theirs governs and
 this is the stale copy). bareguard owns the gate, the file
 format (one letter per row), agent grants such as `r--` / `rw-` /
 `rwx`, child ≤ parent, deny-by-absence and no runtime asks. A `tools`
-entry's value is a BARE SINGLE LETTER (`"r"`, `"w"` or `"x"`); the
-three-letter form is for the `agents` map only, and an object-valued
-tool entry is a config-shape error in bareguard — anything beyond the
-letter belongs in rwxmap's sidecar, never the gate file. rwxmap owns
+entry's value is a BARE SINGLE LETTER (`"r"`, `"w"` or `"x"`), which
+stays legal forever; the three-letter form is for the `agents` map
+only. Under D103 a `tools` / `bash` entry MAY instead be an object
+`{ "letter": "w", "marker": "loose" }`, where `marker` is rwxmap's
+`review` hint (D101); nothing else goes on a tool entry, and
+everything beyond letter and marker — the evidence kind included —
+belongs in rwxmap's sidecar, never the gate file. rwxmap owns
 the labels and the carriers, and gains one offline exporter (an M3
 item): spec → draft `tools` section of `bareguard.rwx.json`, keyed
 `<vendor>.<operationId>` (dot-separated: bareguard matches a `tools`
 key literally against the harness's action `type` and does no
 namespacing, so a bare operationId would collide across vendors),
 letter = class (identity under D87), NEVER the `agents` section.
-Floor PUT/PATCH rows are LEFT OUT: deny-by-absence forces a human
-letter, so a missed row is a loud deny, never a leak. bareguard has
+D91 left floor PUT/PATCH rows OUT of the export, on the grounds that
+deny-by-absence forces a human letter. That policy is DEAD (D103): the
+exporter emits EVERY row. Those rows are right 96.6% of the time
+(1601 of 1657 on the 8376-row tuning pool), and omitting them cost a
+reviewer a median of 38 rows per spec, 1657 of 8376 (19.8%) across 36
+vendors — 0 for stripe, openai and meta-whatsapp, 125 for hubspot
+(half its rows), 60% of trello. The `loose` marker now says the same
+thing the omission used to say, without deleting the row. bareguard has
 no `destructive` concept, now or planned; its deny mechanism is the
 `flags` primitive (e.g. `flags: { type: { "deleteUser": "deny" } }`,
 rule id `flags.type`, or `"ask"` to route to a human), which lives in
@@ -485,8 +500,8 @@ the gate config, not in `bareguard.rwx.json` or on a tool entry, and
 fires before the allowlist/rwx check. The exporter MUST NOT emit
 `flags` — denial is the human's call at grant time, and an
 agent-authored deny rule would cross bareguard's authorship boundary.
-A sidecar review report lists every omitted row with its class and
-evidence, and MAY list rows where `destructive` is true as a
+A sidecar review report carries the evidence kind for each row, and
+MAY list rows where `destructive` is true as a
 clearly-labelled SUGGESTION for the reviewer, never as config;
 `evidence` and `destructive` never enter the gate file. The sidecar
 is HUMAN-FACING ONLY — bareguard never reads it, since an unlisted
@@ -502,9 +517,18 @@ exporter never emits that deny rule, only the sidecar's suggestion.
 bareguard confirmed both of our follow-up consequences on 2026-09-22:
 the sidecar may name `flags.type` inside a clearly-labelled
 suggestions block provided it does not pre-write the operator's
-config text, and the exporter emitting fewer keys than the spec has
-operations (the omitted PUT/PATCH floor rows) is the intended shape,
-not a gap, because `rwx.unlisted` is already a loud named deny.
+config text, and `rwx.unlisted` stays a loud named deny for any row
+the exporter never saw. D103 (2026-09-24) adds one more agreed point:
+bareguard gains an opt-in `rwx.askOn` knob, defaulting to off, which
+reads the marker. That knob is bareguard's design and its default is
+bareguard's call, not rwxmap's; it is recorded here only so the two
+repos agree on what the marker is for. The measured shape of the
+three markers, and why `tight` is a build-time worklist rather than a
+runtime ask trigger, is in D103 and in "The review hint (D101)" below.
+The boundary is unchanged: bareguard never runs rwxmap, at build time
+or at runtime. The consumer runs rwxmap offline, reviews the draft,
+commits the file; bareguard only ever reads a file the operator
+committed.
 
 Vendor-to-vendor inconsistency in how methods are used is structural
 (D81: mined lists do not transfer), and the tool reports it through
@@ -742,7 +766,17 @@ evidence source — and asserts nothing new about confidence.
   to review: no leak was observed in this bucket on either set.
 - `loose` — `class: w` on a PUT or PATCH decided by the method floor.
   This is where most of the danger lives.
-- `settled` — everything else.
+- `settled` — everything else. It is NOT a signed or human-confirmed
+  state; it means "neither of the other two". A genuinely signed state
+  would be a fourth value only a human writes after the export, and
+  rwxmap will never emit it, because signing is the Resource Owner's
+  act.
+
+The three values partition a provider's whole corpus: every row gets
+exactly one. `review` is published into rwxmap's own map, into the
+sidecar, and — since D103 (2026-09-24) — into the bareguard gate file
+as a tool entry's `marker`, the object form `{ "letter": "w",
+"marker": "loose" }`. The bare letter stays legal there forever.
 
 Measured on the 8376-row tuning pool (82 leaks, 1566 over-tight):
 
@@ -825,6 +859,11 @@ In `_meta` rwxmap publishes three of its four fields — `class`,
 needs at call time, and publishing it invites a consumer to read it as
 a confidence score, which it is not (D101). It goes in the exporter's
 sidecar report instead.
+
+**OPEN QUESTION — `review` in MCP.** D102 keeps the marker out of MCP,
+while D103 puts it into the bareguard gate file, which is a runtime
+consumer. Whether MCP should carry it too is unresolved and needs the
+user's ruling.
 
 ```json
 { "name": "delete_share_permission",

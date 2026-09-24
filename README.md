@@ -135,9 +135,11 @@ recommended reading:
   `floor` rows, but `floor` is most of the API, so it is far too broad
   a pile to review from.
 - The exporter (planned) writes a draft `tools` section for bareguard
-  keyed by operationId, one letter per row, and leaves floor rows out
-  so a missed row is a loud deny, never a leak; a sidecar report lists
-  every omitted row with its class and evidence for the reviewer.
+  keyed `<vendor>.<operationId>`, every row exported (D103) — either a
+  bare letter or `{ "letter": "w", "marker": "loose" }`, the marker
+  being `review`. A sidecar report carries each row's evidence for the
+  reviewer, plus the `destructive: true` rows as a suggestion. It never
+  writes bareguard's deny rules: that is the operator's call.
 
 ### `review` — which rows to look at first
 
