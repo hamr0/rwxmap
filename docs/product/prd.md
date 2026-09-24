@@ -164,16 +164,14 @@ charged to the rule that owns the row; a combined line is labelled
 combined. Under- and over-classification are always reported
 separately with counts and the denominator.
 
-**Gate (user ruling 2026-09-22, D89).** On the fresh exam
-(dropbox, shopify, linear, drawn after the exposure check, labelled
-blind under v3, scored once):
-1. Leaks on `evidence: list` rows at or under 2 per 100 list rows,
-   every one listed. (Zero was proposed first; no lowering list
-   reaches zero on the tuning truth — 22 of 673 list rows leak.)
-2. Leaks overall at or under 5% of rows, every one listed.
-3. Over-tight at or under 20% of rows, reported, never traded against
-   1 or 2.
-4. LOVO on the tuning set within 2 points of the fitted number for
+**Gate (user ruling 2026-09-22, D89; item 1 replaced by D94,
+2026-09-23).** On the fresh exam (cloudflare, pagerduty and sentry,
+4279 operations, drawn after the exposure check, labelled blind under
+v3, scored once):
+1. Leaks overall at or under 2% of all rows, every one listed.
+2. Over-tight at or under 20% of rows, reported, never traded against
+   item 1.
+3. LOVO on the tuning set within 2 points of the fitted number for
    every adopted list, or the list is not adopted.
 
 **Deliverables.** poc/d87/ (steps 1-3, flow, tests, readout, proof
@@ -184,7 +182,7 @@ pending, D82/D83).
 
 **The story (user, 2026-09-22).** The words settle r and w for most rows; whatever the words cannot settle goes to x. On the 6557 tuning rows that leaves 1075 over-tight (16.4%) for 64 leaks (1.0%). Jev, asked only about the rows that reach the POST floor, moves a row from x to w only when it is at least 90% sure the row is w (t=0.10, D88): over-tight falls to 309 (4.7%) for 72 leaks (1.1%).
 
-**Results (poc/d87, tuning data, fitted, 2026-09-22).** v3 truth over the 6557 rows: r 2712 / w 2378 / x 1467. Flow: exact 5418 (82.6%), leaks 64 (1.0%), over-tight 1075 (16.4%). LOVO over 23 providers: leaks 1.0% (0.0 points off), over-tight 16.8% (0.4 points off). Leaks: 23 on list rows (22 from KEEP_W lowerings, 1 step 1), 41 on floor rows (39 the PUT/PATCH w floor). Over-tight: 1036 of 1075 on the POST floor. Lists as built: CANT_UNDO 29 (REMOVES 6), KEEP_W 14; deactivate, change, swap, archive and disable left the lowering list below the bar (user ruling 2026-09-22, D89: they stay off, those rows floor at x). create fails the bar (6.99 fitted; kept on 0 of 23 LOVO folds; with a can't-undo-word guard 9.24 fitted, 2 of 23 folds) and is not adopted. Against the gate as ruled (D89): item 1 reads 22 lowering leaks of 673 list rows (3.3 per 100) on the tuning truth, over the bar of 2; items 2, 3 and 4 pass. The 13 can't-undo verbs that leave-three-out drops (execute, run, void in 87% of folds, ten others in 24%) were priced and stay (user ruling 2026-09-22, D90): they claim 40 rows, removing all 13 costs 1 leak and 0 over-tight fitted, changes nothing at all under leave-one-out, and moves 40 rows from list evidence to floor. Detail in learnings, "M3 POC under D87".
+**Results (poc/d87, tuning data, fitted, 2026-09-22).** v3 truth over the 6557 rows: r 2712 / w 2378 / x 1467. Flow: exact 5418 (82.6%), leaks 64 (1.0%), over-tight 1075 (16.4%). LOVO over 23 providers: leaks 1.0% (0.0 points off), over-tight 16.8% (0.4 points off). Leaks: 23 on list rows (22 from KEEP_W lowerings, 1 step 1), 41 on floor rows (39 the PUT/PATCH w floor). Over-tight: 1036 of 1075 on the POST floor. Lists as built: CANT_UNDO 29 (REMOVES 6), KEEP_W 14; deactivate, change, swap, archive and disable left the lowering list below the bar (user ruling 2026-09-22, D89: they stay off, those rows floor at x). create fails the bar (6.99 fitted; kept on 0 of 23 LOVO folds; with a can't-undo-word guard 9.24 fitted, 2 of 23 folds) and is not adopted. Against the gate as it now stands (D89 with item 1 replaced by D94): the tuning read is 64 leaks of 6557 rows (1.0%), inside the 2% bar, and the LOVO line above is inside the 2-point bar; the gate itself is scored on the exam, in "Where the work is" below. The 13 can't-undo verbs that leave-three-out drops (execute, run, void in 87% of folds, ten others in 24%) were priced and stay (user ruling 2026-09-22, D90): they claim 40 rows, removing all 13 costs 1 leak and 0 over-tight fitted, changes nothing at all under leave-one-out, and moves 40 rows from list evidence to floor. Detail in learnings, "M3 POC under D87".
 
 ## Truth by provider (new — the old corpus could not give this)
 
@@ -300,12 +298,14 @@ n=465 exact 83.2% leaks 0.4% over-tight 16.3%; sentry n=239 exact
 rows are POST, because an unclaimed POST floors at x by design — that
 is the pile the optional Jev tier exists to lower; PUT (3.0%) and
 PATCH (4.4%) carry 26 of the 34 leaks, all on the wordless floor.
-D89 gate item 1 FAILS:
-3 leaks on 90 list rows = 3.33 per 100, against a bar of at most 2 per
-100 (two of the three are step 1's read-verb list claiming `evaluate`
-— cloudflare's `EvaluateNewWebhook` and `EvaluateExistingWebhook`,
-both truth x; the third is step 3's modify-verb claiming `add` in
-sentry's `addOrganizationMember`). Full per-method,
+Note, not a gate item since D94: 3 of the 34 leaks sit on
+`evidence: list` rows (3 of 90 list rows), and all three are the known
+lead-verb-matches-a-noun blind spot — two are step 1's read-verb list
+claiming `evaluate` (cloudflare's `EvaluateNewWebhook` and
+`EvaluateExistingWebhook`, both truth x), the third is step 3's
+modify-verb claiming `add` in sentry's `addOrganizationMember`. The
+denominator is tiny, which is why D94 replaced this reading with
+overall leaks. Full per-method,
 evidence-split and row-level detail is in
 `docs/logs/learnings.md` ("The M3 clean exam", 2026-09-23).
 
@@ -318,9 +318,15 @@ Mechanical, no model tier: 82.3% exact (3520 of 4279), 0.8% leaks
 directions fall; nothing is traded. cloudflare is 84% of the rows
 (3575), so the pooled line is never quoted alone.
 
-Next, in order: a decision on the D89 gate item 1 failure; then the
-bareguard exporter; then the M3 release; then a fresh exam for
-anything adopted under D100. D84 stays rejected (D85); the
+**The M3 gate PASSES on all three items**, measured on this exam.
+Item 1 (leaks at or under 2% of all rows): 22 of 4279 (0.5%) with Jev,
+34 of 4279 (0.8%) mechanical. Item 2 (over-tight at or under 20%):
+277 of 4279 (6.5%) with Jev, 725 (16.9%) mechanical. Item 3 (LOVO
+within 2 points of fitted): held, at the LOVO figures already given
+in "Results (poc/d87 …)" above.
+
+Next, in order: the bareguard exporter; then the M3 release; then a
+fresh exam for anything adopted under D100. D84 stays rejected (D85); the
 consumption policy in the following section stands.
 
 ### Adoption bars by direction (D100)
@@ -386,10 +392,11 @@ A combined diagnostic set, `data/combined-2026-09-21/`, puts every row
 we pulled and labelled ourselves in one place: 6557 rows across 23
 providers (the provider corpus's 4171, the 2026-09-17 exam's 1383, the
 2026-09-20 exam's 1003). It is tuning data, not an exam; every number
-it gives is a diagnostic. Next: M3 (brief v3, the relabel of its
-3852 non-r rows under D87, step 2 rebuilt under D87, the bareguard
-exporter), then a fresh exam drawn from the last unused locked
-vendors (dropbox, shopify, linear) after the full exposure check.
+it gives is a diagnostic. The fresh exam drawn after it, from the
+last unused locked vendors that could actually be pulled, is
+cloudflare, pagerduty and sentry (D92); it is scored and burned — see
+"Where the work is" above. What remains of M3 is the bareguard
+exporter and the release.
 
 The full module ladder, the M1 go/no-go gate, the labelled sets and
 the current arbiter shape with its scores live in
@@ -429,9 +436,11 @@ PATCH floor, 1969 of 6557: a floor PUT says w and is right 1698 of
 1969 times (86.2%), 270 are truth x.
 
 What stands instead. The class is the tool's best guess and stays
-accurate by default. The map carries exactly the three fields D76/D77
-already name — `class`, `destructive` and `evidence` (`list` when a
-word fired, `floor` when only the method decided). D85 first read
+accurate by default. The map carries exactly four fields — the three
+D76/D77 name (`class`, `destructive`, `evidence`: `list` when a word
+fired, `floor` when only the method decided, `jev` when the optional
+model tier moved the row) plus `review` (D101),
+the review hint. D85 first read
 them as a runtime policy (ask once on a w-floor row, ask every time
 on x). D86 (2026-09-22) replaces that with review-once: floor rows
 are reviewed once by a human before the map is deployed, and the
@@ -441,10 +450,12 @@ The reading under D87. D87 (2026-09-22) collapsed the definition to
 the chmod reading — see "The shared definition (D87)" above; letter
 = class is unchanged by it. `destructive: true` always sits inside
 class x, so the two "ask every time" rows of the old table collapse
-into one letter. `evidence: floor` marks the rows a human has to read
-before deploy; `evidence: list` rows carry a word the tool read. The
-policy is NOT carried in the map JSON; it is how a consumer reads the
-three fields, and the README states it the same way.
+into one letter. `review` marks the rows a human should read before
+deploy — `tight` first, then `loose` (D101); `evidence` says only
+whether a word fired or the method alone decided, and is not a
+reliability signal. The policy is NOT carried in the map JSON; it is
+how a consumer reads the four fields, and the README states it the
+same way.
 
 bareguard alignment (SETTLED with the bareguard session 2026-09-22,
 D91; bareguard's rwx support is approved but not yet built — their
@@ -563,9 +574,9 @@ menu, or has none. (docs/archive/prd.md:37-48)
 ## Out of scope
 
 - A model/LLM tier in the core. The deterministic flow is the product
-  and works fully on its own. An optional model tier was measured
-  (D82/D83); if adopted it may only raise w to x and never lower, and
-  the core works without it.
+  and works fully on its own. The optional tier was measured
+  (D82/D83) and under D88 may both raise w to x and lower x to w on
+  wordless floor rows; it stays outside the core.
 - A default of `r`, or any guess path.
 - Signing. Output stops at a candidate map; a signature is the Resource
   Owner's act.
@@ -609,12 +620,14 @@ loosening without evidence. (docs/archive/prd.md:489-499)
 Two error directions, counted and reported separately, never collapsed
 into one accuracy number:
 
-- **Over-classification** — a rule proposes a class stricter than the
-  operation's actual behavior warrants. Cost: usability. A Resource
+- **Over-classification — "too tight"**, the word the README and the
+  published `review` hint use — a rule proposes a class stricter than
+  the operation's actual behavior warrants. Cost: usability. A Resource
   Owner who signs an over-classified menu makes their own catalogue
   harder to delegate against than it needs to be.
-- **Under-classification** — a rule proposes a class looser than the
-  operation's actual behavior warrants. Cost: security. This is the
+- **Under-classification — "too loose"**, the README's word for the
+  same thing — a rule proposes a class looser than the operation's
+  actual behavior warrants. Cost: security. This is the
   failure the safety spine exists to keep out of the trust path.
 
 (docs/archive/prd.md:501-510)
@@ -656,7 +669,7 @@ the targeted revision before anything emits, because all four are moving.
 ### The map (the one file rwxmap owns)
 
 One row per operation, keyed by method + path + operationId, carrying
-three fields:
+four fields:
 
 ```json
 {
@@ -664,13 +677,13 @@ three fields:
   "source": "stripe/spec3.json",
   "operations": [
     { "method": "GET",    "path": "/v1/customers/{customer}", "operationId": "GetCustomersCustomer",
-      "class": "r", "destructive": false, "evidence": "floor" },
+      "class": "r", "destructive": false, "evidence": "floor", "review": "settled" },
     { "method": "POST",   "path": "/v1/customers/{customer}", "operationId": "PostCustomersCustomer",
-      "class": "w", "destructive": false, "evidence": "list" },
+      "class": "w", "destructive": false, "evidence": "list",  "review": "settled" },
     { "method": "DELETE", "path": "/rest/api/2/filter/{id}/permission/{permissionId}", "operationId": "deleteSharePermission",
-      "class": "x", "destructive": true,  "evidence": "list" },
+      "class": "x", "destructive": true,  "evidence": "floor", "review": "settled" },
     { "method": "POST",   "path": "/chat/completions", "operationId": "createChatCompletion",
-      "class": "x", "destructive": false, "evidence": "floor" }
+      "class": "x", "destructive": false, "evidence": "floor", "review": "tight" }
   ]
 }
 ```
@@ -680,7 +693,7 @@ All four rows are real corpus rows from
 emits for them today. Under D86 `destructive: true` always coincides
 with `class: x`, as the third row already shows.
 
-`evidence` has exactly two values and they are the same floor/list axis
+`evidence` has exactly three values and they are the same evidence axis
 the internal sheet records:
 
 - `list` — a word list fired. The tool read a word and claimed the row
@@ -689,6 +702,9 @@ the internal sheet records:
   class is that method's default. 3828 rows, 93.9% right, and the
   honesty flag the project already measured: every one of the 55 leaks
   that fired no word, and all 186 over-tight rows, are `floor` rows.
+- `jev` — the optional model tier moved the row (D88/D95). It appears
+  only when the tier ran; the mechanical core emits `list` and `floor`
+  only.
 
 The fourth row above is a `floor` row from step 3's leftover pile and
 it is wrong: `createChatCompletion` is truth `r`, called `x` because
@@ -773,25 +789,49 @@ same file it read:
   delete:
     operationId: DeleteAccountsAccount
     x-rwx:
-      class: w
+      class: x
       destructive: true
       evidence: floor
+      review: settled
 ```
 
 ### Carrier 2 — MCP, per tool
 
-Two slots, both the spec's own. The four hints ride together in one
-`annotations` object (see the MCP hints entry under Open questions for
-what each hint is worth today); rwxmap's own three fields go in `_meta`,
-which the MCP 2026-07-28 specification names as the extension slot and
-where reverse-DNS key prefixes are the stated convention (prefixes whose
-second label is `modelcontextprotocol` or `mcp` are reserved):
+Two slots, both the spec's own: the `annotations` object for MCP's own
+hints, and `_meta` for rwxmap's fields — the MCP 2026-07-28
+specification names `_meta` as the extension slot and reverse-DNS key
+prefixes as the convention there (prefixes whose second label is
+`modelcontextprotocol` or `mcp` are reserved).
+
+**Hints are matched best-effort, not one-to-one (D102).** MCP's four
+hint booleans and rwxmap's fields are not the same axes, so rwxmap
+fills the ones it can determine and emits nothing at all for the rest.
+Leaving a hint out is safe by this project's own invariant, because an
+MCP consumer defaults an omitted hint to the tightest reading.
+
+- `readOnlyHint` — emitted. True when `class` is `r`, false otherwise.
+- `destructiveHint` — emitted. It is rwxmap's `destructive`, which
+  always sits inside `class: x`.
+- `idempotentHint` — not emitted. Idempotency cannot be read off a
+  spec: where it appears at all it is a retry capability the caller
+  may use, not a declaration about the operation (see the MCP hints
+  entry under Open questions).
+- `openWorldHint` — not emitted. There is no evidence source for it
+  (D87).
+
+In `_meta` rwxmap publishes three of its four fields — `class`,
+`destructive` and `evidence`. `review` is NOT published to MCP
+(D102): it is a provider's build-time worklist, not something an agent
+needs at call time, and publishing it invites a consumer to read it as
+a confidence score, which it is not (D101). It goes in the exporter's
+sidecar report instead.
 
 ```json
 { "name": "delete_share_permission",
-  "annotations": { "readOnlyHint": false, "destructiveHint": true, "idempotentHint": false },
+  "annotations": { "readOnlyHint": false, "destructiveHint": true },
   "_meta": { "io.github.hamr0.rwxmap/class": "x",
-             "io.github.hamr0.rwxmap/evidence": "list" } }
+             "io.github.hamr0.rwxmap/destructive": true,
+             "io.github.hamr0.rwxmap/evidence": "floor" } }
 ```
 
 ### Carrier 3 — WebMCP, per tool
@@ -866,9 +906,9 @@ OpenAPI document it describes:
   class, since WebMCP's two flags carry r/w/x with nothing left over
   (carrier 3 above). Neither waits on step 3 any longer — it is built
   (D78) and the classifier has graduated to `src/` (D79).
-  `idempotentHint` is blocked on something else entirely: its two
-  readings are still unchosen (see the hints section below for the
-  numbers on both), and step 3 does not decide between them.
+  `idempotentHint` is not emitted at all (D102): idempotency cannot be
+  read off a spec, and a hint rwxmap cannot determine is left out
+  rather than guessed.
 - The four carriers are an output contract, not code. Step 3 is now
   built (D78) and the classifier has graduated to `src/` (D79), but
   nothing emits yet: the emitter is the next pass, and the
@@ -921,85 +961,62 @@ Non-blocking; never silently assumed.
   withdrawn 2026-09-22 by D85: the pile keeps its best-guess class,
   marked `evidence: floor`, and the consumer's policy asks about it
   once per operation.
-- MCP hints (future feature, M3; the user's end goal is to feed them).
-  Nothing emits hints yet. The shape of the hint output IS now decided
-  — see "The output shape (agreed 2026-09-17, D76)" above, which names
-  MCP's `annotations` plus `_meta` as one of four carriers. What
-  follows is only what is now known about each hint from the 4171-row
-  provider corpus with step 1 and step 2 as they stand.
-  - **The four hints ride together.** An MCP tool carries one
-    `annotations` object holding all four booleans at once — they are
-    independent axes, not a choice between them. Omitting a field is
-    not silence: the consumer assumes `readOnlyHint` false,
-    `destructiveHint` true, `idempotentHint` false, `openWorldHint`
-    true. Those defaults are all the tight reading, so partial
-    emission is safe by this project's own invariant.
-    `destructiveHint` is only meaningful when `readOnlyHint` is false,
-    so the `r` class settles two of the four at once. These annotation
-    names and defaults are from the MCP spec **as recalled, not from a
-    fetched copy**, and must be checked against the exact spec
-    revision targeted before anything emits.
+- MCP hints (answered 2026-09-24 by D102; the user's end goal is to
+  feed them). Nothing emits hints yet — the exporter is unbuilt — but
+  the shape is settled. Hints are matched BEST-EFFORT, not one-to-one:
+  MCP's four booleans and rwxmap's fields are not the same axes, so
+  rwxmap emits `readOnlyHint` (from `class`) and `destructiveHint`
+  (from `destructive`), and emits nothing at all for a hint it cannot
+  determine. That is safe because an MCP consumer defaults an omitted
+  hint to the tightest reading — `readOnlyHint` false,
+  `destructiveHint` true, `idempotentHint` false, `openWorldHint`
+  true — so partial emission cannot loosen anything. The full shape,
+  including what goes in `_meta` and why `review` stays out of MCP, is
+  in "Carrier 2 — MCP, per tool" above. These annotation names and
+  defaults are from the MCP spec **as recalled, not from a fetched
+  copy**, and must be checked against the exact spec revision targeted
+  before anything emits.
   - `readOnlyHint`: **the one that is ready.** True when the class is
-    `r`; GET follows its `r` floor (D59). 2052 rows, 3 wrong in the
-    unsafe direction (0.07% of all 4171 rows, 0.15% of the trues) —
-    the three being the known low-confidence GET rows `datadog
-    GetGraphSnapshot` and `intercom listContactBanners` plus one more.
-    33 further rows are marked not-read-only when they are read-only,
-    which is the safe direction. Step 3 cannot improve this hint at
-    all, because step 3 only raises `w` to `x` and `readOnlyHint` is
-    already false for both — so waiting for step 3 buys
-    `readOnlyHint` nothing.
-  - `idempotentHint`: **not ready, and step 3 is not what would fix
-    it.** Step 3 is built (D78), and the block is the choice below, not
-    the ladder. Two readings, still not chosen. Reading A, from the
-    class: true for `r` or `w`, since by D20 an operation you can't
-    safely repeat is
-    `x` — says true on 3186 rows, 72 unsafe-wrong (1.73% of all rows,
-    2.26% of the trues); the 2026-09-17 `OTHER_PARTY` trim grew the
-    `w` pile by 16 rows without adding one unsafe-wrong row, since all
-    16 are truth `w`. Reading B, from the method, per RFC 9110
-    §9.2.2: true for GET / HEAD / OPTIONS plus PUT and DELETE
-    (`docs/archive/prd.md:363`, §4.3) — says true on 2778 rows, 65
-    unsafe-wrong (1.56% of all rows, 2.34% of the trues), those 65
-    being GET 1, PUT 25, DELETE 39. The two readings disagree on
-    idempotent-but-`x` rows (D20 counted 20 such DELETE rows on its
-    499-row set). Reading A's gap is exactly the 71 rows step 2 now
-    calls `w` that are truth `x` — the rows step 3 exists to raise —
-    so step 3 closes it.
-  - **Idempotency cannot be read off the specs.** Measured across all
-    15 provider specs: 11 of the 15 never mention idempotency at all.
-    The four that do are paypal (103 mentions), square (16), openai
-    (6) and intercom (1), and even there it is prose in descriptions
-    plus an `Idempotency-Key` / `PayPal-Request-Id` request header,
-    not a machine-readable property. That header is a *capability* —
-    the API offering to make retries safe if the caller supplies a key
-    — not a declaration that the operation is idempotent. If anything
-    it is evidence the operation is NOT naturally idempotent, which
-    points toward `x`, so it is a candidate raiser for step 3 rather
-    than an idempotency source. It cannot be measured honestly on 4
-    vendors.
-  - `destructiveHint`: **the class cannot carry it, measured again.**
-    A flag inside x under D86 (`destructive` ⇒ x, but x does not ⇒
-    `destructive`), not built; MCP default `true` until then. D28
-    already rejected `destructiveHint = (class == x)`
-    as wrong on 352 of 719 rows. The broader reading "every non-`r`
-    row is destructive" was measured on this corpus: it would mark all
-    2119 non-`r` rows destructive, but only 584 of them (27.6%) carry
-    any wrecking signal at all — a DELETE method, or a verb such as
-    delete / remove / purge / revoke / expire / void / archive — while
-    1535 rows (72.4%) destroy nothing, being creates, updates, sends
-    and publishes. That reading is safe, because it is identical to
-    the MCP default, and it therefore emits no information. The useful
-    signal is the inverse: which of the non-reads are NOT destructive.
-    That is the flag D28 named and D86 keeps inside x, derived from
-    method plus verb and implying x rather than read off it;
-    `poc/m0/destructive.json` exists from the M0 work and has never
-    been measured against this corpus.
-  - `openWorldHint`: no signal; MCP default `true`. Closed as a class
-    question 2026-09-22 (D87): this is the slot "touches others" would
-    map to; it left the class, may return as an evidence-only flag
-    next to `destructive`, never emitted as false, and is absent today
-    because there is no evidence source.
+    `r`; GET follows its `r` floor (D59). On the 4171-row provider
+    corpus, 2052 rows, 3 wrong in the unsafe direction (0.07% of all
+    4171 rows, 0.15% of the trues) — the three being the known
+    low-confidence GET rows `datadog GetGraphSnapshot` and `intercom
+    listContactBanners` plus one more. 33 further rows are marked
+    not-read-only when they are read-only, which is the too-tight
+    direction.
+  - `destructiveHint`: rwxmap's `destructive` field, a refinement flag
+    inside x under D86 (`destructive` ⇒ x, but x does not ⇒
+    `destructive`), derived from method plus lead verb. D28 rejected
+    the cruder reading `destructiveHint = (class == x)`, wrong on 352
+    of 719 rows, and the broader "every non-`r` row is destructive"
+    was measured on the provider corpus and rejected too: it would
+    mark all 2119 non-`r` rows destructive, but only 584 of them
+    (27.6%) carry any wrecking signal at all — a DELETE method, or a
+    verb such as delete / remove / purge / revoke / expire / void /
+    archive — while 1535 (72.4%) destroy nothing, being creates,
+    updates, sends and publishes. That reading is identical to the MCP
+    default and therefore emits no information. The useful signal is
+    the inverse: which of the non-reads are NOT destructive.
+  - `idempotentHint`: **not emitted (D102).** Idempotency cannot be
+    read off the specs. Measured across all 15 provider specs: 11 of
+    the 15 never mention idempotency at all. The four that do are
+    paypal (103 mentions), square (16), openai (6) and intercom (1),
+    and even there it is prose in descriptions plus an
+    `Idempotency-Key` / `PayPal-Request-Id` request header, not a
+    machine-readable property. That header is a *capability* — the API
+    offering to make retries safe if the caller supplies a key — not a
+    declaration that the operation is idempotent. It cannot be
+    measured honestly on 4 vendors, so rwxmap says nothing and the
+    consumer's tight default (false) stands. The two candidate
+    readings — from the class, or from the method per RFC 9110 §9.2.2
+    — are recorded in `docs/logs/learnings.md`; neither is adopted.
+  - `openWorldHint`: **the one still open.** No signal; MCP default
+    `true` and rwxmap emits nothing. Closed as a class question
+    2026-09-22 (D87): this is the slot "touches others" would map to,
+    it left the class, and it may yet return as an evidence-only flag
+    next to `destructive`, never emitted as false. It is absent today
+    because there is no evidence source. What stays open is whether
+    such an evidence source is ever found.
 - Closed 2026-09-17 (D76): the output file format. rwxmap keeps one map
   of its own, one row per operation, and publishes nothing of its own —
   it fills the extension slot each existing standard already leaves
