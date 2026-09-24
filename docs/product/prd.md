@@ -844,14 +844,28 @@ Leaving a hint out is safe by this project's own invariant, because an
 MCP consumer defaults an omitted hint to the tightest reading.
 
 - `readOnlyHint` — emitted. True when `class` is `r`, false otherwise.
-- `destructiveHint` — emitted. It is rwxmap's `destructive`, which
-  always sits inside `class: x`.
-- `idempotentHint` — not emitted. Idempotency cannot be read off a
-  spec: where it appears at all it is a retry capability the caller
-  may use, not a declaration about the operation (see the MCP hints
-  entry under Open questions).
+- `destructiveHint` — emitted. True when `class` is `x` (D104):
+  `destructiveHint = (class === 'x')`. It is NOT rwxmap's
+  `destructive` flag, which is only the REMOVES subset inside x and
+  would leave 58.2% of x rows reading identically to a plain update.
+  `destructive` still ships in `_meta` as the finer signal for any
+  consumer that wants it; it just no longer drives the hint.
+- `idempotentHint` — CLOSED, never emitted (D104). Idempotency cannot
+  be read off a spec: where it appears at all it is a retry capability
+  the caller may use, not a declaration about the operation (see the
+  MCP hints entry under Open questions). The consumer's tight default
+  (false) stands.
 - `openWorldHint` — not emitted. There is no evidence source for it
   (D87).
+
+The two emitted booleans express exactly three states, the same count
+as r/w/x, so the mapping is direct (D104):
+
+| class | `readOnlyHint` | `destructiveHint` |
+|---|---|---|
+| `r` | true | — |
+| `w` | false | false |
+| `x` | false | true |
 
 In `_meta` rwxmap publishes three of its four fields — `class`,
 `destructive` and `evidence`. `review` is NOT published to MCP
@@ -892,9 +906,10 @@ over:
 
 `consequentialHint` is a closer fit to this project's `x` (cannot be
 undone, D87) than any MCP hint is: MCP's
-`destructiveHint` was measured and rejected as a reading of the class
-(D28), and `idempotentHint` cannot be read off the specs at all. This
-makes WebMCP the carrier where the r/w/x ladder maps cleanly, and it
+`destructiveHint` does now follow the class under D104, but it says
+only "irreversible", not "consequential", and `idempotentHint` cannot
+be read off the specs at all. This makes WebMCP the carrier where the
+r/w/x ladder maps cleanly, and it
 raises the value of step 3 — `consequentialHint` IS the x step.
 
 ```js
@@ -945,9 +960,10 @@ OpenAPI document it describes:
   class, since WebMCP's two flags carry r/w/x with nothing left over
   (carrier 3 above). Neither waits on step 3 any longer — it is built
   (D78) and the classifier has graduated to `src/` (D79).
-  `idempotentHint` is not emitted at all (D102): idempotency cannot be
-  read off a spec, and a hint rwxmap cannot determine is left out
-  rather than guessed.
+  `idempotentHint` is closed and never emitted (D102, D104):
+  idempotency cannot be read off a spec, and a hint rwxmap cannot
+  determine is left out rather than guessed. `destructiveHint` follows
+  the class, true when it is `x` (D104).
 - The four carriers are an output contract, not code. Step 3 is now
   built (D78) and the classifier has graduated to `src/` (D79), but
   nothing emits yet: the emitter is the next pass, and the
@@ -1000,13 +1016,15 @@ Non-blocking; never silently assumed.
   withdrawn 2026-09-22 by D85: the pile keeps its best-guess class,
   marked `evidence: floor`, and the consumer's policy asks about it
   once per operation.
-- MCP hints (answered 2026-09-24 by D102; the user's end goal is to
-  feed them). Nothing emits hints yet — the exporter is unbuilt — but
-  the shape is settled. Hints are matched BEST-EFFORT, not one-to-one:
+- MCP hints (answered 2026-09-24 by D102, amended the same day by
+  D104; the user's end goal is to feed them). Nothing emits hints yet —
+  the exporter is unbuilt — but the shape is settled. Hints are matched
+  BEST-EFFORT, not one-to-one:
   MCP's four booleans and rwxmap's fields are not the same axes, so
   rwxmap emits `readOnlyHint` (from `class`) and `destructiveHint`
-  (from `destructive`), and emits nothing at all for a hint it cannot
-  determine. That is safe because an MCP consumer defaults an omitted
+  (also from `class`, true when it is `x` — D104), and emits nothing
+  at all for a hint it cannot determine. That is safe because an MCP
+  consumer defaults an omitted
   hint to the tightest reading — `readOnlyHint` false,
   `destructiveHint` true, `idempotentHint` false, `openWorldHint`
   true — so partial emission cannot loosen anything. The full shape,
@@ -1023,21 +1041,30 @@ Non-blocking; never silently assumed.
     listContactBanners` plus one more. 33 further rows are marked
     not-read-only when they are read-only, which is the too-tight
     direction.
-  - `destructiveHint`: rwxmap's `destructive` field, a refinement flag
-    inside x under D86 (`destructive` ⇒ x, but x does not ⇒
-    `destructive`), derived from method plus lead verb. D28 rejected
-    the cruder reading `destructiveHint = (class == x)`, wrong on 352
-    of 719 rows, and the broader "every non-`r` row is destructive"
-    was measured on the provider corpus and rejected too: it would
-    mark all 2119 non-`r` rows destructive, but only 584 of them
-    (27.6%) carry any wrecking signal at all — a DELETE method, or a
-    verb such as delete / remove / purge / revoke / expire / void /
-    archive — while 1535 (72.4%) destroy nothing, being creates,
-    updates, sends and publishes. That reading is identical to the MCP
-    default and therefore emits no information. The useful signal is
-    the inverse: which of the non-reads are NOT destructive.
-  - `idempotentHint`: **not emitted (D102).** Idempotency cannot be
-    read off the specs. Measured across all 15 provider specs: 11 of
+  - `destructiveHint`: **the class, not the flag (D104).** True when
+    `class` is `x`. Mapping to rwxmap's own `destructive` field
+    instead was fail-open: on the 8376-row tuning pool (mechanical, no
+    Jev) 2093 of 3599 predicted-x rows (58.2% of x, 25.0% of the pool)
+    carry no `destructive` flag, so they would emit readOnlyHint false
+    + destructiveHint false, which in MCP reads identically to a plain
+    update — charging, sending and running a job presented as no worse
+    than editing a record — and 561 of them are truth x. The adopted
+    mapping under-marks 79 rows (0.94% of the pool) and over-marks
+    1565; over-marking is the safe direction and costs nothing in
+    practice, since a consumer defaults an omitted destructiveHint to
+    true anyway. D28 is not re-litigated: it rejected
+    `destructiveHint = (class == x)` under the PRE-D87 definition,
+    when x did not mean "cannot be undone"; D87 changed what x means,
+    and the earlier rejection stands for the definition it was made
+    under. The honest limit: predicted-x precision is 56.5%
+    mechanically on that pool (2034 of 3599), which is the POST-floor
+    over-tightening, so a lot of `destructiveHint: true` is stricter
+    than needed — a usability cost, not a safety one, and the optional
+    Jev tier is what lowers it. `destructive` itself is not deleted:
+    it stays in `_meta` as the finer REMOVES-subset signal.
+  - `idempotentHint`: **closed; never emitted (D102, D104).**
+    Idempotency cannot be read off the specs. Measured across all 15
+    provider specs: 11 of
     the 15 never mention idempotency at all. The four that do are
     paypal (103 mentions), square (16), openai (6) and intercom (1),
     and even there it is prose in descriptions plus an
@@ -1046,9 +1073,10 @@ Non-blocking; never silently assumed.
     offering to make retries safe if the caller supplies a key — not a
     declaration that the operation is idempotent. It cannot be
     measured honestly on 4 vendors, so rwxmap says nothing and the
-    consumer's tight default (false) stands. The two candidate
-    readings — from the class, or from the method per RFC 9110 §9.2.2
-    — are recorded in `docs/logs/learnings.md`; neither is adopted.
+    consumer's tight default (false) stands. This is CLOSED, not open:
+    the two candidate readings — from the class, or from the method
+    per RFC 9110 §9.2.2 — are history in `docs/logs/learnings.md` and
+    neither will be adopted.
   - `openWorldHint`: **the one still open.** No signal; MCP default
     `true` and rwxmap emits nothing. Closed as a class question
     2026-09-22 (D87): this is the slot "touches others" would map to,
