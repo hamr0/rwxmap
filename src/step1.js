@@ -4,7 +4,7 @@
 import { leadVerbAfterModifiers, tokensForRow, matchingMembers } from './tokens.js';
 
 /** @typedef {import('./types.js').Operation} Operation */
-/** @typedef {import('./types.js').Verdict} Verdict */
+/** @typedef {import('./types.js').StepVerdict} StepVerdict */
 
 // Methods whose floor is r: they are the read verbs of HTTP itself.
 const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
@@ -112,7 +112,7 @@ export const SAFE_VERBS = new Set([
  * @param {{readVerbs?: Set<string>, safeVerbs?: Set<string>}} [words]
  *   Word lists to use in place of the module's own (LOVO passes rebuilt
  *   ones). Omitted fields fall back to READ_VERBS / SAFE_VERBS.
- * @returns {Verdict|null} null when step 1 does not claim the row.
+ * @returns {StepVerdict|null} null when step 1 does not claim the row.
  */
 export function step1(row, words = {}) {
   const readVerbs = words.readVerbs ?? READ_VERBS;

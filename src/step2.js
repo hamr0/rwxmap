@@ -13,7 +13,7 @@
 import { matchingMembers, verbForRow } from './tokens.js';
 
 /** @typedef {import('./types.js').Operation} Operation */
-/** @typedef {import('./types.js').Verdict} Verdict */
+/** @typedef {import('./types.js').StepVerdict} StepVerdict */
 
 // CANT_UNDO (29)
 //
@@ -64,7 +64,7 @@ export const REMOVES = new Set(['delete', 'purge', 'revoke', 'expire', 'void', '
  * @param {{cantUndo?: Set<string>, removes?: Set<string>}} [words]
  *   Word lists to use in place of the module's own (LOVO passes rebuilt
  *   ones). Omitted fields fall back to CANT_UNDO / REMOVES.
- * @returns {Verdict|null} null when step 2 does not claim the row.
+ * @returns {StepVerdict|null} null when step 2 does not claim the row.
  */
 export function step2(row, words = {}) {
   const cantUndo = words.cantUndo ?? CANT_UNDO;
@@ -84,7 +84,7 @@ export function step2(row, words = {}) {
   const matched = matchingMembers(verb, cantUndo);
   if (matched.length === 0) return null;
 
-  /** @type {Verdict} */
+  /** @type {StepVerdict} */
   const verdict = {
     class: 'x',
     step: 2,
@@ -102,7 +102,7 @@ export function step2(row, words = {}) {
  * CANT_UNDO did not claim it x, step 3's KEEP_W did not claim it w). The
  * floor belongs to step 2 under D87 (x is the tighter class and the floor
  * always claims the tighter side of an unknown); flow.js calls it last.
- * @returns {Verdict}
+ * @returns {StepVerdict}
  */
 export function floorPost() {
   return { class: 'x', step: 2, rule: 'floor-post', source: 'floor', matched: [] };

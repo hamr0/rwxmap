@@ -24,6 +24,36 @@ import { step3 } from './step3.js';
 /** @typedef {import('./types.js').Verdict} Verdict */
 
 /**
+ * The REVIEW HINT for one decided row: which rows a provider should look at
+ * before publishing the map. It is derived, not measured — method + class +
+ * source and nothing else — and it asserts nothing the tool does not already
+ * publish.
+ *
+ * THE ONE WRITER of the `review` field. classifyRow below sets it, and
+ * jev.js's applyJev recomputes it through THIS function whenever it moves a
+ * verdict's class. Nothing else may decide a hint.
+ *
+ *   'tight'   class x on a POST — likely tighter than needed, review to
+ *             loosen, and it is safe to review because no leak has ever been
+ *             observed in this bucket.
+ *   'loose'   class w on a PUT/PATCH decided by the method floor — no
+ *             evidence either way, review to confirm.
+ *   'settled' neither.
+ *
+ * @param {string|undefined} method the row's HTTP method, read
+ *   case-insensitively like every other method check in this library.
+ * @param {'r'|'w'|'x'} cls the verdict's class.
+ * @param {'floor'|'list'|'jev'} source the verdict's source.
+ * @returns {'tight'|'loose'|'settled'}
+ */
+export function reviewHint(method, cls, source) {
+  const m = (method || '').toUpperCase();
+  if (cls === 'x' && m === 'POST') return 'tight';
+  if (cls === 'w' && (m === 'PUT' || m === 'PATCH') && source === 'floor') return 'loose';
+  return 'settled';
+}
+
+/**
  * Classify one row through the whole ladder.
  * @param {Operation} row
  * @param {{readVerbs?: Set<string>, safeVerbs?: Set<string>, cantUndo?: Set<string>, removes?: Set<string>, keepW?: Set<string>}} [words]
@@ -33,14 +63,10 @@ import { step3 } from './step3.js';
  * @returns {Verdict} always a verdict — this function never returns null.
  */
 export function classifyRow(row, words = {}) {
-  const one = step1(row, words);
-  if (one) return one;
+  const verdict = step1(row, words)
+    || step2(row, words)
+    || step3(row, words)
+    || floorPost();
 
-  const two = step2(row, words);
-  if (two) return two;
-
-  const three = step3(row, words);
-  if (three) return three;
-
-  return floorPost();
+  return { ...verdict, review: reviewHint(row.method, verdict.class, verdict.source) };
 }

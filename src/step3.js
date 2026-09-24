@@ -14,7 +14,7 @@
 import { matchingMembers, verbForRow } from './tokens.js';
 
 /** @typedef {import('./types.js').Operation} Operation */
-/** @typedef {import('./types.js').Verdict} Verdict */
+/** @typedef {import('./types.js').StepVerdict} StepVerdict */
 
 const FLOOR_METHODS = new Set(['PUT', 'PATCH']);
 
@@ -53,7 +53,7 @@ export const KEEP_W = new Set([
  * @param {{keepW?: Set<string>}} [words]
  *   Word list to use in place of the module's own (LOVO passes a rebuilt
  *   one). An omitted field falls back to KEEP_W.
- * @returns {Verdict|null} null when step 3 does not claim the row.
+ * @returns {StepVerdict|null} null when step 3 does not claim the row.
  */
 export function step3(row, words = {}) {
   const keepW = words.keepW ?? KEEP_W;

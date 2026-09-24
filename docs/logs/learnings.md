@@ -4816,3 +4816,215 @@ class).
   the same instrument problem recorded on 2026-09-18 for the
   write-method rules, where the tuning corpus held ~5x less of the real
   failure than the exam did.
+
+### The LOADED criteria were suppressing jev-raise-wx; an x-only ablation passes its bar (2026-09-23)
+
+- Goal: find why the jev-raise-wx tier failed its adoption bar on two
+  full runs, when the same criteria file, asking the same question,
+  works for jev-lower.
+- Tried: measured the token composition of the LOADED criteria, part by
+  part, by what each part argues for; built
+  `poc/jev-tiers/criteria-x-raise.mjs`, an ablation that keeps the x
+  letter, the six cannot-be-undone clauses (a) to (f) and the x-side
+  examples, and drops the method table, the tripwires, the w-side
+  `can_be_set_back` list and the not-x examples; ran it twice over the
+  same 1657 PUT/PATCH rows and swept the same thresholds. Also
+  registered the new criteria name in `poc/jev-tiers/run.mjs` (one line).
+- Composition of the ~2190-token LOADED prompt: cannot_be_undone ~437
+  tokens and x-side examples ~94 argue FOR x; the method table ~351,
+  `can_be_set_back` ~353, not-x examples ~135 and the tripwires
+  (`ignore`) ~390 argue AGAINST it; definition, framing and focus ~328
+  are mixed. Roughly 530 tokens for x against 1230 against, on a
+  question that only asks about x. Worse on this pile specifically: the
+  method table says "PUT and PATCH are w unless the text says the call
+  does one of the x things", which pre-answers the question for every
+  row in a pile that is entirely PUT/PATCH, and the tripwires forbid
+  inferring anything the text does not name. Evidence: 1544 of the 1657
+  rows landed under p(x)=0.1. This is the prompt doing what it says, not
+  the model failing to find signal. The contrast that proves it:
+  jev-lower uses the SAME criteria file and the same question and works,
+  because its pile is POST rows and the method table says "POST has no
+  default: label it by what it does" — no prior.
+- Outcome, the two sweeps over the same 1657 rows (pile truth 1 r / 1601
+  w / 55 x), as (leaks closed, false alarms) per run:
+
+  | t | LOADED run 1 | LOADED run 2 | x-only run 1 | x-only run 2 |
+  |---|---|---|---|---|
+  | 0.50 | 14, 4 | 14, 4 | 27, 13 | 27, 14 |
+  | 0.60 | 14, 3 | 14, 3 | 22, 7 | 24, 8 |
+  | 0.70 | 12, 2 | 13, 2 | 20, 6 | 20, 5 |
+  | 0.80 | 8, 1 | 9, 1 | 13, 1 | 13, 1 |
+  | 0.90 | 3, 0 | 1, 0 | 3, 1 | 3, 1 |
+  | 0.95 | 1, 0 | 1, 0 | 1, 0 | 1, 0 |
+  | 0.98 | 0, 0 | 0, 0 | 0, 0 | 0, 0 |
+
+- LOADED's best real ratio is 8-9 at t=0.80, against the bar of 10, so
+  it fails. The x-only ablation is 743 tokens against LOADED's 2191 and
+  reaches ratio 13.00 at t=0.80, passing the bar on both runs.
+- Stability: 13 of the 14 moved rows are identical across the two x-only
+  runs. The two that differ — jira `exportArchivedIssues` and
+  digitalocean `genai_patch_cancel_simulation_run` — both sit on the
+  0.80 boundary and both are truth x. The same single false alarm
+  appears in both runs, box
+  `put_metadata_templates_enterprise_security`. The 13 closed rows span
+  7 vendors — gitea, appcenter, digitalocean, jira, docusign, auth0 and
+  zendesk — so it is not one vendor's quirk.
+- The distribution moved the way the diagnosis predicts: rows under
+  p(x)=0.1 fell from 1544 to 1303, and the [0.8, 0.9) bucket went from 6
+  rows to 10, all 10 of them truth x.
+- Operational detail: 4 of the 1657 rows return HTTP 403 from a WAF,
+  reproducibly on every run. The scorer is fail-closed so they stay w,
+  but they are never answered.
+- 13.00 is FITTED — the threshold was swept on this pool — and the
+  ablation is NOT adopted. It needs a clean exam.
+- Lesson: the criteria pre-answered the question for the pile. A method
+  table saying "PUT and PATCH are w" cannot be in the prompt of a tier
+  whose whole job is to find the PUT/PATCH rows that are not w. Criteria
+  must be matched to the pile and the direction, not written once for
+  the project.
+
+### The M3 exam scored with Jev; the adoption bar splits by direction (D100, 2026-09-23)
+
+- Goal: take the with-Jev pass over the M3 clean exam, once, at
+  thresholds frozen before any exam row was read.
+- Tried: froze jev-lower at 0.10 on criteria-x, jev-raise-wx at 0.80 on
+  the new x-only criteria-x-raise, jev-raise-get at 0.50 on
+  criteria-changes; built the three piles from the exam's 4279 rows;
+  collected 3631 answers with zero failures for about $0.31; scored
+  once. The fail-closed guard was broken by hand and seen to throw, then
+  restored.
+- Outcome: the piles were lower 808 rows (truth r 93 / w 602 / x 113),
+  raise-wx 724 (r 2 / w 696 / x 26) and raise-get 2099 (r 2094 / w 5 /
+  x 0) — 3631 of 4279 rows in scope, 0 rows with no usable answer in any
+  pile. Mechanical 82.3% exact (3520) / 0.8% leaks (34) / 16.9%
+  over-tight (725); with all three tiers 93.0% (3980) / 0.5% (22) / 6.5%
+  (277). D94 gate PASS at 22 of 4279 (0.5%) against a bar of 2%.
+- Per tier: jev-lower moved 522 of 808, fixed 453 over-tight rows and
+  created 3 new leaks; jev-raise-wx flagged 11 of 724, 10 right, 1
+  over-tight created; jev-raise-get flagged 9 of 2099, 5 right by the
+  labels, 4 over-tight created.
+- The x-only criteria generalized: 13.00 leaks closed per false alarm
+  fitted on tuning, 10.0 on three unseen vendors. jev-raise-get inverted
+  — flawless and stable on tuning (2 moved, 2 closed, 0 alarms, both
+  runs identical) but 5 right of 9 here.
+- 19 of the 22 surviving leaks are `method-floor` PUT/PATCH rows, and 31
+  of the 34 mechanical leaks are cloudflare. jev-lower's 3 new leaks,
+  named: cloudflare `email_security_post_bulk_move` (p=0.09),
+  `zone-subscription-create-zone-subscription` (0.09) and
+  `zone-subscription-create-zone-subscriptions` (0.08) — two of the
+  three are paid-subscription creates the model read as plain creates.
+- Also recorded: raise-get's 4 over-tight rows were inspected and two
+  were ruled w by the user — `get_TakedownLetterPdfGet`, whose
+  description says the PDF is generated and cached on first fetch, and
+  `wor-subscribe-workflow-instance-events`, which opens a WebSocket.
+  The other two, both named `get-cache-reserve-clear`, stay r: the
+  sibling POST `start-cache-reserve-clear` on the same path is the call
+  that clears, and the two GETs merely reuse its description text,
+  including the sentence "you cannot undo or cancel this operation" that
+  misled the model.
+- Lesson: the 91% adoption bar was written for rules that can loosen a
+  class, where a wrong flag publishes an irreversible call as
+  reversible. Applied unchanged to a rule that can only tighten, it
+  prices a usability cost as if it were a security cost, and rejects a
+  tier that closed 5 real leaks for 4 rows made stricter than needed.
+  The bar has to follow the direction of the error, not the size of the
+  ratio.
+
+### The evidence flag is not a confidence signal; a review hint from method + class is (D101, 2026-09-23)
+
+- Goal: answer two things a provider actually needs. First, "leak" and
+  "over-tight" are defined only by comparison to a labelled truth file,
+  which no adopter has — so what can the published output honestly say
+  about which rows to review? Second, the `list` evidence bucket showed
+  the HIGHEST error rate of the three, so does the flow get better if
+  the word lists are reduced or removed?
+- Tried: measured the M3 exam's error rate per evidence bucket with all
+  three Jev tiers on; then per production-visible bucket (method +
+  class + source); then ran a no-lists arm against the real classifier
+  on both the 8376-row tuning pool and the burned M3 exam, where "no
+  lists" is exactly the method floor (GET/HEAD/OPTIONS r, DELETE x,
+  PUT/PATCH w, POST x); then priced each list rule against what the
+  floor would have said on the rows it claims; then measured a proposed
+  review hint on both sets.
+- Outcome, error rate by evidence bucket (M3 exam, Jev on, 4279 rows):
+  `floor` 3647 rows, 16 leaks, 188 over-tight, 5.6% error; `jev` 542
+  rows, 3 leaks, 71 over-tight, 13.7%; `list` 90 rows, 3 leaks, 18
+  over-tight, 23.3%. Whole exam 22 leaks and 277 over-tight, 7.0%. The
+  finding plainly: the `floor` flag is BACKWARDS as a review signal. It
+  is the cleanest bucket, not the dirtiest, because it is mostly GET
+  rows — and "review the floor rows" means reading 3647 of 4279 rows,
+  85% of the API, to reach 68% of the problems.
+- Outcome, error rate by production-visible bucket (method, class,
+  source), same exam, buckets of 15 rows or more:
+
+  | bucket | rows | leaks | over-tight | error rate |
+  |---|---|---|---|---|
+  | POST → x (floor) | 286 | 0 | 176 | 62% |
+  | POST → x (list) | 27 | 0 | 15 | 56% |
+  | POST → w (jev) | 522 | 3 | 66 | 13% |
+  | POST → r (list) | 36 | 2 | 0 | 6% |
+  | POST → w (list) | 21 | 1 | 0 | 5% |
+  | PATCH → w (floor) | 263 | 7 | 0 | 3% |
+  | PUT → w (floor) | 450 | 9 | 2 | 2% |
+  | DELETE → x (floor) | 558 | 0 | 10 | 2% |
+  | GET → r (floor) | 2090 | 0 | 0 | 0% |
+
+  GET → r on the floor is 2090 rows with zero errors of either kind —
+  half the API needs no review at all — and the current evidence flag
+  lumps those in with everything else, which is exactly why it reads as
+  the cleanest bucket while being useless for targeting.
+- Outcome, the no-lists arm. Tuning pool, 8376 rows: with lists exact
+  6728 (80.3%), leaks 82 (1.0%), over-tight 1566 (18.7%); no lists
+  exact 6191 (73.9%), leaks 75 (0.9%), over-tight 2110 (25.2%). M3
+  exam, 4279 rows — a READ of a burned exam, not a score: with lists
+  exact 3520 (82.3%), leaks 34 (0.8%), over-tight 725 (16.9%); no lists
+  exact 3469 (81.1%), leaks 34 (0.8%), over-tight 776 (18.1%). So
+  dropping every list costs 537 exact rows on tuning to save 7 leaks,
+  and on the exam saves zero leaks while costing 51 rows.
+- Outcome, per list rule on the tuning pool:
+
+  | rule | rows claimed | net exact vs floor | net leaks vs floor |
+  |---|---|---|---|
+  | modify-verb | 321 | +291 | +15 |
+  | modify-verb-summary | 141 | +123 | +9 |
+  | read-verb | 108 | +108 | 0 |
+  | cant-undo-verb | 173 | +9 | -17 |
+  | cant-undo-verb-summary | 64 | 0 | -1 |
+  | read-verb-anywhere | 7 | +6 | +1 |
+
+  The correction this forces: the list bucket's 23.3% error rate is NOT
+  evidence against the lists. 17 of the 18 over-tight rows in the
+  exam's list bucket are `cant-undo-verb`, a raiser being conservative,
+  which is the safe direction — and the same rule removes 17 leaks on
+  tuning. The real leak cost sits in `modify-verb` and
+  `modify-verb-summary` together: +24 leaks bought with +414 exact rows.
+- Outcome, the review hint. Rule: class x and method POST is `tight`;
+  class w and method PUT or PATCH and source floor is `loose`;
+  everything else is `settled`. Measured on both sets:
+
+  | set | hint | rows | leaks | over-tight |
+  |---|---|---|---|---|
+  | Tuning, 8376 rows (82 leaks, 1566 over-tight) | tight | 2116 (25%) | 0 (0%) | 1524 (97%) |
+  | | loose | 1657 (20%) | 55 (67%) | 1 (0%) |
+  | | settled | 4603 (55%) | 27 (33%) | 41 (3%) |
+  | M3 exam, 4279 rows (34 leaks, 725 over-tight) | tight | 835 (20%) | 0 (0%) | 710 (98%) |
+  | | loose | 724 (17%) | 26 (76%) | 2 (0%) |
+  | | settled | 2720 (64%) | 8 (24%) | 13 (2%) |
+
+  What it buys: a provider reviews the `tight` fifth of their API and
+  can only improve it, because zero leaks live in that bucket on either
+  set; they review the `loose` fifth and that is where three quarters
+  of the danger is; the remaining roughly 60% can be left alone.
+- The caveat, recorded and not softened: the hint's rule was read off
+  the M3 exam's own buckets, so its numbers on that exam are FITTED,
+  not a clean generalization figure. It reproduces on the 8376-row
+  tuning pool, which is independent of the exam, and that is the
+  stronger of the two readings — but the rule is unproven until a fresh
+  exam.
+- Lesson: "leak" and "over-tight" are comparisons to a labelled truth
+  file and cannot be named in production, so the published output must
+  carry a signal an adopter can act on without labels. The `evidence`
+  flag answers "did a word fire", which is a fact about the
+  implementation; method plus class answers "should I look at this",
+  which is the question the adopter actually has. Both ship; only the
+  second is a review signal, and neither is a confidence score.

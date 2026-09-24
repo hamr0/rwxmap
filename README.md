@@ -80,15 +80,22 @@ relabelled, and the honest number under it is not known yet.
 Measured on 4171 operations from 15 complete official provider APIs.
 
 - Right on 3930 of those 4171 operations (94.2%).
-- Too loose on 55 of 4171 (1.3%). This is the direction that matters
-  for safety: it is the tool saying a call is tamer than it is.
-- Too strict on 186 of 4171 (4.5%) — annoying, never dangerous.
+- Under-classified on 55 of 4171 (1.3%). This is the direction that
+  matters for safety: it is the tool saying a call is tamer than it is.
+- Over-classified on 186 of 4171 (4.5%) — annoying, never dangerous.
+
+*Under-classified* and *over-classified* are the names used for the two
+error directions everywhere below ("leak" is used for an
+under-classified row where the safety reading is the point). Neither is
+the published `review` value `loose` or `tight`: those are review
+buckets — which rows to look at first — not error counts. See "How an
+agent should read the output".
 
 Every answer comes from one of two places. **Known** means a word in the
 operation's name matched a word list — the tool read something. **Unknown**
 means nothing matched and the HTTP method alone decided it.
 
-| Step | Evidence | Rows | Right | Right % | Too loose | Loose % | Too strict | Strict % |
+| Step | Evidence | Rows | Right | Right % | Under-classified | Under % | Over-classified | Over % |
 |---|---|---|---|---|---|---|---|---|
 | **1 — r** | known | 92 | 91 | 98.9% | 1 | 1.1% | 0 | 0.0% |
 | **1 — r** | unknown | 1960 | 1958 | 99.9% | 2 | 0.1% | 0 | 0.0% |
@@ -109,10 +116,10 @@ Four things that table says, and they are the whole shape of the tool:
   (8%) match a word; those are right 337 of 343 times (98.3%). The other
   92% are decided by the HTTP method alone.
 - **Almost every dangerous mistake is in one cell.** 47 of the 55
-  too-loose answers are step 2's unknown row — a PUT, DELETE or PATCH
+  under-classified answers are step 2's unknown row — a PUT, DELETE or PATCH
   with no word to read, called `w` where the truth was `x`. No other
   cell leaks above 2.2%.
-- **Every too-strict answer is in one other cell.** All 186 are step 3's
+- **Every over-classified answer is in one other cell.** All 186 are step 3's
   unknown row: a POST nothing spoke for, left at `x`. That pile is right
   799 of 985 times (81.1%); the rest is a usability cost, not a safety
   one.
@@ -127,7 +134,7 @@ full picture.
 The clean-exam number, scored once and burned: `data/exam-2026-09-17/`
 (1383 operations from three complete official APIs the rules never
 saw — okta, docusign, xero) came out 85.3% exact, 12.4% leaks (171
-rows), 2.3% too strict. Step 1 scored 583/583; every one of the 171
+rows), 2.3% over-classified. Step 1 scored 583/583; every one of the 171
 leaks belongs to step 2 (30.2% of its claims), all truth `x` called
 `w`. Leave-one-vendor-out is the only honest generalization number —
 the tuning number above looks far better and does not survive it.
@@ -141,18 +148,18 @@ evidence.
   an answer for every call before the call is made.
 - **Labelling your own API** — it gets 3930 of 4171 operations right
   (94.2%) in seconds, with safe defaults where it is unsure; you review
-  the rest by hand, mostly to loosen the 186 it left stricter than they
-  needed to be.
+  the rest by hand, mostly to loosen the 186 it over-classified.
 - **MCP hints** — feed the class straight to the agents already
   calling your API.
 
 ## How an agent should read the output
 
-Every verdict carries three fields: `class` (`r`, `w` or `x`, the
+Every verdict carries four fields: `class` (`r`, `w` or `x`, the
 tool's best guess), `destructive` (true when the call cannot be
-undone — always inside class `x`, never on an `r` or `w` row) and
+undone — always inside class `x`, never on an `r` or `w` row),
 `evidence` (`list` when a word fired, `floor` when only the HTTP
-method decided). The recommended reading:
+method decided) and `review` (which rows to look at first). The
+recommended reading:
 
 - The letter is the answer. A gate such as bareguard reads the letter
   and never asks at runtime; `destructive: true` is a refinement of
@@ -165,8 +172,38 @@ method decided). The recommended reading:
   so a missed row is a loud deny, never a leak; a sidecar report lists
   every omitted row with its class and evidence for the reviewer.
 
+### `review` — which rows to look at first
+
+`review` is one of three values, and it is a review bucket, not an
+error count and not a confidence score. The tool still emits no
+confidence score.
+
+- **`loose`** — class `w` on a PUT or PATCH that the method floor
+  decided, with no word either way.
+- **`tight`** — class `x` on a POST.
+- **`settled`** — everything else.
+
+It is derived from `method`, `class` and `evidence` — all three already
+published — and asserts nothing new. Any reader could compute it; the
+field just saves them the rule.
+
+How to use it: review the `loose` rows first, because that is where the
+under-classified rows are; then the `tight` rows, which are dense with
+over-classified rows and where nothing under-classified has ever been
+observed.
+
+From one scored exam of three vendors (cloudflare, pagerduty and
+sentry, 4279 rows, Jev tiers on) — one exam, three vendors, so read it
+as a shape and not as a guarantee:
+
+| `review` | Rows | Under-classified | Over-classified |
+|---|---|---|---|
+| `loose` | 713 | 16 | — |
+| `tight` | 313 | 0 | 191 |
+| `settled` | 3253 | — | — |
+
 This reading is not carried in the map itself — the map holds only
-the three fields. The tool cannot know which operations you call
+the four fields. The tool cannot know which operations you call
 heavily; it gives the head start and you tighten from traffic.
 
 ## Status

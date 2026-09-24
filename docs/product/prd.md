@@ -260,7 +260,7 @@ lives (src/)" just below still describes today's `src/`.
 | `src/step2.js` | step 2, x by evidence: `method-delete`, `cant-undo-verb`, `cant-undo-verb-summary`, and the `floor-post` floor; owns `CANT_UNDO` (29) and `REMOVES` (6) |
 | `src/step3.js` | step 3, w: `method-floor` (PUT/PATCH), `modify-verb`, `modify-verb-summary`; owns `KEEP_W` (14) |
 | `src/flow.js` | the ladder: step 1, step 2, step 3, then step 2's floor — order written once |
-| `src/jev.js` | the optional Jev tier (D82/D88): `applyJev` lowers a `floor-post` row to w only when p(x) <= 0.10 and the answer carries a model version; any bad answer leaves x. No network code: the adopter makes the call |
+| `src/jev.js` | the optional Jev tiers (D82/D88/D95), three of them, each with its own ledger and none able to undo another: `jev-lower` lowers a `floor-post` row x→w at p(isX) <= 0.10; `jev-raise-wx` raises a `method-floor` row w→x at p(isX) >= 0.80 on the x-only criteria; `jev-raise-get` raises a `method` r row r→w, never x, at p(changes) >= 0.50. Any bad answer leaves the verdict untouched — fail closed. No network code: the adopter makes the call |
 | `src/index.js` | the package entry: `classifyRow`, plus `applyJev`, `needsJev`, `jevState`, `jevQuestions`, `JEV_THRESHOLD` |
 | `src/types.js` | the shared `Operation` and `Verdict` typedefs |
 | `tools/corpus.js`, `tools/csv.js` | corpus loading and CSV read, test/dev only, never shipped |
@@ -284,35 +284,76 @@ unspent-and-pullable vendors of the locked pile, D92) was drawn,
 labelled blind under BRIEF-v3, and scored once on 2026-09-23. It is
 now BURNED (D24) — no re-score, no rule change evaluated against these
 rows again. Mechanical only, no Jev (this exam has no Jev answers of
-its own yet): 4279 rows, exact 3520 (82.3%), leaks 37 (0.9%),
-over-tight 722 (16.9%) — essentially unchanged from the 6557-row
+its own yet): 4279 rows, exact 3520 (82.3%), leaks 34 (0.8%),
+over-tight 725 (16.9%) — essentially unchanged from the 6557-row
 tuning set's own read of 82.6% / 1.0% / 16.4%, unlike the D75/D78
 flow's fall from 93.8% fitted to 85.3% exam. Per vendor (cloudflare is
 84% of the rows, so the pooled line above is never quoted alone):
-cloudflare n=3575 exact 81.8% leaks 1.0% over-tight 17.3%; pagerduty
+cloudflare n=3575 exact 81.8% leaks 0.9% over-tight 17.3%; pagerduty
 n=465 exact 83.2% leaks 0.4% over-tight 16.3%; sentry n=239 exact
 87.4% leaks 0.4% over-tight 12.1%. Per method: GET n=2099 exact 2094
 (99.8%) leaks 5 (0.2%) over-tight 0 (0.0%); POST n=892 exact 179
-(20.1%) leaks 6 (0.7%) over-tight 707 (79.3%); PUT n=460 exact 443
+(20.1%) leaks 3 (0.3%) over-tight 710 (79.6%); PUT n=460 exact 443
 (96.3%) leaks 14 (3.0%) over-tight 3 (0.7%); DELETE n=558 exact 548
 (98.2%) leaks 0 (0.0%) over-tight 10 (1.8%); PATCH n=270 exact 256
-(94.8%) leaks 12 (4.4%) over-tight 2 (0.7%). 707 of the 722 over-tight
+(94.8%) leaks 12 (4.4%) over-tight 2 (0.7%). 710 of the 725 over-tight
 rows are POST, because an unclaimed POST floors at x by design — that
 is the pile the optional Jev tier exists to lower; PUT (3.0%) and
-PATCH (4.4%) carry 26 of the 37 leaks, all on the wordless floor.
+PATCH (4.4%) carry 26 of the 34 leaks, all on the wordless floor.
 D89 gate item 1 FAILS:
-6 leaks on 93 list rows = 6.45 per 100, against a bar of at most 2 per
-100 (five of the six are step 1's read-verb list matching a trailing
-noun — `list` in `lists-create-a-list`, `query` in `queries.post` —
-the known noun/verb blind spot, now confirmed on unseen vendors). Full
-per-method, evidence-split and row-level detail is in
+3 leaks on 90 list rows = 3.33 per 100, against a bar of at most 2 per
+100 (two of the three are step 1's read-verb list claiming `evaluate`
+— cloudflare's `EvaluateNewWebhook` and `EvaluateExistingWebhook`,
+both truth x; the third is step 3's modify-verb claiming `add` in
+sentry's `addOrganizationMember`). Full per-method,
+evidence-split and row-level detail is in
 `docs/logs/learnings.md` ("The M3 clean exam", 2026-09-23).
 
-Next, in order: the with-Jev pass over this exam's floor rows —
-Jev answer collection is pending, not yet run; then a decision on the
-gate item 1 failure; then the bareguard exporter and the M3 release.
-D84 stays rejected (D85); the consumption policy in the following
-section stands.
+The with-Jev pass over this exam has now run — once, at thresholds
+frozen before any exam row was read. M3 clean exam, cloudflare +
+pagerduty + sentry, 4279 operations, scored once and burned (D24).
+Mechanical, no model tier: 82.3% exact (3520 of 4279), 0.8% leaks
+(34), 16.9% over-tight (725). With all three Jev tiers: 93.0% exact
+(3980 of 4279), 0.5% leaks (22), 6.5% over-tight (277). Both error
+directions fall; nothing is traded. cloudflare is 84% of the rows
+(3575), so the pooled line is never quoted alone.
+
+Next, in order: a decision on the D89 gate item 1 failure; then the
+bareguard exporter; then the M3 release; then a fresh exam for
+anything adopted under D100. D84 stays rejected (D85); the
+consumption policy in the following section stands.
+
+### Adoption bars by direction (D100)
+
+A candidate rule is priced on what share of the rows it flags are
+correct, and the bar depends on which way it can be wrong.
+
+| rule direction | can it create a leak? | bar | why |
+|---|---|---|---|
+| loosens a class (x→w, w→r) | yes | at least 91% of flags correct | its mistakes are under-classification, the go/no-go direction |
+| tightens by one step (r→w, w→x) | no | more right than wrong, and neither error type worse overall | its mistakes are over-classification, a usability cost |
+
+The 91% bar is the original 10-leaks-closed-per-false-alarm rule
+restated. It stands unchanged for anything that can loosen. D84 (14%
+correct) and the mined word lists stay rejected under both bars.
+
+Measured on the M3 exam:
+
+| tier | direction | rows flagged | correct | verdict |
+|---|---|---|---|---|
+| jev-lower (x→w, t=0.10) | loosens | 522 of 808 | 99.4% (3 became leaks) | PASS, 91% bar |
+| jev-raise-wx (w→x, t=0.80) | tightens | 11 of 724 | 90.9% (10 of 11) | PASS |
+| jev-raise-get (r→w, t=0.50) | tightens | 9 of 2099 | 55.6% by label, 77.8% after the D100 rulings | PASS |
+
+jev-raise-wx would also pass the old 91% bar; jev-raise-get would not,
+and is adopted on the tightening bar. The caveat, said plainly:
+jev-raise-get's case rests on 9 flagged rows, 5 right by the labels —
+a thin basis, and it is unproven until a fresh exam.
+
+The three thresholds (0.10, 0.80, 0.50) were swept against direct HTTP
+calls. Provider hardening shifted recorded noul values by up to 0.17,
+so routing the calls through a hardened provider invalidates all three
+and they must be re-swept.
 
 D87 was adopted 2026-09-22: the definition collapses to the chmod
 reading and "touches others" leaves the class (see "The shared
@@ -662,14 +703,64 @@ column, and they are deliberately unpublished — an adopter cannot act
 on them, and publishing them would freeze this project's own naming
 into someone else's contract.
 
-There is no `confident` field. `evidence` already carries it: `floor`
-IS the unconfident case, and two fields saying one thing can contradict
-each other.
+There is no `confident` field, and `evidence` is not one either (D101).
+It answers "did a word fire", which is a fact about the implementation,
+not a reading of how likely the row is wrong — measured on the M3 exam,
+`floor` is the CLEANEST bucket of the three (5.6% error) and `list` the
+dirtiest (23.3%), because `floor` is mostly GET rows. The signal an
+adopter can act on is the review hint below.
 
 `destructive` was D28's separate axis; under D86 it is a refinement
 flag inside x — `destructive: true` ⇒ `class: x`, always, while an x
 row need not be destructive — derived from the method and the lead
 verb. `class` is `r < w < x` per the one invariant.
+
+### The review hint (D101)
+
+The map carries a second signal beside `evidence`, answering the
+question an adopter can actually act on: "should I look at this row?"
+It is derived from fields already published — method, `class` and the
+evidence source — and asserts nothing new about confidence.
+
+- `tight` — `class: x` on a POST. Likely tighter than needed, and safe
+  to review: no leak was observed in this bucket on either set.
+- `loose` — `class: w` on a PUT or PATCH decided by the method floor.
+  This is where most of the danger lives.
+- `settled` — everything else.
+
+Measured on the 8376-row tuning pool (82 leaks, 1566 over-tight):
+
+| hint | rows | leaks | over-tight |
+|---|---|---|---|
+| tight | 2116 (25%) | 0 (0%) | 1524 (97%) |
+| loose | 1657 (20%) | 55 (67%) | 1 (0%) |
+| settled | 4603 (55%) | 27 (33%) | 41 (3%) |
+
+And on the M3 exam, 4279 rows (34 leaks, 725 over-tight) — a read of a
+burned exam, not a score:
+
+| hint | rows | leaks | over-tight |
+|---|---|---|---|
+| tight | 835 (20%) | 0 (0%) | 710 (98%) |
+| loose | 724 (17%) | 26 (76%) | 2 (0%) |
+| settled | 2720 (64%) | 8 (24%) | 13 (2%) |
+
+A provider reviews the `tight` fifth of their API and can only improve
+it; they review the `loose` fifth and that is where three quarters of
+the danger is; the remaining roughly 60% can be left alone.
+
+The word lists stay. A no-lists arm — the bare method floor — scores
+6191 exact (73.9%) / 75 leaks / 2110 over-tight on the tuning pool
+against 6728 (80.3%) / 82 / 1566 with lists, and 3469 (81.1%) / 34 /
+776 on the M3 exam against 3520 (82.3%) / 34 / 725. Dropping every list
+costs 537 exact rows on tuning to save 7 leaks, and on the exam saves
+no leaks at all while costing 51 rows.
+
+Caveat, stated plainly: the hint's rule was read off the M3 exam's own
+buckets, so its numbers on that exam are FITTED, not a clean
+generalization figure. It reproduces on the tuning pool, which is
+independent of the exam, and that is the stronger of the two readings —
+but the rule is unproven until a fresh exam.
 
 ### Carrier 1 — OpenAPI, per operation
 
