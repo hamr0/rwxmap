@@ -11,45 +11,46 @@
 
 **[WIP] Maps every OpenAPI operation to r / w / x, so an agent knows what a call does before it is made.**
 
-## The world this is for
+## What it does
 
-Automated traffic is already a large share of the web. Imperva/Thales
-put it at 53% of all web traffic in 2025 — 40% bad bots, 13% benign
-automation. Cloudflare's own measurement is lower, about 35% (both
-figures as of September 2026). The two numbers are far apart, so treat
-the exact share with care. Either way, automation is a large and
-growing part of the traffic, not a fringe of it.
+Every operation gets one letter:
 
-That share is going to keep including more agents acting for a real
-person: buying tickets, ordering groceries, filing forms. Today the
-human is often still in the loop for one reason — getting past
-anti-bot checks. That is a poor place for a human to be: not deciding
-anything, just proving they exist.
+- **r** — reads. Nothing changes.
+- **w** — writes, and a later call of the same API can put it back.
+- **x** — executes, and nothing can put it back: deletes, revokes,
+  sends, charges, runs a job.
 
-Agents reach real systems through APIs and MCP servers, and that is a
-good thing. Much of the industry — WebMCP and others — is working hard
-on the *exposure* side: making APIs usable by agents in the first
-place.
+On doubt it picks the tighter letter, because being too tight annoys
+people and being too loose lets an agent do something irreversible.
 
-## Where rwxmap fits
+## The goal
 
-This project works the other side of that: safety, not exposure. It
-pairs with [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (HTTP
-Message Signatures) and with the author's Internet-Draft, "An
-Attenuated Delegation Profile for Automated Agents"
-([draft-hamr-oauth-agent-delegation-01](https://datatracker.ietf.org/doc/draft-hamr-oauth-agent-delegation/),
-2 September 2026, an individual submission, not a standard), which puts
-human authorization back into agentic flows — a person in the loop, not
-just a click.
+Filesystems solved this with chmod: read, write, execute, three letters
+everyone understands. APIs never got that. An agent handed an API key
+gets all of it or none of it. rwxmap grades every operation of an API
+into the same three letters, so an agent can be given scoped access the
+way a process is — read-only here, writes there, never execute.
 
-rwxmap's part in that: label every API operation r / w / x at the
-point an agent discovers it, so an external arbiter can watch what an
-agent is about to do, and so the same label can be handed to the agent
-itself as an MCP hint.
+## Who it is for
 
-- **r** — read. Nothing changes.
-- **w** — write. Changes something a later write can set back.
-- **x** — execute. Cannot be undone.
+**1. Running agents with scoped permissions.** This works today. The
+mechanical pass is offline, needs no network, and is too loose on 0.8%
+of operations. Pair it with bareguard, the author's agent gate, which
+owns the gate and the grants — or read the labels and enforce them
+yourself.
+
+rwxmap only labels. It never decides to refuse. That decision belongs
+to whatever gates the call.
+
+**2. API providers publishing MCP hints.** This is the one that scales:
+a provider grades once and every agent calling that API benefits. But a
+provider who publishes without reviewing ships an API that is too tight
+on roughly one operation in six. The `tight` and `loose` markers exist
+for exactly that — grading and reviewing are one workflow, not two
+features, and the review pass is where the too-tight rows get loosened
+before anything is published.
+
+Provider-side publishing is future work: the exporter is not built yet.
 
 ## The shared definition
 
@@ -71,86 +72,49 @@ class test. It cannot be read reliably from a spec (the words for
 "whose" mean different things in every API), so it stays out of the
 letter. It may come back as an evidence-only flag beside
 `destructive`, set only when there is evidence and never emitted as
-false; today there is none. Every number below was measured under the
-earlier definition and predates this one; the rows are being
-relabelled, and the honest number under it is not known yet.
+false; today there is none.
 
-## Where it is today
+## Two ways to run it
 
-Measured on 4171 operations from 15 complete official provider APIs.
+| | exact | too loose | too tight |
+|---|---|---|---|
+| **mechanical** — method + word lists, no network | 82.3% | 0.8% | 16.9% |
+| **+Jev** — an optional model pass; moves about 13% of rows | 93.0% | 0.5% | 6.5% |
 
-- Right on 3930 of those 4171 operations (94.2%).
-- Under-classified on 55 of 4171 (1.3%). This is the direction that
-  matters for safety: it is the tool saying a call is tamer than it is.
-- Over-classified on 186 of 4171 (4.5%) — annoying, never dangerous.
+These come from one scored exam — cloudflare, pagerduty and sentry,
+4279 operations across three complete official APIs the rules had never
+seen. On a separate 36-provider, 8376-operation tuning set the same
+figures land within about 3 points, and +Jev matches exactly.
 
-*Under-classified* and *over-classified* are the names used for the two
-error directions everywhere below ("leak" is used for an
-under-classified row where the safety reading is the point). Neither is
-the published `review` value `loose` or `tight`: those are review
-buckets — which rows to look at first — not error counts. See "How an
-agent should read the output".
+Mechanical is free and runs offline; +Jev costs a few cents and sends
+your operation names and descriptions to a third-party model. A full
+pass over the 4279-operation exam cost $0.31 — about $0.07 per thousand
+operations — so a few thousand operations is roughly a quarter.
 
-Every answer comes from one of two places. **Known** means a word in the
-operation's name matched a word list — the tool read something. **Unknown**
-means nothing matched and the HTTP method alone decided it.
+## What to review
 
-| Step | Evidence | Rows | Right | Right % | Under-classified | Under % | Over-classified | Over % |
-|---|---|---|---|---|---|---|---|---|
-| **1 — r** | known | 92 | 91 | 98.9% | 1 | 1.1% | 0 | 0.0% |
-| **1 — r** | unknown | 1960 | 1958 | 99.9% | 2 | 0.1% | 0 | 0.0% |
-| **1 — r** | **total** | **2052** | **2049** | **99.9%** | **3** | **0.1%** | **0** | **0.0%** |
-| **2 — w** | known | 232 | 227 | 97.8% | 5 | 2.2% | 0 | 0.0% |
-| **2 — w** | unknown | 883 | 836 | 94.7% | 47 | 5.3% | 0 | 0.0% |
-| **2 — w** | **total** | **1115** | **1063** | **95.3%** | **52** | **4.7%** | **0** | **0.0%** |
-| **3 — x** | known | 19 | 19 | 100.0% | 0 | 0.0% | 0 | 0.0% |
-| **3 — x** | unknown | 985 | 799 | 81.1% | 0 | 0.0% | 186 | 18.9% |
-| **3 — x** | **total** | **1004** | **818** | **81.5%** | **0** | **0.0%** | **186** | **18.5%** |
-| all | known | 343 | 337 | 98.3% | 6 | 1.7% | 0 | 0.0% |
-| all | unknown | 3828 | 3593 | 93.9% | 49 | 1.3% | 186 | 4.9% |
-| **all** | **total** | **4171** | **3930** | **94.2%** | **55** | **1.3%** | **186** | **4.5%** |
+Each verdict carries `review`, saying which rows to look at:
 
-Four things that table says, and they are the whole shape of the tool:
+| | what it is | rows | how many are wrong |
+|---|---|---|---|
+| **`tight`** | `x` on a POST | 7% of the API | 61% |
+| **`loose`** | `w` on a PUT/PATCH with no word evidence | 17% | 3% |
+| **`settled`** | everything else | 76% | 3% |
 
-- **Words are rare, and nearly always right.** 343 of 4171 operations
-  (8%) match a word; those are right 337 of 343 times (98.3%). The other
-  92% are decided by the HTTP method alone.
-- **Almost every dangerous mistake is in one cell.** 47 of the 55
-  under-classified answers are step 2's unknown row — a PUT, DELETE or PATCH
-  with no word to read, called `w` where the truth was `x`. No other
-  cell leaks above 2.2%.
-- **Every over-classified answer is in one other cell.** All 186 are step 3's
-  unknown row: a POST nothing spoke for, left at `x`. That pile is right
-  799 of 985 times (81.1%); the rest is a usability cost, not a safety
-  one.
-- **Step 3 cannot leak.** It only ever assigns `x`, and there is nothing
-  looser than `x` for it to be wrong toward. That is structural, not luck.
-
-This is a tuning number, not a clean exam (D24): the rules were built
-from these same 4171 rows, so an API the tool has not seen will score
-worse. See `docs/product/prd.md` and `docs/logs/learnings.md` for the
-full picture.
-
-The clean-exam number, scored once and burned: `data/exam-2026-09-17/`
-(1383 operations from three complete official APIs the rules never
-saw — okta, docusign, xero) came out 85.3% exact, 12.4% leaks (171
-rows), 2.3% over-classified. Step 1 scored 583/583; every one of the 171
-leaks belongs to step 2 (30.2% of its claims), all truth `x` called
-`w`. Leave-one-vendor-out is the only honest generalization number —
-the tuning number above looks far better and does not survive it.
-
-On doubt it picks the stricter class. It never loosens without
-evidence.
-
-## Use it for
-
-- **Agentic automation** — give an agent, or the arbiter watching it,
-  an answer for every call before the call is made.
-- **Labelling your own API** — it gets 3930 of 4171 operations right
-  (94.2%) in seconds, with safe defaults where it is unsure; you review
-  the rest by hand, mostly to loosen the 186 it over-classified.
-- **MCP hints** — feed the class straight to the agents already
-  calling your API.
+- `tight` is where the fishing is: six of every ten are genuinely
+  tighter than they need to be, and nothing too loose has ever been
+  observed there, so reviewing it can only improve things.
+- `loose` is mostly false alarms, and that is the point: only 3% are
+  wrong, but those are the dangerous ones and they are three quarters
+  of every dangerous row in the API. It turns a 4279-row search into a
+  713-row one.
+- Running mechanical instead, `tight` is bigger (20% of the API) and
+  richer (85% wrong) — Jev has already fixed the easy ones, so what it
+  leaves is the harder residue.
+- How useful `tight` is depends on your spec: across 36 providers the
+  hit rate ran from 33% (xero and figma, little or no description text)
+  to 97-100% (netbox and spotify). The more your spec says, the better
+  this works.
 
 ## How an agent should read the output
 
@@ -164,9 +128,12 @@ recommended reading:
 - The letter is the answer. A gate such as bareguard reads the letter
   and never asks at runtime; `destructive: true` is a refinement of
   `x` for MCP's `destructiveHint`, not a fourth class.
-- `evidence: floor` rows are reviewed once by a human before the map
-  is deployed. They are the rows the tool guessed from the method
-  alone, and the leaks live there.
+- `review` is the field that says which rows to look at; the buckets
+  and their hit rates are in **What to review** above. `evidence` is
+  not a reliability signal: it answers a different question — whether
+  a word fired or the HTTP method alone decided. Most leaks do sit on
+  `floor` rows, but `floor` is most of the API, so it is far too broad
+  a pile to review from.
 - The exporter (planned) writes a draft `tools` section for bareguard
   keyed by operationId, one letter per row, and leaves floor rows out
   so a missed row is a loud deny, never a leak; a sidecar report lists
@@ -174,37 +141,64 @@ recommended reading:
 
 ### `review` — which rows to look at first
 
-`review` is one of three values, and it is a review bucket, not an
-error count and not a confidence score. The tool still emits no
+The three values, and how many of the rows each one flags are actually
+wrong, are in **What to review** above. `review` is a review bucket,
+not an error count and not a confidence score — the tool still emits no
 confidence score.
-
-- **`loose`** — class `w` on a PUT or PATCH that the method floor
-  decided, with no word either way.
-- **`tight`** — class `x` on a POST.
-- **`settled`** — everything else.
 
 It is derived from `method`, `class` and `evidence` — all three already
 published — and asserts nothing new. Any reader could compute it; the
 field just saves them the rule.
 
-How to use it: review the `loose` rows first, because that is where the
-under-classified rows are; then the `tight` rows, which are dense with
-over-classified rows and where nothing under-classified has ever been
-observed.
-
-From one scored exam of three vendors (cloudflare, pagerduty and
-sentry, 4279 rows, Jev tiers on) — one exam, three vendors, so read it
-as a shape and not as a guarantee:
-
-| `review` | Rows | Under-classified | Over-classified |
-|---|---|---|---|
-| `loose` | 713 | 16 | — |
-| `tight` | 313 | 0 | 191 |
-| `settled` | 3253 | — | — |
-
 This reading is not carried in the map itself — the map holds only
 the four fields. The tool cannot know which operations you call
 heavily; it gives the head start and you tighten from traffic.
+
+## How it publishes
+
+rwxmap does not invent a format. Every standard an agent already reads
+leaves an extension slot open, and rwxmap fills that slot: OpenAPI
+`x-`, MCP `_meta`, WebMCP hints, and the Agentic Resource Discovery
+catalog pointer. The four carriers are described in
+`docs/product/prd.md`.
+
+Two consequences worth stating:
+
+- A provider adopting rwxmap agrees to no new spec. The labels ride in
+  fields their existing documents already allow.
+- MCP hints default to the tightest reading when a field is omitted, so
+  publishing only the rows you are confident in is safe — a row you
+  leave out is read as the tight answer, not the loose one.
+
+## The delegation draft
+
+The author's Internet-Draft, "An Attenuated Delegation Profile for
+Automated Agents"
+([draft-hamr-oauth-agent-delegation](https://datatracker.ietf.org/doc/draft-hamr-oauth-agent-delegation/),
+an individual submission, not a standard), describes how a delegation
+grant is scoped. rwxmap produces the per-operation labels such a grant
+needs. It is not normative in that draft, and this project is not a
+standards track.
+
+It sits in the same neighbourhood as
+[RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (HTTP Message
+Signatures) — signing is the resource owner's act, not this tool's.
+
+## The world this is for
+
+Automated traffic is already a large share of the web. Imperva/Thales
+put it at 53% of all web traffic in 2025 — 40% bad bots, 13% benign
+automation. Cloudflare's own measurement is lower, about 35% (both
+figures as of September 2026). The two numbers are far apart, so treat
+the exact share with care. Either way, automation is a large and
+growing part of the traffic, not a fringe of it.
+
+That share is going to keep including more agents acting for a real
+person: buying tickets, ordering groceries, filing forms. Agents reach
+real systems through APIs and MCP servers, and much of the industry —
+WebMCP and others — is working hard on the *exposure* side: making APIs
+usable by agents in the first place. This project works the other side
+of that: safety, not exposure.
 
 ## Status
 

@@ -5028,3 +5028,86 @@ class).
   implementation; method plus class answers "should I look at this",
   which is the question the adopter actually has. Both ship; only the
   second is a review signal, and neither is a confidence score.
+
+### How much the review markers over-mark, per provider (2026-09-24)
+
+- Goal: the review markers flag rows for an operator to review, but an
+  operator has no labels — so how many of the flagged rows are actually
+  wrong, and how much does it vary by provider?
+- Tried: for every row, computed the published `review` value and
+  compared the class against truth, on the 8376-row tuning pool
+  (mechanical) and on the burned M3 exam (mechanical and +Jev), broken
+  down per provider. "Real" means the row was genuinely misclassified;
+  "wasted" means it was flagged for review but the tool had it right.
+- Outcome, M3 exam (4279 rows) — mechanical: `tight` 835 flagged, 710
+  real, 125 wasted, 85% hit; `loose` 724 flagged, 28 real, 696 wasted,
+  4% hit. Per provider: cloudflare 3575 rows, tight 721/606/115/84%,
+  loose 613/26/587/4%; pagerduty 465 rows, tight 82/75/7/91%, loose
+  76/2/74/3%; sentry 239 rows, tight 32/29/3/91%, loose 35/0/35/0%.
+- Outcome, M3 exam +Jev: `tight` 313 flagged, 191 real, 122 wasted, 61%
+  hit; `loose` 713 flagged, 18 real, 695 wasted, 3% hit. Per provider:
+  cloudflare tight 276/164/112/59%, loose 603/17/586/3%; pagerduty
+  tight 24/17/7/71%, loose 75/1/74/1%; sentry tight 13/10/3/77%, loose
+  35/0/35/0%.
+- Outcome, tuning pool (8376 rows, 36 providers, mechanical): totals
+  `tight` 2116 flagged, 1524 real, 592 wasted, 72% hit; `loose` 1657
+  flagged, 56 real, 1601 wasted, 3% hit. Per provider:
+
+  | provider | rows | tight flagged | tight real | tight wasted | tight hit % | loose flagged | loose real | loose wasted | loose hit % |
+  |---|---|---|---|---|---|---|---|---|---|
+  | okta | 734 | 170 | 128 | 42 | 75% | 98 | 2 | 96 | 2% |
+  | digitalocean | 684 | 144 | 106 | 38 | 74% | 83 | 12 | 71 | 14% |
+  | jira | 610 | 70 | 61 | 9 | 87% | 116 | 1 | 115 | 1% |
+  | stripe | 594 | 213 | 103 | 110 | 48% | 0 | 0 | 0 | - |
+  | docusign | 414 | 65 | 57 | 8 | 88% | 102 | 8 | 94 | 8% |
+  | openai | 346 | 102 | 67 | 35 | 66% | 0 | 0 | 0 | - |
+  | square | 332 | 104 | 61 | 43 | 59% | 36 | 1 | 35 | 3% |
+  | mailchimp | 298 | 33 | 15 | 18 | 45% | 39 | 1 | 38 | 3% |
+  | auth0 | 250 | 72 | 53 | 19 | 74% | 97 | 2 | 95 | 2% |
+  | hubspot | 250 | 63 | 55 | 8 | 87% | 125 | 1 | 124 | 1% |
+  | zendesk | 250 | 77 | 67 | 10 | 87% | 86 | 4 | 82 | 5% |
+  | asana | 249 | 47 | 33 | 14 | 70% | 26 | 0 | 26 | 0% |
+  | datadog | 235 | 45 | 37 | 8 | 82% | 37 | 1 | 36 | 3% |
+  | xero | 235 | 9 | 3 | 6 | 33% | 53 | 1 | 52 | 2% |
+  | intercom | 231 | 52 | 34 | 18 | 65% | 24 | 0 | 24 | 0% |
+  | zoom | 155 | 21 | 19 | 2 | 90% | 31 | 3 | 28 | 10% |
+  | github | 150 | 49 | 35 | 14 | 71% | 50 | 2 | 48 | 4% |
+  | microsoft | 150 | 57 | 44 | 13 | 77% | 42 | 0 | 42 | 0% |
+  | gitea | 150 | 64 | 54 | 10 | 84% | 36 | 1 | 35 | 3% |
+  | appcenter | 150 | 77 | 57 | 20 | 74% | 32 | 3 | 29 | 9% |
+  | netbox | 150 | 33 | 32 | 1 | 97% | 82 | 0 | 82 | 0% |
+  | atlassian | 150 | 27 | 24 | 3 | 89% | 52 | 0 | 52 | 0% |
+  | dracoon | 150 | 52 | 44 | 8 | 85% | 47 | 1 | 46 | 2% |
+  | trello | 150 | 0 | 0 | 0 | - | 90 | 0 | 90 | 0% |
+  | gitlab | 150 | 55 | 47 | 8 | 85% | 43 | 0 | 43 | 0% |
+  | keycloak | 147 | 62 | 47 | 15 | 76% | 33 | 0 | 33 | 0% |
+  | box | 144 | 61 | 52 | 9 | 85% | 42 | 2 | 40 | 5% |
+  | klaviyo | 141 | 65 | 52 | 13 | 80% | 30 | 0 | 30 | 0% |
+  | clearblade | 126 | 45 | 31 | 14 | 69% | 38 | 7 | 31 | 18% |
+  | paypal | 115 | 56 | 26 | 30 | 46% | 12 | 0 | 12 | 0% |
+  | meta-whatsapp | 113 | 41 | 21 | 20 | 51% | 0 | 0 | 0 | - |
+  | miro | 112 | 40 | 34 | 6 | 85% | 37 | 2 | 35 | 5% |
+  | spotify | 96 | 4 | 4 | 0 | 100% | 18 | 1 | 17 | 6% |
+  | canva | 59 | 18 | 7 | 11 | 39% | 2 | 0 | 2 | 0% |
+  | figma | 54 | 3 | 1 | 2 | 33% | 2 | 0 | 2 | 0% |
+  | launchdarkly | 52 | 20 | 13 | 7 | 65% | 16 | 0 | 16 | 0% |
+
+- Outcome, the whole-set comparison, tuning vs exam, both modes:
+
+  | set | mode | exact | too loose | too tight |
+  |---|---|---|---|---|
+  | Tuning, 8376 rows | mechanical | 80.3% | 82 (1.0%) | 1566 (18.7%) |
+  | Tuning, 8376 rows | +Jev | 93.0% | 81 (1.0%) | 502 (6.0%) |
+  | M3 exam, 4279 rows | mechanical | 82.3% | 34 (0.8%) | 725 (16.9%) |
+  | M3 exam, 4279 rows | +Jev | 93.0% | 22 (0.5%) | 277 (6.5%) |
+
+  +Jev's exact figure is identical on both sets, and every other figure
+  lands within about 2 points.
+- Lesson: the two markers are different instruments and must be
+  described differently to an adopter. `tight` over-marks by roughly a
+  third and is an efficient worklist. `loose` over-marks by 97% and is
+  not efficient — it earns its place only because it is the only net
+  that catches the dangerous rows, cutting the search by six times. Jev
+  makes `tight` shorter and its hit rate LOWER (85% to 61%), because it
+  has already fixed the easy rows and what remains is the hard residue;
+  a falling hit rate there is the tool improving, not degrading.
