@@ -11,6 +11,16 @@
 
 **[WIP] Maps every OpenAPI operation to r / w / x, so an agent knows what a call does before it is made.**
 
+> rwxmap is a mechanical starting point, not a standard and not a
+> conformance harness. A label here has the status of an MCP hint: a
+> suggestion the consumer weighs, and nobody should trust it 100%. What
+> it gets wrong is published below rather than hidden, and both error
+> directions are marked so you can decide what to stop on. The
+> alternative it beats is not perfection — it is waiting for API vendors
+> to redesign their methods, or for a standards body to agree on
+> something, and an agent calling an API today does not have to wait for
+> either.
+
 ## What it does
 
 Every operation gets one letter:
@@ -50,7 +60,8 @@ for exactly that — grading and reviewing are one workflow, not two
 features, and the review pass is where the too-tight rows get loosened
 before anything is published.
 
-Provider-side publishing is future work: the exporter is not built yet.
+Provider-side publishing is the newest part: the exporter is in
+progress, landing now.
 
 ## The shared definition
 
@@ -91,9 +102,19 @@ your operation names and descriptions to a third-party model. A full
 pass over the 4279-operation exam cost $0.31 — about $0.07 per thousand
 operations — so a few thousand operations is roughly a quarter.
 
+What those numbers add up to: about one operation in a hundred is graded
+looser than it should be, and about one in two hundred once Jev runs.
+That is the number to decide against. Too tight — 16.9% mechanical, 6.5%
+with Jev — costs usability and nothing else. Too loose is the one that
+matters, it is small, and it is stated here rather than engineered out
+of sight; the `loose` marker below says where most of it sits.
+
 ## What to review
 
 Each verdict carries `review`, saying which rows to look at:
+
+Measured on the 4279-operation M3 exam with Jev running (the
+mechanical-only figures are in the bullets below):
 
 | | what it is | rows | how many are wrong |
 |---|---|---|---|
@@ -108,8 +129,13 @@ Each verdict carries `review`, saying which rows to look at:
   wrong, but those are the dangerous ones and they are three quarters
   of every dangerous row in the API. It turns a 4279-row search into a
   713-row one.
-- Running mechanical instead, `tight` is bigger (20% of the API) and
-  richer (85% wrong) — Jev has already fixed the easy ones, so what it
+- `settled` means only that neither of the other two fired. It is not
+  signed, not verified, not confirmed by anyone, and most settled rows
+  are pure method-floor guesses. A confirmed state would be a fourth
+  value that only a person writes: signing is the Resource Owner's act,
+  never this tool's.
+- Running mechanical instead, `tight` is bigger (19.5% of the exam,
+  835 rows) and richer (85.0% wrong) — Jev has already fixed the easy ones, so what it
   leaves is the harder residue.
 - How useful `tight` is depends on your spec: across 36 providers the
   hit rate ran from 33% (xero and figma, little or no description text)
