@@ -143,6 +143,7 @@ function loadRows() {
       step: p.step || '',
       rule: p.rule || '',
       source: p.source || '',
+      review: p.review || '',
       matched: p.matched || '',
       verdict,
       reason: label.reason,
@@ -284,7 +285,7 @@ const rows = loadRows();
 
 const header = [
   'row_id', 'provider', 'method', 'path', 'operationId',
-  'truth', 'confidence', 'predicted', 'step', 'rule', 'source', 'matched', 'verdict',
+  'truth', 'confidence', 'predicted', 'step', 'rule', 'source', 'review', 'matched', 'verdict',
 ];
 writeFileSync(OUT_CSV, toCsv(rows, header));
 

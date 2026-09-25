@@ -1,3 +1,12 @@
+**Deleted 2026-09-23:** `data/holdout-2026-09-07/`, `data/holdout2-2026-09-07/`,
+`data/holdout3-2026-09-08/`, `data/holdout4-2026-09-08/`,
+`data/holdout5-2026-09-08/` and `docs/logs/m0/` (referenced throughout this
+brief) no longer exist in the working tree — this M0/M1 hold-out process is
+long closed and superseded. Their results live in `docs/logs/learnings.md`
+and `docs/wiki/decisions-log.md`; the files themselves are recoverable from
+git history. The brief below is kept verbatim as the historical record of
+the exact instructions given to the reading agents at the time.
+
 Brief to give to the reading agents for hold-out set 5 (slack, notion,
 amazon SP-API), 2026-09-08. Starts from docs/logs/m0/reading-brief.md
 verbatim, with every accumulated adaptation from hold-out sets 1-4 carried

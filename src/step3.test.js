@@ -1,123 +1,76 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { step3, floorPost, wordsForStep3, RAISE_WORDS } from './step3.js';
+import { step3, KEEP_W } from './step3.js';
 
-test('RAISE_WORDS is the 17-word list, verbatim', () => {
-  assert.equal(RAISE_WORDS.size, 17);
-  for (const word of [
-    'permission', 'membership', 'memberships', 'panelist', 'panelists',
-    'watcher', 'watchers', 'participants', 'actor', 'invites', 'invitation',
-    'invitations', 'sso', 'password', 'grant', 'disassociate', 'reject',
-  ]) {
-    assert.equal(RAISE_WORDS.has(word), true, `${word} should be in RAISE_WORDS`);
+test('method-floor rule: PUT floors to w with an empty matched list', () => {
+  const v = step3({ method: 'PUT', operationId: 'updateWidget' });
+  assert.deepEqual(v, { class: 'w', step: 3, rule: 'method-floor', source: 'floor', matched: [] });
+});
+
+test('method-floor rule: PATCH also floors to w; DELETE does not (step 3 has no reach into DELETE)', () => {
+  const patch = step3({ method: 'PATCH', operationId: 'patchWidget' });
+  assert.deepEqual(patch, { class: 'w', step: 3, rule: 'method-floor', source: 'floor', matched: [] });
+  assert.equal(step3({ method: 'DELETE', operationId: 'deleteWidget' }), null);
+});
+
+test('modify-verb rule: POST with a KEEP_W lead verb', () => {
+  const v = step3({ method: 'POST', operationId: 'updateWidget' });
+  assert.deepEqual(v, { class: 'w', step: 3, rule: 'modify-verb', source: 'list', matched: ['update'] });
+});
+
+test('modify-verb-summary rule: bare-method lead falls back to the summary verb', () => {
+  const v = step3({
+    method: 'POST',
+    operationId: 'PostLists',
+    summary: 'Update a list',
+  });
+  assert.deepEqual(v, { class: 'w', step: 3, rule: 'modify-verb-summary', source: 'list', matched: ['update'] });
+});
+
+test('modify-verb-summary fires only when the lead token is a bare method word', () => {
+  const v = step3({
+    method: 'POST',
+    operationId: 'updateWidget',
+    summary: 'Remove a widget',
+  });
+  assert.deepEqual(v, { class: 'w', step: 3, rule: 'modify-verb', source: 'list', matched: ['update'] });
+});
+
+test('null for a GET row (step 3 never assigns r)', () => {
+  assert.equal(step3({ method: 'GET', operationId: 'listWidgets' }), null);
+});
+
+test('null for a POST with no KEEP_W verb', () => {
+  assert.equal(step3({ method: 'POST', operationId: 'createWidget' }), null);
+});
+
+test('deactivate/change/swap/archive/disable are gone from KEEP_W (D89, measured below the adoption bar)', () => {
+  for (const removed of ['deactivate', 'change', 'swap', 'archive', 'disable']) {
+    assert.equal(KEEP_W.has(removed), false, `${removed} should not be in KEEP_W`);
+    assert.equal(step3({ method: 'POST', operationId: `${removed}Thing` }), null);
   }
 });
 
-test('raise-word rule: a PUT whose path names a permission is claimed x, reporting the word', () => {
-  const v = step3({ method: 'PUT', operationId: 'updateUser', path: '/users/{id}/permission' });
-  assert.deepEqual(v, {
-    class: 'x', step: 3, rule: 'raise-word', source: 'list', matched: ['permission'],
-  });
+test('create is not adopted into KEEP_W (measured 503 fixed / 72 leaks = 6.99, short of the bar of 10)', () => {
+  assert.equal(KEEP_W.has('create'), false);
+  assert.equal(step3({ method: 'POST', operationId: 'createThing' }), null);
 });
 
-test('raise-word rule: a raise word in the operationId also fires', () => {
-  const v = step3({ method: 'DELETE', operationId: 'deleteMembership', path: '/teams/{id}/members/{userId}' });
-  assert.deepEqual(v, {
-    class: 'x', step: 3, rule: 'raise-word', source: 'list', matched: ['membership'],
-  });
+test('words injection overrides KEEP_W', () => {
+  const custom = { keepW: new Set(['banana']) };
+  const v = step3({ method: 'POST', operationId: 'bananaWidget' }, custom);
+  assert.deepEqual(v, { class: 'w', step: 3, rule: 'modify-verb', source: 'list', matched: ['banana'] });
+
+  // With the defaults, the same operationId is not claimed.
+  assert.equal(step3({ method: 'POST', operationId: 'bananaWidget' }), null);
 });
 
-test('raise-word rule: a raise word in the summary also fires', () => {
-  const v = step3({ method: 'PATCH', operationId: 'updateThing', path: '/things/{id}', summary: 'Reset the password' });
-  assert.deepEqual(v, {
-    class: 'x', step: 3, rule: 'raise-word', source: 'list', matched: ['password'],
-  });
-});
-
-test('raise-word rule: matches at any token position, not just the lead', () => {
-  const v = step3({ method: 'DELETE', operationId: 'removeTeamWatcher', path: '/teams/{id}' });
-  assert.deepEqual(v, {
-    class: 'x', step: 3, rule: 'raise-word', source: 'list', matched: ['watcher'],
-  });
-});
-
-test('raise-word rule: the match is exact, not a stem or a substring', () => {
-  // "passwords" is not a RAISE_WORDS member; only "password" is, and these
-  // are nouns, so no inflection is accepted.
-  assert.equal(step3({ method: 'PUT', operationId: 'rotatePasswords', path: '/accounts/{id}' }), null);
-});
-
-test('no raise word anywhere returns null', () => {
-  assert.equal(step3({ method: 'PUT', operationId: 'updateThing', path: '/things/{id}' }), null);
-});
-
-test('matched reports EVERY member present, sorted ascending — not the first one found', () => {
-  // CONSTRUCTED deliberately, because the corpus's coverage of this is
-  // thin: 17 of its 4171 rows fire more than one RAISE_WORDS member, but 14
-  // of those are singular/plural pairs (membership+memberships and friends)
-  // that sit adjacent and already in order in RAISE_WORDS's declaration, so
-  // they cannot tell a sorted result from an insertion-ordered one. Only
-  // grant+permission (3 rows) can.
-  //
-  // This row can too, on purpose: RAISE_WORDS is declared with "watcher"
-  // (6th) before "actor" (9th), so insertion order would give
-  // ['watcher', 'actor'] and only a sort gives ['actor', 'watcher'].
-  const v = step3({ method: 'DELETE', operationId: 'removeActor', path: '/things/{id}/watcher' });
-  assert.deepEqual(v, {
-    class: 'x', step: 3, rule: 'raise-word', source: 'list', matched: ['actor', 'watcher'],
-  });
-});
-
-test('matched reports both members of a singular/plural pair when both are present', () => {
-  // The shape asana's /memberships/{membership_gid} updateMembership takes:
-  // the operationId carries "membership" and the path segment carries
-  // "memberships", and both are separate RAISE_WORDS members.
-  const v = step3({ method: 'PUT', operationId: 'updateMembership', path: '/memberships/{membership_gid}' });
-  assert.ok(v);
-  assert.deepEqual(v.matched, ['membership', 'memberships']);
-});
-
-test('floorPost: the floor verdict always carries an empty matched list', () => {
-  assert.deepEqual(floorPost(), {
-    class: 'x', step: 3, rule: 'floor-post', source: 'floor', matched: [],
-  });
-});
-
-test('words injection overrides RAISE_WORDS (the LOVO path)', () => {
-  const row = { method: 'PUT', operationId: 'updateSsoConfig', path: '/accounts/{id}' };
-
-  // An emptied list claims nothing, even though "sso" is a default member.
-  assert.equal(step3(row, { raiseWords: new Set() }), null);
-
-  // A rebuilt list claims the row and reports its own member.
-  assert.deepEqual(step3(row, { raiseWords: new Set(['sso']) }), {
-    class: 'x', step: 3, rule: 'raise-word', source: 'list', matched: ['sso'],
-  });
-
-  // A word that is not a default member fires when injected, and does not
-  // fire on the defaults.
-  const banana = { method: 'DELETE', operationId: 'deleteBanana', path: '/bananas/{id}' };
-  assert.deepEqual(step3(banana, { raiseWords: new Set(['banana']) }), {
-    class: 'x', step: 3, rule: 'raise-word', source: 'list', matched: ['banana'],
-  });
-  assert.equal(step3(banana), null);
-});
-
-test('words injection sorts the injected list too, not just the default one', () => {
-  const v = step3(
-    { method: 'DELETE', operationId: 'removeZebra', path: '/apple/{id}' },
-    { raiseWords: new Set(['zebra', 'apple']) },
-  );
-  assert.ok(v);
-  assert.deepEqual(v.matched, ['apple', 'zebra']);
-});
-
-test('wordsForStep3: includes a raise word buried mid-path, not just the lead token', () => {
-  const words = wordsForStep3({ method: 'PUT', operationId: 'updateUser', path: '/users/{id}/permissions/{permId}' });
-  assert.equal(words.includes('permissions'), true);
-});
-
-test('wordsForStep3: skips {param} path segments', () => {
-  const words = wordsForStep3({ method: 'PUT', operationId: 'updateThing', path: '/things/{password}' });
-  assert.equal(words.includes('password'), false);
+test('KEEP_W has 14 members, verbatim', () => {
+  assert.equal(KEEP_W.size, 14);
+  for (const word of [
+    'update', 'remove', 'add', 'attach', 'assign', 'activate', 'unarchive',
+    'move', 'restore', 'pause', 'unpause', 'enable', 'modify', 'suspend',
+  ]) {
+    assert.equal(KEEP_W.has(word), true, `${word} should be in KEEP_W`);
+  }
 });

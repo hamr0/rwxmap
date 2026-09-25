@@ -4,7 +4,7 @@
 import { leadVerbAfterModifiers, tokensForRow, matchingMembers } from './tokens.js';
 
 /** @typedef {import('./types.js').Operation} Operation */
-/** @typedef {import('./types.js').Verdict} Verdict */
+/** @typedef {import('./types.js').StepVerdict} StepVerdict */
 
 // Methods whose floor is r: they are the read verbs of HTTP itself.
 const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
@@ -38,6 +38,51 @@ export const READ_VERBS = new Set([
   'introspect', 'suggest', 'sanitise', 'sanitize',
 ]);
 
+// PLURAL-NOUN GUARD (D99, adopted 2026-09-23)
+//
+// DIRECTION: tightens. It never claims a row; it only withholds
+// read-verb's claim, leaving the row to fall through the rest of the
+// ladder untouched.
+// WHICH ROWS: only the POST rows read-verb was about to claim — that is,
+// only after matchingMembers(leadVerb, READ_VERBS) has already returned a
+// non-empty list.
+// WHERE IT MATCHES: the LEAD token only, against the members read-verb
+// itself matched. An operationId names its action in the IMPERATIVE
+// (createList, listAccounts), never the third person, so a lead token that
+// reaches a read verb ONLY through a plural / third-person-singular
+// inflection (-s, -es, consonant+y -> -ies) is a resource NOUN, not a
+// verb: github's checks/rerequest-suite leads with `checks`, which
+// stemMatches accepts as `check`, and its real action is `rerequest`. A
+// lead token that equals a member outright, or reaches it through any
+// other inflection (-e, -d, -ed, -ing, doubled-consonant, -ied), is a real
+// verb and still claims.
+// WHAT IT IS NOT: not a word list, and not a rule of its own — it emits no
+// verdict and appears in no ledger. It does NOT touch read-verb-anywhere
+// (SAFE_VERBS, any position), the GET/HEAD/OPTIONS method floor, or step 2
+// or step 3.
+//
+// Numbers: on the 8376-row tuning pool it closed 1 leak at 0 cost
+// (list/read-verb/r goes n=109/1 leak to n=108/0 leaks; pool exact
+// 6727 -> 6728, leaks 83 -> 82, over-tight 1566 unchanged) and 0 of 35
+// leave-one-fold-out folds were made worse.
+const PLURAL_SUFFIXES = ['s', 'es'];
+
+/**
+ * True when `lead` reaches `stem` ONLY as a plural / third-person-singular
+ * form of it — never true when the two are the same word.
+ * @param {string} lead
+ * @param {string} stem
+ * @returns {boolean}
+ */
+function isPluralOf(lead, stem) {
+  if (lead === stem) return false;
+  for (const suffix of PLURAL_SUFFIXES) {
+    if (lead === stem + suffix) return true;
+  }
+  if (stem.endsWith('y') && lead === stem.slice(0, -1) + 'ies') return true;
+  return false;
+}
+
 // SAFE_VERBS
 //
 // DIRECTION: also lowers toward r, at lower priority than READ_VERBS (it is
@@ -67,7 +112,7 @@ export const SAFE_VERBS = new Set([
  * @param {{readVerbs?: Set<string>, safeVerbs?: Set<string>}} [words]
  *   Word lists to use in place of the module's own (LOVO passes rebuilt
  *   ones). Omitted fields fall back to READ_VERBS / SAFE_VERBS.
- * @returns {Verdict|null} null when step 1 does not claim the row.
+ * @returns {StepVerdict|null} null when step 1 does not claim the row.
  */
 export function step1(row, words = {}) {
   const readVerbs = words.readVerbs ?? READ_VERBS;
@@ -81,7 +126,10 @@ export function step1(row, words = {}) {
 
   const leadVerb = leadVerbAfterModifiers(row);
   const leadMatches = matchingMembers(leadVerb, readVerbs);
-  if (leadMatches.length > 0) {
+  // The guard (D99, above): withhold the claim only when EVERY member
+  // read-verb matched was reached through a plural/3sg inflection, which
+  // makes the lead token a resource noun rather than a verb.
+  if (leadMatches.length > 0 && !leadMatches.every((m) => isPluralOf(leadVerb, m))) {
     return { class: 'r', step: 1, rule: 'read-verb', source: 'list', matched: leadMatches };
   }
 

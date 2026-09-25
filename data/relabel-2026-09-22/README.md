@@ -1,15 +1,17 @@
-# data/relabel-2026-09-22 — relabel of the v1 truth-w rows under BRIEF-v2
+# data/relabel-2026-09-22 — relabel of every non-r row under BRIEF-v3 (D87)
 
 ## What this is
 
-Blind relabelling files for the 2266 rows of the combined set
+Blind relabelling files for the 3852 rows of the combined set
 (`data/combined-2026-09-21/rows.json.gz`, 6557 rows across
-23 providers) whose v1 truth is `w`, to be relabelled under
-`data/relabel-2026-09-22/BRIEF-v2.md` — the D86 definition, where "cannot be
-undone" is a third road to x.
+23 providers) whose v1 truth is `w` or `x`, to be relabelled
+under `data/relabel-2026-09-22/BRIEF-v3.md` — the D87 definition (the chmod
+reading: w if a later call of the same API can set it back, x if it
+cannot; "whose thing it is" leaves the class).
 
-Only the v1 truth-w rows are relabelled. v2 moves a row w->x and never
-the other way, so v1 truth-r and truth-x labels stand as they are.
+v3 is bidirectional against v1: a v1 x can become a v3 w and a v1 w
+can become a v3 x. So both v1 truth-w and v1 truth-x rows are in here.
+v1 truth-r labels stand as they are and are not relabelled.
 
 **This stays TUNING DATA.** Every source in the combined set is either
 the tuning corpus (`pc-`) or a burned exam (`x17-`, `x20-`; D24).
@@ -22,16 +24,16 @@ labeller must not be able to see what the tool guessed, nor the v1 label.
 
 ## Brief
 
-Label every row under `data/relabel-2026-09-22/BRIEF-v2.md`. That is the exact brief
+Label every row under `data/relabel-2026-09-22/BRIEF-v3.md`. That is the exact brief
 path; no other version of the brief may be used.
 
 ## Calibration (`calib/`)
 
-BRIEF-v2 is a DRAFT until it is calibrated. Two draws off the front of
+BRIEF-v3 is a DRAFT until it is calibrated. Two draws off the front of
 the one seeded shuffle:
 
 - `practice-blind.csv` (100 rows, shuffled positions 1-100): two
-  labellers label it blind under BRIEF-v2; their disagreements are read
+  labellers label it blind under BRIEF-v3; their disagreements are read
   row by row and ruled by the user; the brief is revised if a ruling
   shows a gap.
 - `holdback-blind.csv` (100 rows, shuffled positions 101-200): measured
@@ -44,10 +46,10 @@ relabel below: the calibration rows get relabelled in the main run too.
 
 ## Split (`label/`)
 
-- Seed: 20260922 (mulberry32, one shuffle over all 2266 rows; the
+- Seed: 20260922 (mulberry32, one shuffle over all 3852 rows; the
   calibration draws are the first 200 rows of that same shuffle).
-- 2266 rows split into 9 parts: parts 1-8 have 251 rows each,
-  part 9 has 258 rows (8*251 + 258 = 2266).
+- 3852 rows split into 9 parts: parts 1-8 have 428 rows each,
+  part 9 has 428 rows (8*428 + 428 = 3852).
 - Rows are shuffled across all 23 providers before splitting, so no
   labeller receives one provider's rows in a block.
 - `blind-1.csv` … `blind-9.csv`: one file per labeller, single-digit
@@ -69,7 +71,7 @@ relabel below: the calibration rows get relabelled in the main run too.
   brief specifies: `truth_class` is r, w, x or ?; `confidence` is EXACTLY
   `high` or `low` (there is no medium, and any other value means the file
   is rejected); `reason` is a short phrase under 15 words with no commas
-  (or the whole reason double-quoted) naming the rule or road applied. One
+  (or the whole reason double-quoted) naming the clause applied. One
   line per input row, same order, no rows skipped, no extras.
 - Do not look at any other labeller's blind or output file.
 

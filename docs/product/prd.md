@@ -6,784 +6,417 @@ status: stable
 
 # rwxmap — PRD
 
-## The floor (start here)
-
-Every operation starts at its method's floor. The floor is each method's
-own measured truth lean over the 4171-row provider corpus
-(`data/provider-corpus-2026-09-16/`, 15 complete official API specs —
-stripe, openai, square, zoom, paypal, meta-whatsapp, spotify,
-digitalocean, jira, mailchimp, asana, datadog, intercom, canva, figma —
-labelled blind under `data/calibration-2026-09-14/BRIEF.md`). This
-replaced the prior 5465-row corpus on 2026-09-16: that corpus never saw
-one complete API (319 of its 332 providers had zero GET rows, 58
-contributed exactly 24 write rows and nothing else), so it could not
-give a per-provider truth read; the old table and its numbers are in
-`docs/logs/learnings.md`. It is a starting value, never an early return
-(D42).
-
-| method | n | truth r | truth w | truth x | floor | holds? |
-|---|---|---|---|---|---|---|
-| GET | 1960 | 100% | 0% | 0% | **r** | yes |
-| POST | 1309 | 9% | 29% | 61% | **x** | yes |
-| PUT | 345 | 0% | 93% | 7% | **w** | yes |
-| DELETE | 473 | 0% | 92% | 8% | **w** | yes |
-| PATCH | 84 | 0% | 98% | 2% | **w** | yes |
-
-Every floor holds on the new corpus, including POST at 61% x — unlike
-exam 5's unseen-vendor draw against the old corpus, where POST
-inverted (x 62% to 23%, r 17% to 63%); that inversion and its
-vendor-by-vendor recheck are recorded in `docs/logs/learnings.md` and
-are not repeated here since this table supersedes them as the current
-per-method truth read.
-
-## The shared definition (D86)
-
-Adopted 2026-09-22 (user ruling): rwxmap and bareguard — the user's
-agent gate, one hand-written file of r/w/x letters per tool or
-command — use ONE meaning of the three letters:
-
-- r = changes nothing.
-- w = changes only the caller's OWN stuff, AND can be undone, AND is
-  safe to repeat.
-- x = any change that fails one of those: reaches another party, OR
-  can't be undone, OR isn't safe to repeat.
-- Unsure → x.
-
-This is D20's x-definition plus one more disjunct, "can't be undone",
-folded INTO the class. It is strictly tighter than before: rows move
-w→x and never the other way, so the one invariant holds. Until the
-rows are relabelled, "can't be undone" is read through a PROXY: the
-DELETE method, or a lead verb in the 23-word destructive list
-(`poc/archive/v2/m0/destructive.json`). `destructive` stops being an
-axis of its own (D28 superseded): `destructive: true` ⇒ class x,
-always, and it is kept as a refinement flag inside x — x+destructive
-against x non-destructive — so MCP `destructiveHint` can still be
-fed. `evidence` (`list` / `floor`) is unchanged.
-
-The floor table above predates the fold. Under the proxy, over the
-combined 6557-row set (tuning data), truth w rows that become x are
-888 of 2266 (39%); truth becomes r 2705 / w 1378 / x 2474, so w falls
-from 35% to 21% of rows. The caveat travels with every such number:
-reversibility was never labelled, and the proxy flips truth and
-prediction with the same rule, so where it applies it cannot disagree
-with itself. These are not accuracy numbers and are never quoted as
-an exam; the honest number needs the relabel (option 2, nine
-labellers, owed before the next fresh exam).
-
-The labelling brief needs a v2 with a reversibility clause.
-`data/calibration-2026-09-14/BRIEF.md` stays verbatim — it is the
-calibrated brief every existing label was made under — so the v2 is
-a new file, an M3 item, calibrated blind before any exam relies on
-it.
-
-## Truth by provider (new — the old corpus could not give this)
-
-No single-corpus provider had enough rows to read a per-provider truth
-lean before; the 4171-row provider corpus's 15 complete specs can:
-
-| provider | n | r | w | x |
-|---|---|---|---|---|
-| digitalocean | 684 | 53% | 30% | 17% |
-| jira | 610 | 50% | 35% | 15% |
-| stripe | 594 | 46% | 29% | 25% |
-| openai | 346 | 48% | 24% | 28% |
-| square | 332 | 48% | 33% | 20% |
-| mailchimp | 298 | 50% | 31% | 19% |
-| asana | 249 | 48% | 27% | 25% |
-| datadog | 235 | 52% | 29% | 19% |
-| intercom | 231 | 49% | 32% | 19% |
-| zoom | 155 | 52% | 28% | 21% |
-| paypal | 115 | 37% | 24% | 39% |
-| meta-whatsapp | 113 | 43% | 22% | 35% |
-| spotify | 96 | 63% | 29% | 8% |
-| canva | 59 | 61% | 8% | 31% |
-| figma | 54 | 80% | 13% | 7% |
-
-32 rows overlap the old corpus (all stripe, every stripe row the old
-corpus had); 29 of 32 agree (90.6%), and all 3 disagreements are
-x → w — the new labels lean slightly looser.
-
-**How the flow works (the user's reading, 2026-09-13).** One sequence,
-three steps. Each step takes the rows the step before left behind.
-
-1. **Step 1, r.** Start every GET / HEAD / OPTIONS row at r. Then look
-   at POST, twice: a POST whose **lead token** is a read verb is r; and
-   a POST the lead rule did not claim, carrying a never-a-noun compute
-   verb **anywhere** in its name, is r too. Built and frozen 2026-09-16
-   (D74) — 2052 claimed, 3 leaks, 2049 of the corpus's 2082 truth-r
-   rows found (98.4%).
-2. **Step 2, w.** Start every PUT / DELETE / PATCH row at w. Then look
-   at the POST rows step 1 left behind: a POST whose lead token is a
-   modify verb from `MODIFY_VERBS` is w, and so is one whose
-   operationId carries no verb at all (a bare `PostThing` name) but
-   whose summary leads with one. Either way the lowering is blocked
-   when the row names someone who is not the caller, from
-   `OTHER_PARTY`. Built and frozen 2026-09-17 (D75) — 1134 claimed,
-   71 leaks, reaching 227 of the 380 truth-w POST rows. See learnings,
-   "One-flow ladder".
-3. **Step 3, x.** Two rules. `raise-word` scans the PUT / DELETE /
-   PATCH rows step 2 floored WITHOUT a word and raises them to x when
-   one of the 17 `RAISE_WORDS` nouns fires at any token position — 19
-   claimed, 19 right, 0 false alarms. `floor-post` is the named
-   leftover pile: every row steps 1 and 2 left, 985 of them, all POST,
-   called x because x is the tightest class and nothing spoke for the
-   row. Built and frozen 2026-09-17 (D78) — 1004 claimed, 818 right,
-   **0 leaks, structurally**, since x is the tightest class and there
-   is nothing looser for step 3 to be wrong toward.
-
-**Superseded — what follows describes the retired core.** The shape that
-replaced it is in "The new core" further down, and it is what the code
-implements today. All three steps are now built, frozen and living in
-`src/`: step 1 (D74), step 2 (D75), step 3 (D78), graduated from `poc/`
-to `src/` on 2026-09-17 (D79). The freeze is on the rules and the word
-lists, not on where the files sit — `src/` reproduces them with 0 class
-/ 0 rule / 0 source / 0 matched differences over all 4171 corpus rows —
-so graduation re-housed the frozen core, it did not thaw it.
-
-**The build, step by step, in plain words (the user's ruling
-2026-09-14: keep it all as is, this is the best measured shape).**
-
-1. **Step 1, r.** GET is r. POST with a read verb is r. Unchanged.
-2. **Step 2, w.** PUT / DELETE / PATCH start at w. Then, in order,
-   the first hit decides:
-   - a live verb (send, cancel, pay) → give up, x.
-   - a 3p noun → give up, x.
-   - a money noun (payment) → give up, x.
-   - every noun yours → keep, w, marked "evidence".
-   - none of the above → keep, w, marked "x-pile" (no evidence fired).
-     This is the 1972-row pile, and it is the leaks marker: 155 of
-     step 2's 187 leaks sit in it.
-3. **Step 3, x.** Only what step 2 gave up. No rules.
-4. **Output.** One CSV, all 5465 rows: the step that claimed the row,
-   class, flag, truth, verdict.
-5. **Ledger pins.** Step 1: 49 over-tight / 0 leaks. Step 2: 805 false
-   alarms / 187 leaks, with 155 of the 187 in the x-pile (1972 rows).
-   Whole flow: exact 78.8%, leaks 3.7%, over-tight 17.5%.
-
-The four checks in step 2 run one after another, each on what the
-one before left. Dropping the 3p check sends its 1034 rows to the
-x-pile: 82 false alarms / 524 leaks. Dropping the x-pile flag
-changes no count; it only hides the 155 leaks among 3183 w rows
-instead of a 1972-row pile. Sending the x-pile to x instead (shape A)
-doubles the x pile to 3572 rows, 2645 of them safe writes, for 37
-leaks.
-
-**Step 2 in order (measured 2026-09-13, the chosen shape B plus a flag;
-the money-noun raiser added 2026-09-14, D66).**
-A PUT / DELETE / PATCH row is checked in this order; the first hit
-decides and the rest are not consulted:
-
-- a. a live verb (send, cancel, pay, ...) → give up, x.
-- b. a someone-else's noun (the mined 3p blocklist) → give up, x.
-- b2. a money noun (payment) → give up, x.
-- c. every noun on the yours list → keep, w, flagged "evidence".
-- d. none of the above → keep, w, flagged "x-pile".
-
-Both mined noun lists have a bar: a noun is "yours" when it was seen
-on 2+ other-vendor rows over write rows (every method but
-GET/HEAD/OPTIONS) and was safe 80%+ of the time — GET is truth r no
-matter whose thing it touches, so it carries no yours signal and only
-dilutes the w-share; it is "someone else's" when 2+ other vendors used
-it over PUT/DELETE/PATCH rows and it was dangerous 30%+ of the time. A
-noun that meets neither bar is on no mined list, and its row lands in
-d unless it is on the hand-picked money-noun list (payment). Step 2
-group table on the 4406 PUT/DELETE/PATCH rows:
-
-| group | rows | truly w | truly x |
-|---|---|---|---|
-| a. live verb → x | 184 | 84 | 100 |
-| b. other-party or money noun → x | 1039 | 721 | 318 |
-| c. every noun yours → w | 1211 | 1176 | 32 |
-| d. neither → w, x-pile | 1972 | 1795 | 155 |
-
-Of group b's 1039 rows, 5 are money-noun rows (rule money-noun),
-all truth x.
-
-Why a row lands in d, measured on this 1972-row pile:
-
-| reason | rows | truly x | what it means |
-|---|---|---|---|
-| between bars | 1046 | 104 | the noun had enough other-vendor rows but its w-share fell short of 0.8 |
-| too few rows | 240 | 16 | fewer than 2 other-vendor write rows carried the noun |
-| vendor-only | 670 | 35 | no other vendor ever wrote the noun on a write row |
-| no noun | 16 | 0 | the row carries no noun at all |
-
-Group d is 91% safe and holds 155 of step 2's 187 leaks; it is the
-pile a human or a per-API hint sorts later (D44), not a list problem.
-
-Sequential beats joint. Letting a yours noun override a live verb
-(live + all-yours → w) gives 772 false alarms / 221 leaks against
-803 / 211 sequential (pre-money-noun baseline): 31 freed for 10 leaks,
-under the 10-for-1 curve. Letting "no 3p noun" override a live verb:
-738 / 260. The yours-beats-3p candidate (762 / 212) is parked, to be
-re-measured. A hand raiser is admitted only above that same 10-for-1
-line and only after a logged measurement — "confirm" and "payment"
-together closed 24 leaks for 2 false alarms, 12 per 1 (D66).
-
-Step 2's ledger on this shape: 805 false alarms / 187 leaks. Whole
-flow on all 5465 rows: exact 78.8%, leaks 3.7%, over-tight 17.5%.
-The alternative (d → x, the yours-list-only shape A) is 37 leaks /
-2645 false alarms, exact 49.7%; rejected by the user 2026-09-13.
-
-On the 5465 rows PATCH is no longer the outlier it was on 42 rows (31%
-x); it sits with PUT and DELETE at 14-15% x, so it keeps the w floor.
-
-In code, src/flow.js runs step 1 -> step 2 -> step 3, one order
-written once; there is no second lens.
-
-**Movement rule.** Raising is `w -> x` on PUT/DELETE/PATCH. Lowering is
-`x -> r` on POST, by a read verb. `r` comes from the GET floor or from
-a POST read verb — nowhere else (D43).
-
-One direction of travel per method (D43):
-
-- GET / HEAD / OPTIONS — no word rules run. The floor stands. Last in
-  the attack order, after step 3, step 2 and step 1.
-- POST — lower only, `x -> r`.
-- PUT / DELETE / PATCH — raise only, `w -> x`.
-
-### The new core (all three steps frozen)
-
-The user's model, 2026-09-16, corrected where the 2026-09-16 floor POC
-contradicts it; the gist and the structure are the user's. Three
-steps; each step takes the rows the step before left behind, and every
-row comes out with a class and a flag.
-
-1. **Step 1, r floor** = GET 99.9% (1958 of 1960) > POST 9.5% (124 of
-   1309). **FROZEN 2026-09-16 (D74)** — no rule or word-list change
-   until the user lifts the freeze. Built and measured, `src/step1.js`.
-   How: the method
-   floor (GET / HEAD / OPTIONS -> r; the corpus has no HEAD or OPTIONS
-   rows, so those two are carried on principle, not on evidence), plus
-   two read-verb rules on POST: the **lead token** of the operationId,
-   after skipping the `LEAD_MODIFIERS` words `bulk` / `batch` /
-   `deprecated` / `beta` / `async`, matched stem-aware against
-   `READ_VERBS`, the 23-word read-verb list; and, on a POST the
-   lead-token rule did not claim, a `SAFE_VERBS` word — the 10
-   never-a-noun compute verbs, a subset of the 23 — matched at any
-   token position. Every other POST passes down to step 2 unclaimed.
-   Ledger over all 4171 rows: `method` 1960 claimed / 2 leaks;
-   `read-verb` 87 claimed / 0 leaks; `read-verb-anywhere` 5 claimed /
-   1 leak; total 2052 claimed / 3 leaks / 33 truth-r rows missed. Of
-   the corpus's 2082 truth-r rows, 2049 are found (98.4%).
-   Leave-one-vendor-out: 83 claimed / 1 leak. Two of the 3 leaks are
-   on the GET floor (`datadog GetGraphSnapshot`, `intercom
-   listContactBanners`, both labelled low confidence) and are out of
-   reach of a method floor by construction. The lead-token rule is
-   positional on purpose: the same 23-word list read at any token
-   position scores 31 leaks instead of 0, because `list`, `get`,
-   `count` and `check` are nouns in API names as often as verbs —
-   which is why only the safe subset may be read that way.
-   The third rule is the tool's first deliberate leak, adopted on the
-   user's explicit decision 2026-09-16 at a priced cost of 4 right
-   rows for 1 leak, with the gains in one vendor (digitalocean) and
-   the leak in another (stripe), so LOVO expects the cost to
-   generalize and the gain not to. See `docs/logs/learnings.md`.
-2. **Step 2, w** — **FROZEN 2026-09-17 (D75)** — no rule or
-   word-list change until the user lifts the freeze. `src/step2.js`,
-   built and verified. Three rules. (a) `method-floor`: every PUT /
-   DELETE / PATCH row starts at w, no words involved. (b)
-   `modify-verb`: on the POST rows step 1 left behind, a **modify
-   verb** from `MODIFY_VERBS` at the operationId's lead token lowers
-   x to w. (c) `modify-verb-summary`: the same list read against the
-   summary's lead verb instead, when the operationId's lead token is a
-   bare HTTP method word, as in stripe's `PostTaxCalculations` and
-   mailchimp's `postLists`. Both POST rules, (b) and (c), are BLOCKED
-   if any word of the row is in `OTHER_PARTY`. Two lists, both owned
-   by step 2:
-   `MODIFY_VERBS` (24 verbs that act on a thing that already exists)
-   and `OTHER_PARTY` (21 role nouns naming someone who is not the
-   caller). Ledger over the 2119 rows step 1 left it: `method-floor`
-   902 claimed / 836 right / 66 leaks (7.3%); `modify-verb` 114 /
-   113 / 1; `modify-verb-summary` 118 / 114 / 4; total 1134 claimed /
-   1063 right / 71 leaks (6.3% of claims). It claims 53.5% of what it
-   inherits and passes on 985 rows (46.5%, truth r 33 / w 153 / x
-   799). Step 2 has zero over-tight rows. The POST rules reach 227 of
-   the 380 truth-w POST rows (59.7%), against zero before, at 232
-   claimed / 5 leaks — 2.2% fitted, and **3.2% leave-one-vendor-out
-   with both lists rebuilt per holdout**, which is the honest figure.
-   66 of its 71 leaks are the wordless method floor, not the lists:
-   they are PUT / DELETE / PATCH rows whose truth is x, they cluster
-   in openai and zoom account/user administration, and raising them is
-   step 3's job, not something better words here can do. See
-   `docs/logs/learnings.md`.
-3. **Step 3, x** = the fallback, not a floor. **FROZEN 2026-09-17
-   (D78)** — built and measured, `src/step3.js`. How: `RAISE_WORDS`, 17
-   role/access nouns read at any token position, raising a row that
-   step 2 floored WITHOUT a word from w to x — 19 claimed, 19 right, 0
-   false alarms, fitted; 6 of 66 leave-one-vendor-out and all 6 the
-   single word `permission`. Then the named leftover pile for
-   everything still unclaimed. The via-negativa yours noun this plan
-   called for is deliberately NOT built, and step 3's README says so:
-   mining it was measured at 9 rows of 380 at 0 leaks, too weak to
-   adopt, because 15 providers yield only 36 nouns against the old
-   corpus's 439 from 332 vendors. What made step 3 work was not its
-   words but the wiring — step 2's wordless floor became a DEFAULT
-   that passes through, where before it returned and step 3 never saw
-   the rows it exists to fix. For PUT 7% / DELETE 8% / PATCH
-   2% (Table 1, provider corpus) this is evidence-raised x. For POST,
-   the 61% x lean is the measured truth on 15 complete APIs (Table 1)
-   and holds under LOVO; the earlier reading that this lean inverts to
-   23% on unseen vendors was a property of exam 5's draw
-   (89 vendors, median 1 POST row each, drawn from APIs.guru
-   fragments), not of POST itself — see `docs/logs/learnings.md`. An
-   unclaimed POST lands at x because x is the tightest class and the
-   floor holds; the measured gap is not that the floor is wrong, it is
-   how many POSTs never get moved off it. Step 2 now moves 232 of them
-   to w (227 right, 5 leaks), reaching 227 of the 380 truth-w POST
-   rows; the other 153 are still on this x floor, over-tight.
-
-### Which list runs in which step
-
-| step | claims | lists it runs, in order | direction |
-|---|---|---|---|
-| 1 — r | GET/HEAD/OPTIONS, and POST reads | `LEAD_MODIFIERS` (5, plumbing) → `READ_VERBS` (23, lead token only) → `SAFE_VERBS` (10, a subset of the 23, any token position) | lowers to r |
-| 2 — w | PUT/DELETE/PATCH, and POST edits | method floor (no list) → `MODIFY_VERBS` (24, lead token, or the summary's verb when the operationId lead is a bare method word) → `OTHER_PARTY` (21, blocks the lowering) | lowers to w |
-| 3 — x | step 2's wordless floor rows, and everything left | `RAISE_WORDS` (17 nouns, any token position, and only on a row step 2 floored without a word) → the leftover pile (no list) | raises to x; nothing looser than x to be wrong toward |
-
-Six lists, 100 words in total, and every list runs in exactly one
-step — no list is shared between steps, which is D57 still holding.
-One of the six is plumbing (`LEAD_MODIFIERS`), two are verb lists that
-lower a row, one is a noun list that blocks a lowering, and one is a
-noun list that raises a row. Where each lives: `LEAD_MODIFIERS` (5) in
-`src/tokens.js`, `READ_VERBS` (23) and `SAFE_VERBS` (10) in
-`src/step1.js`, `MODIFY_VERBS` (24) and `OTHER_PARTY` (21) in
-`src/step2.js`, and `RAISE_WORDS` (17) in `src/step3.js`.
-
-### What the tool would say today
-
-Every answer the tool gives comes from exactly one of two sources, and
-the CSV names which in a `source` column beside the rule:
-
-- **floor** — the HTTP method alone. No word matched. A floor is a
-  *default*, so a later step's evidence may override it; that is exactly
-  how step 3's `raise-word` turns step 2's `method-floor` `w` into `x`.
-- **list** — a word list fired. A list claim is *evidence* and it is
-  final; nothing downstream overrides it.
-
-The full ledger over all 4171 corpus rows, both frozen steps plus step
-3, split by step and by source:
-
-| step | source | claims | right | right % | leaks | over-tight |
-|---|---|---|---|---|---|---|
-| **1** (r) | list | 92 | 91 | 98.9% | 1 | 0 |
-| | floor | 1960 | 1958 | 99.9% | 2 | 0 |
-| | **total** | **2052** | **2049** | **99.9%** | **3** | **0** |
-| **2** (w) | list | 232 | 227 | 97.8% | 5 | 0 |
-| | floor | 883 | 836 | 94.7% | **47** | 0 |
-| | **total** | **1115** | **1063** | **95.3%** | **52** | **0** |
-| **3** (x) | list | 19 | 19 | **100.0%** | 0 | 0 |
-| | floor | 985 | 799 | 81.1% | 0 | **186** |
-| | **total** | **1004** | **818** | **81.5%** | **0** | **186** |
-| **ALL** | list | 343 | 337 | 98.3% | 6 | 0 |
-| | floor | 3828 | 3593 | 93.9% | 49 | 186 |
-| | **TOTAL** | **4171** | **3930** | **94.2%** | **55** | **186** |
-
-Read per emitted class instead:
-
-| the tool says | rows | right | wrong in the loose direction |
-|---|---|---|---|
-| `r` | 2052 | 99.9% | 3 (0.1%) |
-| `w` | 1115 | 95.3% | 52 (4.7%) |
-| `x` | 1004 | 81.5% | **0** |
-
-Whole flow: **exact 94.2%, leaks 1.3% (55 rows), over-tight 4.5% (186
-rows)**. The goal is 90%+ on providers it has not seen; this corpus is
-a tuning set (D24) and 94.2% is a fitted number, not a generalization
-claim. What has changed is that a clean exam now exists —
-`data/exam-2026-09-17/`, 1383 rows across okta, docusign and xero,
-labelled blind on 2026-09-18 — and it has not been scored. The
-classifier's predictions on those rows were pre-registered at commit
-66c68f1 before any truth existed, so the exam can be scored once
-without anyone having to promise the rules were not fitted to it.
-Scoring it is a single deliberate act still to be taken (D24).
-
-Four things this table says that no single accuracy number can:
-
-1. **The tool is mostly an HTTP method table.** 3593 of its 3930 correct
-   answers — 91.4% — come from floors. Word lists are a thin layer of
-   evidence on top: excellent when they fire (98.3% right) but firing on
-   only 343 rows, 8% of the corpus.
-2. **Words are where the tool is confident, floors are where the risk
-   is.** 49 of the 55 leaks fired no word at all, and 47 of those 49 sit
-   in one cell: step 2's wordless PUT / DELETE / PATCH floor. That cell
-   is the whole remaining dangerous error.
-3. **All 186 over-tight rows sit in one other cell**, step 3's
-   `floor-post` pile. Safety errors and usability errors live in two
-   different boxes and never mix.
-4. **"Floor" does not mean "guess" everywhere.** GET → `r` is 99.9%
-   right and PUT / DELETE / PATCH → `w` is 94.7%; both are strong priors.
-   Only step 3's leftover-POST floor, at 81.1%, is a genuine shrug, and
-   it is the pile the output names rather than emitting a silent `x`.
-
-This is a guess tool that is mostly accurate and never claims certainty.
-It emits no confidence score — only the `source` column, which says
-whether a word was read or only the method was known. A row called `x`
-when it is really `w` costs the caller an extra ask and nothing else;
-the only dangerous error is a row called looser than it is, which is why
-the two directions are always counted and reported separately.
-
-The open work, stated plainly:
-
-- **47 leaks** on step 2's remaining 883-row wordless floor. Words have
-  been measured out: every candidate list either failed the 10-per-1
-  adoption bar or collapsed under leave-one-vendor-out (relationship
-  nouns 22 closed / 11 false alarms; un-verbs 12 / 8; description-mined
-  words 10 / 37 under LOVO). What closed the last 19 was the wiring, not
-  the vocabulary.
-- **153 truth-w POST rows** that never get off step 3's x floor — the
-  remainder of step 2's prize, and where a via-negativa yours-noun rule
-  would pay if one could be mined. It cannot be, on 15 providers: 36
-  nouns against the old corpus's 439 from 332 vendors, best settings 9
-  rows of 380.
-- **33 truth-r POST rows** sitting in step 3's pile. These are step 1's
-  known misses, not step 3's to fix: only step 1 assigns `r`, and
-  anything → `r` is the loosening direction. Reaching them means
-  unfreezing step 1 (D74).
-
-Step 3's honest reach: its word list closes 19 of the 66 floor leaks
-fitted, 6 leave-one-vendor-out, at 0 false alarms in both readings — and
-all 6 LOVO closures are the single word `permission`, because the other
-16 words each appear in only one provider.
-
-### Where the code lives (src/)
-
-| file | owns |
-|---|---|
-| `src/tokens.js` | the splitter, tokenizer, verb stemmer — readers only, no classification list |
-| `src/step1.js` | step 1, the r step: `method`, `read-verb`, `read-verb-anywhere`; owns `READ_VERBS`, `SAFE_VERBS` |
-| `src/step2.js` | step 2, the w step: `method-floor`, `modify-verb`, `modify-verb-summary`; owns `MODIFY_VERBS`, `OTHER_PARTY` |
-| `src/step3.js` | step 3, the x step: `raise-word`, `floor-post`; owns `RAISE_WORDS` |
-| `src/flow.js` | the ladder — step order and precedence, written once |
-| `src/index.js` | the package entry point |
-| `src/types.js` | the shared `Operation` and `Verdict` typedefs |
-| `tools/corpus.js`, `tools/csv.js` | corpus loading and CSV read, test/dev only, never shipped |
-| `tools/proof-*.js` | the proofs (see below) |
-
-- One order, written once, in `src/flow.js`.
-- Each step owns its own word lists; `src/tokens.js` holds readers
-  only, never a list.
-- Each rule returns its own `source` (floor/list) and `matched` (the
-  member that fired) at the moment it matches. Nothing re-derives them
-  afterwards, which is what let `sourceForRule` and
-  `matchedWordsForRule` be deleted rather than ported (D79).
-- `poc/` is retained deliberately, byte-untouched, as the FROZEN
-  REFERENCE the src code is proved against — not as live code and not
-  as a second implementation. `tools/proof-step1.js`,
-  `tools/proof-step2.js` and `tools/proof-step3.js` are the
-  equivalence proofs: they run both sides over all 4171 corpus rows and
-  compare class, rule, source and matched, row by row.
-
-The public surface is ONE export: `classifyRow`, from `src/index.js`,
-which returns a `Verdict` (`class`, `step`, `rule`, `source`,
-`matched`). The steps, the word lists, the tokeniser, `wordsForStep3`
-and `floorPost` are internals, sealed by the package's `exports` map
-rather than merely undocumented. The D76/D77 published map and its
-`evidence` field are NOT built: that emitter is the next pass, and
-nothing emits yet.
-
-Run: `npm test` (153 tests); `npm run typecheck` (`tsc --noEmit` over
-`src/`); and the five proofs, each printing "All pins hold." and
-exiting 0 or printing its mismatches and exiting 1 —
-`node tools/proof-tokens.js`, `node tools/proof-step1.js`,
-`node tools/proof-step2.js`, `node tools/proof-step3.js` (the four
-equivalence proofs against frozen `poc/`) and
-`node tools/proof-flow.js` (every pinned flow number, recomputed from
-`src/` alone).
-
-Current shape, n=4171: **exact 3930 (94.2%), leaks 55 (1.3%),
-over-tight 186 (4.5%).** Per step and per source — step 1 list
-92/91/1 leak and floor 1960/1958/2; step 2 list 232/227/5 and floor
-883/836/47; step 3 list 19/19/0 and floor 985/799/0 with all 186
-over-tight rows. Known limits: there is NO CLEAN EXAM — all three steps
-were measured on the same 4171 rows they were tuned on, which under D24
-makes this corpus a tuning set, so an unseen vendor will score worse;
-47 of the 55 leaks sit on step 2's wordless PUT/DELETE/PATCH floor and
-all 186 over-tight rows on step 3's `floor-post` pile. Leaks can only
-be created where a step stops at a loose class — step 1's `r` and step
-2's `w` — which is why step 3's leak count is 0 by construction rather
-than by luck. `poc/m1` is archived at `poc/archive/m1/` (D65).
-Superseded shapes and their numbers are in `docs/logs/learnings.md`,
-not here.
-
-GET is last on the list; it runs no word rules by design. On the new
-provider corpus GET truth is 100% r (Table 1) and the frozen core
-scores 99.9% exact with 2 leaks (0.1%) on GET's 1960 rows.
-
-Every row still gets a judgement — there is no "no answer" outcome —
-and where the judge is unsure it moves in the safer direction (tighter
-class).
-
-## Where the work is
-
-The core is frozen at v0.3.0: the D75/D78 three-step flow in `src/`
-stays as it is, shipped, with no more word-list mining and no more
-model tuning. M1 is closed as the mechanical offering (D83) and step
-2 is closed (D81). D84 — publish every wordless write as x — was
-tried on paper and rejected against the adoption bar (D85). The next
-shape is the consumption policy in the following section, plus the
-pending Jev raise tier.
-
-D86 was adopted 2026-09-22: one shared r/w/x definition with
-bareguard, reversibility folded into the class (see "The shared
-definition (D86)" above). Its effect on the code: the wordless floor
-loses DELETE — the method is now evidence for x — so the floor
-becomes wordless PUT/PATCH, roughly 1000 rows instead of 1969. Step 2
-must be rebuilt, not patched: DELETE floors at x, the destructive
-verb list becomes a raise (w→x), the PUT/PATCH floor stays w. That is
-new `src/` code and a new module, M3 = step 2 rebuilt under the fold
-+ the bareguard exporter + brief v2. The burned exams cannot re-score
-it (D24). Jev keeps its D82/D83 role; its pile shrinks with the floor
-and its criteria text changes to the three-clause definition, a
-criteria edit inside M3.
-
-A second clean exam, `data/exam-2026-09-20/`, was drawn from five
-vendors no prior set had seen — auth0, hubspot, zendesk, klaviyo,
-miro — 1003 write-method rows. Jev's predictions were committed before
-any row was labelled, and the exam was scored once and is burned
-(D24). Each over 1003 rows: the flow scored exact 841 (83.8%), leaks
-82 (8.2%), over-tight 80 (8.0%); flow plus the Jev raise scored leaks
-51 (5.1%), over-tight 80 (8.0%); Jev alone leaked 207 (20.6%). This is
-now the project's latest honest generalization number, standing
-beside the 2026-09-17 exam's 85.3% exact / 12.4% leaks / 2.3%
-over-tight over 1383 rows. The two are not comparable head to head:
-different vendors, and the 2026-09-20 exam holds write methods only.
-
-A combined diagnostic set, `data/combined-2026-09-21/`, puts every row
-we pulled and labelled ourselves in one place: 6557 rows across 23
-providers (the provider corpus's 4171, the 2026-09-17 exam's 1383, the
-2026-09-20 exam's 1003). It is tuning data, not an exam; every number
-it gives is a diagnostic. Next: M3 (step 2 rebuilt under D86, the
-bareguard exporter, brief v2), then the reversibility relabel of the
-6557 rows, then a fresh exam drawn from the last unused locked
-vendors (dropbox, shopify, linear) after the full exposure check.
-
-The full module ladder, the M1 go/no-go gate, the labelled sets and
-the current arbiter shape with its scores live in
-[module ladder and arbiter shape](../wiki/module-ladder-and-shape.md).
-Decisions D1-D70 are in [the decisions log](../wiki/decisions-log.md).
-M0 is closed; its gate statement and results are in
-[go/no-go gate and M0 results](../logs/gate-and-m0-results.md). Notes
-carried from the original outline are in
-[design notes](../logs/design-notes.md).
-
-## How to consume the map (D85, revised by D86)
-
-D84 (2026-09-21) proposed publishing every wordless write row as x
-with `evidence: floor`, so the tool would stop guessing w against x
-where no word fired. It was rejected 2026-09-22 (user ruling, D85)
-before its POC was built. On the combined set the move trades 270
-fewer leaks for 1698 more over-tight rows: 0.16 leaks closed per false
-alarm against the project's standing adoption bar of 10, about 60x
-under it. It is not a better classifier — it is the same wordless
-guess relabelled — and it fails the project's own bar. The honesty it
-wanted already exists: `evidence: floor` is published on every
-verdict (D76/D77), so the safety decision belongs in the adopter's
-runtime policy, not in the class.
-
-The record of why. Measured on the combined set, 6557 rows across 23
-providers, each over all 6557 rows; a diagnostic over tuning data,
-not an exam:
-
-| shape | exact | leaks | over-tight |
-|---|---|---|---|
-| today's flow (v0.3.0) | 5951 (90.8%) | 308 (4.7%) | 298 (4.5%) |
-| D84: w only with a word (rejected) | 4523 (69.0%) | 38 (0.6%) | 1996 (30.4%) |
-| every write x (r against not-r only), reference | 4227 (64.5%) | 3 (0.0%) | 2327 (35.5%) |
-
-The rows D84 would have moved are step 2's wordless PUT / DELETE /
-PATCH floor, 1969 of 6557: a floor PUT says w and is right 1698 of
-1969 times (86.2%), 270 are truth x.
-
-What stands instead. The class is the tool's best guess and stays
-accurate by default. The map carries exactly the three fields D76/D77
-already name — `class`, `destructive` and `evidence` (`list` when a
-word fired, `floor` when only the method decided). D85 first read
-them as a runtime policy (ask once on a w-floor row, ask every time
-on x). D86 (2026-09-22) replaces that with review-once: floor rows
-are reviewed once by a human before the map is deployed, and the
-gate never asks at runtime.
-
-The reading under D86. `destructive: true` always sits inside class
-x, so the two "ask every time" rows of the old table collapse into
-one letter. `evidence: floor` marks the rows a human has to read
-before deploy; `evidence: list` rows carry a word the tool read. The
-policy is NOT carried in the map JSON; it is how a consumer reads the
-three fields, and the README states it the same way.
-
-bareguard alignment (agreed with the bareguard session 2026-09-22,
-in principle, pending the user on both sides). bareguard owns the
-gate, the file format (one letter per row), agent grants such as
-`r--` / `rw-` / `rwx`, child ≤ parent, deny-by-absence and no runtime
-asks. rwxmap owns the labels and the carriers, and gains one offline
-exporter (an M3 item): spec → draft `tools` section of
-`bareguard.rwx.json`, keyed by operationId, letter = class (identity
-under D86), NEVER the `agents` section. Floor PUT/PATCH rows are LEFT
-OUT: deny-by-absence forces a human letter, so a missed row is a loud
-deny, never a leak. A sidecar review report lists every omitted row
-with its class and evidence; `evidence` never enters the gate file.
-A human reviews the sidecar and commits the file; nothing writes at
-runtime. D28's motivating case, "read and reply, never delete", is
-expressed in bareguard as a grant of `r-x` plus a deny flag on the
-delete action, so nothing is lost by folding `destructive` into x.
-
-Vendor-to-vendor inconsistency in how methods are used is structural
-(D81: mined lists do not transfer), and the tool reports it through
-the floor flag rather than chasing it. The tool cannot know which
-operations an adopter actually calls heavily — a spec does not say —
-so it gives the head start and the adopter tightens from traffic.
-
-What stays frozen: `src/` is unchanged today, the word lists are kept
-as they are, the POST floor stays x, and the output shape and its
-carriers (D76/D77) are unchanged. `poc/unreviewed/` is never created.
-D86 reopens step 2 for the M3 rebuild (see "Where the work is");
-nothing in `src/` has changed yet.
-Jev returns to D82/D83's role: an optional raise-only tier (w to x,
-never lower), measured at 31 of 82 leaks closed for 0 false alarms on
-the 2026-09-20 exam and 86 of 305 for 9 under leave-one-vendor-out on
-the combined set (ratio 9.56, just under the bar of 10). It is
-pending against the bar, not adopted; its next number comes from a
-fresh exam per D24.
+rwxmap reads an API description and gives every operation one letter —
+`r`, `w` or `x` — so an agent, a gate or a harness knows what a call does
+before it is made. It is a mechanical starting point and the proof of a
+bet: that APIs can be made mostly safe mechanically, today, without
+waiting for vendors to redesign their methods or for a standards body to
+agree on something. It is not a standard and not a conformance harness.
+Nobody should trust it 100%: a letter from rwxmap has the status of an
+MCP hint, a suggestion the consumer weighs. The residual risk is real,
+it is small, and it is stated loudly below rather than engineered away.
+Both error directions are marked on every row, so a consumer decides
+what to stop on.
+
+History — superseded shapes, rejected candidates, how each decision was
+reached — lives in `docs/logs/learnings.md`. Each ruling is a row in
+[the decisions log](../wiki/decisions-log.md); a D-number here is the
+pointer to its argument.
 
 ## Problem & goal
 
-The -02 draft
-(`justabit:ietf/v3/docs/draft-hamr-oauth-agent-delegation-02.xml`, anchor
-`classification`) defines two ways a request's `actionClass` gets
-decided. Under `classSource` **method**, the class comes from the HTTP
-method alone: GET, HEAD, and OPTIONS default to `r`; PUT and DELETE
-default to `w`; POST and PATCH default to `x` (lines 810-816). Under
-`classSource` **declared**, a Resource Owner publishes a JWS-signed menu
-(anchor `declared-menu`) naming each operation's class explicitly, and
-where that menu verifies and matches, "the declared value alone governs,
-replacing the method default rather than being compared against it"
-(lines 826-830). (docs/archive/prd.md:10-21)
+An agent handed an API key gets all of the API or none of it.
+Filesystems solved the same problem with chmod — read, write, execute —
+and APIs never got an equivalent. The HTTP method is not one: a POST may
+be a search, a PUT may send an email, and a GET may change state. The
+people who could publish the real answer (the API owner, a standards
+body) have not, and an agent calling an API today cannot wait for them.
 
-The method default is a reliable floor in one direction and not the
-other. The 2026-09-01 CAMARA catalogue survey in the other repo
-(`justabit:ietf/v3/poc/spike-a/`, 292 operations across 60 repositories)
-found zero operations judged `x` behind a safe method — the leak
-direction is closed. But 57 of 138 POST operations are named as reads
-(`retrieve-`, `check-`, `verify-`, `status-`prefixed — the exact
-predicate catalogue this project targets: SimSwap `/check`,
-NumberVerification `/verify`, `retrieve-location`, KYC match), and every
-one classes as `x` under `classSource` method, because POST defaults to
-`x` regardless of what the operation actually does.
-(docs/archive/prd.md:22-31)
+The goal: grade every operation of an API into the same three letters,
+mechanically, so an agent can be given scoped access the way a process
+is — read-only here, writes there, never execute — and publish the
+grade in the slots the standards agents already read.
 
-The declared menu already exists in the spec to fix this. The
-bottleneck is that nobody wants to hand-classify hundreds of operations
-across dozens of repositories to author the menu in the first place.
-(docs/archive/prd.md:33-35)
-
-**rwxmap is the author's own tool, first.** It reads an OpenAPI document
-and draws a map of which operation is `r`, `w`, or `x`, so an agent, a
-guard, a harness, or a classic workflow knows what a call does before it
-is made, and so a mechanical arbiter outside the auth agent can see what
-agents do. It is a discovery tool, not a proof. It also serves as a
-supporting proof-of-concept for -02's actionClass axis and declared
-menu, but it is **not load-bearing** for that draft or for any CAMARA
-filing — it may ship imperfect. It is also useful on its own as a
-stopgap "upfront" map when an API owner is slow to publish a declared
-menu, or has none. (docs/archive/prd.md:37-48)
+rwxmap is the author's own tool first. It also serves as a supporting
+proof-of-concept for the author's Internet-Draft (the -02 delegation
+profile's `actionClass` axis and declared menu), but it is not
+load-bearing for that draft and not normative in it.
 
 ## Out of scope
 
-- A model/LLM tier in the core. The deterministic flow is the product
-  and works fully on its own. An optional model tier was measured
-  (D82/D83); if adopted it may only raise w to x and never lower, and
-  the core works without it.
+- A model/LLM in the core. The deterministic ladder is the product and
+  works fully on its own. The optional Jev tiers sit outside the core,
+  run only when a key is configured, and may both raise and lower, each
+  in one direction on its own pile only (D88, D95).
 - A default of `r`, or any guess path.
-- Signing. Output stops at a candidate map; a signature is the Resource
-  Owner's act.
-- Anything normative in an Internet-Draft.
-- A third standards track.
-- A mandated conformance harness.
-- A CLI, packaging, or UI before M3 passes.
+- Signing. A signature is the Resource Owner's act, never this tool's.
+- Being a standard: nothing normative in an Internet-Draft, no third
+  standards track, no mandated conformance harness.
 - A claim of coverage beyond the vendors actually measured.
 
-(docs/archive/prd.md:133-145)
+## The one invariant and the two error directions
 
-For the module ladder that M3 refers to, see the
-[module ladder page](../wiki/module-ladder-and-shape.md).
-
-## The safety spine
-
-Output classes are `r < w < x`, per the -02 axis-registry ordering
-(anchor `action-class-values`: "actionClass is an ordered enumeration
-with three values, r, w, and x, ranked r < w < x"). (docs/archive/prd.md:478-480)
-
-When the tool does not know, or when its confidence is below the set
-line, **the answer is the tighter class.** The tool never loosens
-without evidence. Defaulting to `r` would be fail-open and a security
-hole: `r` is the least restrictive class on the actionClass axis, so a
-delegation restricted to reads would admit whatever operation the
-classifier guessed wrong on — including a destructive one.
-(docs/archive/prd.md:482-487)
-
-This changes the outline's framing. The outline said "omit the
-operation" — that was right for a signed menu a Resource Owner authors,
-and is still what a verifier does per the -02 quotes above (on any menu
-failure, or on no menu at all, "the verifier MUST fall back to the
-method default," and "A verifier MUST NOT construct or synthesize a
-menu entry ... on behalf of a resource owner that has not published
-one," anchor `classification`, lines 826-827, 837-839). rwxmap's
-consumers are agents and guards that need an answer for every
-operation, not a verifier consuming a signed menu, so rwxmap answers
-with the tightest class instead of omitting. Both are the same rule: no
-loosening without evidence. (docs/archive/prd.md:489-499)
+Output classes are ordered `r < w < x`, per the -02 axis ordering. When
+the tool does not know, the answer is the tighter class. It never
+loosens without evidence. Defaulting to `r` would be fail-open: `r` is
+the least restrictive class, so a grant restricted to reads would admit
+whatever operation the tool guessed wrong on, including one that cannot
+be undone. rwxmap answers every operation with the tightest class it
+cannot rule out; it never omits one.
 
 Two error directions, counted and reported separately, never collapsed
 into one accuracy number:
 
-- **Over-classification** — a rule proposes a class stricter than the
-  operation's actual behavior warrants. Cost: usability. A Resource
-  Owner who signs an over-classified menu makes their own catalogue
-  harder to delegate against than it needs to be.
-- **Under-classification** — a rule proposes a class looser than the
-  operation's actual behavior warrants. Cost: security. This is the
-  failure the safety spine exists to keep out of the trust path.
+| formal term | README word | what went wrong | cost |
+|---|---|---|---|
+| under-classification (a leak) | **too loose** | the letter is looser than what the call does | security — the go/no-go direction |
+| over-classification | **too tight** | the letter is stricter than what the call does | usability — reported, never traded against the other |
 
-(docs/archive/prd.md:501-510)
+Every figure in this document gives both, with counts and the
+denominator.
 
-A single accuracy figure hides the one that matters. Report both
-counts, every time, as justabit's `docs/logs/findings.md` already does
-for leak-direction and usability findings. This repo's own log starts
-at M4. (docs/archive/prd.md:512-514)
+## The definition (D87)
 
-For the module that produces these counts and the go/no-go gate built
-on them, see the [module ladder page](../wiki/module-ladder-and-shape.md)
-and the [go/no-go gate page](../logs/gate-and-m0-results.md).
+rwxmap and bareguard — the author's agent gate, one file of r/w/x
+letters per tool — use one meaning of the three letters, the chmod
+reading:
 
-## Direction
+- **r** = read: changes nothing.
+- **w** = write: changes things, the caller's own or anyone else's, in a
+  way a later write can set back. Sets, edits, creates, toggles,
+  archives, pauses, cancels of something that can be resumed. Posting a
+  comment or a reaction the same API can delete is w (D98).
+- **x** = execute: cannot be undone. Deletes and removals, revokes,
+  expires, voids, sends, publishes, charges, pays, refunds, triggers a
+  run. A create that also sends, charges or runs is x.
+- Unsure → **x**.
 
-Both directions are in scope. The tool proposes loosening (POST → `r`
-or `w`) and tightening (DELETE or PUT → `x` when the verb says
-destructive, e.g. `terminateCall`). For the -02 story this means "a
-menu replaces the method default in both directions," not only "fixes
-POST over-classification." Whether tightening becomes part of the -02
-argument or stays a demonstration is open — see Open questions below —
-and depends on how many tighten cases M0 finds. (docs/archive/prd.md:518-527)
+"Whose thing is it" is not a class test: it cannot be read reliably
+from a spec, because the words for "whose" mean different things per
+vendor (D81). Only "what does the call do" is asked.
 
-This is D4; see the [decisions log](../wiki/decisions-log.md) for the
-full ruling record.
+The labelling brief every truth label is made under is
+`data/relabel-2026-09-22/BRIEF-v3.md` (amended by D98).
 
-## The output shape (agreed 2026-09-17, D76)
+## The core (frozen)
 
-rwxmap does not publish a format for anyone to adopt. It keeps one small
-map of its own and fills the slot that each existing standard already
-leaves open for other people's data. Four carriers, one map, no new
-standards track — which is the same commitment CLAUDE.md makes about the
-draft: this is not a third standards track.
+### What frozen means
 
-The standards below were fetched and read on 2026-09-17, not recalled.
-Field names, defaults and schema constraints MUST be re-checked against
-the targeted revision before anything emits, because all four are moving.
+The whole of `src/` is the core and it is frozen: the D87 ladder
+(`tokens.js`, `step1.js`, `step2.js`, `step3.js`, `flow.js`), the
+`reviewHint`, the Jev tiers in `jev.js`, and the bareguard exporter in
+`exporter.js`. Behaviour changes only through a new D-number and a
+re-measurement, and any rule change needs a fresh clean exam (D24, D96).
+The M3 exam (cloudflare, pagerduty, sentry) is burned and cannot score
+a change.
 
-### The map (the one file rwxmap owns)
+### The ladder
+
+Three standalone steps, named by run order, each owning one letter and
+its own word lists, then step 2's floor. `src/flow.js` decides only the
+order: step 1, step 2, step 3, floor. The first step that claims a row
+decides it.
+
+| order | step | claims | rule | evidence |
+|---|---|---|---|---|
+| 1 | step 1, r | GET, HEAD, OPTIONS | `method` | floor |
+| 1 | step 1, r | POST whose lead verb is in `READ_VERBS` | `read-verb` | list |
+| 1 | step 1, r | POST with a `SAFE_VERBS` word at any position | `read-verb-anywhere` | list |
+| 2 | step 2, x | DELETE, always, `destructive: true` | `method-delete` | floor |
+| 2 | step 2, x | POST, PUT or PATCH whose verb is in `CANT_UNDO` | `cant-undo-verb`, `cant-undo-verb-summary` | list |
+| 3 | step 3, w | PUT, PATCH | `method-floor` | floor |
+| 3 | step 3, w | POST whose verb is in `KEEP_W` | `modify-verb`, `modify-verb-summary` | list |
+| last | step 2's floor, x | anything unclaimed: a POST with no word, or any other method | `floor-post` | floor |
+
+**The method floor, as the code has it.**
+
+| method | floor | what can move it |
+|---|---|---|
+| GET, HEAD, OPTIONS | r | nothing in the mechanical core |
+| DELETE | x, `destructive: true` | nothing — DELETE beats every word |
+| PUT, PATCH | w | a `CANT_UNDO` verb raises it to x |
+| POST | none — decided by its verb | `READ_VERBS`/`SAFE_VERBS` → r; `CANT_UNDO` → x; `KEEP_W` → w; no word → x |
+| any other method, or none | x | nothing |
+
+The labelling brief lets a DELETE be w when its text names a trash or
+restore; the core does not read description text, so it cannot see
+that and calls every DELETE x.
+
+**Precedence.** Method DELETE beats every word. A word beats a floor.
+`CANT_UNDO` and `KEEP_W` are disjoint by construction (asserted in the
+tests), so steps 2 and 3 never both fire on one row. A POST claimed r
+by step 1 is never reached by step 2.
+
+**Word lists, and who owns each.**
+
+| list | owner | size | matched where | moves the row to |
+|---|---|---|---|---|
+| `READ_VERBS` | step 1 | — | lead token only, after `LEAD_MODIFIERS` (bulk, batch, deprecated, beta, async); the plural-noun guard withholds a match reached only through `-s`/`-es`/`-ies` (D99) | r |
+| `SAFE_VERBS` | step 1 | 10 | any token position — only words that are never nouns | r |
+| `CANT_UNDO` | step 2 | 29 | the row's verb | x |
+| `REMOVES` ⊂ `CANT_UNDO` | step 2 | 6 (delete purge revoke expire void redact) | the row's verb | sets `destructive: true` |
+| `KEEP_W` | step 3 | 14 | the row's verb | w |
+
+"The row's verb" (`verbForRow` in `src/tokens.js`) is the lead token of
+the operationId, or of the path's last segment when there is no
+operationId. When that lead token is a bare HTTP method word (stripe's
+`PostCustomersCustomer`), the summary's first real word is used
+instead, and the rule is named `…-summary`. `src/tokens.js` holds
+readers only, no class list.
+
+List decisions in force: deactivate, change, swap, archive and disable
+are off `KEEP_W`, so their POST rows floor at x (D89); `create` is not
+on it — it failed the bar at 6.99 fixed per leak against 10; the 13
+fragile `CANT_UNDO` verbs stay (D90).
+
+### The four published fields
+
+Every verdict carries `class`, `destructive`, `evidence` and `review`.
+The internal `step`, `rule` and `matched` fields exist on the verdict
+for debugging and are never published (D28/D76/D77).
+
+- **`class`** — `r`, `w` or `x`.
+- **`destructive`** — `true` only inside x, for the `REMOVES` subset
+  and every DELETE. On the verdict it is absent rather than `false`;
+  the map and the sidecar spell it out as a boolean. It is a refinement
+  flag inside x, not a fourth class (D86's ruling on D28).
+- **`evidence`** — exactly three values: `floor` (the method alone
+  decided, no word matched), `list` (a word list fired), `jev` (an
+  optional Jev tier moved the row; appears only when a tier ran). It
+  answers "did a word fire", which is a fact about the implementation,
+  not a reliability signal: on the M3 exam `floor` was the cleanest
+  bucket (5.6% error) and `list` the dirtiest (23.3%), because `floor`
+  is mostly GET rows (D101).
+- **`review`** — which rows a provider should look at (D101). Derived
+  from method + class + evidence and nothing else; its one writer is
+  `reviewHint` in `src/flow.js`, and `applyJev` recomputes it through
+  the same function when a tier moves a row.
+  - `tight` — class x on a POST. Likely tighter than needed; safe to
+    review, since no too-loose row has been observed in this bucket.
+  - `loose` — class w on a PUT or PATCH decided by the method floor.
+    Where most of the too-loose rows live.
+  - `settled` — neither of the other two. It is NOT signed or
+    confirmed by anyone. A signed state would be a fourth value only a
+    human writes after the export; rwxmap never emits it.
+
+The tool emits no confidence score.
+
+### The Jev tiers (optional, D82/D88/D95)
+
+Three independent tiers. Each reads only its own pile of mechanical
+verdicts, makes one one-way move, and keeps its own ledger; no two
+piles overlap, so no tier can undo another.
+
+| tier | pile (mechanical rule) | move | question | fires at |
+|---|---|---|---|---|
+| `jev-lower` | `floor-post`, class x | x → w | is this x? | p(x) ≤ 0.10 |
+| `jev-raise-wx` | `method-floor`, class w | w → x | is this x? (x-only criteria) | p(x) ≥ 0.80 |
+| `jev-raise-get` | `method`, class r | r → w, never x | does anything change? | p(changes) ≥ 0.50 |
+
+`src/jev.js` makes no network call and holds no key: the caller obtains
+the model's answer and passes it to `applyJev`. Any bad answer — p not a
+finite number in [0, 1], no model string, below threshold — leaves the
+verdict untouched: fail closed. A moved verdict records `jev: {p,
+model}` so a map never changes silently when the model behind it does.
+The criteria text is transcribed verbatim from BRIEF-v3. Opting in means
+spec text (method, path, operationId, summary, description) goes to an
+outside service, and the adopter must say so.
+
+### Where the code lives
+
+| file | owns |
+|---|---|
+| `src/tokens.js` | splitter, tokenizer, verb stemmer, `verbForRow`, `LEAD_MODIFIERS`, `METHOD_WORDS` — readers only |
+| `src/step1.js` | step 1, r: `READ_VERBS`, `SAFE_VERBS`, the plural-noun guard (D74, D99) |
+| `src/step2.js` | step 2, x: `method-delete`, `cant-undo-verb(-summary)`, `floor-post`; `CANT_UNDO` (29), `REMOVES` (6) |
+| `src/step3.js` | step 3, w: `method-floor`, `modify-verb(-summary)`; `KEEP_W` (14) |
+| `src/flow.js` | `classifyRow` (the order, written once) and `reviewHint` (the one writer of `review`) |
+| `src/jev.js` | the three Jev tiers, thresholds, `applyJev`, `needsJev`, `jevState`, `jevQuestions` |
+| `src/exporter.js` | the bareguard exporter: `operationsFrom`, `exportGate`, `exportSidecar` |
+| `src/index.js` | the package entry: `classifyRow`, `reviewHint`, the Jev exports, the exporter exports |
+| `src/types.js` | the `Operation`, `Verdict` and `StepVerdict` typedefs |
+| `tools/corpus.js`, `tools/csv.js` | corpus loading and CSV reading, dev only, never shipped |
+
+`poc/d87/` is the reference `src/` is proved against: `node
+poc/d87/proof-src.mjs` compares both over all 6557 rows of the combined
+set, must print 0 differences (checked to fail when broken), and
+replays the recorded Jev answers through `applyJev` (804 lowered).
+`tools/proof-step1.js` still passes after D99 but is blind to the
+plural-noun guard, so it does not pin step 1's full behaviour (D99).
+
+Run: `npm test`, `npm run typecheck`, `node poc/d87/proof-src.mjs`,
+`node tools/proof-step1.js`.
+
+## Measured results
+
+### The sets
+
+| set | rows | what it is |
+|---|---|---|
+| tuning pool | 8376 across 36 vendors | `combined-2026-09-21` (6557 rows, 23 providers) + `relabel-buildset-2026-09-23` (1819 rows, 13 vendors), all labelled under BRIEF-v3. Tuning data: the lists were written and priced on it, so every figure it gives reads better than an unseen vendor would (D24, D96). |
+| M3 exam | 4279 | cloudflare 3575, pagerduty 465, sentry 239 — three complete official APIs the rules never saw, labelled blind under BRIEF-v3, scored once, burned (D92, D93, D24). **The honest generalization number.** |
+
+### Headline
+
+| set | run | exact | too loose | too tight |
+|---|---|---|---|---|
+| tuning pool, 8376 | mechanical | 6728 (80.3%) | 82 (1.0%) | 1566 (18.7%) |
+| combined, 6557, fitted | mechanical | 5418 (82.6%) | 64 (1.0%) | 1075 (16.4%) |
+| combined, 6557, LOVO over 23 providers | mechanical | — | 1.0% (0.0 points off fitted) | 16.8% (0.4 points off) |
+| combined, 6557, fitted | + `jev-lower` only, t=0.10 | 94.2% | 72 (1.1%) | 309 (4.7%) |
+| **M3 exam, 4279** | **mechanical** | **3520 (82.3%)** | **34 (0.8%)** | **725 (16.9%)** |
+| **M3 exam, 4279** | **+ all three Jev tiers** | **3980 (93.0%)** | **22 (0.5%)** | **277 (6.5%)** |
+
+On the 6557 combined rows, v3 truth is r 2712 / w 2378 / x 1467. Of the
+64 fitted leaks, 23 sit on list rows and 41 on floor rows (39 of them
+the PUT/PATCH w floor); 1036 of the 1075 too-tight rows are on the POST
+floor. `jev-lower` alone lowered 804 rows there, 8 of them wrongly (D88).
+Step 1 claims 2642 of 2645 rows right on the combined set.
+
+On the exam both error directions fall with Jev; nothing is traded.
+cloudflare is 84% of the exam's rows, so the pooled line is never quoted
+alone (D92). Per vendor, mechanical:
+
+| vendor | n | exact | too loose | too tight |
+|---|---|---|---|---|
+| cloudflare | 3575 | 81.8% | 0.9% | 17.3% |
+| pagerduty | 465 | 83.2% | 0.4% | 16.3% |
+| sentry | 239 | 87.4% | 0.4% | 12.1% |
+
+Per method, M3 exam, mechanical:
+
+| method | n | exact | too loose | too tight |
+|---|---|---|---|---|
+| GET | 2099 | 2094 (99.8%) | 5 (0.2%) | 0 (0.0%) |
+| POST | 892 | 179 (20.1%) | 3 (0.3%) | 710 (79.6%) |
+| PUT | 460 | 443 (96.3%) | 14 (3.0%) | 3 (0.7%) |
+| DELETE | 558 | 548 (98.2%) | 0 (0.0%) | 10 (1.8%) |
+| PATCH | 270 | 256 (94.8%) | 12 (4.4%) | 2 (0.7%) |
+
+710 of the 725 too-tight rows are POST, because an unclaimed POST floors
+at x by design — that is the pile `jev-lower` exists to lower. PUT and
+PATCH carry 26 of the 34 too-loose rows, all on the wordless floor.
+
+### The Jev tiers on the M3 exam (D100)
+
+A rule that can loosen must get at least 91% of its flags right (the
+original 10-leaks-closed-per-false-alarm bar, restated). A rule that can
+only tighten, by one step, is adopted when it gets more right than wrong
+and worsens neither error type overall (D100).
+
+| tier | direction | rows flagged | correct | verdict |
+|---|---|---|---|---|
+| `jev-lower` (x→w, t=0.10) | loosens | 522 of 808 | 99.4% (3 became leaks) | PASS, 91% bar |
+| `jev-raise-wx` (w→x, t=0.80) | tightens | 11 of 724 | 90.9% (10 of 11) | PASS |
+| `jev-raise-get` (r→w, t=0.50) | tightens | 9 of 2099 | 55.6% by label, 77.8% after the D100 rulings | PASS |
+
+`jev-raise-get`'s case rests on 9 flagged rows, 5 right by the labels:
+a thin basis, unproven until a fresh exam. The three thresholds were
+swept against direct HTTP calls; provider hardening shifted recorded
+values by up to 0.17, so routing the calls through a hardened provider
+invalidates all three and they must be re-swept. Jev is
+non-deterministic: no threshold can be pinned from one run.
+
+### The M3 gate (D89, item 1 replaced by D94)
+
+On the M3 exam, scored once:
+1. Too-loose at or under 2% of all rows, every one listed.
+2. Too-tight at or under 20% of rows, reported, never traded against
+   item 1.
+3. LOVO on the tuning set within 2 points of the fitted number for
+   every adopted list, or the list is not adopted.
+
+**The M3 gate PASSES on all three items**, measured on this exam.
+Item 1 (leaks at or under 2% of all rows): 22 of 4279 (0.5%) with Jev,
+34 of 4279 (0.8%) mechanical. Item 2 (over-tight at or under 20%):
+277 of 4279 (6.5%) with Jev, 725 (16.9%) mechanical. Item 3 (LOVO
+within 2 points of fitted): held, at the LOVO figures in the headline
+table above.
+
+### The review markers
+
+Mechanical, no Jev. The tuning-pool rows are the stronger reading; the
+exam rows are fitted, because the rule was read off the exam's own
+buckets (D101).
+
+| set | marker | rows | exact | too loose | too tight |
+|---|---|---|---|---|---|
+| tuning, 8376 | `tight` | 2116 (25.3%) | 28.0% | 0 (0.0%) | 1524 (72.0%) |
+| tuning, 8376 | `loose` | 1657 (19.8%) | 1601 (96.6%) | 55 (3.3%) | 1 (0.1%) |
+| tuning, 8376 | `settled` | 4603 (55.0%) | 98.5% | 27 (0.6%) | 41 (0.9%) |
+| M3 exam, 4279 (fitted) | `tight` | 835 (20%) | — | 0 | 710 |
+| M3 exam, 4279 (fitted) | `loose` | 724 (17%) | — | 26 | 2 |
+| M3 exam, 4279 (fitted) | `settled` | 2720 (64%) | — | 8 | 13 |
+
+`tight` carries zero too-loose rows by construction — it is class x,
+the tightest letter — so it is a build-time worklist meaning "review
+this to loosen it", not a runtime stop (D103). `loose` is where the
+danger is: 55 of the tuning pool's 82 too-loose rows, 26 of the exam's
+34. Of the 4603 `settled` rows on the tuning pool, 3999 are pure
+method-floor guesses: settled means only that neither marker fired.
+
+### Input shape (D105)
+
+What rwxmap sees changes exactness, not safety. Mechanical:
+
+| input | M3 exam, 4279: exact / too loose / too tight | tuning pool, 8376: exact / too loose / too tight |
+|---|---|---|
+| full spec (method, path, operationId, summary) | 82.3% / 0.8% / 16.9% | 80.3% / 1.0% / 18.7% |
+| method + path | 81.9% / 0.8% / 17.3% | 76.5% / 0.8% / 22.6% |
+| method only | 81.1% / 0.8% / 18.1% | 73.9% / 0.9% / 25.2% |
+
+Going without a spec costs exactness, all of it in the too-tight
+direction. Method only is the same as dropping every word list: on the
+tuning pool it is 6191 exact / 75 too loose / 2110 too tight, and on
+the exam 3469 / 34 / 776. So the lists stay: dropping them costs 537
+exact rows on the tuning pool to save 7 too-loose rows, and on the exam
+saves none while costing 51 (D101).
+
+### Known limits, stated loudly
+
+- **The residual too-loose rate is real.** About one operation in a
+  hundred is graded looser than it should be (D105): 34 of 4279 on the
+  M3 exam mechanically, 22 of 4279 with Jev. It is published, not
+  hidden.
+- **The lead-position blind spot.** Word lists match the lead token
+  only. On the APIs.guru copies of github, box, stripe and slack, whose
+  operationIds are namespace-led or method-led and carry no summary
+  verb, no word list fires at all and every row decides on the method
+  floor (evidence `list` on 0 rows), while aws-ec2's verb-led ids fire
+  260 of 1182. The same blind spot works the other way when a lead verb
+  is really a noun: 3 of the M3 exam's 34 too-loose rows sit on
+  `evidence: list` rows (3 of 90 list rows) — cloudflare's
+  `EvaluateNewWebhook` and `EvaluateExistingWebhook` (step 1 reading
+  `evaluate`) and sentry's `addOrganizationMember` (step 3 reading
+  `add`).
+- **GETs that change state leak.** GET floors at r. A site whose GETs
+  change state leaks through that floor (5 of 2099 GET rows on the M3
+  exam). `jev-raise-get` is the only thing that can catch them.
+- **The review rule is fitted.** D101's `tight`/`loose`/`settled`
+  rule was read off the M3 exam; it reproduces on the tuning pool and
+  needs a fresh exam.
+- **The tuning pool is a tuning set, not an exam** (D24). Its lists were
+  written and priced on it.
+- **An unknown method floors at x, and `jev-lower` can lower it.** A
+  row whose method is none the ladder knows (TRACE, or missing) falls
+  to `floor-post` and becomes x with `review: settled`, so it lands in
+  `jev-lower`'s pile and a model answer can move it to w. Known, not
+  changed: the core is frozen.
+- **Spec quality matters.** Descriptions feed only Jev; a spec with
+  little text gives Jev little to read.
+
+## Published output
+
+rwxmap publishes no format for anyone to adopt. It keeps one map of its
+own and fills the slot each existing standard already leaves open (D76).
+The standards below were read on 2026-09-17; field names, defaults and
+schema constraints must be re-checked against the targeted revision
+before anything emits, because all four are moving.
+
+### The map
 
 One row per operation, keyed by method + path + operationId, carrying
-three fields:
+the four fields:
 
 ```json
 {
@@ -791,96 +424,127 @@ three fields:
   "source": "stripe/spec3.json",
   "operations": [
     { "method": "GET",    "path": "/v1/customers/{customer}", "operationId": "GetCustomersCustomer",
-      "class": "r", "destructive": false, "evidence": "floor" },
+      "class": "r", "destructive": false, "evidence": "floor", "review": "settled" },
     { "method": "POST",   "path": "/v1/customers/{customer}", "operationId": "PostCustomersCustomer",
-      "class": "w", "destructive": false, "evidence": "list" },
+      "class": "w", "destructive": false, "evidence": "list",  "review": "settled" },
     { "method": "DELETE", "path": "/rest/api/2/filter/{id}/permission/{permissionId}", "operationId": "deleteSharePermission",
-      "class": "x", "destructive": true,  "evidence": "list" },
+      "class": "x", "destructive": true,  "evidence": "floor", "review": "settled" },
     { "method": "POST",   "path": "/chat/completions", "operationId": "createChatCompletion",
-      "class": "x", "destructive": false, "evidence": "floor" }
+      "class": "x", "destructive": false, "evidence": "floor", "review": "tight" }
   ]
 }
 ```
 
-All four rows are real corpus rows from
-`data/provider-corpus-2026-09-16/`, carrying what the tool actually
-emits for them today. Under D86 `destructive: true` always coincides
-with `class: x`, as the third row already shows.
+All four are real corpus rows from `data/provider-corpus-2026-09-16/`,
+carrying what the tool emits for them today. The fourth is wrong on
+purpose: `createChatCompletion` is truth `r`, called `x` because nothing
+spoke for it, and `review: "tight"` is how a consumer sees that.
 
-`evidence` has exactly two values and they are the same floor/list axis
-the internal sheet records:
+### The bareguard gate file (D91, amended by D103)
 
-- `list` — a word list fired. The tool read a word and claimed the row
-  on evidence. 343 of the 4171 corpus rows, 98.3% right.
-- `floor` — no word matched; only the HTTP method was known, and the
-  class is that method's default. 3828 rows, 93.9% right, and the
-  honesty flag the project already measured: every one of the 55 leaks
-  that fired no word, and all 186 over-tight rows, are `floor` rows.
+bareguard owns the gate, the file format, agent grants (`r--`, `rw-`,
+`rwx`), child ≤ parent, deny-by-absence and the `flags` deny primitive.
+rwxmap owns the labels and the carriers. bareguard's own spec governs
+on any disagreement; this is the copy.
 
-The fourth row above is a `floor` row from step 3's leftover pile and
-it is wrong: `createChatCompletion` is truth `r`, called `x` because
-nothing spoke for it. Showing it is the point — `evidence: "floor"` is
-how a consumer sees that for itself.
+- **Every row is exported.** No row is ever dropped (D103).
+- **Keys** are `<vendor>.<operationId>`, dot-separated: bareguard
+  matches a `tools` key literally against the harness's action `type`
+  and does no namespacing. With no operationId the key falls back to the
+  last path segment with braces stripped, then to the lowercased method.
+  Two operations on one key keep the tighter letter and are reported as
+  a collision, never silently overwritten.
+- **An entry** is a bare letter (`"r"`, `"w"`, `"x"`), legal forever, or
+  `{ "letter": "w", "marker": "loose" }`, where `marker` is `review`.
+  Nothing else goes on a tool entry. The exporter emits the object form
+  by default and the bare letter on request.
+- **Never emitted:** `flags`, the `agents` section, any deny rule.
+  Denial is the human's call at grant time.
+- **The sidecar** carries `evidence` and `destructive` for every row, a
+  review list (`loose` first, then `tight`), collisions, and the
+  `destructive: true` rows as a clearly-labelled suggestion, never as
+  config. It is human-facing only; bareguard never reads it (an unlisted
+  tool already denies with `rwx.unlisted`).
+- bareguard's opt-in `rwx.askOn` knob, default off, reads the marker;
+  it is bareguard's design and its default is bareguard's call (D103).
+  bareguard never runs rwxmap and never depends on it.
 
-What the map does NOT carry: the rule name (`method-floor`,
-`modify-verb-summary`, `raise-word`, …) and the specific word that
-matched. Those are rwxmap's internal vocabulary, they live in the
-debugging sheet `run-proof/step3.csv` alongside truth and the `matched`
-column, and they are deliberately unpublished — an adopter cannot act
-on them, and publishing them would freeze this project's own naming
-into someone else's contract.
-
-There is no `confident` field. `evidence` already carries it: `floor`
-IS the unconfident case, and two fields saying one thing can contradict
-each other.
-
-`destructive` was D28's separate axis; under D86 it is a refinement
-flag inside x — `destructive: true` ⇒ `class: x`, always, while an x
-row need not be destructive — derived from the method and the lead
-verb. `class` is `r < w < x` per the one invariant.
+D28's case, "read and reply, never delete", is a grant of `r-x` plus a
+`flags.type: deny` rule on the delete action in bareguard's own gate
+config, written by the operator.
 
 ### Carrier 1 — OpenAPI, per operation
 
 OpenAPI allows `x-` extension keys on any object, including an
-operation. rwxmap reads these files already; it writes back into the
-same file it read:
+operation. rwxmap writes back into the same file it read:
 
 ```yaml
 /v1/accounts/{account}:
   delete:
     operationId: DeleteAccountsAccount
     x-rwx:
-      class: w
+      class: x
       destructive: true
       evidence: floor
+      review: settled
 ```
 
 ### Carrier 2 — MCP, per tool
 
-Two slots, both the spec's own. The four hints ride together in one
-`annotations` object (see the MCP hints entry under Open questions for
-what each hint is worth today); rwxmap's own three fields go in `_meta`,
-which the MCP 2026-07-28 specification names as the extension slot and
-where reverse-DNS key prefixes are the stated convention (prefixes whose
-second label is `modelcontextprotocol` or `mcp` are reserved):
+Two slots, both the spec's own: `annotations` for MCP's hints, and
+`_meta` for rwxmap's fields under a reverse-DNS key prefix (the MCP
+2026-07-28 specification names `_meta` as the extension slot; prefixes
+whose second label is `modelcontextprotocol` or `mcp` are reserved).
+
+Hints are matched best-effort, not one-to-one (D102, amended by D104).
+A hint rwxmap cannot determine is not emitted at all, which is safe
+because an MCP consumer defaults an omitted hint to the tightest
+reading (`readOnlyHint` false, `destructiveHint` true, `idempotentHint`
+false, `openWorldHint` true).
+
+- `readOnlyHint` — true when `class` is `r`, false otherwise.
+- `destructiveHint` — `class === 'x'` (D104). It is not rwxmap's
+  `destructive` flag, which covers only the `REMOVES` subset and would
+  leave 2093 of 3599 predicted-x rows (58.2%) on the tuning pool reading
+  like a plain update. The class mapping under-marks 79 rows (0.94% of
+  the pool) and over-marks 1565, the safe direction.
+- `idempotentHint` — closed, never emitted (D104). Idempotency cannot
+  be read off a spec: 11 of the 15 provider specs never mention it, and
+  where it appears it is a retry capability the caller may use, not a
+  declaration about the operation.
+- `openWorldHint` — not emitted. There is no evidence source (D87).
+
+| class | `readOnlyHint` | `destructiveHint` |
+|---|---|---|
+| `r` | true | — |
+| `w` | false | false |
+| `x` | false | true |
+
+`_meta` carries three of the four fields: `class`, `destructive` and
+`evidence`. `review` is not published to MCP (D102): it is a provider's
+build-time worklist, and publishing it invites a consumer to read it as
+a confidence score.
 
 ```json
 { "name": "delete_share_permission",
-  "annotations": { "readOnlyHint": false, "destructiveHint": true, "idempotentHint": false },
+  "annotations": { "readOnlyHint": false, "destructiveHint": true },
   "_meta": { "io.github.hamr0.rwxmap/class": "x",
-             "io.github.hamr0.rwxmap/evidence": "list" } }
+             "io.github.hamr0.rwxmap/destructive": true,
+             "io.github.hamr0.rwxmap/evidence": "floor" } }
 ```
+
+`readOnlyHint` rests on step 1, which on the 4171-row provider corpus
+claims 2052 rows with 3 wrong in the unsafe direction (0.07% of all
+rows) and 33 more marked not-read-only when they are (D74).
 
 ### Carrier 3 — WebMCP, per tool
 
 WebMCP (W3C Web Machine Learning Community Group, Draft Community Group
-Report of 2026-04-23) has a page hand tools to the agent through
-`navigator.modelContext`. Its `ToolAnnotations` dictionary is NOT MCP's
-four; as read on 2026-09-17 it is `readOnlyHint`, `untrustedContentHint`,
-`consequentialHint` and `debugging`, and the IDL admits defined members
-only — no `_meta`, no extension slot. Nothing custom is needed, because
-the two flags that matter carry all three classes with nothing left
-over:
+Report of 2026-04-23) hands tools to the agent through
+`navigator.modelContext`. Its `ToolAnnotations` are `readOnlyHint`,
+`untrustedContentHint`, `consequentialHint` and `debugging`, with no
+`_meta` and no extension slot. Two flags carry all three classes with
+nothing left over:
 
 | class | `readOnlyHint` | `consequentialHint` |
 |---|---|---|
@@ -888,12 +552,8 @@ over:
 | `w` | false | false |
 | `x` | false | true |
 
-`consequentialHint` is a closer fit to this project's `x` (reach beyond
-the caller, or not repeatable) than any MCP hint is: MCP's
-`destructiveHint` was measured and rejected as a reading of the class
-(D28), and `idempotentHint` cannot be read off the specs at all. This
-makes WebMCP the carrier where the r/w/x ladder maps cleanly, and it
-raises the value of step 3 — `consequentialHint` IS the x step.
+`consequentialHint` is the closest fit to `x` (cannot be undone) of any
+hint in any carrier.
 
 ```js
 navigator.modelContext.registerTool({
@@ -907,18 +567,11 @@ navigator.modelContext.registerTool({
 
 ARD (Google and ten others, published 2026-06-17) has a domain serve
 `/.well-known/ai-catalog.json` with `specVersion`, `host` and `entries`,
-one entry per whole resource — an MCP server, an A2A agent, an OpenAPI
-document.
-
-Per-operation data cannot go inside an entry, and this is a schema fact,
-not a preference: the published entry schema sets
-`additionalProperties: false`, there is no `x-` support and no
-extensions object, and the one free slot, `metadata`, takes flat
-key-value pairs whose values are limited to string, number, boolean or
-null. A map of 1309 operations does not fit in a flat scalar.
-
-So the map is its own resource with its own URL, listed beside the
-OpenAPI document it describes:
+one entry per whole resource. Per-operation data cannot go inside an
+entry: the entry schema sets `additionalProperties: false`, has no `x-`
+support, and its one free slot, `metadata`, takes flat scalar values
+only. So the map is its own resource, listed beside the OpenAPI
+document it describes:
 
 ```json
 { "identifier": "urn:stripe:rwxmap",
@@ -928,224 +581,129 @@ OpenAPI document it describes:
   "metadata": { "rwxmapVersion": "0.1", "operations": 1309 } }
 ```
 
-### What this means for the work
+Only two of the four slots are rwxmap's own (OpenAPI `x-rwx`, MCP
+`_meta`); in the other two it sets fields the spec already defines.
+Today the exporter covers the bareguard file only; no carrier is
+emitted yet (see What is next).
 
-- rwxmap is a **build-time annotator**, not a runtime component. It runs
-  once over a spec and produces the map; the map feeds whichever carrier
-  the Resource Owner publishes. This keeps signing the Resource Owner's
-  act, per Out of scope.
-- Only two of the four slots are rwxmap's own: OpenAPI's `x-rwx` and
-  MCP's `_meta` keys. In the other two it sets fields the spec already
-  defines.
-- What is shippable today is unchanged by this decision: `readOnlyHint`
-  (and therefore WebMCP's `readOnlyHint`) is ready at 3 unsafe-wrong
-  rows in 4171 (0.07%); `consequentialHint` follows directly from the
-  class, since WebMCP's two flags carry r/w/x with nothing left over
-  (carrier 3 above). Neither waits on step 3 any longer — it is built
-  (D78) and the classifier has graduated to `src/` (D79).
-  `idempotentHint` is blocked on something else entirely: its two
-  readings are still unchosen (see the hints section below for the
-  numbers on both), and step 3 does not decide between them.
-- The four carriers are an output contract, not code. Step 3 is now
-  built (D78) and the classifier has graduated to `src/` (D79), but
-  nothing emits yet: the emitter is the next pass, and the
-  input-adapter question under Open questions stays open.
+## How it runs (D105)
+
+The harness — not a human — fetches, runs rwxmap and starts the gate.
+The agent runs with the grant a human set, and there is no human review
+step. The grant is the ceiling: nothing rwxmap adds can go beyond what
+the human granted. The accepted cost is the published too-loose rate,
+roughly 1 in 100.
+
+1. **Spec first, always.** When a run touches a new site, the harness
+   asks rwxmap to look for an OpenAPI/Swagger spec at the usual
+   locations. The check is forced; there is no option to skip straight
+   to per-request mode, because a harness allowed to skip would skip for
+   speed and every run would be rougher — equally safe, more asks.
+2. **Spec found:** every operation is classified and the whole set goes
+   to the gate, keyed `<vendor>.<operationId>`.
+3. **No spec found:** that result is cached, and from then on each
+   request is classified on its own, before the call, with
+   `classifyRow({method, path})`.
+4. **Undocumented endpoint on a spec'd site:** a request matching none
+   of the spec's operations takes the per-request path too.
+5. **No GET special rule.** `classifyRow` already sends GET to r through
+   the method floor; the harness carries no second copy of that
+   decision.
+
+**The cache**, owned by rwxmap: a 30-day TTL, keyed by spec URL +
+content hash + rwxmap version + Jev model id when Jev ran, so a new
+release or a model change invalidates old results. "No spec here" is
+cached too, so a spec-less site is not probed every run. When the TTL
+runs out rwxmap fetches again and reuses the classification if the hash
+has not changed.
+
+**The key normalizer**, owned by rwxmap: one exported function the
+harness calls to build the `action.type` for a request without a spec,
+`<host>.<METHOD> <normalized path>` (e.g. `api.example.com.POST
+/v1/orders`). It drops the query string and turns id segments into
+`{id}`. Spotting ids is a documented best guess — all-digit segments,
+UUIDs, long hex strings — so a map does not grow one entry per order
+id. rwxmap is the one writer of that key; the harness never builds it
+by hand.
+
+**Who owns what.**
+
+| party | owns | never |
+|---|---|---|
+| rwxmap | spec discovery, the cache, classification, the key normalizer; returns letters and markers (`{ letter, marker }`) | a decision to allow or deny |
+| harness | depends on rwxmap (npm), runs it, feeds the gate, owns the spec-discovery fetch; runs Jev at classification time when a key is configured | lets the agent reach the discovery fetch — that would make "go find the spec" a general-purpose fetcher around the gate |
+| bareguard | every allow/deny decision | depends on rwxmap |
+
+With no Jev key the results are mechanical and say so loudly; neither
+case stops the run.
+
+**bareguard's `add(entries)`** (bareguard 0.18.0 — bareguard's
+primitive, bareguard's design and bareguard's to build; recorded so both
+repos agree): tighten-only — a new key is added, and an existing key,
+hand-written ones included, can only get stricter (r < w < x), never
+looser; the tools map only, never the bash map, agents or grants;
+validated exactly as at construct time, a bad entry throws and the whole
+batch lands or none of it; an `rwx.added` audit line (key, letter,
+marker) for every add; the gate copies its rwx config at construct time
+and `add()` changes that copy; a size cap on the tools map, past which
+the gate fails closed and the harness has to rebuild; callable from
+harness code only. bareguard 0.17.0 ships unchanged.
+
+**A known property of spec-less sites.** In per-request mode the agent
+picks the method and URL `classifyRow` sees, so it can steer a call
+toward r by using GET. The only case that actually slips through is a
+site whose GETs change state — the same GET-floor leak already accepted
+above.
+
+## Where it stands
+
+- **M0** — ground truth and the first arbiter: closed (D29).
+- **M1** — the informed arbiter: closed as the mechanical offering, the
+  D75/D78 flow, shipped as `rwxmap@0.3.0` (D83).
+- **M2** — shape rules, only if justified (D5): no D-row records it as
+  opened or closed.
+- **M3** — the D87 ladder, the three Jev tiers (D95) and the bareguard
+  exporter (D103), in `src/`: the M3 exam is scored and burned (D92,
+  D93) and the gate passes (D89 as amended by D94). Not yet released:
+  npm still ships 0.3.0.
+
+Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
+
+## What is next — NOT BUILT
+
+The forward plan for a standalone npm release, in order:
+
+a. **Input.** Point it at a URL or a file path; JSON or YAML in, JSON
+   out. URL fetching uses Node 22's built-in `fetch` (no dependency).
+   YAML needs the `yaml` package, today a devDependency; it becomes a
+   runtime dependency of the I/O layer only, allowed by the dependency
+   rule because the standard library cannot parse YAML in under 100
+   lines. The classifier library itself stays dependency-free.
+b. **Spec discovery** at the usual locations (a best guess, not a
+   standard), the 30-day cache, and the key normalizer (D105).
+c. **Jev.** Key configured → used; no key → mechanical, never stops,
+   says loudly which mode ran and shows what it knows. `jev.js` makes no
+   network call today; how the CLI obtains the model answer is to be
+   designed.
+d. **CLI**, in order: first a command that writes the bareguard gate
+   file and sidecar; then an interactive `rwxmap` menu with options 1–4,
+   one per carrier (OpenAPI `x-rwx`, MCP annotations, WebMCP, ARD).
+e. **Emitters** for carriers 1–4. None is built; the exporter covers
+   the bareguard file only.
+f. **Release sequence:** PRD cleanup → review everything on the branch
+   → publish the frozen core to npm → continue building the above.
 
 ## Open questions
 
-Non-blocking; never silently assumed.
-
-- The last mile: can a model read what words cannot? Partly, and not
-  enough to decide a class. TypeSafe Jev was measured three times. On
-  the build set, as a raise over the 1113 rows the flow calls w, it
-  closed 51 of 147 leaks for 1 false alarm fitted and 43 for 1 under
-  leave-one-vendor-out. On the 2026-09-20 clean exam, scored once, it
-  closed 31 of 82 flow leaks for 0 false alarms, taking leaks from 82
-  to 51 of 1003 rows with over-tight unchanged at 80. On the combined
-  6557-row set, over the 2335 rows step 2 decides, it closes 86 of 305
-  leaks for 9 false alarms under leave-one-vendor-out with the
-  bar-of-10 selection (ratio 9.56, just under the bar). It raises; it
-  cannot replace: alone it leaks 893 of 6557 rows (13.6%) on the
-  combined set and 207 of 1003 (20.6%) on the exam, mostly POST
-  creates called w. The answer given 2026-09-21 by D84 (Jev only orders
-  a review queue) is withdrawn 2026-09-22 by D85: Jev stands as the
-  D82/D83 optional raise-only tier, pending against the bar of 10.
-  Raised 2026-09-19.
-- Is the POST floor (x) wrong? No — on the 4171-row provider corpus of
-  15 complete official APIs the POST floor holds: truth x is 61%
-  (804 of 1309), close to the old corpus's 62%, not to exam 5's 23%;
-  the inversion recorded 2026-09-14/15 is now read as a property of
-  exam 5's draw (89 vendors, median 1 POST row each, drawn from
-  APIs.guru fragments) rather than of POST itself. How a POST row
-  reaches w is no longer open either: step 2 (`src/step2.js`) answers it
-  with a modify verb plus the `OTHER_PARTY` block, reaching 227 of the
-  380 truth-w POST rows, against zero before. What stays open is the
-  remaining 153 POST rows that never get off the `x` floor, and step
-  3: the 66 PUT / DELETE / PATCH rows sitting on step 2's method floor
-  at `w` that are truth `x`, which are 93% of step 2's leaks and the
-  only dangerous part of the tool's error. See list item 2 of "The new
-  core" above and `docs/logs/learnings.md`. Raised 2026-09-14, updated
-  2026-09-15, updated 2026-09-16 with the provider-corpus read,
-  updated 2026-09-16 when step 2 was built. The D84 answer of
-  2026-09-21 is withdrawn by D85 (2026-09-22); the POST floor stays x,
-  published with `evidence: floor`, unchanged.
-- Can the "I don't know" pile be shrunk by reading the description?
-  Answer so far: no — mining the yours list from description text
-  resolves at best 130 of 1972 rows (6.6%) and leaks 8; the safe
-  settings clear 2-5%. Rejected 2026-09-16, POC kept at
-  `poc/desc-yours/`. The pile stays as the flag because it holds 155
-  of 204 leaks. D84's answer of 2026-09-21 (publish the pile as x) is
-  withdrawn 2026-09-22 by D85: the pile keeps its best-guess class,
-  marked `evidence: floor`, and the consumer's policy asks about it
-  once per operation.
-- MCP hints (future feature, M3; the user's end goal is to feed them).
-  Nothing emits hints yet. The shape of the hint output IS now decided
-  — see "The output shape (agreed 2026-09-17, D76)" above, which names
-  MCP's `annotations` plus `_meta` as one of four carriers. What
-  follows is only what is now known about each hint from the 4171-row
-  provider corpus with step 1 and step 2 as they stand.
-  - **The four hints ride together.** An MCP tool carries one
-    `annotations` object holding all four booleans at once — they are
-    independent axes, not a choice between them. Omitting a field is
-    not silence: the consumer assumes `readOnlyHint` false,
-    `destructiveHint` true, `idempotentHint` false, `openWorldHint`
-    true. Those defaults are all the tight reading, so partial
-    emission is safe by this project's own invariant.
-    `destructiveHint` is only meaningful when `readOnlyHint` is false,
-    so the `r` class settles two of the four at once. These annotation
-    names and defaults are from the MCP spec **as recalled, not from a
-    fetched copy**, and must be checked against the exact spec
-    revision targeted before anything emits.
-  - `readOnlyHint`: **the one that is ready.** True when the class is
-    `r`; GET follows its `r` floor (D59). 2052 rows, 3 wrong in the
-    unsafe direction (0.07% of all 4171 rows, 0.15% of the trues) —
-    the three being the known low-confidence GET rows `datadog
-    GetGraphSnapshot` and `intercom listContactBanners` plus one more.
-    33 further rows are marked not-read-only when they are read-only,
-    which is the safe direction. Step 3 cannot improve this hint at
-    all, because step 3 only raises `w` to `x` and `readOnlyHint` is
-    already false for both — so waiting for step 3 buys
-    `readOnlyHint` nothing.
-  - `idempotentHint`: **not ready, and step 3 is not what would fix
-    it.** Step 3 is built (D78), and the block is the choice below, not
-    the ladder. Two readings, still not chosen. Reading A, from the
-    class: true for `r` or `w`, since by D20 an operation you can't
-    safely repeat is
-    `x` — says true on 3186 rows, 72 unsafe-wrong (1.73% of all rows,
-    2.26% of the trues); the 2026-09-17 `OTHER_PARTY` trim grew the
-    `w` pile by 16 rows without adding one unsafe-wrong row, since all
-    16 are truth `w`. Reading B, from the method, per RFC 9110
-    §9.2.2: true for GET / HEAD / OPTIONS plus PUT and DELETE
-    (`docs/archive/prd.md:363`, §4.3) — says true on 2778 rows, 65
-    unsafe-wrong (1.56% of all rows, 2.34% of the trues), those 65
-    being GET 1, PUT 25, DELETE 39. The two readings disagree on
-    idempotent-but-`x` rows (D20 counted 20 such DELETE rows on its
-    499-row set). Reading A's gap is exactly the 71 rows step 2 now
-    calls `w` that are truth `x` — the rows step 3 exists to raise —
-    so step 3 closes it.
-  - **Idempotency cannot be read off the specs.** Measured across all
-    15 provider specs: 11 of the 15 never mention idempotency at all.
-    The four that do are paypal (103 mentions), square (16), openai
-    (6) and intercom (1), and even there it is prose in descriptions
-    plus an `Idempotency-Key` / `PayPal-Request-Id` request header,
-    not a machine-readable property. That header is a *capability* —
-    the API offering to make retries safe if the caller supplies a key
-    — not a declaration that the operation is idempotent. If anything
-    it is evidence the operation is NOT naturally idempotent, which
-    points toward `x`, so it is a candidate raiser for step 3 rather
-    than an idempotency source. It cannot be measured honestly on 4
-    vendors.
-  - `destructiveHint`: **the class cannot carry it, measured again.**
-    A flag inside x under D86 (`destructive` ⇒ x, but x does not ⇒
-    `destructive`), not built; MCP default `true` until then. D28
-    already rejected `destructiveHint = (class == x)`
-    as wrong on 352 of 719 rows. The broader reading "every non-`r`
-    row is destructive" was measured on this corpus: it would mark all
-    2119 non-`r` rows destructive, but only 584 of them (27.6%) carry
-    any wrecking signal at all — a DELETE method, or a verb such as
-    delete / remove / purge / revoke / expire / void / archive — while
-    1535 rows (72.4%) destroy nothing, being creates, updates, sends
-    and publishes. That reading is safe, because it is identical to
-    the MCP default, and it therefore emits no information. The useful
-    signal is the inverse: which of the non-reads are NOT destructive.
-    That is the flag D28 named and D86 keeps inside x, derived from
-    method plus verb and implying x rather than read off it;
-    `poc/m0/destructive.json` exists from the M0 work and has never
-    been measured against this corpus.
-  - `openWorldHint`: no signal; MCP default `true`.
-- Closed 2026-09-17 (D76): the output file format. rwxmap keeps one map
-  of its own, one row per operation, and publishes nothing of its own —
-  it fills the extension slot each existing standard already leaves
-  open: OpenAPI's `x-rwx` per operation, MCP's `annotations` plus a
-  reverse-DNS `_meta` key per tool, WebMCP's `readOnlyHint` /
-  `consequentialHint` per tool, and one Agentic Resource Discovery
-  `ai-catalog.json` entry per domain pointing at the map file. See
-  "The output shape" above. This supersedes the archived bullet below
-  that offered the -02 declared menu's `{iss, menu}` shape or rwxmap's
-  own JSON with a converter.
-- Whether tightening enters the -02 argument, or stays a demonstration
-  (D4, M4).
-- The exact confidence formula and line — M0 finds it.
-- The output file format: the -02 declared menu's `{iss, menu}` shape
-  (anchor `declared-menu`), or rwxmap's own JSON with a converter.
-- The GitHub remote is `hamr0/rwxmap`; visibility (public with a WIP
-  marker, like the author's other repos, or private) is decided at the
-  first push.
-- Whether the -02 draft's definition of `x` is amended to name
-  consequence in the test and not only in the label. This is rwxmap's
-  first finding with a consequence for the draft text, and it belongs
-  to the justabit track to accept or reject.
-- Input adapters beyond OpenAPI. The arbiter is a function of a method,
-  a name, and a text; GraphQL (`query` vs `mutation`), gRPC/AIP custom
-  methods, AsyncAPI, and MCP tool lists can each feed those three
-  through a small adapter, with the method empty where the format has
-  none. Deferred until the output contract exists; the MCP tool-list
-  adapter is the strongest candidate to go first.
-- The three questions opened on 2026-09-07 — the `x` definition, the
-  DELETE/PUT default, and the gate's treatment of low-confidence rows —
-  were decided the same day; see D20, D21 and D22 in the decisions log.
-- Preflight against a mock: run an agent against a mock server built
-  from the OpenAPI file (e.g. Prism), record which operations it
-  reaches for, look each up in the map, and show the x calls before any
-  token is issued. HTTP has no dry run; vendor test modes exist for
-  some APIs only. Raised by the user 2026-09-07; a later module, not
-  M1.
-- Closed 2026-09-07 (D31): queryAssistant is truth `r`; ask-an-assistant
-  reads back an answer and reaches no one. It is not a negative
-  control.
-- Closed 2026-09-22 (D86): the ordered r < w < x scale holds because
-  `destructive` is no longer a separate axis — `destructive: true` ⇒
-  `x`, and it is a refinement flag inside x. A consumer wanting "`x`,
-  non-destructive only" says so in bareguard as a grant of `r-x` plus
-  a deny flag on the destructive action; the scale itself needs no
-  new word. Raised 2026-09-07.
-- Closed 2026-09-07 (D32): a read whose result arrives by callback is
-  `r`; the caller named the sink, so it reaches no one else. Callbacks
-  raise only when the lead verb is not a read (M1-C7).
-- Which structural fields qualify for a rule, per set, by the user's
-  criterion "present consistently or almost always"? Answered by the
-  M1 census, pending 2026-09-07.
-- Truth re-read owed (raised by M1-C9/C10): the judge names the E24
-  arguable rows and three GitHub rows (repos/delete,
-  issues/set-issue-field-values, issues/remove-sub-issue) as the only
-  leaks that block the summary-verb source. The user re-reads; nothing
-  is re-labelled by the tool.
-- Over-tight rows are a usability cost invisible to humans at run time;
-  how a consumer surfaces or overrides them is open.
-- Closed 2026-09-08 (D35): the no-text tighten rule (Rule A) is
-  adopted — a PUT/DELETE/PATCH with no summary and no description ->
-  x, marked no-text. Hold-out 3 became a tuning set to decide it;
-  hold-out 4 is the new clean exam.
-- Owner-declared notify flags (e.g. x-github.triggersNotification:
-  true) as a raise-only step: zero leaks, tiny coverage; admit as an
-  exact vendor-key list?
-
-(docs/archive/prd.md:528-586)
-
-For the decisions named above (D4, D20-D22, D31, D32, D35) and any
-decision numbers not yet resolved here, see the
-[decisions log page](../wiki/decisions-log.md).
-For the module numbers (M0-M4) referenced throughout, see the
-[module ladder page](../wiki/module-ladder-and-shape.md). For the
-arbiter's shape and rules (e.g. Rule A, the summary-verb source), see
-the [arbiter shape page](../wiki/module-ladder-and-shape.md).
+- **`openWorldHint` has no evidence source.** It is the slot "touches
+  others" would map to; it may return as an evidence-only flag beside
+  `destructive`, never emitted as false, if a source is ever found (D87).
+- **`review` in MCP.** D102 keeps the marker out of MCP, while D103
+  puts it into the bareguard gate file, which is a runtime consumer.
+  Whether MCP should carry it too is unresolved and needs the user's
+  ruling.
+- **The fresh exam.** Anything adopted under D100 (`jev-raise-wx`,
+  `jev-raise-get`), D101's review rule, and any change to the frozen
+  core need a fresh clean exam, drawn from vendors no set has seen.
+- **The lead-position blind spot** is the first post-freeze candidate:
+  a fix changes the core, so it needs a new D-number and a new exam.

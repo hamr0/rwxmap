@@ -1,8 +1,17 @@
-// Shared tokeniser for all three steps (r/w/x). Ported verbatim, logic
-// unchanged, from the frozen poc/step1/words.mjs. This file holds no word
-// list and makes no r/w/x decision — each step (poc/step1, poc/step2,
-// poc/step3, and their src/ equivalents) owns its own classification lists.
-// Imports nothing.
+// Shared tokeniser for all three steps (r/w/x), plus the one verb-reading
+// helper steps 2 and 3 both call. Originally ported verbatim from the
+// frozen poc/step1/words.mjs; graduated from poc/d87/tokens.mjs under D87
+// (the reader fix below). This file holds no classification word list and
+// makes no r/w/x decision — each step owns its own lists. Imports nothing.
+//
+// D87 READER FIX: `delete` is removed from METHOD_WORDS (see the constant
+// below). Every other method word is still stripped from lead position
+// when followed by an explicit separator (post_ai_ask, delete_files_id
+// keeps its old shape for every word but delete). With `delete` gone,
+// `deleteThing` and `delete_files_id` both keep `delete` as their lead
+// token on ANY method — step 2 can then read a `delete` lead as a
+// can't-undo verb even on a POST, which the old METHOD_WORDS (which
+// included `delete`) would have silently stripped.
 
 // withSplitOperationId(row) — the '/' + whitespace split. splitTokens only
 // splits on '_ - .' and camelCase, so an operationId like 'gists/unstar' or
@@ -20,10 +29,13 @@ function withSplitOperationId(row) {
 
 // HTTP-method words that get stripped from lead position when the
 // operationId starts with the word followed by a separator.
-// Exported because step 2 also needs this exact vocabulary, to detect a
-// bare-method lead token that carries no verb — this is HTTP method
-// vocabulary shared by the tokeniser and step 2, not a classification list.
-export const METHOD_WORDS = new Set(['get', 'post', 'put', 'patch', 'delete', 'head', 'options']);
+// Exported because verbForRow (below) also needs this exact vocabulary, to
+// detect a bare-method lead token that carries no verb — this is HTTP
+// method vocabulary shared by the tokeniser and the verb reader, not a
+// classification list.
+// D87 reader fix: 'delete' removed (see file header) so a `delete` lead
+// verb is never stripped on any method.
+export const METHOD_WORDS = new Set(['get', 'post', 'put', 'patch', 'head', 'options']);
 // An explicit separator right after the method word means it is a
 // redundant method-name prefix (post_ai_ask, post-cardDetails,
 // delete_files_id); an uppercase letter there means ordinary camelCase
@@ -172,4 +184,39 @@ export function leadVerbAfterModifiers(row) {
   let i = 0;
   while (i < tokens.length && LEAD_MODIFIERS.has(tokens[i])) i += 1;
   return i < tokens.length ? tokens[i] : '';
+}
+
+// --- shared verb reading for steps 2 and 3 --------------------------------
+//
+// One copy, used by both step2.js and step3.js. Ported from poc/d87's
+// tokens.mjs (itself ported from the pre-D87 src/step2.js's
+// summaryWords/summaryVerb).
+
+// Words skipped when reading a verb off the summary line. Plumbing, not a
+// classification list.
+const SUMMARY_SKIP = new Set(['test', 'mode', 'a', 'an', 'the', 'bulk', 'batch']);
+
+function summaryWords(row) {
+  return (row.summary || '').toLowerCase().split(/[^a-z]+/).filter(Boolean);
+}
+
+function summaryVerbForRow(row) {
+  for (const w of summaryWords(row)) {
+    if (!SUMMARY_SKIP.has(w)) return w;
+  }
+  return '';
+}
+
+/**
+ * The verb a row is judged on: the operationId/path lead verb, or, when
+ * that lead token is a bare HTTP method word (METHOD_WORDS — no verb at
+ * all, e.g. stripe's PostTaxCalculations, mailchimp's postLists), the
+ * summary's first non-filler word instead.
+ * @param {import('./types.js').Operation} row
+ * @returns {{verb: string, fromSummary: boolean}}
+ */
+export function verbForRow(row) {
+  const lead = leadVerbAfterModifiers(row);
+  const fromSummary = METHOD_WORDS.has(lead);
+  return { verb: fromSummary ? summaryVerbForRow(row) : lead, fromSummary };
 }

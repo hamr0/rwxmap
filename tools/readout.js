@@ -1,5 +1,5 @@
 // Debugging readout for the whole flow — run with: node tools/readout.js
-// Runs src/'s ladder over all 4171 corpus rows and writes the 12-column
+// Runs src/'s ladder over all 4171 corpus rows and writes the 13-column
 // sheet run-proof/readout.csv, one line per operation, so a human can read
 // what the classifier did row by row. Prints a per-step-per-source ledger
 // afterwards. Test/dev tooling only — never part of the published library.
@@ -19,7 +19,7 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 const OUT_CSV = path.join(REPO_ROOT, 'run-proof/readout.csv');
 
 const HEADER = ['provider', 'method', 'path', 'operationId', 'summary', 'truth',
-  'confidence', 'class', 'step', 'rule', 'source', 'matched'];
+  'confidence', 'class', 'step', 'rule', 'source', 'review', 'matched'];
 
 /** r < w < x — the one ordering the whole project runs on. */
 const ORDER = { r: 0, w: 1, x: 2 };
@@ -40,6 +40,8 @@ writeFileSync(OUT_CSV, toCsv(flow.map(({ row, hit }) => ({
   step: hit.step,
   rule: hit.rule,
   source: hit.source,
+  // The review hint, the second published signal beside evidence.
+  review: hit.review,
   // A floor row matched nothing, so its cell is empty.
   matched: hit.matched.join('+'),
 })), HEADER));

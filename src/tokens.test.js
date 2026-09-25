@@ -6,6 +6,8 @@ import {
   stemMatches,
   matchingMembers,
   leadVerbAfterModifiers,
+  verbForRow,
+  METHOD_WORDS,
 } from './tokens.js';
 
 // --- ported from poc/step1/words.test.mjs --------------------------------
@@ -21,15 +23,27 @@ test('tokensForRow: gists/unstar (path-shaped operationId, not method-stripped)'
   assert.deepEqual(tokens, ['gists', 'unstar']);
 });
 
-test('tokensForRow: delete_files_id with method DELETE strips the redundant method prefix', () => {
-  // Stripping is observable directly in the token array: "delete" is gone
-  // from the front, leaving only the rest of the operationId.
+test('D87 reader fix: delete_files_id with method DELETE no longer strips "delete" (METHOD_WORDS no longer has it)', () => {
+  // Pre-D87 this stripped to ['files', 'id']; the reader fix removes
+  // 'delete' from METHOD_WORDS entirely, so it is never treated as a
+  // redundant method-name prefix on ANY method.
   const tokens = tokensForRow({ operationId: 'delete_files_id', method: 'DELETE' });
-  assert.deepEqual(tokens, ['files', 'id']);
+  assert.deepEqual(tokens, ['delete', 'files', 'id']);
 });
 
-test('tokensForRow: deleteDevice keeps the camelCase verb as lead (not stripped)', () => {
-  // No strip: the lead verb "delete" stays as tokens[0].
+test('D87 reader fix: deleteThing keeps "delete" as the lead token on a POST too, not just DELETE', () => {
+  // This is the whole point of the reader fix: step 2 can read a `delete`
+  // lead as a can't-undo verb even when the HTTP method is POST.
+  const tokens = tokensForRow({ operationId: 'deleteThing', method: 'POST' });
+  assert.deepEqual(tokens, ['delete', 'thing']);
+});
+
+test('D87 reader fix: METHOD_WORDS no longer contains delete', () => {
+  assert.equal(METHOD_WORDS.has('delete'), false);
+  assert.equal(METHOD_WORDS.has('get'), true);
+});
+
+test('tokensForRow: deleteDevice keeps the camelCase verb as lead (not stripped, as before D87)', () => {
   const tokens = tokensForRow({ operationId: 'deleteDevice', method: 'DELETE' });
   assert.deepEqual(tokens, ['delete', 'device']);
 });
@@ -149,4 +163,37 @@ test('stemMatches: e suffix, currently unreached on the corpus but must keep wor
 
 test('stemMatches: es suffix, currently unreached on the corpus but must keep working (searches/search)', () => {
   assert.equal(stemMatches('searches', 'search'), true);
+});
+
+// --- verbForRow (shared by step2/step3, D87) ------------------------------
+
+test('verbForRow: an ordinary lead verb is read directly, fromSummary false', () => {
+  assert.deepEqual(verbForRow({ method: 'POST', operationId: 'cancelSubscription' }), {
+    verb: 'cancel', fromSummary: false,
+  });
+});
+
+test('verbForRow: a bare-method lead (no verb at all) falls back to the summary verb, fromSummary true', () => {
+  assert.deepEqual(
+    verbForRow({ method: 'POST', operationId: 'PostTaxCalculations', summary: 'Cancel a tax calculation' }),
+    { verb: 'cancel', fromSummary: true },
+  );
+});
+
+test('verbForRow: summary fallback skips filler words (a/an/the/bulk/batch/test/mode)', () => {
+  assert.deepEqual(
+    verbForRow({ method: 'POST', operationId: 'postLists', summary: 'The bulk delete of a list' }),
+    { verb: 'delete', fromSummary: true },
+  );
+});
+
+test('verbForRow: no summary at all on a bare-method lead yields an empty verb, fromSummary true', () => {
+  assert.deepEqual(verbForRow({ method: 'POST', operationId: 'postLists' }), { verb: '', fromSummary: true });
+});
+
+test('verbForRow: modifiers are skipped before the bare-method check', () => {
+  assert.deepEqual(
+    verbForRow({ method: 'POST', operationId: 'bulk_post_things', summary: 'Cancel things' }),
+    { verb: 'cancel', fromSummary: true },
+  );
 });

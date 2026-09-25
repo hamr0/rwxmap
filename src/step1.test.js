@@ -105,3 +105,82 @@ test('READ_VERBS has 23 members and SAFE_VERBS has 10, SAFE_VERBS a strict subse
   assert.equal(SAFE_VERBS.size, 10);
   for (const v of SAFE_VERBS) assert.ok(READ_VERBS.has(v));
 });
+
+// --- D99 plural-noun guard -------------------------------------------------
+
+test('D99 guard: github checks/rerequest-suite on POST is not claimed by read-verb', () => {
+  // Corpus row b0127 (github, truth x). The lead token is the resource
+  // noun "checks", which stemMatches accepts as the verb "check"; the real
+  // action is "rerequest". The row must fall through step 1 untouched.
+  const v = step1({
+    method: 'POST',
+    path: '/repos/{owner}/{repo}/check-suites/{check_suite_id}/rerequest',
+    operationId: 'checks/rerequest-suite',
+    summary: 'Rerequest a check suite',
+  });
+  assert.equal(v, null);
+});
+
+test('D99 guard: a bare lead verb still claims read-verb', () => {
+  for (const [operationId, matched] of [
+    ['listAccounts', 'list'],
+    ['checkPermission', 'check'],
+    ['queryUsage', 'query'],
+  ]) {
+    const v = step1({ method: 'POST', operationId });
+    assert.deepEqual(v, {
+      class: 'r', step: 1, rule: 'read-verb', source: 'list', matched: [matched],
+    }, operationId);
+  }
+});
+
+test('D99 guard: the -es and consonant+y -> -ies plural forms are guarded too', () => {
+  // "queries" reaches "query" only through y -> ies; "matches" and
+  // "searches" reach "match"/"search" only through -es.
+  assert.equal(step1({ method: 'POST', operationId: 'queries.post' }), null);
+  assert.equal(step1({ method: 'POST', operationId: 'matches/create' }), null);
+  assert.equal(step1({ method: 'POST', operationId: 'searches/rerun' }), null);
+});
+
+test('D99 guard: a non-plural inflection still claims read-verb', () => {
+  // No row in the tuning pool leads with a gerund or a past form — an
+  // operationId names its action in the imperative — so this case is
+  // constructed to pin the guard's boundary: only the plural/3sg
+  // inflections are withheld, every other inflection stemMatches accepts
+  // is still read as a real verb.
+  const ing = step1({ method: 'POST', operationId: 'listingAccounts' });
+  assert.ok(ing);
+  assert.equal(ing.rule, 'read-verb');
+  assert.deepEqual(ing.matched, ['list']);
+
+  const ed = step1({ method: 'POST', operationId: 'checked_state' });
+  assert.ok(ed);
+  assert.equal(ed.rule, 'read-verb');
+  assert.deepEqual(ed.matched, ['check']);
+});
+
+test('D99 guard: an exact match alongside a plural match still claims', () => {
+  // Constructed via the words injection: when the lead token IS a member
+  // outright it is a real verb, whatever else it also pluralises into.
+  const v = step1(
+    { method: 'POST', operationId: 'checks_rerequest_suite' },
+    { readVerbs: new Set(['check', 'checks']) },
+  );
+  assert.ok(v);
+  assert.equal(v.rule, 'read-verb');
+  assert.deepEqual(v.matched, ['check', 'checks']);
+});
+
+test('D99 guard: does not touch the GET/HEAD/OPTIONS method floor', () => {
+  const v = step1({ method: 'GET', operationId: 'checks/list-suites' });
+  assert.deepEqual(v, { class: 'r', step: 1, rule: 'method', source: 'floor', matched: [] });
+});
+
+test('D99 guard: does not touch read-verb-anywhere', () => {
+  // The lead token "checks" is guarded, so read-verb cannot claim; the
+  // SAFE_VERBS word "validate" deeper in the name still can.
+  const v = step1({ method: 'POST', operationId: 'checks/validate-suite' });
+  assert.deepEqual(v, {
+    class: 'r', step: 1, rule: 'read-verb-anywhere', source: 'list', matched: ['validate'],
+  });
+});

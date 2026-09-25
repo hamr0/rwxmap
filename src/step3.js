@@ -1,125 +1,78 @@
-// Step 3 — the x step. A standalone classifier: it only ever emits x, it
-// never loosens to r or w, it does not call step 1 or step 2 (the ladder
-// decides order), it reads no files and it prints nothing.
+// Step 3 — the w step (D87). A standalone classifier: it claims the rows
+// it can call w and returns null for everything else, which passes down to
+// step 2's floor untouched. It never assigns r or x, it does not call
+// step 1 or step 2 (the ladder decides order), it reads no files and it
+// prints nothing.
 //
-// Two rules, and they sit on opposite sides of the floor/list split:
-//
-//   raise-word  the one rule here that reads evidence. A word from
-//               RAISE_WORDS anywhere in the row's words claims the row x.
-//               The ladder only offers it rows step 2 claimed with its
-//               WORDLESS method floor, which is step 3's only reach into
-//               PUT/DELETE/PATCH — but the rule itself does not inspect
-//               the method, so it stays a plain word test.
-//   floor-post  the leftover pile: no word fired anywhere in the ladder,
-//               only the method is known. See floorPost() below.
-import { splitTokens } from './tokens.js';
-import { wordsForRow } from './step2.js';
+// Rebuilt under D87, not a patch of the pre-D87 file: the old step 3
+// (RAISE_WORDS, an exact any-position noun match answering "whose is it")
+// is gone — D87 drops "whose" as a class test entirely (see the PRD's
+// "Why" paragraph, docs/product/prd.md "The shared definition (D87)").
+// OTHER_PARTY, RAISE_WORDS and wordsForStep3/wordsForRow are deleted along
+// with it. Shares the verb-reading helper (verbForRow) with step2.js via
+// ./tokens.js.
+import { matchingMembers, verbForRow } from './tokens.js';
 
 /** @typedef {import('./types.js').Operation} Operation */
-/** @typedef {import('./types.js').Verdict} Verdict */
+/** @typedef {import('./types.js').StepVerdict} StepVerdict */
 
-// RAISE_WORDS (17)
+const FLOOR_METHODS = new Set(['PUT', 'PATCH']);
+
+// KEEP_W (14)
 //
-// DIRECTION: raises toward x, and only ever upward — step 3 is the top of
-// the ladder and has nothing below x to lower to.
-// WHICH ROWS: only the rows the ladder hands it, which are step 2's
-// wordless method-floor rows (PUT/DELETE/PATCH with no verb evidence). A
-// row step 2 claimed with a WORD is never offered: a word beats no word.
-// WHERE IT MATCHES: an EXACT match at ANY token position of the row's words
-// (see wordsForStep3) — no stemming, no lead-token restriction. These are
-// role/access nouns, not verbs to be inflected, so there is no inflection
-// to accept and a noun can sit anywhere in the name. `passwords` does not
-// match `password`, by design: only the members listed here match.
-// WHAT IT IS NOT: not verbs. The PRD's step 3 sketch calls the mechanism
-// "live verbs" and nothing in this list is a verb — every member names a
-// permission, a membership, a credential, or someone else's presence in
-// the account.
+// DIRECTION: claims w. A POST otherwise floors at x (step 2's floor-post);
+// a verb match here claims it w instead.
+// WHICH ROWS: only POST rows (PUT/PATCH already floor at w by method,
+// below).
+// WHERE IT MATCHES: a single verb, stem-matched against the verb this row
+// is judged on — verbForRow's lead verb, or the summary verb when the
+// lead carries no verb (see tokens.js's verbForRow).
+// WHAT IT IS NOT: not a "whose" test, and not the pre-D87 MODIFY_VERBS list
+// it superficially resembles — the can't-undo members that used to sit in
+// that list (cancel, delete, archive, rotate, merge, expire, void, ...)
+// moved to step 2's CANT_UNDO under D87; KEEP_W keeps only the survivors
+// that D87's brief calls "can be set back".
 //
-// The two-word overlap with step 2's OTHER_PARTY — `permission` and
-// `participants` — is DELIBERATE, measured, and not to be tidied away
-// (D75). The lists sit on different steps, see different rows, and move in
-// opposite directions: OTHER_PARTY blocks a lowering on step 2's POST
-// rows; RAISE_WORDS forces a raise on step 3's PUT/DELETE/PATCH floor
-// rows. D75 measured the WHOLE of OTHER_PARTY used as a raiser over these
-// same floor rows and REJECTED it (0.31 leaks closed per false alarm
-// against an adoption bar of 10); `permission` was the single exception —
-// 6 flags, all 6 truth x, 0 false alarms — and was left for step 3, which
-// adopted it.
-//
-// The via-negativa "yours" noun list from the PRD's step 3 plan is
-// deliberately absent: mining an allowlist of "these nouns mean it is the
-// caller's own thing" was measured at 9 rows of 380 recovered at 0 leaks,
-// too weak to adopt (D78). It is missing because it was tried and
-// rejected, not because it was forgotten.
-//
-// Copied verbatim from the frozen poc/step3/step3.mjs. Do not add or
-// remove any member.
-export const RAISE_WORDS = new Set([
-  'permission', 'membership', 'memberships', 'panelist', 'panelists',
-  'watcher', 'watchers', 'participants', 'actor', 'invites', 'invitation',
-  'invitations', 'sso', 'password', 'grant', 'disassociate', 'reject',
+// PROVENANCE: written from the v3-relabelled pile (data/relabel-2026-09-22,
+// BRIEF-v3's "What can be set back" list) the same way CANT_UNDO was.
+// `deactivate`, `change`, `swap`, `archive` and `disable` were measured and
+// REMOVED (D89, user ruling 2026-09-22): each pays more leaks than it fixes
+// against this project's adoption bar of 10 fixed per leak — 29/5 (5.8),
+// 4/2 (2.0), 1/1 (1.0), 3/5 (0.6), 1/2 (0.5) — so their POST rows floor at
+// x, the tighter side, instead. `create` was also measured and NOT
+// adopted: 503 fixed / 72 leaks = 6.99, short of the bar of 10 (poc/d87
+// README / learnings, "M3 POC under D87").
+export const KEEP_W = new Set([
+  'update', 'remove', 'add', 'attach', 'assign', 'activate', 'unarchive',
+  'move', 'restore', 'pause', 'unpause', 'enable', 'modify', 'suspend',
 ]);
 
 /**
- * Every word step 3 looks at: step 2's wordsForRow (the row's
- * operationId/path lead tokens plus every summary word) PLUS the row's own
- * path tokens — every '/'-separated path segment that is not a {param}
- * placeholder, run through splitTokens.
- *
- * The path tokens are the reason this exists rather than step 3 reusing
- * wordsForRow directly: wordsForRow's path contribution is only the LEAD
- * token, so a raise word further back in the path (/users/{id}/permission)
- * would otherwise never be seen.
+ * Apply step 3 to one row.
  * @param {Operation} row
- * @returns {string[]}
- */
-export function wordsForStep3(row) {
-  const path = row.path || '';
-  const segments = path.split('/').filter((s) => s && !(s.startsWith('{') && s.endsWith('}')));
-  const pathTokens = segments.flatMap((s) => splitTokens(s));
-  return [...wordsForRow(row), ...pathTokens];
-}
-
-/**
- * Apply step 3's raise-word rule to one row.
- *
- * Looking for sourceForRule / matchedWordsForRule? They are gone. The POC
- * re-derived a row's `source` and its matched word(s) AFTER the fact, from
- * the rule name, because the frozen steps handed back only class/step/rule.
- * Every rule now returns its own `source` and its own `matched` at the
- * moment it matches, so there is nothing left to re-derive and nothing that
- * can drift from what actually fired.
- * @param {Operation} row
- * @param {{raiseWords?: Set<string>}} [words]
+ * @param {{keepW?: Set<string>}} [words]
  *   Word list to use in place of the module's own (LOVO passes a rebuilt
- *   one). An omitted field falls back to RAISE_WORDS.
- * @returns {Verdict|null} null when no raise word appears in the row.
+ *   one). An omitted field falls back to KEEP_W.
+ * @returns {StepVerdict|null} null when step 3 does not claim the row.
  */
 export function step3(row, words = {}) {
-  const raiseWords = words.raiseWords ?? RAISE_WORDS;
+  const keepW = words.keepW ?? KEEP_W;
 
-  // EVERY member present, not the first one found: a row can genuinely
-  // carry two members at once (asana's /memberships/{gid} updateMembership
-  // holds both `membership` and `memberships`), and reporting only one
-  // would silently drop a real match.
-  const rowWords = new Set(wordsForStep3(row));
-  const matched = [...raiseWords].filter((w) => rowWords.has(w)).sort();
+  const method = (row.method || '').toUpperCase();
+  if (FLOOR_METHODS.has(method)) {
+    return { class: 'w', step: 3, rule: 'method-floor', source: 'floor', matched: [] };
+  }
+  if (method !== 'POST') return null;
+
+  const { verb, fromSummary } = verbForRow(row);
+  const matched = matchingMembers(verb, keepW);
   if (matched.length === 0) return null;
 
-  return { class: 'x', step: 3, rule: 'raise-word', source: 'list', matched };
-}
-
-/**
- * Step 3's floor: the named leftover pile. A row no step claimed with any
- * word at all is x — no evidence was read, only the method is known (in
- * this corpus always POST, since steps 1 and 2 between them claim every
- * GET/HEAD/OPTIONS/PUT/DELETE/PATCH row).
- *
- * This is a function, not a literal the ladder builds for itself: step 3
- * owns every verdict that carries step: 3, so there is one writer for the
- * shape of a floor-post verdict and flow.js cannot drift from it.
- * @returns {Verdict}
- */
-export function floorPost() {
-  return { class: 'x', step: 3, rule: 'floor-post', source: 'floor', matched: [] };
+  return {
+    class: 'w',
+    step: 3,
+    rule: fromSummary ? 'modify-verb-summary' : 'modify-verb',
+    source: 'list',
+    matched,
+  };
 }

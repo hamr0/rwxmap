@@ -1,156 +1,109 @@
-// Step 2 — the w step. A standalone classifier: it claims the rows it can
-// call w and returns null for everything else, which passes down to step 3
-// untouched. It never assigns r or x, it does not call step 1 (the ladder
-// decides order), it reads no files and it prints nothing.
-import { leadVerbAfterModifiers, tokensForRow, matchingMembers, METHOD_WORDS } from './tokens.js';
+// Step 2 — the x step (D87: the shared chmod reading, r/w/x — see
+// docs/product/prd.md "The shared definition (D87)" / "M3 spec (D87)").
+// A standalone classifier: it claims the rows it can call x and returns
+// null for everything else, which passes down to step 3 untouched. It
+// never assigns r or w, it does not call step 1 (the ladder decides
+// order), it reads no files and it prints nothing.
+//
+// Rebuilt under D87, not a patch of the pre-D87 file: the old step 2
+// answered "whose is it" (OTHER_PARTY/MODIFY_VERBS); D87 drops "whose" as
+// a class test entirely (see the PRD's "Why" paragraph) and step 2 now
+// asks only "can this be undone". The verb-reading helper (verbForRow) is
+// shared with step3.js via ./tokens.js.
+import { matchingMembers, verbForRow } from './tokens.js';
 
 /** @typedef {import('./types.js').Operation} Operation */
-/** @typedef {import('./types.js').Verdict} Verdict */
+/** @typedef {import('./types.js').StepVerdict} StepVerdict */
 
-// Methods whose floor is w by the method itself, no words involved. This
-// floor is a DEFAULT — a later step is free to override it with evidence
-// (step 3's raise-word rule does exactly that to a method-floor row). The
-// two word rules below are the opposite: a word claim is FINAL and nothing
-// downstream overrides it. Precedence runs on evidence strength, not on
-// which step ran first (D78) — getting this backwards is the easiest way
-// to break the ladder.
-const FLOOR_METHODS = new Set(['PUT', 'DELETE', 'PATCH']);
-
-// MODIFY_VERBS (24)
+// CANT_UNDO (29)
 //
-// DIRECTION: lowers toward w. A POST otherwise floors at x (step 3's
-// floor-post); a lead-verb (or, when the lead carries no verb, summary-verb)
-// match here pulls it down to w instead.
-// WHICH ROWS: only POST rows, and only when the gate below does not block.
-// WHERE IT MATCHES: a single verb, stem-matched (via stemMatches) against
-// the verb this row is judged on — the operationId's lead verb, or the
-// summary's first non-filler word when the lead token is a bare HTTP method
-// word (METHOD_WORDS), which is how stripe's `PostTaxCalculations` and
-// mailchimp's `postLists` are reached, since their operationIds carry no
-// verb at all — never any-position, since these are verbs naming an action
-// already done to an existing thing, not nouns.
-// WHAT IT IS NOT: not OTHER_PARTY (below), which does not itself lower
-// anything — it only blocks this list's lowering.
+// DIRECTION: claims x. This is the only word rule in the whole ladder that
+// claims x — step 3 (below) only ever claims w.
+// WHICH ROWS: POST, PUT or PATCH rows (DELETE is claimed by the
+// method-delete floor above this rule; see step2() below).
+// WHERE IT MATCHES: a single verb, stem-matched (via matchingMembers)
+// against the verb this row is judged on — verbForRow's lead verb, or,
+// when the lead token carries no verb at all (a bare HTTP method word,
+// e.g. stripe's PostTaxCalculations, mailchimp's postLists), the summary's
+// first non-filler word instead.
+// WHAT IT IS NOT: not a "whose" test. D87 dropped OTHER_PARTY and its
+// gate entirely — a can't-undo verb claims x regardless of who the row
+// reaches.
 //
-// Three verbs were measured and REJECTED because they paid most of the
-// leaks: `set` (3 leaks), `attach` (2), `finalize` (1) (D75).
-export const MODIFY_VERBS = new Set([
-  'cancel', 'delete', 'archive', 'unarchive', 'move', 'dismiss', 'restore',
-  'pause', 'unpause', 'activate', 'deactivate', 'rotate', 'disable', 'enable',
-  'swap', 'merge', 'update', 'modify', 'change', 'remove', 'suspend',
-  'detach', 'expire', 'void',
+// PROVENANCE: written from the v3-relabelled pile (data/relabel-2026-09-22,
+// BRIEF-v3's "What cannot be undone" list), by reading which verbs the
+// relabel actually marked x, plus the PRD's own spec candidates (delete,
+// remove, purge, revoke, expire, void, send, publish, trigger, run,
+// execute, charge, pay, refund …). Priced against the tuning set (D87 POC
+// readout, poc/d87/README.md): 673 list rows, 22 lowering leaks (3.3 per
+// 100), passing the D89-revised gate item 1 (<=2 per 100... marked
+// "over the bar", see D89 — kept pending the fresh exam, not because the
+// list itself is wrong, but per D89's plan of graduating first and
+// re-measuring on the fresh exam next).
+export const CANT_UNDO = new Set([
+  'delete', 'purge', 'revoke', 'expire', 'void', 'send', 'publish',
+  'trigger', 'run', 'execute', 'charge', 'pay', 'refund', 'cancel',
+  'reject', 'redact', 'accept', 'approve', 'rotate', 'merge', 'capture',
+  'request', 'dismiss', 'unsubscribe', 'simulate', 'complete', 'resend',
+  'reset', 'start',
 ]);
 
-// OTHER_PARTY (21)
+// REMOVES (6) ⊂ CANT_UNDO
 //
-// DIRECTION: moves nothing itself — the one via-negativa list in this tool.
-// It BLOCKS a MODIFY_VERBS lowering rather than causing one.
-// WHICH ROWS: consulted only on a POST row whose verb already matched
-// MODIFY_VERBS — the gate that decides whether that lowering may proceed.
-// WHERE IT MATCHES: an EXACT match against ANY word of the row (operationId
-// and path tokens plus every summary word — see wordsForRow), not a stem
-// match at the lead — these are role nouns, not verbs to be inflected, and
-// the noun can sit anywhere in the name.
-// WHAT IT IS NOT: not RAISE_WORDS (step 3). The two overlap on exactly two
-// words, `permission` and `participants` — deliberate, measured, and not to
-// be "tidied" away. They sit on different steps, see different rows, and
-// move in opposite directions: OTHER_PARTY blocks a lowering on step 2's
-// POST rows; RAISE_WORDS forces a raise on step 3's PUT/DELETE/PATCH floor
-// rows. D75 measured the WHOLE of OTHER_PARTY used as a raiser over those
-// same floor rows and REJECTED it — 0.31 leaks closed per false alarm
-// against this project's adoption bar of 10, because `user` flags 42 write
-// rows of which only 13 are truth x. `permission` was the single exception
-// (6 flags, all 6 truth x, 0 false alarms) and was left for step 3, which
-// adopted it.
-//
-// Four words — `customer`, `contact`, `agent`, `person` — were REMOVED on
-// 2026-09-17: they vetoed 18 rows between them, all truth w, and caught
-// zero leaks. They named a human, which was the wrong test — the gate asks
-// whose data it is, not whether a person is involved, and your own
-// customer record is your data (D75).
-export const OTHER_PARTY = new Set([
-  'user', 'users', 'member', 'members', 'follower', 'followers', 'role',
-  'roles', 'permission', 'permissions', 'participant', 'participants',
-  'collaborator', 'invite', 'people', 'admin', 'assignee', 'owner',
-  'subscriber', 'recipient', 'audience',
-]);
-
-// Words skipped when reading a verb off the summary, before the verb is
-// read. Tokeniser-ish plumbing for the summary line, not a classification
-// list — nothing here decides r/w/x.
-const SUMMARY_SKIP = new Set(['test', 'mode', 'a', 'an', 'the', 'bulk', 'batch']);
-
-/**
- * Every word of the row's summary, lowercased.
- * @param {Operation} row
- * @returns {string[]}
- */
-function summaryWords(row) {
-  return (row.summary || '').toLowerCase().split(/[^a-z]+/).filter(Boolean);
-}
-
-/**
- * The first summary word that is not a SUMMARY_SKIP filler, or ''.
- * @param {Operation} row
- * @returns {string}
- */
-function summaryVerb(row) {
-  for (const w of summaryWords(row)) {
-    if (!SUMMARY_SKIP.has(w)) return w;
-  }
-  return '';
-}
-
-/**
- * Every word the OTHER_PARTY gate looks at: the row's operationId/path lead
- * tokens plus every summary word.
- *
- * Public, unlike the other helpers in this file: step 3 builds its own,
- * wider word set on top of this one (this plus the row's non-param path
- * tokens), so this is the one export that is not the entry point (step2)
- * or a LOVO word list (MODIFY_VERBS/OTHER_PARTY) — it exists because a real
- * caller outside this module needs it.
- * @param {Operation} row
- * @returns {string[]}
- */
-export function wordsForRow(row) {
-  return [...tokensForRow(row), ...summaryWords(row)];
-}
+// The subset of CANT_UNDO that also sets `destructive: true` when it is
+// the member that matched — a refinement flag inside x (D86's ruling on
+// D28 stands: destructive is a flag on x, never a fourth class). Every
+// CANT_UNDO member marks the row x; only these six mark it destructive
+// too, because only these six remove something rather than merely doing
+// something unrepeatable.
+export const REMOVES = new Set(['delete', 'purge', 'revoke', 'expire', 'void', 'redact']);
 
 /**
  * Apply step 2 to one row.
  * @param {Operation} row
- * @param {{modifyVerbs?: Set<string>, otherParty?: Set<string>}} [words]
+ * @param {{cantUndo?: Set<string>, removes?: Set<string>}} [words]
  *   Word lists to use in place of the module's own (LOVO passes rebuilt
- *   ones). Omitted fields fall back to MODIFY_VERBS / OTHER_PARTY.
- * @returns {Verdict|null} null when step 2 does not claim the row.
+ *   ones). Omitted fields fall back to CANT_UNDO / REMOVES.
+ * @returns {StepVerdict|null} null when step 2 does not claim the row.
  */
 export function step2(row, words = {}) {
-  const modifyVerbs = words.modifyVerbs ?? MODIFY_VERBS;
-  const otherParty = words.otherParty ?? OTHER_PARTY;
+  const cantUndo = words.cantUndo ?? CANT_UNDO;
+  const removes = words.removes ?? REMOVES;
 
   const method = (row.method || '').toUpperCase();
-  if (FLOOR_METHODS.has(method)) {
-    return { class: 'w', step: 2, rule: 'method-floor', source: 'floor', matched: [] };
+  // DELETE beats every word (D87): it is always x, always destructive,
+  // with no word evidence needed or possible. This floor is decided by the
+  // method alone, but unlike step 3's old method-floor default, DELETE's
+  // verdict is never overridden by anything downstream — see flow.js.
+  if (method === 'DELETE') {
+    return { class: 'x', step: 2, rule: 'method-delete', source: 'floor', matched: [], destructive: true };
   }
-  if (method !== 'POST') return null;
+  if (method !== 'POST' && method !== 'PUT' && method !== 'PATCH') return null;
 
-  const lead = leadVerbAfterModifiers(row);
-  const fromSummary = METHOD_WORDS.has(lead);
-  const verb = fromSummary ? summaryVerb(row) : lead;
-
-  const matched = matchingMembers(verb, modifyVerbs);
+  const { verb, fromSummary } = verbForRow(row);
+  const matched = matchingMembers(verb, cantUndo);
   if (matched.length === 0) return null;
 
-  // The gate: a modify verb aimed at someone who is not the caller is not a
-  // w. A blocked row is not claimed here at all — it passes on to step 3.
-  if (wordsForRow(row).some((w) => otherParty.has(w))) return null;
-
-  return {
-    class: 'w',
+  /** @type {StepVerdict} */
+  const verdict = {
+    class: 'x',
     step: 2,
-    rule: fromSummary ? 'modify-verb-summary' : 'modify-verb',
+    rule: fromSummary ? 'cant-undo-verb-summary' : 'cant-undo-verb',
     source: 'list',
     matched,
   };
+  if (matched.some((m) => removes.has(m))) verdict.destructive = true;
+  return verdict;
+}
+
+/**
+ * Step 2's floor: the named leftover pile — a POST with no word evidence
+ * anywhere in the ladder (step 1 did not claim it r, step 2's own
+ * CANT_UNDO did not claim it x, step 3's KEEP_W did not claim it w). The
+ * floor belongs to step 2 under D87 (x is the tighter class and the floor
+ * always claims the tighter side of an unknown); flow.js calls it last.
+ * @returns {StepVerdict}
+ */
+export function floorPost() {
+  return { class: 'x', step: 2, rule: 'floor-post', source: 'floor', matched: [] };
 }

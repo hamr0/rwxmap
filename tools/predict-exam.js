@@ -33,7 +33,7 @@ export const EXPECTED_ROWS = 1383;
 const EXPECTED_BY_PROVIDER = { okta: 734, docusign: 414, xero: 235 };
 
 const HEADER = ['provider', 'method', 'path', 'operationId', 'summary',
-  'class', 'step', 'rule', 'source', 'matched'];
+  'class', 'step', 'rule', 'source', 'review', 'matched'];
 
 const ops = parseCsv(gunzipSync(readFileSync(OPS_GZ)).toString('utf8'));
 
@@ -82,6 +82,8 @@ writeFileSync(OUT_CSV, toCsv(flow.map(({ provider, row, hit }) => ({
   step: hit.step,
   rule: hit.rule,
   source: hit.source,
+  // The review hint, the second published signal beside evidence.
+  review: hit.review,
   // A floor row matched nothing, so its cell is empty.
   matched: hit.matched.join('+'),
 })), HEADER));

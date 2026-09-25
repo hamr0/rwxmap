@@ -1,0 +1,893 @@
+row_id,provider,method,path,operationId,summary,description
+x22-3540,cloudflare,PUT,/zones/{zone_id}/waiting_rooms/settings,waiting-room-update-zone-settings,Update zone-level Waiting Room settings,Replace zone-level Waiting Room settings.
+x22-4045,sentry,GET,/api/0/organizations/{organization_id_or_slug}/agents/conversations/{conversation_id}/,retrieveOrganizationAIConversation,Retrieve an Organization's AI Conversation,"**Experimental:** This API is under active development and may change.
+
+Return spans recorded for one AI conversation in start-time order.
+
+Message, tool, and response attributes contain their recorded string values.
+Without an explicit range, Sentry widens the search across available retention.
+A missing conversation returns an empty `spans` list."
+x22-0990,cloudflare,GET,/accounts/{account_id}/devices/registrations/{registration_id},get-registration,Get registration,Fetches a single WARP registration.
+x22-1141,cloudflare,POST,/accounts/{account_id}/dns_firewall,dns-firewall-create-dns-firewall-cluster,Create DNS Firewall Cluster,Create a DNS Firewall cluster
+x22-0965,cloudflare,GET,/accounts/{account_id}/devices/policy/include,devices-get-split-tunnel-include-list,Get the Split Tunnel include list,Fetches the list of routes included in the WARP client's tunnel.
+x22-1212,cloudflare,POST,/accounts/{account_id}/email-security/settings/sending_domain_restrictions,email_security_create_sending_domain_restriction,Create a sending domain restriction,Creates a new sending domain restriction to enforce TLS requirements for a domain. Emails without TLS from this domain will be dropped unless the subdomain is in the exclude list.
+x22-2581,cloudflare,GET,/radar/as112/timeseries_groups/edns,radar-get-dns-as112-timeseries-group-by-edns,Get AS112 DNS queries by EDNS support summary,Retrieves the distribution of AS112 DNS queries by EDNS (Extension Mechanisms for DNS) support over time.
+x22-3832,pagerduty,GET,/rulesets/{id},getRuleset,Get a Ruleset,"Get a Ruleset.
+<!-- theme: warning -->
+> ### End-of-life
+> Rulesets and Event Rules will end-of-life soon. We highly recommend that you [migrate to Event Orchestration](https://support.pagerduty.com/docs/migrate-to-event-orchestration) as soon as possible so you can take advantage of the new functionality, such as improved UI, rule creation, APIs and Terraform support, advanced conditions, and rule nesting.
+
+Rulesets allow you to route events to an endpoint and create collections of Event Rules, which define sets of actions to take based on event content.
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#rulesets)
+
+Scoped OAuth requires: `event_rules.read`"
+x22-3439,cloudflare,PATCH,/zones/{zone_id}/settings/ssl_automatic_mode,ssl-detector-automatic-mode-patch-enrollment,Patch Automatic SSL/TLS Enrollment status for given zone,"The automatic system is enabled when this endpoint is hit with value in the request body is set to ""auto"", and disabled when the request body value is set to ""custom""."
+x22-0027,cloudflare,GET,/accounts/{account_id}/abuse-reports,ListAbuseReports,List abuse reports,List the abuse reports for a given account
+x22-0439,cloudflare,POST,/accounts/{account_id}/brand-protection/queries,postAccountsAccountIdBrandProtectionQueries,Create new saved string queries,Return a success message after creating new saved string queries
+x22-1731,cloudflare,POST,/accounts/{account_id}/moq/relays,moq-relays-create,Create a relay,"Provisions a new MoQ relay instance. Auto-creates a publish+subscribe
+token and a subscribe-only token. Token values are included in the
+response (shown once). Config is always set to defaults (upstreams
+off) and cannot be supplied here — sending a non-empty `config` is
+rejected (21014); `null` or `{}` is accepted as absent. Use PUT to
+configure the relay after it exists."
+x22-2877,cloudflare,GET,/user/load_balancers/preview/{preview_id},load-balancer-monitors-preview-result,Preview Result,Get the result of a previous preview operation using the provided preview_id.
+x22-1732,cloudflare,GET,/accounts/{account_id}/moq/relays/{relay_id},moq-relays-get,Get a relay,"Retrieves a single MoQ relay including config and status.
+Tokens are NOT included."
+x22-0047,cloudflare,POST,/accounts/{account_id}/access/ai-controls/mcp/servers,mcp-portals-api-create-servers,Create a new MCP Server,Creates a new MCP server for connecting to an upstream MCP endpoint.
+x22-3313,cloudflare,GET,/zones/{zone_id}/page_shield,page-shield-get-settings,Get client-side security settings,Returns the client-side security product enablement status and reporting behaviors.
+x22-0123,cloudflare,GET,/accounts/{account_id}/access/policies,access-policies-list-access-reusable-policies,List Access reusable policies,Lists Access reusable policies.
+x22-2422,cloudflare,DELETE,/accounts/{account_id}/workers/scripts/{script_name}/secrets/{secret_name},worker-delete-script-secret,Delete Worker script secret,"Remove a secret from a Worker script by creating a new version without that
+secret.
+
+When changing more than one secret at a time, prefer the ""Patch multiple
+script secrets"" API instead of changing many secrets individually."
+x22-2998,cloudflare,POST,/zones/{zone_id}/api_gateway/operations,api-shield-endpoint-management-add-operations-to-a-zone,Create web or API operations,"Creates one or more web or API operations. Hosts, methods, and paths are normalized; an existing matching operation is returned instead of duplicated."
+x22-2098,cloudflare,GET,/accounts/{account_id}/security-center/insights,get-security-center-insights,Retrieves Security Center Insights,"Lists all Security Center insights for the account, showing security findings and recommendations."
+x22-2700,cloudflare,GET,/radar/email/routing/summary/encrypted,radar-get-email-routing-summary-by-encrypted,Get email encryption status summary,Retrieves the distribution of emails by encryption status (encrypted vs. not-encrypted).
+x22-1908,cloudflare,GET,/accounts/{account_id}/r2/buckets/{bucket_name}/storage-class-migration-jobs,r2-list-storage-class-migration-jobs,List Storage Class Migration Jobs,Lists storage-class migration jobs for an R2 bucket.
+x22-0967,cloudflare,GET,/accounts/{account_id}/devices/policy/{policy_id},devices-get-device-settings-policy-by-id,Get device settings profile by ID,Fetches a device settings profile by ID.
+x22-4006,pagerduty,DELETE,/v3/schedules/{id}/overrides/{override_id},deleteOverride,Delete an override,"<!-- theme: info -->
+
+> **Important note:** Shift-based schedules use the V3 API and are not compatible with V2 automations. **To create automations for Shift-Based Schedules, you need to:**
+>
+> 1. **Update your automations** to use the V3 API for all new shift-based schedules
+> 2. **Keep the V2 endpoint** for your existing schedules
+>
+> An upgrade tool for existing schedules is coming soon; your legacy schedules will keep working in the meantime. [Learn more](https://support.pagerduty.com/main/docs/shift-based-schedules-api-upgrade-examples).
+
+Delete an override by ID."
+x22-3088,cloudflare,GET,/zones/{zone_id}/custom_hostnames/fallback_origin,custom-hostname-fallback-origin-for-a-zone-get-fallback-origin-for-custom-hostnames,Get Fallback Origin for Custom Hostnames,Retrieves the current fallback origin configuration for custom hostnames on a zone. The fallback origin handles traffic when specific custom hostname origins are unavailable.
+x22-1734,cloudflare,DELETE,/accounts/{account_id}/moq/relays/{relay_id},moq-relays-delete,Delete a relay,"Soft-deletes a MoQ relay. The relay ID goes in the URL path —
+`DELETE /accounts/{account_id}/moq/relays/{relay_id}` — not the
+request body; there is no collection-level delete endpoint."
+x22-0952,cloudflare,DELETE,/accounts/{account_id}/devices/networks/{network_id},device-managed-networks-delete-device-managed-network,Delete a device managed network,Deletes a device managed network and fetches a list of the remaining device managed networks for an account.
+x22-0138,cloudflare,GET,/accounts/{account_id}/access/service_tokens/{service_token_id},access-service-tokens-get-a-service-token,Get a service token,Fetches a single service token.
+x22-3834,pagerduty,DELETE,/rulesets/{id},deleteRuleset,Delete a Ruleset,"Delete a Ruleset.
+<!-- theme: warning -->
+> ### End-of-life
+> Rulesets and Event Rules will end-of-life soon. We highly recommend that you [migrate to Event Orchestration](https://support.pagerduty.com/docs/migrate-to-event-orchestration) as soon as possible so you can take advantage of the new functionality, such as improved UI, rule creation, APIs and Terraform support, advanced conditions, and rule nesting.
+
+Rulesets allow you to route events to an endpoint and create collections of Event Rules, which define sets of actions to take based on event content.
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#rulesets)
+
+Scoped OAuth requires: `event_rules.write`"
+x22-2025,cloudflare,GET,/accounts/{account_id}/rulesets,listAccountRulesets,List account rulesets,Fetches all rulesets at the account level.
+x22-0555,cloudflare,GET,/accounts/{account_id}/challenges/widgets/{sitekey},accounts-turnstile-widget-get,Turnstile Widget Details,Show a single challenge widget configuration.
+x22-1245,cloudflare,POST,/accounts/{account_id}/email/sending/send,email-sending-account-send-builder,Send an email,"Send an email for the specified account using the structured builder. Provide the sender, recipients, subject, and at least one of text or html; attachments are optional."
+x22-2992,cloudflare,GET,/zones/{zone_id}/api_gateway/labels/user/{name},api-shield-labels-get-user-label,Get a user-defined operation label,Returns a user-defined label and the web and API operations associated with it.
+x22-2722,cloudflare,GET,/radar/email/security/timeseries_groups/dkim,radar-get-email-security-timeseries-group-by-dkim,Get email DKIM validation time series,Retrieves the distribution of emails by DKIM (DomainKeys Identified Mail) validation over time.
+x22-1409,cloudflare,DELETE,/accounts/{account_id}/infrastructure/targets/batch,infra-targets-delete-batch,Delete targets (Deprecated),Removes one or more targets.
+x22-0127,cloudflare,DELETE,/accounts/{account_id}/access/policies/{policy_id},access-policies-delete-an-access-reusable-policy,Delete an Access reusable policy,Deletes an Access reusable policy.
+x22-0254,cloudflare,GET,/accounts/{account_id}/ai-gateway/gateways/{gateway_id}/provider_configs,aig-config-list-providers,List Provider Configs,Lists all AI Gateway evaluator types configured for the account.
+x22-2996,cloudflare,PUT,/zones/{zone_id}/api_gateway/labels/user/{name}/resources/operation,api-shield-labels-replace-operations-attached-to-user-label,Replace operations attached to a user-defined label,Replaces the complete set of web and API operations attached to the user-defined label.
+x22-3740,pagerduty,POST,/incident_workflows,postIncidentWorkflow,Create an Incident Workflow,"Create a new Incident Workflow
+
+An Incident Workflow is a sequence of configurable Steps and associated Triggers that can execute automated Actions for a given Incident.
+
+Scoped OAuth requires: `incident_workflows.write`"
+x22-0279,cloudflare,POST,/accounts/{account_id}/ai-search/instances/{id}/chat/completions,ai-search-instance-chat-completion,Chat Completions,"Performs a chat completion request against an AI Search instance, using indexed content as context for generating responses.
+
+Deprecated: use /accounts/{account_id}/ai-search/namespaces/{name}/instances (and descendant paths) instead."
+x22-3665,pagerduty,POST,/enrichment/query,queryEnrichmentData,Query enrichment data,"Query an enrichment schema for records matching a set of field values. Supply up to 3 query fields; all must match. Returns at most one record for standard schemas, or multiple records for schemas that use a discriminator field.
+
+<!-- theme: warning -->
+
+> ### Early Access
+> This API is in Early Access and may change at any time. Contact your PagerDuty account team to request access.
+
+Scoped OAuth requires: `contextual_data.read`"
+x22-3028,cloudflare,GET,/zones/{zone_id}/available_plans/{plan_identifier},zone-rate-plan-available-plan-details,Available Plan Details,Details of the available plan that the zone can subscribe to.
+x22-2546,cloudflare,DELETE,/organizations/{organization_id}/members/{member_id},Members_delete,Delete organization member,Delete a membership to a particular Organization. (Currently in Public Beta - see https://developers.cloudflare.com/fundamentals/organizations/)
+x22-1916,cloudflare,GET,/accounts/{account_id}/realtime/kit/{app_id}/analytics/daywise,get-org-analytics,Fetch day-wise session and recording analytics data for an App,"Returns day-wise session and recording analytics data of an App for the specified time range start_date to end_date. If start_date and end_date are not provided, the default time range is set from 30 days ago to the current date."
+x22-0411,cloudflare,GET,/accounts/{account_id}/billing/unpaid-invoice,account-billing-get-unpaid-invoices,Get Unpaid Invoices,Gets unpaid invoice information for an account.
+x22-4102,sentry,GET,/api/0/organizations/{organization_id_or_slug}/preprodartifacts/{artifact_id}/install-details/,getOrganizationPreprodArtifactInstallDetails,Retrieve install info for a given artifact,"Retrieve install info for a given artifact.
+
+Returns distribution and installation details for a specific preprod artifact,
+including whether the artifact is installable, the install URL, download count,
+and iOS-specific code signing information."
+x22-2848,cloudflare,GET,/user/billing/profile,user-billing-profile-(-deprecated)-billing-profile-details,Billing Profile Details,Accesses your billing profile object.
+x22-4075,sentry,POST,/api/0/organizations/{organization_id_or_slug}/group-search-views/,createOrganizationIssueView,Create an Issue View,Create a new custom view for the current organization member.
+x22-1417,cloudflare,GET,/accounts/{account_id}/intel/attack-surface-report/issue-types,get-security-center-issue-types,Retrieves Security Center Issues Types,"Lists all available issue types in Security Center, describing categories of security issues."
+x22-1196,cloudflare,PATCH,/accounts/{account_id}/email-security/settings/content_policies/{policy_id},email_security_update_content_policy,Update a content policy,Updates an existing content policy. Only provided fields will be modified.
+x22-1951,cloudflare,GET,/accounts/{account_id}/realtime/kit/{app_id}/recordings,get_all_recordings,Fetch all recordings for an App,"Returns all recordings for an App. If the `meeting_id` parameter is passed, returns all recordings for the given meeting ID."
+x22-3897,pagerduty,GET,/status_pages,listStatusPages,List Status Pages,"List Status Pages.
+
+Scoped OAuth requires: `status_pages.read`"
+x22-4038,pagerduty,POST,/recommendations/event_orchestrations/services/{service_id}/rules/{recommendation_id}/dismiss,dismissRecommendedRule,Dismiss a recommended rule,"Dismiss a recommended rule for a service, recording feedback on whether the recommendation was useful.
+
+Scoped OAuth requires: `recommendations.write`"
+x22-0219,cloudflare,GET,/accounts/{account_id}/ai-gateway/billing/topup/limits,aig-billing-get-topup-limits,Get account top-up limits,Retrieve the minimum and maximum allowed top-up amounts (in cents) for this account.
+x22-1021,cloudflare,GET,/accounts/{account_id}/dex/http-tests/{test_id}/percentiles,dex-endpoints-http-test-percentiles,Get percentiles for an http test,Get percentiles for an http test for a given time period between 1 hour and 7 days.
+x22-0740,cloudflare,GET,/accounts/{account_id}/cloudforce-one/v2/brand-protection/logo/matches,get_LogoMatchList,List logo matches,Get paginated list of logo matches for a specific brand protection logo query
+x22-4207,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/releases/{version}/commits/,listProjectReleaseCommits,List a Project Release's Commits,Retrieve a list of commits for a given release.
+x22-4013,pagerduty,GET,/v3/schedules/{id}/rotations/{rotation_id}/events/{event_id},getEvent,Get an event,"<!-- theme: info -->
+
+> **Important note:** Shift-based schedules use the V3 API and are not compatible with V2 automations. **To create automations for Shift-Based Schedules, you need to:**
+>
+> 1. **Update your automations** to use the V3 API for all new shift-based schedules
+> 2. **Keep the V2 endpoint** for your existing schedules
+>
+> An upgrade tool for existing schedules is coming soon; your legacy schedules will keep working in the meantime. [Learn more](https://support.pagerduty.com/main/docs/shift-based-schedules-api-upgrade-examples).
+
+Retrieve a specific event by ID."
+x22-3819,pagerduty,POST,/maintenance_windows,createMaintenanceWindow,Create a maintenance window,"Create a new maintenance window for the specified services. No new incidents will be created for a service that is in maintenance.
+
+A Maintenance Window is used to temporarily disable one or more Services for a set period of time.
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#maintenance-windows)
+
+Scoped OAuth requires: `services.write`"
+x22-2274,cloudflare,POST,/accounts/{account_id}/vectorize/indexes,vectorize-(-deprecated)-create-vectorize-index,Create Vectorize Index (Deprecated),Creates and returns a new Vectorize Index.
+x22-2531,cloudflare,DELETE,/memberships/{membership_id},user'-s-account-memberships-delete-membership,Delete Membership,Remove the associated member from an account.
+x22-3341,cloudflare,GET,/zones/{zone_id}/rate_limits,rate-limits-for-a-zone-list-rate-limits,List rate limits,**Deprecated**: This endpoint returns 410 Gone. Please use the Rulesets API instead.
+x22-3052,cloudflare,DELETE,/zones/{zone_id}/cache/tiered_cache_smart_topology_enable,smart-tiered-cache-delete-smart-tiered-cache-setting,Delete Smart Tiered Cache setting,"Smart Tiered Cache dynamically selects the single closest upper tier for each of your website’s origins with no configuration required, using our in-house performance and routing data. Cloudflare collects latency data for each request to an origin, and uses the latency data to determine how well any upper-tier data center is connected with an origin. As a result, Cloudflare can select the data center with the lowest latency to be the upper-tier for an origin."
+x22-2116,cloudflare,POST,/accounts/{account_id}/shares,share-create,Create a new share,Creates a new resource share for sharing Cloudflare resources with other accounts or organizations.
+x22-3850,pagerduty,POST,/schedules/preview,createSchedulePreview,Preview a schedule,"Preview what an on-call schedule would look like without saving it.
+
+A Schedule determines the time periods that users are On-Call.
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#schedules)
+
+Scoped OAuth requires: `schedules.write`"
+x22-1749,cloudflare,POST,/accounts/{account_id}/oauth_clients/{oauth_client_id}/rotate_secret,oauth-clients-rotate-secret,Rotate OAuth Client Secret,Creates a second client secret so you can update your client configuration before deleting the old one. The `has_rotated_secret` field on the client will be set to `true`.
+x22-2623,cloudflare,GET,/radar/attacks/layer7/timeseries_groups/http_version,radar-get-attacks-layer7-timeseries-group-by-http-version,Get layer 7 attacks by HTTP version time series,Retrieves the distribution of layer 7 attacks by HTTP version over time.
+x22-2659,cloudflare,GET,/radar/bots/timeseries,radar-get-bots-timeseries,Get bots HTTP requests time series,Retrieves bots HTTP request volume over time.
+x22-4154,sentry,GET,/api/0/organizations/{organization_id_or_slug}/trace-items/attributes/,listOrganizationTraceItemAttributes,List Trace Item Attributes,"List the attribute keys available on a given trace item dataset (spans, logs,
+trace metrics, etc.), with optional substring and structured filtering."
+x22-3950,pagerduty,POST,/templates/{id}/render,renderTemplate,Render a template,"Render a template. This endpoint has a variable request body depending on the template type. For the `status_update` template type, the caller will provide the incident id, and a status update message.
+
+Scoped OAuth requires: `templates.read`"
+x22-0881,cloudflare,POST,/accounts/{account_id}/custom_csrs,custom-csrs-for-an-account-create-custom-csr,Create Custom CSR,Generate a new custom Certificate Signing Request (CSR) for an account. Cloudflare generates and securely stores the private key associated with the CSR.
+x22-3428,cloudflare,GET,/zones/{zone_id}/settings/origin_max_http_version,zone-cache-settings-get-origin-max-http-version-setting,Get Origin Max HTTP Version Setting,"Origin Max HTTP Setting Version sets the highest HTTP version Cloudflare will attempt to use with your origin. This setting allows Cloudflare to make HTTP/2 requests to your origin. (Refer to [Enable HTTP/2 to Origin](https://developers.cloudflare.com/cache/how-to/enable-http2-to-origin/), for more information.). The default value is ""2"" for all plan types except Enterprise where it is ""1""."
+x22-0344,cloudflare,POST,/accounts/{account_id}/alerting/v3/destinations/webhooks,notification-webhooks-create-a-webhook,Create a webhook,Creates a new webhook destination.
+x22-0807,cloudflare,GET,/accounts/{account_id}/cloudforce-one/v2/requests/{project_type}/{request_id}/messages,get_MessageList,List messages for an RFI request,"Retrieves the published, non-deleted messages visible to the agent for an RFI request, with pagination."
+x22-2931,cloudflare,PATCH,/zones/{zone_id}/access/apps/{app_id}/settings,zone-level-access-applications-patch-update-access-application-settings,Update application settings,Updates application settings.
+x22-1209,cloudflare,DELETE,/accounts/{account_id}/email-security/settings/impersonation_registry/{impersonation_registry_id},email_security_delete_impersonation_registry,Delete an impersonation registry entry,"Removes an entry from the impersonation registry. After deletion, this identity will no longer be protected from impersonation."
+x22-2139,cloudflare,DELETE,/accounts/{account_id}/slurper/jobs/{job_id},slurper-delete-job,Delete a job,"Deletes a completed, aborted, or errored R2 Super Slurper migration job. Active jobs cannot be deleted."
+x22-2446,cloudflare,PUT,/accounts/{account_id}/workers/workers/{worker_id},updateWorker,Update Worker,"Perform a complete replacement of a Worker, where omitted properties are set to their default values. This is the exact same as the Create Worker endpoint, but operates on an existing Worker. To perform a partial update instead, use the Edit Worker endpoint."
+x22-1499,cloudflare,GET,/accounts/{account_id}/logpush/transformers/{transformer_id},get-accounts-account_id-logpush-transformers-transformer_id,Get transformer,Gets a single custom log transformer by ID.
+x22-3152,cloudflare,DELETE,/zones/{zone_id}/email/sending/subdomains/{subdomain_id},email-sending-subdomains-delete-sending-subdomain,Delete a sending subdomain,"Disables sending on a subdomain and removes its DNS records. If routing is still active on the subdomain, only sending is disabled."
+x22-2925,cloudflare,POST,/zones/{zone_id}/access/apps/{app_id}/policies,zone-level-access-policies-create-an-access-policy,Create an Access policy,Create a new Access policy for an application.
+x22-3110,cloudflare,GET,/zones/{zone_id}/dns_records/scan/review,dns-records-for-a-zone-review-dns-scan,List Scanned DNS Records,Retrieves the list of DNS records discovered up to this point by the asynchronous scan. These records are temporary until explicitly accepted or rejected via `POST /scan/review`. Additional records may be discovered by the scan later.
+x22-1304,cloudflare,GET,/accounts/{account_id}/gateway/configuration,zero-trust-accounts-get-zero-trust-account-configuration,Get Zero Trust account configuration,Retrieve the current Zero Trust account configuration.
+x22-2423,cloudflare,GET,/accounts/{account_id}/workers/scripts/{script_name}/settings,worker-script-get-settings,Get Worker Script and Version Settings,"Get Worker script metadata and config, such as bindings or usage model."
+x22-2908,cloudflare,DELETE,/zones/{zone_identifier}/custom_pages/assets/{asset_name},custom-assets-for-a-zone-delete-a-custom-asset,Delete a custom asset,Deletes an existing custom asset.
+x22-3044,cloudflare,GET,/zones/{zone_id}/cache/origin_cloud_regions/{origin_ip},origin-cloud-regions-get,Get an origin cloud region mapping,Returns the cloud region mapping for a single origin IP address. The IP path parameter is normalized before lookup (RFC 5952 for IPv6). Returns 404 (code 1142) if the zone has no mappings or if the specified IP has no mapping.
+x22-1798,cloudflare,POST,/accounts/{account_id}/pay-per-crawl/terms/signature,pay-per-crawl.sendTermsSignatureEvent,Record pay-per-crawl terms activity,Records that an account displayed or agreed to the pay-per-crawl terms.
+x22-0451,cloudflare,POST,/accounts/{account_id}/brand-protection/submit,postAccountsAccountIdBrandProtectionSubmit,Create new URL submissions,Return new URL submissions
+x22-1389,cloudflare,POST,/accounts/{account_id}/images/v2/direct_upload,cloudflare-images-create-authenticated-direct-upload-url-v-2,Create authenticated direct upload URL V2,"Direct uploads allow users to upload images without API keys. A common use case are web apps, client-side applications, or mobile devices where users upload content directly to Cloudflare Images. This method creates a draft record for a future image. It returns an upload URL and an image identifier. To verify if the image itself has been uploaded, send an image details request (accounts/:account_identifier/images/v1/:identifier), and check that the `draft: true` property is not present."
+x22-2396,cloudflare,POST,/accounts/{account_id}/workers/observability/telemetry/live-tail,telemetry.live-tail.post,Prepare live tail,Prepare websocket server for live tail.
+x22-0537,cloudflare,POST,/accounts/{account_id}/calls/turn_keys,calls-turn-key-create,Create a TURN key,Creates a new Realtime TURN key.
+x22-1644,cloudflare,PUT,/accounts/{account_id}/magic/gre_tunnels/{gre_tunnel_id},magic-gre-tunnels-update-gre-tunnel,Update GRE Tunnel,Updates a specific GRE tunnel. Use `?validate_only=true` as an optional query parameter to only run validation without persisting changes.
+x22-2374,cloudflare,GET,/accounts/{account_id}/workers/observability/issues/automations/{automationId},issues.automations.get,Get an issue automation,Retrieve an issue automation.
+x22-1663,cloudflare,GET,/accounts/{account_id}/magic/routes/{route_id},magic-static-routes-route-details,Route Details,Get a specific Magic static route.
+x22-2590,cloudflare,GET,/radar/as112/top/locations/ip_version/{ip_version},radar-get-dns-as112-top-locations-by-ip-version,Get top locations by AS112 DNS queries for an IP version,Retrieves the top locations of DNS queries to AS112 for an IP version.
+x22-1094,cloudflare,GET,/accounts/{account_id}/dlp/entries/{entry_id},dlp-entries-get-dlp-entry,Get DLP Entry,Fetches a DLP entry by ID.
+x22-1258,cloudflare,GET,/accounts/{account_id}/event_notifications/r2/{bucket_name}/configuration,r2-get-event-notification-configs,List Event Notification Rules,List all event notification rules for a bucket.
+x22-0262,cloudflare,PATCH,/accounts/{account_id}/ai-gateway/gateways/{gateway_id}/routes/{id},aig-config-update-gateway-dynamic-route,Update an AI Gateway Dynamic Route.,Update an AI Gateway Dynamic Route.
+x22-3533,cloudflare,GET,/zones/{zone_id}/url_normalization,getUrlNormalization,Get URL Normalization settings,Fetches the current URL Normalization settings.
+x22-2906,cloudflare,GET,/zones/{zone_identifier}/custom_pages/assets/{asset_name},custom-assets-for-a-zone-get-a-custom-asset,Get a custom asset,Fetches the details of a custom asset.
+x22-2703,cloudflare,GET,/radar/email/routing/summary/{dimension},radar-get-email-routing-summary,Get email routing summary by dimension,Retrieves the distribution of email routing metrics by the specified dimension.
+x22-1869,cloudflare,GET,/accounts/{account_id}/r2-catalog/{bucket_name}/namespaces/{namespace}/tables,list-tables,List tables in namespace,"Returns a list of tables in the specified namespace within an R2 catalog.
+Supports pagination for efficient traversal of large table collections."
+x22-2195,cloudflare,DELETE,/accounts/{account_id}/stream/webhook,stream-webhook-delete-webhooks,Delete webhooks,Deletes the on-demand video webhook.
+x22-3338,cloudflare,PUT,/zones/{zone_id}/precursor,precursor-for-a-zone-update-config,Update Zone Precursor Config,"Updates the Precursor configuration for a zone.
+
+`default_mode` sets the zone-level enforcement mode. `enforcement_rules`
+is the ordered list of rules that override enforcement for matching
+requests.
+
+This is a partial update: only the fields present in the request body
+are changed.
+
+- Sending an empty array (`[]`) clears all enforcement rules.
+- At least one of `default_mode` or `enforcement_rules` must be present;
+  an empty body (`{}`) is rejected with `400`.
+- Rule `id` is read-only (assigned by Cloudflare) and ignored on input.
+- Rule `mode` must be `min-friction` or `max-security` (`off` is not a
+  valid rule mode; use `default_mode` to disable enforcement).
+- Rule `expression` is limited to 4000 characters. The limit applies to
+  each rule individually, not to the combined size of all rules."
+x22-3498,cloudflare,GET,/zones/{zone_id}/ssl/certificate_packs/quota,certificate-packs-get-certificate-pack-quotas,Get Certificate Pack Quotas,"For a given zone, list certificate pack quotas."
+x22-3496,cloudflare,GET,/zones/{zone_id}/ssl/certificate_packs,certificate-packs-list-certificate-packs,List Certificate Packs,"For a given zone, list all active certificate packs."
+x22-1532,cloudflare,GET,/accounts/{account_id}/magic/advanced_tcp_protection/configs/allowlist/{prefix_id},getAllowlistPrefix,Get allowlist prefix.,Get an allowlist prefix specified by the given UUID.
+x22-2121,cloudflare,POST,/accounts/{account_id}/shares/{share_id}/excluded-recipients,share-excluded-recipient-create,Create a new share excluded recipient,"Excludes a single account from an organization-targeted share. The share continues to target the entire organization, but the excluded account is skipped during reconciliation."
+x22-1099,cloudflare,GET,/accounts/{account_id}/dlp/payload_log,dlp-payload-log-get,Get payload log settings,"Gets the current payload logging configuration for DLP, showing whether matched content is being logged."
+x22-0909,cloudflare,POST,/accounts/{account_id}/data-security/posture/findings/unignore,UnIgnoreFinding,Remove ignore marker from a finding,Ability to un-ignore a Finding if it's previously been ignored. Does nothing if the Finding is not ignored.
+x22-2976,cloudflare,PUT,/zones/{zone_id}/ai-security/settings,ai-security-settings-put,Update the AI Security for Apps status for a zone.,"Update the AI Security for Apps status for the zone, enabling or disabling the detection. The detection results are exposed as `cf.llm.prompt.*` fields for use in custom rules and rate limiting rules; changes can take up to a minute to propagate."
+x22-2920,cloudflare,DELETE,/zones/{zone_id}/access/apps/{app_id},zone-level-access-applications-delete-an-access-application,Delete an Access application,Deletes an application from Access.
+x22-0289,cloudflare,GET,/accounts/{account_id}/ai-search/namespaces/{name},ai-search-fetch-namespace,Get a namespace,Retrieve a namespace and its description.
+x22-1044,cloudflare,DELETE,/accounts/{account_id}/dlp/custom_prompt_topics/{entry_id},dlp-custom-prompt-topics-delete,Delete custom prompt topic,Deletes a DLP custom prompt topic entry.
+x22-1865,cloudflare,POST,/accounts/{account_id}/r2-catalog/{bucket_name}/enable,enable-catalog,Enable R2 bucket as a catalog,"Enable an R2 bucket as an Apache Iceberg catalog. This operation creates
+the necessary catalog infrastructure and activates the bucket for storing
+Iceberg metadata and data files."
+x22-4177,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/environments/{environment}/,getProjectEnvironment,Retrieve a Project Environment,Return details on a project environment.
+x22-1502,cloudflare,GET,/accounts/{account_id}/logpush/transformers/{transformer_id}/content,get-accounts-account_id-logpush-transformers-transformer_id-content,Get transformer content,"Returns the SQL query content for a transformer. Without query params, returns the latest version. With `version_id`, returns the specified version."
+x22-0436,cloudflare,GET,/accounts/{account_id}/brand-protection/matches,getAccountsAccountIdBrandProtectionMatches,Read matches for string queries by ID,Return matches for string queries based on ID
+x22-4019,pagerduty,GET,/webhook_subscriptions/{id},getWebhookSubscription,Get a webhook subscription,"Gets details about an existing webhook subscription.
+
+Scoped OAuth requires: `webhook_subscriptions.read`"
+x22-3713,pagerduty,DELETE,/event_orchestrations/services/{service_id}/cache_variables/{cache_variable_id},deleteCacheVarOnServiceOrch,Delete a Cache Variable for a Service Event Orchestration,"Delete a Cache Variable for a Service Event Orchestration.
+
+Cache Variables allow you to store event data on an Event Orchestration, which can then be used in Event Orchestration rules as part of conditions or actions.
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#event-orchestrations)
+
+Scoped OAuth requires: `services.write`"
+x22-3524,cloudflare,PATCH,/zones/{zone_id}/token_validation/config/{config_id}/credentials,token-validation-config-credentials-edit,Edit token validation credentials,Updates the configuration's complete key set while allowing omitted fields on existing keys to retain stored values. Omitted key identities are removed.
+x22-0678,cloudflare,GET,/accounts/{account_id}/cloudforce-one/requests/quota,cloudforce-one-request-quota,Get Request Quota,Retrieves quota usage for Cloudforce One standard requests.
+x22-1988,cloudflare,GET,/accounts/{account_id}/registrar/domains/{domain_name},registrar-domains-get-domain,Get domain,Show individual domain.
+x22-0471,cloudflare,DELETE,/accounts/{account_id}/browser-rendering/devtools/browser/{session_id},brapi-delete_DevtoolsBrowserDelete,Close browser session.,Closes an existing browser session.
+x22-0687,cloudflare,DELETE,/accounts/{account_id}/cloudforce-one/requests/{request_id}/asset/{asset_id},cloudforce-one-request-asset-delete,Delete a Request Asset,Removes an asset from a Cloudforce One intelligence request.
+x22-0764,cloudflare,POST,/accounts/{account_id}/cloudforce-one/v2/collections/{collection_id}/columns,post_ColumnAdd,Add column to collection,Adds a new column to an existing collection schema. Existing items will have NULL for the new column unless a default value is provided.
+x22-2044,cloudflare,GET,/accounts/{account_id}/rum/site_info/validate/{hostname},web-analytics-validate-site-hostname,Validate a Web Analytics site hostname,"Validates that the provided hostname is well-formed, does not contain wildcards, and has a valid TLD. Returns an empty result on success."
+x22-1431,cloudflare,PUT,/accounts/{account_id}/intel/indicator-feeds/permissions/remove,custom-indicator-feeds-remove-permission,Revoke permission to indicator feed,Revokes access permissions for a custom threat indicator feed.
+x22-3785,pagerduty,POST,/incidents/types,createIncidentType,Create an Incident Type,"Create a new incident type.
+
+Incident Types are a feature which will allow customers to categorize incidents, such as a security incident, a major incident, or a fraud incident.
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#incidentType)
+
+Scoped OAuth requires: `incident_types.write`"
+x22-3356,cloudflare,DELETE,/zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id},deleteZoneRulesetRule,Delete a zone ruleset rule,Deletes an existing rule from a zone ruleset.
+x22-0251,cloudflare,PATCH,/accounts/{account_id}/ai-gateway/gateways/{gateway_id}/logs/{id},aig-config-patch-gateway-log,Patch Gateway Log,Updates metadata for an AI Gateway log entry.
+x22-0731,cloudflare,PATCH,/accounts/{account_id}/cloudforce-one/v2/brand-protection/domain/queries/{query_id},patch_UpdateDomainQuery,Update domain query,Update a saved brand protection domain query with string match patterns
+x22-1496,cloudflare,GET,/accounts/{account_id}/logpush/transformers,get-accounts-account_id-logpush-transformers,List transformers,Lists all custom log transformers for an account.
+x22-1501,cloudflare,DELETE,/accounts/{account_id}/logpush/transformers/{transformer_id},delete-accounts-account_id-logpush-transformers-transformer_id,Delete transformer,Deletes a custom log transformer. Returns 409 Conflict if any active logpush jobs reference the transformer.
+x22-1548,cloudflare,GET,/accounts/{account_id}/magic/advanced_tcp_protection/configs/syn_protection/rules,listSynProtectionRulesForAccount,List all SYN Protection rules.,List all SYN Protection rules for an account.
+x22-1709,cloudflare,GET,/accounts/{account_id}/members,account-members-list-members,List Members,List all members of an account.
+x22-4022,pagerduty,POST,/webhook_subscriptions/{id}/enable,enableWebhookSubscription,Enable a webhook subscription,"Enable a webhook subscription that is temporarily disabled. (This API does not require a request body.)
+
+Webhook subscriptions can become temporarily disabled when the subscription's delivery method is repeatedly rejected by the server.
+
+Scoped OAuth requires: `webhook_subscriptions.write`"
+x22-2811,cloudflare,GET,/radar/quality/speed/top/ases,radar-get-quality-speed-top-ases,Get top ASes by speed test results,"Retrieves the top autonomous systems by bandwidth, latency, jitter, or packet loss, from the previous 90 days of Cloudflare Speed Test data."
+x22-0791,cloudflare,GET,/accounts/{account_id}/cloudforce-one/v2/priority-intelligence/{priority_id},get_PirGet,Get a priority intelligence requirement by ID,Returns a single free-form Priority Intelligence Requirement for the authenticated account.
+x22-1490,cloudflare,POST,/accounts/{account_id}/logpush/jobs,post-accounts-account_id-logpush-jobs,Create Logpush job,Creates a new Logpush job for an account.
+x22-0690,cloudflare,PUT,/accounts/{account_id}/cloudforce-one/requests/{request_id}/message/{message_id},cloudforce-one-request-message-update,Update a Request Message,Updates a message in a Cloudforce One intelligence request thread.
+x22-0905,cloudflare,GET,/accounts/{account_id}/data-security/posture/finding_types/{finding_type_id}/remediation_types,GetRemediationTypesForFindingType,List remediation types for a finding type,"List all remediation types for a given finding type.
+This endpoint supports both cursor and offset pagination.
+Note that `cursor` and `page` are mutually exclusive."
+x22-0469,cloudflare,POST,/accounts/{account_id}/browser-rendering/devtools/browser,brapi-post_DevtoolsAcquire,Get a browser session ID.,Acquires a browser and returns its session ID and websocket URL. Optionally accepts a JSON body with session guardrails to restrict outbound HTTP/S traffic.
+x22-3190,cloudflare,PATCH,/zones/{zone_id}/firewall/rules,firewall-rules-update-priority-of-firewall-rules,Update priority of firewall rules,"**This endpoint has been deprecated and returns 410 Gone. Please use the [Rulesets API](https://developers.cloudflare.com/ruleset-engine/) instead.**
+
+Updates the priority of existing firewall rules."
+x22-2194,cloudflare,PUT,/accounts/{account_id}/stream/webhook,stream-webhook-create-webhooks,Create VOD webhooks,Create a webhook for notifications about on-demand video uploads.
+x22-0742,cloudflare,POST,/accounts/{account_id}/cloudforce-one/v2/brand-protection/logo/queries,post_InsertLogoQuery,Insert logo query,Create a new saved brand protection logo query for visual similarity matching
+x22-2552,cloudflare,POST,/pages/assets/upload,pages-assets-upload,Upload asset,"Upload one or more files to the Pages asset store. Each file is
+identified by its content hash and is uploaded using the same JSON shape
+as the Cloudflare KV bulk write API. Used as part of the Pages Direct
+Upload workflow.
+
+Authenticate with the JWT obtained from the upload-token endpoint:
+GET /accounts/{account_id}/pages/projects/{project_name}/upload-token"
+x22-0969,cloudflare,PATCH,/accounts/{account_id}/devices/policy/{policy_id},devices-update-device-settings-policy,Update a device settings profile,Updates a configured device settings profile.
+x22-3750,pagerduty,PUT,/incident_workflows/triggers/{id},updateIncidentWorkflowTrigger,Update a Trigger,"Update an existing Incident Workflow Trigger
+
+Scoped OAuth requires: `incident_workflows.write`"
+x22-1148,cloudflare,PATCH,/accounts/{account_id}/dns_firewall/{dns_firewall_id}/reverse_dns,dns-firewall-update-dns-firewall-cluster-reverse-dns,Update DNS Firewall Cluster Reverse DNS,Update reverse DNS configuration (PTR records) for a DNS Firewall cluster
+x22-2347,cloudflare,GET,/accounts/{account_id}/workers/dispatch/namespaces/{dispatch_namespace}/scripts/{script_name}/content,namespace-worker-get-script-content,Get Workers for Platforms Script Content,Fetch content from a script uploaded to a Workers for Platforms dispatch namespace.
+x22-4072,sentry,PUT,/api/0/organizations/{organization_id_or_slug}/forwarding/{data_forwarder_id}/,updateOrganizationForwarding,Update a Data Forwarder for an Organization,"Updates a data forwarder for an organization or update a project-specific override.
+Updates to the data forwarder's configuration require `org:write` permissions, and the entire
+configuration to be provided, including the `project_ids` field.
+
+To configure project-specific overrides, specify only the following fields:
+
+  - 'project_id': The ID of the project to create/modify the override for.
+  - 'overrides': Follows the same format as `config` but all provider fields are optional, since only specified fields are overridden.
+  - 'is_enabled': To enable/disable the forwarder for events on the specific project.
+
+Overrides can be performed with `project:write` permissions on the project being modified."
+x22-0313,cloudflare,GET,/accounts/{account_id}/ai-search/namespaces/{name}/instances/{id}/jobs/{job_id}/logs,ai-search-namespace-instance-list-job-logs,List Job Logs,Lists log entries for an AI Search indexing job.
+x22-0772,cloudflare,PATCH,/accounts/{account_id}/cloudforce-one/v2/collections/{collection_id}/items/{item_id},patch_ItemUpdate,Update collection item,Update an item in a collection with partial data.
+x22-2345,cloudflare,POST,/accounts/{account_id}/workers/dispatch/namespaces/{dispatch_namespace}/scripts/{script_name}/assets-upload-session,namespace-worker-script-update-create-assets-upload-session,Create Workers for Platforms Assets Upload Session,"Start uploading a collection of assets for use in a Workers for Platforms script version. To learn more about the direct uploads of assets, see https://developers.cloudflare.com/workers/static-assets/direct-upload/."
+x22-2105,cloudflare,GET,/accounts/{account_id}/security-center/insights/type,get-security-center-insight-counts-by-type,Retrieves Security Center Insight Counts by Type,Retrieves Security Center insight counts aggregated by insight type.
+x22-1931,cloudflare,POST,/accounts/{account_id}/realtime/kit/{app_id}/meetings/{meeting_id}/active-session/kick,KickPartcipants,Kick participants from an active session,Kicks one or more participants from an active session using user ID or custom participant ID.
+x22-2808,cloudflare,GET,/radar/quality/iqi/timeseries_groups,radar-get-quality-index-timeseries-group,Get Internet Quality Index (IQI) time series,"Retrieves a time series (percentiles) of bandwidth, latency, or DNS response time from the Radar Internet Quality Index (IQI)."
+x22-1883,cloudflare,DELETE,/accounts/{account_id}/r2/buckets/{bucket_name}/cors,r2-delete-bucket-cors-policy,Delete Bucket CORS Policy,Delete the CORS policy for a bucket.
+x22-2378,cloudflare,DELETE,/accounts/{account_id}/workers/observability/issues/groups/{groupId},issues.groups.delete,Dissolve an issue group,Dissolve an issue group and restore its members as standalone issues.
+x22-2628,cloudflare,GET,/radar/attacks/layer7/timeseries_groups/vertical,radar-get-attacks-layer7-timeseries-group-by-vertical,Get layer 7 attacks by vertical time series,Retrieves the distribution of layer 7 attacks by targeted vertical over time.
+x22-1447,cloudflare,GET,/accounts/{account_id}/intel/sinkholes/{sinkhole_id}/ingresses,sinkhole-config-list-sinkhole-ingresses,List ingresses for a sinkhole,Returns all ingress rules associated with the specified sinkhole.
+x22-1130,cloudflare,PUT,/accounts/{account_id}/dlp/settings,dlp-settings-update,Update DLP account-level settings (full replacement).,Missing fields are reset to initial (unconfigured) values.
+x22-2602,cloudflare,GET,/radar/attacks/layer3/timeseries_groups/industry,radar-get-attacks-layer3-timeseries-group-by-industry,Get layer 3 attacks by target industries time series,Retrieves the distribution of layer 3 attacks by targeted industry over time.
+x22-3788,pagerduty,GET,/incidents/types/{type_id_or_name}/custom_fields,listIncidentTypeCustomFields,List Incident Type Custom Fields,"List the custom fields for an incident type.
+
+Custom Fields (CF) are a feature which will allow customers to extend Incidents with their own custom data,
+to provide additional context and support features such as customized filtering, search and analytics.
+Custom Fields can be applied to different incident types.
+
+Scoped OAuth requires: `custom_fields.read`"
+x22-1938,cloudflare,GET,/accounts/{account_id}/realtime/kit/{app_id}/meetings/{meeting_id}/participants,get_meeting_participants,Fetch all participants of a meeting,Returns all participants detail for the given meeting ID.
+x22-1061,cloudflare,GET,/accounts/{account_id}/dlp/data_tag_category_templates/{template_id},dlp-data-tag-category-template-read,Retrieve a specific data tag category template.,Gets an available data tag category template.
+x22-1559,cloudflare,PATCH,/accounts/{account_id}/magic/advanced_tcp_protection/configs/tcp_flow_protection/filters/{filter_id},updateTcpFlowProtectionFilter,Update TCP Flow Protection filter.,Update a TCP Flow Protection filter specified by the given UUID.
+x22-3763,pagerduty,PUT,/incidents/{id}/business_services/{business_service_id}/impacts,putIncidentManualBusinessServiceAssociation,Manually change an Incident's Impact on a Business Service.,"Change Impact of an Incident on a Business Service.
+Scoped OAuth requires: `incidents.write`"
+x22-0250,cloudflare,GET,/accounts/{account_id}/ai-gateway/gateways/{gateway_id}/logs/{id},aig-config-get-gateway-log-detail,Get Gateway Log Detail,Retrieves detailed information for a specific AI Gateway log entry.
+x22-1547,cloudflare,PATCH,/accounts/{account_id}/magic/advanced_tcp_protection/configs/syn_protection/filters/{filter_id},updateSynProtectionFilter,Update SYN Protection filter.,Update a SYN Protection filter specified by the given UUID.
+x22-1240,cloudflare,GET,/accounts/{account_id}/email/routing/suppression/{suppression_id},get_publicGetSuppressionRouting,Get account email suppression,Retrieves a single email suppression for the specified account.
+x22-0483,cloudflare,GET,/accounts/{account_id}/browser-rendering/devtools/session/{session_id},brapi-get_DevtoolsSessionDetails,Get session details.,Get details for a specific browser session.
+x22-1485,cloudflare,DELETE,/accounts/{account_id}/load_balancers/{load_balancer_id},account-load-balancers-delete-account-load-balancer,Delete Account Load Balancer,Delete a configured account-scoped load balancer.
+x22-2281,cloudflare,POST,/accounts/{account_id}/vectorize/indexes/{index_name}/query,vectorize-(-deprecated)-query-vector,Query Vectors (Deprecated),Finds vectors closest to a given vector in an index.
+x22-3618,pagerduty,POST,/automation_actions/actions/{id}/teams,createAutomationActionTeamAssociation,Associate an Automation Action with a team,Associate an Automation Action with a team
+x22-0997,cloudflare,PUT,/accounts/{account_id}/devices/settings,zero-trust-accounts-update-device-settings-for-the-zero-trust-account,Update device settings for a Zero Trust account,Updates the current device settings for a Zero Trust account.
+x22-0946,cloudflare,DELETE,/accounts/{account_id}/devices/ip-profiles/{profile_id},delete-ip-profile,Delete IP profile,Delete a WARP Device IP profile.
+x22-3273,cloudflare,POST,/zones/{zone_id}/logs/explorer/datasets,zones-logs-explorer-datasets-create,Create a zone dataset,"Create a new Log Explorer dataset for the zone.
+
+List available zone datasets to see the dataset types and fields you
+can use.
+
+The `fields` property is optional. If not specified, all available fields
+will be enabled.
+
+For dataset field definitions, see: https://developers.cloudflare.com/logs/logpush/logpush-job/datasets/"
+x22-2570,cloudflare,GET,/radar/annotations/outages/locations,radar-get-annotations-outages-top,Get the number of outages by location,Retrieves the number of outages by location.
+x22-2737,cloudflare,GET,/radar/entities/asns/ip,radar-get-entities-asn-by-ip,Get AS details by IP address,Retrieves the requested autonomous system information based on IP address. Population estimates come from APNIC (refer to https://labs.apnic.net/?p=526).
+x22-3839,pagerduty,DELETE,/rulesets/{id}/rules/{rule_id},deleteRulesetEventRule,Delete an Event Rule,"Delete an Event Rule.
+<!-- theme: warning -->
+> ### End-of-life
+> Rulesets and Event Rules will end-of-life soon. We highly recommend that you [migrate to Event Orchestration](https://support.pagerduty.com/docs/migrate-to-event-orchestration) as soon as possible so you can take advantage of the new functionality, such as improved UI, rule creation, APIs and Terraform support, advanced conditions, and rule nesting.
+
+Rulesets allow you to route events to an endpoint and create collections of Event Rules, which define sets of actions to take based on event content.
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#rulesets)
+
+Scoped OAuth requires: `event_rules.write`"
+x22-0134,cloudflare,POST,/accounts/{account_id}/access/saml_certificates/{saml_cert_set_id}/rotate,access-saml-certificates-rotate-certificate,Rotate SAML certificate,"Rotates the SAML encryption certificates within the specified certificate set. This generates a new
+certificate and moves the current certificate to the previous slot. If a previous certificate exists,
+it will be deactivated and removed.
+
+This endpoint ensures zero-downtime rotation by maintaining both current and previous certificates 
+during the transition period, allowing IdPs time to update their configurations. Automated rotation
+happens 30 days before a current certificate's expiration."
+x22-0406,cloudflare,POST,/accounts/{account_id}/billing/profile,account-billing-profile-create-billing-profile,Create Billing Profile,Creates a billing profile for an account.
+x22-0978,cloudflare,GET,/accounts/{account_id}/devices/posture/integration,device-posture-integrations-list-device-posture-integrations,List your device posture integrations,Fetches the list of device posture integrations for an account.
+x22-0987,cloudflare,DELETE,/accounts/{account_id}/devices/registrations,delete-registrations,Delete registrations,Deletes a list of WARP registrations.
+x22-1208,cloudflare,GET,/accounts/{account_id}/email-security/settings/impersonation_registry/{impersonation_registry_id},email_security_get_impersonation_registry,Get an impersonation registry entry,"Retrieves details for a specific impersonation registry entry including the protected identity, email pattern, and synchronization source if directory-synced."
+x22-2132,cloudflare,GET,/accounts/{account_id}/shares/{share_id}/resources/{share_resource_id},share-resources-get-by-id,Get share resource by ID,Get share resource by ID.
+x22-1886,cloudflare,GET,/accounts/{account_id}/r2/buckets/{bucket_name}/domains/custom/{domain},r2-get-custom-domain-settings,Get Custom Domain Settings,Get the configuration for a custom domain on an existing R2 bucket.
+x22-1868,cloudflare,GET,/accounts/{account_id}/r2-catalog/{bucket_name}/namespaces,list-namespaces,List namespaces in catalog,"Returns a list of namespaces in the specified R2 catalog.
+Supports hierarchical filtering and pagination for efficient traversal
+of large namespace hierarchies."
+x22-0459,cloudflare,DELETE,/accounts/{account_id}/browser-extension/config,accounts-browser-extension-config-delete,Delete browser extension configuration,"Deletes the browser extension configuration for an account.
+The shard mapping is preserved and not deleted."
+x22-3230,cloudflare,GET,/zones/{zone_id}/hostnames/settings/{setting_id},per-hostname-tls-settings-list,List TLS setting for hostnames,List the requested TLS setting for the hostnames under this zone.
+x22-4125,sentry,POST,/api/0/organizations/{organization_id_or_slug}/releases/{version}/files/,uploadOrganizationReleaseFile,Upload a New Organization Release File,"Upload a new file for the given release.
+
+Files must be uploaded using the `multipart/form-data` content type, against the
+region-specific domain (e.g. `us.sentry.io` or `de.sentry.io`)."
+x22-2447,cloudflare,DELETE,/accounts/{account_id}/workers/workers/{worker_id},deleteWorker,Delete Worker,"Delete a Worker and all its associated resources (versions, deployments, etc.)."
+x22-3593,pagerduty,POST,/analytics/metrics/incidents/services,getAnalyticsMetricsIncidentsService,Get aggregated service data,"Provides aggregated metrics for incidents aggregated into units of time by service.
+
+Example metrics include Seconds to Resolve, Seconds to Engage, Snoozed Seconds, and Sleep Hour Interruptions. Metric definitions can be found in our [Knowledge Base](https://support.pagerduty.com/docs/insights#services-list).
+Data can be aggregated by day, week or month in addition to by service, or provided just as a collection of aggregates for each service in the dataset for the entire period.  If a unit is provided, each row in the returned dataset will include a 'range_start' timestamp.
+
+<!-- theme: info -->
+> **Note:** Data availability reflects [pipeline processing cycles](https://support.pagerduty.com/main/docs/insights#:~:text=Data%20Update%20Schedule) and is generally within 24 hours under normal conditions.
+
+Scoped OAuth requires: `analytics.write`"
+x22-0118,cloudflare,POST,/accounts/{account_id}/access/organizations,zero-trust-organization-create-your-zero-trust-organization,Create your Zero Trust organization,Sets up a Zero Trust organization for your account.
+x22-2354,cloudflare,GET,/accounts/{account_id}/workers/dispatch/namespaces/{dispatch_namespace}/scripts/{script_name}/settings,namespace-worker-get-script-settings,Get Workers for Platforms Script Settings,Get settings for a script uploaded to a Workers for Platforms dispatch namespace.
+x22-3197,cloudflare,GET,/zones/{zone_id}/firewall/ua_rules/{ua_rule_id},user-agent-blocking-rules-get-a-user-agent-blocking-rule,Get a User Agent Blocking rule,Fetches the details of a User Agent Blocking rule.
+x22-0399,cloudflare,GET,/accounts/{account_id}/billable/usage,billable-usage-v2-get-account-usage,"Get Account Usage (Version 2, Alpha, Restricted)","Returns cost and usage data for a single Cloudflare account, aligned
+with the [FinOps FOCUS v1.3](https://focus.finops.org/focus-specification/v1-3/)
+Cost and Usage dataset specification.
+
+Each record represents one billable metric for one account on one day.
+This includes all metered usage, including usage that falls within
+free-tier allowances and may result in zero cost.
+
+**Note:** Cost and pricing fields are not yet populated and
+will be absent from responses until billing integration is complete.
+
+When `from` and `to` are omitted, defaults to the start of the current
+month through today. The maximum date range is 31 days."
+x22-2436,cloudflare,GET,/accounts/{account_id}/workers/services/{service_name}/environments/{environment_name}/content,worker-environment-get-script-content,Get Worker Environment Script Content,Get Worker script content for an environment.
+x22-2370,cloudflare,PATCH,/accounts/{account_id}/workers/observability/destinations/{slug},destination.update,Update Destination,Update an existing Workers Observability Telemetry Destination.
+x22-2283,cloudflare,GET,/accounts/{account_id}/vectorize/v2/indexes,vectorize-list-vectorize-indexes,List Vectorize Indexes,Returns a list of Vectorize Indexes
+x22-3475,cloudflare,GET,/zones/{zone_id}/snippets/{snippet_name}/content,getZoneSnippetContent,Get a zone snippet content,Fetches the content of a snippet belonging to the zone.
+x22-2241,cloudflare,GET,/accounts/{account_id}/teamnet/virtual_networks,tunnel-virtual-network-list-virtual-networks,List virtual networks,Lists and filters virtual networks in an account.
+x22-1991,cloudflare,GET,/accounts/{account_id}/registrar/extensions/{extension},registrar-extension-get,Get extension,"Returns metadata and JSON Schema documents describing the expected input
+structure for registration operations on a specific
+extension (TLD).
+
+Supports HTTP conditional GET via `ETag`. Include the `ETag` value
+from a previous response in an `If-None-Match` header to receive a
+`304 Not Modified` when the data has not changed."
+x22-1187,cloudflare,GET,/accounts/{account_id}/email-security/settings/block_senders/{pattern_id},email_security_get_blocked_sender,Get a blocked email sender,"Retrieves details for a specific blocked sender pattern including its pattern type, value, and metadata."
+x22-3045,cloudflare,DELETE,/zones/{zone_id}/cache/origin_cloud_regions/{origin_ip},origin-cloud-regions-delete,Delete an origin cloud region mapping,Removes the cloud region mapping for a single origin IP address. The IP path parameter is normalized before lookup. Returns the deleted entry on success. Returns 404 (code 1163) if no mapping exists for the specified IP. When the last mapping for the zone is removed the underlying rule record is also deleted.
+x22-2152,cloudflare,POST,/accounts/{account_id}/sso_connectors/{sso_connector_id}/begin_verification,begin-sso-connector-verification,Begin SSO connector verification,Validates the user has added the DNS TXT record required for validating ownership of the domain they are trying to set up a connector for.
+x22-1005,cloudflare,POST,/accounts/{account_id}/dex/commands,post-commands,Create account commands,Initiate commands for up to 10 devices per account.
+x22-0271,cloudflare,DELETE,/accounts/{account_id}/ai-gateway/gateways/{id},aig-config-delete-gateway,Delete a Gateway,Deletes an AI Gateway dataset.
+x22-3837,pagerduty,GET,/rulesets/{id}/rules/{rule_id},getRulesetEventRule,Get an Event Rule,"Get an Event Rule.
+<!-- theme: warning -->
+> ### End-of-life
+> Rulesets and Event Rules will end-of-life soon. We highly recommend that you [migrate to Event Orchestration](https://support.pagerduty.com/docs/migrate-to-event-orchestration) as soon as possible so you can take advantage of the new functionality, such as improved UI, rule creation, APIs and Terraform support, advanced conditions, and rule nesting.
+
+Rulesets allow you to route events to an endpoint and create collections of Event Rules, which define sets of actions to take based on event content.
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#rulesets)
+
+Note: Create and Update on rules will accept 'description' or 'summary' interchangeably as an extraction action target. Get and List on rules will always return 'summary' as the target. If you are expecting 'description' please change your automation code to expect 'summary' instead.
+
+Scoped OAuth requires: `event_rules.read`"
+x22-2903,cloudflare,GET,/zones/{zone_identifier}/custom_pages,custom-pages-for-a-zone-list-custom-pages,List custom pages,Fetches all the custom pages at the zone level.
+x22-1388,cloudflare,GET,/accounts/{account_id}/images/v2,cloudflare-images-list-images-v2,List images V2,"List up to 10000 images from CF Images, with up to 1000 results per page. Use the optional parameters below to get a specific range of images.
+Pagination is supported via continuation_token.
+
+**Metadata Filtering (Optional):**
+
+You can optionally filter images by custom metadata fields using the `meta.<field>[<operator>]=<value>` syntax.
+
+**Supported Operators:**
+- `eq` / `eq:string` / `eq:number` / `eq:boolean` - Exact match
+- `gt` / `gt:number` - Greater than (number only)
+- `gte` / `gte:number` - Greater than or equal (number only)
+- `lt` / `lt:number` - Less than (number only)
+- `lte` / `lte:number` - Less than or equal (number only)
+- `in` / `in:string` / `in:number` - Match any value in list (pipe-separated)
+
+**Metadata Filter Constraints:**
+- Maximum 5 metadata filters per request
+- Maximum 5 levels of nesting (e.g., `meta.first.second.third.fourth.fifth`)
+- Maximum 10 elements for list operators (`in`)
+- Supports string, number, and boolean value types
+- Range operators (`gt`, `gte`, `lt`, `lte`) only accept numeric values
+
+**Filter Consistency:**
+Filters are combined with AND logic. The system does not validate whether filter combinations are logically consistent. For example, `meta.priority[eq:number]=5&meta.priority[lte:number]=3` will return zero results because no value can satisfy both conditions simultaneously. It is the caller's responsibility to ensure filter combinations make sense.
+
+**Examples:**
+```
+# List all images
+/images/v2
+
+# Filter by metadata [eq]
+/images/v2?meta.status[eq:string]=active
+
+# Filter by metadata [in]
+/images/v2?meta.status[in]=pending|deleted|flagged
+
+# Filter by metadata [in:number]
+/images/v2?meta.ratings[in:number]=4|5
+
+# Filter by metadata range [gte:number]
+/images/v2?meta.priority[gte:number]=1
+
+# Filter by bounded range
+/images/v2?meta.priority[gte:number]=1&meta.priority[lte:number]=5
+
+# Filter by nested metadata
+/images/v2?meta.region.name[eq]=eu-west
+
+# Combine metadata filters with creator
+/images/v2?meta.status[eq]=active&creator=user123
+
+# Multiple metadata filters (AND logic)
+/images/v2?meta.status[eq]=active&meta.priority[eq:number]=5
+```"
+x22-0312,cloudflare,PATCH,/accounts/{account_id}/ai-search/namespaces/{name}/instances/{id}/jobs/{job_id},ai-search-namespace-instance-change-job-status,Cancel an indexing job.,Cancel an in-progress indexing job for an AI Search instance.
+x22-1809,cloudflare,GET,/accounts/{account_id}/pcaps/ownership,magic-pcap-collection-list-pca-ps-bucket-ownership,List PCAPs Bucket Ownership,List all buckets configured for use with PCAPs API.
+x22-2854,cloudflare,DELETE,/user/firewall/access_rules/rules/{rule_id},ip-access-rules-for-a-user-delete-an-ip-access-rule,Delete an IP Access rule,"Deletes an IP Access rule at the user level.
+
+Note: Deleting a user-level rule will affect all zones owned by the user."
+x22-0899,cloudflare,GET,/accounts/{account_id}/data-security/posture/content,ListContentAssets,List DLP content findings,List DLP content findings
+x22-2499,cloudflare,PUT,/accounts/{account_id}/zerotrust/subnets/initial_resolved_ip/{address_family},zero-trust-networks-subnet-update-initial-resolved-ip,Update Initial Resolved IP Subnet,"Updates the CIDR for the account's default Initial Resolved IP Subnet of the given address
+family. The new CIDR must not conflict with existing private routes in the account."
+x22-3532,cloudflare,PATCH,/zones/{zone_id}/token_validation/rules/{rule_id},token-validation-rules-edit,Edit a token validation rule,Updates only the supplied fields on a token validation rule.
+x22-0837,cloudflare,GET,/accounts/{account_id}/cloudforce-one/v2/threat-signals/indicators,rssArticleIndicatorList,List Threat Signals article indicators,List Threat Signals article indicators.
+x22-2006,cloudflare,POST,/accounts/{account_id}/resource-library/applications,createResourceLibraryApplication,Create application,Create a custom application for an account.
+x22-0353,cloudflare,DELETE,/accounts/{account_id}/alerting/v3/policies/{policy_id},notification-policies-delete-a-notification-policy,Delete a Notification policy,Delete a Notification policy.
+x22-3928,pagerduty,GET,/tags/{id},getTag,Get a tag,"Get details about an existing Tag.
+
+A Tag is applied to Escalation Policies, Teams or Users and can be used to filter them.
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#tags)
+
+Scoped OAuth requires: `tags.read`"
+x22-2293,cloudflare,POST,/accounts/{account_id}/vectorize/v2/indexes/{index_name}/metadata_index/delete,vectorize-delete-metadata-index,Delete Metadata Index,Allow Vectorize to delete the specified metadata index.
+x22-1283,cloudflare,GET,/accounts/{account_id}/flagship/apps/{app_id}/flags,flagship_list_flags,List flags,Lists an app's flags ordered by key. Pass `cursor` from `result_info` to page forward; a null cursor indicates the last page.
+x22-1824,cloudflare,GET,/accounts/{account_id}/pipelines/v1/sinks/{sink_id},getV4AccountsByAccount_idPipelinesV1SinksBySink_id,Get Sink Details,Get Sink Details.
+x22-3200,cloudflare,GET,/zones/{zone_id}/firewall/waf/overrides,waf-overrides-list-waf-overrides,List WAF overrides,"**This endpoint has been deprecated and returns 410 Gone. Please use the [Rulesets API](https://developers.cloudflare.com/ruleset-engine/) instead.**
+
+Previously fetched the URI-based WAF overrides in a zone."
+x22-3077,cloudflare,POST,/zones/{zone_id}/custom_certificates,custom-ssl-for-a-zone-create-ssl-configuration,Create SSL Configuration,Upload a new SSL certificate for a zone.
+x22-1953,cloudflare,GET,/accounts/{account_id}/realtime/kit/{app_id}/recordings/active-recording/{meeting_id},get_active_recording,Fetch active recording,Returns the active recording details for the given meeting ID.
+x22-2586,cloudflare,GET,/radar/as112/timeseries_groups/{dimension},radar-get-dns-as112-timeseries-group,Get AS112 time series grouped by dimension,Retrieves the distribution of AS112 queries grouped by dimension over time.
+x22-3283,cloudflare,GET,/zones/{zone_id}/managed_headers,listManagedTransforms,List Managed Transforms,Fetches a list of all Managed Transforms.
+x22-0986,cloudflare,GET,/accounts/{account_id}/devices/registrations,list-registrations,List registrations,Lists WARP registrations.
+x22-0545,cloudflare,PATCH,/accounts/{account_id}/cfd_tunnel/{tunnel_id},cloudflare-tunnel-update-a-cloudflare-tunnel,Update a Cloudflare Tunnel,Updates the name or secret of an existing Cloudflare Tunnel.
+x22-0473,cloudflare,GET,/accounts/{account_id}/browser-rendering/devtools/browser/{session_id}/json/activate/{target_id},brapi-get_DevtoolsJsonActivate,Activate a browser target.,Activates (brings to front) a specific browser target by its ID.
+x22-2329,cloudflare,PUT,/accounts/{account_id}/warp_connector/{tunnel_id}/failover,cloudflare-tunnel-manual-failover-warp-connector-tunnel,Trigger a manual failover for a WARP Connector Tunnel,"Triggers a manual failover for a specific WARP Connector Tunnel, setting the specified client as the active connector. The tunnel must be configured for high availability (HA) and the client must be linked to the tunnel."
+x22-2144,cloudflare,PUT,/accounts/{account_id}/slurper/jobs/{job_id}/resume,slurper-resume-job,Resume a job,"Resumes a paused R2 Super Slurper migration job, continuing the transfer from where it stopped."
+x22-0645,cloudflare,POST,/accounts/{account_id}/cloudforce-one/events/tags/categories/create,post_TagCategoryCreate,Creates a new tag category (SoT),Creates a new Source-of-Truth tag category for an account.
+x22-3838,pagerduty,PUT,/rulesets/{id}/rules/{rule_id},updateRulesetEventRule,Update an Event Rule,"Update an Event Rule. Note that the endpoint supports partial updates, so any number of the writable fields can be provided.
+<!-- theme: warning -->
+> ### End-of-life
+> Rulesets and Event Rules will end-of-life soon. We highly recommend that you [migrate to Event Orchestration](https://support.pagerduty.com/docs/migrate-to-event-orchestration) as soon as possible so you can take advantage of the new functionality, such as improved UI, rule creation, APIs and Terraform support, advanced conditions, and rule nesting.
+
+Rulesets allow you to route events to an endpoint and create collections of Event Rules, which define sets of actions to take based on event content.
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#rulesets)
+
+Note: Create and Update on rules will accept 'description' or 'summary' interchangeably as an extraction action target. Get and List on rules will always return 'summary' as the target. If you are expecting 'description' please change your automation code to expect 'summary' instead.
+
+Scoped OAuth requires: `event_rules.write`"
+x22-1225,cloudflare,POST,/accounts/{account_id}/email-security/settings/url_ignore_patterns,email_security_create_url_ignore_pattern,Create a URL ignore pattern,Creates a new URL rewrite ignore pattern. URLs matching this pattern will not be rewritten.
+x22-0893,cloudflare,POST,/accounts/{account_id}/d1/database/{database_id}/export,d1-export-database,Export D1 Database as SQL,"Returns a URL where the SQL contents of your D1 can be downloaded. Note: this process may take
+some time for larger DBs, during which your D1 will be unavailable to serve queries. To avoid
+blocking your DB unnecessarily, an in-progress export must be continually polled or will automatically cancel."
+x22-2481,cloudflare,PATCH,/accounts/{account_id}/workflows/{workflow_name}/instances/{instance_id}/status,wor-change-status-workflow-instance,Change status of instance,"Changes the execution status of a workflow instance (e.g., pause, resume, terminate)."
+x22-2597,cloudflare,GET,/radar/attacks/layer3/summary/vertical,radar-get-attacks-layer3-summary-by-vertical,Get layer 3 attacks by targeted vertical summary,Retrieves the distribution of layer 3 attacks by targeted vertical.
+x22-1693,cloudflare,PATCH,/accounts/{account_id}/magic/sites/{site_id}/netflow_config,magic-site-netflow-config-patch-netflow-config,Update NetFlow Configuration,Updates NetFlow configuration for a site.
+x22-0500,cloudflare,DELETE,/accounts/{account_id}/builds/repos/connections/{repo_connection_uuid},deleteRepoConnection,Delete a repository connection,Delete a saved repository connection.
+x22-3256,cloudflare,GET,/zones/{zone_id}/logpush/datasets/{dataset_id}/fields,get-zones-zone_id-logpush-datasets-dataset_id-fields,List fields,"Lists all fields available for a dataset. The response result is. an object with key-value pairs, where keys are field names, and values are descriptions."
+x22-2787,cloudflare,GET,/radar/leaked_credential_checks/summary/bot_class,radar-get-leaked-credential-checks-summary-by-bot-class,Get HTTP authentication requests by bot class summary,Retrieves the distribution of HTTP authentication requests by bot class.
+x22-3488,cloudflare,POST,/zones/{zone_id}/speed_api/pages/{url}/tests,speed-create-test,Start page test,"Starts a test for a specific webpage, in a specific region."
+x22-2145,cloudflare,PUT,/accounts/{account_id}/slurper/source/connectivity-precheck,slurper-check-source-connectivity,Check source connectivity,Check whether tokens are valid against the source bucket
+x22-2398,cloudflare,POST,/accounts/{account_id}/workers/observability/telemetry/query,telemetry.query,Run a query,Run a temporary or saved query.
+x22-1566,cloudflare,GET,/accounts/{account_id}/magic/advanced_tcp_protection/configs/tcp_protection_status,getProtectionStatus,Get protection status.,Get the protection status of the account.
+x22-3302,cloudflare,GET,/zones/{zone_id}/origin_tls_client_auth/hostnames,per-hostname-authenticated-origin-pull-list-hostname-associations,List Hostname Associations,List certificate ID - hostname associations for the given zone. Shows which hostnames are associated to which certificates for authenticated origin pulls.
+x22-0355,cloudflare,POST,/accounts/{account_id}/alerting/v3/policies/{policy_id}/email/unsubscribe,notification-policies-unsubscribe-email-from-notification-policy,Unsubscribe email from a Notification policy,Unsubscribes an email address from a notification policy.
+x22-2638,cloudflare,GET,/radar/bgp/ips/top/ases,radar-get-bgp-ips-top-ases,Get top ASes by announced IP space,Returns the top-N autonomous systems by announced IP space at the nearest 8-hour RIB boundary at or before the requested date. The snapped boundary is returned as `anchor_ts`.
+x22-2893,cloudflare,GET,/user/tokens/verify,user-api-tokens-verify-token,Verify Token,Test whether a token works.
+x22-4228,sentry,POST,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/teams/{team_id_or_slug}/,addProjectTeam,Add a Team to a Project,Give a team access to a project.
+x22-3527,cloudflare,POST,/zones/{zone_id}/token_validation/rules/bulk,token-validation-rules-bulk-create,Create token validation rules,Creates multiple token validation rules for the zone in one request.
+x22-2078,cloudflare,GET,/accounts/{account_id}/secondary_dns/peers/{peer_id},secondary-dns-(-peer)-peer-details,Peer Details,Get Peer.
+x22-1270,cloudflare,GET,/accounts/{account_id}/firewall/access_rules/rules,ip-access-rules-for-an-account-list-ip-access-rules,List IP Access rules,Fetches IP Access rules of an account. These rules apply to all the zones in the account. You can filter the results using several optional parameters.
+x22-2875,cloudflare,POST,/user/load_balancers/pools/{pool_id}/preview,load-balancer-pools-preview-pool,Preview Pool,Preview pool health using provided monitor details. The returned preview_id can be used in the preview endpoint to retrieve the results.
+x22-1479,cloudflare,GET,/accounts/{account_id}/load_balancers/regions,load-balancer-regions-list-regions,List Regions,List all region mappings.
+x22-1647,cloudflare,POST,/accounts/{account_id}/magic/ipsec_tunnels,magic-ipsec-tunnels-create-ipsec-tunnels,Create an IPsec tunnel,Creates a new IPsec tunnel associated with an account. Use `?validate_only=true` as an optional query parameter to only run validation without persisting changes.
+x22-0490,cloudflare,POST,/accounts/{account_id}/browser-rendering/scrape,brapi-post_Scrape,Scrape elements.,"Get meta attributes like height, width, text and others of selected elements."
+x22-2297,cloudflare,GET,/accounts/{account_id}/vuln_scanner/credential_sets,list-credential-sets,List credential sets,Returns all credential sets for the account.
+x22-0912,cloudflare,POST,/accounts/{account_id}/data-security/posture/findings/{finding_id}/instances/archive,ArchiveFindingInstance,Archive a finding,Archive one or more finding instances.
+x22-4122,sentry,GET,/api/0/organizations/{organization_id_or_slug}/releases/{version}/deploys/,listOrganizationReleaseDeploys,List a Release's Deploys,"Returns a list of deploys based on the organization, version, and project."
+x22-0488,cloudflare,GET,/accounts/{account_id}/browser-rendering/recording/{session_id},brapi-get_Recording,Get recording data.,Returns the recording data for a given session as a dictionary of events per targetId.
+x22-2736,cloudflare,GET,/radar/entities/asns/botnet_threat_feed,radar-get-as-botnet-threat-feed,Get AS rankings by botnet threat feed activity,Retrieves a ranked list of Autonomous Systems based on their presence in the Cloudflare Botnet Threat Feed. Rankings can be sorted by offense count or number of bad IPs. Optionally compare to a previous date to see rank changes.
+x22-3169,cloudflare,POST,/zones/{zone_id}/environments/{environment_id}/rollback,zonesEnvironmentsRollback,Roll back zone environment,Rolls a zone environment back to its previous version.
+x22-2219,cloudflare,GET,/accounts/{account_id}/subscriptions/{subscription_identifier},account-subscriptions-get-subscription,Get Subscription,Gets an account subscription by identifier.
+x22-4033,pagerduty,POST,/workflows/integrations/{integration_id}/connections,createWorkflowIntegrationConnection,Create Workflow Integration Connection,"Create a new Workflow Integration Connection.
+
+Scoped OAuth requires: `workflow_integrations:connections.write`"
+x22-1536,cloudflare,POST,/accounts/{account_id}/magic/advanced_tcp_protection/configs/prefixes,createPrefix,Create prefix.,Create a prefix for an account.
+x22-0622,cloudflare,POST,/accounts/{account_id}/cloudforce-one/events/event_tag/{event_id}/create,post_EventTagCreate,Adds a tag to an event,Adds a tag to a threat event in Cloudforce One for classification and filtering.
+x22-2896,cloudflare,DELETE,/user/tokens/{token_id},user-api-tokens-delete-token,Delete Token,Destroy a token.
+x22-1313,cloudflare,GET,/accounts/{account_id}/gateway/lists/{list_id},zero-trust-lists-zero-trust-list-details,Get Zero Trust list details,Fetch a single Zero Trust list.
+x22-1394,cloudflare,DELETE,/accounts/{account_id}/images/v2/sourcingkit/migrations/{migration_id},cloudflare-images-sourcingkit-delete-migration,Delete a sourcing kit migration,"Delete an existing migration. Only completed, errored, or aborted migrations can be deleted."
+x22-2391,cloudflare,DELETE,/accounts/{account_id}/workers/observability/queries/{queryId},queries.delete,Delete query,Delete a saved query.
+x22-1201,cloudflare,GET,/accounts/{account_id}/email-security/settings/domains/{domain_id},email_security_get_domain,Get an email domain,"Retrieves detailed information for a specific protected email domain including its delivery configuration, SPF/DMARC status, and authorization state."
+x22-1216,cloudflare,PATCH,/accounts/{account_id}/email-security/settings/sending_domain_restrictions/{sending_domain_restriction_id},email_security_update_sending_domain_restriction,Update a sending domain restriction,Updates an existing sending domain restriction. Only provided fields will be modified. Changes affect which domains require TLS and which subdomains are excluded.
+x22-0559,cloudflare,POST,/accounts/{account_id}/client-secret,account-billing-create-setup-intent,Create Setup Intent,Creates a Stripe setup intent for adding a payment method to an account. Returns a client secret for frontend payment method collection.
+x22-0983,cloudflare,GET,/accounts/{account_id}/devices/posture/{rule_id},device-posture-rules-device-posture-rules-details,Get device posture rule details,Fetches a single device posture rule.
+x22-2824,cloudflare,GET,/radar/tlds,radar-get-tlds,List TLDs,Retrieves a list of TLDs.
+x22-0097,cloudflare,DELETE,/accounts/{account_id}/access/groups/{group_id},access-groups-delete-an-access-group,Delete an Access group,Deletes an Access group.
+x22-1397,cloudflare,PATCH,/accounts/{account_id}/images/v2/sourcingkit/migrations/{migration_id}/lifecycle/start,cloudflare-images-sourcingkit-start-migration,Start a migration,Start a pending migration. The migration will begin importing objects from the configured source.
+x22-1385,cloudflare,DELETE,/accounts/{account_id}/images/v1/{image_id},cloudflare-images-delete-image,Delete image,"Delete an image on Cloudflare Images. On success, all copies of the image are deleted and purged from cache."
+x22-0083,cloudflare,DELETE,/accounts/{account_id}/access/certificates/{certificate_id},access-mtls-authentication-delete-an-mtls-certificate,Delete an mTLS certificate,Deletes an mTLS certificate.
+x22-3548,cloudflare,GET,/zones/{zone_id}/waiting_rooms/{waiting_room_id}/events/{event_id},waiting-room-event-details,Event details,Fetches a single configured event for a waiting room.
+x22-1905,cloudflare,GET,/accounts/{account_id}/r2/buckets/{bucket_name}/sippy,r2-get-bucket-sippy-config,Get Sippy Configuration,Gets configuration for Sippy for an existing R2 bucket.
+x22-3885,pagerduty,GET,/session_configurations,getSessionConfigurations,Get an account's session configurations,"Retrieves session configurations for a PagerDuty account. Returns an array containing
+the requested configurations. If a specific type is requested, the array contains one item.
+If no type is specified, the array contains all available configurations (mobile and web).
+If no configurations exist, a 404 Not Found error will be returned.
+
+A Session Configuration needs to be created before it can be retrieved and used.
+
+Scoped OAuth requires: `session_configurations.read`"
+x22-0991,cloudflare,DELETE,/accounts/{account_id}/devices/registrations/{registration_id},delete-registration,Delete registration,Deletes a WARP registration.
+x22-2064,cloudflare,GET,/accounts/{account_id}/scim/v2/ServiceProviderConfig,scim-service-provider-config-get,Get SCIM Service Provider Config,"Returns the SCIM 2.0 Service Provider configuration (RFC 7643 Section 5). IdPs use this endpoint to auto-configure their SCIM integration with Cloudflare, discovering which optional features (patch, bulk, filter, etc.) are supported."
+x22-0982,cloudflare,PATCH,/accounts/{account_id}/devices/posture/integration/{integration_id},device-posture-integrations-update-device-posture-integration,Update a device posture integration,Updates a configured device posture integration.
+x22-0437,cloudflare,GET,/accounts/{account_id}/brand-protection/matches/download,getAccountsAccountIdBrandProtectionMatchesDownload,Download matches for string queries by ID,Return matches as CSV for string queries based on ID
+x22-4252,sentry,PUT,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/hooks/{hook_id}/,Update a Service Hook,,Update a service hook.
+x22-1335,cloudflare,DELETE,/accounts/{account_id}/gateway/proxy_endpoints/{proxy_endpoint_id},zero-trust-gateway-proxy-endpoints-delete-proxy-endpoint,Delete a proxy endpoint,Delete a configured Zero Trust Gateway proxy endpoint.
+x22-0787,cloudflare,GET,/accounts/{account_id}/cloudforce-one/v2/priority-intelligence/interests/evaluations/{evaluation_id},get_PirInterestEvaluationGet,Get a persisted account-interest evaluation,Returns a previously completed live account-interest evaluation by ID. The evaluation must belong to this account.
+x22-0744,cloudflare,POST,/accounts/{account_id}/cloudforce-one/v2/brand-protection/logo/search,post_SearchLogoSimilarity,Search scanned images,Submit an image and find the n closest matches from the scanned images index without creating any match records. Returns similarity scores and metadata for each match.
+x22-1993,cloudflare,POST,/accounts/{account_id}/registrar/registrations,registrar-domain-registration-create,Create Registration,"Starts a domain registration workflow. This is a billable operation — successful
+registration charges the account's default payment method. All successful
+domain registrations are non-refundable — once the workflow completes with
+`state: succeeded`, the charge cannot be reversed.
+
+### Prerequisites
+- The account must have a billing profile with a valid default payment method.
+  Set this up at `https://dash.cloudflare.com/{account_id}/billing/payment-info`.
+- The account must not already be at the maximum supported domain limit.
+  A single account may own up to 500 domains in total across registrations
+  created through either the dashboard or this API.
+- The domain must be on a supported extension for programmatic registration.
+- Use `POST /domain-check` immediately before calling this endpoint to confirm
+  real-time availability and pricing.
+
+### Supported extensions
+
+This API supports programmatic registration for all extensions supported by
+the dashboard experience, with the following exceptions:
+
+`giving`, `mom`, `inc`, `lol`, `sh`, `link`, `cc`, `new`
+
+Cloudflare Registrar supports 400+ extensions in the dashboard. Extensions
+listed above can be registered at
+`https://dash.cloudflare.com/{account_id}/domains/registrations`.
+
+### Express mode
+The only required field is `domain_name`. If `contacts` is omitted, the system
+uses the account's default address book entry as the registrant. If no default
+exists and no contact is provided, the request fails. Set up a default address
+book entry and accept the required agreement at
+`https://dash.cloudflare.com/{account_id}/domains/registrations`.
+
+### Defaults
+- `years`: defaults to the extension's minimum registration period (1 year for
+  most extensions, but varies — for example, `.ai` (if supported) requires a minimum of 2 years).
+- `auto_renew`: defaults to `false`. Setting it to `true` is an explicit
+  opt-in authorizing Cloudflare to charge the account's default payment
+  method up to 30 days before domain expiry to renew the registration.
+  Renewal pricing may change over time based on registry pricing.
+- `privacy_mode`: defaults to `redaction`.
+
+### Premium domains
+Premium domain registration is not currently supported by this API.
+If `POST /domain-check` returns `tier: premium`, do not call this
+endpoint for that domain.
+
+### Response behavior
+By default, the server holds the connection for a bounded, server-defined
+amount of time while the registration completes. Most registrations finish
+within this window and return `201 Created` with a completed workflow status.
+
+If the registration is still processing after this synchronous wait window,
+the server returns `202 Accepted`. Poll the URL in `links.self` to track progress.
+
+To skip the wait and receive an immediate `202`, send `Prefer: respond-async`."
+x22-3294,cloudflare,PUT,/zones/{zone_id}/origin/cloud_regions/batch,origin-cloud-regions-v2-batch-upsert,Batch create or replace origin cloud region mappings,"Upserts up to 100 IP-to-cloud-region mappings in a single request. Items in the request body are created or replaced; mappings not included in the request body are preserved unchanged (this is a merge operation, not a full collection replacement). Each item is validated independently — valid items are applied and invalid items are returned in the `failed` array. The vendor and region for every item are validated against the list from `GET /zones/{zone_id}/origin/cloud_regions/supported_regions`."
+x22-1337,cloudflare,GET,/accounts/{account_id}/gateway/rules,zero-trust-gateway-rules-list-zero-trust-gateway-rules,List Zero Trust Gateway rules,List Zero Trust Gateway rules for an account.
+x22-0548,cloudflare,GET,/accounts/{account_id}/cfd_tunnel/{tunnel_id}/connections,cloudflare-tunnel-list-cloudflare-tunnel-connections,List Cloudflare Tunnel connections,"Lists the connections for a Cloudflare Tunnel, including connector IDs, cloudflared versions, and Cloudflare locations."
+x22-2779,cloudflare,GET,/radar/http/top/locations/bot_class/{bot_class},radar-get-http-top-locations-by-bot-class,Get top locations by HTTP requests for a bot class,"Retrieves the top locations, by HTTP requests, of the requested bot class."
+x22-1320,cloudflare,GET,/accounts/{account_id}/gateway/locations/{location_id},zero-trust-gateway-locations-zero-trust-gateway-location-details,Get Zero Trust Gateway location details,Get a single Zero Trust Gateway location.
+x22-2708,cloudflare,GET,/radar/email/routing/timeseries_groups/ip_version,radar-get-email-routing-timeseries-group-by-ip-version,Get email IP version time series,Retrieves the distribution of emails by IP version over time.
+x22-0579,cloudflare,GET,/accounts/{account_id}/cloudforce-one/events/dataset,get_DatasetList,Lists all datasets in an account,Lists all threat event datasets configured in Cloudforce One.
+x22-1627,cloudflare,POST,/accounts/{account_id}/magic/connectors,mconn-connectors-create,Create Connector,Creates a Magic WAN Connector.
+x22-2657,cloudflare,GET,/radar/bots/crawlers/timeseries_groups/{dimension},radar-get-crawlers-timeseries-group,Get time series of crawler HTTP request distribution by dimension,"Retrieves the distribution of HTTP requests from crawlers, grouped by the specified dimension over time."
+x22-1223,cloudflare,PATCH,/accounts/{account_id}/email-security/settings/trusted_domains/{trusted_domain_id},email_security_update_trusted_domain,Update a trusted email domain,Updates an existing trusted domain pattern. Only provided fields will be modified. Changes take effect for new emails matching the pattern.
+x22-0847,cloudflare,GET,/accounts/{account_id}/cni/cnis/{cni},get_cni,Get information about a CNI object,"Retrieves configuration details for a specific Cloud Network Interconnect (CNI), including
+connection status and parameters."
+x22-0620,cloudflare,PATCH,/accounts/{account_id}/cloudforce-one/events/event-categories/by-id/{category_id},patch_CategoryUpdate,Updates a category,"Partially updates a threat event category in Cloudforce One, modifying specific fields without replacing the entire category."
+x22-4123,sentry,POST,/api/0/organizations/{organization_id_or_slug}/releases/{version}/deploys/,createOrganizationReleaseDeploy,Create a Deploy,Create a deploy for a given release.
+x22-1416,cloudflare,GET,/accounts/{account_id}/intel/asn/{asn}/subnets,asn-intelligence-get-asn-subnets,Get ASN Subnets,Get ASN Subnets.
+x22-3529,cloudflare,POST,/zones/{zone_id}/token_validation/rules/preview,token-validation-rules-preview,Preview a token validation rule,Returns zone operations annotated as included or excluded to preview the rule's coverage before creation.
+x22-3029,cloudflare,GET,/zones/{zone_id}/available_rate_plans,zone-rate-plan-list-available-rate-plans,List Available Rate Plans,Lists all rate plans the zone can subscribe to.
+x22-1580,cloudflare,GET,/accounts/{account_id}/magic/cf1_sites,magic-cf1-sites-list-cf1-sites,List CF1 Sites,Lists CF1 Sites associated with an account. A CF1 Site represents a physical customer network location with optional geographic coordinates.
+x22-2321,cloudflare,POST,/accounts/{account_id}/warp_connector,cloudflare-tunnel-create-a-warp-connector-tunnel,Create a Warp Connector Tunnel,Creates a new Warp Connector Tunnel in an account.
+x22-0337,cloudflare,GET,/accounts/{account_id}/alerting/v3/available_alerts,notification-alert-types-get-alert-types,Get Alert Types,Gets a list of all alert types for which an account is eligible.
+x22-3497,cloudflare,POST,/zones/{zone_id}/ssl/certificate_packs/order,certificate-packs-order-advanced-certificate-manager-certificate-pack,Order Advanced Certificate Manager Certificate Pack,"For a given zone, order an advanced certificate pack."
+x22-2260,cloudflare,GET,/accounts/{account_id}/urlscanner/scan,urlscanner-search-scans,Search URL scans,"Search scans by date and webpages' requests, including full URL (after redirects), hostname, and path. <br/> A successful scan will appear in search results a few minutes after finishing but may take much longer if the system in under load. By default, only successfully completed scans will appear in search results, unless searching by `scanId`. Please take into account that older scans may be removed from the search index at an unspecified time."
+x22-2940,cloudflare,GET,/zones/{zone_id}/access/groups,zone-level-access-groups-list-access-groups,List Access groups,Lists all Access groups.
+x22-0235,cloudflare,GET,/accounts/{account_id}/ai-gateway/gateways/{gateway_id}/custom-domains,aig-config-list-custom-domain,List Custom Domains,Lists all AI Gateway evaluator types configured for the account.
+x22-1226,cloudflare,POST,/accounts/{account_id}/email-security/settings/url_ignore_patterns/batch,email_security_batch_url_ignore_patterns,Batch URL ignore patterns,Sends a batch of URL ignore patterns API calls to execute together.
+x22-3207,cloudflare,PATCH,/zones/{zone_id}/firewall/waf/packages/{package_id},waf-packages-update-a-waf-package,Update a WAF package,"Updates a WAF package. You can update the sensitivity and the action of an anomaly detection WAF package.
+
+**Note:** Applies only to the [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/)."
+x22-3076,cloudflare,GET,/zones/{zone_id}/custom_certificates,custom-ssl-for-a-zone-list-ssl-configurations,List SSL Configurations,"List, search, and filter all of your custom SSL certificates. The higher priority will break ties across overlapping 'legacy_custom' certificates, but 'legacy_custom' certificates will always supercede 'sni_custom' certificates."
+x22-1911,cloudflare,GET,/accounts/{account_id}/r2/metrics,r2-get-account-level-metrics,Get Account-Level Metrics,Get Storage/Object Count Metrics across all buckets in your account. Note that Account-Level Metrics may not immediately reflect the latest data.
+x22-2946,cloudflare,POST,/zones/{zone_id}/access/identity_providers,zone-level-access-identity-providers-add-an-access-identity-provider,Add an Access identity provider,Adds a new identity provider to Access.
+x22-0288,cloudflare,POST,/accounts/{account_id}/ai-search/namespaces,ai-search-create-namespace,Create a namespace,Create a namespace for organizing AI Search instances.
+x22-0414,cloudflare,GET,/accounts/{account_id}/botnet_feed/asn/{asn_id}/full_report,botnet-threat-feed-get-full-report,Get full report,Gets all the data the botnet threat feed tracking database has for a given ASN registered to user account.
+x22-2762,cloudflare,GET,/radar/http/timeseries_groups/ip_version,radar-get-http-timeseries-group-by-ip-version,Get HTTP requests by IP version time series,Retrieves the distribution of HTTP requests by IP version over time.
+x22-0958,cloudflare,GET,/accounts/{account_id}/devices/policy,devices-get-default-device-settings-policy,Get the default device settings profile,Fetches the default device settings profile for an account.
+x22-4117,sentry,POST,/api/0/organizations/{organization_id_or_slug}/releases/,createOrganizationRelease,Create a New Release for an Organization,"Create a new release for the given organization. Releases are used by Sentry to
+improve error reporting by correlating first-seen events with the release that may
+have introduced them, and are required for source maps and other debug features.
+
+Release versions that are the same across multiple projects within an organization
+are treated as the same release in Sentry."
+x22-4192,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/members/,listProjectMembers,List a Project's Organization Members,Returns a list of active organization members that belong to any team assigned to the project.
+x22-2157,cloudflare,DELETE,/accounts/{account_id}/storage/kv/namespaces/{namespace_id},workers-kv-namespace-remove-a-namespace,Remove a Namespace,Deletes the namespace corresponding to the given ID.
+x22-1011,cloudflare,GET,/accounts/{account_id}/dex/devices/dex_tests/{dex_test_id},device-dex-test-get-device-dex-test,Get Device DEX test,Fetch a single DEX test.
+x22-2612,cloudflare,GET,/radar/attacks/layer3/top/vertical,radar-get-attacks-layer3-top-verticals,Get top verticals targeted by layer 3 attacks,"This endpoint is deprecated. To continue getting this data, switch to the summary by vertical endpoint."
+x22-2819,cloudflare,GET,/radar/robots_txt/top/domain_categories,radar-get-robots-txt-top-domain-categories-by-files-parsed,Get top domain categories by robots.txt files parsed,Retrieves the top domain categories by the number of robots.txt files parsed.
+x22-1715,cloudflare,POST,/accounts/{account_id}/mnm/config,magic-network-monitoring-configuration-create-account-configuration,Create account configuration,Create a new network monitoring configuration.
+x22-1613,cloudflare,GET,/accounts/{account_id}/magic/cloud/providers,providers-list,List Cloud Integrations,List Cloud Integrations (Closed Beta).
+x22-2789,cloudflare,GET,/radar/leaked_credential_checks/summary/{dimension},radar-get-leaked-credential-checks-summary,Get HTTP authentication requests distribution by dimension,Retrieves an aggregated summary of HTTP authentication requests grouped by the specified dimension.
+x22-2210,cloudflare,POST,/accounts/{account_id}/stream/{identifier}/downloads,stream-mp4-downloads-create-downloads,Create downloads,Creates a download for a video when a video is ready to view. Use `/downloads/{download_type}` instead for type-specific downloads. Available types are `default` and `audio`.
+x22-3061,cloudflare,GET,/zones/{zone_id}/client_certificates/{client_certificate_id},client-certificate-for-a-zone-client-certificate-details,Client Certificate Details,Get Details for a single mTLS API Shield Client Certificate.
+x22-4081,sentry,PUT,/api/0/organizations/{organization_id_or_slug}/issues/,updateOrganizationIssues,Bulk Mutate an Organization's Issues,"Bulk mutate various attributes on a maxmimum of 1000 issues. 
+- For non-status updates, the `id` query parameter is required. 
+- For status updates, the `id` query parameter may be omitted to update issues that match the filtering. 
+If any IDs are out of scope, the data won't be mutated but the endpoint will still produce a successful response. For example, if no issues were found matching the criteria, a HTTP 204 is returned."
+x22-2284,cloudflare,POST,/accounts/{account_id}/vectorize/v2/indexes,vectorize-create-vectorize-index,Create Vectorize Index,Creates and returns a new Vectorize Index.
+x22-1341,cloudflare,GET,/accounts/{account_id}/gateway/rules/{rule_id},zero-trust-gateway-rules-zero-trust-gateway-rule-details,Get Zero Trust Gateway rule details.,Get a single Zero Trust Gateway rule.
+x22-0432,cloudflare,GET,/accounts/{account_id}/brand-protection/logos,getAccountsAccountIdBrandProtectionLogos,Read all saved logo queries,Return all saved logo queries
+x22-3420,cloudflare,GET,/zones/{zone_id}/settings/h2_prioritization,zone-settings-get-h2-prioritization-setting,Get HTTP/2 Prioritization setting,"HTTP/2 Prioritization controls the order in which assets are delivered to browsers.
+Cloudflare's HTTP/2 Prioritization overrides the default browser prioritization order,
+improving the loading performance of web pages."
+x22-2406,cloudflare,DELETE,/accounts/{account_id}/workers/scripts/{script_name},worker-script-delete-worker,Delete Worker,Delete your worker. This call has no response body on a successful delete.
+x22-1568,cloudflare,GET,/accounts/{account_id}/magic/apps,magic-account-apps-list-apps,List Apps,Lists Apps associated with an account.
+x22-2770,cloudflare,GET,/radar/http/top/ases/device_type/{device_type},radar-get-http-top-ases-by-device-type,Get top ASes by HTTP requests for a device type,"Retrieves the top autonomous systems, by HTTP requests, of the requested device type."
+x22-3795,pagerduty,GET,/incidents/types/{type_id_or_name}/custom_fields/{field_id}/field_options/{field_option_id},getIncidentTypeCustomFieldFieldOptions,Get a Field Option on a Custom Field,"Get a field option on a custom field
+
+Custom Fields (CF) are a feature which will allow customers to extend Incidents with their own custom data,
+to provide additional context and support features such as customized filtering, search and analytics.
+Custom Fields can be applied to different incident types.
+
+Scoped OAuth requires: `custom_fields.read`"
+x22-1147,cloudflare,GET,/accounts/{account_id}/dns_firewall/{dns_firewall_id}/reverse_dns,dns-firewall-show-dns-firewall-cluster-reverse-dns,Show DNS Firewall Cluster Reverse DNS,Show reverse DNS configuration (PTR records) for a DNS Firewall cluster
+x22-2970,cloudflare,PATCH,/zones/{zone_id}/addressing/regional_hostnames/{hostname},dls-zone-regional-hostnames-patch,Update Regional Hostname,Update the configuration for a specific Regional Hostname. Only the region_key of a hostname is mutable.
+x22-4224,sentry,POST,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/symbol-sources/,addProjectSymbolSource,Add a Symbol Source to a Project,Add a custom symbol source to a project.
+x22-3858,pagerduty,PUT,/services/{id},updateService,Update a service,"Update an existing service.
+
+A service may represent an application, component, or team you wish to open incidents against.
+
+There is a limit of 100,000 open Incidents per Service. If the limit is reached and you disable `auto_resolve_timeout` (set to 0 or null), the API will respond with an error.
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#services)
+
+Scoped OAuth requires: `services.write`"
+x22-0307,cloudflare,GET,/accounts/{account_id}/ai-search/namespaces/{name}/instances/{id}/items/{item_id}/download,ai-search-namespace-instance-get-item-content,Download Item Content.,Downloads the raw file content for a specific item from the managed AI Search instance storage.
+x22-0055,cloudflare,GET,/accounts/{account_id}/access/apps/{app_id},access-applications-get-an-access-application,Get an Access application,Fetches information about an Access application.
+x22-4107,sentry,GET,/api/0/organizations/{organization_id_or_slug}/preprodartifacts/snapshots/latest-base/,getOrganizationPreprodArtifactSnapshotLatestBase,Retrieve latest base Snapshot,"Retrieve the most recent base snapshot for a given app.
+
+A base snapshot is one uploaded without a `base_sha` (i.e., a snapshot
+from a base branch like `main`). Use the optional `branch` and `project`
+parameters to narrow the search.
+
+The response includes the full image list with download URLs. Use
+`compact_metadata=1` to reduce image metadata.
+
+This endpoint requires a bearer token with `project:read` access."
+x22-2652,cloudflare,GET,/radar/bgp/top/ases,radar-get-bgp-top-ases,Get top ASes by BGP updates,Retrieves the top autonomous systems by BGP updates (announcements only).
+x22-0212,cloudflare,POST,/accounts/{account_id}/ai-gateway/billing/spending-limit,aig-billing-set-spending-limit,Set spending limit (deprecated),"Deprecated: spending limits can no longer be created, enabled, or modified and this endpoint always responds 403. Use the new AI Gateway spend limits instead: https://developers.cloudflare.com/ai-gateway/features/spend-limits/. Existing limits can be removed via DELETE /spending-limit."
+x22-3920,pagerduty,POST,/status_pages/{id}/subscriptions,createStatusPageSubscription,Create a Status Page Subscription,"Create a Subscription for a Status Page by Status Page ID.
+
+Scoped OAuth requires: `status_pages.write`"
+x22-0755,cloudflare,GET,/accounts/{account_id}/cloudforce-one/v2/brand-protection/takedown-notices/{notice_id}/letters/{letter_id},get_TakedownLetterGet,Get takedown letter,"Get a specific takedown letter by ID, including the rendered text."
+x22-1156,cloudflare,PATCH,/accounts/{account_id}/dns_settings/views/{view_id},dns-views-for-an-account-update-internal-dns-view,Update Internal DNS View,Update an existing Internal DNS View
+x22-1880,cloudflare,PATCH,/accounts/{account_id}/r2/buckets/{bucket_name},r2-patch-bucket,Patch Bucket,Updates properties of an existing R2 bucket.
+x22-2810,cloudflare,GET,/radar/quality/speed/summary,radar-get-quality-speed-summary,Get speed tests summary,"Retrieves a summary of bandwidth, latency, jitter, and packet loss, from the previous 90 days of Cloudflare Speed Test data."
+x22-0975,cloudflare,PUT,/accounts/{account_id}/devices/policy/{policy_id}/include,devices-set-split-tunnel-include-list-for-a-device-settings-policy,Set the Split Tunnel include list for a device settings profile,Sets the list of routes included in the WARP client's tunnel for a specific device settings profile.
+x22-3688,pagerduty,PUT,/event_orchestrations/{id}/integrations/{integration_id},updateOrchestrationIntegration,Update an Integration for an Event Orchestration,"Update an Integration associated with this Event Orchestrations.
+
+You can use the Routing Key from this Integration to send events to PagerDuty!
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#event-orchestrations)
+
+Scoped OAuth requires: `event_orchestrations.write`"
+x22-0605,cloudflare,DELETE,/accounts/{account_id}/cloudforce-one/events/dataset/{dataset_id}/indicators/{indicator_id}/relationships/{rel_uuid},delete_IndicatorRelationshipDelete,Delete a relationship,Deletes a relationship by UUID. Idempotent: returns deleted=false if not found.
+x22-2424,cloudflare,PATCH,/accounts/{account_id}/workers/scripts/{script_name}/settings,worker-script-patch-settings,Patch Worker Script and Version Settings,"Patch Worker script metadata or config, such as bindings or usage model."
+x22-3192,cloudflare,PUT,/zones/{zone_id}/firewall/rules/{rule_id},firewall-rules-update-a-firewall-rule,Update a firewall rule,"**This endpoint has been deprecated and returns 410 Gone. Please use the [Rulesets API](https://developers.cloudflare.com/ruleset-engine/) instead.**
+
+Updates an existing firewall rule."
+x22-3216,cloudflare,GET,/zones/{zone_id}/healthchecks,health-checks-list-health-checks,List Health Checks,List configured health checks.
+x22-4147,sentry,GET,/api/0/organizations/{organization_id_or_slug}/sessions/,getOrganizationSessions,Retrieve Release Health Session Statistics,"Returns a time series of release health session statistics for projects bound to an organization.
+
+The interval and date range are subject to certain restrictions and rounding rules.
+
+The date range is rounded to align with the interval, and is rounded to at least one
+hour. The interval can at most be one day and at least one hour currently. It has to cleanly
+divide one day, for rounding reasons.
+
+Because of technical limitations, this endpoint returns
+at most 10000 data points. For example, if you select a 90 day window grouped by releases,
+you will see at most `floor(10k / (90 + 1)) = 109` releases. To get more results, reduce the
+`statsPeriod`."
+x22-3358,cloudflare,GET,/zones/{zone_id}/rulesets/{ruleset_id}/versions,listZoneRulesetVersions,List a zone ruleset's versions,Fetches the versions of a zone ruleset.
+x22-1092,cloudflare,PUT,/accounts/{account_id}/dlp/entries/predefined/{entry_id},dlp-entries-update-predefined-entry,Update predefined entry,Updates a DLP entry.
+x22-2593,cloudflare,GET,/radar/attacks/layer3/summary/industry,radar-get-attacks-layer3-summary-by-industry,Get layer 3 attacks by targeted industry summary,Retrieves the distribution of layer 3 attacks by targeted industry.
+x22-1761,cloudflare,POST,/accounts/{account_id}/one/integrations/{id}/resume,resume_integration_v2,Resume integration,"Resumes a paused integration, restarting crawlers."
+x22-0041,cloudflare,POST,/accounts/{account_id}/access/ai-controls/mcp/portals,mcp-portals-api-create-portals,Create a new MCP Portal,Creates a new MCP portal for managing AI tool access through Cloudflare Access.
+x22-3804,pagerduty,POST,/incidents/custom_fields/{field_id}/field_options,createCustomFieldsFieldOption,Create a Field Option,"<!-- theme: warning -->
+> ### Deprecated
+> This endpoint is deprecated and only works for fields on the Base Incident Type. \
+> For more flexibility, we recommend using the Incident Types endpoint: \
+> [/incidents/types/{type_id_or_name}/custom_fields/{field_id}/field_options](openapiv3.json/paths/~1incidents~1types~1{type_id_or_name}~1custom_fields~1{field_id}~1field_options/post)
+
+Create a new Field Option for a Custom Field on the Base Incident Type. Field Options may only be created for Fields that have `field_options`. A Field may have no more than 10 enabled options.
+
+Scoped OAuth requires: `custom_fields.write`"
+x22-2063,cloudflare,GET,/accounts/{account_id}/scim/v2/Schemas/{schema_id},scim-schemas-get,Get SCIM Schema,Returns a single SCIM schema definition by schema URI ID (RFC 7643 Section 7). Valid IDs are `urn:ietf:params:scim:schemas:core:2.0:User` and `urn:ietf:params:scim:schemas:core:2.0:Group`.
+x22-3631,pagerduty,DELETE,/automation_actions/runners/{id}/teams/{team_id},deleteAutomationActionsRunnerTeamAssociation,Disassociate a runner from a team,Disassociates a runner from a team
+x22-3912,pagerduty,POST,/status_pages/{id}/posts/{post_id}/post_updates,createStatusPagePostUpdate,Create a Status Page Post Update,"Create a Post Update for a Post by Post ID.
+
+Scoped OAuth requires: `status_pages.write`"
+x22-2358,cloudflare,PUT,/accounts/{account_id}/workers/dispatch/namespaces/{dispatch_namespace}/scripts/{script_name}/tags/{tag},namespace-worker-put-script-tag,Create Workers for Platforms Script Tag,Add a single tag to a script uploaded to a Workers for Platforms dispatch namespace.
+x22-1915,cloudflare,GET,/accounts/{account_id}/realtime/kit/apps/{app_id},get_app,Fetch app details,Fetch details for an app in your account.
+x22-2355,cloudflare,PATCH,/accounts/{account_id}/workers/dispatch/namespaces/{dispatch_namespace}/scripts/{script_name}/settings,namespace-worker-patch-script-settings,Patch Workers for Platforms Script Settings,"Patch metadata for a script uploaded to a Workers for Platforms dispatch namespace, such as bindings."
+x22-2459,cloudflare,DELETE,/accounts/{account_id}/workers/workers/{worker_id}/previews/{preview_id}/deployments/{deployment_id},workers.previews.deployments.delete,Delete Preview Deployment,Delete a preview deployment.
+x22-2990,cloudflare,POST,/zones/{zone_id}/api_gateway/labels/user,api-shield-labels-create-user-labels,Create user-defined operation labels,Creates one or more user-defined labels for classifying web and API operations.
+x22-3625,pagerduty,GET,/automation_actions/runners/{id},getAutomationActionsRunner,Get an Automation Action runner,Get an Automation Action runner
+x22-1649,cloudflare,POST,/accounts/{account_id}/magic/ipsec_tunnels/psk,magic-ipsec-tunnels-set-pre-shared-keys-for-ipsec-tunnels,Set Pre-Shared Keys (PSK) for IPsec tunnels,"Sets Pre-Shared Keys for multiple IPsec tunnels associated with an account. Use `?validate_only=true` as an optional query parameter to only run validation without persisting changes. After PSKs are applied, they are immediately persisted to Cloudflare's edge and cannot be retrieved later. Store the PSKs in a safe place."
+x22-0249,cloudflare,DELETE,/accounts/{account_id}/ai-gateway/gateways/{gateway_id}/logs,aig-config-delete-gateway-logs,Delete Gateway Logs,Deletes gateway log entries matching the specified criteria.
+x22-1670,cloudflare,DELETE,/accounts/{account_id}/magic/sites/{site_id},magic-sites-delete-site,Delete Site,Remove a specific Site.
+x22-0944,cloudflare,POST,/accounts/{account_id}/devices/ip-profiles,create-ip-profile,Create IP profile,"Creates a WARP Device IP profile. Currently, only IPv4 Device subnets can be associated."
+x22-2301,cloudflare,DELETE,/accounts/{account_id}/vuln_scanner/credential_sets/{credential_set_id},delete-credential-set,Delete credential set,Deletes a credential set and all of its credentials.
+x22-2086,cloudflare,GET,/accounts/{account_id}/secrets_store/quota,secrets-store-quota,View secret usage,Lists the number of secrets used in the account.
+x22-2317,cloudflare,DELETE,/accounts/{account_id}/vuln_scanner/target_environments/{target_environment_id},delete-target-environment,Delete target environment,Removes a target environment.
+x22-3905,pagerduty,GET,/status_pages/{id}/statuses/{status_id},getStatusPageStatus,Get a Status Page Status,"Get a Status for a Status Page by Status Page ID and Status ID.
+
+Scoped OAuth requires: `status_pages.read`"
+x22-2704,cloudflare,GET,/radar/email/routing/timeseries_groups/arc,radar-get-email-routing-timeseries-group-by-arc,Get email ARC validation time series,Retrieves the distribution of emails by ARC (Authenticated Received Chain) validation over time.
+x22-2146,cloudflare,PUT,/accounts/{account_id}/slurper/target/connectivity-precheck,slurper-check-target-connectivity,Check target connectivity,Check whether tokens are valid against the target bucket
+x22-1138,cloudflare,GET,/accounts/{account_id}/dls/regions,publicListRegions,List DLS regions for an account,
+x22-4010,pagerduty,DELETE,/v3/schedules/{id}/rotations/{rotation_id},deleteRotation,Delete a rotation,"<!-- theme: info -->
+
+> **Important note:** Shift-based schedules use the V3 API and are not compatible with V2 automations. **To create automations for Shift-Based Schedules, you need to:**
+>
+> 1. **Update your automations** to use the V3 API for all new shift-based schedules
+> 2. **Keep the V2 endpoint** for your existing schedules
+>
+> An upgrade tool for existing schedules is coming soon; your legacy schedules will keep working in the meantime. [Learn more](https://support.pagerduty.com/main/docs/shift-based-schedules-api-upgrade-examples).
+
+Delete a rotation and all its events.
+
+On deletion, past events are preserved in the audit history, the current
+active event is truncated to the deletion time, and future events are
+removed."
+x22-1285,cloudflare,GET,/accounts/{account_id}/flagship/apps/{app_id}/flags/{flag_key},flagship_get_flag,Get flag,"Returns the full flag definition including rules, variations, and audit fields."
+x22-2971,cloudflare,GET,/zones/{zone_id}/ai-audit/robots,ai-audit-get-robots,Get robots.txt rules,"Fetches and parses the robots.txt file for a zone or a specific subdomain within the zone. Returns parsed user-agent rules, content signals, and sitemaps."
+x22-0971,cloudflare,PUT,/accounts/{account_id}/devices/policy/{policy_id}/exclude,devices-set-split-tunnel-exclude-list-for-a-device-settings-policy,Set the Split Tunnel exclude list for a device settings profile,Sets the list of routes excluded from the WARP client's tunnel for a specific device settings profile.
+x22-3748,pagerduty,POST,/incident_workflows/triggers,createIncidentWorkflowTrigger,Create a Trigger,"Create new Incident Workflow Trigger
+
+Scoped OAuth requires: `incident_workflows.write`"
+x22-0100,cloudflare,GET,/accounts/{account_id}/access/identity_providers/{identity_provider_id},access-identity-providers-get-an-access-identity-provider,Get an Access identity provider,Fetches a configured identity provider.
+x22-0087,cloudflare,GET,/accounts/{account_id}/access/custom_pages/{custom_page_id},access-custom-pages-get-a-custom-page,Get a custom page,Fetches a custom page and also returns its HTML.
+x22-3702,pagerduty,POST,/event_orchestrations/{id}/cache_variables,createCacheVarOnGlobalOrch,Create a Cache Variable for a Global Event Orchestration,"Create a Cache Variable for a Global Event Orchestration.
+
+Cache Variables allow you to store event data on an Event Orchestration, which can then be used in Event Orchestration rules as part of conditions or actions.
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#event-orchestrations)
+
+Scoped OAuth requires: `event_orchestrations.write`"
+x22-2468,cloudflare,PATCH,/accounts/{account_id}/workflows/settings,wor-update-workflow-settings,Update account settings,Updates only the account-level Workflows settings fields present in the request body.
+x22-3383,cloudflare,POST,/zones/{zone_id}/secondary_dns/outgoing,secondary-dns-(-primary-zone)-create-primary-zone-configuration,Create Primary Zone Configuration,Create primary zone configuration for outgoing zone transfers.
+x22-0775,cloudflare,POST,/accounts/{account_id}/cloudforce-one/v2/credential-monitor/domains,post_DomainCreate,Create monitored domain,Register a domain for credential monitoring.
+x22-0291,cloudflare,DELETE,/accounts/{account_id}/ai-search/namespaces/{name},ai-search-delete-namespace,Delete a namespace,"Permanently delete a namespace. The namespace must be empty (no instances), and the default namespace cannot be deleted."
+x22-0685,cloudflare,GET,/accounts/{account_id}/cloudforce-one/requests/{request_id}/asset/{asset_id},cloudforce-one-request-asset-get,Get a Request Asset,Retrieves an asset attached to a Cloudforce One intelligence request.
+x22-3764,pagerduty,GET,/incidents/{id}/business_services/impacts,getIncidentImpactedBusinessServices,List Business Services impacted by the given Incident,"Retrieve a list of Business Services that are being impacted by the given Incident.
+Scoped OAuth requires: `incidents.read`"
+x22-2362,cloudflare,GET,/accounts/{account_id}/workers/domains/{domain_id},workers.domains.get,Get Worker Domain,Gets information about a Worker domain.
+x22-4141,sentry,POST,/api/0/organizations/{organization_id_or_slug}/scim/v2/Users,provisionOrganizationScimV2User,Provision a New Organization Member,"Create a new Organization Member via a SCIM Users POST Request.
+
+Note that this API does not support setting secondary emails."
+x22-4084,sentry,POST,/api/0/organizations/{organization_id_or_slug}/members/,addOrganizationMember,Add a Member to an Organization,Add or invite a member to an organization.
+x22-3719,pagerduty,GET,/extension_schemas,listExtensionSchemas,List extension schemas,"List all extension schemas.
+
+A PagerDuty extension vendor represents a specific type of outbound extension such as Generic Webhook, Slack, ServiceNow.
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#extension-schemas)
+
+Scoped OAuth requires: `extension_schemas.read`"
+x22-3012,cloudflare,GET,/zones/{zone_id}/api_gateway/schemas,api-shield-endpoint-management-retrieve-operations-and-features-as-open-api-schemas,Export web and API operations as OpenAPI schemas,Returns tracked web and API operations and their feature configuration rendered as OpenAPI schemas.
+x22-4034,pagerduty,GET,/workflows/integrations/{integration_id}/connections/{id},getWorkflowIntegrationConnection,Get Workflow Integration Connection,"Get details about a Workflow Integration Connection.
+
+Scoped OAuth requires: `workflow_integrations:connections.read`"
+x22-3458,cloudflare,GET,/zones/{zone_id}/smart_shield,smart-shield-get-settings,Get Smart Shield Settings,Retrieve Smart Shield Settings.
+x22-1845,cloudflare,GET,/accounts/{account_id}/queues/{queue_id}/consumers/{consumer_id},queues-get-consumer,Get Queue Consumer,Returns a Queue consumer by identifier.
+x22-3404,cloudflare,GET,/zones/{zone_id}/settings,zone-settings-get-all-zone-settings,Get all zone settings,Available settings for your user in relation to a zone.
+x22-3120,cloudflare,GET,/zones/{zone_id}/dnssec,dnssec-dnssec-details,DNSSEC Details,Details about DNSSEC status and configuration.
+x22-4241,sentry,PUT,/api/0/teams/{organization_id_or_slug}/{team_id_or_slug}/external-teams/{external_team_id}/,updateTeamExternalTeam,Update an External Team,Update a team in an external provider that is currently linked to a Sentry team.
+x22-1796,cloudflare,GET,/accounts/{account_id}/pay-per-crawl/terms,pay-per-crawl.getTerms,Get pay-per-crawl terms,Gets the pay-per-crawl terms and conditions contract.
+x22-1399,cloudflare,GET,/accounts/{account_id}/images/v2/sourcingkit/sources,cloudflare-images-sourcingkit-list-sources,List sourcing kit sources,List all configured migration sources for the account.
+x22-0142,cloudflare,POST,/accounts/{account_id}/access/service_tokens/{service_token_id}/rotate,access-service-tokens-rotate-a-service-token,Rotate a service token,Generates a new Client Secret for a service token and revokes the old one.
+x22-3464,cloudflare,GET,/zones/{zone_id}/smart_shield/healthchecks/{healthcheck_id},smart-shield-health-check-details,Health Check Details,Fetch a single configured health check.
+x22-2772,cloudflare,GET,/radar/http/top/ases/http_version/{http_version},radar-get-http-top-ases-by-http-version,Get top ASes by HTTP requests for an HTTP version,"Retrieves the top autonomous systems, by HTTP requests, of the requested HTTP version."
+x22-1577,cloudflare,DELETE,/accounts/{account_id}/magic/bgp/filter_profiles/{profile_id},magic-bgp-delete-filter-profile,Delete BGP Filter Profile,Deletes a BGP filter profile.
+x22-0037,cloudflare,GET,/accounts/{account_id}/access/ai-controls/mcp/analytics/portals/{portal_id}/tool-calls/timeseries,mcp-portals-api-portal-tool-call-timeseries,Per-portal MCP tool-call timeseries,Returns daily or monthly tool-call counts for a portal.
