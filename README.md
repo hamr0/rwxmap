@@ -60,8 +60,8 @@ for exactly that — grading and reviewing are one workflow, not two
 features, and the review pass is where the too-tight rows get loosened
 before anything is published.
 
-Provider-side publishing is the newest part: the exporter is in
-progress, landing now.
+The bareguard exporter is built (`exportGate`, `exportSidecar`). The CLI
+and the emitters for the MCP, OpenAPI, WebMCP and ARD slots are not yet.
 
 ## The shared definition
 
@@ -145,22 +145,24 @@ mechanical-only figures are in the bullets below):
 ## How an agent should read the output
 
 Every verdict carries four fields: `class` (`r`, `w` or `x`, the
-tool's best guess), `destructive` (true when the call cannot be
-undone — always inside class `x`, never on an `r` or `w` row),
+tool's best guess), `destructive` (true when the call removes
+something — a delete, purge, revoke, expire, void or redact — always
+inside class `x`, never on an `r` or `w` row),
 `evidence` (`list` when a word fired, `floor` when only the HTTP
-method decided) and `review` (which rows to look at first). The
+method decided, `jev` when the optional model tier moved the row) and `review` (which rows to look at first). The
 recommended reading:
 
 - The letter is the answer. A gate such as bareguard reads the letter
-  and never asks at runtime; `destructive: true` is a refinement of
-  `x` for MCP's `destructiveHint`, not a fourth class.
+  and, unless its operator turns on asking, never asks at runtime; `destructive: true` is a refinement inside
+  `x`, not a fourth class. MCP's `destructiveHint` follows the class —
+  true on every `x` — not this flag (D104).
 - `review` is the field that says which rows to look at; the buckets
   and their hit rates are in **What to review** above. `evidence` is
   not a reliability signal: it answers a different question — whether
   a word fired or the HTTP method alone decided. Most leaks do sit on
   `floor` rows, but `floor` is most of the API, so it is far too broad
   a pile to review from.
-- The exporter (planned) writes a draft `tools` section for bareguard
+- The exporter writes a draft `tools` section for bareguard
   keyed `<vendor>.<operationId>`, every row exported (D103) — either a
   bare letter or `{ "letter": "w", "marker": "loose" }`, the marker
   being `review`. A sidecar report carries each row's evidence for the
