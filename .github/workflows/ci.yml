@@ -1,0 +1,23 @@
+# Push / PR gate (LIBRARY_CONVENTIONS §5): npm ci → lockfile → typecheck → build:types → test.
+# No lint step (tsc already catches the bug class that matters). Node 22 only: engines
+# pins >=22. Default shallow checkout: no test reads git history. Tests are hermetic and
+# token-free — no network, no model.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run check:lockfile   # package-lock.json's own version matches package.json
+      - run: npm run typecheck        # tsc --noEmit
+      - run: npm run build:types      # prove the .d.ts generate from the JSDoc
+      - run: npm test                 # node --test
