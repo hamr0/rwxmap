@@ -5155,6 +5155,29 @@ class).
   the one split spec in hand, and resolving them would make rwxmap
   fetch whatever URLs a third-party document names.
 
+### Input POC pass 2: byte caps and binary refusal (2026-09-26)
+
+- Goal: stop one wrong URL from killing the process, and fix the
+  measurement's load-error count.
+- Tried: a 64 MB default cap on the URL body (content-length checked up
+  front, then a streamed running total), on file size, and on gunzip
+  output (zlib maxOutputLength); a binary check (NUL, or `ustar` at
+  offset 257) before any parse.
+- Outcome: 14/14 loader tests. The 5 new cap/binary tests all fail
+  against the pass 1 loader (verified by the orchestrator in a separate
+  copy). The live hubspot URL is refused in 1.6 s at 158 MB RSS under a
+  1 GB heap ("gunzip output exceeds maxBytes 67108864"), where pass 1
+  died out of heap. The measurement now counts a failed load as
+  all-missing: disk totals expected 10586, got 11505, missing 684 (the
+  digitalocean fragments), extra 1603. The live-URL run over all four
+  sets now completes (exit 0): every unchanged spec still matches, and
+  the differences are vendor drift since the locks (stripe +18, openai
+  +6, canva +4, sentry +6, cloudflare +50/−31, digitalocean 715 live
+  operations against 684).
+- Lesson: the cap caught hubspot at gunzip, before the binary check
+  ever ran. Keep both: the binary check covers a tarball small enough
+  to pass the cap.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.
