@@ -110,6 +110,14 @@ function multisetExtra(a, b) {
   return { examples: out.slice(0, EXAMPLE_LIMIT), total };
 }
 
+// A load error (e.g. hubspot's tar.gz, or a truncated fetch) can carry
+// binary/control bytes in its message; strip them and cap the length so
+// one bad spec cannot flood the console.
+function safeErrorLine(message, maxLen = 160) {
+  const cleaned = String(message).replace(/[^\x20-\x7e]/g, '');
+  return cleaned.length > maxLen ? `${cleaned.slice(0, maxLen)}…` : cleaned;
+}
+
 function mib(bytes) {
   return (bytes / (1024 * 1024)).toFixed(1);
 }
@@ -179,6 +187,13 @@ async function measureOneSpec(setDir, entry, expectedByKey) {
     }
   } catch (err) {
     result.loadError = err.message;
+    // FIX (pass 2): a spec that fails to load previously left missing/extra
+    // at their zeroed defaults, so a total load failure silently counted as
+    // 0 missing instead of every expected row — the totals, and the exit
+    // code they gate, understated real damage. Every expected row is
+    // missing when nothing was loaded at all.
+    const expectedKeys = expectedRows.map(opKey);
+    result.missing = multisetExtra(expectedKeys, []);
     return result;
   }
 
@@ -266,7 +281,7 @@ function printSetTable({ setDir, results, opsRowCount }) {
     console.log(line);
 
     if (r.loadError) {
-      console.log(`    LOAD ERROR: ${r.loadError}`);
+      console.log(`    LOAD ERROR: ${safeErrorLine(r.loadError)}`);
     }
     if (r.lockCheck && r.lockCheck.error) {
       console.log(`    LOCK CHECK ERROR: ${r.lockCheck.error}`);

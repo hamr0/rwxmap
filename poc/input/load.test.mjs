@@ -4,8 +4,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import zlib from 'node:zlib';
+import http from 'node:http';
 
 import { loadSpec } from './load.mjs';
+import { operationsFrom } from '../../src/index.js';
 
 // Fixtures are written under os.tmpdir(), never into the repo (CLAUDE.md:
 // "never write a corpus or data extract to a scratchpad" / "keep originals"
@@ -112,4 +114,142 @@ test('YAML 1.2 core schema: on/yes/no/01 stay strings, not booleans or numbers',
   assert.equal(typeof op.summary, 'string');
   assert.equal(op.description, '01');
   assert.equal(typeof op.description, 'string');
+});
+
+// --- Pass 2: byte caps and binary refusal before YAML (D106) ---------
+
+function tarLikeBuffer() {
+  // A minimal stand-in for a POSIX tar header: some leading bytes (with a
+  // NUL, as any real tar header has via its zero-padded fields), then the
+  // `ustar` magic at the fixed offset every tar reader/writer agrees on.
+  const buf = Buffer.alloc(512);
+  buf.write('some-file-name.txt', 0, 'utf8');
+  buf.write('ustar', 257, 'utf8');
+  return buf;
+}
+
+test('throws the binary error on tar-like content (NUL + ustar at offset 257), never reaching the YAML parser', async () => {
+  const p = writeFixture('archive.tar', tarLikeBuffer());
+  await assert.rejects(() => loadSpec(p), (err) => {
+    assert.match(err.message, /not an OpenAPI document \(binary content\)/);
+    assert.ok(err.message.includes(p), `error message should name the source: ${err.message}`);
+    // If this reached the YAML parser instead, the error would name YAML
+    // (as the "garbage.txt" test above does), not "binary content".
+    assert.doesNotMatch(err.message, /could not parse as JSON or YAML/);
+    return true;
+  });
+});
+
+test('throws when a gzip bomb\'s decompressed output exceeds maxBytes', async () => {
+  const big = Buffer.alloc(1024 * 1024); // 1MB of zeros, gzips tiny
+  const gz = zlib.gzipSync(big);
+  const p = writeFixture('bomb.json.gz', gz);
+  await assert.rejects(() => loadSpec(p, { maxBytes: 64 * 1024 }), (err) => {
+    assert.match(err.message, /exceeds maxBytes/);
+    assert.ok(err.message.includes(p));
+    return true;
+  });
+});
+
+test('throws when a file on disk exceeds maxBytes, before it is read', async () => {
+  const p = writeFixture('too-big.json', Buffer.alloc(200));
+  await assert.rejects(() => loadSpec(p, { maxBytes: 100 }), (err) => {
+    assert.match(err.message, /exceeds maxBytes/);
+    assert.ok(err.message.includes(p));
+    return true;
+  });
+});
+
+// Starts a plain node:http server on an ephemeral 127.0.0.1 port, running
+// `handler(req, res)`; returns { url, close }. Used for the two URL cap
+// tests and the $ref-not-fetched proof below — no external network access.
+async function startServer(handler) {
+  const server = http.createServer(handler);
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const { port } = server.address();
+  return {
+    url: (p) => `http://127.0.0.1:${port}${p}`,
+    // A test that throws before draining the response body leaves a
+    // keep-alive socket open; a plain server.close() then waits out
+    // Node's keepAliveTimeout (~5s) before its callback fires.
+    // closeAllConnections forces those sockets shut so teardown is fast.
+    close: () => new Promise((resolve) => {
+      server.closeAllConnections();
+      server.close(resolve);
+    }),
+  };
+}
+
+test('throws when a URL streams more than maxBytes with no content-length', async () => {
+  const chunk = Buffer.alloc(64 * 1024, 0x61); // 64KB of 'a'
+  const { url, close } = await startServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    // No content-length header: the cap must be enforced on the actual
+    // streamed total, not a header the server could omit or lie about.
+    for (let i = 0; i < 4; i++) res.write(chunk); // 256KB total
+    res.end();
+  });
+  try {
+    await assert.rejects(
+      () => loadSpec(url('/spec.json'), { maxBytes: 64 * 1024 }),
+      (err) => {
+        assert.match(err.message, /exceeds maxBytes/);
+        return true;
+      },
+    );
+  } finally {
+    await close();
+  }
+});
+
+test('throws when a URL sends a too-large content-length header, before the body is read', async () => {
+  const { url, close } = await startServer((req, res) => {
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Content-Length': String(200 * 1024 * 1024),
+    });
+    // Body deliberately never fully sent: a correct implementation throws
+    // on the header alone and never waits for this.
+    res.write(Buffer.alloc(1024));
+  });
+  try {
+    await assert.rejects(
+      () => loadSpec(url('/spec.json'), { maxBytes: 64 * 1024 }),
+      (err) => {
+        assert.match(err.message, /content-length.*exceeds maxBytes/i);
+        return true;
+      },
+    );
+  } finally {
+    await close();
+  }
+});
+
+test('an external $ref operation loads as a method+path row with no operationId, and is never fetched', async () => {
+  let otherYmlRequests = 0;
+  const { url, close } = await startServer((req, res) => {
+    if (req.url === '/other.yml') otherYmlRequests++;
+    res.writeHead(200, { 'Content-Type': 'text/yaml' });
+    res.end('operationId: shouldNotBeFetched\n');
+  });
+  try {
+    const refUrl = url('/other.yml');
+    const doc = {
+      paths: {
+        '/widgets/{id}': {
+          get: { $ref: refUrl },
+        },
+      },
+    };
+    const p = writeFixture('ref-spec.json', JSON.stringify(doc));
+    const result = await loadSpec(p);
+    const operations = operationsFrom(result.doc);
+    assert.equal(operations.length, 1);
+    assert.equal(operations[0].method, 'GET');
+    assert.equal(operations[0].path, '/widgets/{id}');
+    assert.ok(!Object.prototype.hasOwnProperty.call(operations[0], 'operationId'), 'a $ref operation must not carry an operationId');
+    assert.equal(otherYmlRequests, 0, 'the external $ref target must never be fetched');
+  } finally {
+    await close();
+  }
 });

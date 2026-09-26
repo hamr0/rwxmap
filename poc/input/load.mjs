@@ -14,13 +14,19 @@
 //
 // NEVER SHIP THE POC (CLAUDE.md) — this is a proof, not shipped code.
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
 import { parse as parseYaml } from 'yaml';
 
 const GZIP_MAGIC = Buffer.from([0x1f, 0x8b]);
 const DEFAULT_TIMEOUT_MS = 30_000;
+const DEFAULT_MAX_BYTES = 64 * 1024 * 1024;
+// The tar `ustar` magic sits at a fixed offset in every POSIX tar header,
+// whether or not the archive carries a version suffix after it (D106: a
+// tarball must be refused before it ever reaches the YAML parser).
+const TAR_USTAR_OFFSET = 257;
+const TAR_USTAR_MAGIC = Buffer.from('ustar');
 
 function isHttpUrl(source) {
   return /^https?:\/\//i.test(String(source));
@@ -39,18 +45,65 @@ function stripBom(text) {
   return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
 }
 
-async function readUrlBytes(url, timeoutMs) {
+async function readUrlBytes(url, timeoutMs, maxBytes) {
   const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
   if (res.status < 200 || res.status >= 300) {
     throw new Error(`loadSpec: ${url}: http ${res.status}`);
   }
+  // Content-length is an early, cheap check but is never trusted alone: a
+  // server can omit it or lie, so the running total below is what actually
+  // enforces the cap while the body streams in.
+  const contentLength = res.headers.get('content-length');
+  if (contentLength && Number(contentLength) > maxBytes) {
+    throw new Error(`loadSpec: ${url}: content-length ${contentLength} exceeds maxBytes ${maxBytes}`);
+  }
   // Content-type is not trusted: some vendors serve YAML as text/plain or
   // JSON as application/octet-stream. The bytes decide format, not the header.
-  return Buffer.from(await res.arrayBuffer());
+  if (!res.body) {
+    return Buffer.from(await res.arrayBuffer());
+  }
+  const chunks = [];
+  let total = 0;
+  const reader = res.body.getReader();
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.length;
+      if (total > maxBytes) {
+        throw new Error(`loadSpec: ${url}: response body exceeds maxBytes ${maxBytes}`);
+      }
+      chunks.push(value);
+    }
+  } finally {
+    try { reader.cancel(); } catch { /* already done or errored */ }
+  }
+  return Buffer.concat(chunks, total);
 }
 
-function readFileBytes(filePath) {
+function readFileBytes(filePath, maxBytes) {
+  const { size } = statSync(filePath);
+  if (size > maxBytes) {
+    throw new Error(`loadSpec: ${filePath}: file size ${size} exceeds maxBytes ${maxBytes}`);
+  }
   return readFileSync(filePath);
+}
+
+// A NUL byte never appears in valid JSON or YAML text, and the `ustar`
+// marker at offset 257 is how POSIX tar headers self-identify. Both are
+// checked BEFORE the YAML parser ever sees the bytes (D106): the hubspot
+// URL in pass 1 gunzipped to 85MB of binary tar and ran the YAML parser
+// out of heap trying to parse it.
+function assertNotBinary(text, decompressed, source) {
+  if (text.includes('\u0000')) {
+    throw new Error(`loadSpec: ${source}: not an OpenAPI document (binary content)`);
+  }
+  if (
+    decompressed.length >= TAR_USTAR_OFFSET + TAR_USTAR_MAGIC.length
+    && decompressed.subarray(TAR_USTAR_OFFSET, TAR_USTAR_OFFSET + TAR_USTAR_MAGIC.length).equals(TAR_USTAR_MAGIC)
+  ) {
+    throw new Error(`loadSpec: ${source}: not an OpenAPI document (binary content)`);
+  }
 }
 
 /**
@@ -63,23 +116,39 @@ function readFileBytes(filePath) {
  * core schema, its default maxAliasCount) second.
  *
  * @param {string} source  An http(s) URL or a file path.
- * @param {{timeoutMs?: number}} [opts]  `timeoutMs` bounds a URL fetch
- *   (default 30000); ignored for a file path.
+ * @param {{timeoutMs?: number, maxBytes?: number}} [opts]  `timeoutMs`
+ *   bounds a URL fetch (default 30000); ignored for a file path.
+ *   `maxBytes` (default 64MiB) bounds the bytes read (a URL's
+ *   content-length and its actual streamed body; a file's stat size) AND
+ *   the decompressed gunzip output — a gzip bomb throws rather than
+ *   expanding past it.
  * @returns {Promise<{doc: any, bytes: number, sha256: string, format: 'json'|'yaml', source: string}>}
  *   `bytes` and `sha256` describe the bytes AS READ — before gunzip, if any.
  */
 export async function loadSpec(source, opts = {}) {
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const maxBytes = opts.maxBytes ?? DEFAULT_MAX_BYTES;
 
   const raw = isHttpUrl(source)
-    ? await readUrlBytes(source, timeoutMs)
-    : readFileBytes(source);
+    ? await readUrlBytes(source, timeoutMs, maxBytes)
+    : readFileBytes(source, maxBytes);
 
   const bytes = raw.length;
   const sha256 = sha256Of(raw);
 
-  const decompressed = isGzip(raw) ? gunzipSync(raw) : raw;
+  let decompressed;
+  if (isGzip(raw)) {
+    try {
+      decompressed = gunzipSync(raw, { maxOutputLength: maxBytes });
+    } catch (err) {
+      throw new Error(`loadSpec: ${source}: gunzip output exceeds maxBytes ${maxBytes} (${err.message})`);
+    }
+  } else {
+    decompressed = raw;
+  }
   const text = stripBom(decompressed.toString('utf8'));
+
+  assertNotBinary(text, decompressed, source);
 
   let doc;
   let format;
