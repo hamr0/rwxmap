@@ -5178,6 +5178,27 @@ class).
   ever ran. Keep both: the binary check covers a tarball small enough
   to pass the cap.
 
+### Input pass 3: the loader graduates as rwxmap/load (2026-09-26)
+
+- Goal: graduate the frozen loader POC into src/ under equivalence-proof
+  safety and ship it as its own subpath export.
+- Tried: rewrote poc/input/load.mjs as src/load.js; subpath export
+  `rwxmap/load` (D107); `yaml` moved to dependencies; tools/proof-load.js
+  compares src vs POC over all 722 locked spec files.
+- Outcome: 255/255 tests, typecheck clean, proof 722/722 "All pins
+  hold" (seen red when the hash was swapped to md5), a resolve-hook
+  test proving `import 'rwxmap'` loads no yaml (seen red with `import
+  'yaml'` added to a scratch index.js), and a tarball smoke test (figma
+  YAML → 54 operations). The orchestrator's review caught two defects,
+  fixed in ae68a5b: every gunzip failure was reported as "exceeds
+  maxBytes" (a truncated gzip now says "not a valid gzip stream"; the
+  cap is recognised by ERR_BUFFER_TOO_LARGE), and the README's
+  `.map(classifyRow)` passed the array index into `words` (0 verdict
+  changes over 4169 stripe+cloudflare rows today, but fragile).
+- Lesson: `Array.map(fn)` hands fn an index; any exported function with
+  an optional second parameter should be shown called through an arrow
+  in docs.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.
