@@ -165,6 +165,19 @@ test('throws when a gzip bomb\'s decompressed output exceeds maxBytes', async ()
   });
 });
 
+test('throws a distinct "not a valid gzip stream" error on a truncated gzip, never "exceeds maxBytes"', async () => {
+  const jsonText = JSON.stringify(MINIMAL_DOC);
+  const gz = zlib.gzipSync(Buffer.from(jsonText, 'utf8'));
+  const truncated = gz.subarray(0, gz.length - 8); // drop the gzip trailer (CRC32 + ISIZE)
+  const p = writeFixture('truncated.json.gz', truncated);
+  await assert.rejects(() => loadSpec(p), (err) => {
+    assert.match(errMessage(err), /not a valid gzip stream/);
+    assert.ok(errMessage(err).includes(p), `error message should name the source: ${errMessage(err)}`);
+    assert.doesNotMatch(errMessage(err), /exceeds maxBytes/);
+    return true;
+  });
+});
+
 test('throws when a file on disk exceeds maxBytes, before it is read', async () => {
   const p = writeFixture('too-big.json', Buffer.alloc(200));
   await assert.rejects(() => loadSpec(p, { maxBytes: 100 }), (err) => {

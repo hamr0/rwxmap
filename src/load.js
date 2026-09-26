@@ -207,7 +207,15 @@ export async function loadSpec(source, opts = {}) {
       decompressed = gunzipSync(raw, { maxOutputLength: maxBytes });
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err);
-      throw new Error(`loadSpec: ${source}: gunzip output exceeds maxBytes ${maxBytes} (${reason})`);
+      // zlib's maxOutputLength cap throws a RangeError coded
+      // ERR_BUFFER_TOO_LARGE (confirmed on Node 22); every other gunzip
+      // failure — a truncated or otherwise corrupt gzip stream — throws a
+      // different code (e.g. Z_BUF_ERROR's "unexpected end of file") and
+      // must not be reported as an oversize download.
+      if (err instanceof Error && /** @type {NodeJS.ErrnoException} */ (err).code === 'ERR_BUFFER_TOO_LARGE') {
+        throw new Error(`loadSpec: ${source}: gunzip output exceeds maxBytes ${maxBytes} (${reason})`);
+      }
+      throw new Error(`loadSpec: ${source}: not a valid gzip stream (${reason})`);
     }
   } else {
     decompressed = raw;

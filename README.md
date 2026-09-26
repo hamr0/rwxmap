@@ -191,7 +191,7 @@ import { loadSpec } from 'rwxmap/load';
 import { operationsFrom, classifyRow } from 'rwxmap';
 
 const { doc } = await loadSpec('https://example.com/openapi.yaml');
-const verdicts = operationsFrom(doc).map(classifyRow);
+const verdicts = operationsFrom(doc).map((op) => classifyRow(op));
 ```
 
 `loadSpec` takes a URL or a file path, JSON or YAML, gzipped or not, and
