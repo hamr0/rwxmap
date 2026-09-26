@@ -236,6 +236,7 @@ outside service, and the adopter must say so.
 | `src/index.js` | the package entry: `classifyRow`, `reviewHint`, the Jev exports, the exporter exports |
 | `src/types.js` | the `Operation`, `Verdict` and `StepVerdict` typedefs |
 | `tools/corpus.js`, `tools/csv.js` | corpus loading and CSV reading, dev only, never shipped |
+| `src/load.js` | `loadSpec` (file or URL, JSON or YAML, 64 MB caps, binary refusal, no `$ref` resolution, D106), shipped as `rwxmap/load` (D107), and the only file that imports `yaml` |
 
 `poc/d87/` is the reference `src/` is proved against: `node
 poc/d87/proof-src.mjs` compares both over all 6557 rows of the combined
@@ -681,7 +682,8 @@ a. **Input.** Point it at a URL or a file path; JSON or YAML in, JSON
    lines. The classifier library itself stays dependency-free. External
    `$ref`s are not followed (D106); those operations fall back to
    method+path, and a download over 64 MB (compressed or decoded) or
-   binary content is refused.
+   binary content is refused. Built as `rwxmap/load` (D107); not yet
+   released.
 b. **Spec discovery** at the usual locations (a best guess, not a
    standard), the 30-day cache, and the key normalizer (D105).
 c. **Jev.** Key configured → used; no key → mechanical, never stops,
