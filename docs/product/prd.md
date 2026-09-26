@@ -664,8 +664,8 @@ above.
   opened or closed.
 - **M3** — the D87 ladder, the three Jev tiers (D95) and the bareguard
   exporter (D103), in `src/`: the M3 exam is scored and burned (D92,
-  D93) and the gate passes (D89 as amended by D94). Not yet released:
-  npm still ships 0.3.0.
+  D93) and the gate passes (D89 as amended by D94). Released as
+  `rwxmap@0.4.0` (2026-09-25).
 
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
@@ -678,7 +678,10 @@ a. **Input.** Point it at a URL or a file path; JSON or YAML in, JSON
    YAML needs the `yaml` package, today a devDependency; it becomes a
    runtime dependency of the I/O layer only, allowed by the dependency
    rule because the standard library cannot parse YAML in under 100
-   lines. The classifier library itself stays dependency-free.
+   lines. The classifier library itself stays dependency-free. External
+   `$ref`s are not followed (D106); those operations fall back to
+   method+path, and a download over 64 MB (compressed or decoded) or
+   binary content is refused.
 b. **Spec discovery** at the usual locations (a best guess, not a
    standard), the 30-day cache, and the key normalizer (D105).
 c. **Jev.** Key configured → used; no key → mechanical, never stops,
