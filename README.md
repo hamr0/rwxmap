@@ -184,6 +184,24 @@ This reading is not carried in the map itself — the map holds only
 the four fields. The tool cannot know which operations you call
 heavily; it gives the head start and you tighten from traffic.
 
+## Loading a spec
+
+```js
+import { loadSpec } from 'rwxmap/load';
+import { operationsFrom, classifyRow } from 'rwxmap';
+
+const { doc } = await loadSpec('https://example.com/openapi.yaml');
+const verdicts = operationsFrom(doc).map(classifyRow);
+```
+
+`loadSpec` takes a URL or a file path, JSON or YAML, gzipped or not, and
+refuses anything over 64 MB (compressed or decoded) before it is fully
+read, and any binary content, so one bad link can't take the process down.
+It never follows an external `$ref` — an operation split into another
+file classifies on method+path alone (D106). It ships as the separate
+`rwxmap/load` subpath, not from the package root, so `import 'rwxmap'`
+never loads its one dependency, the `yaml` parser (D107).
+
 ## How it publishes
 
 rwxmap does not invent a format. Every standard an agent already reads
