@@ -5112,6 +5112,49 @@ class).
   has already fixed the easy rows and what remains is the hard residue;
   a falling hit rate there is the tool improving, not degrading.
 
+### Input POC pass 1: loading real specs from file and URL (2026-09-26)
+
+- Goal: point rwxmap at a file or URL (JSON or YAML) and get the same
+  operations the corpus was built from. The riskiest assumption of PRD
+  "What is next" item a.
+- Tried: poc/input/load.mjs (loadSpec: fs or fetch, gunzip on magic
+  bytes, BOM strip, JSON then yaml 1.2 core schema) feeding the frozen
+  operationsFrom. Measured against the four sets that keep raw specs
+  and ops.csv (provider-corpus-2026-09-16, exam-2026-09-17,
+  exam-2026-09-20, exam-2026-09-22), keyed on (METHOD, path,
+  operationId), from disk and from the locked URLs. The lock files
+  record the bytes and sha256 of the uncompressed original, not the
+  .gz.
+- Outcome: 20 vendors match exactly: 9,149 operations, 0 missing, 0
+  extra (14 of 15 corpus vendors, okta/docusign/xero,
+  cloudflare/pagerduty/sentry), JSON and YAML alike. In
+  exam-2026-09-20 (write-only, deduped, capped at 250 per vendor)
+  every sampled row was found; the extras are GETs and unsampled rows.
+  The slowest load was okta YAML at 1.8 s; cloudflare's 26 MB JSON
+  took 0.37 s and about 127 MB RSS. The builders trimmed
+  summary/description and operationsFrom does not; over all 11,505
+  loaded operations this changes 0 verdicts (class, review,
+  destructive).
+- Outcome, digitalocean: the spec keeps every operation in an external
+  `$ref` file, so without resolving them its 684 operations load as
+  method+path only. Against the labelled truth: with the fragment
+  text 564/684 exact (82.5%), 12 leaks (1.8%), 108 over-tight (15.8%);
+  method+path only 564 (82.5%), 10 leaks (1.5%), 110 over-tight
+  (16.1%); 6 verdicts flip.
+- Outcome, hubspot: its URL serves a 5.7 MB tar.gz that gunzips to
+  85 MB of binary tar (with NUL bytes). The yaml parser then ran the
+  process out of heap (FATAL ... heap out of memory, exit 134),
+  reproduced alone under a 1 GB heap. The URL leg's other finding:
+  canva +4, stripe +18 and digitalocean +31 live operations since the
+  locks (vendor drift).
+- Outcome, measurement bug: a spec that fails to load was counted 0
+  missing instead of all missing.
+- Lesson: a URL is untrusted input. The loader needs byte caps and a
+  binary check before the YAML parser, or one wrong link kills the
+  harness. Not resolving external `$ref`s costs nothing measurable on
+  the one split spec in hand, and resolving them would make rwxmap
+  fetch whatever URLs a third-party document names.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.
