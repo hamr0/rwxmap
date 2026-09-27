@@ -44,10 +44,11 @@ load-bearing for that draft and not normative in it.
 
 ## Out of scope
 
-- A model/LLM in the core. The deterministic ladder is the product and
-  works fully on its own. The optional Jev tiers sit outside the core,
-  run only when a key is configured, and may both raise and lower, each
-  in one direction on its own pile only (D88, D95).
+- A model/LLM required to run. The ladder is deterministic and works
+  fully on its own. The Jev tiers are optional and run only when a key
+  is configured, each moving one direction on its own pile only (D88,
+  D95); `jev.js`'s rules are core (D109), because they can move a
+  letter.
 - A default of `r`, or any guess path.
 - Signing. A signature is the Resource Owner's act, never this tool's.
 - Being a standard: nothing normative in an Internet-Draft, no third
@@ -102,13 +103,16 @@ The labelling brief every truth label is made under is
 
 ### What frozen means
 
-The whole of `src/` is the core and it is frozen: the D87 ladder
-(`tokens.js`, `step1.js`, `step2.js`, `step3.js`, `flow.js`), the
-`reviewHint`, the Jev tiers in `jev.js`, and the bareguard exporter in
-`exporter.js`. Behaviour changes only through a new D-number and a
-re-measurement, and any rule change needs a fresh clean exam (D24, D96).
-The M3 exam (cloudflare, pagerduty, sentry) is burned and cannot score
-a change.
+Core is the files that can change a row's letter or its review marker
+(D109): `src/tokens.js`, `src/step1.js`, `src/step2.js`, `src/step3.js`,
+`src/flow.js` (`classifyRow` and `reviewHint`), `src/jev.js`. Changing
+any of them needs a new D-number and a fresh clean exam (D24, D96); the
+M3 exam (cloudflare, pagerduty, sentry) is burned and cannot score a
+change. `src/load.js`, `src/exporter.js`, `src/index.js` and `src/types.js`
+(exports and type definitions) are not core, and neither are the coming
+discovery, cache, request key, matcher and emitters — they change under
+their own tests and proofs, with no exam. In one line: if a change can
+move a row's letter or marker, it is core.
 
 ### The ladder
 
@@ -521,17 +525,16 @@ false, `openWorldHint` true).
 | `w` | false | false |
 | `x` | false | true |
 
-`_meta` carries three of the four fields: `class`, `destructive` and
-`evidence`. `review` is not published to MCP (D102): it is a provider's
-build-time worklist, and publishing it invites a consumer to read it as
-a confidence score.
+`_meta` carries all four fields: `class`, `destructive`, `evidence` and
+`review` (D110, amending D102's "`review` is not published to MCP").
 
 ```json
 { "name": "delete_share_permission",
   "annotations": { "readOnlyHint": false, "destructiveHint": true },
   "_meta": { "io.github.hamr0.rwxmap/class": "x",
              "io.github.hamr0.rwxmap/destructive": true,
-             "io.github.hamr0.rwxmap/evidence": "floor" } }
+             "io.github.hamr0.rwxmap/evidence": "floor",
+             "io.github.hamr0.rwxmap/review": "settled" } }
 ```
 
 `readOnlyHint` rests on step 1, which on the 4171-row provider corpus
@@ -642,13 +645,18 @@ case stops the run.
 primitive, bareguard's design and bareguard's to build; recorded so both
 repos agree): tighten-only — a new key is added, and an existing key,
 hand-written ones included, can only get stricter (r < w < x), never
-looser; the tools map only, never the bash map, agents or grants;
-validated exactly as at construct time, a bad entry throws and the whole
-batch lands or none of it; an `rwx.added` audit line (key, letter,
-marker) for every add; the gate copies its rwx config at construct time
-and `add()` changes that copy; a size cap on the tools map, past which
-the gate fails closed and the harness has to rebuild; callable from
-harness code only. bareguard 0.17.0 ships unchanged.
+looser, and the tighten-only rule covers the marker too; the tools map
+only, never the bash map, agents or grants; validated exactly as at
+construct time, a bad entry throws and the whole batch lands or none of
+it; an `rwx.added` audit line (key, letter, marker) for every add; the
+gate copies its rwx config at construct time and `add()` changes that
+copy; a size cap on the tools map, past which `add()` refuses that one
+batch — nothing from the batch lands, an `rwx.add_rejected` line goes
+into the audit log, and the gate keeps working on its existing rules,
+with no rebuild (D111, correcting D105's "the gate fails closed and the
+harness has to rebuild"); every refused `add()` — a bad entry, an
+attempt to loosen, or one over the cap — gets a loud audit line;
+callable from harness code only. bareguard 0.17.0 ships unchanged.
 
 **A known property of spec-less sites.** In per-request mode the agent
 picks the method and URL `classifyRow` sees, so it can steer a call
@@ -687,7 +695,8 @@ a. **Input.** Point it at a URL or a file path; JSON or YAML in, JSON
 b. **Spec discovery** at the usual locations (a best guess, not a
    standard), the 30-day cache, and the key normalizer (D105). The
    discovery order is D108's; no curated list, and no third-party
-   directory.
+   directory. It reads OpenAPI and Swagger only; Postman is not read
+   (D112).
 c. **Jev.** Key configured → used; no key → mechanical, never stops,
    says loudly which mode ran and shows what it knows. `jev.js` makes no
    network call today; how the CLI obtains the model answer is to be
@@ -705,10 +714,6 @@ f. **Release sequence:** PRD cleanup → review everything on the branch
 - **`openWorldHint` has no evidence source.** It is the slot "touches
   others" would map to; it may return as an evidence-only flag beside
   `destructive`, never emitted as false, if a source is ever found (D87).
-- **`review` in MCP.** D102 keeps the marker out of MCP, while D103
-  puts it into the bareguard gate file, which is a runtime consumer.
-  Whether MCP should carry it too is unresolved and needs the user's
-  ruling.
 - **The fresh exam.** Anything adopted under D100 (`jev-raise-wx`,
   `jev-raise-get`), D101's review rule, and any change to the frozen
   core need a fresh clean exam, drawn from vendors no set has seen.

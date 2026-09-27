@@ -5304,6 +5304,34 @@ class).
   nothing; the shapes that work are the cheap standard ones plus the
   address the caller already knows.
 
+### Spec discovery pass 4: which description shapes APIs publish (2026-09-27)
+
+- Goal: find out, across a real sample of public APIs, which spec
+  shape is actually out there — OpenAPI, Swagger, Postman, GraphQL or
+  nothing — so discovery knows what is worth reading for.
+- Method: `poc/formats/` (`sample.mjs`, `count.mjs`),
+  `data/formats-2026-09-27/`. Source: the public-apis README, 1839
+  entries; seeded sample of 200; 8 already-known vendors excluded;
+  2143 requests. Per API: the docs page read for evidence words, then
+  guessed common spec paths loaded and classified.
+- Outcome: loaded and classified (confirmed), of 200: OpenAPI 3 26,
+  Swagger 2 1, Postman 3, Google Discovery 1; 29 APIs had anything
+  confirmed. So OpenAPI/Swagger is 27 of the 29 that loaded (93%). One
+  of the 27 is a false positive: Sportmonks' guessed `/openapi.json`
+  loaded GitBook's own API spec, not Sportmonks'. Confirmed OR
+  mentioned on the docs page, of 200: OpenAPI/Swagger 51 (25.5%),
+  GraphQL 14, Postman 7; 60 APIs showed any shape. Cumulative over
+  those 60: OpenAPI/Swagger 51 (85%), adding Postman 54, adding
+  GraphQL 58. Nothing found: 140 of 200 (70%): 39 dead links, the rest
+  JS-rendered pages or plain pages with no spec.
+- What it taught: where anything machine-readable is published it is
+  almost always OpenAPI/Swagger; Postman adds 3 of 60 and would be a
+  second parser for little reach. Most public APIs publish nothing
+  reachable, so per-request mode is the common case, not the edge
+  case. Mention-counts overstate: "mentioned" is 51 but "loaded" is
+  27, so any figure quoted must say which.
+- Decision: user ruling, skip Postman (D112).
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.
