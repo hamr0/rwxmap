@@ -5229,6 +5229,47 @@ class).
   spec is the right one except checking it against the host being
   called.
 
+### Spec discovery pass 2: matching a call to its operation, and the per-request key (2026-09-27)
+
+- Goal: given a real request, can rwxmap match it to its operation in a
+  locked spec, and can the match be reduced to one deterministic
+  per-request key a policy engine can compare against unchanged?
+- Tried: poc/match/key.mjs requestKey (host lowercased, IDN to
+  punycode, default ports dropped, other ports kept, METHOD
+  uppercased, query and fragment dropped, only unreserved chars
+  decoded and other escapes uppercased, repeated slashes collapsed,
+  trailing slash dropped except on root; ids to {id}: all-digit, UUID,
+  hex of 16+) and poc/match/match.mjs matchOperation (strip the server
+  base path, a {param} matches one segment, the most literal segments
+  win, then document order). Measured with one synthesized URL per
+  operation over 11,505 operations from the four sets.
+- Outcome: 11,448 matched their own operation, 54 wrong, 3 no-match. 46
+  of the 54 were exact structural ties (meta-whatsapp
+  /{Version}/{X}, xero ContactID/ContactNumber, miro dedup-suffixed
+  params, openai paths keyed with a literal `?beta=true`). By
+  mechanical class: 53 of 54 wrong matches got the same class and 1
+  got a LOOSER one (meta-whatsapp POST /{Version}/{TEMPLATE_ID}, x,
+  matched updatePhoneNumberStatus, w). The 3 no-matches are id segments
+  with a suffix ({id}.json, {scan_id}.png) and one literal placeholder
+  path. Built without the server base path, 5,595 URLs still matched
+  something, 33 of them the wrong op. Per-request key collisions
+  (distinct ops on one key): 56 with 3 id rules; a 4th rule (mixed
+  alnum of 20+ chars) made it 65 by folding real words (digitalocean
+  metric names, cloudflare setting names), so it was not adopted.
+  Stripe-style prefixed ids (`cus_NffrFeUfNV2Hib`, 18 chars) are not
+  folded by any adopted rule.
+- Outcome, from the bareguard session: its e2e bench passed 57/57 with
+  exportGate's tools feeding gate.add() unchanged; bareguard matches
+  action.type byte-for-byte, so the key must be deterministic;
+  bareguard 0.18.0 will run its net domain check on any action carrying
+  `url` (user ruling), so the harness sends `{ type: <key>, url: <real
+  URL> }`. A read verb in a POST path already classifies RPC-style
+  reads as r (`/api/getFlights`, Google's `.../GetShoppingResults`); an
+  opaque `POST /graphql` stays x because rwxmap never reads bodies.
+- Lesson: a matcher cannot separate structurally identical templates,
+  so on a tie it must pick the tightest class among the tied ops; that
+  closes the one looser case.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.
