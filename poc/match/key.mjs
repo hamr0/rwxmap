@@ -37,18 +37,20 @@
 //   2. a UUID, any version, case-insensitive
 //      (`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`);
 //   3. hex, case-insensitive, 16 or more characters (`^[0-9a-f]{16,}$`,
-//      D105's "best guess").
-// A fourth candidate — mixed letters+digits, 20 or more characters,
+//      D105's "best guess");
+//   4. a prefixed id, `^([a-z]{2,5})_([A-Za-z0-9]{10,})$`, where the part
+//      after "_" contains at least one digit OR both an uppercase and a
+//      lowercase letter (that clause exists so a lowercase word like
+//      `user_preferences` never folds) — ADOPTED 2026-09-27: 0 false
+//      folds over 4051 literal path segments in the corpus, against 39
+//      for the clause-less variant (e.g. `event_notifications`,
+//      `sso_connectors`, `team_memberships`); see
+//      docs/logs/learnings.md, "Spec discovery pass 6".
+// A further candidate — mixed letters+digits, 20 or more characters,
 // containing at least one letter AND one digit — is NOT applied by
 // default. Pass `{ mixedIds: true }` to turn it on; poc/match/measure.mjs
 // reports its effect on the corpus separately, per the brief ("do not
 // adopt it silently").
-// FLAGGED, not silently fixed: the brief's own illustrative example,
-// stripe's `cus_NffrFeUfNV2Hib`, is 18 characters — it does not itself
-// clear the stated 20-char floor. The rule below keeps the brief's
-// literal 20-char number rather than quietly lowering it to fit the
-// example; see key.test.mjs and the report for the counterexample this
-// produces.
 //
 // Throws on a non-http(s) URL (checked via `.protocol`) or one `new URL`
 // itself cannot parse.
@@ -112,6 +114,20 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const ALL_DIGIT_RE = /^[0-9]+$/;
 const HEX16_RE = /^[0-9a-f]{16,}$/i;
 const MIXED20_RE = /^[0-9a-zA-Z_-]{20,}$/;
+const PREFIXED_ID_RE = /^([a-z]{2,5})_([A-Za-z0-9]{10,})$/;
+
+/**
+ * The digit-or-mixed-case clause on the part of a prefixed id after "_",
+ * per rule 4 (see the header comment). Not exported: internal to
+ * isIdSegment, the one caller.
+ * @param {string} rest  The captured part after "_" (already known to
+ *   match PREFIXED_ID_RE).
+ * @returns {boolean}
+ */
+function prefixedRestQualifies(rest) {
+  if (/[0-9]/.test(rest)) return true;
+  return /[a-z]/.test(rest) && /[A-Z]/.test(rest);
+}
 
 /**
  * @param {string} segment
@@ -122,6 +138,8 @@ function isIdSegment(segment, mixedIds) {
   if (ALL_DIGIT_RE.test(segment)) return true;
   if (UUID_RE.test(segment)) return true;
   if (HEX16_RE.test(segment)) return true;
+  const prefixed = PREFIXED_ID_RE.exec(segment);
+  if (prefixed && prefixedRestQualifies(prefixed[2])) return true;
   if (mixedIds && MIXED20_RE.test(segment) && /[0-9]/.test(segment) && /[a-zA-Z]/.test(segment)) return true;
   return false;
 }

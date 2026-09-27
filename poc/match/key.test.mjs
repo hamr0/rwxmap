@@ -109,37 +109,70 @@ test('id rule: hex counterexample below the 16-char floor stays literal', () => 
 });
 
 // --- id rule (candidate, off by default): mixed letters+digits, 20+ ---
-// NOTE: the brief's own example id, stripe's `cus_NffrFeUfNV2Hib`, is only
-// 18 characters — it does NOT clear the stated 20-char floor (flagged in
-// the report as a brief/example mismatch, not silently "fixed" by
-// loosening the threshold). It is used here as a negative case for
-// exactly that reason; a genuinely 20+ char id is used for the positive
-// case.
-test('mixed-id candidate: off by default, a stripe-style prefixed id stays literal', () => {
+// Values here deliberately carry no "word_" prefix (no "_" at all), so
+// they never trip the now-default prefixed-id rule (rule 4 below) and
+// isolate what the mixedIds candidate alone does.
+test('mixed-id candidate: off by default, an 18-char mixed id stays literal', () => {
   assert.equal(
-    requestKey('GET', 'https://api.stripe.com/v1/customers/cus_NffrFeUfNV2Hib'),
-    'api.stripe.com.GET /v1/customers/cus_NffrFeUfNV2Hib',
+    requestKey('GET', 'https://api.stripe.com/v1/customers/AbcDefGhi123456789'),
+    'api.stripe.com.GET /v1/customers/AbcDefGhi123456789',
   );
 });
-test('mixed-id candidate: brief\'s own 18-char example stays literal even with the candidate turned on (below the stated 20-char floor)', () => {
+test('mixed-id candidate: an 18-char mixed id stays literal even with the candidate turned on (below the stated 20-char floor)', () => {
   assert.equal(
-    requestKey('GET', 'https://api.stripe.com/v1/customers/cus_NffrFeUfNV2Hib', { mixedIds: true }),
-    'api.stripe.com.GET /v1/customers/cus_NffrFeUfNV2Hib',
+    requestKey('GET', 'https://api.stripe.com/v1/customers/AbcDefGhi123456789', { mixedIds: true }),
+    'api.stripe.com.GET /v1/customers/AbcDefGhi123456789',
   );
 });
 test('mixed-id candidate: turned on via {mixedIds: true} replaces a genuinely 20+ char mixed id', () => {
   assert.equal(
-    requestKey('GET', 'https://api.stripe.com/v1/customers/cus_NffrFeUfNV2HibAB', { mixedIds: true }),
+    requestKey('GET', 'https://api.stripe.com/v1/customers/NffrFeUfNV2HibABCDEF', { mixedIds: true }),
     'api.stripe.com.GET /v1/customers/{id}',
   );
   assert.equal(
-    requestKey('GET', 'https://api.stripe.com/v1/customers/cus_NffrFeUfNV2HibAB'),
-    'api.stripe.com.GET /v1/customers/cus_NffrFeUfNV2HibAB',
+    requestKey('GET', 'https://api.stripe.com/v1/customers/NffrFeUfNV2HibABCDEF'),
+    'api.stripe.com.GET /v1/customers/NffrFeUfNV2HibABCDEF',
   );
 });
 test('mixed-id candidate counterexample: /api/v2 stays literal even with the candidate on (too short)', () => {
   assert.equal(
     requestKey('GET', 'https://api.example.com/api/v2', { mixedIds: true }),
     'api.example.com.GET /api/v2',
+  );
+});
+
+// --- id rule: stripe-style prefixed id (adopted 2026-09-27, default) ---
+test('prefixed-id rule: cus_ and acct_ ids fold by default', () => {
+  assert.equal(
+    requestKey('GET', 'https://api.stripe.com/v1/customers/cus_NffrFeUfNV2Hib'),
+    'api.stripe.com.GET /v1/customers/{id}',
+  );
+  assert.equal(
+    requestKey('GET', 'https://api.stripe.com/v1/accounts/acct_1032D82eZvKYlo2C'),
+    'api.stripe.com.GET /v1/accounts/{id}',
+  );
+});
+test('prefixed-id rule counterexample: user_preferences stays literal (rest is a lowercase-only word, no digit)', () => {
+  assert.equal(
+    requestKey('GET', 'https://api.example.com/settings/user_preferences'),
+    'api.example.com.GET /settings/user_preferences',
+  );
+});
+test('prefixed-id rule counterexample: api_v2 stays literal (rest below the 10-char floor)', () => {
+  assert.equal(
+    requestKey('GET', 'https://api.example.com/api_v2'),
+    'api.example.com.GET /api_v2',
+  );
+});
+test('prefixed-id rule counterexample: oauth_token stays literal (rest below the 10-char floor)', () => {
+  assert.equal(
+    requestKey('GET', 'https://api.example.com/oauth_token'),
+    'api.example.com.GET /oauth_token',
+  );
+});
+test('prefixed-id rule counterexample: SK_abcdefghijk1 stays literal (prefix is uppercase)', () => {
+  assert.equal(
+    requestKey('GET', 'https://api.example.com/keys/SK_abcdefghijk1'),
+    'api.example.com.GET /keys/SK_abcdefghijk1',
   );
 });

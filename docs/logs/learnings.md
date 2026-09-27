@@ -5373,6 +5373,46 @@ class).
   which row a live call maps to — so it changes under its own tests and
   needs no exam.
 
+### Spec discovery pass 6: prefixed ids fold in the request key (2026-09-27)
+
+- Goal: measure a narrow stripe-style prefixed-id rule for
+  `poc/match/key.mjs`'s request key (`^([a-z]{2,5})_([A-Za-z0-9]{10,})$`,
+  the part after "_" containing a digit or both an uppercase and a
+  lowercase letter) against a looser clause-less variant B, over false
+  folds (literal path segments) and recall (the specs' own path-parameter
+  examples), before deciding whether to adopt it.
+- Method: `poc/match/measure.mjs`, three new blocks: (1) key collisions
+  over the four sets' 11,505 synthesized calls, rule A and variant B each
+  against the pre-adoption 3-rule (digit/UUID/hex16) baseline; (2) every
+  LITERAL path segment across every spec, deduped per vendor+segment; (3)
+  every path parameter's own example value from the specs, not the
+  synthesized fill.
+- Outcome: 4,051 literal segments checked — rule A 0 false folds, the
+  clause-less variant B 39 (e.g. `event_notifications`, `sso_connectors`,
+  `team_memberships` — compound `noun_noun` API path segments the clause
+  exists to keep literal). Real path-param examples: 12,679 path params
+  found, 9,702 with no example at all, 2,627 usable string examples —
+  folded 1,175 by the old 3 rules, 1,182 with rule A adopted (the 7 new
+  are all openai, `resp_…` and `cp_…`), 1,445 folded by none (mostly
+  `me`, `abc123`, email addresses, slugs — not prefixed ids at all).
+  Collisions: 56 (pre-adoption 3-rule baseline) to 66 with rule A
+  adopted; all 6 new groups are operations whose templates were already
+  identical in shape (xero `/Journals/{JournalID}` vs `{JournalNumber}`,
+  openai `/responses/{response_id}` vs its `?beta=true` twin, and one
+  miro pair, one meta-whatsapp pair), distinct before only because the
+  rotation's synthetic fill value (`cus_NffrFeUfNV2Hib`) was not folded —
+  an artefact of the fill, not a real-word fold.
+- What it taught: a collision count over synthetic fills measures the
+  fill values as much as the rule; the real tests are false folds over
+  literal segments and recall over the specs' own examples. Stripe
+  itself publishes no path examples in this corpus, so its own recall is
+  unmeasured.
+- Decision: user adopted rule A (2026-09-27) as key.mjs's default rule 4
+  — always on, no switch; `mixedIds` (a further, still-unadopted
+  candidate) is unaffected. Not core (D109): the request key is a
+  matching aid, not a class decision, so it changes under its own tests
+  and needs no exam.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.
