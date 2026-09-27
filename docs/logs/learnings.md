@@ -5270,6 +5270,40 @@ class).
   so on a tie it must pick the tightest class among the tied ops; that
   closes the one looser case.
 
+### Spec discovery pass 3: docs-page links, sitemaps and a host check (2026-09-27)
+
+- Goal: close the two open questions from pass 1 — do docs-page links
+  and sitemaps find specs that the fixed-path guesses miss, and does
+  checking a candidate spec's host against the vendor's registrable
+  domain catch wrong finds — over the same 25 vendors (the full run of
+  six strategies took 2050 requests).
+- Tried: E, links scanned from the HTML of docs./developer./developers.
+  and the API root (Swagger UI, Redoc, Stoplight, Scalar and RapiDoc
+  attributes too, one level deep); F, sitemap.xml on the same hosts;
+  the host check (does the candidate spec's own server host share the
+  vendor's registrable domain?) run over all 12 pass-1 results.
+- Outcome: E found 0, wrong 0. F found 0, wrong 0; 211 extra requests
+  for nothing. Most modern docs sites build their pages with
+  JavaScript, and their sitemaps list pages, not spec files. The host
+  check passed on all 12 results, including all 4 wrong ones (xero
+  identity, openai 1.2.0, digitalocean 2.0 from APIs.guru,
+  www.cloudflare.com/openapi.json) — wrong specs come from the
+  vendor's own domain, so a host check cannot tell right from wrong.
+  What limits the harm: a wrong spec's operations mostly do not match
+  the calls, so those calls fall back to per-request mode. APIs.guru's
+  list: 2,529 APIs across 677 domains, newest entry updated
+  2023-04-21; by year of last update, 2016 21, 2017 187, 2018 308,
+  2019 177, 2020 353, 2021 660, 2022 15, 2023 808 — it looks
+  unmaintained since April 2023.
+- User rulings (2026-09-27): drop APIs.guru, drop E and F. The two use
+  cases are (a) an API provider pointing rwxmap at its own spec (URL
+  or file), and (b) inside bareguard or an agent harness, capturing
+  the whole API through the discovery order and, if that fails,
+  classifying each call as it comes.
+- Lesson: every discovery shape that reads a third party's pages found
+  nothing; the shapes that work are the cheap standard ones plus the
+  address the caller already knows.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.

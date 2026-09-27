@@ -685,7 +685,9 @@ a. **Input.** Point it at a URL or a file path; JSON or YAML in, JSON
    binary content is refused. Built as `rwxmap/load` (D107); not yet
    released.
 b. **Spec discovery** at the usual locations (a best guess, not a
-   standard), the 30-day cache, and the key normalizer (D105).
+   standard), the 30-day cache, and the key normalizer (D105). The
+   discovery order is D108's; no curated list, and no third-party
+   directory.
 c. **Jev.** Key configured → used; no key → mechanical, never stops,
    says loudly which mode ran and shows what it knows. `jev.js` makes no
    network call today; how the CLI obtains the model answer is to be
