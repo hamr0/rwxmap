@@ -5199,6 +5199,36 @@ class).
   an optional second parameter should be shown called through an arrow
   in docs.
 
+### Spec discovery pass 1: four strategies over 25 vendors (2026-09-27)
+
+- Goal: can rwxmap find a site's spec on its own?
+- Tried: A RFC 9727 /.well-known/api-catalog; B RFC 8631 Link
+  rel="service-desc"; C 14 guessed paths on the API host and on
+  docs./developer./developers.; D APIs.guru list.json. A find counts
+  only if it loads and overlaps the locked spec's (METHOD, path) keys
+  at 50% or more.
+- Outcome: found for 8 of 25 vendors (32%). A: intercom (70%). B:
+  intercom (same file). C: cloudflare, via
+  docs.cloudflare.com/openapi.json (99%). D: asana 66%, docusign 94%,
+  spotify 92%, square 54%, stripe 74%, zoom 92%. Wrong spec from D:
+  xero (identity API, 0%), openai (5%), digitalocean (42%); from B:
+  cloudflare www.cloudflare.com/openapi.json (0%). Not found at all:
+  17, including openai, pagerduty, sentry, okta, figma, datadog, jira.
+  Five hosts are per-customer placeholders in the spec (auth0
+  {tenant}, okta subdomain, zendesk example, jira your-domain,
+  mailchimp server). About 74 requests per site, mostly failed
+  guesses.
+- Outcome, user ruling (2026-09-27): no hand-curated vendor→spec list
+  ships with rwxmap, since it would silently commit the project to
+  upkeep. Discovery is a caller-given address first, then a few fixed
+  location shapes tried one at a time, then per-request mode. Recorded
+  as D108 once the APIs.guru question is settled.
+- Lesson: specs mostly live on GitHub or docs sites, not on the API
+  host. The reliable input is an address the harness already knows;
+  guessing is a best effort, and in real use nothing proves a found
+  spec is the right one except checking it against the host being
+  called.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.
