@@ -1,6 +1,6 @@
-// Pass 1 of item b (spec discovery), step 3 — probe.mjs.
+// Pass 1 of item b (spec discovery), step 3 — probe.mjs (pass 3 adds E, F).
 //
-// For each vendor derived by vendors.mjs, run four independent discovery
+// For each vendor derived by vendors.mjs, run independent discovery
 // strategies against the live vendor server and report what each finds,
 // without ever assuming one strategy's failure implies another's. This is
 // a POC: it never writes into src/ and imports from it read-only
@@ -20,11 +20,31 @@
 //    first path segment when it has one.
 // D. APIs.guru's `list.json` (cached), matched by key or
 //    `x-providerName` against the vendor's registrable domain.
+// E. Docs page links: GET the HTML root of `docs./developer./developers.
+//    <domain>` and the API host (if it answers with HTML), scan the text
+//    with a small regex/attribute scanner (CLAUDE.md: no HTML-parser
+//    dependency for a POC) for href/src attributes, Swagger UI's inline
+//    `url:` config, Redoc's `spec-url=`/`Redoc.init(...)`, and Stoplight/
+//    Scalar/RapiDoc's `apiDescriptionUrl=`/`data-url=`. A hit is kept only
+//    if its URL contains openapi/swagger/api-docs/apispec or ends in
+//    .json/.yaml/.yml; kept hits are followed one level deep, capped at 10
+//    per vendor, in page order.
+// F. Sitemap: GET `/sitemap.xml` on the same hosts as E; a sitemap index
+//    is expanded into at most 3 child sitemaps; `<loc>` entries pass
+//    through the same URL-shape filter as E, capped at 10 per vendor.
 //
 // A candidate is FOUND only when it loads (loadSpec) AND its operations
 // overlap the locked spec's (METHOD, path) keys at >= 0.5 share. Below
 // that, but still loadable, it is WRONG_SPEC. Anything that never loads
-// is NOT_FOUND for that strategy.
+// is NOT_FOUND for that strategy. Every found/wrong_spec candidate, in
+// every strategy, also gets a `hostCheck`: does any host the candidate
+// spec itself declares (servers[].url resolved, or Swagger 2 `host`)
+// equal the vendor's API host or share its registrable domain? This is
+// the check production could run without ever consulting a locked spec.
+//
+// `--only=E,F` on the CLI runs only the named strategies (skipping their
+// network calls entirely, not just hiding them from the summary); any
+// other bare argument is still a vendor-name filter, as before.
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname } from 'node:path';
@@ -152,7 +172,7 @@ function opKeys(ops) {
 /**
  * @param {string} candidateUrl
  * @param {Set<string>} lockedKeys
- * @returns {Promise<{verdict: 'found'|'wrong_spec'|'not_found', overlap: number, error: string|null}>}
+ * @returns {Promise<{verdict: 'found'|'wrong_spec'|'not_found', overlap: number, error: string|null, doc: any}>}
  */
 async function validateCandidate(candidateUrl, lockedKeys) {
   let loaded;
@@ -160,7 +180,7 @@ async function validateCandidate(candidateUrl, lockedKeys) {
     loaded = await enqueue(() => loadSpec(candidateUrl, { timeoutMs: TIMEOUT_MS }));
     totalRequests += 1; // loadSpec makes its own fetch
   } catch (err) {
-    return { verdict: 'not_found', overlap: 0, error: err instanceof Error ? err.message : String(err) };
+    return { verdict: 'not_found', overlap: 0, error: err instanceof Error ? err.message : String(err), doc: null };
   }
   const ops = operationsFrom(loaded.doc);
   const candidateKeys = opKeys(ops);
@@ -169,7 +189,55 @@ async function validateCandidate(candidateUrl, lockedKeys) {
     if (candidateKeys.has(k)) hits += 1;
   }
   const overlap = lockedKeys.size > 0 ? hits / lockedKeys.size : 0;
-  return { verdict: overlap >= OVERLAP_THRESHOLD ? 'found' : 'wrong_spec', overlap, error: null };
+  return { verdict: overlap >= OVERLAP_THRESHOLD ? 'found' : 'wrong_spec', overlap, error: null, doc: loaded.doc };
+}
+
+// ---------------------------------------------------------------------
+// hostCheck — the production-shaped check: does any host the candidate
+// spec itself declares (OpenAPI 3 `servers[].url`, variables resolved to
+// their defaults; or Swagger 2 `host`) equal the vendor's API host, or
+// share its registrable domain? Reported next to overlap for every
+// found/wrong_spec candidate in every strategy, so the orchestrator can
+// see whether hostCheck alone would have separated found from wrong_spec
+// without ever consulting the locked spec (which production doesn't have).
+// ---------------------------------------------------------------------
+function specHosts(doc) {
+  const hosts = [];
+  if (Array.isArray(doc?.servers)) {
+    for (const server of doc.servers) {
+      if (!server || typeof server.url !== 'string') continue;
+      let url = server.url;
+      const vars = server.variables || {};
+      for (const [name, v] of Object.entries(vars)) {
+        if (v && typeof v.default === 'string') url = url.split(`{${name}}`).join(v.default);
+      }
+      const withScheme = /^https?:\/\//i.test(url)
+        ? url
+        : url.startsWith('//')
+          ? `https:${url}`
+          : `https://${url.replace(/^\/+/, '')}`;
+      try {
+        hosts.push(new URL(withScheme).host.toLowerCase());
+      } catch {
+        // unresolvable server URL template; skip it, don't guess.
+      }
+    }
+  } else if (typeof doc?.host === 'string' && doc.host) {
+    hosts.push(doc.host.toLowerCase());
+  }
+  return hosts;
+}
+
+function hostCheckFor(doc, apiHost, registrable) {
+  const hosts = specHosts(doc);
+  if (hosts.length === 0) return false;
+  const apiHostLower = apiHost.toLowerCase();
+  for (const h of hosts) {
+    const hostNoPort = h.split(':')[0];
+    if (hostNoPort === apiHostLower) return true;
+    if (registrableDomain(hostNoPort) === registrable) return true;
+  }
+  return false;
 }
 
 // ---------------------------------------------------------------------
@@ -214,16 +282,17 @@ async function strategyA(apiHost, registrable, lockedKeys) {
     const hrefs = parseLinksetServiceDesc(res.text, url);
     for (const href of hrefs) {
       const v = await validateCandidate(href, lockedKeys);
-      tried.push({ url: href, method: 'GET (followed service-desc)', status: v.error ? `load error: ${v.error}` : 'loaded' });
+      const hostCheck = v.doc ? hostCheckFor(v.doc, apiHost, registrable) : false;
+      tried.push({ url: href, method: 'GET (followed service-desc)', status: v.error ? `load error: ${v.error}` : 'loaded', overlap: v.overlap, hostCheck });
       if (v.verdict === 'found') {
-        return { result: 'found', winningUrl: href, overlap: v.overlap, tried, requestCount: tried.length };
+        return { result: 'found', winningUrl: href, overlap: v.overlap, hostCheck, tried, requestCount: tried.length };
       }
       if (v.verdict === 'wrong_spec') {
-        return { result: 'wrong_spec', winningUrl: href, overlap: v.overlap, tried, requestCount: tried.length };
+        return { result: 'wrong_spec', winningUrl: href, overlap: v.overlap, hostCheck, tried, requestCount: tried.length };
       }
     }
   }
-  return { result: 'not_found', winningUrl: null, overlap: 0, tried, requestCount: tried.length };
+  return { result: 'not_found', winningUrl: null, overlap: 0, hostCheck: null, tried, requestCount: tried.length };
 }
 
 // ---------------------------------------------------------------------
@@ -263,16 +332,17 @@ async function strategyB(apiHost, registrable, lockedKeys) {
     const hrefs = parseLinkHeaderServiceDesc(linkHeader, url);
     for (const href of hrefs) {
       const v = await validateCandidate(href, lockedKeys);
-      tried.push({ url: href, method: 'GET (followed service-desc)', status: v.error ? `load error: ${v.error}` : 'loaded' });
+      const hostCheck = v.doc ? hostCheckFor(v.doc, apiHost, registrable) : false;
+      tried.push({ url: href, method: 'GET (followed service-desc)', status: v.error ? `load error: ${v.error}` : 'loaded', overlap: v.overlap, hostCheck });
       if (v.verdict === 'found') {
-        return { result: 'found', winningUrl: href, overlap: v.overlap, tried, requestCount: tried.length };
+        return { result: 'found', winningUrl: href, overlap: v.overlap, hostCheck, tried, requestCount: tried.length };
       }
       if (v.verdict === 'wrong_spec') {
-        return { result: 'wrong_spec', winningUrl: href, overlap: v.overlap, tried, requestCount: tried.length };
+        return { result: 'wrong_spec', winningUrl: href, overlap: v.overlap, hostCheck, tried, requestCount: tried.length };
       }
     }
   }
-  return { result: 'not_found', winningUrl: null, overlap: 0, tried, requestCount: tried.length };
+  return { result: 'not_found', winningUrl: null, overlap: 0, hostCheck: null, tried, requestCount: tried.length };
 }
 
 // ---------------------------------------------------------------------
@@ -300,10 +370,11 @@ async function strategyC(apiHost, registrable, serverUrlRaw, lockedKeys) {
       tried.push({ url, method: 'GET', status: res.status ?? `error: ${res.error}` });
       if (res.ok) {
         const v = await validateCandidate(url, lockedKeys);
-        tried.push({ url, method: 'GET (validate)', status: v.error ? `load error: ${v.error}` : 'loaded' });
-        if (v.verdict === 'found') return { result: 'found', winningUrl: url, overlap: v.overlap, tried, requestCount: tried.length };
+        const hostCheck = v.doc ? hostCheckFor(v.doc, apiHost, registrable) : false;
+        tried.push({ url, method: 'GET (validate)', status: v.error ? `load error: ${v.error}` : 'loaded', overlap: v.overlap, hostCheck });
+        if (v.verdict === 'found') return { result: 'found', winningUrl: url, overlap: v.overlap, hostCheck, tried, requestCount: tried.length };
         if (v.verdict === 'wrong_spec' && !tried.wrongSpecSeen) {
-          tried.wrongSpecSeen = { url, overlap: v.overlap };
+          tried.wrongSpecSeen = { url, overlap: v.overlap, hostCheck };
         }
       }
     }
@@ -314,19 +385,20 @@ async function strategyC(apiHost, registrable, serverUrlRaw, lockedKeys) {
         tried.push({ url, method: 'GET', status: res.status ?? `error: ${res.error}` });
         if (res.ok) {
           const v = await validateCandidate(url, lockedKeys);
-          tried.push({ url, method: 'GET (validate)', status: v.error ? `load error: ${v.error}` : 'loaded' });
-          if (v.verdict === 'found') return { result: 'found', winningUrl: url, overlap: v.overlap, tried, requestCount: tried.length };
+          const hostCheck = v.doc ? hostCheckFor(v.doc, apiHost, registrable) : false;
+          tried.push({ url, method: 'GET (validate)', status: v.error ? `load error: ${v.error}` : 'loaded', overlap: v.overlap, hostCheck });
+          if (v.verdict === 'found') return { result: 'found', winningUrl: url, overlap: v.overlap, hostCheck, tried, requestCount: tried.length };
           if (v.verdict === 'wrong_spec' && !tried.wrongSpecSeen) {
-            tried.wrongSpecSeen = { url, overlap: v.overlap };
+            tried.wrongSpecSeen = { url, overlap: v.overlap, hostCheck };
           }
         }
       }
     }
   }
   if (tried.wrongSpecSeen) {
-    return { result: 'wrong_spec', winningUrl: tried.wrongSpecSeen.url, overlap: tried.wrongSpecSeen.overlap, tried, requestCount: tried.length };
+    return { result: 'wrong_spec', winningUrl: tried.wrongSpecSeen.url, overlap: tried.wrongSpecSeen.overlap, hostCheck: tried.wrongSpecSeen.hostCheck, tried, requestCount: tried.length };
   }
-  return { result: 'not_found', winningUrl: null, overlap: 0, tried, requestCount: tried.length };
+  return { result: 'not_found', winningUrl: null, overlap: 0, hostCheck: null, tried, requestCount: tried.length };
 }
 
 // ---------------------------------------------------------------------
@@ -345,14 +417,14 @@ async function loadApisGuruList() {
   return JSON.parse(res.text);
 }
 
-async function strategyD(registrable, lockedKeys, sharedListPromise) {
+async function strategyD(apiHost, registrable, lockedKeys, sharedListPromise) {
   const tried = [];
   let list;
   try {
     list = await sharedListPromise;
   } catch (err) {
     tried.push({ url: 'https://api.apis.guru/v2/list.json', method: 'GET', status: `error: ${err.message}` });
-    return { result: 'not_found', winningUrl: null, overlap: 0, tried, requestCount: tried.length };
+    return { result: 'not_found', winningUrl: null, overlap: 0, hostCheck: null, tried, requestCount: tried.length };
   }
   tried.push({ url: 'https://api.apis.guru/v2/list.json', method: 'GET (cached/shared)', status: 'ok' });
 
@@ -370,17 +442,168 @@ async function strategyD(registrable, lockedKeys, sharedListPromise) {
     const specUrl = preferred?.swaggerUrl || preferred?.swaggerYamlUrl;
     if (!specUrl) continue;
     const v = await validateCandidate(specUrl, lockedKeys);
-    tried.push({ url: specUrl, method: 'GET (validate)', status: v.error ? `load error: ${v.error}` : 'loaded' });
-    if (v.verdict === 'found') return { result: 'found', winningUrl: specUrl, overlap: v.overlap, tried, requestCount: tried.length };
-    if (v.verdict === 'wrong_spec') return { result: 'wrong_spec', winningUrl: specUrl, overlap: v.overlap, tried, requestCount: tried.length };
+    const hostCheck = v.doc ? hostCheckFor(v.doc, apiHost, registrable) : false;
+    tried.push({ url: specUrl, method: 'GET (validate)', status: v.error ? `load error: ${v.error}` : 'loaded', overlap: v.overlap, hostCheck });
+    if (v.verdict === 'found') return { result: 'found', winningUrl: specUrl, overlap: v.overlap, hostCheck, tried, requestCount: tried.length };
+    if (v.verdict === 'wrong_spec') return { result: 'wrong_spec', winningUrl: specUrl, overlap: v.overlap, hostCheck, tried, requestCount: tried.length };
   }
-  return { result: 'not_found', winningUrl: null, overlap: 0, tried, requestCount: tried.length };
+  return { result: 'not_found', winningUrl: null, overlap: 0, hostCheck: null, tried, requestCount: tried.length };
+}
+
+// ---------------------------------------------------------------------
+// Strategy E — docs page links
+// ---------------------------------------------------------------------
+// Regexes over the raw HTML text, run independently and then merged in
+// order of first match position, so "in page order" means what it says
+// without needing a full HTML parser (CLAUDE.md: no HTML-parser
+// dependency for this POC, a documented regex/attribute scanner is fine).
+//
+//   1. any href="..."/src="..." attribute (covers <a>, <link>, <script src>,
+//      including <link rel="service-desc">, whose rel we don't need to
+//      check separately because the URL-shape filter below does the work).
+//   2. Swagger UI's inline config: `url: "..."` (also matches `urls: [{
+//      url: "..." }]` and `SwaggerUIBundle({ url: ... })`, since all three
+//      contain a bare `url: "<string>"` token).
+//   3. Redoc's `spec-url="..."` attribute.
+//   4. Redoc's `Redoc.init('...')` call.
+//   5. Stoplight/Scalar/RapiDoc's `apiDescriptionUrl="..."` / `data-url="..."`.
+const DOCS_PAGE_PATTERNS = [
+  /\b(?:href|src)\s*=\s*["']([^"']+)["']/gi,
+  /\burl\s*:\s*["']([^"']+)["']/gi,
+  /spec-url\s*=\s*["']([^"']+)["']/gi,
+  /Redoc\.init\(\s*["']([^"']+)["']/gi,
+  /(?:apiDescriptionUrl|data-url)\s*=\s*["']([^"']+)["']/gi,
+];
+
+function extractPageCandidates(html, pageUrl) {
+  const found = [];
+  for (const re of DOCS_PAGE_PATTERNS) {
+    re.lastIndex = 0;
+    let m;
+    while ((m = re.exec(html))) {
+      found.push({ index: m.index, raw: m[1] });
+    }
+  }
+  found.sort((a, b) => a.index - b.index);
+  const seen = new Set();
+  const out = [];
+  for (const { raw } of found) {
+    let resolved;
+    try {
+      resolved = new URL(raw.trim(), pageUrl).toString();
+    } catch {
+      continue;
+    }
+    if (seen.has(resolved)) continue;
+    seen.add(resolved);
+    out.push(resolved);
+  }
+  return out;
+}
+
+// The candidate URL-shape filter shared by strategies E and F: kept only
+// if it looks like it names a spec, never followed just because it's a
+// link on the page.
+function isCandidateSpecUrl(url) {
+  const lower = url.toLowerCase();
+  if (/(openapi|swagger|api-docs|apispec)/.test(lower)) return true;
+  if (/\.(json|ya?ml)(?:[?#]|$)/.test(lower)) return true;
+  return false;
+}
+
+function looksHtml(res) {
+  const ct = res.headers ? res.headers.get('content-type') : null;
+  if (ct) return /html/i.test(ct);
+  return !!(res.text && /<html[\s>]/i.test(res.text));
+}
+
+async function strategyE(apiHost, registrable, lockedKeys) {
+  const tried = [];
+  const hosts = [`docs.${registrable}`, `developer.${registrable}`, `developers.${registrable}`, apiHost];
+  const pages = [];
+  for (const host of hosts) {
+    const url = `https://${host}/`;
+    const res = await request(url);
+    tried.push({ url, method: 'GET', status: res.status ?? `error: ${res.error}` });
+    if (res.ok && res.text && looksHtml(res)) pages.push({ url, text: res.text });
+  }
+
+  const candidates = [];
+  for (const page of pages) {
+    for (const u of extractPageCandidates(page.text, page.url)) {
+      if (isCandidateSpecUrl(u)) candidates.push(u);
+    }
+  }
+  const capped = candidates.slice(0, 10); // per vendor, in page order
+
+  let wrongSpecSeen = null;
+  for (const url of capped) {
+    const v = await validateCandidate(url, lockedKeys);
+    const hostCheck = v.doc ? hostCheckFor(v.doc, apiHost, registrable) : false;
+    tried.push({ url, method: 'GET (validate, docs-page candidate)', status: v.error ? `load error: ${v.error}` : 'loaded', overlap: v.overlap, hostCheck });
+    if (v.verdict === 'found') return { result: 'found', winningUrl: url, overlap: v.overlap, hostCheck, tried, requestCount: tried.length };
+    if (v.verdict === 'wrong_spec' && !wrongSpecSeen) wrongSpecSeen = { url, overlap: v.overlap, hostCheck };
+  }
+  if (wrongSpecSeen) {
+    return { result: 'wrong_spec', winningUrl: wrongSpecSeen.url, overlap: wrongSpecSeen.overlap, hostCheck: wrongSpecSeen.hostCheck, tried, requestCount: tried.length };
+  }
+  return { result: 'not_found', winningUrl: null, overlap: 0, hostCheck: null, tried, requestCount: tried.length };
+}
+
+// ---------------------------------------------------------------------
+// Strategy F — sitemap
+// ---------------------------------------------------------------------
+function extractLocs(xmlText) {
+  const out = [];
+  for (const m of xmlText.matchAll(/<loc>\s*([^<]+?)\s*<\/loc>/gi)) {
+    out.push(m[1].trim());
+  }
+  return out;
+}
+
+async function strategyF(apiHost, registrable, lockedKeys) {
+  const tried = [];
+  const hosts = [apiHost, `docs.${registrable}`, `developer.${registrable}`, `developers.${registrable}`];
+  const candidateUrls = [];
+
+  for (const host of hosts) {
+    const url = `https://${host}/sitemap.xml`;
+    const res = await request(url);
+    tried.push({ url, method: 'GET', status: res.status ?? `error: ${res.error}` });
+    if (!res.ok || !res.text) continue;
+    const isIndex = /<sitemapindex[\s>]/i.test(res.text);
+    if (isIndex) {
+      const childUrls = extractLocs(res.text).slice(0, 3); // at most 3 child sitemaps
+      for (const childUrl of childUrls) {
+        const childRes = await request(childUrl);
+        tried.push({ url: childUrl, method: 'GET (child sitemap)', status: childRes.status ?? `error: ${childRes.error}` });
+        if (childRes.ok && childRes.text) candidateUrls.push(...extractLocs(childRes.text));
+      }
+    } else {
+      candidateUrls.push(...extractLocs(res.text));
+    }
+  }
+
+  const capped = candidateUrls.filter(isCandidateSpecUrl).slice(0, 10); // per vendor
+
+  let wrongSpecSeen = null;
+  for (const url of capped) {
+    const v = await validateCandidate(url, lockedKeys);
+    const hostCheck = v.doc ? hostCheckFor(v.doc, apiHost, registrable) : false;
+    tried.push({ url, method: 'GET (validate, sitemap candidate)', status: v.error ? `load error: ${v.error}` : 'loaded', overlap: v.overlap, hostCheck });
+    if (v.verdict === 'found') return { result: 'found', winningUrl: url, overlap: v.overlap, hostCheck, tried, requestCount: tried.length };
+    if (v.verdict === 'wrong_spec' && !wrongSpecSeen) wrongSpecSeen = { url, overlap: v.overlap, hostCheck };
+  }
+  if (wrongSpecSeen) {
+    return { result: 'wrong_spec', winningUrl: wrongSpecSeen.url, overlap: wrongSpecSeen.overlap, hostCheck: wrongSpecSeen.hostCheck, tried, requestCount: tried.length };
+  }
+  return { result: 'not_found', winningUrl: null, overlap: 0, hostCheck: null, tried, requestCount: tried.length };
 }
 
 // ---------------------------------------------------------------------
 // Driver
 // ---------------------------------------------------------------------
-export async function probeVendor(vendorRow, sharedListPromise) {
+export async function probeVendor(vendorRow, sharedListPromise, strategyFilter = null) {
   const { vendor, host, raw } = vendorRow;
   if (!host) {
     return { vendor, skipped: true, reason: 'no derivable host' };
@@ -389,27 +612,32 @@ export async function probeVendor(vendorRow, sharedListPromise) {
   const { doc } = await enqueue(() => loadSpec(vendorRow.specPath, { timeoutMs: TIMEOUT_MS }));
   const lockedKeys = opKeys(operationsFrom(doc));
 
-  const [a, b, c, d] = [
-    await strategyA(host, registrable, lockedKeys),
-    await strategyB(host, registrable, lockedKeys),
-    await strategyC(host, registrable, raw, lockedKeys),
-    await strategyD(registrable, lockedKeys, sharedListPromise),
-  ];
+  const want = (letter) => !strategyFilter || strategyFilter.includes(letter);
+  const strategies = {};
+  if (want('A')) strategies.A = await strategyA(host, registrable, lockedKeys);
+  if (want('B')) strategies.B = await strategyB(host, registrable, lockedKeys);
+  if (want('C')) strategies.C = await strategyC(host, registrable, raw, lockedKeys);
+  if (want('D')) strategies.D = await strategyD(host, registrable, lockedKeys, sharedListPromise);
+  if (want('E')) strategies.E = await strategyE(host, registrable, lockedKeys);
+  if (want('F')) strategies.F = await strategyF(host, registrable, lockedKeys);
 
   return {
     vendor,
     host,
     registrable,
     lockedOpCount: lockedKeys.size,
-    strategies: { A: a, B: b, C: c, D: d },
+    strategies,
   };
 }
 
-export async function probeVendors(vendors) {
-  const sharedListPromise = loadApisGuruList();
+export async function probeVendors(vendors, strategyFilter = null) {
+  // Only pay for apis.guru's list.json when strategy D is actually wanted
+  // (e.g. a --only=E,F dry run shouldn't fetch it at all).
+  const needsD = !strategyFilter || strategyFilter.includes('D');
+  const sharedListPromise = needsD ? loadApisGuruList() : Promise.resolve({});
   const out = [];
   for (const v of vendors) {
-    out.push(await probeVendor(v, sharedListPromise));
+    out.push(await probeVendor(v, sharedListPromise, strategyFilter));
   }
   return out;
 }
@@ -418,16 +646,21 @@ function summarize(report) {
   const lines = [];
   lines.push(`${report.vendor}  host=${report.host}  registrable=${report.registrable}  locked-ops=${report.lockedOpCount}`);
   for (const [name, s] of Object.entries(report.strategies)) {
-    lines.push(`  ${name}: ${s.result}${s.winningUrl ? ` -> ${s.winningUrl} (overlap ${(s.overlap * 100).toFixed(0)}%)` : ''} [${s.requestCount} requests]`);
+    lines.push(`  ${name}: ${s.result}${s.winningUrl ? ` -> ${s.winningUrl} (overlap ${(s.overlap * 100).toFixed(0)}%, hostCheck=${s.hostCheck})` : ''} [${s.requestCount} requests]`);
   }
   return lines.join('\n');
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const only = process.argv.slice(2);
+  const rawArgs = process.argv.slice(2);
+  const onlyArg = rawArgs.find((a) => a.startsWith('--only='));
+  const strategyFilter = onlyArg
+    ? onlyArg.slice('--only='.length).split(',').map((s) => s.trim().toUpperCase()).filter(Boolean)
+    : null;
+  const vendorArgs = rawArgs.filter((a) => !a.startsWith('--only='));
   const all = await collectVendorRows();
-  const vendors = only.length > 0 ? all.filter((v) => only.includes(v.vendor)) : all;
-  const reports = await probeVendors(vendors);
+  const vendors = vendorArgs.length > 0 ? all.filter((v) => vendorArgs.includes(v.vendor)) : all;
+  const reports = await probeVendors(vendors, strategyFilter);
   for (const r of reports) {
     console.log(summarize(r));
     console.log('');
