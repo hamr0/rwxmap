@@ -5332,6 +5332,47 @@ class).
   27, so any figure quoted must say which.
 - Decision: user ruling, skip Postman (D112).
 
+### Spec discovery pass 5: a matcher tie takes the tighter class (2026-09-27)
+
+- Goal: when `poc/match/match.mjs`'s matcher ties two or more candidate
+  operations on literal-segment count, check whether the tie-break
+  (earliest document order) ever lands on a wrong-op pick that is
+  looser than the truth, and if so fix it toward the project's
+  tighter-on-doubt invariant.
+- Method: `poc/match/measure.mjs` now classifies every wrong-op pick
+  with `classifyRow` and buckets it by class direction (same / tighter
+  / looser) against the expected operation's class. Changed
+  `matchOperation`: among candidates tied on literal-segment count, the
+  tightest class (x > w > r, from `classifyRow`, computed only on the
+  tied candidates) now wins; still tied on class, earliest document
+  order wins as before. `tie`/`tieCount` keep their old meaning, keyed
+  on the literal-count group.
+- Outcome: before, over 11,505 synthesized calls: 11,448 right, 54
+  wrong-op, 3 no-match; wrong-op by class 53 same / 0 tighter / 1
+  looser (meta-whatsapp POST `/{Version}/{TEMPLATE_ID}` `editTemplate`,
+  truth x, picked as `updatePhoneNumberStatus`, w). After the tie-break
+  change: right/wrong-op/no-match unchanged (11,448 / 54 / 3); wrong-op
+  by class 49 same / 5 tighter / 0 looser — all 5 tighter rows are
+  meta-whatsapp POST `/{Version}/{param}` calls, whose paths are
+  indistinguishable by shape from `editTemplate`'s own path.
+  meta-whatsapp has 6 POSTs on that shape: `updatePhoneNumberStatus`,
+  `updateGroupSettings`, `updateFlowMetadata`,
+  `updateWhatsAppBusinessAccount`, `updateWhatsAppBusinessProfile` (all
+  w) and `editTemplate` (x). Under the tie-break, calls for the 5 w
+  ones now map to `editTemplate` (x); before, `editTemplate`'s own call
+  mapped to `updatePhoneNumberStatus` (w) — the one looser row above.
+  Its DELETEs on that same path shape are all x already, so they are
+  unaffected. 38 matcher tests pass; the new tie-break test was seen to
+  fail with the old (doc-order-only) sort before the fix was restored.
+- What it taught: where a spec's own paths cannot tell two operations
+  apart, no path rule can pick the right one — the tie-break only
+  chooses which direction to be wrong in, and the project's invariant
+  says tighter. The trade was 5 over-tight calls for 1 leak closed, all
+  on one vendor.
+- Not core (D109): the matcher cannot change a row's own class, only
+  which row a live call maps to — so it changes under its own tests and
+  needs no exam.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.

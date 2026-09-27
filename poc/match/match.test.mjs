@@ -74,6 +74,38 @@ test('a tie is reported: same literal-segment count, earliest doc order wins', (
   assert.equal(result.tieCount, 2);
 });
 
+test('tied on literal count, different classes: the TIGHTER class wins even when it is later in document order', () => {
+  const ops = [
+    { method: 'POST', path: '/orders/{id}/{action}', operationId: 'updateOrder' }, // w (KEEP_W 'update'), earlier
+    { method: 'POST', path: '/orders/{oid}/{verb}', operationId: 'cancelOrder' }, // x (CANT_UNDO 'cancel'), later
+  ];
+  const result = matchOperation(ops, SERVERS, 'POST', 'https://api.example.com/v1/orders/123/whatever');
+  assert.equal(result.op.operationId, 'cancelOrder');
+  assert.equal(result.tie, true);
+  assert.equal(result.tieCount, 2);
+});
+
+test('tied on literal count, same class: earliest in document order still wins', () => {
+  const ops = [
+    { method: 'GET', path: '/customers/{id}' },
+    { method: 'GET', path: '/customers/{slug}' },
+  ];
+  const result = matchOperation(ops, SERVERS, 'GET', 'https://api.example.com/v1/customers/abc');
+  assert.equal(result.op.path, '/customers/{id}'); // earliest in document order (both are class r)
+  assert.equal(result.tie, true);
+  assert.equal(result.tieCount, 2);
+});
+
+test('a more-literal op still beats a tighter-class less-literal op: literal count comes first', () => {
+  const ops = [
+    { method: 'POST', path: '/orders/{id}/update', operationId: 'updateOrder' }, // 2 literal segments, class w
+    { method: 'POST', path: '/orders/{id}/{action}', operationId: 'cancelOrder' }, // 1 literal segment, class x
+  ];
+  const result = matchOperation(ops, SERVERS, 'POST', 'https://api.example.com/v1/orders/123/update');
+  assert.equal(result.op.operationId, 'updateOrder');
+  assert.equal(result.tie, false);
+});
+
 test('server base path is stripped before matching', () => {
   const ops = [{ method: 'GET', path: '/customers/{id}' }];
   const result = matchOperation(ops, ['https://api.example.com/v1'], 'GET', 'https://api.example.com/v1/customers/123');

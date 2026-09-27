@@ -45,9 +45,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { loadSpec } from '../../src/load.js';
-import { operationsFrom } from '../../src/index.js';
+import { operationsFrom, classifyRow } from '../../src/index.js';
 import { matchOperation } from './match.mjs';
 import { requestKey } from './key.mjs';
+
+// Class order r < w < x, same invariant as src/exporter.js's TIGHTNESS —
+// used here only to bucket wrongOp rows by direction, never to reclassify
+// anything.
+const CLASS_TIGHTNESS = { r: 0, w: 1, x: 2 };
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -169,7 +174,10 @@ async function measureOneSpec(file) {
     loadError: null,
     opCount: 0,
     noServers: false,
-    a: { exact: 0, wrongOp: 0, noMatch: 0, ties: 0, wrongOpExamples: [], noMatchExamples: [] },
+    a: {
+      exact: 0, wrongOp: 0, noMatch: 0, ties: 0, wrongOpExamples: [], noMatchExamples: [],
+      classSame: 0, classTighter: 0, classLooser: 0, markerDiff: 0, looserRows: [],
+    },
     b3: { keyToIdxs: new Map(), ops: [] },
     b4: { keyToIdxs: new Map(), ops: [] },
     c: { stillMatches: 0, stillRightOp: 0, stillWrongOp: 0, total: 0, examples: [] },
@@ -219,6 +227,31 @@ async function measureOneSpec(file) {
         result.a.wrongOpExamples.push({
           expected: { method: op.method, path: op.path },
           got: { method: matched.op.method, path: matched.op.path },
+          url,
+        });
+      }
+
+      // Class-direction bucketing: classifyRow takes exactly the same
+      // {method, path, operationId?, summary?, description?} shape
+      // operationsFrom(doc) already produced these ops in (src/exporter.js
+      // passes the same shape straight through to classifyRow) — no
+      // reshaping needed.
+      const expectedVerdict = classifyRow(op);
+      const gotVerdict = classifyRow(matched.op);
+      const expectedTightness = CLASS_TIGHTNESS[expectedVerdict.class];
+      const gotTightness = CLASS_TIGHTNESS[gotVerdict.class];
+      if (gotTightness === expectedTightness) {
+        result.a.classSame++;
+        if (expectedVerdict.review !== gotVerdict.review) result.a.markerDiff++;
+      } else if (gotTightness > expectedTightness) {
+        result.a.classTighter++;
+      } else {
+        result.a.classLooser++;
+        result.a.looserRows.push({
+          provider: file.provider,
+          method: op.method,
+          expected: { path: op.path, operationId: op.operationId, class: expectedVerdict.class },
+          got: { path: matched.op.path, operationId: matched.op.operationId, class: gotVerdict.class },
           url,
         });
       }
@@ -281,7 +314,11 @@ function printVendorTable(setDir, results) {
   const totals = {
     opCount: 0, exact: 0, wrongOp: 0, noMatch: 0, ties: 0,
     coll3: 0, coll4: 0, cMatch: 0, cRight: 0, cWrong: 0,
+    classSame: 0, classTighter: 0, classLooser: 0, markerDiff: 0,
   };
+  // Every looser wrongOp row across the whole set, printed in full below —
+  // never capped by EXAMPLE_LIMIT, unlike the (a) wrong-op examples above.
+  const setLooserRows = [];
 
   for (const r of results) {
     if (r.loadError) {
@@ -313,6 +350,11 @@ function printVendorTable(setDir, results) {
     totals.cMatch += r.c.stillMatches;
     totals.cRight += r.c.stillRightOp;
     totals.cWrong += r.c.stillWrongOp;
+    totals.classSame += r.a.classSame;
+    totals.classTighter += r.a.classTighter;
+    totals.classLooser += r.a.classLooser;
+    totals.markerDiff += r.a.markerDiff;
+    setLooserRows.push(...r.a.looserRows);
 
     if (r.a.wrongOpExamples.length > 0) {
       console.log(`    (a) wrong-op examples:`);
@@ -347,6 +389,18 @@ function printVendorTable(setDir, results) {
   }
 
   console.log(`--- ${setDir} totals: ops ${totals.opCount}, exact ${totals.exact}, wrongOp ${totals.wrongOp}, noMatch ${totals.noMatch}, ties ${totals.ties}, coll@3 ${totals.coll3}, coll@4 ${totals.coll4}, c:match ${totals.cMatch} (right ${totals.cRight}, wrong ${totals.cWrong}) ---`);
+  console.log(`wrongOp by class: same ${totals.classSame}, tighter ${totals.classTighter}, looser ${totals.classLooser} (markerDiff ${totals.markerDiff})`);
+
+  if (setLooserRows.length > 0) {
+    console.log(`    (a) looser wrongOp rows, ALL ${setLooserRows.length} (not capped by EXAMPLE_LIMIT):`);
+    for (const lr of setLooserRows) {
+      console.log(
+        `      [${lr.provider}] ${lr.method} `
+        + `expected ${lr.expected.path} (opId=${lr.expected.operationId ?? ''}, class=${lr.expected.class}) -> `
+        + `got ${lr.got.path} (opId=${lr.got.operationId ?? ''}, class=${lr.got.class})  (${lr.url})`,
+      );
+    }
+  }
 
   return totals;
 }
@@ -358,6 +412,7 @@ async function main() {
   const grand = {
     opCount: 0, exact: 0, wrongOp: 0, noMatch: 0, ties: 0,
     coll3: 0, coll4: 0, cMatch: 0, cRight: 0, cWrong: 0,
+    classSame: 0, classTighter: 0, classLooser: 0, markerDiff: 0,
   };
 
   for (const setDir of SETS) {
@@ -376,6 +431,7 @@ async function main() {
   console.log(`ops ${grand.opCount}, exact ${grand.exact}, wrongOp ${grand.wrongOp}, noMatch ${grand.noMatch}, ties ${grand.ties}`);
   console.log(`3-rule key collisions: ${grand.coll3} rows involved; 4-rule (mixedIds) key collisions: ${grand.coll4} rows involved`);
   console.log(`wrong-base-path variant: ${grand.cMatch} of ${grand.opCount} still matched something (${grand.cRight} still right, ${grand.cWrong} wrong-op)`);
+  console.log(`wrongOp by class: same ${grand.classSame}, tighter ${grand.classTighter}, looser ${grand.classLooser} (markerDiff ${grand.markerDiff})`);
 
   process.exit(anyWrongOp ? 1 : 0);
 }

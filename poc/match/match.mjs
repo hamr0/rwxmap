@@ -23,9 +23,15 @@
 //     that position exactly (paths are case-sensitive).
 //   - Segment counts must match exactly; no wildcard tail matching.
 //   - When several operations match, the one with the MOST LITERAL
-//     (non-template) segments wins; on a tie, the earliest one in
-//     document order wins. Every tie is reported (`tie`, `tieCount`), not
-//     just resolved silently.
+//     (non-template) segments wins; among those tied on literal-segment
+//     count, the TIGHTEST class wins (x > w > r, from classifyRow in
+//     src/index.js, computed only on the tied candidates) — when the tool
+//     cannot tell which operation a call is, it takes the tighter answer,
+//     the project's one invariant; still tied on class, the earliest one
+//     in document order wins. Every tie is reported (`tie`, `tieCount`),
+//     not just resolved silently — `tie`/`tieCount` are keyed on the
+//     literal-segment-count group exactly as before; the class tie-break
+//     only decides WHICH of that group wins, it never narrows the count.
 //   - Multiple servers: tried in the given order (duplicates, by exact
 //     string, collapsed first — some specs list the same base URL more
 //     than once, e.g. meta-whatsapp's four `servers` entries that are all
@@ -49,6 +55,12 @@
 // Throws on a non-http(s) `url` or one `new URL` cannot parse — the same
 // contract as key.mjs's requestKey, since both read the same kind of
 // input.
+import { classifyRow } from '../../src/index.js';
+
+// Class order r < w < x, the project's one invariant — used only to break
+// a literal-segment-count tie among candidates, never to reclassify or
+// filter anything outside the tied group.
+const CLASS_TIGHTNESS = { r: 0, w: 1, x: 2 };
 
 /**
  * Split a path into non-empty segments. This intentionally treats
@@ -155,9 +167,20 @@ export function matchOperation(ops, servers, method, url) {
   if (byIdx.size === 0) return null;
 
   const candidates = [...byIdx.values()];
-  candidates.sort((a, b) => b.literalCount - a.literalCount || a.idx - b.idx);
-  const top = candidates[0];
-  const tieCandidates = candidates.filter((c) => c.literalCount === top.literalCount);
+  const maxLiteralCount = Math.max(...candidates.map((c) => c.literalCount));
+  // tie/tieCount are keyed on this group — the most-literal-segments
+  // candidates — exactly as before the class tie-break was added.
+  const tieCandidates = candidates.filter((c) => c.literalCount === maxLiteralCount);
+
+  // Classify ONLY the tied candidates (never every op) to break the tie:
+  // the tightest class wins, then earliest document order. Tightness is
+  // computed once per candidate (not inline in the comparator) since a
+  // sort comparator may re-invoke per element more than once.
+  const tightnessByIdx = new Map(
+    tieCandidates.map((c) => [c.idx, CLASS_TIGHTNESS[classifyRow(c.op).class]]),
+  );
+  tieCandidates.sort((a, b) => tightnessByIdx.get(b.idx) - tightnessByIdx.get(a.idx) || a.idx - b.idx);
+  const top = tieCandidates[0];
 
   return {
     op: top.op,
