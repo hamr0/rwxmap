@@ -54,6 +54,13 @@ import { parse as parseYaml } from 'yaml';
  *   content-length and its actual streamed body, or a file's stat size —
  *   AND the decompressed gunzip output (default 64 MiB, i.e. 64 * 1024 *
  *   1024).
+ * @property {Record<string, string>} [headers]  Extra request headers for
+ *   a URL fetch (e.g. a caller's own User-Agent). Ignored for a file
+ *   path. Default (no extra headers) is unchanged for every existing
+ *   caller.
+ * @property {'follow'|'manual'|'error'} [redirect]  Passed straight to
+ *   fetch. Default 'follow' — fetch's own default, unchanged for every
+ *   existing caller.
  */
 
 const GZIP_MAGIC = Buffer.from([0x1f, 0x8b]);
@@ -103,10 +110,12 @@ function stripBom(text) {
  * @param {string} url
  * @param {number} timeoutMs
  * @param {number} maxBytes
+ * @param {Record<string, string>} [headers]
+ * @param {'follow'|'manual'|'error'} [redirect]
  * @returns {Promise<Buffer>}
  */
-async function readUrlBytes(url, timeoutMs, maxBytes) {
-  const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
+async function readUrlBytes(url, timeoutMs, maxBytes, headers, redirect) {
+  const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs), headers, redirect });
   if (res.status < 200 || res.status >= 300) {
     throw new Error(`loadSpec: ${url}: http ${res.status}`);
   }
@@ -195,7 +204,7 @@ export async function loadSpec(source, opts = {}) {
   const maxBytes = opts.maxBytes ?? DEFAULT_MAX_BYTES;
 
   const raw = isHttpUrl(source)
-    ? await readUrlBytes(source, timeoutMs, maxBytes)
+    ? await readUrlBytes(source, timeoutMs, maxBytes, opts.headers, opts.redirect)
     : readFileBytes(source, maxBytes);
 
   const bytes = raw.length;

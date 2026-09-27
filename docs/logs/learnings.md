@@ -5413,6 +5413,54 @@ class).
   matching aid, not a class decision, so it changes under its own tests
   and needs no exam.
 
+### Spec discovery pass 7: key and matcher graduate to src/ (2026-09-27)
+
+- Goal: rewrite `poc/match/key.mjs` and `poc/match/match.mjs` as clean
+  src/ modules (`src/key.js`'s `requestKey`, `src/match.js`'s
+  `matchOperation`) under an equivalence proof against the frozen POC,
+  same discipline as the earlier step1-3/exporter graduations.
+- Method: `src/key.js` ports only the ADOPTED rules (1-4, including
+  pass 6's prefixed-id rule) with no `options` argument at all — the
+  still-unadopted `mixedIds` candidate documented in the POC's header is
+  not ported. `src/match.js` ports the matcher's tightest-class-on-a-tie
+  rule, with an unknown class counted as `x`. `tools/proof-match.js`
+  compares both new modules against `poc/match` over the same 11,505
+  synthesized calls, 37 spec files, 4 sets the POC's own measure.mjs
+  uses.
+- Outcome: 299/299 existing tests pass; the proof found 0 differences
+  over all 11,505 calls across all 4 sets for both `requestKey` and
+  `matchOperation`. The proof was deliberately broken twice and seen to
+  fail: disabling key rule 4 produced 2,974 key differences (exit 1);
+  reverting the tie-break to plain document order produced 6
+  `matchIdentity` differences (exit 1). Both were restored and the proof
+  re-passed clean.
+- Found in review: the first port of the tie-break fell back to `r` (the
+  loosest class) for an operation whose `classifyRow` returned an
+  unrecognised class — unreachable today since `classifyRow` only ever
+  returns `r`/`w`/`x`, but fail-open if it ever didn't. Fixed to fall
+  back to `x` instead, matching the project's one invariant (tighter on
+  doubt) and this file's own header comment, which already claimed `x`.
+- A separate, offline check for the next item (spec discovery) ran
+  alongside this pass: which parent-domain heuristic finds the right
+  vendor host for the 25 discovery-POC vendor hosts. Dropping only the
+  first label (what a public-suffix-list approximation would give
+  without one) matched the probe's own suffix-list answer on 23 of 25 —
+  wrong for `server.api.mailchimp.com` (needs `mailchimp.com`, two
+  labels dropped) and `api-m.sandbox.paypal.com` (needs `paypal.com`,
+  two labels dropped). Walking up one label at a time, stopping at two
+  labels, passed through the right parent on 25 of 25, with no list at
+  all.
+- User rulings (2026-09-27): walk up one label at a time with no public
+  suffix list, for the reason above; a discovered spec's gate keys use
+  the API host as the vendor (`<host>.<operationId>`), not a hand-picked
+  vendor name.
+- What it taught: a tie-break's "impossible" branch is worth fixing
+  anyway when the cost is one line and the alternative is fail-open;
+  and a heuristic that agrees with a real suffix list on 23/25 samples
+  can still be silently wrong on exactly the multi-label vendor hosts
+  that matter most (a shared API subdomain, a sandbox subdomain) — the
+  disagreements cluster on the hard cases, not spread evenly.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.

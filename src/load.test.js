@@ -6,6 +6,7 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import http from 'node:http';
 import { execFileSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 
 import { loadSpec } from './load.js';
 import { operationsFrom } from './index.js';
@@ -305,8 +306,15 @@ function writeYamlHookFiles(dir) {
   fs.writeFileSync(hookPath, `
     import { appendFileSync } from 'node:fs';
     export async function resolve(specifier, context, nextResolve) {
-      if (specifier === 'yaml' || specifier.startsWith('yaml/')) {
+      if ((specifier === 'yaml' || specifier.startsWith('yaml/')) && process.env.RWXMAP_YAML_HITS_FILE) {
         appendFileSync(process.env.RWXMAP_YAML_HITS_FILE, 'hit\\n');
+      }
+      // Same proof, for rwxmap/discover (src/discover.js): the classifier
+      // root must never resolve it either — it fetches over the network
+      // and pulls in the yaml loader, so a dependency-free
+      // \`import 'rwxmap'\` must stay entirely clear of it too.
+      if (specifier.endsWith('discover.js') && process.env.RWXMAP_DISCOVER_HITS_FILE) {
+        appendFileSync(process.env.RWXMAP_DISCOVER_HITS_FILE, 'hit\\n');
       }
       return nextResolve(specifier, context);
     }
@@ -342,6 +350,40 @@ test('import("rwxmap") (src/index.js) never resolves yaml; src/load.js does', ()
     const loadCounterFile = path.join(hookDir, 'hits-load.txt');
     const loadHits = countYamlResolutions(runnerPath, path.join(repoRoot, 'src', 'load.js'), loadCounterFile);
     assert.ok(loadHits > 0, 'src/load.js must resolve the yaml package (proves the hook itself can detect a hit)');
+  } finally {
+    fs.rmSync(hookDir, { recursive: true, force: true });
+  }
+});
+
+// --- rwxmap/discover (src/discover.js) is not reachable from the root --
+//
+// Same proof, same hook, for the other subpath that must stay out of
+// `import 'rwxmap'`: rwxmap/discover fetches over the network and (via
+// loadSpec) pulls in yaml, so src/index.js resolving it at all would be
+// exactly the dependency-free promise D107 breaks.
+function countDiscoverResolutions(runnerPath, targetPath, counterFile) {
+  fs.writeFileSync(counterFile, '');
+  execFileSync(process.execPath, [runnerPath, targetPath], {
+    encoding: 'utf8',
+    env: { ...process.env, RWXMAP_DISCOVER_HITS_FILE: counterFile },
+  });
+  return fs.readFileSync(counterFile, 'utf8').split('\n').filter((l) => l.length > 0).length;
+}
+
+test('import("rwxmap") (src/index.js) never resolves discover.js; a module importing it does', () => {
+  const hookDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rwxmap-discover-hook-'));
+  try {
+    const runnerPath = writeYamlHookFiles(hookDir);
+    const indexCounterFile = path.join(hookDir, 'hits-index.txt');
+    const indexHits = countDiscoverResolutions(runnerPath, path.join(repoRoot, 'src', 'index.js'), indexCounterFile);
+    assert.equal(indexHits, 0, 'src/index.js must never resolve src/discover.js');
+
+    const probeModule = path.join(hookDir, 'discover-probe.mjs');
+    const discoverUrl = pathToFileURL(path.join(repoRoot, 'src', 'discover.js')).href;
+    fs.writeFileSync(probeModule, `import ${JSON.stringify(discoverUrl)};\n`);
+    const discoverCounterFile = path.join(hookDir, 'hits-discover-probe.txt');
+    const discoverHits = countDiscoverResolutions(runnerPath, probeModule, discoverCounterFile);
+    assert.ok(discoverHits > 0, 'a module importing src/discover.js must trip the hook (proves it can detect a hit)');
   } finally {
     fs.rmSync(hookDir, { recursive: true, force: true });
   }
