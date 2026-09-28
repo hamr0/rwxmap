@@ -184,6 +184,105 @@ This reading is not carried in the map itself — the map holds only
 the four fields. The tool cannot know which operations you call
 heavily; it gives the head start and you tighten from traffic.
 
+## Loading a spec
+
+```js
+import { loadSpec } from 'rwxmap/load';
+import { operationsFrom, classifyRow } from 'rwxmap';
+
+const { doc } = await loadSpec('https://example.com/openapi.yaml');
+const verdicts = operationsFrom(doc).map((op) => classifyRow(op));
+```
+
+`loadSpec` takes a URL or a file path, JSON or YAML, gzipped or not, and
+refuses anything over 64 MB (compressed or decoded) before it is fully
+read, and any binary content, so one bad link can't take the process down.
+It never follows an external `$ref` — an operation split into another
+file classifies on method+path alone (D106). It ships as the separate
+`rwxmap/load` subpath, not from the package root, so `import 'rwxmap'`
+never loads its one dependency, the `yaml` parser (D107).
+
+## Discovering a spec, for harness authors
+
+`rwxmap/discover` finds an API's spec on its own and classifies calls
+against it, for a harness or gate that wants whole-API coverage
+instead of one URL at a time.
+
+If you know the API's spec URL, or have the file, pass it as
+`findSpec(apiUrl, { spec })`. That's the best case: nothing is
+guessed. Big public vendors mostly publish their spec in their own
+GitHub repo or on a docs site, which discovery does not look at — the
+live run found 2 of 25.
+
+Otherwise, `findSpec` tries, in order:
+
+1. the given spec, with nothing else tried.
+2. the 30-day cache.
+3. `/.well-known/api-catalog` (RFC 9727).
+4. the `Link: rel="service-desc"` header (RFC 8631).
+5. `/openapi.json`, `/openapi.yaml`, `/swagger.json`.
+6. nothing found → every call is classified on its own.
+
+Steps 3-4 run on the API host, then walk up to its parent domain,
+stopping at two labels. Step 5's fixed paths run on the API host, and
+on `docs.`, `developer.` and `developers.` of that two-label parent
+(for `api.cloudflare.com`, that's `docs.cloudflare.com`,
+`developer.cloudflare.com` and `developers.cloudflare.com`).
+
+The spec-or-not decision is made per call, not per API: a call that
+matches no operation in the found spec — for example because the spec
+is incomplete — is classified on its own, so an incomplete spec costs
+exactness, never a looser letter (see the test "classifyCall: an
+undocumented endpoint on a found spec falls back to per-request
+classification" in `src/discover.test.js`).
+
+```js
+import { findSpec, classifyCall } from 'rwxmap/discover';
+
+const found = await findSpec('https://api.example.com');
+const verdict = classifyCall(found, 'POST', 'https://api.example.com/v1/orders');
+// { key, letter, marker, source: 'spec' | 'request' }
+```
+
+- `findSpec(apiUrl, { spec?, cacheDir? })` looks for an OpenAPI/Swagger
+  document at the usual locations (D108), caches the result for 30
+  days, and refuses to probe a non-https URL, an IP-literal host,
+  `localhost` or a single-label host (D114).
+- `classifyCall(found, method, url)` matches the call to a spec
+  operation when it can, else falls back to per-request classification
+  (`classifyRow`), and always returns `{ key, letter, marker, source }`.
+- `requestKey(method, url)` is the per-request key builder on its own,
+  for a caller that already has a `letter`/`marker` from elsewhere.
+
+A discovered spec's keys (`<host>.<operationId>`) and per-request keys
+(`requestKey`) are separate keyspaces — a harness must never build one
+from the other (a bareguard guard-session finding).
+
+Discovery is limited: at most 3 guessed paths, at most 3 service-desc
+links followed, and a 60 s wall-clock budget per `findSpec` call (up
+to one request timeout of overrun). A spec-less site costs about 26
+requests, measured live, then cached for 30 days.
+
+Discovery can occasionally land on a spec for a different API on the
+same domain. Live, cloudflare's `www.cloudflare.com/openapi.json` was
+a 3-operation file for something else, and it matched 0 calls. A call
+that happens to match such a spec takes that spec's letter — in
+testing that made 4 of 414,180 cross-vendor calls looser. No test
+tells a wrong spec from a right one, so this is an accepted, known
+limit (D117). Passing the spec URL avoids it.
+
+For bareguard: a found spec's `entries` go straight into `gate.add()`
+unchanged. A per-request key must be added with
+`gate.add({ [key]: { letter, marker } })` *before* the matching
+`gate.check({ type: key, url })`, with the real URL in `url` — an
+unlisted key is denied. `add()` is tighten-only and all-or-nothing per
+batch: a refused batch throws and is audited, so catch it and keep
+going, and the stricter existing entry stays in force. A gate caps out
+at 10,000 keys.
+
+It ships as its own `rwxmap/discover` subpath (D113), never from the
+package root, so `import 'rwxmap'` stays offline and dependency-free.
+
 ## How it publishes
 
 rwxmap does not invent a format. Every standard an agent already reads

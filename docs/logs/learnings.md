@@ -5112,6 +5112,447 @@ class).
   has already fixed the easy rows and what remains is the hard residue;
   a falling hit rate there is the tool improving, not degrading.
 
+### Input POC pass 1: loading real specs from file and URL (2026-09-26)
+
+- Goal: point rwxmap at a file or URL (JSON or YAML) and get the same
+  operations the corpus was built from. The riskiest assumption of PRD
+  "What is next" item a.
+- Tried: poc/input/load.mjs (loadSpec: fs or fetch, gunzip on magic
+  bytes, BOM strip, JSON then yaml 1.2 core schema) feeding the frozen
+  operationsFrom. Measured against the four sets that keep raw specs
+  and ops.csv (provider-corpus-2026-09-16, exam-2026-09-17,
+  exam-2026-09-20, exam-2026-09-22), keyed on (METHOD, path,
+  operationId), from disk and from the locked URLs. The lock files
+  record the bytes and sha256 of the uncompressed original, not the
+  .gz.
+- Outcome: 20 vendors match exactly: 9,149 operations, 0 missing, 0
+  extra (14 of 15 corpus vendors, okta/docusign/xero,
+  cloudflare/pagerduty/sentry), JSON and YAML alike. In
+  exam-2026-09-20 (write-only, deduped, capped at 250 per vendor)
+  every sampled row was found; the extras are GETs and unsampled rows.
+  The slowest load was okta YAML at 1.8 s; cloudflare's 26 MB JSON
+  took 0.37 s and about 127 MB RSS. The builders trimmed
+  summary/description and operationsFrom does not; over all 11,505
+  loaded operations this changes 0 verdicts (class, review,
+  destructive).
+- Outcome, digitalocean: the spec keeps every operation in an external
+  `$ref` file, so without resolving them its 684 operations load as
+  method+path only. Against the labelled truth: with the fragment
+  text 564/684 exact (82.5%), 12 leaks (1.8%), 108 over-tight (15.8%);
+  method+path only 564 (82.5%), 10 leaks (1.5%), 110 over-tight
+  (16.1%); 6 verdicts flip.
+- Outcome, hubspot: its URL serves a 5.7 MB tar.gz that gunzips to
+  85 MB of binary tar (with NUL bytes). The yaml parser then ran the
+  process out of heap (FATAL ... heap out of memory, exit 134),
+  reproduced alone under a 1 GB heap. The URL leg's other finding:
+  canva +4, stripe +18 and digitalocean +31 live operations since the
+  locks (vendor drift).
+- Outcome, measurement bug: a spec that fails to load was counted 0
+  missing instead of all missing.
+- Lesson: a URL is untrusted input. The loader needs byte caps and a
+  binary check before the YAML parser, or one wrong link kills the
+  harness. Not resolving external `$ref`s costs nothing measurable on
+  the one split spec in hand, and resolving them would make rwxmap
+  fetch whatever URLs a third-party document names.
+
+### Input POC pass 2: byte caps and binary refusal (2026-09-26)
+
+- Goal: stop one wrong URL from killing the process, and fix the
+  measurement's load-error count.
+- Tried: a 64 MB default cap on the URL body (content-length checked up
+  front, then a streamed running total), on file size, and on gunzip
+  output (zlib maxOutputLength); a binary check (NUL, or `ustar` at
+  offset 257) before any parse.
+- Outcome: 14/14 loader tests. The 5 new cap/binary tests all fail
+  against the pass 1 loader (verified by the orchestrator in a separate
+  copy). The live hubspot URL is refused in 1.6 s at 158 MB RSS under a
+  1 GB heap ("gunzip output exceeds maxBytes 67108864"), where pass 1
+  died out of heap. The measurement now counts a failed load as
+  all-missing: disk totals expected 10586, got 11505, missing 684 (the
+  digitalocean fragments), extra 1603. The live-URL run over all four
+  sets now completes (exit 0): every unchanged spec still matches, and
+  the differences are vendor drift since the locks (stripe +18, openai
+  +6, canva +4, sentry +6, cloudflare +50/−31, digitalocean 715 live
+  operations against 684).
+- Lesson: the cap caught hubspot at gunzip, before the binary check
+  ever ran. Keep both: the binary check covers a tarball small enough
+  to pass the cap.
+
+### Input pass 3: the loader graduates as rwxmap/load (2026-09-26)
+
+- Goal: graduate the frozen loader POC into src/ under equivalence-proof
+  safety and ship it as its own subpath export.
+- Tried: rewrote poc/input/load.mjs as src/load.js; subpath export
+  `rwxmap/load` (D107); `yaml` moved to dependencies; tools/proof-load.js
+  compares src vs POC over all 722 locked spec files.
+- Outcome: 255/255 tests, typecheck clean, proof 722/722 "All pins
+  hold" (seen red when the hash was swapped to md5), a resolve-hook
+  test proving `import 'rwxmap'` loads no yaml (seen red with `import
+  'yaml'` added to a scratch index.js), and a tarball smoke test (figma
+  YAML → 54 operations). The orchestrator's review caught two defects,
+  fixed in ae68a5b: every gunzip failure was reported as "exceeds
+  maxBytes" (a truncated gzip now says "not a valid gzip stream"; the
+  cap is recognised by ERR_BUFFER_TOO_LARGE), and the README's
+  `.map(classifyRow)` passed the array index into `words` (0 verdict
+  changes over 4169 stripe+cloudflare rows today, but fragile).
+- Lesson: `Array.map(fn)` hands fn an index; any exported function with
+  an optional second parameter should be shown called through an arrow
+  in docs.
+
+### Spec discovery pass 1: four strategies over 25 vendors (2026-09-27)
+
+- Goal: can rwxmap find a site's spec on its own?
+- Tried: A RFC 9727 /.well-known/api-catalog; B RFC 8631 Link
+  rel="service-desc"; C 14 guessed paths on the API host and on
+  docs./developer./developers.; D APIs.guru list.json. A find counts
+  only if it loads and overlaps the locked spec's (METHOD, path) keys
+  at 50% or more.
+- Outcome: found for 8 of 25 vendors (32%). A: intercom (70%). B:
+  intercom (same file). C: cloudflare, via
+  docs.cloudflare.com/openapi.json (99%). D: asana 66%, docusign 94%,
+  spotify 92%, square 54%, stripe 74%, zoom 92%. Wrong spec from D:
+  xero (identity API, 0%), openai (5%), digitalocean (42%); from B:
+  cloudflare www.cloudflare.com/openapi.json (0%). Not found at all:
+  17, including openai, pagerduty, sentry, okta, figma, datadog, jira.
+  Five hosts are per-customer placeholders in the spec (auth0
+  {tenant}, okta subdomain, zendesk example, jira your-domain,
+  mailchimp server). About 74 requests per site, mostly failed
+  guesses.
+- Outcome, user ruling (2026-09-27): no hand-curated vendor→spec list
+  ships with rwxmap, since it would silently commit the project to
+  upkeep. Discovery is a caller-given address first, then a few fixed
+  location shapes tried one at a time, then per-request mode. Recorded
+  as D108 once the APIs.guru question is settled.
+- Lesson: specs mostly live on GitHub or docs sites, not on the API
+  host. The reliable input is an address the harness already knows;
+  guessing is a best effort, and in real use nothing proves a found
+  spec is the right one except checking it against the host being
+  called.
+
+### Spec discovery pass 2: matching a call to its operation, and the per-request key (2026-09-27)
+
+- Goal: given a real request, can rwxmap match it to its operation in a
+  locked spec, and can the match be reduced to one deterministic
+  per-request key a policy engine can compare against unchanged?
+- Tried: poc/match/key.mjs requestKey (host lowercased, IDN to
+  punycode, default ports dropped, other ports kept, METHOD
+  uppercased, query and fragment dropped, only unreserved chars
+  decoded and other escapes uppercased, repeated slashes collapsed,
+  trailing slash dropped except on root; ids to {id}: all-digit, UUID,
+  hex of 16+) and poc/match/match.mjs matchOperation (strip the server
+  base path, a {param} matches one segment, the most literal segments
+  win, then document order). Measured with one synthesized URL per
+  operation over 11,505 operations from the four sets.
+- Outcome: 11,448 matched their own operation, 54 wrong, 3 no-match. 46
+  of the 54 were exact structural ties (meta-whatsapp
+  /{Version}/{X}, xero ContactID/ContactNumber, miro dedup-suffixed
+  params, openai paths keyed with a literal `?beta=true`). By
+  mechanical class: 53 of 54 wrong matches got the same class and 1
+  got a LOOSER one (meta-whatsapp POST /{Version}/{TEMPLATE_ID}, x,
+  matched updatePhoneNumberStatus, w). The 3 no-matches are id segments
+  with a suffix ({id}.json, {scan_id}.png) and one literal placeholder
+  path. Built without the server base path, 5,595 URLs still matched
+  something, 33 of them the wrong op. Per-request key collisions
+  (distinct ops on one key): 56 with 3 id rules; a 4th rule (mixed
+  alnum of 20+ chars) made it 65 by folding real words (digitalocean
+  metric names, cloudflare setting names), so it was not adopted.
+  Stripe-style prefixed ids (`cus_NffrFeUfNV2Hib`, 18 chars) are not
+  folded by any adopted rule.
+- Outcome, from the bareguard session: its e2e bench passed 57/57 with
+  exportGate's tools feeding gate.add() unchanged; bareguard matches
+  action.type byte-for-byte, so the key must be deterministic;
+  bareguard 0.18.0 will run its net domain check on any action carrying
+  `url` (user ruling), so the harness sends `{ type: <key>, url: <real
+  URL> }`. A read verb in a POST path already classifies RPC-style
+  reads as r (`/api/getFlights`, Google's `.../GetShoppingResults`); an
+  opaque `POST /graphql` stays x because rwxmap never reads bodies.
+- Lesson: a matcher cannot separate structurally identical templates,
+  so on a tie it must pick the tightest class among the tied ops; that
+  closes the one looser case.
+
+### Spec discovery pass 3: docs-page links, sitemaps and a host check (2026-09-27)
+
+- Goal: close the two open questions from pass 1 — do docs-page links
+  and sitemaps find specs that the fixed-path guesses miss, and does
+  checking a candidate spec's host against the vendor's registrable
+  domain catch wrong finds — over the same 25 vendors (the full run of
+  six strategies took 2050 requests).
+- Tried: E, links scanned from the HTML of docs./developer./developers.
+  and the API root (Swagger UI, Redoc, Stoplight, Scalar and RapiDoc
+  attributes too, one level deep); F, sitemap.xml on the same hosts;
+  the host check (does the candidate spec's own server host share the
+  vendor's registrable domain?) run over all 12 pass-1 results.
+- Outcome: E found 0, wrong 0. F found 0, wrong 0; 211 extra requests
+  for nothing. Most modern docs sites build their pages with
+  JavaScript, and their sitemaps list pages, not spec files. The host
+  check passed on all 12 results, including all 4 wrong ones (xero
+  identity, openai 1.2.0, digitalocean 2.0 from APIs.guru,
+  www.cloudflare.com/openapi.json) — wrong specs come from the
+  vendor's own domain, so a host check cannot tell right from wrong.
+  What limits the harm: a wrong spec's operations mostly do not match
+  the calls, so those calls fall back to per-request mode. APIs.guru's
+  list: 2,529 APIs across 677 domains, newest entry updated
+  2023-04-21; by year of last update, 2016 21, 2017 187, 2018 308,
+  2019 177, 2020 353, 2021 660, 2022 15, 2023 808 — it looks
+  unmaintained since April 2023.
+- User rulings (2026-09-27): drop APIs.guru, drop E and F. The two use
+  cases are (a) an API provider pointing rwxmap at its own spec (URL
+  or file), and (b) inside bareguard or an agent harness, capturing
+  the whole API through the discovery order and, if that fails,
+  classifying each call as it comes.
+- Lesson: every discovery shape that reads a third party's pages found
+  nothing; the shapes that work are the cheap standard ones plus the
+  address the caller already knows.
+
+### Spec discovery pass 4: which description shapes APIs publish (2026-09-27)
+
+- Goal: find out, across a real sample of public APIs, which spec
+  shape is actually out there — OpenAPI, Swagger, Postman, GraphQL or
+  nothing — so discovery knows what is worth reading for.
+- Method: `poc/formats/` (`sample.mjs`, `count.mjs`),
+  `data/formats-2026-09-27/`. Source: the public-apis README, 1839
+  entries; seeded sample of 200; 8 already-known vendors excluded;
+  2143 requests. Per API: the docs page read for evidence words, then
+  guessed common spec paths loaded and classified.
+- Outcome: loaded and classified (confirmed), of 200: OpenAPI 3 26,
+  Swagger 2 1, Postman 3, Google Discovery 1; 29 APIs had anything
+  confirmed. So OpenAPI/Swagger is 27 of the 29 that loaded (93%). One
+  of the 27 is a false positive: Sportmonks' guessed `/openapi.json`
+  loaded GitBook's own API spec, not Sportmonks'. Confirmed OR
+  mentioned on the docs page, of 200: OpenAPI/Swagger 51 (25.5%),
+  GraphQL 14, Postman 7; 60 APIs showed any shape. Cumulative over
+  those 60: OpenAPI/Swagger 51 (85%), adding Postman 54, adding
+  GraphQL 58. Nothing found: 140 of 200 (70%): 39 dead links, the rest
+  JS-rendered pages or plain pages with no spec.
+- What it taught: where anything machine-readable is published it is
+  almost always OpenAPI/Swagger; Postman adds 3 of 60 and would be a
+  second parser for little reach. Most public APIs publish nothing
+  reachable, so per-request mode is the common case, not the edge
+  case. Mention-counts overstate: "mentioned" is 51 but "loaded" is
+  27, so any figure quoted must say which.
+- Decision: user ruling, skip Postman (D112).
+
+### Spec discovery pass 5: a matcher tie takes the tighter class (2026-09-27)
+
+- Goal: when `poc/match/match.mjs`'s matcher ties two or more candidate
+  operations on literal-segment count, check whether the tie-break
+  (earliest document order) ever lands on a wrong-op pick that is
+  looser than the truth, and if so fix it toward the project's
+  tighter-on-doubt invariant.
+- Method: `poc/match/measure.mjs` now classifies every wrong-op pick
+  with `classifyRow` and buckets it by class direction (same / tighter
+  / looser) against the expected operation's class. Changed
+  `matchOperation`: among candidates tied on literal-segment count, the
+  tightest class (x > w > r, from `classifyRow`, computed only on the
+  tied candidates) now wins; still tied on class, earliest document
+  order wins as before. `tie`/`tieCount` keep their old meaning, keyed
+  on the literal-count group.
+- Outcome: before, over 11,505 synthesized calls: 11,448 right, 54
+  wrong-op, 3 no-match; wrong-op by class 53 same / 0 tighter / 1
+  looser (meta-whatsapp POST `/{Version}/{TEMPLATE_ID}` `editTemplate`,
+  truth x, picked as `updatePhoneNumberStatus`, w). After the tie-break
+  change: right/wrong-op/no-match unchanged (11,448 / 54 / 3); wrong-op
+  by class 49 same / 5 tighter / 0 looser — all 5 tighter rows are
+  meta-whatsapp POST `/{Version}/{param}` calls, whose paths are
+  indistinguishable by shape from `editTemplate`'s own path.
+  meta-whatsapp has 6 POSTs on that shape: `updatePhoneNumberStatus`,
+  `updateGroupSettings`, `updateFlowMetadata`,
+  `updateWhatsAppBusinessAccount`, `updateWhatsAppBusinessProfile` (all
+  w) and `editTemplate` (x). Under the tie-break, calls for the 5 w
+  ones now map to `editTemplate` (x); before, `editTemplate`'s own call
+  mapped to `updatePhoneNumberStatus` (w) — the one looser row above.
+  Its DELETEs on that same path shape are all x already, so they are
+  unaffected. 38 matcher tests pass; the new tie-break test was seen to
+  fail with the old (doc-order-only) sort before the fix was restored.
+- What it taught: where a spec's own paths cannot tell two operations
+  apart, no path rule can pick the right one — the tie-break only
+  chooses which direction to be wrong in, and the project's invariant
+  says tighter. The trade was 5 over-tight calls for 1 leak closed, all
+  on one vendor.
+- Not core (D109): the matcher cannot change a row's own class, only
+  which row a live call maps to — so it changes under its own tests and
+  needs no exam.
+
+### Spec discovery pass 6: prefixed ids fold in the request key (2026-09-27)
+
+- Goal: measure a narrow stripe-style prefixed-id rule for
+  `poc/match/key.mjs`'s request key (`^([a-z]{2,5})_([A-Za-z0-9]{10,})$`,
+  the part after "_" containing a digit or both an uppercase and a
+  lowercase letter) against a looser clause-less variant B, over false
+  folds (literal path segments) and recall (the specs' own path-parameter
+  examples), before deciding whether to adopt it.
+- Method: `poc/match/measure.mjs`, three new blocks: (1) key collisions
+  over the four sets' 11,505 synthesized calls, rule A and variant B each
+  against the pre-adoption 3-rule (digit/UUID/hex16) baseline; (2) every
+  LITERAL path segment across every spec, deduped per vendor+segment; (3)
+  every path parameter's own example value from the specs, not the
+  synthesized fill.
+- Outcome: 4,051 literal segments checked — rule A 0 false folds, the
+  clause-less variant B 39 (e.g. `event_notifications`, `sso_connectors`,
+  `team_memberships` — compound `noun_noun` API path segments the clause
+  exists to keep literal). Real path-param examples: 12,679 path params
+  found, 9,702 with no example at all, 2,627 usable string examples —
+  folded 1,175 by the old 3 rules, 1,182 with rule A adopted (the 7 new
+  are all openai, `resp_…` and `cp_…`), 1,445 folded by none (mostly
+  `me`, `abc123`, email addresses, slugs — not prefixed ids at all).
+  Collisions: 56 (pre-adoption 3-rule baseline) to 66 with rule A
+  adopted; all 6 new groups are operations whose templates were already
+  identical in shape (xero `/Journals/{JournalID}` vs `{JournalNumber}`,
+  openai `/responses/{response_id}` vs its `?beta=true` twin, and one
+  miro pair, one meta-whatsapp pair), distinct before only because the
+  rotation's synthetic fill value (`cus_NffrFeUfNV2Hib`) was not folded —
+  an artefact of the fill, not a real-word fold.
+- What it taught: a collision count over synthetic fills measures the
+  fill values as much as the rule; the real tests are false folds over
+  literal segments and recall over the specs' own examples. Stripe
+  itself publishes no path examples in this corpus, so its own recall is
+  unmeasured.
+- Decision: user adopted rule A (2026-09-27) as key.mjs's default rule 4
+  — always on, no switch; `mixedIds` (a further, still-unadopted
+  candidate) is unaffected. Not core (D109): the request key is a
+  matching aid, not a class decision, so it changes under its own tests
+  and needs no exam.
+
+### Spec discovery pass 7: key and matcher graduate to src/ (2026-09-27)
+
+- Goal: rewrite `poc/match/key.mjs` and `poc/match/match.mjs` as clean
+  src/ modules (`src/key.js`'s `requestKey`, `src/match.js`'s
+  `matchOperation`) under an equivalence proof against the frozen POC,
+  same discipline as the earlier step1-3/exporter graduations.
+- Method: `src/key.js` ports only the ADOPTED rules (1-4, including
+  pass 6's prefixed-id rule) with no `options` argument at all — the
+  still-unadopted `mixedIds` candidate documented in the POC's header is
+  not ported. `src/match.js` ports the matcher's tightest-class-on-a-tie
+  rule, with an unknown class counted as `x`. `tools/proof-match.js`
+  compares both new modules against `poc/match` over the same 11,505
+  synthesized calls, 37 spec files, 4 sets the POC's own measure.mjs
+  uses.
+- Outcome: 299/299 existing tests pass; the proof found 0 differences
+  over all 11,505 calls across all 4 sets for both `requestKey` and
+  `matchOperation`. The proof was deliberately broken twice and seen to
+  fail: disabling key rule 4 produced 2,974 key differences (exit 1);
+  reverting the tie-break to plain document order produced 6
+  `matchIdentity` differences (exit 1). Both were restored and the proof
+  re-passed clean.
+- Found in review: the first port of the tie-break fell back to `r` (the
+  loosest class) for an operation whose `classifyRow` returned an
+  unrecognised class — unreachable today since `classifyRow` only ever
+  returns `r`/`w`/`x`, but fail-open if it ever didn't. Fixed to fall
+  back to `x` instead, matching the project's one invariant (tighter on
+  doubt) and this file's own header comment, which already claimed `x`.
+- A separate, offline check for the next item (spec discovery) ran
+  alongside this pass: which parent-domain heuristic finds the right
+  vendor host for the 25 discovery-POC vendor hosts. Dropping only the
+  first label (what a public-suffix-list approximation would give
+  without one) matched the probe's own suffix-list answer on 23 of 25 —
+  wrong for `server.api.mailchimp.com` (needs `mailchimp.com`, two
+  labels dropped) and `api-m.sandbox.paypal.com` (needs `paypal.com`,
+  two labels dropped). Walking up one label at a time, stopping at two
+  labels, passed through the right parent on 25 of 25, with no list at
+  all.
+- User rulings (2026-09-27): walk up one label at a time with no public
+  suffix list, for the reason above; a discovered spec's gate keys use
+  the API host as the vendor (`<host>.<operationId>`), not a hand-picked
+  vendor name.
+- What it taught: a tie-break's "impossible" branch is worth fixing
+  anyway when the cost is one line and the alternative is fail-open;
+  and a heuristic that agrees with a real suffix list on 23/25 samples
+  can still be silently wrong on exactly the multi-label vendor hosts
+  that matter most (a shared API subdomain, a sandbox subdomain) — the
+  disagreements cluster on the hard cases, not spread evenly.
+
+### Spec discovery pass 8: rwxmap/discover built (2026-09-28)
+
+- Goal: build `rwxmap/discover` (D113) — `findSpec`, `classifyCall`,
+  `requestKey` — as the subpath export that turns an API's base URL
+  into a loaded spec plus a way to classify a live call against it,
+  with the 30-day cache and the address safety rule (D114).
+- Found in review: the first version passed its own tests, but the
+  address check ran only on the API URL — once a discovery request
+  went out, redirects were followed automatically and service-desc
+  links were fetched unchecked, so a redirect or a link could still
+  point discovery at a non-https, IP-literal, `localhost` or
+  single-label address the first check was meant to keep it away from.
+  Fixed with manual hop-by-hop redirects (at most 5) and the same
+  address check re-run on every hop and every service-desc link.
+- Verified by the orchestrator directly, not just by the agent's
+  say-so: a real local server confirmed Node's `fetch` with
+  `redirect: 'manual'` returns status 302 and a readable `Location`
+  header, which the hop-by-hop loop depends on.
+- A second review break tested the fix itself: disabling the hop check
+  inside the catalog/Link-header probe path still passed all 29 tests,
+  meaning that path was untested. 3 tests were added that exercise it
+  and fail under the same break.
+- Also fixed in review: a discovered spec's vendor was being read from
+  the spec file's own basename (e.g. `openapi.yaml.getFile`); it now
+  reads from `apiUrl`'s host, matching D113
+  (`api.figma.com.getFile`).
+- Outcome: 332 tests, typecheck clean, `tools/proof-load.js` and
+  `tools/proof-match.js` still hold, a tarball smoke test passes, and a
+  resolve-hook test confirms `import 'rwxmap'` never loads
+  `discover.js`.
+- Lesson: a safety check on the input address means nothing once the
+  fetch is allowed to follow redirects on its own — the check has to
+  run again on wherever the redirect actually lands; and a check that
+  nothing fails when removed is not a check, it's dead code with a
+  comment attached.
+
+### Spec discovery pass 9: discovery limits measured, no wrong-spec guard (2026-09-28)
+
+- Goal: cut discovery's request cost with evidence instead of a guess,
+  and test whether a "spec may only tighten" or operation-count rule
+  can catch a wrong discovered spec.
+- Tried, offline: counted where the 21 finds in hand actually came
+  from (guessed paths 15, Link header 4, api-catalog 2 — no other
+  guessed path ever fired); measured api-catalog/Link-list link
+  fan-out (zoom alone made 464 requests, 364 of them chasing
+  api-catalog links to doc pages); measured operation counts on real
+  vs wrong specs (real minimum 2, median 197; wrong specs 2-290);
+  measured a "spec may only tighten" rule across 1332 cross-vendor
+  pairs / 414,180 calls (`poc/discover/measure-limits.mjs`).
+- Outcome, offline: guessed paths cut to 3 (`/openapi.json`,
+  `/openapi.yaml`, `/swagger.json`); service-desc links capped at 3
+  followed per list; a 60 s wall-clock budget added per `findSpec`
+  call, checked between requests (D116). The tighten-only rule closes
+  4 real wrong-spec leaks (datadog/intercom/pagerduty rows) but makes
+  213-348 correct letters wrongly tight on right specs, failing the
+  10:1 bar (D100); an operation-count cutoff at N=5 or N=30 both catch
+  some wrong specs while rejecting more real ones. Neither rule is
+  adopted (D117) — a wrong spec that matches no call is harmless, one
+  that collides is a known, accepted limit.
+- Outcome, live: re-ran the 25-vendor live probe with all three limits
+  in place (`data/discover-live-2026-09-28-limits/results.json`): 675
+  requests total against 2758 before, per-site median 26 against 97
+  before, max sentry 51; zoom fell to 43 requests / 59.4 s; okta's
+  60 s budget stopped it at 65.1 s, the up-to-one-timeout overrun the
+  design expects since the budget is only checked between requests;
+  intercom still found RIGHT (70% overlap, 5 requests); cloudflare
+  still finds the wrong 3-op spec but it matches 0 calls, so it stays
+  harmless; 0 unsafe requests; a cache recheck of 3 vendors made 0
+  requests.
+- Measurement bug, caught before the numbers were used: the first run
+  of `measure-limits.mjs` had `tighterOf` inverted, so the agent's
+  first report said the tighten-only rule "makes right specs looser"
+  — impossible, since taking the tighter of two letters can never be
+  looser than either input. The orchestrator caught the impossible
+  claim, the agent fixed the inversion, and the corrected run produced
+  the numbers above. A message to the agent crossed its own finish, so
+  its first report repeated the stale (inverted) numbers even after
+  the fix landed; the orchestrator re-read the file directly rather
+  than trusting the report.
+- Also: D113's "60 requests, worst case 118" discovery-cost figure was
+  reasoned from code, never measured; the live run before limits read
+  a median of 97. D116 replaces it with a measured number and D113 is
+  corrected to point at D116.
+- Also: per-request classification on cloudflare's 3575 unmatched
+  calls (its spec matches nothing) had 32 rows looser than truth — a
+  baseline the classifier already carries on its own, not something
+  discovery caused.
+- Lesson: taking the tighter of two letters cannot produce a looser
+  result by construction — a measurement that reports otherwise is a
+  bug in the measurement, not a finding, and is worth checking by hand
+  before spending time on the number.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.

@@ -44,10 +44,11 @@ load-bearing for that draft and not normative in it.
 
 ## Out of scope
 
-- A model/LLM in the core. The deterministic ladder is the product and
-  works fully on its own. The optional Jev tiers sit outside the core,
-  run only when a key is configured, and may both raise and lower, each
-  in one direction on its own pile only (D88, D95).
+- A model/LLM required to run. The ladder is deterministic and works
+  fully on its own. The Jev tiers are optional and run only when a key
+  is configured, each moving one direction on its own pile only (D88,
+  D95); `jev.js`'s rules are core (D109), because they can move a
+  letter.
 - A default of `r`, or any guess path.
 - Signing. A signature is the Resource Owner's act, never this tool's.
 - Being a standard: nothing normative in an Internet-Draft, no third
@@ -102,13 +103,16 @@ The labelling brief every truth label is made under is
 
 ### What frozen means
 
-The whole of `src/` is the core and it is frozen: the D87 ladder
-(`tokens.js`, `step1.js`, `step2.js`, `step3.js`, `flow.js`), the
-`reviewHint`, the Jev tiers in `jev.js`, and the bareguard exporter in
-`exporter.js`. Behaviour changes only through a new D-number and a
-re-measurement, and any rule change needs a fresh clean exam (D24, D96).
-The M3 exam (cloudflare, pagerduty, sentry) is burned and cannot score
-a change.
+Core is the files that can change a row's letter or its review marker
+(D109): `src/tokens.js`, `src/step1.js`, `src/step2.js`, `src/step3.js`,
+`src/flow.js` (`classifyRow` and `reviewHint`), `src/jev.js`. Changing
+any of them needs a new D-number and a fresh clean exam (D24, D96); the
+M3 exam (cloudflare, pagerduty, sentry) is burned and cannot score a
+change. `src/load.js`, `src/exporter.js`, `src/index.js` and `src/types.js`
+(exports and type definitions) are not core, and neither are the coming
+discovery, cache, request key, matcher and emitters — they change under
+their own tests and proofs, with no exam. In one line: if a change can
+move a row's letter or marker, it is core.
 
 ### The ladder
 
@@ -236,6 +240,7 @@ outside service, and the adopter must say so.
 | `src/index.js` | the package entry: `classifyRow`, `reviewHint`, the Jev exports, the exporter exports |
 | `src/types.js` | the `Operation`, `Verdict` and `StepVerdict` typedefs |
 | `tools/corpus.js`, `tools/csv.js` | corpus loading and CSV reading, dev only, never shipped |
+| `src/load.js` | `loadSpec` (file or URL, JSON or YAML, 64 MB caps, binary refusal, no `$ref` resolution, D106), shipped as `rwxmap/load` (D107), and the only file that imports `yaml` |
 
 `poc/d87/` is the reference `src/` is proved against: `node
 poc/d87/proof-src.mjs` compares both over all 6557 rows of the combined
@@ -404,6 +409,12 @@ saves none while costing 51 (D101).
   changed: the core is frozen.
 - **Spec quality matters.** Descriptions feed only Jev; a spec with
   little text gives Jev little to read.
+- **A wrong discovered spec is a known, accepted limit (D117).** No
+  request-count, path-count or operation-count test can tell a wrong
+  spec from a right one; a "may only tighten" guard was rejected for
+  failing the 10:1 bar (4 leaks closed against 213-348 correct letters
+  wrongly tightened). A wrong spec that matches no real call is
+  harmless; one that collides on an operation is not caught.
 
 ## Published output
 
@@ -520,17 +531,16 @@ false, `openWorldHint` true).
 | `w` | false | false |
 | `x` | false | true |
 
-`_meta` carries three of the four fields: `class`, `destructive` and
-`evidence`. `review` is not published to MCP (D102): it is a provider's
-build-time worklist, and publishing it invites a consumer to read it as
-a confidence score.
+`_meta` carries all four fields: `class`, `destructive`, `evidence` and
+`review` (D110, amending D102's "`review` is not published to MCP").
 
 ```json
 { "name": "delete_share_permission",
   "annotations": { "readOnlyHint": false, "destructiveHint": true },
   "_meta": { "io.github.hamr0.rwxmap/class": "x",
              "io.github.hamr0.rwxmap/destructive": true,
-             "io.github.hamr0.rwxmap/evidence": "floor" } }
+             "io.github.hamr0.rwxmap/evidence": "floor",
+             "io.github.hamr0.rwxmap/review": "settled" } }
 ```
 
 `readOnlyHint` rests on step 1, which on the 4171-row provider corpus
@@ -610,17 +620,23 @@ roughly 1 in 100.
    the method floor; the harness carries no second copy of that
    decision.
 
-**The cache**, owned by rwxmap: a 30-day TTL, keyed by spec URL +
-content hash + rwxmap version + Jev model id when Jev ran, so a new
-release or a model change invalidates old results. "No spec here" is
-cached too, so a spec-less site is not probed every run. When the TTL
-runs out rwxmap fetches again and reuses the classification if the hash
-has not changed.
+**The cache** (built, `rwxmap/discover`), owned by rwxmap: one JSON file
+per cache key under `opts.cacheDir ?? $XDG_CACHE_HOME/rwxmap ??
+~/.cache/rwxmap`, keyed by the API host (or the caller-given spec
+address), valid for 30 days AND the same rwxmap version — either one
+aging out means a miss. A miss rediscovers and reclassifies from
+scratch (D115): mechanical classification is cheap, so there is
+nothing to save by reusing it, only the network round trips the cache
+already saves. The entry still records the content sha256 and a
+Jev model id (null today) against the day Jev runs at classification
+time and a model call costs money. "No spec here" is cached too, so a
+spec-less site is not probed every run.
 
-**The key normalizer**, owned by rwxmap: one exported function the
-harness calls to build the `action.type` for a request without a spec,
+**The key normalizer** (built, `rwxmap/discover`'s `requestKey`), owned
+by rwxmap: one exported function the harness calls to build the
+per-request key for a call without a matched spec operation,
 `<host>.<METHOD> <normalized path>` (e.g. `api.example.com.POST
-/v1/orders`). It drops the query string and turns id segments into
+/v1/orders/{id}`). It drops the query string and turns id segments into
 `{id}`. Spotting ids is a documented best guess — all-digit segments,
 UUIDs, long hex strings — so a map does not grow one entry per order
 id. rwxmap is the one writer of that key; the harness never builds it
@@ -641,13 +657,18 @@ case stops the run.
 primitive, bareguard's design and bareguard's to build; recorded so both
 repos agree): tighten-only — a new key is added, and an existing key,
 hand-written ones included, can only get stricter (r < w < x), never
-looser; the tools map only, never the bash map, agents or grants;
-validated exactly as at construct time, a bad entry throws and the whole
-batch lands or none of it; an `rwx.added` audit line (key, letter,
-marker) for every add; the gate copies its rwx config at construct time
-and `add()` changes that copy; a size cap on the tools map, past which
-the gate fails closed and the harness has to rebuild; callable from
-harness code only. bareguard 0.17.0 ships unchanged.
+looser, and the tighten-only rule covers the marker too; the tools map
+only, never the bash map, agents or grants; validated exactly as at
+construct time, a bad entry throws and the whole batch lands or none of
+it; an `rwx.added` audit line (key, letter, marker) for every add; the
+gate copies its rwx config at construct time and `add()` changes that
+copy; a size cap on the tools map, past which `add()` refuses that one
+batch — nothing from the batch lands, an `rwx.add_rejected` line goes
+into the audit log, and the gate keeps working on its existing rules,
+with no rebuild (D111, correcting D105's "the gate fails closed and the
+harness has to rebuild"); every refused `add()` — a bad entry, an
+attempt to loosen, or one over the cap — gets a loud audit line;
+callable from harness code only. bareguard 0.17.0 ships unchanged.
 
 **A known property of spec-less sites.** In per-request mode the agent
 picks the method and URL `classifyRow` sees, so it can steer a call
@@ -664,8 +685,8 @@ above.
   opened or closed.
 - **M3** — the D87 ladder, the three Jev tiers (D95) and the bareguard
   exporter (D103), in `src/`: the M3 exam is scored and burned (D92,
-  D93) and the gate passes (D89 as amended by D94). Not yet released:
-  npm still ships 0.3.0.
+  D93) and the gate passes (D89 as amended by D94). Released as
+  `rwxmap@0.4.0` (2026-09-25).
 
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
@@ -678,9 +699,33 @@ a. **Input.** Point it at a URL or a file path; JSON or YAML in, JSON
    YAML needs the `yaml` package, today a devDependency; it becomes a
    runtime dependency of the I/O layer only, allowed by the dependency
    rule because the standard library cannot parse YAML in under 100
-   lines. The classifier library itself stays dependency-free.
+   lines. The classifier library itself stays dependency-free. External
+   `$ref`s are not followed (D106); those operations fall back to
+   method+path, and a download over 64 MB (compressed or decoded) or
+   binary content is refused. Built as `rwxmap/load` (D107); not yet
+   released.
 b. **Spec discovery** at the usual locations (a best guess, not a
-   standard), the 30-day cache, and the key normalizer (D105).
+   standard), the 30-day cache, and the per-request key. BUILT on
+   `input/load`, not yet released, as the subpath export
+   `rwxmap/discover` (D113): `findSpec`, `classifyCall`, `requestKey`.
+   The discovery order is D108's; no curated list, and no third-party
+   directory. It reads OpenAPI and Swagger only; Postman is not read
+   (D112). Every discovery request is checked before it is sent — no
+   non-https URL, IP-literal host, `localhost` or single-label host,
+   checked on the API URL and on every redirect hop and service-desc
+   link (D114); such a host gets `status: 'none'`
+   uncached, and its calls fall through to per-request classification.
+   A cache entry that passes 30 days or a version bump rediscovers and
+   reclassifies from scratch rather than reusing the old verdict
+   (D115, amends D105 item 2) — mechanical classification is cheap, so
+   only the network trip was worth caching. Discovery is limited
+   (D116): 3 guessed paths (`/openapi.json`, `/openapi.yaml`,
+   `/swagger.json`), at most 3 service-desc links followed per
+   api-catalog/Link list, and a 60 s wall-clock budget per `findSpec`
+   call (up to one request timeout of overrun) — a live re-run over 25
+   vendors cut discovery from 2758 requests to 675, per-site median 97
+   to 26, with 0 unsafe requests and the right spec still found for
+   intercom.
 c. **Jev.** Key configured → used; no key → mechanical, never stops,
    says loudly which mode ran and shows what it knows. `jev.js` makes no
    network call today; how the CLI obtains the model answer is to be
@@ -690,20 +735,64 @@ d. **CLI**, in order: first a command that writes the bareguard gate
    one per carrier (OpenAPI `x-rwx`, MCP annotations, WebMCP, ARD).
 e. **Emitters** for carriers 1–4. None is built; the exporter covers
    the bareguard file only.
-f. **Release sequence:** PRD cleanup → review everything on the branch
-   → publish the frozen core to npm → continue building the above.
+f. **Release sequence:** `/branch-review`, then release 0.5.0 with
+   items a (`rwxmap/load`) and b (`rwxmap/discover`) → continue
+   building the above.
+
+### Go/no-go for items a and b
+
+No go/no-go bar was set before either item was built — a process gap.
+The bars below were written after the fact (2026-09-28), each line
+next to the number it was measured against.
+
+**Item a (`rwxmap/load`)**, from "Input pass 3: the loader graduates
+as rwxmap/load" (learnings, 2026-09-26) — no bar was set before
+building; this reconstructs one from what pass 1-3 recorded:
+1. Loaded operations match the labelled corpus exactly — 20 of 20
+   sampled vendors, 9,149 operations, 0 missing, 0 extra.
+2. `src/load.js` matches the frozen POC byte-for-byte — proof
+   722/722 spec files, "All pins hold" (seen red under a swapped
+   hash).
+3. `import 'rwxmap'` never loads `yaml` — a resolve-hook test (seen
+   red with `import 'yaml'` added).
+4. A malformed or oversized URL body cannot crash the process — cap
+   and binary-check tests (5/5), hubspot's 85 MB gunzip refused in
+   1.6 s instead of dying out of heap.
+5. A tarball smoke test loads a real spec end to end — figma YAML,
+   54 operations.
+
+**Item b (`rwxmap/discover`)**, set after building (2026-09-28), not
+before:
+1. Zero unsafe requests in a live run — 0 of 675 (D116).
+2. A call matched to a discovered spec is never looser than truth in
+   the live run — 0 of 165 (intercom).
+3. A right spec reachable by the D108 discovery order is found —
+   intercom found right.
+4. The spec-less cost is bounded and cached — median 26 requests per
+   site (D116), cache recheck 0 requests over 3 vendors.
+5. bareguard's end-to-end check passes — all items pass (bareguard
+   0.18.1).
 
 ## Open questions
 
 - **`openWorldHint` has no evidence source.** It is the slot "touches
   others" would map to; it may return as an evidence-only flag beside
   `destructive`, never emitted as false, if a source is ever found (D87).
-- **`review` in MCP.** D102 keeps the marker out of MCP, while D103
-  puts it into the bareguard gate file, which is a runtime consumer.
-  Whether MCP should carry it too is unresolved and needs the user's
-  ruling.
 - **The fresh exam.** Anything adopted under D100 (`jev-raise-wx`,
   `jev-raise-get`), D101's review rule, and any change to the frozen
   core need a fresh clean exam, drawn from vendors no set has seen.
 - **The lead-position blind spot** is the first post-freeze candidate:
   a fix changes the core, so it needs a new D-number and a new exam.
+- **Framework-default spec paths for self-hosted APIs.** Discovery
+  guesses only `/openapi.json`, `/openapi.yaml` and `/swagger.json`
+  (D116). Framework defaults were probed on public APIs and found 0:
+  Spring `/v3/api-docs` (0 on 25 vendors, 0 on the 200-API sample),
+  `/v2/api-docs`, .NET `/swagger/v1/swagger.json`, `/api-docs` (0 on
+  25 and 0 on 200), `/swagger.yaml`, `/.well-known/openapi.json` (not
+  an IANA-registered well-known URI; checked 2026-09-28). Some
+  defaults were never probed: `/openapi`, `/v3/api-docs.yaml`, NestJS
+  `/api-json`, Django drf-spectacular `/api/schema/`, Laravel
+  `/api/documentation`. These defaults are where self-hosted and
+  internal APIs serve their spec, and we have no self-hosted sample,
+  so the 0s say nothing about them. Add them only after measuring them
+  on a self-hosted sample.

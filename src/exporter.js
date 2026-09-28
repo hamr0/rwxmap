@@ -149,11 +149,15 @@ export function operationsFrom(spec) {
  * the collision handling below exists for, and it is reported rather
  * than hidden.
  *
+ * Exported (internally — not re-exported from src/index.js) so
+ * `rwxmap/discover` can look up the SAME key this file already computed
+ * for an operation, rather than re-deriving it a second way.
+ *
  * @param {string} vendor
  * @param {Operation} row
  * @returns {string}
  */
-function gateKey(vendor, row) {
+export function gateKey(vendor, row) {
   const id = (row.operationId || '').trim();
   if (id) return `${vendor}.${id}`;
 
