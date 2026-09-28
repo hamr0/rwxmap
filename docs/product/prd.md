@@ -719,7 +719,8 @@ a. **Input.** Point it at a URL or a file path; JSON or YAML in, JSON
 b. **Spec discovery** at the usual locations (a best guess, not a
    standard), the 30-day cache, and the per-request key. Released in
    `rwxmap@0.5.0` as the subpath export
-   `rwxmap/discover` (D113): `findSpec`, `classifyCall`, `requestKey`.
+   `rwxmap/discover` (D113): `findSpec`, `classifyCall`, `requestKey`,
+   `firstServerHost` (D123's vendor default for a local file).
    The discovery order is D108's; no curated list, and no third-party
    directory. It reads OpenAPI and Swagger only; Postman is not read
    (D112). Every discovery request is checked before it is sent — no
@@ -773,44 +774,80 @@ before:
 5. bareguard's end-to-end check passes — all items pass (bareguard
    0.18.1).
 
-## What is next — NOT BUILT
+## What is next
 
 The forward plan for a standalone npm release, in this order: **d,
 then c, then e.**
 
-d. **CLI + combined output** (D121, D122): one command,
-   `rwxmap <spec URL | local file | bare API address>`. A spec URL or
-   file is read with `rwxmap/load`; a bare API address runs `findSpec`
-   first, and if nothing is found it says so and exits non-zero,
-   writing no file. It writes the one output JSON — `bareguard: { tools
-   }` (exactly `exportGate`'s tools) and `mcp` (keyed by method+path,
-   D122) — plus the human-facing sidecar. Mechanical only; Jev is wired
-   in with item c.
+d. **CLI + combined output** (D121, D122, D123): BUILT on
+   `docs/post-0.5.0`, not yet released. One command,
+   `rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--force]`
+   (bin `rwxmap`, `src/cli.js`). A local path loads with `loadSpec`. An
+   http(s) URL is tried as a spec first (`loadSpec`, at least 1
+   operation); if that fails or finds zero operations it is treated as
+   a bare API address and `findSpec` runs; nothing found → exit 1,
+   writing no file. A URL the caller types is explicit input and is
+   fetched as given (D114's exemption for a caller-given spec);
+   discovery's own address safety rule (D114) still applies when
+   `findSpec` runs. Vendor default (D123, approved 2026-09-28):
+   `--vendor` wins; else a URL's own host; else, for a local file, the
+   spec's first server host via `firstServerHost`; none → exit 1 asking
+   for `--vendor`. Output, in `-o <dir>` (default cwd): `<vendor>.rwxmap.json`
+   (`rwxmapVersion`, `source`, `vendor`, `bareguard.tools`, `mcp` keyed
+   `"METHOD path"`, D122) and `<vendor>.rwxmap.review.json` (the
+   sidecar, also carrying any gate-key collisions as `mcpCollisions`).
+   An existing file without `--force` → exit 1, nothing written. Both
+   files are written atomically (tmp file plus rename). stdout reports
+   the files written, counts by letter, the review count, any
+   collisions, and "Jev: off (mechanical)". Mechanical only; Jev is
+   wired in with item c.
 
-### Go/no-go for item d — PROPOSED, awaiting user approval
+### Go/no-go for item d — approved 2026-09-28, all bars met
 
-Each bar is checkable by a command.
+Each bar is checkable by a command (`node tools/proof-cli.js`, exit 0).
 
 1. For every spec file in the tuning and exam spec sets that
-   `tools/proof-load.js` covers (722 files), the CLI's `bareguard.tools`
-   deep-equals `exportGate` on the same operations: 0 differences.
+   `tools/proof-cli.js` covers, the CLI's `bareguard.tools` deep-equals
+   `exportGate` on the same operations: 0 differences. Met — 37 spec
+   files, 11,505 operations. (The proof's own bar text once said "722
+   files"; that count is the spec *entries* `proof-load` checks, of
+   which 685 are digitalocean per-resource fragments and hubspot's
+   tar.gz — files with no top-level paths, excluded here the same way
+   `proof-match` excludes them.)
 2. On those same files, the `mcp` dict has exactly one entry per
    operation (count equals the operation count), and every entry's
    class equals the bareguard letter for that operation: 0 mismatches.
+   Met, including the tie-break rule: every gate key holds the
+   tightest `classifyRow` letter of its operations — 521 collided
+   operations across 178 collided gate keys, all checked. Seen to
+   fail: mapping `mcp` x to w gave 3,619 and 3,830 mismatches on two
+   independent broken builds; keeping a collided key's looser letter
+   gave 143 mismatches.
 3. The hint mapping matches D104's table on every row. There's a test
    for each of r, w and x, and the test is seen to fail when the
-   mapping is broken by hand.
+   mapping is broken by hand. Met.
 4. A bare API address with no findable spec exits non-zero and writes
    no file. A load failure (a bad URL, a file over the cap, binary
    content) exits non-zero and writes no file. Output files are
-   written atomically.
+   written atomically. Met — tests cover no spec found, a missing
+   file, binary content, an existing file without `--force`, no
+   vendor, and atomic-write failure; all exit 1 with no file.
 5. No row's letter differs from the library's own classification
    (`classifyRow`, as used by `exportGate`): the CLI adds nothing and
-   loosens nothing.
+   loosens nothing. Met.
 6. One live run of a bare API address that discovery can resolve
    (intercom's API host) writes a JSON whose operation count equals the
-   found spec's.
-7. The full suite, typecheck and both proofs still pass.
+   found spec's. Met — `rwxmap https://api.intercom.io` exit 0, found
+   via discovery (developers.intercom.com bundle @2.15), 166
+   operations, 166 mcp entries, 165 bareguard keys (1 collision), r 84
+   / w 23 / x 59, 56 flagged for review. (An earlier discovery-only
+   live run the same morning recorded 162 operations for the same URL;
+   today's load gives 166 both through `operationsFrom` and a raw
+   method+path count. Most likely cause: intercom updated the spec
+   during the day; unconfirmed.)
+7. The full suite, typecheck and both proofs still pass. Met — npm
+   test 348/348, typecheck 0, `proof-load` 722/722, `proof-match` 0
+   differences.
 
 c. **Jev** (D118-D120), wired into the CLI. Key configured → used; no
    key → mechanical, never stops, says loudly which mode ran and shows
@@ -829,8 +866,9 @@ e. **Remaining carriers**: OpenAPI `x-rwx`, WebMCP and ARD (MCP moved
    current revisions before emitting. For OpenAPI output, write a new
    file beside the original, never over it (keep-originals rule); see
    the amended sentence in Carrier 1 below.
-f. **Next:** each of c, d, e needs its own go/no-go bar set before it
-   is built.
+f. **Next:** item d's go/no-go was set after the fact (a process gap,
+   as with a and b); c and e each still need their own bar set before
+   they are built.
 
 ## Open questions
 

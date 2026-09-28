@@ -202,6 +202,76 @@ file classifies on method+path alone (D106). It ships as the separate
 `rwxmap/load` subpath, not from the package root, so `import 'rwxmap'`
 never loads its one dependency, the `yaml` parser (D107).
 
+## Command line [unreleased]
+
+```
+rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--force]
+```
+
+Not yet published to npm — built, not released.
+
+The address can be three kinds of input:
+
+- a **local file**, JSON or YAML, loaded with `loadSpec`.
+- a **spec URL**, tried as a spec first (`loadSpec`, at least one
+  operation found); a URL you type is explicit input, so it's fetched
+  as given.
+- a **bare API address**, anything else — an http(s) URL that fails to
+  load as a spec, or loads with zero operations. Discovery
+  (`findSpec`) runs instead, with its own address safety rule still in
+  force (no non-https URL, IP-literal host, `localhost` or
+  single-label host). Nothing found → exit 1, no file written.
+
+**Vendor**, in this order: `--vendor` if given; else, for a URL, the
+URL's own host; else, for a local file, the spec's first declared
+server host (`firstServerHost`); if none resolve, exit 1 asking for
+`--vendor`.
+
+**Output**, written to `-o <dir>` (default: the current directory):
+
+- `<vendor>.rwxmap.json` — the combined bareguard + MCP map:
+
+  ```json
+  {
+    "rwxmapVersion": "0.5.0",
+    "source": "https://api.example.com/openapi.yaml",
+    "vendor": "api.example.com",
+    "bareguard": {
+      "tools": { "api.example.com.deleteOrder": { "letter": "x", "marker": "settled" } }
+    },
+    "mcp": {
+      "DELETE /v1/orders/{id}": {
+        "operationId": "deleteOrder",
+        "annotations": { "readOnlyHint": false, "destructiveHint": true },
+        "_meta": {
+          "io.github.hamr0.rwxmap/class": "x",
+          "io.github.hamr0.rwxmap/destructive": true,
+          "io.github.hamr0.rwxmap/evidence": "floor",
+          "io.github.hamr0.rwxmap/review": "settled"
+        }
+      }
+    }
+  }
+  ```
+
+  The `mcp` dict is hints only, never full tool definitions — no
+  `inputSchema` — meant for an MCP server generated from the same
+  OpenAPI spec. It is advisory: a client may ignore it. bareguard is
+  what enforces, reading `bareguard.tools`.
+- `<vendor>.rwxmap.review.json` — the human-facing sidecar: per-row
+  evidence and review marker, counts, and the review list.
+
+Both files are written atomically (nothing partial on a crash). An
+existing file at either path is left alone unless you pass `--force`.
+
+**Exit codes**: 0 on success, 1 on any failure (no spec found, a load
+error, an existing file without `--force`, no vendor resolvable) —
+never a partial write.
+
+Every run prints `rwxmap: Jev: off (mechanical)` on stdout. Jev — an
+optional, bring-your-own-key LLM tier that can raise a row's class —
+is not wired into the CLI yet; it comes later.
+
 ## Discovering a spec, for harness authors
 
 `rwxmap/discover` finds an API's spec on its own and classifies calls
@@ -253,6 +323,11 @@ const verdict = classifyCall(found, 'POST', 'https://api.example.com/v1/orders')
   (`classifyRow`), and always returns `{ key, letter, marker, source }`.
 - `requestKey(method, url)` is the per-request key builder on its own,
   for a caller that already has a `letter`/`marker` from elsewhere.
+- `firstServerHost(doc, specAddr)` reads a spec's own declared server
+  (OpenAPI 3 `servers[]`, with variable substitution, or Swagger 2
+  `host`+`basePath`) and returns its host, or `null` if none resolves.
+  It is the one writer of that resolution, shared with `findSpec`'s own
+  vendor default and with the CLI's local-file vendor default.
 
 A discovered spec's keys (`<host>.<operationId>`) and per-request keys
 (`requestKey`) are separate keyspaces — a harness must never build one

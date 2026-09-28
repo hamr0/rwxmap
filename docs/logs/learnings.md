@@ -5553,6 +5553,48 @@ class).
   bug in the measurement, not a finding, and is worth checking by hand
   before spending time on the number.
 
+### CLI pass 1: item d built (2026-09-28)
+
+- Goal: build item d, the one CLI command
+  (`rwxmap <spec URL | local file | bare API address>`), wiring
+  `rwxmap/load`, `rwxmap/discover` and `exporter.js` into the combined
+  `bareguard`+`mcp` output plus the sidecar, and settle its go/no-go
+  after the fact.
+- Tried: built `src/cli.js` and `tools/proof-cli.js`; ran the proof
+  over the tuning and exam spec set; ran the hint-mapping, failure-path
+  and atomic-write tests; ran a live discovery-backed call against
+  intercom; ran the full suite, typecheck and both proofs.
+- Outcome: proof exit 0 over 37 spec files, 11,505 operations, 0
+  `bareguard.tools`/`exportGate` differences, one `mcp` entry per
+  operation, every `mcp` class equal to `classifyRow`'s class for its
+  operation, every gate key holding the tightest `classifyRow` letter
+  of its operations (521 collided operations across 178 collided gate
+  keys, all checked). The first `proof-cli.js` silently skipped those
+  521 of 11,505 operations — the collided keys — because it compared
+  gate-key counts without a counter for how many operations a
+  collision folds together; the orchestrator caught the mismatch
+  between "521 collisions" and a proof that reported clean, and the
+  fix now checks every operation and every key with no skip path. Seen
+  to fail: mapping `mcp` x to w gave 3,619 and 3,830 mismatches on two
+  independently broken builds (the orchestrator's own break and the
+  worker's); keeping a collided key's looser letter gave 143. Local-file
+  vendor resolution: the worker escalated rather than copying
+  `discover.js`'s server-resolution logic into `cli.js`, which led to
+  factoring it out as `firstServerHost`, the one writer, shared by both
+  files. Live: `rwxmap https://api.intercom.io` exit 0, found via
+  discovery (developers.intercom.com bundle @2.15), 166 operations, 166
+  `mcp` entries, 165 `bareguard` keys (1 collision), r 84 / w 23 / x 59,
+  56 flagged for review. The earlier discovery-only live run the same
+  morning recorded 162 operations for the same URL; today's load gives
+  166 both through `operationsFrom` and a raw method+path count — most
+  likely intercom updated the spec during the day, unconfirmed. Full
+  suite: npm test 348/348, typecheck 0, `proof-load` 722/722,
+  `proof-match` 0 differences. Go/no-go set after building (a process
+  gap, same as items a and b) and met on all seven bars (D123).
+- Lesson: a proof that excludes rows must print how many it excluded,
+  or the exclusion is invisible — the first `proof-cli.js` looked clean
+  while silently skipping 521 of 11,505 operations.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.
