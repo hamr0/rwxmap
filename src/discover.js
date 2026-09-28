@@ -777,15 +777,39 @@ function tryParseHostname(u) {
 function determineVendor(apiUrl, doc, specAddr) {
   const fromApiUrl = tryParseHostname(apiUrl);
   if (fromApiUrl) return fromApiUrl;
-  const base = tryParseHostname(specAddr) ? specAddr : undefined;
-  for (const server of resolvedServers(doc, base)) {
-    const fromServer = tryParseHostname(server);
-    if (fromServer) return fromServer;
-  }
+  const fromServer = firstServerHost(doc, specAddr);
+  if (fromServer) return fromServer;
   throw new Error(
     'findSpec: opts.spec was given, but apiUrl does not identify a host (pass e.g. "https://api.example.com") '
     + 'and the spec declares no servers of its own — there is no vendor to key gate entries on',
   );
+}
+
+/**
+ * THE ONE WRITER of "what host does this spec's own first server name" —
+ * determineVendor's branch (2) above, factored out so a caller with no
+ * apiUrl at all (the CLI's local-file case: `rwxmap ./openapi.yaml`, no
+ * --vendor) can reuse the SAME resolution (OpenAPI 3 `servers[]`, with
+ * variable defaults resolved, or Swagger 2 `schemes`+`host`+`basePath`)
+ * rather than a second, simplified copy that could drift from it.
+ * Exported (subpath `rwxmap/discover`, alongside findSpec/classifyCall/
+ * requestKey) for exactly that reuse.
+ *
+ * @param {any} doc  A parsed OpenAPI/Swagger document (untrusted).
+ * @param {string} [specAddr]  The spec's own address, used only to
+ *   resolve a RELATIVE server URL against; an absolute server URL (the
+ *   common case) needs no base at all.
+ * @returns {string|null}  The first resolved server's lowercased
+ *   hostname, or null when the doc declares no servers, or none of them
+ *   resolve to a real http(s) URL.
+ */
+export function firstServerHost(doc, specAddr) {
+  const base = typeof specAddr === 'string' && tryParseHostname(specAddr) ? specAddr : undefined;
+  for (const server of resolvedServers(doc, base)) {
+    const host = tryParseHostname(server);
+    if (host) return host;
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------
