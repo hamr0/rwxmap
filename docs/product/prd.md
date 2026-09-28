@@ -687,26 +687,26 @@ above.
   exporter (D103), in `src/`: the M3 exam is scored and burned (D92,
   D93) and the gate passes (D89 as amended by D94). Released as
   `rwxmap@0.4.0` (2026-09-25).
+- **Input and discovery** — `rwxmap/load` (D106, D107) and
+  `rwxmap/discover` (D108, D112-D117) released as `rwxmap@0.5.0`
+  (2026-09-28).
 
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
-## What is next — NOT BUILT
-
-The forward plan for a standalone npm release, in order:
+## Input and discovery — released in 0.5.0
 
 a. **Input.** Point it at a URL or a file path; JSON or YAML in, JSON
    out. URL fetching uses Node 22's built-in `fetch` (no dependency).
-   YAML needs the `yaml` package, today a devDependency; it becomes a
-   runtime dependency of the I/O layer only, allowed by the dependency
-   rule because the standard library cannot parse YAML in under 100
-   lines. The classifier library itself stays dependency-free. External
-   `$ref`s are not followed (D106); those operations fall back to
-   method+path, and a download over 64 MB (compressed or decoded) or
-   binary content is refused. Built as `rwxmap/load` (D107); not yet
-   released.
+   YAML needs the `yaml` package, a runtime dependency of the I/O
+   layer only, allowed by the dependency rule because the standard
+   library cannot parse YAML in under 100 lines. The classifier
+   library itself stays dependency-free. External `$ref`s are not
+   followed (D106); those operations fall back to method+path, and a
+   download over 64 MB (compressed or decoded) or binary content is
+   refused. Built as `rwxmap/load` (D107); released in `rwxmap@0.5.0`.
 b. **Spec discovery** at the usual locations (a best guess, not a
-   standard), the 30-day cache, and the per-request key. BUILT on
-   `input/load`, not yet released, as the subpath export
+   standard), the 30-day cache, and the per-request key. Built on
+   `rwxmap/load`, released in `rwxmap@0.5.0` as the subpath export
    `rwxmap/discover` (D113): `findSpec`, `classifyCall`, `requestKey`.
    The discovery order is D108's; no curated list, and no third-party
    directory. It reads OpenAPI and Swagger only; Postman is not read
@@ -726,18 +726,6 @@ b. **Spec discovery** at the usual locations (a best guess, not a
    vendors cut discovery from 2758 requests to 675, per-site median 97
    to 26, with 0 unsafe requests and the right spec still found for
    intercom.
-c. **Jev.** Key configured → used; no key → mechanical, never stops,
-   says loudly which mode ran and shows what it knows. `jev.js` makes no
-   network call today; how the CLI obtains the model answer is to be
-   designed.
-d. **CLI**, in order: first a command that writes the bareguard gate
-   file and sidecar; then an interactive `rwxmap` menu with options 1–4,
-   one per carrier (OpenAPI `x-rwx`, MCP annotations, WebMCP, ARD).
-e. **Emitters** for carriers 1–4. None is built; the exporter covers
-   the bareguard file only.
-f. **Release sequence:** `/branch-review`, then release 0.5.0 with
-   items a (`rwxmap/load`) and b (`rwxmap/discover`) → continue
-   building the above.
 
 ### Go/no-go for items a and b
 
@@ -772,6 +760,22 @@ before:
    site (D116), cache recheck 0 requests over 3 vendors.
 5. bareguard's end-to-end check passes — all items pass (bareguard
    0.18.1).
+
+## What is next — NOT BUILT
+
+The forward plan for a standalone npm release, in order:
+
+c. **Jev.** Key configured → used; no key → mechanical, never stops,
+   says loudly which mode ran and shows what it knows. `jev.js` makes no
+   network call today; how the CLI obtains the model answer is to be
+   designed.
+d. **CLI**, in order: first a command that writes the bareguard gate
+   file and sidecar; then an interactive `rwxmap` menu with options 1–4,
+   one per carrier (OpenAPI `x-rwx`, MCP annotations, WebMCP, ARD).
+e. **Emitters** for carriers 1–4. None is built; the exporter covers
+   the bareguard file only.
+f. **Next:** continue with c-e; each needs its own go/no-go bar set
+   before it is built.
 
 ## Open questions
 
