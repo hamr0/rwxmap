@@ -5497,6 +5497,62 @@ class).
   nothing fails when removed is not a check, it's dead code with a
   comment attached.
 
+### Spec discovery pass 9: discovery limits measured, no wrong-spec guard (2026-09-28)
+
+- Goal: cut discovery's request cost with evidence instead of a guess,
+  and test whether a "spec may only tighten" or operation-count rule
+  can catch a wrong discovered spec.
+- Tried, offline: counted where the 21 finds in hand actually came
+  from (guessed paths 15, Link header 4, api-catalog 2 — no other
+  guessed path ever fired); measured api-catalog/Link-list link
+  fan-out (zoom alone made 464 requests, 364 of them chasing
+  api-catalog links to doc pages); measured operation counts on real
+  vs wrong specs (real minimum 2, median 197; wrong specs 2-290);
+  measured a "spec may only tighten" rule across 1332 cross-vendor
+  pairs / 414,180 calls (`poc/discover/measure-limits.mjs`).
+- Outcome, offline: guessed paths cut to 3 (`/openapi.json`,
+  `/openapi.yaml`, `/swagger.json`); service-desc links capped at 3
+  followed per list; a 60 s wall-clock budget added per `findSpec`
+  call, checked between requests (D116). The tighten-only rule closes
+  4 real wrong-spec leaks (datadog/intercom/pagerduty rows) but makes
+  213-348 correct letters wrongly tight on right specs, failing the
+  10:1 bar (D100); an operation-count cutoff at N=5 or N=30 both catch
+  some wrong specs while rejecting more real ones. Neither rule is
+  adopted (D117) — a wrong spec that matches no call is harmless, one
+  that collides is a known, accepted limit.
+- Outcome, live: re-ran the 25-vendor live probe with all three limits
+  in place (`data/discover-live-2026-09-28-limits/results.json`): 675
+  requests total against 2758 before, per-site median 26 against 97
+  before, max sentry 51; zoom fell to 43 requests / 59.4 s; okta's
+  60 s budget stopped it at 65.1 s, the up-to-one-timeout overrun the
+  design expects since the budget is only checked between requests;
+  intercom still found RIGHT (70% overlap, 5 requests); cloudflare
+  still finds the wrong 3-op spec but it matches 0 calls, so it stays
+  harmless; 0 unsafe requests; a cache recheck of 3 vendors made 0
+  requests.
+- Measurement bug, caught before the numbers were used: the first run
+  of `measure-limits.mjs` had `tighterOf` inverted, so the agent's
+  first report said the tighten-only rule "makes right specs looser"
+  — impossible, since taking the tighter of two letters can never be
+  looser than either input. The orchestrator caught the impossible
+  claim, the agent fixed the inversion, and the corrected run produced
+  the numbers above. A message to the agent crossed its own finish, so
+  its first report repeated the stale (inverted) numbers even after
+  the fix landed; the orchestrator re-read the file directly rather
+  than trusting the report.
+- Also: D113's "60 requests, worst case 118" discovery-cost figure was
+  reasoned from code, never measured; the live run before limits read
+  a median of 97. D116 replaces it with a measured number and D113 is
+  corrected to point at D116.
+- Also: per-request classification on cloudflare's 3575 unmatched
+  calls (its spec matches nothing) had 32 rows looser than truth — a
+  baseline the classifier already carries on its own, not something
+  discovery caused.
+- Lesson: taking the tighter of two letters cannot produce a looser
+  result by construction — a measurement that reports otherwise is a
+  bug in the measurement, not a finding, and is worth checking by hand
+  before spending time on the number.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.

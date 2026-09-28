@@ -409,6 +409,12 @@ saves none while costing 51 (D101).
   changed: the core is frozen.
 - **Spec quality matters.** Descriptions feed only Jev; a spec with
   little text gives Jev little to read.
+- **A wrong discovered spec is a known, accepted limit (D117).** No
+  request-count, path-count or operation-count test can tell a wrong
+  spec from a right one; a "may only tighten" guard was rejected for
+  failing the 10:1 bar (4 leaks closed against 213-348 correct letters
+  wrongly tightened). A wrong spec that matches no real call is
+  harmless; one that collides on an operation is not caught.
 
 ## Published output
 
@@ -712,7 +718,14 @@ b. **Spec discovery** at the usual locations (a best guess, not a
    A cache entry that passes 30 days or a version bump rediscovers and
    reclassifies from scratch rather than reusing the old verdict
    (D115, amends D105 item 2) — mechanical classification is cheap, so
-   only the network trip was worth caching.
+   only the network trip was worth caching. Discovery is limited
+   (D116): 3 guessed paths (`/openapi.json`, `/openapi.yaml`,
+   `/swagger.json`), at most 3 service-desc links followed per
+   api-catalog/Link list, and a 60 s wall-clock budget per `findSpec`
+   call (up to one request timeout of overrun) — a live re-run over 25
+   vendors cut discovery from 2758 requests to 675, per-site median 97
+   to 26, with 0 unsafe requests and the right spec still found for
+   intercom.
 c. **Jev.** Key configured → used; no key → mechanical, never stops,
    says loudly which mode ran and shows what it knows. `jev.js` makes no
    network call today; how the CLI obtains the model answer is to be
@@ -725,6 +738,40 @@ e. **Emitters** for carriers 1–4. None is built; the exporter covers
 f. **Release sequence:** `/branch-review`, then release 0.5.0 with
    items a (`rwxmap/load`) and b (`rwxmap/discover`) → continue
    building the above.
+
+### Go/no-go for items a and b
+
+No go/no-go bar was set before either item was built — a process gap.
+The bars below were written after the fact (2026-09-28), each line
+next to the number it was measured against.
+
+**Item a (`rwxmap/load`)**, from "Input pass 3: the loader graduates
+as rwxmap/load" (learnings, 2026-09-26) — no bar was set before
+building; this reconstructs one from what pass 1-3 recorded:
+1. Loaded operations match the labelled corpus exactly — 20 of 20
+   sampled vendors, 9,149 operations, 0 missing, 0 extra.
+2. `src/load.js` matches the frozen POC byte-for-byte — proof
+   722/722 spec files, "All pins hold" (seen red under a swapped
+   hash).
+3. `import 'rwxmap'` never loads `yaml` — a resolve-hook test (seen
+   red with `import 'yaml'` added).
+4. A malformed or oversized URL body cannot crash the process — cap
+   and binary-check tests (5/5), hubspot's 85 MB gunzip refused in
+   1.6 s instead of dying out of heap.
+5. A tarball smoke test loads a real spec end to end — figma YAML,
+   54 operations.
+
+**Item b (`rwxmap/discover`)**, set after building (2026-09-28), not
+before:
+1. Zero unsafe requests in a live run — 0 of 675 (D116).
+2. A call matched to a discovered spec is never looser than truth in
+   the live run — 0 of 165 (intercom).
+3. A right spec reachable by the D108 discovery order is found —
+   intercom found right.
+4. The spec-less cost is bounded and cached — median 26 requests per
+   site (D116), cache recheck 0 requests over 3 vendors.
+5. bareguard's end-to-end check passes — all items pass (bareguard
+   0.18.1).
 
 ## Open questions
 

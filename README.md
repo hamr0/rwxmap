@@ -226,6 +226,15 @@ const verdict = classifyCall(found, 'POST', 'https://api.example.com/v1/orders')
 - `requestKey(method, url)` is the per-request key builder on its own,
   for a caller that already has a `letter`/`marker` from elsewhere.
 
+A discovered spec's keys (`<host>.<operationId>`) and per-request keys
+(`requestKey`) are separate keyspaces — a harness must never build one
+from the other (a bareguard guard-session finding).
+
+Discovery is limited: at most 3 guessed paths, at most 3 service-desc
+links followed, and a 60 s wall-clock budget per `findSpec` call (up
+to one request timeout of overrun). A spec-less site costs about 26
+requests, measured live, then cached for 30 days.
+
 For bareguard: a found spec's `entries` go straight into `gate.add()`
 unchanged. A per-request key must be added with
 `gate.add({ [key]: { letter, marker } })` *before* the matching
