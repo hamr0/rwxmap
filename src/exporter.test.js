@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { operationsFrom, exportGate, exportSidecar } from './exporter.js';
+import { operationsFrom, exportGate, exportSidecar, classifyOperations } from './exporter.js';
 
 // ---- operationsFrom -----------------------------------------------------
 
@@ -334,4 +334,23 @@ test('the gate letter for a key always matches the sidecar row that holds it', (
   for (const row of exportSidecar(NO_OMISSION_OPS, { vendor: 'acme' }).rows) {
     assert.equal(tools[row.key], row.letter);
   }
+});
+
+// ---- precomputed verdicts ----------------------------------------------
+
+test('verdicts of the wrong length throw instead of silently re-classifying (fail-closed)', () => {
+  const ops = NO_OMISSION_OPS;
+  const verdicts = classifyOperations(ops);
+  // A raised letter the fallback would silently drop: if the wrong-length
+  // list fell back to mechanical, this move would vanish with no signal.
+  /** @type {any[]} */
+  const bads = [verdicts.slice(1), [...verdicts, verdicts[0]], [], null, 'x', {}];
+  for (const bad of bads) {
+    assert.throws(() => exportGate(ops, { vendor: 'acme', verdicts: bad }), /options\.verdicts must be an array of exactly/);
+    assert.throws(() => exportSidecar(ops, { vendor: 'acme', verdicts: bad }), /options\.verdicts must be an array of exactly/);
+  }
+  // Omitted keeps today's behaviour; the right length is used as given.
+  assert.deepEqual(exportGate(ops, { vendor: 'acme' }), exportGate(ops, { vendor: 'acme', verdicts }));
+  const raised = verdicts.map((v) => ({ ...v, class: /** @type {'x'} */ ('x') }));
+  for (const row of exportSidecar(ops, { vendor: 'acme', verdicts: raised }).rows) assert.equal(row.letter, 'x');
 });

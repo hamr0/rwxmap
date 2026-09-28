@@ -1,4 +1,5 @@
-// Equivalence proof for the CLI (PRD "Go/no-go for item d", bars 1, 2, 5).
+// Equivalence proof for the CLI (PRD "Go/no-go for item d", bars 1, 2, 5;
+// and item c's own bar 7 — see the second pass below).
 //
 // For every spec file the same four sets use (data/provider-corpus-
 // 2026-09-16, data/exam-2026-09-17, data/exam-2026-09-20,
@@ -38,6 +39,25 @@
 // every operation in that file, as the CLI itself would use for a local
 // file loaded with --vendor <provider>).
 //
+// ITEM C, BAR 7 (a second, independent pass over the SAME files/ops, no
+// network, no key): "after Jev moves rows, every mcp class equals its
+// operation's final letter, and every bareguard key holds the tightest
+// final letter of its operations." This proof cannot call the real Jev
+// endpoint (no live requests from a proof, per the item c brief), so it
+// builds a DETERMINISTIC FAKE answer for every row jev.js's needsJev
+// names — a seeded p in [0, 1) from the row's own vendor/method/path/tier
+// (seededP below), so the same file always gets the same fake answers
+// (reproducible, not random) and every tier's threshold fires on SOME
+// rows and not others (it is not one constant p for every row). Each
+// fake answer is applied through jev.js's OWN applyJev (never
+// re-implemented here), and the resulting FINAL verdicts are handed to
+// buildOutput's `verdicts` option — the exact mechanism src/cli.js's
+// run() uses when a real key is configured. The mcp/bareguard/sidecar
+// checks below are then independently RECOMPUTED against those final
+// verdicts (never trusting exporter.js's or cli.js's own idea of what
+// they should be), so a bug in either file's Jev wiring is caught here
+// exactly as bars 1-5 catch a bug in the mechanical-only wiring.
+//
 // Run with: node tools/proof-cli.js
 // Prints the total compared (operations checked, collided operations,
 // collided keys), then the TRUE differences count per comparison (never
@@ -48,10 +68,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 
 import { loadSpec } from '../src/load.js';
 import { operationsFrom, exportGate, gateKey } from '../src/exporter.js';
 import { classifyRow } from '../src/flow.js';
+import { needsJev, applyJev } from '../src/jev.js';
 import { buildOutput } from '../src/cli.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -113,6 +135,22 @@ function deepEqual(a, b) {
   }
 }
 
+/**
+ * A deterministic p in [0, 1) for one row's own Jev tier question — the
+ * SAME file always produces the SAME fake answers (reproducible, no
+ * network, no randomness), and different rows land at different points
+ * in [0, 1) so a tier's threshold fires on some rows and not others,
+ * exercising both directions of each tier's one-way move.
+ * @param {string} seed
+ * @returns {number}
+ */
+function seededP(seed) {
+  const digest = createHash('sha256').update(seed).digest();
+  // First 4 bytes as an unsigned 32-bit int, scaled into [0, 1).
+  const n = digest.readUInt32BE(0);
+  return n / 0x100000000;
+}
+
 async function main() {
   const files = collectFiles();
 
@@ -135,6 +173,16 @@ async function main() {
   const bareguardTightestDiffs = [];
   /** @type {{filePath: string, detail: string}[]} */
   const loadErrors = [];
+
+  // Item c, bar 7 (deterministic fake Jev pass — see the file header).
+  let jevPileRows = 0;
+  let jevMovedRows = 0;
+  /** @type {{filePath: string, detail: string}[]} */
+  const jevMcpTruthDiffs = [];
+  /** @type {{filePath: string, detail: string}[]} */
+  const jevBareguardMissingDiffs = [];
+  /** @type {{filePath: string, detail: string}[]} */
+  const jevBareguardTightestDiffs = [];
 
   for (const { filePath, provider } of files) {
     let doc;
@@ -218,6 +266,60 @@ async function main() {
         });
       }
     }
+
+    // Item c, bar 7: a deterministic fake Jev pass over the SAME ops.
+    // `finalVerdicts` is this proof's OWN independent ground truth —
+    // mechanical classifyRow, then jev.js's own needsJev/applyJev with a
+    // seeded fake answer for every row a tier claims — never trusted from
+    // buildOutput's own output. buildOutput is then called a SECOND time
+    // with those verdicts (the exact mechanism src/cli.js's run() uses
+    // with a real key), and the mcp/bareguard checks below are redone
+    // independently against `finalVerdicts`, not against `direct` or the
+    // mechanical `combined` above.
+    const mechanicalVerdicts = ops.map((op) => classifyRow(op));
+    const finalVerdicts = mechanicalVerdicts.map((verdict, i) => {
+      const tier = needsJev(verdict);
+      if (!tier) return verdict;
+      jevPileRows += 1;
+      const op = ops[i];
+      const p = seededP(`${vendor}:${op.method}:${op.path}:${tier}`);
+      const moved = applyJev(verdict, { p, model: 'proof-fake-model' }, { method: op.method });
+      if (moved.class !== verdict.class) jevMovedRows += 1;
+      return moved;
+    });
+    const { combined: jevCombined } = buildOutput(ops, vendor, filePath, { verdicts: finalVerdicts });
+
+    for (let i = 0; i < ops.length; i += 1) {
+      const op = ops[i];
+      const mcpEntry = jevCombined.mcp[`${op.method} ${op.path}`];
+      const truth = finalVerdicts[i].class;
+      const mcpLetter = mcpEntry && mcpEntry._meta['io.github.hamr0.rwxmap/class'];
+      if (mcpLetter !== truth) {
+        jevMcpTruthDiffs.push({
+          filePath,
+          detail: `${op.method} ${op.path}: post-jev mcp class "${mcpLetter}" !== final verdict "${truth}"`,
+        });
+      }
+    }
+
+    for (const [key, group] of opsByKey) {
+      const groupIndices = [];
+      for (let i = 0; i < ops.length; i += 1) {
+        if (gateKey(vendor, ops[i]) === key) groupIndices.push(i);
+      }
+      const bareguardEntry = jevCombined.bareguard.tools[key];
+      if (!bareguardEntry) {
+        jevBareguardMissingDiffs.push({ filePath, detail: `${key}: no post-jev bareguard entry (${group.length} operation(s) map here)` });
+        continue;
+      }
+      const tightest = tightestOf(groupIndices.map((i) => finalVerdicts[i].class));
+      if (bareguardEntry.letter !== tightest) {
+        jevBareguardTightestDiffs.push({
+          filePath,
+          detail: `${key}: post-jev bareguard letter "${bareguardEntry.letter}" !== tightest-of-group final "${tightest}" (${group.length} operation(s))`,
+        });
+      }
+    }
   }
 
   console.log(`Checked ${filesChecked} spec files (${opsChecked} operations) across ${SETS.length} sets.`);
@@ -226,9 +328,15 @@ async function main() {
     console.log(`Load errors (excluded from the counts above): ${loadErrors.length}`);
     for (const d of loadErrors.slice(0, MAX_REPORT)) console.log(`  [${d.filePath}] ${d.detail}`);
   }
+  console.log(
+    `Item c bar 7 (deterministic fake Jev pass): ${jevPileRows} of ${opsChecked} operations fell into a Jev `
+    + `tier's pile, ${jevMovedRows} of those actually moved (the seeded p landed on the firing side of that `
+    + `tier's threshold).`,
+  );
 
   const totalDiffs = toolsDiffs.length + mcpCountDiffs.length + mcpMissingDiffs.length
-    + mcpTruthDiffs.length + bareguardMissingDiffs.length + bareguardTightestDiffs.length;
+    + mcpTruthDiffs.length + bareguardMissingDiffs.length + bareguardTightestDiffs.length
+    + jevMcpTruthDiffs.length + jevBareguardMissingDiffs.length + jevBareguardTightestDiffs.length;
   if (totalDiffs === 0) {
     console.log('All pins hold.');
     process.exit(0);
@@ -246,6 +354,9 @@ async function main() {
   report('mcp class !== classifyRow (bar 2 + bar 5)', mcpTruthDiffs);
   report('bareguard entries missing for a gate key (bar 1)', bareguardMissingDiffs);
   report('bareguard letter !== tightest-of-group classifyRow (bar 1 + bar 5)', bareguardTightestDiffs);
+  report('post-jev mcp class !== final verdict (item c bar 7)', jevMcpTruthDiffs);
+  report('post-jev bareguard entries missing for a gate key (item c bar 7)', jevBareguardMissingDiffs);
+  report('post-jev bareguard letter !== tightest-of-group final verdict (item c bar 7)', jevBareguardTightestDiffs);
   process.exit(1);
 }
 

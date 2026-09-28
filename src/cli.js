@@ -8,8 +8,15 @@
 // classify (load.js / discover.js) and HOW to reshape one classification
 // into the two carriers the PRD names.
 //
-// THIS IS NOT CORE (D109): it never imports tokens.js, step1-3.js, flow.js
-// or jev.js directly, and holds no word list and no r/w/x judgement.
+// THIS IS NOT CORE (D109): it never imports tokens.js, step1-3.js or
+// flow.js, and holds no word list and no r/w/x judgement of its own.
+// jev.js IS imported here, read-only, for exactly the two functions its
+// own header names the caller as owning: needsJev (which rows a tier
+// wants) and applyJev (apply an answer this file already obtained over
+// the network). Neither is a judgement call this file makes itself — the
+// judgement (the tier's pile, threshold and one-way move) is entirely
+// jev.js's, and this file never edits jev.js, never re-derives a
+// threshold, and never moves a class on its own reasoning.
 //
 // D121 — ONE COMMAND. A spec URL or local file is read with
 // `rwxmap/load` (loadSpec); a bare API address (an http(s) URL that is
@@ -30,9 +37,21 @@
 // exportSidecar's own return value, unchanged (it already carries
 // `collisions`, so nothing here duplicates that).
 //
-// Mechanical only. Jev (PRD item c) is wired in later; every run says so
-// on stdout ("Jev: off (mechanical)") because the mode is otherwise
-// silent and a consumer should never have to guess which ran.
+// JEV (PRD item c, D118-120): key configured -> used; no key -> mechanical,
+// never stops, and every run says loudly which mode ran. The key is
+// RWXMAP_JEV_KEY from the environment, else a `.env` file in `cwd` read
+// through Node's own process.loadEnvFile (no dotenv dependency) -- an
+// already-set variable wins and this file never reads or logs `.env`'s
+// contents itself (loadEnvFile writes straight into process.env). With a
+// key: classify every operation mechanically ONCE (exporter.js's
+// classifyOperations, the same pass classifyAll runs by default), ask
+// jev-client.js's runJevBatch about exactly the rows jev.js's needsJev
+// names, apply every usable answer through jev.js's own applyJev (which
+// fails closed on anything unusable), and hand the FINAL verdicts to
+// buildOutput's `verdicts` option so exportGate/exportSidecar classify
+// nothing a second time. A row Jev cannot answer for -- a request
+// failure, a bad answer -- keeps its mechanical verdict; the run never
+// stops on a Jev error.
 //
 // LOCAL-FILE VENDOR DEFAULT (user ruling, orchestrator escalation 1
 // resolved): "a local file -> the spec's first server host." Reuses
@@ -54,7 +73,9 @@ import { fileURLToPath } from 'node:url';
 
 import { loadSpec } from './load.js';
 import { findSpec, firstServerHost } from './discover.js';
-import { operationsFrom, exportGate, exportSidecar } from './exporter.js';
+import { operationsFrom, exportGate, exportSidecar, classifyOperations } from './exporter.js';
+import { needsJev, applyJev } from './jev.js';
+import { runJevBatch } from './jev-client.js';
 
 // ---------------------------------------------------------------------
 // Small local helpers — each one trivial enough (a regex, a URL-API call,
@@ -297,6 +318,16 @@ function atomicWriteFiles(files) {
 }
 
 /**
+ * The `jev` top-level field's shape when no key was configured (D122's
+ * combined JSON, extended by item c). The one writer of this default —
+ * `runJev` below builds the "on" version, never this file's other code.
+ * @returns {{mode: 'off', model: null, sent: 0, answered: 0, failed: 0, changed: 0, tokens: {input: 0, output: 0}}}
+ */
+function jevOffSummary() {
+  return { mode: 'off', model: null, sent: 0, answered: 0, failed: 0, changed: 0, tokens: { input: 0, output: 0 } };
+}
+
+/**
  * Build the combined output and the sidecar from an already-resolved
  * operation list. Pure — no I/O, no process exit — so both `run` (which
  * writes the result to disk) and `tools/proof-cli.js` (which never writes
@@ -306,11 +337,19 @@ function atomicWriteFiles(files) {
  * @param {import('./types.js').Operation[]} ops
  * @param {string} vendor
  * @param {string} source
+ * @param {{verdicts?: import('./types.js').Verdict[], jevSummary?: object}} [options]
+ *   `verdicts` is the FINAL (post-Jev, or plain mechanical) verdict list,
+ *   same order as `ops` — omitted (mechanical-only callers, e.g.
+ *   tools/proof-cli.js) falls back to exportGate/exportSidecar's own
+ *   default of classifying `ops` themselves, unchanged from item d.
+ *   `jevSummary` is the combined JSON's top-level `jev` field; omitted
+ *   defaults to the "off" shape.
  * @returns {{combined: any, sidecarOut: any, collisions: import('./exporter.js').Collision[], mcpCollisions: Array<{key: string, kept: string, dropped: string}>}}
  */
-export function buildOutput(ops, vendor, source) {
-  const { tools, collisions } = exportGate(ops, { vendor });
-  const sidecar = exportSidecar(ops, { vendor });
+export function buildOutput(ops, vendor, source, options = {}) {
+  const { verdicts, jevSummary = jevOffSummary() } = options;
+  const { tools, collisions } = exportGate(ops, { vendor, verdicts });
+  const sidecar = exportSidecar(ops, { vendor, verdicts });
   const { mcp, mcpCollisions } = buildMcp(ops, sidecar.rows);
 
   const combined = {
@@ -319,10 +358,103 @@ export function buildOutput(ops, vendor, source) {
     vendor,
     bareguard: { tools },
     mcp,
+    jev: jevSummary,
   };
   const sidecarOut = mcpCollisions.length > 0 ? { ...sidecar, mcpCollisions } : sidecar;
 
   return { combined, sidecarOut, collisions, mcpCollisions };
+}
+
+/**
+ * The Jev key (D118): RWXMAP_JEV_KEY from the environment, else a `.env`
+ * file in `cwd` via Node's own process.loadEnvFile — an already-set
+ * environment variable always wins and this function never reads or logs
+ * `.env`'s own contents (loadEnvFile writes straight into process.env; a
+ * malformed or unreadable `.env` is treated the same as no `.env` at all,
+ * per D118's "no key -> mechanical, never stops"). A missing `.env` file
+ * is not an error: `.env` is optional.
+ *
+ * @param {string} cwd
+ * @returns {string|undefined}
+ */
+function loadJevKey(cwd) {
+  if (typeof process.env.RWXMAP_JEV_KEY === 'string' && process.env.RWXMAP_JEV_KEY !== '') {
+    return process.env.RWXMAP_JEV_KEY;
+  }
+  const envPath = path.join(cwd, '.env');
+  if (fs.existsSync(envPath)) {
+    try {
+      process.loadEnvFile(envPath);
+    } catch {
+      // malformed .env: no key, the run stays mechanical.
+    }
+  }
+  return typeof process.env.RWXMAP_JEV_KEY === 'string' && process.env.RWXMAP_JEV_KEY !== ''
+    ? process.env.RWXMAP_JEV_KEY
+    : undefined;
+}
+
+/**
+ * Run the optional Jev tiers (D118-120) over one mechanically-classified
+ * batch. NEVER THROWS and NEVER STOPS THE RUN: any row Jev cannot usefully
+ * answer for (a request failure, a bad/missing answer) keeps exactly the
+ * mechanical verdict `verdicts` already gave it — jev.js's applyJev is the
+ * one place that decides that, and it already fails closed, so this
+ * function only has to feed it real answers or nothing at all.
+ *
+ * Sends ONLY the rows jev.js's needsJev names — one askJev call per such
+ * row, never the whole operation list — so the request count this run
+ * makes is exactly the count it reports as "sent".
+ *
+ * @param {import('./types.js').Operation[]} ops
+ * @param {import('./types.js').Verdict[]} verdicts  mechanical, same
+ *   length/order as `ops` (exporter.js's classifyOperations).
+ * @param {{key: string, fetchImpl: typeof fetch, model?: string, concurrency?: number}} jevOpts
+ * `summary.tokens` sums the answered rows' own usage (askJev's `usage`);
+ * a failed row contributes nothing. The usage never reaches applyJev,
+ * which is handed only `{p, model}`, so it never lands in a sidecar row.
+ *
+ * @returns {Promise<{verdicts: import('./types.js').Verdict[], summary: {mode: 'on', model: string|null, sent: number, answered: number, failed: number, changed: number, tokens: {input: number, output: number}}}>}
+ */
+async function runJev(ops, verdicts, jevOpts) {
+  /** @type {{index: number, tier: string}[]} */
+  const targets = [];
+  for (let i = 0; i < verdicts.length; i += 1) {
+    const tier = needsJev(verdicts[i]);
+    if (tier) targets.push({ index: i, tier });
+  }
+
+  const items = targets.map((t) => ({ row: ops[t.index], tier: t.tier }));
+  const answers = items.length > 0 ? await runJevBatch(items, jevOpts) : [];
+
+  const finalVerdicts = verdicts.slice();
+  let answered = 0;
+  let failed = 0;
+  let changed = 0;
+  const tokens = { input: 0, output: 0 };
+  /** @type {string|null} */
+  let model = null;
+
+  for (let j = 0; j < targets.length; j += 1) {
+    const { index } = targets[j];
+    const answer = answers[j];
+    if (!answer) {
+      failed += 1;
+      continue;
+    }
+    answered += 1;
+    tokens.input += answer.usage.input;
+    tokens.output += answer.usage.output;
+    if (!model) model = answer.model;
+    const moved = applyJev(verdicts[index], { p: answer.p, model: answer.model }, { method: ops[index].method });
+    finalVerdicts[index] = moved;
+    if (moved.class !== verdicts[index].class) changed += 1;
+  }
+
+  return {
+    verdicts: finalVerdicts,
+    summary: { mode: 'on', model, sent: items.length, answered, failed, changed, tokens },
+  };
 }
 
 const USAGE = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--force]';
@@ -333,7 +465,15 @@ const USAGE = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir
  * tests never have to spawn a process.
  *
  * @param {string[]} argv  Arguments only (no "node"/script path).
- * @param {{cwd: string, stdout: {write: (s: string) => void}, stderr: {write: (s: string) => void}, cacheDir?: string}} env
+ * @param {{cwd: string, stdout: {write: (s: string) => void}, stderr: {write: (s: string) => void}, cacheDir?: string, jevKey?: string, fetchImpl?: typeof fetch, jevConcurrency?: number}} env
+ *   `jevKey`, `fetchImpl` and `jevConcurrency` are test-only overrides for
+ *   the Jev wiring (D118), the same pattern `cacheDir` already uses for
+ *   discovery: `jevKey` bypasses loadJevKey's environment/.env read
+ *   entirely (so a test never has to touch real process.env or a real
+ *   `.env` file), and `fetchImpl` bypasses the real network `fetch` (so no
+ *   test may reach the real Jev endpoint). Neither is a documented CLI
+ *   flag; the real entry point below never passes either, so a real run
+ *   always uses loadJevKey and the real global fetch.
  * @returns {Promise<number>}  Process exit code.
  */
 export async function run(argv, env) {
@@ -387,8 +527,6 @@ export async function run(argv, env) {
     return 1;
   }
 
-  const { combined, sidecarOut, collisions } = buildOutput(ops, vendor, source);
-
   const mapPath = path.join(outDir, `${vendor}.rwxmap.json`);
   const reviewPath = path.join(outDir, `${vendor}.rwxmap.review.json`);
 
@@ -399,6 +537,27 @@ export async function run(argv, env) {
       return 1;
     }
   }
+
+  // Classify mechanically ONCE (D118: "one classification per run, one
+  // writer"). A configured key runs the optional Jev tiers over exactly
+  // the rows jev.js's needsJev names; no key means jevSummary stays the
+  // "off" shape and `verdicts` stays the mechanical pass untouched.
+  const verdicts = classifyOperations(ops);
+  /** @type {{mode: 'off'|'on', model: string|null, sent: number, answered: number, failed: number, changed: number, tokens: {input: number, output: number}}} */
+  let jevSummary = jevOffSummary();
+  const key = typeof env.jevKey === 'string' ? env.jevKey : loadJevKey(cwd);
+  if (key) {
+    const targetCount = verdicts.reduce((n, v) => (needsJev(v) ? n + 1 : n), 0);
+    stdout.write(
+      `rwxmap: Jev: on — sends method, path, operationId, summary, description of ${targetCount} operation(s) to api.typesafe.ai. Your key, your cost.\n`,
+    );
+    const fetchImpl = env.fetchImpl || globalThis.fetch;
+    const result = await runJev(ops, verdicts, { key, fetchImpl, concurrency: env.jevConcurrency });
+    verdicts.splice(0, verdicts.length, ...result.verdicts);
+    jevSummary = result.summary;
+  }
+
+  const { combined, sidecarOut, collisions, mcpCollisions } = buildOutput(ops, vendor, source, { verdicts, jevSummary });
 
   try {
     fs.mkdirSync(outDir, { recursive: true });
@@ -412,15 +571,26 @@ export async function run(argv, env) {
     return 1;
   }
 
+  const total = sidecarOut.counts.rows;
   const { r, w, x } = sidecarOut.counts.byLetter;
-  stdout.write(`rwxmap: wrote ${mapPath}\n`);
-  stdout.write(`rwxmap: wrote ${reviewPath}\n`);
-  stdout.write(`rwxmap: ${sidecarOut.counts.rows} operations — r:${r} w:${w} x:${x}\n`);
-  stdout.write(`rwxmap: ${sidecarOut.review.length} row(s) flagged for review\n`);
-  if (collisions.length > 0) {
-    stdout.write(`rwxmap: ${collisions.length} bareguard key collision(s) — see the sidecar\n`);
+  const { settled, loose, tight } = sidecarOut.counts.byMarker;
+  const pctOf = (n) => (total === 0 ? 0 : Math.round((100 * n) / total));
+
+  stdout.write(`rwxmap: ${vendor} — ${total} operations (r ${r} · w ${w} · x ${x})\n`);
+  stdout.write(
+    `rwxmap: settled ${settled} (${pctOf(settled)}%) · loose ${loose} (${pctOf(loose)}%) · tight ${tight} (${pctOf(tight)}%)\n`,
+  );
+  stdout.write(
+    jevSummary.mode === 'on'
+      ? `rwxmap: Jev: on — ${jevSummary.sent} sent · ${jevSummary.answered} answered · ${jevSummary.failed} failed (kept mechanical) · ${jevSummary.changed} letters changed · ${jevSummary.tokens.input} in / ${jevSummary.tokens.output} out tokens\n`
+      : 'rwxmap: Jev: off (mechanical)\n',
+  );
+  stdout.write(`rwxmap: wrote ${path.basename(mapPath)} + ${path.basename(reviewPath)}\n`);
+  if (collisions.length > 0 || mcpCollisions.length > 0) {
+    stdout.write(
+      `rwxmap: ${collisions.length} bareguard key collision(s), ${mcpCollisions.length} mcp key collision(s) — see the sidecar\n`,
+    );
   }
-  stdout.write('rwxmap: Jev: off (mechanical)\n');
 
   return 0;
 }

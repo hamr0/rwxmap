@@ -5,6 +5,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { run } from './cli.js';
+import { JEV_LOWER_THRESHOLD, JEV_RAISE_WX_THRESHOLD, JEV_RAISE_GET_THRESHOLD } from './jev.js';
 
 // ---------------------------------------------------------------------
 // Fixtures / helpers
@@ -47,6 +48,61 @@ const SPEC_SWAGGER2_HOST_DOC = {
     '/things': { get: { operationId: 'listThings' } },
   },
 };
+
+// One operation in each of the three Jev piles, plus two controls that
+// must NEVER be sent to Jev: a DELETE (method-delete, step 2's own floor,
+// not step 2's floor-post pile) and a POST whose lead verb a word list
+// already claims (list evidence, not a floor at all).
+// Pile rows are DELIBERATELY interleaved with the two non-pile controls
+// (indices 1, 3, 4 are pile rows; 0 and 2 are not) rather than grouped at
+// the front — a wiring bug that zips a Jev answer back onto the WRONG
+// operation (e.g. by pile-relative position instead of the operation's
+// own index in `ops`) would go undetected if every pile row happened to
+// sit at the same position in both orderings.
+const SPEC_JEV_DOC = {
+  openapi: '3.0.0',
+  servers: [{ url: 'https://api.example.com' }],
+  paths: {
+    '/things/{id}/permission': { delete: { operationId: 'deleteThingPermission' } }, // idx0: x, rule "method-delete", NOT a pile
+    '/things': { get: { operationId: 'listThings' } }, // idx1: r, rule "method" -> jev-raise-get pile
+    '/things/{id}/archive': { post: { operationId: 'updateThingArchive' } }, // idx2: w, rule "modify-verb" (list evidence), NOT a pile
+    '/things/{id}': { put: { operationId: 'updateThing' } }, // idx3: w, rule "method-floor" -> jev-raise-wx pile
+    '/mystery': { post: { operationId: 'doMystery' } }, // idx4: x, rule "floor-post" -> jev-lower pile
+  },
+};
+
+/**
+ * A fetch stub keyed by operationId. `routes[operationId]` is one of:
+ *   { p, model? }        -- a usable answer at that probability
+ *   { fail: true }        -- a non-ok HTTP status (never retried, 400)
+ *   { malformed: true }   -- 200 OK but no usable answer for the question
+ * Any operationId not named in `routes` is a bug in the test (throws),
+ * so a stray/unexpected send is never silently answered.
+ *
+ * @param {Record<string, {p?: number, model?: string, fail?: boolean, malformed?: boolean, usage?: any}>} routes
+ *   `usage` (optional) is sent back verbatim as the response's `usage`.
+ * @returns {{fetchImpl: (url: string, init: any) => Promise<any>, calls: Array<{operationId: string, body: any}>}}
+ */
+function routedJevFetch(routes) {
+  /** @type {Array<{operationId: string, body: any}>} */
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    const body = JSON.parse(init.body);
+    const opId = body.state.operationId;
+    calls.push({ operationId: opId, body });
+    const route = routes[opId];
+    if (!route) throw new Error(`routedJevFetch: unexpected request for operationId ${opId}`);
+    if (route.fail) return { ok: false, status: 400, json: async () => ({}) };
+    if (route.malformed) return { ok: true, status: 200, json: async () => ({ model: route.model || 'jev-1.0.0', answers: {}, usage: route.usage }) };
+    const qKey = Object.keys(body.questions)[0];
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ model: route.model || 'jev-1.0.0', answers: { [qKey]: { noul: route.p } }, usage: route.usage }),
+    };
+  };
+  return { fetchImpl, calls };
+}
 
 function mkScratch() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'rwxmap-cli-test-'));
@@ -298,4 +354,324 @@ test('run: stdout always says Jev is off (mechanical)', async () => {
 
   assert.equal(code, 0, stderr.text());
   assert.match(stdout.text(), /Jev: off \(mechanical\)/);
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.deepEqual(combined.jev, {
+    mode: 'off', model: null, sent: 0, answered: 0, failed: 0, changed: 0, tokens: { input: 0, output: 0 },
+  });
+});
+
+// ---------------------------------------------------------------------
+// Jev wiring (PRD item c, D118-120) — go/no-go bars 2-7. Every test here
+// uses env.jevKey (a fake key, never real process.env) and env.fetchImpl
+// (a stub, never real network) — see run()'s own JSDoc for why those two
+// overrides exist and why the real entry point never passes either.
+// ---------------------------------------------------------------------
+
+// bar 4: only rows in a tier are sent — request count == needsJev count.
+test('run: with a key, only the rows in a Jev tier are sent (bar 4)', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
+  const outDir = mkScratch();
+  const { fetchImpl, calls } = routedJevFetch({
+    listThings: { p: 0.1 },
+    updateThing: { p: 0.1 },
+    doMystery: { p: 0.1 },
+  });
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+    cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
+  });
+
+  assert.equal(code, 0);
+  // Exactly the 3 pile rows, never the DELETE (method-delete) or the
+  // list-claimed POST (archiveThing).
+  assert.deepEqual(calls.map((c) => c.operationId).sort(), ['doMystery', 'listThings', 'updateThing']);
+
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.equal(combined.jev.sent, 3);
+});
+
+// bar 2: each tier moves only its own way at its threshold.
+test('run: jev-lower moves x -> w at p <= threshold, not above it (bar 2)', async () => {
+  const dir = mkScratch();
+  const outDir1 = mkScratch();
+  const outDir2 = mkScratch();
+  const specPath1 = writeSpecFile(dir, 'spec1.json', SPEC_JEV_DOC);
+  const specPath2 = writeSpecFile(dir, 'spec2.json', SPEC_JEV_DOC);
+
+  const atThreshold = routedJevFetch({
+    listThings: { p: 0 }, updateThing: { p: 0 }, doMystery: { p: JEV_LOWER_THRESHOLD },
+  });
+  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example'], {
+    cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: atThreshold.fetchImpl,
+  });
+  assert.equal(codeAt, 0);
+  const atCombined = readJson(path.join(outDir1, 'example.rwxmap.json'));
+  assert.equal(atCombined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/class'], 'w');
+
+  const aboveThreshold = routedJevFetch({
+    listThings: { p: 0 }, updateThing: { p: 0 }, doMystery: { p: JEV_LOWER_THRESHOLD + 0.01 },
+  });
+  const codeAbove = await run([specPath2, '-o', outDir2, '--vendor', 'example'], {
+    cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: aboveThreshold.fetchImpl,
+  });
+  assert.equal(codeAbove, 0);
+  const aboveCombined = readJson(path.join(outDir2, 'example.rwxmap.json'));
+  assert.equal(aboveCombined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/class'], 'x');
+});
+
+test('run: jev-raise-wx moves w -> x at p >= threshold, not below it (bar 2)', async () => {
+  const dir = mkScratch();
+  const outDir1 = mkScratch();
+  const outDir2 = mkScratch();
+  const specPath1 = writeSpecFile(dir, 'spec1.json', SPEC_JEV_DOC);
+  const specPath2 = writeSpecFile(dir, 'spec2.json', SPEC_JEV_DOC);
+
+  const atThreshold = routedJevFetch({
+    listThings: { p: 0 }, updateThing: { p: JEV_RAISE_WX_THRESHOLD }, doMystery: { p: 1 },
+  });
+  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example'], {
+    cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: atThreshold.fetchImpl,
+  });
+  assert.equal(codeAt, 0);
+  const atCombined = readJson(path.join(outDir1, 'example.rwxmap.json'));
+  assert.equal(atCombined.mcp['PUT /things/{id}']._meta['io.github.hamr0.rwxmap/class'], 'x');
+
+  const belowThreshold = routedJevFetch({
+    listThings: { p: 0 }, updateThing: { p: JEV_RAISE_WX_THRESHOLD - 0.01 }, doMystery: { p: 1 },
+  });
+  const codeBelow = await run([specPath2, '-o', outDir2, '--vendor', 'example'], {
+    cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: belowThreshold.fetchImpl,
+  });
+  assert.equal(codeBelow, 0);
+  const belowCombined = readJson(path.join(outDir2, 'example.rwxmap.json'));
+  assert.equal(belowCombined.mcp['PUT /things/{id}']._meta['io.github.hamr0.rwxmap/class'], 'w');
+});
+
+test('run: jev-raise-get moves r -> w at p >= threshold, not below it (bar 2)', async () => {
+  const dir = mkScratch();
+  const outDir1 = mkScratch();
+  const outDir2 = mkScratch();
+  const specPath1 = writeSpecFile(dir, 'spec1.json', SPEC_JEV_DOC);
+  const specPath2 = writeSpecFile(dir, 'spec2.json', SPEC_JEV_DOC);
+
+  const atThreshold = routedJevFetch({
+    listThings: { p: JEV_RAISE_GET_THRESHOLD }, updateThing: { p: 0 }, doMystery: { p: 1 },
+  });
+  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example'], {
+    cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: atThreshold.fetchImpl,
+  });
+  assert.equal(codeAt, 0);
+  const atCombined = readJson(path.join(outDir1, 'example.rwxmap.json'));
+  assert.equal(atCombined.mcp['GET /things']._meta['io.github.hamr0.rwxmap/class'], 'w');
+
+  const belowThreshold = routedJevFetch({
+    listThings: { p: JEV_RAISE_GET_THRESHOLD - 0.01 }, updateThing: { p: 0 }, doMystery: { p: 1 },
+  });
+  const codeBelow = await run([specPath2, '-o', outDir2, '--vendor', 'example'], {
+    cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: belowThreshold.fetchImpl,
+  });
+  assert.equal(codeBelow, 0);
+  const belowCombined = readJson(path.join(outDir2, 'example.rwxmap.json'));
+  assert.equal(belowCombined.mcp['GET /things']._meta['io.github.hamr0.rwxmap/class'], 'r');
+});
+
+// bar 3: a bad answer never moves a letter — one case each.
+test('run: a bad answer (NaN, out-of-range, missing model, HTTP error, timeout-like failure, malformed JSON) never moves a letter (bar 3)', async () => {
+  const dir = mkScratch();
+
+  /** @type {Array<[string, any]>} */
+  const cases = [
+    ['NaN p', { ok: true, status: 200, json: async () => ({ model: 'm', answers: { isX: { noul: NaN } } }) }],
+    ['p out of range', { ok: true, status: 200, json: async () => ({ model: 'm', answers: { isX: { noul: 1.5 } } }) }],
+    ['missing model', { ok: true, status: 200, json: async () => ({ answers: { isX: { noul: 0.01 } } }) }],
+    ['HTTP error', { ok: false, status: 400, json: async () => ({}) }],
+    ['network failure (stand-in for a timeout)', null],
+    ['malformed JSON', { ok: true, status: 200, json: async () => { throw new SyntaxError('bad json'); } }],
+  ];
+
+  for (const [label, response] of cases) {
+    const outDir = mkScratch();
+    const specPath = writeSpecFile(dir, `spec-${label.replace(/[^a-z0-9]/gi, '')}.json`, SPEC_JEV_DOC);
+    const fetchImpl = response === null
+      ? async () => { throw new Error('simulated network failure'); }
+      : async () => response;
+
+    const stdout = captureStream();
+    const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+      cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
+    });
+    assert.equal(code, 0, `[${label}] expected exit 0`);
+
+    const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+    // Every pile row keeps its MECHANICAL letter: r/w/x floors, untouched.
+    assert.equal(combined.mcp['GET /things']._meta['io.github.hamr0.rwxmap/class'], 'r', label);
+    assert.equal(combined.mcp['PUT /things/{id}']._meta['io.github.hamr0.rwxmap/class'], 'w', label);
+    assert.equal(combined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/class'], 'x', label);
+    assert.equal(combined.jev.changed, 0, label);
+    assert.equal(combined.jev.failed, 3, label);
+  }
+});
+
+// bar 6: never stops — every call fails, exit 0, all letters mechanical.
+test('run: never stops when every Jev call fails (bar 6)', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
+  const outDir = mkScratch();
+  const fetchImpl = async () => { throw new Error('offline'); };
+  const stdout = captureStream();
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+    cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
+  });
+
+  assert.equal(code, 0);
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.equal(combined.jev.sent, 3);
+  assert.equal(combined.jev.answered, 0);
+  assert.equal(combined.jev.failed, 3);
+  assert.equal(combined.jev.changed, 0);
+  assert.equal(combined.mcp['GET /things']._meta['io.github.hamr0.rwxmap/class'], 'r');
+  assert.equal(combined.mcp['PUT /things/{id}']._meta['io.github.hamr0.rwxmap/class'], 'w');
+  assert.equal(combined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/class'], 'x');
+  assert.match(stdout.text(), /3 failed/);
+});
+
+// bar 5: only the five state fields (plus the tier question/model) leave
+// the machine, and the key never appears anywhere observable.
+test('run: sends only method/path/operationId/summary/description, and the key never leaks (bar 5)', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
+  const outDir = mkScratch();
+  const SECRET = 'sk-do-not-leak-this-fake-key';
+  const { fetchImpl, calls } = routedJevFetch({
+    listThings: { p: 0.9 }, updateThing: { p: 0.9 }, doMystery: { p: 0.01 },
+  });
+  const stdout = captureStream();
+  const stderr = captureStream();
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+    cwd: dir, stdout, stderr, jevKey: SECRET, fetchImpl,
+  });
+  assert.equal(code, 0);
+
+  for (const call of calls) {
+    assert.deepEqual(Object.keys(call.body).sort(), ['model', 'questions', 'state']);
+    assert.deepEqual(Object.keys(call.body.state).sort(), ['description', 'method', 'operationId', 'path', 'summary']);
+    assert.equal(JSON.stringify(call.body).includes(SECRET), false);
+  }
+
+  const combinedText = fs.readFileSync(path.join(outDir, 'example.rwxmap.json'), 'utf8');
+  const sidecarText = fs.readFileSync(path.join(outDir, 'example.rwxmap.review.json'), 'utf8');
+  assert.equal(combinedText.includes(SECRET), false);
+  assert.equal(sidecarText.includes(SECRET), false);
+  assert.equal(stdout.text().includes(SECRET), false);
+  assert.equal(stderr.text().includes(SECRET), false);
+});
+
+// bar 7: after Jev moves rows, mcp/bareguard/sidecar all agree with the
+// FINAL (post-Jev) letter, and the sidecar carries p/model for a moved row.
+test('run: after Jev moves rows, mcp, bareguard and the sidecar all carry the final letter (bar 7)', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
+  const outDir = mkScratch();
+  const { fetchImpl } = routedJevFetch({
+    listThings: { p: JEV_RAISE_GET_THRESHOLD, model: 'jev-2.0.0' }, // r -> w
+    updateThing: { p: JEV_RAISE_WX_THRESHOLD, model: 'jev-2.0.0' }, // w -> x
+    doMystery: { p: JEV_LOWER_THRESHOLD, model: 'jev-2.0.0' }, // x -> w
+  });
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+    cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
+  });
+  assert.equal(code, 0);
+
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  const sidecar = readJson(path.join(outDir, 'example.rwxmap.review.json'));
+
+  assert.equal(combined.jev.mode, 'on');
+  assert.equal(combined.jev.model, 'jev-2.0.0');
+  assert.equal(combined.jev.sent, 3);
+  assert.equal(combined.jev.answered, 3);
+  assert.equal(combined.jev.failed, 0);
+  assert.equal(combined.jev.changed, 3);
+
+  // Every mcp entry's class equals its bareguard.tools entry's letter, and
+  // both equal the FINAL (moved) class — never the mechanical one. Each
+  // moved row's sidecar entry carries the model's own p and model (the
+  // design point's "each moved row's p and model go into the sidecar").
+  const expected = {
+    'GET /things': { cls: 'w', p: JEV_RAISE_GET_THRESHOLD },
+    'PUT /things/{id}': { cls: 'x', p: JEV_RAISE_WX_THRESHOLD },
+    'POST /mystery': { cls: 'w', p: JEV_LOWER_THRESHOLD },
+  };
+  for (const [key, { cls, p }] of Object.entries(expected)) {
+    assert.equal(combined.mcp[key]._meta['io.github.hamr0.rwxmap/class'], cls, key);
+    const [method, opPath] = key.split(' ');
+    const sidecarRow = sidecar.rows.find((r) => r.method === method && r.path === opPath);
+    assert.ok(sidecarRow, key);
+    assert.equal(sidecarRow.letter, cls, key);
+    assert.deepEqual(sidecarRow.jev, { p, model: 'jev-2.0.0' }, key);
+  }
+
+  // bareguard.tools's own letters agree too (same source, D122).
+  const toolsLetters = Object.values(combined.bareguard.tools).map((e) => e.letter).sort();
+  const mcpLetters = Object.values(combined.mcp).map((e) => e._meta['io.github.hamr0.rwxmap/class']).sort();
+  assert.deepEqual(toolsLetters, mcpLetters);
+});
+
+// The disclosure banner (design point step 0) and the on-mode summary line.
+test('run: with a key, stdout prints the disclosure banner and the on-mode summary line', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
+  const outDir = mkScratch();
+  const { fetchImpl } = routedJevFetch({
+    listThings: { p: 0 }, updateThing: { p: 0 }, doMystery: { p: 1 },
+  });
+  const stdout = captureStream();
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+    cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
+  });
+  assert.equal(code, 0);
+
+  const text = stdout.text();
+  assert.match(text, /Jev: on — sends method, path, operationId, summary, description of 3 operation/);
+  assert.match(text, /api\.typesafe\.ai/);
+  assert.match(text, /Your key, your cost\./);
+  assert.match(text, /Jev: on — 3 sent · 3 answered · 0 failed \(kept mechanical\) · 0 letters changed/);
+});
+
+// Bar 8 cost figure: the `jev` summary sums answered rows' token usage;
+// a failed row adds nothing, and usage never reaches a sidecar row.
+test('run: jev.tokens sums answered rows usage, skips failed rows, and stays out of the sidecar', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
+  const outDir = mkScratch();
+  const { fetchImpl } = routedJevFetch({
+    listThings: { p: JEV_RAISE_GET_THRESHOLD, usage: { input_tokens: 700, output_tokens: 30 } }, // r -> w, answered
+    updateThing: { p: 0, usage: { input_tokens: 500, output_tokens: 20 } }, // answered, stays w
+    doMystery: { malformed: true, usage: { input_tokens: 9999, output_tokens: 9999 } }, // failed: adds nothing
+  });
+  const stdout = captureStream();
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+    cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
+  });
+  assert.equal(code, 0);
+
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.equal(combined.jev.answered, 2);
+  assert.equal(combined.jev.failed, 1);
+  assert.deepEqual(combined.jev.tokens, { input: 1200, output: 50 });
+  assert.match(stdout.text(), /Jev: on — 3 sent · 2 answered · 1 failed \(kept mechanical\) · 1 letters changed · 1200 in \/ 50 out tokens\n/);
+
+  // The moved row carries exactly {p, model}; no row carries usage.
+  const sidecarText = fs.readFileSync(path.join(outDir, 'example.rwxmap.review.json'), 'utf8');
+  const sidecar = JSON.parse(sidecarText);
+  const moved = sidecar.rows.find((r) => r.method === 'GET' && r.path === '/things');
+  assert.deepEqual(moved.jev, { p: JEV_RAISE_GET_THRESHOLD, model: 'jev-1.0.0' });
+  assert.equal(/usage|input_tokens|tokens/.test(sidecarText), false);
+  const { jev, ...rest } = combined;
+  assert.equal(/usage|input_tokens|tokens/.test(JSON.stringify(rest)), false);
 });
