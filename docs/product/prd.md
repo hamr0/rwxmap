@@ -487,7 +487,9 @@ config, written by the operator.
 ### Carrier 1 — OpenAPI, per operation
 
 OpenAPI allows `x-` extension keys on any object, including an
-operation. rwxmap writes back into the same file it read:
+operation. rwxmap writes a new file beside the original, never over it
+(keep-originals rule; amends the earlier "writes back into the same
+file it read"):
 
 ```yaml
 /v1/accounts/{account}:
@@ -546,6 +548,16 @@ false, `openWorldHint` true).
 `readOnlyHint` rests on step 1, which on the 4171-row provider corpus
 claims 2052 rows with 3 wrong in the unsafe direction (0.07% of all
 rows) and 33 more marked not-read-only when they are (D74).
+
+The CLI's combined output emits this carrier as the `mcp` dict, keyed
+by `"METHOD path"` (D122): each entry holds `operationId`,
+`annotations` and `_meta` as above. An MCP server author, or an AI
+building one, copies `annotations`/`_meta` per tool from this dict; a
+proxy in front of an existing MCP server can merge them into a
+`tools/list` reply. Every `mcp` letter equals the `bareguard` letter
+for the same operation, since both come from one classification. These
+hints are advice, not enforcement — a client may ignore them, and
+bareguard is what enforces.
 
 ### Carrier 3 — WebMCP, per tool
 
@@ -763,28 +775,76 @@ before:
 
 ## What is next — NOT BUILT
 
-The forward plan for a standalone npm release, in order:
+The forward plan for a standalone npm release, in this order: **d,
+then c, then e.**
 
-c. **Jev.** Key configured → used; no key → mechanical, never stops,
-   says loudly which mode ran and shows what it knows. `jev.js` makes no
-   network call today; how the CLI obtains the model answer is to be
-   designed.
-d. **CLI**, in order: first a command that writes the bareguard gate
-   file and sidecar; then an interactive `rwxmap` menu with options 1–4,
-   one per carrier (OpenAPI `x-rwx`, MCP annotations, WebMCP, ARD).
-e. **Emitters** for carriers 1–4. None is built; the exporter covers
-   the bareguard file only.
-f. **Next:** continue with c-e; each needs its own go/no-go bar set
-   before it is built.
+d. **CLI + combined output** (D121, D122): one command,
+   `rwxmap <spec URL | local file | bare API address>`. A spec URL or
+   file is read with `rwxmap/load`; a bare API address runs `findSpec`
+   first, and if nothing is found it says so and exits non-zero,
+   writing no file. It writes the one output JSON — `bareguard: { tools
+   }` (exactly `exportGate`'s tools) and `mcp` (keyed by method+path,
+   D122) — plus the human-facing sidecar. Mechanical only; Jev is wired
+   in with item c.
+
+### Go/no-go for item d — PROPOSED, awaiting user approval
+
+Each bar is checkable by a command.
+
+1. For every spec file in the tuning and exam spec sets that
+   `tools/proof-load.js` covers (722 files), the CLI's `bareguard.tools`
+   deep-equals `exportGate` on the same operations: 0 differences.
+2. On those same files, the `mcp` dict has exactly one entry per
+   operation (count equals the operation count), and every entry's
+   class equals the bareguard letter for that operation: 0 mismatches.
+3. The hint mapping matches D104's table on every row. There's a test
+   for each of r, w and x, and the test is seen to fail when the
+   mapping is broken by hand.
+4. A bare API address with no findable spec exits non-zero and writes
+   no file. A load failure (a bad URL, a file over the cap, binary
+   content) exits non-zero and writes no file. Output files are
+   written atomically.
+5. No row's letter differs from the library's own classification
+   (`classifyRow`, as used by `exportGate`): the CLI adds nothing and
+   loosens nothing.
+6. One live run of a bare API address that discovery can resolve
+   (intercom's API host) writes a JSON whose operation count equals the
+   found spec's.
+7. The full suite, typecheck and both proofs still pass.
+
+c. **Jev** (D118-D120), wired into the CLI. Key configured → used; no
+   key → mechanical, never stops, says loudly which mode ran and shows
+   what it knows. rwxmap calls the Jev endpoint itself with plain Node
+   `fetch` (D118): a per-request timeout, a retry with backoff on
+   429/529 only, no bareagent dependency. The key is read from the
+   environment via Node's built-in `process.loadEnvFile()`, no dotenv
+   dependency; the variable name is fixed when this item is built. All
+   three tiers (`jev-lower`, `jev-raise-wx`, `jev-raise-get`) ship on
+   when a key is set (D119). Jev is separate and bring-your-own-key: the
+   README and the CLI output both say Jev is optional, the key and cost
+   are the adopter's own, and it sends spec text (method, path,
+   operationId, summary, description) to an outside service (D120).
+e. **Remaining carriers**: OpenAPI `x-rwx`, WebMCP and ARD (MCP moved
+   into item d, D122). Re-check all four standards against their
+   current revisions before emitting. For OpenAPI output, write a new
+   file beside the original, never over it (keep-originals rule); see
+   the amended sentence in Carrier 1 below.
+f. **Next:** each of c, d, e needs its own go/no-go bar set before it
+   is built.
 
 ## Open questions
 
 - **`openWorldHint` has no evidence source.** It is the slot "touches
   others" would map to; it may return as an evidence-only flag beside
   `destructive`, never emitted as false, if a source is ever found (D87).
-- **The fresh exam.** Anything adopted under D100 (`jev-raise-wx`,
-  `jev-raise-get`), D101's review rule, and any change to the frozen
-  core need a fresh clean exam, drawn from vendors no set has seen.
+- **The fresh exam.** Shipping the two raise tiers (`jev-raise-wx`,
+  `jev-raise-get`) is settled (D119). A fresh clean exam, drawn from
+  vendors no set has seen, is still required for any future change to
+  D100's tiers, D101's review rule, or the frozen core.
+- **Hand-written MCP tools** (D122). A tool with a name and a
+  description but no method or path has no method floor to classify
+  from; this needs its own module, its own labelled set and its own
+  exam.
 - **The lead-position blind spot** is the first post-freeze candidate:
   a fix changes the core, so it needs a new D-number and a new exam.
 - **Framework-default spec paths for self-hosted APIs.** Discovery
