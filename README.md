@@ -208,6 +208,30 @@ never loads its one dependency, the `yaml` parser (D107).
 own and classifies calls against it, for a harness or gate that wants
 whole-API coverage instead of one URL at a time.
 
+If you know the API's spec URL, or have the file, pass it as
+`findSpec(apiUrl, { spec })`. That's the best case: nothing is
+guessed. Big public vendors mostly publish their spec in their own
+GitHub repo or on a docs site, which discovery does not look at — the
+live run found 2 of 25.
+
+Otherwise, `findSpec` tries, in order:
+
+1. the given spec, with nothing else tried.
+2. the 30-day cache.
+3. `/.well-known/api-catalog` (RFC 9727).
+4. the `Link: rel="service-desc"` header (RFC 8631).
+5. `/openapi.json`, `/openapi.yaml`, `/swagger.json`.
+6. nothing found → every call is classified on its own.
+
+Steps 3-5 run on the API host, then walk up to its parent domain.
+
+The spec-or-not decision is made per call, not per API: a call that
+matches no operation in the found spec — for example because the spec
+is incomplete — is classified on its own, so an incomplete spec costs
+exactness, never a looser letter (see the test "classifyCall: an
+undocumented endpoint on a found spec falls back to per-request
+classification" in `src/discover.test.js`).
+
 ```js
 import { findSpec, classifyCall } from 'rwxmap/discover';
 
@@ -234,6 +258,14 @@ Discovery is limited: at most 3 guessed paths, at most 3 service-desc
 links followed, and a 60 s wall-clock budget per `findSpec` call (up
 to one request timeout of overrun). A spec-less site costs about 26
 requests, measured live, then cached for 30 days.
+
+Discovery can occasionally land on a spec for a different API on the
+same domain. Live, cloudflare's `www.cloudflare.com/openapi.json` was
+a 3-operation file for something else, and it matched 0 calls. A call
+that happens to match such a spec takes that spec's letter — in
+testing that made 4 of 414,180 cross-vendor calls looser. No test
+tells a wrong spec from a right one, so this is an accepted, known
+limit (D117). Passing the spec URL avoids it.
 
 For bareguard: a found spec's `entries` go straight into `gate.add()`
 unchanged. A per-request key must be added with

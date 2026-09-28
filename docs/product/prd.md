@@ -783,3 +783,16 @@ before:
   core need a fresh clean exam, drawn from vendors no set has seen.
 - **The lead-position blind spot** is the first post-freeze candidate:
   a fix changes the core, so it needs a new D-number and a new exam.
+- **Framework-default spec paths for self-hosted APIs.** Discovery
+  guesses only `/openapi.json`, `/openapi.yaml` and `/swagger.json`
+  (D116). Framework defaults were probed on public APIs and found 0:
+  Spring `/v3/api-docs` (0 on 25 vendors, 0 on the 200-API sample),
+  `/v2/api-docs`, .NET `/swagger/v1/swagger.json`, `/api-docs` (0 on
+  25 and 0 on 200), `/swagger.yaml`, `/.well-known/openapi.json` (not
+  an IANA-registered well-known URI; checked 2026-09-28). Some
+  defaults were never probed: `/openapi`, `/v3/api-docs.yaml`, NestJS
+  `/api-json`, Django drf-spectacular `/api/schema/`, Laravel
+  `/api/documentation`. These defaults are where self-hosted and
+  internal APIs serve their spec, and we have no self-hosted sample,
+  so the 0s say nothing about them. Add them only after measuring them
+  on a self-hosted sample.
