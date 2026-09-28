@@ -204,9 +204,9 @@ never loads its one dependency, the `yaml` parser (D107).
 
 ## Discovering a spec, for harness authors
 
-**[unreleased — 0.5.0]** `rwxmap/discover` finds an API's spec on its
-own and classifies calls against it, for a harness or gate that wants
-whole-API coverage instead of one URL at a time.
+`rwxmap/discover` finds an API's spec on its own and classifies calls
+against it, for a harness or gate that wants whole-API coverage
+instead of one URL at a time.
 
 If you know the API's spec URL, or have the file, pass it as
 `findSpec(apiUrl, { spec })`. That's the best case: nothing is
@@ -223,7 +223,11 @@ Otherwise, `findSpec` tries, in order:
 5. `/openapi.json`, `/openapi.yaml`, `/swagger.json`.
 6. nothing found → every call is classified on its own.
 
-Steps 3-5 run on the API host, then walk up to its parent domain.
+Steps 3-4 run on the API host, then walk up to its parent domain,
+stopping at two labels. Step 5's fixed paths run on the API host, and
+on `docs.`, `developer.` and `developers.` of that two-label parent
+(for `api.cloudflare.com`, that's `docs.cloudflare.com`,
+`developer.cloudflare.com` and `developers.cloudflare.com`).
 
 The spec-or-not decision is made per call, not per API: a call that
 matches no operation in the found spec — for example because the spec
