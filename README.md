@@ -202,6 +202,42 @@ file classifies on method+path alone (D106). It ships as the separate
 `rwxmap/load` subpath, not from the package root, so `import 'rwxmap'`
 never loads its one dependency, the `yaml` parser (D107).
 
+## Discovering a spec, for harness authors
+
+**[unreleased — 0.5.0]** `rwxmap/discover` finds an API's spec on its
+own and classifies calls against it, for a harness or gate that wants
+whole-API coverage instead of one URL at a time.
+
+```js
+import { findSpec, classifyCall } from 'rwxmap/discover';
+
+const found = await findSpec('https://api.example.com');
+const verdict = classifyCall(found, 'POST', 'https://api.example.com/v1/orders');
+// { key, letter, marker, source: 'spec' | 'request' }
+```
+
+- `findSpec(apiUrl, { spec?, cacheDir? })` looks for an OpenAPI/Swagger
+  document at the usual locations (D108), caches the result for 30
+  days, and refuses to probe a non-https URL, an IP-literal host,
+  `localhost` or a single-label host (D114).
+- `classifyCall(found, method, url)` matches the call to a spec
+  operation when it can, else falls back to per-request classification
+  (`classifyRow`), and always returns `{ key, letter, marker, source }`.
+- `requestKey(method, url)` is the per-request key builder on its own,
+  for a caller that already has a `letter`/`marker` from elsewhere.
+
+For bareguard: a found spec's `entries` go straight into `gate.add()`
+unchanged. A per-request key must be added with
+`gate.add({ [key]: { letter, marker } })` *before* the matching
+`gate.check({ type: key, url })`, with the real URL in `url` — an
+unlisted key is denied. `add()` is tighten-only and all-or-nothing per
+batch: a refused batch throws and is audited, so catch it and keep
+going, and the stricter existing entry stays in force. A gate caps out
+at 10,000 keys.
+
+It ships as its own `rwxmap/discover` subpath (D113), never from the
+package root, so `import 'rwxmap'` stays offline and dependency-free.
+
 ## How it publishes
 
 rwxmap does not invent a format. Every standard an agent already reads

@@ -614,17 +614,23 @@ roughly 1 in 100.
    the method floor; the harness carries no second copy of that
    decision.
 
-**The cache**, owned by rwxmap: a 30-day TTL, keyed by spec URL +
-content hash + rwxmap version + Jev model id when Jev ran, so a new
-release or a model change invalidates old results. "No spec here" is
-cached too, so a spec-less site is not probed every run. When the TTL
-runs out rwxmap fetches again and reuses the classification if the hash
-has not changed.
+**The cache** (built, `rwxmap/discover`), owned by rwxmap: one JSON file
+per cache key under `opts.cacheDir ?? $XDG_CACHE_HOME/rwxmap ??
+~/.cache/rwxmap`, keyed by the API host (or the caller-given spec
+address), valid for 30 days AND the same rwxmap version — either one
+aging out means a miss. A miss rediscovers and reclassifies from
+scratch (D115): mechanical classification is cheap, so there is
+nothing to save by reusing it, only the network round trips the cache
+already saves. The entry still records the content sha256 and a
+Jev model id (null today) against the day Jev runs at classification
+time and a model call costs money. "No spec here" is cached too, so a
+spec-less site is not probed every run.
 
-**The key normalizer**, owned by rwxmap: one exported function the
-harness calls to build the `action.type` for a request without a spec,
+**The key normalizer** (built, `rwxmap/discover`'s `requestKey`), owned
+by rwxmap: one exported function the harness calls to build the
+per-request key for a call without a matched spec operation,
 `<host>.<METHOD> <normalized path>` (e.g. `api.example.com.POST
-/v1/orders`). It drops the query string and turns id segments into
+/v1/orders/{id}`). It drops the query string and turns id segments into
 `{id}`. Spotting ids is a documented best guess — all-digit segments,
 UUIDs, long hex strings — so a map does not grow one entry per order
 id. rwxmap is the one writer of that key; the harness never builds it
@@ -693,10 +699,20 @@ a. **Input.** Point it at a URL or a file path; JSON or YAML in, JSON
    binary content is refused. Built as `rwxmap/load` (D107); not yet
    released.
 b. **Spec discovery** at the usual locations (a best guess, not a
-   standard), the 30-day cache, and the key normalizer (D105). The
-   discovery order is D108's; no curated list, and no third-party
+   standard), the 30-day cache, and the per-request key. BUILT on
+   `input/load`, not yet released, as the subpath export
+   `rwxmap/discover` (D113): `findSpec`, `classifyCall`, `requestKey`.
+   The discovery order is D108's; no curated list, and no third-party
    directory. It reads OpenAPI and Swagger only; Postman is not read
-   (D112).
+   (D112). Every discovery request is checked before it is sent — no
+   non-https URL, IP-literal host, `localhost` or single-label host,
+   checked on the API URL and on every redirect hop and service-desc
+   link (D114); such a host gets `status: 'none'`
+   uncached, and its calls fall through to per-request classification.
+   A cache entry that passes 30 days or a version bump rediscovers and
+   reclassifies from scratch rather than reusing the old verdict
+   (D115, amends D105 item 2) — mechanical classification is cheap, so
+   only the network trip was worth caching.
 c. **Jev.** Key configured → used; no key → mechanical, never stops,
    says loudly which mode ran and shows what it knows. `jev.js` makes no
    network call today; how the CLI obtains the model answer is to be
@@ -706,8 +722,9 @@ d. **CLI**, in order: first a command that writes the bareguard gate
    one per carrier (OpenAPI `x-rwx`, MCP annotations, WebMCP, ARD).
 e. **Emitters** for carriers 1–4. None is built; the exporter covers
    the bareguard file only.
-f. **Release sequence:** PRD cleanup → review everything on the branch
-   → publish the frozen core to npm → continue building the above.
+f. **Release sequence:** `/branch-review`, then release 0.5.0 with
+   items a (`rwxmap/load`) and b (`rwxmap/discover`) → continue
+   building the above.
 
 ## Open questions
 

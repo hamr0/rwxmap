@@ -5461,6 +5461,42 @@ class).
   that matter most (a shared API subdomain, a sandbox subdomain) — the
   disagreements cluster on the hard cases, not spread evenly.
 
+### Spec discovery pass 8: rwxmap/discover built (2026-09-28)
+
+- Goal: build `rwxmap/discover` (D113) — `findSpec`, `classifyCall`,
+  `requestKey` — as the subpath export that turns an API's base URL
+  into a loaded spec plus a way to classify a live call against it,
+  with the 30-day cache and the address safety rule (D114).
+- Found in review: the first version passed its own tests, but the
+  address check ran only on the API URL — once a discovery request
+  went out, redirects were followed automatically and service-desc
+  links were fetched unchecked, so a redirect or a link could still
+  point discovery at a non-https, IP-literal, `localhost` or
+  single-label address the first check was meant to keep it away from.
+  Fixed with manual hop-by-hop redirects (at most 5) and the same
+  address check re-run on every hop and every service-desc link.
+- Verified by the orchestrator directly, not just by the agent's
+  say-so: a real local server confirmed Node's `fetch` with
+  `redirect: 'manual'` returns status 302 and a readable `Location`
+  header, which the hop-by-hop loop depends on.
+- A second review break tested the fix itself: disabling the hop check
+  inside the catalog/Link-header probe path still passed all 29 tests,
+  meaning that path was untested. 3 tests were added that exercise it
+  and fail under the same break.
+- Also fixed in review: a discovered spec's vendor was being read from
+  the spec file's own basename (e.g. `openapi.yaml.getFile`); it now
+  reads from `apiUrl`'s host, matching D113
+  (`api.figma.com.getFile`).
+- Outcome: 332 tests, typecheck clean, `tools/proof-load.js` and
+  `tools/proof-match.js` still hold, a tarball smoke test passes, and a
+  resolve-hook test confirms `import 'rwxmap'` never loads
+  `discover.js`.
+- Lesson: a safety check on the input address means nothing once the
+  fetch is allowed to follow redirects on its own — the check has to
+  run again on wherever the redirect actually lands; and a check that
+  nothing fails when removed is not a check, it's dead code with a
+  comment attached.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.
