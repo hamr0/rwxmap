@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-09-28
+
+### Added
+
+- **`rwxmap/load`** (D106/D107): `loadSpec(source, opts)` loads an OpenAPI/Swagger document from an http(s) URL or a file path, JSON or YAML, transparently gunzipped if gzip-magic bytes are present. A download is capped at 64 MiB both as read (compressed) and as decoded, and a gzip bomb throws rather than expanding past the cap; a corrupt (truncated) gzip stream is now named as corrupt, not oversize. Binary content (a NUL byte, or a POSIX tar `ustar` header) is refused before it reaches the YAML parser. An external `$ref` (an operation defined in another file) is never followed — that operation classifies on method+path alone. Ships as its own `rwxmap/load` subpath, never from the package root, so `import 'rwxmap'` never loads the `yaml` parser.
+- **`rwxmap/discover`** (D108, D112-D117): `findSpec`, `classifyCall` and `requestKey`, for a harness or gate that wants whole-API coverage instead of classifying one URL at a time.
+  - `findSpec(apiUrl, { spec?, cacheDir? })` looks for a spec, in order: the caller-supplied `spec` (nothing else tried); a 30-day on-disk cache (including a cached "none"); `/.well-known/api-catalog` (RFC 9727); the `Link: rel="service-desc"` header (RFC 8631); then the fixed paths `/openapi.json`, `/openapi.yaml`, `/swagger.json`. Only OpenAPI/Swagger documents are recognized (D112). The catalog/Link steps walk up the host one label at a time, stopping at two labels, with no public suffix list.
+  - `classifyCall(found, method, url)` matches a live call to a spec operation when it can, else falls back to per-request classification (`classifyRow`), and always returns `{ key, letter, marker, source: 'spec' | 'request' }`.
+  - `requestKey(method, url)` is the per-request key builder on its own.
+  - Discovery never requests a non-https URL, an IP-literal host, `localhost`, or a single-label host, checked on every redirect hop and every followed service-desc link.
+  - Discovery is limited to at most 3 guessed paths, at most 3 service-desc links followed, and a 60-second wall-clock budget per `findSpec` call (up to one request timeout of overrun).
+  - Known limit (D117): discovery can occasionally match a spec for a different API on the same domain (a call against it then takes that spec's letter); there is no rule that tells a wrong spec from a right one. Passing the spec URL directly avoids it.
+  - Ships as its own `rwxmap/discover` subpath, never from the package root, so `import 'rwxmap'` stays offline and dependency-free.
+
+### Changed
+
+- **`yaml` moved from `devDependencies` to `dependencies`.** It is loaded only by `rwxmap/load` and (transitively, for spec-parsing) `rwxmap/discover` — `import 'rwxmap'` from the package root still never loads it.
+
 ## [0.4.0] - 2026-09-25
 
 ### Changed
