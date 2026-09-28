@@ -705,8 +705,8 @@ a. **Input.** Point it at a URL or a file path; JSON or YAML in, JSON
    download over 64 MB (compressed or decoded) or binary content is
    refused. Built as `rwxmap/load` (D107); released in `rwxmap@0.5.0`.
 b. **Spec discovery** at the usual locations (a best guess, not a
-   standard), the 30-day cache, and the per-request key. Built on
-   `rwxmap/load`, released in `rwxmap@0.5.0` as the subpath export
+   standard), the 30-day cache, and the per-request key. Released in
+   `rwxmap@0.5.0` as the subpath export
    `rwxmap/discover` (D113): `findSpec`, `classifyCall`, `requestKey`.
    The discovery order is D108's; no curated list, and no third-party
    directory. It reads OpenAPI and Swagger only; Postman is not read
