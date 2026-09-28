@@ -344,6 +344,139 @@ test('api-catalog body over 1 MB is treated as no result (fix #2)', async () => 
 });
 
 // ---------------------------------------------------------------------
+// LIMIT 1 — GUESS_PATHS shrunk to exactly 3 (user ruling 2026-09-28)
+// ---------------------------------------------------------------------
+
+test('LIMIT 1: only /openapi.json, /openapi.yaml, /swagger.json are ever guessed, for a spec-less 3-label host', async () => {
+  const cacheDir = mkTmpCacheDir();
+  const { calls, restore } = stubFetch({}); // everything 404s -> spec-less
+  try {
+    const result = await findSpec('https://api.example.com', { cacheDir });
+    assert.equal(result.status, 'none');
+    // Exact ordered request list: step 3 (2 catalog probes: api.example.com,
+    // example.com) + step 4 (HEAD+GET "/" on each of those 2 hosts) +
+    // step 5 (3 guess paths x 4 hosts: api.example.com, docs./developer./
+    // developers.example.com), nothing else.
+    assert.deepEqual(calls.map((c) => `${c.method} ${c.url}`), [
+      'GET https://api.example.com/.well-known/api-catalog',
+      'GET https://example.com/.well-known/api-catalog',
+      'HEAD https://api.example.com/',
+      'GET https://api.example.com/',
+      'HEAD https://example.com/',
+      'GET https://example.com/',
+      'HEAD https://api.example.com/openapi.json',
+      'HEAD https://api.example.com/openapi.yaml',
+      'HEAD https://api.example.com/swagger.json',
+      'HEAD https://docs.example.com/openapi.json',
+      'HEAD https://docs.example.com/openapi.yaml',
+      'HEAD https://docs.example.com/swagger.json',
+      'HEAD https://developer.example.com/openapi.json',
+      'HEAD https://developer.example.com/openapi.yaml',
+      'HEAD https://developer.example.com/swagger.json',
+      'HEAD https://developers.example.com/openapi.json',
+      'HEAD https://developers.example.com/openapi.yaml',
+      'HEAD https://developers.example.com/swagger.json',
+    ], `total request count for a spec-less 3-label host: ${calls.length} (expected 18)`);
+    assert.equal(calls.length, 18, `spec-less 3-label host: ${calls.length} total requests (2 catalog + 4 link-header + 12 guess-path)`);
+  } finally {
+    restore();
+    fs.rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+// ---------------------------------------------------------------------
+// LIMIT 2 — at most 3 service-desc hrefs tried per catalog/Link response
+// ---------------------------------------------------------------------
+
+test('LIMIT 2: an api-catalog response with 5 service-desc hrefs tries only the first 3, in document order', async () => {
+  const cacheDir = mkTmpCacheDir();
+  const hrefs = [1, 2, 3, 4, 5].map((i) => `https://example.com/spec${i}.json`);
+  const { calls, restore } = stubFetch({
+    'GET https://example.com/.well-known/api-catalog': {
+      status: 200,
+      text: JSON.stringify({ 'service-desc': hrefs.map((href) => ({ href })) }),
+    },
+    // every candidate 404s by default -> catalog step exhausts its capped
+    // list and discovery falls through to steps 4-5, irrelevant here.
+  });
+  try {
+    await findSpec('https://example.com', { cacheDir });
+    const requestedUrls = calls.map((c) => c.url);
+    assert.ok(requestedUrls.includes('https://example.com/spec1.json'));
+    assert.ok(requestedUrls.includes('https://example.com/spec2.json'));
+    assert.ok(requestedUrls.includes('https://example.com/spec3.json'));
+    assert.ok(!requestedUrls.includes('https://example.com/spec4.json'), 'the 4th href must never be tried');
+    assert.ok(!requestedUrls.includes('https://example.com/spec5.json'), 'the 5th href must never be tried');
+  } finally {
+    restore();
+    fs.rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+test('LIMIT 2: a Link header with 5 service-desc hrefs tries only the first 3, in document order', async () => {
+  const cacheDir = mkTmpCacheDir();
+  const hrefs = [1, 2, 3, 4, 5].map((i) => `https://example.com/spec${i}.json`);
+  const linkHeader = hrefs.map((href) => `<${href}>; rel="service-desc"`).join(', ');
+  const { calls, restore } = stubFetch({
+    'GET https://example.com/.well-known/api-catalog': { status: 404 },
+    'HEAD https://example.com/': { status: 200, headers: { link: linkHeader } },
+  });
+  try {
+    await findSpec('https://example.com', { cacheDir });
+    const requestedUrls = calls.map((c) => c.url);
+    assert.ok(requestedUrls.includes('https://example.com/spec1.json'));
+    assert.ok(requestedUrls.includes('https://example.com/spec2.json'));
+    assert.ok(requestedUrls.includes('https://example.com/spec3.json'));
+    assert.ok(!requestedUrls.includes('https://example.com/spec4.json'), 'the 4th href must never be tried');
+    assert.ok(!requestedUrls.includes('https://example.com/spec5.json'), 'the 5th href must never be tried');
+  } finally {
+    restore();
+    fs.rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+// ---------------------------------------------------------------------
+// LIMIT 3 — 60s wall-clock budget for steps 3-5. No clock option is added
+// to findSpec's public API; the mocked wall clock is advanced by Node's
+// own node:test timer mock (a seam the test runner already provides, not
+// a test-only export from discover.js), ticking it forward from inside
+// the stubbed fetch responses themselves.
+// ---------------------------------------------------------------------
+
+test('LIMIT 3: the 60s discovery budget stops new requests once exhausted; cached as a time-budget "none"', async (t) => {
+  const cacheDir = mkTmpCacheDir();
+  t.mock.timers.enable({ apis: ['Date'] });
+  const tick = () => t.mock.timers.tick(25_000);
+  const { calls, restore } = stubFetch({
+    'GET https://example.com/.well-known/api-catalog': () => { tick(); return { status: 404 }; },
+    'HEAD https://example.com/': () => { tick(); return { status: 404 }; },
+    'GET https://example.com/': () => { tick(); return { status: 404 }; },
+  });
+  try {
+    const result = await findSpec('https://example.com', { cacheDir });
+    assert.equal(result.status, 'none');
+    assert.equal(result.reason, 'time budget (60 s) exhausted');
+    // 3 x 25s ticks = 75s elapsed, past the 60s budget, so step 5 (guess
+    // paths) must never even start.
+    assert.deepEqual(calls.map((c) => `${c.method} ${c.url}`), [
+      'GET https://example.com/.well-known/api-catalog',
+      'HEAD https://example.com/',
+      'GET https://example.com/',
+    ], `budget-exhausted request count: ${calls.length} (expected 3, step 5 never starts)`);
+
+    calls.length = 0;
+    const second = await findSpec('https://example.com', { cacheDir });
+    assert.equal(second.fromCache, true);
+    assert.equal(second.reason, 'time budget (60 s) exhausted');
+    assert.equal(calls.length, 0, 'a budget-exhausted "none" must be cached like any other none');
+  } finally {
+    restore();
+    t.mock.timers.reset();
+    fs.rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+// ---------------------------------------------------------------------
 // Walk-up order
 // ---------------------------------------------------------------------
 

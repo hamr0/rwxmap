@@ -49,6 +49,18 @@
 // globalThis.fetch and restore it — there is deliberately no `fetch`
 // option here to stub around.
 //
+// LIMITS (user ruling 2026-09-28, from data/discover-live-2026-09-28 and
+// data/discover-limits-2026-09-28): discovery cost a median of 97
+// requests/site; zoom alone cost 464 requests / 489s chasing every one of
+// the ~50 doc-page links its own api-catalog listed. Across 21 real
+// finds, GUESS_PATHS (step 5) only ever found /openapi.json, /openapi.yaml
+// or /swagger.json; api-catalog/Link (steps 3-4) found 6 (incl.
+// intercom). Three limits follow, each a module constant near its use:
+// GUESS_PATHS shrunk to those 3 paths, MAX_SERVICE_DESC_HREFS caps how
+// many service-desc hrefs one catalog/Link response can offer, and
+// DISCOVERY_BUDGET_MS caps steps 3-5's wall-clock time so a zoom-shaped
+// site is not retried every run — it's cached as a "none" like any other.
+//
 // CACHE (D105 item 2): one JSON file per cache key under
 // `opts.cacheDir ?? $XDG_CACHE_HOME/rwxmap ?? ~/.cache/rwxmap`, named by
 // the sha256 of the key (the API host, or opts.spec's address when
@@ -92,23 +104,33 @@ const TIMEOUT_MS = 10_000;
 const MAX_REDIRECTS = 5;
 const MAX_BODY_BYTES = 1 * 1024 * 1024;
 
-// Copied verbatim from poc/discover/probe.mjs's GUESS_PATHS (strategy C).
+// LIMIT 1 (user ruling 2026-09-28): of 21 real finds, guessed paths only
+// ever found these 3 — shrunk from the poc's 14-path list.
 const GUESS_PATHS = [
   '/openapi.json',
   '/openapi.yaml',
-  '/openapi.yml',
   '/swagger.json',
-  '/swagger.yaml',
-  '/v3/api-docs',
-  '/v2/api-docs',
-  '/api-docs',
-  '/api-docs.json',
-  '/swagger/v1/swagger.json',
-  '/.well-known/openapi.json',
-  '/.well-known/openapi.yaml',
-  '/spec/openapi.json',
-  '/openapi/v3.json',
 ];
+
+// LIMIT 2 (user ruling 2026-09-28): zoom's own api-catalog listed ~50
+// doc-page hrefs, all tried (464 requests); cap at the first 3, in
+// document order, from any one catalog/Link response.
+const MAX_SERVICE_DESC_HREFS = 3;
+
+// LIMIT 3 (user ruling 2026-09-28): median site costs 97 requests but
+// zoom cost 464/489s — a 60s wall-clock budget for findSpec's steps 3-5
+// bounds that tail; a run that hits it is cached as 'none' like any other.
+const DISCOVERY_BUDGET_MS = 60_000;
+
+/**
+ * @param {number|undefined} deadline  `Date.now()`-comparable epoch ms, or
+ *   undefined for "no budget" (never set outside steps 3-5's call chain —
+ *   opts.spec's own load never threads a deadline through).
+ * @returns {boolean}
+ */
+function budgetExceeded(deadline) {
+  return deadline !== undefined && Date.now() >= deadline;
+}
 
 let cachedVersion;
 /**
@@ -221,13 +243,14 @@ async function rawHop(url, opts) {
  * (orchestrator fixes #1/#2).
  *
  * @param {string} url
- * @param {{method?: string, userAgent: string}} opts
+ * @param {{method?: string, userAgent: string, deadline?: number}} opts
  * @returns {Promise<{ok: boolean, status: number|null, headers: Headers|null, text: string|null, error: string|null}>}
  */
 function politeFetch(url, opts) {
   return enqueue(async () => {
     let current = url;
     for (let hop = 0; ; hop++) {
+      if (budgetExceeded(opts.deadline)) return { ok: false, status: null, headers: null, text: null, error: 'time budget exhausted' };
       const { reason } = unsafeReason(current);
       if (reason) return { ok: false, status: null, headers: null, text: null, error: `unsafe URL (${reason}): ${current}` };
       if (hop > MAX_REDIRECTS) return { ok: false, status: null, headers: null, text: null, error: `too many redirects (> ${MAX_REDIRECTS})` };
@@ -269,17 +292,20 @@ function politeFetch(url, opts) {
  *
  * @param {string} url
  * @param {string} userAgent
+ * @param {number} [deadline]
  * @returns {Promise<string|null>}
  */
-async function resolveSafeCandidateUrl(url, userAgent) {
+async function resolveSafeCandidateUrl(url, userAgent, deadline) {
   let current = url;
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    if (budgetExceeded(deadline)) return null;
     const { reason } = unsafeReason(current);
     if (reason) return null;
 
     let hopResult = await enqueue(() => rawHop(current, { method: 'HEAD', userAgent }));
     const headRefused = hopResult.error || hopResult.status === null || hopResult.status === 405 || (hopResult.status !== null && hopResult.status >= 500);
     if (headRefused) {
+      if (budgetExceeded(deadline)) return null;
       hopResult = await enqueue(() => rawHop(current, { method: 'GET', userAgent }));
       // Discard the body deliberately: this pass only resolves the URL,
       // it never reads or caps a spec body — loadSpec does that, once,
@@ -318,11 +344,14 @@ async function resolveSafeCandidateUrl(url, userAgent) {
  *
  * @param {string} url
  * @param {string} userAgent
+ * @param {number} [deadline]
  * @returns {Promise<{specUrl: string, loaded: import('./load.js').LoadResult, ops: Operation[]} | null>}
  */
-async function tryLoadCandidate(url, userAgent) {
-  const safeUrl = await resolveSafeCandidateUrl(url, userAgent);
+async function tryLoadCandidate(url, userAgent, deadline) {
+  if (budgetExceeded(deadline)) return null;
+  const safeUrl = await resolveSafeCandidateUrl(url, userAgent, deadline);
   if (!safeUrl) return null;
+  if (budgetExceeded(deadline)) return null;
 
   let loaded;
   try {
@@ -450,15 +479,20 @@ function parseCatalogServiceDesc(text, baseUrl) {
 /**
  * @param {string[]} candidates
  * @param {string} userAgent
+ * @param {number} [deadline]
  * @returns {Promise<{specUrl: string, loaded: import('./load.js').LoadResult, ops: Operation[]} | null>}
  */
-async function stepCatalog(candidates, userAgent) {
+async function stepCatalog(candidates, userAgent, deadline) {
   for (const h of candidates) {
+    if (budgetExceeded(deadline)) return null;
     const url = `https://${h}/.well-known/api-catalog`;
-    const res = await politeFetch(url, { userAgent });
+    const res = await politeFetch(url, { userAgent, deadline });
     if (!res.ok || !res.text) continue;
-    for (const href of parseCatalogServiceDesc(res.text, url)) {
-      const found = await tryLoadCandidate(href, userAgent);
+    // LIMIT 2: at most MAX_SERVICE_DESC_HREFS hrefs, in document order.
+    const hrefs = parseCatalogServiceDesc(res.text, url).slice(0, MAX_SERVICE_DESC_HREFS);
+    for (const href of hrefs) {
+      if (budgetExceeded(deadline)) return null;
+      const found = await tryLoadCandidate(href, userAgent, deadline);
       if (found) return found;
     }
   }
@@ -493,18 +527,24 @@ function parseLinkHeaderServiceDesc(linkHeader, baseUrl) {
 /**
  * @param {string[]} candidates
  * @param {string} userAgent
+ * @param {number} [deadline]
  * @returns {Promise<{specUrl: string, loaded: import('./load.js').LoadResult, ops: Operation[]} | null>}
  */
-async function stepLinkHeader(candidates, userAgent) {
+async function stepLinkHeader(candidates, userAgent, deadline) {
   for (const h of candidates) {
+    if (budgetExceeded(deadline)) return null;
     const url = `https://${h}/`;
-    let res = await politeFetch(url, { method: 'HEAD', userAgent });
+    let res = await politeFetch(url, { method: 'HEAD', userAgent, deadline });
     if (res.status === null || res.status === 405 || (res.status !== null && res.status >= 400)) {
-      res = await politeFetch(url, { method: 'GET', userAgent });
+      if (budgetExceeded(deadline)) return null;
+      res = await politeFetch(url, { method: 'GET', userAgent, deadline });
     }
     const linkHeader = res.headers ? res.headers.get('link') : null;
-    for (const href of parseLinkHeaderServiceDesc(linkHeader, url)) {
-      const found = await tryLoadCandidate(href, userAgent);
+    // LIMIT 2: at most MAX_SERVICE_DESC_HREFS hrefs, in document order.
+    const hrefs = parseLinkHeaderServiceDesc(linkHeader, url).slice(0, MAX_SERVICE_DESC_HREFS);
+    for (const href of hrefs) {
+      if (budgetExceeded(deadline)) return null;
+      const found = await tryLoadCandidate(href, userAgent, deadline);
       if (found) return found;
     }
   }
@@ -519,13 +559,15 @@ async function stepLinkHeader(candidates, userAgent) {
  * @param {string} host  The API host (full, not walked up).
  * @param {string} twoLabelParent  The last host candidate (two labels).
  * @param {string} userAgent
+ * @param {number} [deadline]
  * @returns {Promise<{specUrl: string, loaded: import('./load.js').LoadResult, ops: Operation[]} | null>}
  */
-async function stepGuessPaths(host, twoLabelParent, userAgent) {
+async function stepGuessPaths(host, twoLabelParent, userAgent, deadline) {
   const hosts = [host, `docs.${twoLabelParent}`, `developer.${twoLabelParent}`, `developers.${twoLabelParent}`];
   for (const h of hosts) {
     for (const p of GUESS_PATHS) {
-      const found = await tryLoadCandidate(`https://${h}${p}`, userAgent);
+      if (budgetExceeded(deadline)) return null;
+      const found = await tryLoadCandidate(`https://${h}${p}`, userAgent, deadline);
       if (found) return found;
     }
   }
@@ -803,14 +845,20 @@ export async function findSpec(apiUrl, opts = {}) {
 
   const candidates = hostCandidates(cacheKey);
   const twoLabelParent = candidates[candidates.length - 1];
+  // LIMIT 3: a 60s wall-clock budget for steps 3-5 combined, so no new
+  // request starts once it runs out (an in-flight request keeps its own
+  // TIMEOUT_MS bound regardless). Does not apply to opts.spec above.
+  const deadline = Date.now() + DISCOVERY_BUDGET_MS;
 
-  let found = await stepCatalog(candidates, userAgent);
-  if (!found) found = await stepLinkHeader(candidates, userAgent);
-  if (!found) found = await stepGuessPaths(cacheKey, twoLabelParent, userAgent);
+  let found = await stepCatalog(candidates, userAgent, deadline);
+  if (!found) found = await stepLinkHeader(candidates, userAgent, deadline);
+  if (!found) found = await stepGuessPaths(cacheKey, twoLabelParent, userAgent, deadline);
 
   const result = found
     ? buildFoundResult(cacheKey, found.specUrl, found.loaded, found.ops)
-    : { status: 'none', host: cacheKey, reason: 'no spec found', mode: 'mechanical' };
+    : budgetExceeded(deadline)
+      ? { status: 'none', host: cacheKey, reason: 'time budget (60 s) exhausted', mode: 'mechanical' }
+      : { status: 'none', host: cacheKey, reason: 'no spec found', mode: 'mechanical' };
 
   const wrote = writeCache(cacheDir, cacheKey, version, result);
   return { ...result, fromCache: false, cached: wrote };
