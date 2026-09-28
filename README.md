@@ -250,7 +250,8 @@ server host (`firstServerHost`); if none resolve, exit 1 asking for
           "io.github.hamr0.rwxmap/review": "settled"
         }
       }
-    }
+    },
+    "jev": { "mode": "off", "model": null, "sent": 0, "answered": 0, "failed": 0, "changed": 0, "tokens": { "input": 0, "output": 0 } }
   }
   ```
 
@@ -268,9 +269,52 @@ existing file at either path is left alone unless you pass `--force`.
 error, an existing file without `--force`, no vendor resolvable) —
 never a partial write.
 
-Every run prints `rwxmap: Jev: off (mechanical)` on stdout. Jev — an
-optional, bring-your-own-key LLM tier that can raise a row's class —
-is not wired into the CLI yet; it comes later.
+### Jev (optional)
+
+Jev is an optional LLM tier. It re-checks some rows and can move a
+letter one step. It is bring-your-own-key: your key, your cost (D120).
+Without a key, rwxmap runs mechanically and says so.
+
+**The key.** Set `RWXMAP_JEV_KEY`. rwxmap also reads a `.env` file in
+the folder you run it from. A variable already set in your shell wins.
+
+Careful: unsetting the variable does **not** turn Jev off if a `.env`
+with the key sits in the folder you run from. To run without Jev, run
+from another folder, or remove that line from `.env`.
+
+**What leaves your machine.** For each row Jev checks, five fields from
+the spec: method, path, operationId, summary and description, plus the
+question for that row and the model name. They go to `https://api.typesafe.ai/v1/systemone`.
+Nothing else is sent. The key goes only in the request header and never
+appears in any output or error.
+
+**When a call fails** (or its answer is unusable), that row keeps its mechanical letter. The run
+never stops.
+
+**stdout.** With a key (illustrative numbers):
+
+```
+rwxmap: Jev: on — sends method, path, operationId, summary, description of 40 operation(s) to api.typesafe.ai. Your key, your cost.
+rwxmap: api.example.com — 50 operations (r 20 · w 18 · x 12)
+rwxmap: settled 38 (76%) · loose 5 (10%) · tight 7 (14%)
+rwxmap: Jev: on — 40 sent · 39 answered · 1 failed (kept mechanical) · 6 letters changed · 41200 in / 2100 out tokens
+rwxmap: wrote api.example.com.rwxmap.json + api.example.com.rwxmap.review.json
+```
+
+Without a key, the Jev line reads `rwxmap: Jev: off (mechanical)`.
+
+**The `jev` field** in `<vendor>.rwxmap.json`:
+
+- `mode` — `"on"` or `"off"`.
+- `model` — the Jev model that answered, or `null` when off.
+- `sent` — rows asked about.
+- `answered` — rows with a usable answer.
+- `failed` — rows that kept their mechanical letter because the call
+  failed or the answer was unusable.
+- `changed` — rows whose letter Jev moved.
+- `tokens` — `{ input, output }`, summed over answered rows; your cost.
+
+A row Jev moved carries its `p` and `model` in the review file.
 
 ## Discovering a spec, for harness authors
 

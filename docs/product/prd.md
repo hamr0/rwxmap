@@ -849,7 +849,8 @@ Each bar is checkable by a command (`node tools/proof-cli.js`, exit 0).
    test 348/348, typecheck 0, `proof-load` 722/722, `proof-match` 0
    differences.
 
-c. **Jev** (D118-D120), wired into the CLI. Key configured → used; no
+c. **Jev** (D118-D120), wired into the CLI: BUILT on `docs/post-0.5.0`,
+   not yet released. Key configured → used; no
    key → mechanical, never stops, says loudly which mode ran and shows
    what it knows. rwxmap calls the Jev endpoint itself with plain Node
    `fetch` (D118): a per-request timeout, a retry with backoff on
@@ -861,14 +862,96 @@ c. **Jev** (D118-D120), wired into the CLI. Key configured → used; no
    README and the CLI output both say Jev is optional, the key and cost
    are the adopter's own, and it sends spec text (method, path,
    operationId, summary, description) to an outside service (D120).
+
+### Go/no-go for item c — approved 2026-09-28, all bars met
+
+Design: the key variable is `RWXMAP_JEV_KEY`, read from the environment,
+else from `.env` in the current directory via `process.loadEnvFile()`; an
+already-set variable wins. With a key, every run prints: "Jev: on — sends
+method, path, operationId, summary, description of N operations to
+api.typesafe.ai. Your key, your cost." A row whose call fails keeps its
+mechanical letter; the run never stops. The combined JSON gets a
+top-level `jev: { mode: "on"|"off", model, sent, answered, failed,
+changed, tokens: { input, output } }`. Each moved row's `p` and `model`
+go into the review file (sidecar). The stdout summary is four lines, percentages over the
+operation count:
+
+```
+rwxmap: api.intercom.io — 166 operations (r 84 · w 23 · x 59)
+rwxmap: settled 110 (66%) · loose 16 (10%) · tight 40 (24%)
+rwxmap: Jev: off (mechanical)            | or: Jev: on — 129 sent · 127 answered · 2 failed (kept mechanical) · 31 letters changed · <in> in / <out> out tokens
+rwxmap: wrote <vendor>.rwxmap.json + .review.json
+```
+
+(settled = trust; loose = may be too permissive, review first; tight =
+may be too strict). Collisions, if any, can be one extra line.
+
+Bars: (1) no key → output identical to item d on all 37 spec files
+(proof-cli passes) and "Jev: off (mechanical)"; (2) each tier moves only
+its own way at its threshold (lower x→w p ≤ 0.10; raise-wx w→x p ≥ 0.80;
+raise-get r→w p ≥ 0.50), tested against a stub Jev, each test seen to
+fail when broken; (3) a bad answer never moves a letter: NaN, p outside
+[0,1], missing model, HTTP error, timeout, malformed JSON, one test each;
+(4) only rows in a tier are sent: request count == needsJev count,
+checked with the stub; (5) only method, path, operationId, summary and
+description (plus the tier question) leave the machine, checked by a
+test on each request body, and the key never appears in output, sidecar,
+stdout, stderr or error messages; (6) never stops: with every call
+failing → exit 0, all letters mechanical, the failed count printed; (7)
+after Jev moves rows, every mcp class equals its operation's final
+letter, and every bareguard key holds the tightest final letter of its
+operations; (8) live: intercom with the real key, run twice; both runs 0
+failed; moved rows reported per tier for both runs; no move in the wrong
+direction; the request count, time and cost measured and reported (the
+orchestrator does this); (9) the suite, typecheck and all three proofs
+pass. Not required: the same rows moving on both runs (Jev isn't
+deterministic).
+
+**Met.** Bars 1-7 and 9 by test and proof; each bar was broken by hand
+once, seen to fail, and restored. The client is `src/jev-client.js` (not
+core, D109). `src/cli.js` classifies once, asks Jev only about the rows
+`needsJev` names, applies answers through the unchanged `applyJev`, and
+hands the final letters to the exporter's `verdicts` option.
+`proof-cli` adds a network-free fake-Jev pass over the same 37 files:
+9266 of 11,505 operations in a tier's pile, 3287 moved, 0 differences.
+`npm test` 386/386, typecheck 0, `proof-load` 722/722, `proof-match` and
+`proof-cli` 0 differences.
+
+Bar 8, live (the orchestrator's run). Intercom, 166 operations, 129 sent
+per run (raise-get 78, lower 35, raise-wx 16), model `jev-1.13.0`.
+
+| | r · w · x | settled · loose · tight | failed | changed | time |
+|---|---|---|---|---|---|
+| Mechanical | 84 · 23 · 59 | 110 (66%) · 16 (10%) · 40 (24%) | — | — | — |
+| Run 1 | 84 · 41 · 41 | 77% · 10% · 13% | 0 of 129 | 18, all x→w | 12.6 s |
+| Run 2 | 84 · 42 · 40 | — | 0 of 129 | 19, all x→w | 9.7 s |
+
+Every move was x→w by the lower tier; no move went the wrong way. The
+one row that differed between runs was `POST /contacts/{contact_id}/block`.
+The two raise tiers moved 0 rows on intercom. A probe of 2 invented rows
+(a GET that archives, a PUT that permanently deletes) came back with the
+right answer keys at p 0.95 and 0.96, so the raise tiers can fire. Cost
+is counted in tokens only, from the new `jev.tokens` field: a third
+live run (after the tokens field was added) used 306,288 input / 2,631
+output tokens for 129 rows (about 2,370 in and 20 out per row), 10.3 s,
+18 changed, 0 failed; the per-token price is set by the Jev provider
+and is not in rwxmap.
+
+Two fixes found in review, both with a test seen to fail when broken:
+(1) the exporter's `verdicts` option used to fall back to mechanical
+when the list had the wrong length, silently dropping every Jev move
+(fail-open); it now throws. (2) Jev token usage is now recorded: each
+answered row's `usage` is summed into `jev.tokens: { input, output }`
+and printed on the "Jev: on" line; a failed row adds nothing, and usage
+never reaches a sidecar row.
+
 e. **Remaining carriers**: OpenAPI `x-rwx`, WebMCP and ARD (MCP moved
    into item d, D122). Re-check all four standards against their
    current revisions before emitting. For OpenAPI output, write a new
    file beside the original, never over it (keep-originals rule); see
    the amended sentence in Carrier 1 below.
-f. **Next:** item d's go/no-go was set after the fact (a process gap,
-   as with a and b); c and e each still need their own bar set before
-   they are built.
+f. **Next:** c is built and its bar is met. e needs its go/no-go set
+   before it is built.
 
 ## Open questions
 

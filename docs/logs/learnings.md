@@ -5595,6 +5595,48 @@ class).
   or the exclusion is invisible — the first `proof-cli.js` looked clean
   while silently skipping 521 of 11,505 operations.
 
+### CLI pass 2: item c built (2026-09-28)
+
+- Goal: wire the optional Jev tiers (D118-D120) into the CLI, check
+  bars 1-9 of item c's go/no-go, and run bar 8 live on intercom.
+- Tried: built `src/jev-client.js` (plain `fetch`, 30 s timeout,
+  backoff on 429/529 only) and the Jev pass in `src/cli.js`; added a
+  network-free fake-Jev pass to `tools/proof-cli.js`; broke each bar by
+  hand once; ran intercom live twice with the real key. Review then
+  found two gaps, fixed in the same pass: the exporter's `verdicts`
+  option fell back to mechanical on a wrong-length list (now throws),
+  and nothing recorded Jev's token cost (now `jev.tokens`).
+- Outcome: proof-cli 0 differences, mechanical and fake-Jev (9266 of
+  11,505 operations in a tier's pile, 3287 moved). Live, intercom, 166
+  operations, 129 sent per run (raise-get 78, lower 35, raise-wx 16),
+  model `jev-1.13.0`. Mechanical: r 84 · w 23 · x 59, settled 110 (66%)
+  · loose 16 (10%) · tight 40 (24%). Run 1: 129 answered, 0 failed, 18
+  changed, all x→w by the lower tier; r 84 · w 41 · x 41; settled 77% ·
+  loose 10% · tight 13%; 12.6 s. Run 2: 0 failed, 19 changed, all x→w;
+  r 84 · w 42 · x 40; 9.7 s. The one row that differed between runs:
+  `POST /contacts/{contact_id}/block`. No move went the wrong way. The
+  raise tiers moved 0 rows; a probe of 2 invented rows (a GET that
+  archives, a PUT that permanently deletes) came back with the right
+  answer keys at p 0.95 and 0.96. Cost: a third live run (after the
+  tokens field was added) used 306,288 input / 2,631 output tokens for
+  129 rows (about 2,370 in and 20 out per row), 10.3 s, 18 changed, 0
+  failed; the per-token price is set by the Jev provider and is not in
+  rwxmap. In all, the orchestrator's live runs used the key 4 times
+  plus a 2-request probe (one run was meant to be mechanical but read
+  `.env`).
+- Lessons:
+  - The orchestrator's first by-hand break (spreading the row into the
+    request state) was a no-op: an operation carries only the 5 fields,
+    so the request did not change. A break must change something
+    observable.
+  - Unsetting the env variable did not turn Jev off, because a `.env`
+    with the key sat in the folder the CLI ran from.
+  - The raise tiers moved 0 rows on intercom. That alone does not show
+    they work; a probe with 2 invented rows confirmed they are wired
+    correctly.
+  - The wrong-length `verdicts` fallback was fail-open: it silently
+    dropped every Jev move, so letters got looser with nothing saying so.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.
