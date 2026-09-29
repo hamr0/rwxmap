@@ -202,6 +202,214 @@ file classifies on method+path alone (D106). It ships as the separate
 `rwxmap/load` subpath, not from the package root, so `import 'rwxmap'`
 never loads its one dependency, the `yaml` parser (D107).
 
+## Command line
+
+```
+rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--force]
+```
+
+The address can be three kinds of input:
+
+- a **local file**, JSON or YAML, loaded with `loadSpec`.
+- a **spec URL**, tried as a spec first (`loadSpec`, at least one
+  operation found); a URL you type is explicit input, so it's fetched
+  as given.
+- a **bare API address**, anything else — an http(s) URL that fails to
+  load as a spec, or loads with zero operations. Discovery
+  (`findSpec`) runs instead, with its own address safety rule still in
+  force (no non-https URL, IP-literal host, `localhost` or
+  single-label host). Nothing found → exit 1, no file written. A spec
+  discovery finds is fetched once more to build the output, with
+  redirects refused (a redirect → exit 1, no file written); if its
+  bytes changed since discovery cached it, the fresh copy is used and
+  stdout says so.
+
+**Vendor**, in this order: `--vendor` if given; else, for a URL, the
+URL's own host; else, for a local file, the spec's first declared
+server host (`firstServerHost`); if none resolve, exit 1 asking for
+`--vendor`.
+
+**Output**, written to `-o <dir>` (default: the current directory):
+
+- `<vendor>.rwxmap.json` — the combined bareguard + MCP + WebMCP map:
+
+  ```json
+  {
+    "rwxmapVersion": "0.6.0",
+    "source": "https://api.example.com/openapi.yaml",
+    "vendor": "api.example.com",
+    "bareguard": {
+      "tools": { "api.example.com.deleteOrder": { "letter": "x", "marker": "settled" } }
+    },
+    "mcp": {
+      "DELETE /v1/orders/{id}": {
+        "operationId": "deleteOrder",
+        "annotations": { "readOnlyHint": false, "destructiveHint": true },
+        "_meta": {
+          "io.github.hamr0.rwxmap/class": "x",
+          "io.github.hamr0.rwxmap/destructive": true,
+          "io.github.hamr0.rwxmap/evidence": "floor",
+          "io.github.hamr0.rwxmap/review": "settled"
+        }
+      }
+    },
+    "webmcp": {
+      "DELETE /v1/orders/{id}": {
+        "annotations": { "readOnlyHint": false, "consequentialHint": true }
+      }
+    },
+    "jev": { "mode": "off", "model": null, "sent": 0, "answered": 0, "failed": 0, "changed": 0, "tokens": { "input": 0, "output": 0 } }
+  }
+  ```
+
+  The `mcp` dict is hints only, never full tool definitions — no
+  `inputSchema` — meant for an MCP server generated from the same
+  OpenAPI spec. It is advisory: a client may ignore it. bareguard is
+  what enforces, reading `bareguard.tools`.
+  The `webmcp` dict is keyed the same way; each entry is the WebMCP
+  `annotations` for that operation: r → `readOnlyHint: true,
+  consequentialHint: false`; w → both false; x → `readOnlyHint: false,
+  consequentialHint: true`. Both flags are always written, because
+  WebMCP reads an omitted hint as false.
+- `<vendor>.rwxmap.review.json` — the human-facing sidecar: per-row
+  evidence and review marker, counts, and the review list.
+- `<vendor>.openapi.rwx.json` — a copy of your spec with
+  `x-rwx: { class, destructive, evidence, review }` on every
+  operation under a standard HTTP method (`get`, `put`, `post`,
+  `delete`, `options`, `head`, `patch`, `trace`). OpenAPI 3.2 `query`
+  and `additionalOperations` operations are not labelled yet — no
+  letter, no key, no `x-rwx` — and stdout counts them
+  (`rwxmap: N operation(s) under OpenAPI 3.2 query/additionalOperations
+  are not labelled yet ...`). Always JSON (2-space indent), even for a
+  YAML input. JSON cannot hold `.inf`, `-.inf` or `.nan`: they become
+  `null` in the copy, stdout says how many (`rwxmap: N value(s) can't
+  be written as JSON (.inf/.nan) ...`) and the sidecar's `counts`
+  carries `openapiNonFinite: N`. An integer past 2^53 may already have
+  been rounded when the spec was parsed (JavaScript numbers), before any
+  letter was worked out, and that cannot be detected afterwards; stdout
+  says how many such integers there are (`rwxmap: M integer(s) past 2^53
+  in the spec may already be rounded ...`), and `counts` carries
+  `openapiBigIntegers: M`. Both counts are absent when 0. Your own spec file is only read,
+  never written. An `x-rwx` already in your spec is replaced in the
+  copy, and stdout says how many
+  (`rwxmap: N existing x-rwx overwritten in the copy`).
+
+Each of the three files is replaced atomically (tmp file plus rename),
+so none is ever half-written. An existing file at any of the three paths
+is left alone unless you pass `--force`. With `--force`, each old file
+is first kept as a hard-linked backup (where hard links are not
+supported, a copy, or the same symlink for a symlink) and stays in place until the new one replaces it; if any
+write fails, all three are rolled back, so a failed run leaves them
+unchanged. The symlink is kept only when a run fails and is rolled
+back: a successful `--force` replaces a symlinked output file with a
+regular file and leaves the file it pointed to unchanged. A hard kill mid-set (power loss, `kill -9`) can leave a mix
+of old and new files plus stray `.tmp`/`.bak` files, but never a
+missing file. The next run reports any such files on stdout as possible leftovers
+(they may instead belong to another rwxmap run still writing; a `.bak`
+holds the previous version of that file) and never touches them;
+remove them yourself when done.
+
+**Who reads what.** Only bareguard reads rwxmap's output directly today
+(`bareguard.tools`). The other three are hints you copy into place
+yourself; nothing reads them for you, and a client may ignore a hint.
+
+- **MCP** — copy an `mcp` entry's `annotations` and `_meta` onto the
+  tool with the same operation. With `@modelcontextprotocol/sdk` 1.31,
+  `inputSchema` must be a Zod raw shape (`import { z } from 'zod'`,
+  then e.g. `{ id: z.string() }`), or `{}` for no arguments; it
+  refuses a plain JSON Schema object:
+
+  ```js
+  server.registerTool('delete_order', {
+    description: 'Delete an order.',
+    inputSchema: { /* yours */ }, // Zod raw shape, e.g. { id: z.string() }; {} for none
+    annotations: { readOnlyHint: false, destructiveHint: true },
+    _meta: {
+      'io.github.hamr0.rwxmap/class': 'x',
+      'io.github.hamr0.rwxmap/destructive': true,
+      'io.github.hamr0.rwxmap/evidence': 'floor',
+      'io.github.hamr0.rwxmap/review': 'settled',
+    },
+  }, handler);
+  ```
+
+- **WebMCP** — copy a `webmcp` entry's `annotations` into
+  `registerTool`. Needs Chrome 154+ with WebMCP enabled
+  (`--enable-features=WebMCPTesting` today); Chromium 153 drops
+  `consequentialHint`.
+
+  ```js
+  await document.modelContext.registerTool({
+    name: 'delete_order',
+    description: 'Delete an order.',
+    annotations: { readOnlyHint: false, consequentialHint: true },
+    execute: async (input) => { /* yours */ },
+  });
+  ```
+
+- **OpenAPI** — serve `<vendor>.openapi.rwx.json` where you served the
+  original spec (or diff it in); the `x-rwx` keys are OpenAPI
+  extensions, which any OpenAPI tool that doesn't know them ignores.
+
+**Exit codes**: 0 on success, 1 on any failure (no spec found, a load
+error, a spec with no operations — `rwxmap: no operations found in
+<source>`, or, when its only operations are OpenAPI 3.2 `query`/
+`additionalOperations`, `rwxmap: no labelled operations in <source> — N
+operation(s) under OpenAPI 3.2 query/additionalOperations are not read
+yet (item g)` — an existing file without `--force`, no vendor resolvable) —
+never a partial write.
+
+### Jev (optional)
+
+Jev is an optional LLM tier. It re-checks some rows and can move a
+letter one step. It is bring-your-own-key: your key, your cost (D120).
+Without a key, rwxmap runs mechanically and says so.
+
+**The key.** Set `RWXMAP_JEV_KEY`. rwxmap also reads a `.env` file in
+the folder you run it from, and takes only its `RWXMAP_JEV_KEY` line;
+no other `.env` variable (a proxy, say) touches the run. A variable
+already set in your shell wins. An empty one (`RWXMAP_JEV_KEY=`) counts
+as unset, so a `.env` key is still used. A `.env` that cannot be read or parsed
+means no key: the run stays mechanical.
+
+Careful: unsetting the variable does **not** turn Jev off if a `.env`
+with the key sits in the folder you run from. To run without Jev, run
+from another folder, or remove that line from `.env`.
+
+**What leaves your machine.** For each row Jev checks, five fields from
+the spec: method, path, operationId, summary and description, plus the
+question for that row and the model name. They go to `https://api.typesafe.ai/v1/systemone`.
+Nothing else is sent. The key goes only in the request header and never
+appears in any output or error.
+
+**When a call fails** (or its answer is unusable), that row keeps its mechanical letter. The run
+never stops.
+
+**stdout.** With a key (illustrative numbers):
+
+```
+rwxmap: Jev: on — sends method, path, operationId, summary, description of 40 operation(s) to api.typesafe.ai. Your key, your cost.
+rwxmap: api.example.com — 50 operations (r 20 · w 18 · x 12)
+rwxmap: settled 38 (76%) · loose 5 (10%) · tight 7 (14%)
+rwxmap: Jev: on — 40 sent · 39 answered · 1 failed (kept mechanical) · 6 letters changed · 41200 in / 2100 out tokens
+rwxmap: wrote api.example.com.rwxmap.json + api.example.com.rwxmap.review.json + api.example.com.openapi.rwx.json
+```
+
+Without a key, the Jev line reads `rwxmap: Jev: off (mechanical)`.
+
+**The `jev` field** in `<vendor>.rwxmap.json`:
+
+- `mode` — `"on"` or `"off"`.
+- `model` — the Jev model that answered, or `null` when off.
+- `sent` — rows asked about.
+- `answered` — rows with a usable answer.
+- `failed` — rows that kept their mechanical letter because the call
+  failed or the answer was unusable.
+- `changed` — rows whose letter Jev moved.
+- `tokens` — `{ input, output }`, summed over answered rows; your cost.
+
+A row Jev moved carries its `p` and `model` in the review file.
+
 ## Discovering a spec, for harness authors
 
 `rwxmap/discover` finds an API's spec on its own and classifies calls
@@ -253,6 +461,11 @@ const verdict = classifyCall(found, 'POST', 'https://api.example.com/v1/orders')
   (`classifyRow`), and always returns `{ key, letter, marker, source }`.
 - `requestKey(method, url)` is the per-request key builder on its own,
   for a caller that already has a `letter`/`marker` from elsewhere.
+- `firstServerHost(doc, specAddr)` reads a spec's own declared server
+  (OpenAPI 3 `servers[]`, with variable substitution, or Swagger 2
+  `host`+`basePath`) and returns its host, or `null` if none resolves.
+  It is the one writer of that resolution, shared with `findSpec`'s own
+  vendor default and with the CLI's local-file vendor default.
 
 A discovered spec's keys (`<host>.<operationId>`) and per-request keys
 (`requestKey`) are separate keyspaces — a harness must never build one
@@ -287,9 +500,9 @@ package root, so `import 'rwxmap'` stays offline and dependency-free.
 
 rwxmap does not invent a format. Every standard an agent already reads
 leaves an extension slot open, and rwxmap fills that slot: OpenAPI
-`x-`, MCP `_meta`, WebMCP hints, and the Agentic Resource Discovery
-catalog pointer. The four carriers are described in
-`docs/product/prd.md`.
+`x-`, MCP `_meta` and WebMCP hints; the fourth, an Agentic Resource
+Discovery catalog entry, is parked while that standard is a proposal
+(D124). The carriers are described in `docs/product/prd.md`.
 
 Two consequences worth stating:
 
@@ -297,7 +510,10 @@ Two consequences worth stating:
   fields their existing documents already allow.
 - MCP hints default to the tightest reading when a field is omitted, so
   publishing only the rows you are confident in is safe — a row you
-  leave out is read as the tight answer, not the loose one.
+  leave out is read as the tight answer, not the loose one. WebMCP is
+  the opposite: its hints default to false, so an omitted
+  `consequentialHint` reads as "can be undone". Copy both WebMCP flags
+  on every tool.
 
 ## The delegation draft
 

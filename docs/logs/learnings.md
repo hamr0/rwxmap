@@ -5553,6 +5553,298 @@ class).
   bug in the measurement, not a finding, and is worth checking by hand
   before spending time on the number.
 
+### CLI pass 1: item d built (2026-09-28)
+
+- Goal: build item d, the one CLI command
+  (`rwxmap <spec URL | local file | bare API address>`), wiring
+  `rwxmap/load`, `rwxmap/discover` and `exporter.js` into the combined
+  `bareguard`+`mcp` output plus the sidecar, and settle its go/no-go
+  after the fact.
+- Tried: built `src/cli.js` and `tools/proof-cli.js`; ran the proof
+  over the tuning and exam spec set; ran the hint-mapping, failure-path
+  and atomic-write tests; ran a live discovery-backed call against
+  intercom; ran the full suite, typecheck and both proofs.
+- Outcome: proof exit 0 over 37 spec files, 11,505 operations, 0
+  `bareguard.tools`/`exportGate` differences, one `mcp` entry per
+  operation, every `mcp` class equal to `classifyRow`'s class for its
+  operation, every gate key holding the tightest `classifyRow` letter
+  of its operations (521 collided operations across 178 collided gate
+  keys, all checked). The first `proof-cli.js` silently skipped those
+  521 of 11,505 operations — the collided keys — because it compared
+  gate-key counts without a counter for how many operations a
+  collision folds together; the orchestrator caught the mismatch
+  between "521 collisions" and a proof that reported clean, and the
+  fix now checks every operation and every key with no skip path. Seen
+  to fail: mapping `mcp` x to w gave 3,619 and 3,830 mismatches on two
+  independently broken builds (the orchestrator's own break and the
+  worker's); keeping a collided key's looser letter gave 143. Local-file
+  vendor resolution: the worker escalated rather than copying
+  `discover.js`'s server-resolution logic into `cli.js`, which led to
+  factoring it out as `firstServerHost`, the one writer, shared by both
+  files. Live: `rwxmap https://api.intercom.io` exit 0, found via
+  discovery (developers.intercom.com bundle @2.15), 166 operations, 166
+  `mcp` entries, 165 `bareguard` keys (1 collision), r 84 / w 23 / x 59,
+  56 flagged for review. The earlier discovery-only live run the same
+  morning recorded 162 operations for the same URL; today's load gives
+  166 both through `operationsFrom` and a raw method+path count — most
+  likely intercom updated the spec during the day, unconfirmed. Full
+  suite: npm test 348/348, typecheck 0, `proof-load` 722/722,
+  `proof-match` 0 differences. Go/no-go set after building (a process
+  gap, same as items a and b) and met on all seven bars (D123).
+- Lesson: a proof that excludes rows must print how many it excluded,
+  or the exclusion is invisible — the first `proof-cli.js` looked clean
+  while silently skipping 521 of 11,505 operations.
+
+### CLI pass 2: item c built (2026-09-28)
+
+- Goal: wire the optional Jev tiers (D118-D120) into the CLI, check
+  bars 1-9 of item c's go/no-go, and run bar 8 live on intercom.
+- Tried: built `src/jev-client.js` (plain `fetch`, 30 s timeout,
+  backoff on 429/529 only) and the Jev pass in `src/cli.js`; added a
+  network-free fake-Jev pass to `tools/proof-cli.js`; broke each bar by
+  hand once; ran intercom live twice with the real key. Review then
+  found two gaps, fixed in the same pass: the exporter's `verdicts`
+  option fell back to mechanical on a wrong-length list (now throws),
+  and nothing recorded Jev's token cost (now `jev.tokens`).
+- Outcome: proof-cli 0 differences, mechanical and fake-Jev (9266 of
+  11,505 operations in a tier's pile, 3287 moved). Live, intercom, 166
+  operations, 129 sent per run (raise-get 78, lower 35, raise-wx 16),
+  model `jev-1.13.0`. Mechanical: r 84 · w 23 · x 59, settled 110 (66%)
+  · loose 16 (10%) · tight 40 (24%). Run 1: 129 answered, 0 failed, 18
+  changed, all x→w by the lower tier; r 84 · w 41 · x 41; settled 77% ·
+  loose 10% · tight 13%; 12.6 s. Run 2: 0 failed, 19 changed, all x→w;
+  r 84 · w 42 · x 40; 9.7 s. The one row that differed between runs:
+  `POST /contacts/{contact_id}/block`. No move went the wrong way. The
+  raise tiers moved 0 rows; a probe of 2 invented rows (a GET that
+  archives, a PUT that permanently deletes) came back with the right
+  answer keys at p 0.95 and 0.96. Cost: a third live run (after the
+  tokens field was added) used 306,288 input / 2,631 output tokens for
+  129 rows (about 2,370 in and 20 out per row), 10.3 s, 18 changed, 0
+  failed; the per-token price is set by the Jev provider and is not in
+  rwxmap. In all, the orchestrator's live runs used the key 4 times
+  plus a 2-request probe (one run was meant to be mechanical but read
+  `.env`).
+- Lessons:
+  - The orchestrator's first by-hand break (spreading the row into the
+    request state) was a no-op: an operation carries only the 5 fields,
+    so the request did not change. A break must change something
+    observable.
+  - Unsetting the env variable did not turn Jev off, because a `.env`
+    with the key sat in the folder the CLI ran from.
+  - The raise tiers moved 0 rows on intercom. That alone does not show
+    they work; a probe with 2 invented rows confirmed they are wired
+    correctly.
+  - The wrong-length `verdicts` fallback was fail-open: it silently
+    dropped every Jev move, so letters got looser with nothing saying so.
+
+### CLI pass 3: item e built (2026-09-29)
+
+- Goal: build item e (D124) — emit the exact fragment each standard's
+  own slot takes, so adoption is a copy: an OpenAPI copy with `x-rwx`
+  on every operation and a `webmcp` dict beside `mcp`. ARD is parked.
+  A one-off conformance check (bar 10) follows as its own pass.
+- Tried: re-read the four standards before building; added the
+  `<vendor>.openapi.rwx.json` copy and the `webmcp` dict to the CLI;
+  extended `tools/proof-cli.js` to check `x-rwx` and `webmcp` on every
+  operation in both the mechanical and fake-Jev passes; broke each new
+  check by hand; ran intercom live once.
+- Outcome: npm test 396/396, typecheck 0, `proof-load` 722 files,
+  `proof-match` 0 differences, `proof-cli` 0 differences with "11505
+  operations checked, 0 skipped" in both passes; 0 inputs already
+  carried `x-rwx`. 15 breaks by the worker, plus one by the
+  orchestrator (keeping an input's `x-rwx` instead of overwriting it
+  failed the bar 7 test). Live (no Jev, fresh cache):
+  `rwxmap https://api.intercom.io` exit 0, 166 operations, three files
+  written; `openapi.rwx.json` 1,285,068 bytes from an OpenAPI 3.0.1
+  input; 166 operations carry `x-rwx`, 0 letter mismatches against the
+  review file; `webmcp` 166 entries: read-only 84, neither 23,
+  consequential 59 (= r 84, w 23, x 59). Bars 1-9 met; bar 10 pending.
+- Lessons:
+  - Carriers must be re-read before emitting. The re-read found WebMCP
+    had moved to `document.modelContext`, and ARD v0.91 changed its
+    path, identifier and schema within three months.
+  - Discovery's cache holds the operations, not the document. So the
+    CLI reloads the spec once (redirect `'manual'`) and builds the
+    letters and the copy from that one fetch.
+  - YAML aliases share one JS object. `structuredClone` keeps that
+    sharing, so writing `x-rwx` would land on two operations at once; a
+    JSON round trip splits them.
+  - A live check that answers from the discovery cache proves nothing.
+    The live check sets `XDG_CACHE_HOME` to a fresh folder per host.
+  - OpenAPI 3.2 `QUERY` and `additionalOperations` are not read (item
+    g).
+
+### CLI pass 4: item e bar 10, one-off conformance (2026-09-29)
+
+- Goal: check that what item e emits is valid against each standard's
+  own schema, a real MCP SDK and a real browser (bar 10). The check
+  lives in `poc/conformance/` with its own `package.json`, outside
+  rwxmap's tests and CI.
+- Tried: built `poc/conformance/run.mjs`; pinned every schema with
+  sha256 in `poc/conformance/schemas/README.md`; fed it 37 spec files
+  through `buildOutput` plus one live intercom CLI run (38 files,
+  11,671 operations); ran `cd poc/conformance && CHROME=<Chrome for
+  Testing 154.0.8037.57> node run.mjs`; broke every check once with
+  `--break=<name>`.
+- Outcome: 7/7 checks pass, exit 0.
+  - OpenAPI (official OAI schemas 2.0 of 2017-08-27, 3.0 of 2024-10-18,
+    3.1 of 2026-08-03; no 3.2 input): the copy gives the same errors as
+    the input in 38/38 files (3.0: 31, 3.1: 4, 2.0: 3). 11 inputs are
+    already invalid, the vendor's own errors and the same in the copy:
+    digitalocean, meta-whatsapp, paypal (5), spotify, square, okta,
+    zendesk.
+  - MCP: 11,671/11,671 Tools valid against `schema.json` 2026-07-28;
+    46,684/46,684 `_meta` keys follow the key rule. An
+    `@modelcontextprotocol/sdk` 1.31.0 server→client round trip
+    returned 166/166 intercom tools with `annotations` and `_meta`
+    deep-equal, on protocol 2025-11-25.
+  - WebMCP: 11,671/11,671 entries match the IDL (4 boolean members,
+    parsed from the pinned 2026-09-28 draft). Chrome for Testing
+    154.0.8037.57 and Canary 156.0.8077.0 with
+    `--enable-features=WebMCPTesting` register r, w and x tools and
+    read the same hints back via `getTools()`. Chromium 153.0.8010.36
+    silently drops `consequentialHint`, so an x tool reads back as a
+    plain write.
+  - Every check failed when broken; the orchestrator re-ran the webmcp
+    and browser breaks itself.
+- Lessons:
+  - A validator can be wrong about the standard. Ajv 8.20 mis-resolves
+    the 3.1 schema's `$dynamicRef: "#meta"`. `run.mjs` swaps it for a
+    static `$ref` to the one `$dynamicAnchor`, in memory, and first
+    checks that a minimal valid 3.1 document passes. That sanity check
+    catches a broken validator before its errors get blamed on the
+    input.
+  - A browser build can lag the spec and silently drop a hint.
+    Chromium 153 loses `consequentialHint` with no error. Test on the
+    version that ships the member (154+), and say which one.
+  - SDKs trail the spec revision. Tools were validated against the
+    2026-07-28 schema, but no SDK release negotiates 2026-07-28 yet, so
+    the round trip ran on 2025-11-25.
+  - The README's MCP snippet was wrong for the real SDK: 1.31's
+    `registerTool` refuses a JSON Schema `inputSchema` and wants a Zod
+    raw shape or `{}`. Only running the snippet found that; the README
+    now says so.
+
+### CLI pass 5: debrief fixes (2026-09-29)
+
+- Goal: fix what the debrief found. The debrief covered
+  `abffdcd..870fdd6`; the full suite was 396/396 and the proofs green,
+  yet it found 5 items. All 5 are fixed.
+- Tried:
+  1. YAML `.inf`, `-.inf`, `.nan` and integers past 2^53 became `null`
+     or were rounded in the JSON copy, with no notice. The copy stays
+     JSON (D124); the run now counts these values, prints a line, and
+     the sidecar gets `counts.openapiInexact`.
+  2. A failed `--force` rename deleted the user's older outputs. Old
+     targets are now moved aside first and restored on failure.
+  3. OpenAPI 3.2 `query` and `additionalOperations` operations were
+     left unlabelled with no notice. They are now counted and a line is
+     printed. Reading them is still item g.
+  4. `process.loadEnvFile()` put every `.env` variable into
+     `process.env`, so an `HTTPS_PROXY` in `.env` would reach the
+     process. Now `.env` is read with `fs.readFileSync` and
+     `util.parseEnv`, only `RWXMAP_JEV_KEY` is taken, and nothing is
+     written to `process.env`. An already-set variable still wins.
+  5. Zero operations: a local file exited 0 with 3 empty files, while a
+     bare address exited 1. Now one rule for every input: exit 1,
+     nothing written.
+- Outcome: npm test 405/405, typecheck 0, proofs 0 differences,
+  conformance 6/6, `check:live` 4 PASS. Each fix's test was broken once
+  by hand and failed. The orchestrator also broke the rollback restore
+  itself, and test 35 failed.
+- Lessons:
+  - An "all or nothing" write needs a backup of what it replaces, or the
+    rollback destroys the user's older files.
+  - A convenience loader (`loadEnvFile`) can import far more than the
+    one value needed.
+  - A JSON copy of a YAML spec is not lossless.
+
+### CLI pass 6: debrief round 2 fixes (2026-09-29)
+
+- Goal: fix the five round-2 debrief findings on CLI pass 5.
+- Tried:
+  1. `--force` moved each old target away before renaming the new file
+     in, so a kill between the two steps left no target. The backup is
+     now a hard link (`fs.linkSync`, a copy where links are not
+     supported) and the rename replaces the target atomically; a failure
+     renames each backup back. A test-only seam (`env.beforeReplace`)
+     checks the old file is still there between backup and rename. A
+     real SIGKILL at that point left the old `<vendor>.rwxmap.json` in
+     place, plus stray `.tmp`/`.bak` files.
+  2. Precision past 2^53 is lost at parse time, not at the copy, so it
+     cannot be detected afterwards. The one count is split:
+     `openapiNonFinite` (`.inf`/`.nan`, written as null) and
+     `openapiBigIntegers` (may already be rounded; 1e21, which is exact,
+     also counts). Each gets its own stdout line.
+  3. A spec whose only operations are OpenAPI 3.2 `query`/
+     `additionalOperations` now says so ("no labelled operations ... not
+     read yet (item g)") instead of "no operations found"; still exit 1,
+     nothing written.
+  4. An empty `RWXMAP_JEV_KEY` counts as unset, so `.env` still supplies
+     the key. Now documented and pinned by a test.
+  5. The D118 row is restored verbatim to its 870fdd6 text; the change
+     is recorded as D125, which amends it.
+- Outcome: npm test 408/408, typecheck 0, proof-load, proof-match and
+  proof-cli all pins hold, conformance 6/6, `check:live` 4 PASS. Each
+  new test was broken once by hand and failed.
+- Lesson: a backup made by moving the old file away opens a crash
+  window where the target is missing; a hard link keeps the target
+  present at every instant.
+
+### CLI pass 7: debrief round 3 fixes (2026-09-29)
+
+- Goal: fix three round-3 debrief findings on CLI pass 6.
+- Tried:
+  1. Where hard links fail, the backup was a `copyFileSync`, which
+     follows a symlink, so a rollback turned a symlink target into a
+     plain file. The fallback now recreates a symlink as the same
+     symlink (`symlinkSync(readlinkSync(target))`) and copies anything
+     else. Two tests force the fallback by patching `fs.linkSync` and
+     calling `syncBuiltinESMExports()`.
+  2. PRD item d still said "both files ... tmp file plus rename" as if
+     current; it keeps its build-time text plus a dated note pointing to
+     the three-file, hard-link-backup behaviour.
+  3. A killed `--force` run left `.bak`/`.tmp` files silently. Each run
+     now counts files matching the tool's own naming
+     (`<target>.<pid>.<ms>.<base36>.bak|.tmp`) before writing and prints
+     one stdout line; they are never deleted (keep-originals).
+- Outcome: npm test 412/412, typecheck 0, proof-load, proof-match and
+  proof-cli all pins hold, conformance 6/6, `check:live` 4 PASS. Each
+  new test was broken once by hand and failed.
+- Lesson: a copy fallback must copy the file type, not just the bytes;
+  `copyFileSync` silently dereferences a symlink.
+- Follow-up (round 4): README now says the symlink survives only a
+  rolled-back run (a successful `--force` writes a regular file, target
+  untouched); the leftover match needs a non-empty random segment
+  (`[0-9a-z]+`, generator falls back to `'0'` when `Math.random()` is 0),
+  and the stdout line now says "possible leftover" since another live run
+  can own the files; a test pins that `example.rwxmap.json.1.2..bak` is
+  not counted.
+
+### CLI pass 8: the installed bin ran nothing (2026-09-29)
+
+- Goal: fix the blocker a branch review found in `src/cli.js`: the
+  installed `rwxmap` command exited 0 and printed nothing.
+- Tried: `isMain` compared the realpath'd `import.meta.url` with the
+  un-realpath'd `process.argv[1]`. npm's bin link and npx run the file
+  through a symlink, so the two never matched and `run` never started.
+  Both sides now go through `fs.realpathSync` (false if either throws).
+  Three spawn tests: through a symlink, `node src/cli.js`, and an import
+  from another module that must run nothing. `npm run check:live` now
+  runs the CLI through a symlink too, so a release check sees what npm
+  ships. Every earlier pass tested `run()` by import, or ran
+  `node src/cli.js`, so none could see this.
+- Outcome: the review re-ran it: a symlinked `src/cli.js` and a packed
+  tarball installed into a temp project (`node_modules/.bin/rwxmap`)
+  both exit 0, print the summary and write 3 files; the pre-fix source
+  through a symlink exits 0 with no output and no files. The symlink
+  test goes red against the pre-fix source; the other two pass on both.
+  npm test 415/415, typecheck 0, proof-load, proof-match, proof-cli all
+  pins hold.
+- Lesson: a test that imports the code and a run of `node <file>` both
+  miss an entry-point bug that only the installed path triggers; spawn
+  the entry the way users get it.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.

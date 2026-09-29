@@ -75,6 +75,10 @@ import { classifyRow } from './flow.js';
  *   real boolean here, unlike the verdict's optional `destructive`, because
  *   a report a human reads should not make them wonder what an absent field
  *   meant.
+ * @property {{p: number, model: string}} [jev]  Present only when a Jev
+ *   tier (jev.js's applyJev) moved this row: its own p and model, straight
+ *   off the verdict (PRD item c, D118-120). Absent on every mechanical row,
+ *   exactly like the verdict's own optional `jev` field.
  */
 
 // The real HTTP methods an OpenAPI path item may carry (OpenAPI 3.x fixed
@@ -90,12 +94,48 @@ const HTTP_METHODS = new Set(['get', 'put', 'post', 'delete', 'options', 'head',
 const TIGHTNESS = { r: 0, w: 1, x: 2 };
 
 /**
+ * THE ONE WRITER of "which objects in a document are operations" (D124).
+ * Walks `paths` in document order and yields each real HTTP-method
+ * field of each path item, with the operation object itself (a live
+ * reference into `spec`, not a copy). operationsFrom below is built on
+ * this, and the CLI's OpenAPI copy (`x-rwx`) walks the same entries, so
+ * the i-th operation row and the i-th object that gets `x-rwx` can never
+ * disagree about which operation they mean.
+ *
+ * No `$ref` is resolved, on a path item or anywhere else (D106): a path
+ * item that is only a `$ref` has no method fields and yields nothing.
+ * `field` is the key exactly as it appears in the document (it may be
+ * upper case); the method is its upper-cased form.
+ *
+ * @param {any} spec  A parsed OpenAPI document (untrusted).
+ * @returns {{path: string, field: string, operation: any}[]} in document
+ *   order; [] when there is no usable `paths` object at all.
+ */
+export function operationEntries(spec) {
+  const paths = spec && typeof spec === 'object' ? spec.paths : undefined;
+  if (!paths || typeof paths !== 'object') return [];
+
+  /** @type {{path: string, field: string, operation: any}[]} */
+  const entries = [];
+  for (const [path, pathItem] of Object.entries(paths)) {
+    if (!pathItem || typeof pathItem !== 'object') continue;
+    for (const [field, operation] of Object.entries(pathItem)) {
+      if (!HTTP_METHODS.has(field.toLowerCase())) continue;
+      if (!operation || typeof operation !== 'object') continue;
+      entries.push({ path, field, operation });
+    }
+  }
+  return entries;
+}
+
+/**
  * Read the operations out of a parsed OpenAPI document.
  *
  * This function does NO I/O and NO parsing: the caller has already read
  * the file and turned it into an object (JSON.parse, or a YAML parser of
  * their choosing). Keeping file and format handling out of the library is
- * what lets rwxmap stay dependency-free.
+ * what lets rwxmap stay dependency-free. Which objects count as
+ * operations is operationEntries' call above, never re-decided here.
  *
  * A missing operationId STAYS MISSING here. Synthesising a name is the key
  * builder's job (gateKey below) and it is the only writer of that
@@ -108,29 +148,17 @@ const TIGHTNESS = { r: 0, w: 1, x: 2 };
  *   usable `paths` object at all.
  */
 export function operationsFrom(spec) {
-  const paths = spec && typeof spec === 'object' ? spec.paths : undefined;
-  if (!paths || typeof paths !== 'object') return [];
-
-  /** @type {Operation[]} */
-  const operations = [];
-  for (const [path, pathItem] of Object.entries(paths)) {
-    if (!pathItem || typeof pathItem !== 'object') continue;
-    for (const [field, operation] of Object.entries(pathItem)) {
-      if (!HTTP_METHODS.has(field.toLowerCase())) continue;
-      if (!operation || typeof operation !== 'object') continue;
-
-      /** @type {Operation} */
-      const row = { method: field.toUpperCase(), path };
-      // Only real strings are copied across. An absent field stays absent
-      // rather than becoming `undefined`, so a row carries no key it
-      // cannot answer for.
-      if (typeof operation.operationId === 'string') row.operationId = operation.operationId;
-      if (typeof operation.summary === 'string') row.summary = operation.summary;
-      if (typeof operation.description === 'string') row.description = operation.description;
-      operations.push(row);
-    }
-  }
-  return operations;
+  return operationEntries(spec).map(({ path, field, operation }) => {
+    /** @type {Operation} */
+    const row = { method: field.toUpperCase(), path };
+    // Only real strings are copied across. An absent field stays absent
+    // rather than becoming `undefined`, so a row carries no key it
+    // cannot answer for.
+    if (typeof operation.operationId === 'string') row.operationId = operation.operationId;
+    if (typeof operation.summary === 'string') row.summary = operation.summary;
+    if (typeof operation.description === 'string') row.description = operation.description;
+    return row;
+  });
 }
 
 /**
@@ -185,16 +213,48 @@ function requireVendor(options) {
 }
 
 /**
- * Classify every operation once and resolve keys, so the gate and the
- * sidecar can never disagree about a row's letter, marker or key. Both
- * exported builders call this and reshape what it returns; neither
- * re-derives any of it.
+ * Classify every operation once, mechanically (no Jev) — the same pass
+ * classifyAll below runs by default. Factored out so a caller wiring in
+ * the optional Jev tiers (the CLI, PRD item c, D118-120) can run this ONE
+ * classifyRow pass per operation, decide which rows a tier wants
+ * (jev.js's needsJev), obtain answers and apply them (jev.js's applyJev),
+ * then hand the FINAL verdicts back to exportGate/exportSidecar through
+ * their own `verdicts` option below — so there is still exactly one
+ * classifyRow call per operation and flow.js stays the one writer of the
+ * base verdict, never re-derived here or in the CLI.
+ *
+ * @param {Operation[]} operations
+ * @returns {Verdict[]} same order as `operations`.
+ */
+export function classifyOperations(operations) {
+  return (operations || []).map((operation) => classifyRow(operation));
+}
+
+/**
+ * Classify every operation and resolve keys, so the gate and the sidecar
+ * can never disagree about a row's letter, marker or key. Both exported
+ * builders call this and reshape what it returns; neither re-derives any
+ * of it.
  *
  * @param {Operation[]} operations
  * @param {string} vendor
+ * @param {Verdict[]} [verdicts]  Precomputed verdicts, same length and
+ *   order as `operations` — an adopter (the CLI) that already ran
+ *   classifyOperations and applied Jev passes its FINAL verdicts here so
+ *   this function does not classify a second time. Omitted (undefined)
+ *   falls back to classifyOperations(operations). Given but not an array
+ *   of exactly operations.length THROWS: a silent fallback would drop
+ *   every Jev raise and loosen letters with nothing saying so (fail-open).
  * @returns {{rows: SidecarRow[], entries: Map<string, GateEntry>, collisions: Collision[]}}
  */
-function classifyAll(operations, vendor) {
+function classifyAll(operations, vendor, verdicts) {
+  const ops = operations || [];
+  if (verdicts !== undefined && !(Array.isArray(verdicts) && verdicts.length === ops.length)) {
+    const got = Array.isArray(verdicts) ? `an array of length ${verdicts.length}` : typeof verdicts;
+    throw new Error(`exporter: options.verdicts must be an array of exactly ${ops.length} verdict(s), one per operation, got ${got} — refusing to fall back to mechanical, which would drop any Jev move`);
+  }
+  const verdictList = verdicts === undefined ? classifyOperations(ops) : verdicts;
+
   /** @type {SidecarRow[]} */
   const rows = [];
   /** @type {Map<string, GateEntry>} */
@@ -208,8 +268,9 @@ function classifyAll(operations, vendor) {
   /** @type {Collision[]} */
   const collisions = [];
 
-  for (const operation of operations || []) {
-    const verdict = classifyRow(operation);
+  for (let i = 0; i < ops.length; i += 1) {
+    const operation = ops[i];
+    const verdict = verdictList[i];
     const key = gateKey(vendor, operation);
     const method = operation.method || '';
     const path = operation.path || '';
@@ -222,6 +283,7 @@ function classifyAll(operations, vendor) {
       marker: verdict.review,
       evidence: verdict.source,
       destructive: verdict.destructive === true,
+      ...(verdict.jev ? { jev: verdict.jev } : {}),
     });
 
     const held = entries.get(key);
@@ -260,11 +322,14 @@ function classifyAll(operations, vendor) {
  * only the map would make losing that report the default.
  *
  * @param {Operation[]} operations
- * @param {{vendor?: string, form?: 'object'|'letter'}} options
+ * @param {{vendor?: string, form?: 'object'|'letter', verdicts?: Verdict[]}} options
  *   `vendor` is required. `form` picks the entry shape: 'object' (the
  *   default) emits D103's `{ letter, marker }`; 'letter' emits the bare
  *   letter, which stays legal forever and is what a consumer who does not
- *   want the marker should ask for. Both are correct output.
+ *   want the marker should ask for. Both are correct output. `verdicts`
+ *   is the same optional precomputed-verdicts escape hatch classifyAll
+ *   documents above (omitted: classifies `operations` itself; given with
+ *   the wrong length: throws).
  * @returns {{tools: Record<string, GateEntry|'r'|'w'|'x'>, collisions: Collision[]}}
  */
 export function exportGate(operations, options = {}) {
@@ -274,7 +339,7 @@ export function exportGate(operations, options = {}) {
     throw new Error(`exporter: options.form must be 'object' or 'letter', got ${JSON.stringify(options.form)}`);
   }
 
-  const { entries, collisions } = classifyAll(operations, vendor);
+  const { entries, collisions } = classifyAll(operations, vendor, options.verdicts);
 
   /** @type {Record<string, GateEntry|'r'|'w'|'x'>} */
   const tools = {};
@@ -292,7 +357,10 @@ export function exportGate(operations, options = {}) {
  * for a reviewer rather than for a parser.
  *
  * @param {Operation[]} operations
- * @param {{vendor?: string}} options  `vendor` is required, same as the gate.
+ * @param {{vendor?: string, verdicts?: Verdict[]}} options  `vendor` is
+ *   required, same as the gate. `verdicts` is the same optional
+ *   precomputed-verdicts escape hatch classifyAll documents above
+ *   (omitted: classifies `operations` itself; wrong length: throws).
  * @returns {{
  *   vendor: string,
  *   counts: {
@@ -309,7 +377,7 @@ export function exportGate(operations, options = {}) {
  */
 export function exportSidecar(operations, options = {}) {
   const vendor = requireVendor(options);
-  const { rows, collisions } = classifyAll(operations, vendor);
+  const { rows, collisions } = classifyAll(operations, vendor, options.verdicts);
 
   const counts = {
     rows: rows.length,
