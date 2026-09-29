@@ -7219,3 +7219,8 @@ _Why it is history:_ Each item was ruled on 2026-09-29: openWorldHint and hand-w
   the repo's `.env` Jev key and sent 189 real Jev rows (about 452k input
   tokens). Unsetting the variable is not enough. Run mechanical smoke
   tests from a scratch folder.
+
+Later the same day the user ruled corrections-survive-a-re-run out of
+scope: nobody has adopted it or asked for it, and a provider who edits
+the letters owns those edits. Framework-default spec paths is now the
+only planned item.

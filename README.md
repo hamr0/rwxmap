@@ -46,9 +46,8 @@ nothing else. A full Jev pass over the 4279 operations cost $0.31.
 ## Two ways to use it
 
 **API providers.** Grade all your APIs, look at the rows the review
-markers point to, and correct them. Keeping your corrections across
-re-runs is not built yet: a re-run overwrites any `x-rwx` already in
-the spec. It is the next thing on the list.
+markers point to, and correct them. rwxmap does not keep your edits:
+a re-run labels the spec afresh.
 
 **Agentic automation.** Scope APIs on the fly for an agent that runs
 with scoped permissions, through bareguard. rwxmap only labels; the gate
