@@ -7250,3 +7250,52 @@ Moved from prd.md 'What is next':
    internal APIs serve their spec, and we have no self-hosted sample,
    so the 0s say nothing about them. Add them only after measuring them
    on a self-hosted sample. Getting that sample comes first.
+
+## 2026-09-29 — CLI polish pass (help, version, plain errors, CI install check)
+
+A hand test of the CLI found five rough spots.
+
+1. No `--help` and no `--version`. Both said "Unknown option" and
+   exited 1.
+2. A missing local file printed a raw ENOENT.
+3. A failed lookup printed "no spec found for X: no spec found", the
+   same words twice.
+4. When a spec URL failed to load (say an http 503) and discovery then
+   found nothing, the load error was swallowed. The user saw only "no
+   spec found".
+5. Nothing in CI ran the installed bin.
+
+The hand test itself ran clean on two real inputs. Swagger 2.0 docusign
+gave 414 operations, exit 0. `https://api.intercom.io` through discovery
+gave exit 0.
+
+What changed (commit 015d15f):
+
+- `-h`/`--help` prints a short guide (inputs, options, outputs, Jev,
+  exit codes). `-v`/`--version` prints the package version. Both exit 0.
+- A missing file says `no such file: <path>`.
+- "no spec found" no longer repeats itself.
+- A load error is kept when discovery finds nothing:
+  `no spec found for X (as a spec: http 503)`.
+- CI packs the package, installs the tarball and runs the installed bin
+  on a tracked spec.
+- README: three example commands, and a line that per-request
+  classification is for library use while the CLI needs a spec.
+
+The bar, set before building: help and version exit 0; each error path
+tested with its exact text; the proof-cli pins hold; CI runs the
+installed bin. All four were met.
+
+- 420 of 420 tests pass.
+- The 5 new tests each fail against the old cli.js. The orchestrator
+  also broke the load-error clause and the version output separately and
+  saw the matching test fail each time.
+- Typecheck: 0 errors.
+- proof-cli: "All pins hold".
+- The CI install step, run locally: exit 0.
+
+Not yet done: the GitHub Actions run itself. The branch is not pushed,
+so CI has not run on it.
+
+This pass closed two fix-ledger items: the 503 swallowed by discovery,
+and CI not running the installed bin.
