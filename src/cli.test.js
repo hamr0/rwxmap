@@ -214,6 +214,69 @@ test('run: a missing local file exits 1 and writes no file', async () => {
   assert.deepEqual(fs.readdirSync(outDir), []);
 });
 
+test('run: a missing local file says so plainly', async () => {
+  const dir = mkScratch();
+  const stderr = captureStream();
+  const code = await run(['./nope.json', '--vendor', 'x'], { cwd: dir, stdout: captureStream(), stderr });
+  assert.equal(code, 1);
+  assert.equal(stderr.text(), 'rwxmap: no such file: ./nope.json\n');
+});
+
+/** Every fetch answers `status` with `text` — discovery and the spec load alike. */
+function fetchAll(status, text = '') {
+  return /** @type {typeof fetch} */ (/** @type {unknown} */ (async () => ({
+    ok: status >= 200 && status < 300,
+    status,
+    headers: { get: () => null },
+    body: null,
+    text: async () => text,
+    arrayBuffer: async () => new TextEncoder().encode(text).buffer,
+  })));
+}
+
+test('run: no spec found does not repeat itself when the address loaded fine', async (t) => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = fetchAll(200, JSON.stringify({ openapi: '3.0.0', paths: {} }));
+  t.after(() => { globalThis.fetch = originalFetch; });
+  const dir = mkScratch();
+  const stderr = captureStream();
+  const code = await run(['https://nospec.example.test'], { cwd: dir, stdout: captureStream(), stderr, cacheDir: mkScratch() });
+  assert.equal(code, 1);
+  assert.equal(stderr.text(), 'rwxmap: no spec found for https://nospec.example.test\n');
+});
+
+test('run: no spec found keeps the load error of the address itself', async (t) => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = fetchAll(503);
+  t.after(() => { globalThis.fetch = originalFetch; });
+  const dir = mkScratch();
+  const stderr = captureStream();
+  const code = await run(['https://down.example.test'], { cwd: dir, stdout: captureStream(), stderr, cacheDir: mkScratch() });
+  assert.equal(code, 1);
+  assert.equal(stderr.text(), 'rwxmap: no spec found for https://down.example.test (as a spec: http 503)\n');
+});
+
+test('run: --help and -h print the usage to stdout and exit 0', async () => {
+  for (const flag of ['--help', '-h']) {
+    const stdout = captureStream();
+    const stderr = captureStream();
+    const code = await run([flag], { cwd: mkScratch(), stdout, stderr });
+    assert.equal(code, 0);
+    assert.match(stdout.text(), /^usage: rwxmap <spec URL \| local file \| bare API address>/);
+    assert.equal(stderr.text(), '');
+  }
+});
+
+test('run: --version and -v print the package version and exit 0', async () => {
+  const { version } = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+  for (const flag of ['--version', '-v']) {
+    const stdout = captureStream();
+    const code = await run([flag], { cwd: mkScratch(), stdout, stderr: captureStream() });
+    assert.equal(code, 0);
+    assert.equal(stdout.text(), `${version}\n`);
+  }
+});
+
 test('run: binary content exits 1 and writes no file', async () => {
   const dir = mkScratch();
   const outDir = mkScratch();

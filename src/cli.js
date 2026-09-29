@@ -209,6 +209,7 @@ async function resolveInput(address, findSpecOpts = {}) {
     try {
       loaded = await loadSpec(address);
     } catch (err) {
+      if (err && err.code === 'ENOENT') throw new CliError(`no such file: ${address}`);
       const reason = err instanceof Error ? err.message : String(err);
       throw new CliError(reason);
     }
@@ -218,12 +219,13 @@ async function resolveInput(address, findSpecOpts = {}) {
   // http(s) URL: try it as a spec first.
   /** @type {{ops: import('./types.js').Operation[], source: string, doc: any}|null} */
   let asSpec = null;
+  let loadError = '';
   try {
     const loaded = await loadSpec(address);
     const ops = operationsFrom(loaded.doc);
     if (ops.length > 0) asSpec = { ops, source: address, doc: loaded.doc };
-  } catch {
-    asSpec = null;
+  } catch (err) {
+    loadError = (err instanceof Error ? err.message : String(err)).replace(`loadSpec: ${address}: `, '');
   }
   if (asSpec) return { ...asSpec, viaDiscover: false, isLocalFile: false, specChanged: false };
 
@@ -231,8 +233,9 @@ async function resolveInput(address, findSpecOpts = {}) {
   // API address and run discovery.
   const found = await findSpec(address, findSpecOpts);
   if (found.status !== 'found') {
-    const reason = found.reason ? `: ${found.reason}` : '';
-    throw new CliError(`no spec found for ${address}${reason}`);
+    const reason = found.reason && found.reason !== 'no spec found' ? `: ${found.reason}` : '';
+    const asSpecNote = loadError ? ` (as a spec: ${loadError})` : '';
+    throw new CliError(`no spec found for ${address}${reason}${asSpecNote}`);
   }
 
   // D124: findSpec's result (and its cache) carries operations but not
@@ -730,6 +733,26 @@ async function runJev(ops, verdicts, jevOpts) {
 
 const USAGE = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--force]';
 
+const HELP = `${USAGE}
+
+Input:
+  local file     an OpenAPI 3.x or Swagger 2.0 file, JSON or YAML
+  spec URL       an http(s) address that serves such a spec
+  API address    an http(s) address with no spec of its own; looks in the common places
+
+Options:
+  -o <dir>       write the output files here (default: the current folder)
+  --vendor <n>   name for the output files and tool keys (default: the host)
+  --force        overwrite existing output files
+  -h, -v         this help; the version
+
+Writes <vendor>.rwxmap.json, <vendor>.rwxmap.review.json, <vendor>.openapi.rwx.json.
+
+Jev (optional model pass): set RWXMAP_JEV_KEY, or put it in a .env in the run folder. Without it the run is mechanical.
+
+Exit 0 on success; 1 on failure, with nothing written.
+`;
+
 /**
  * The testable core: no process.exit, no direct stdout/stderr — everything
  * observable goes through the injected streams and the return value, so
@@ -763,12 +786,23 @@ export async function run(argv, env) {
         outDir: { type: 'string', short: 'o' },
         vendor: { type: 'string' },
         force: { type: 'boolean', default: false },
+        help: { type: 'boolean', short: 'h', default: false },
+        version: { type: 'boolean', short: 'v', default: false },
       },
     }));
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
     stderr.write(`rwxmap: ${reason}\n${USAGE}\n`);
     return 1;
+  }
+
+  if (values.help) {
+    stdout.write(HELP);
+    return 0;
+  }
+  if (values.version) {
+    stdout.write(`${packageVersion()}\n`);
+    return 0;
   }
 
   if (positionals.length !== 1) {

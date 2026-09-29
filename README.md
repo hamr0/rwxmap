@@ -66,7 +66,8 @@ WebMCP flags are always written.
 - A bare API address. Discovery tries the common places for a spec. It
   often finds nothing: discovery is hard.
 - Per-request classification when there is no spec. It costs exactness,
-  not safety.
+  not safety. That is for library use, a harness classifying call by call;
+  the CLI needs a spec and exits 1 when it finds none.
 
 Each works with or without a Jev key.
 
@@ -80,6 +81,14 @@ still works, less exactly.
 ```
 npx rwxmap <spec URL | file | API address> [-o dir] [--vendor name] [--force]
 ```
+
+```
+npx rwxmap ./openapi.yaml
+npx rwxmap https://api.example.com/openapi.json
+npx rwxmap https://api.example.com
+```
+
+`rwxmap --help` lists everything.
 
 It writes three files, in `-o` (default: the current folder):
 
