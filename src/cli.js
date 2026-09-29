@@ -926,8 +926,18 @@ export async function run(argv, env) {
 // Process entry point — only runs when this file is executed directly
 // (`rwxmap ...` / `node src/cli.js ...`), never on `import './cli.js'`,
 // so a test can import `run` without triggering a real process exit.
+// Both sides are realpaths: npm's bin link and npx run this file through a
+// symlink, and Node resolves import.meta.url through it but not argv[1].
 // ---------------------------------------------------------------------
-const isMain = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
+function isMainModule() {
+  if (!process.argv[1]) return false;
+  try {
+    return fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+const isMain = isMainModule();
 if (isMain) {
   const code = await run(process.argv.slice(2), { cwd: process.cwd(), stdout: process.stdout, stderr: process.stderr });
   process.exitCode = code;

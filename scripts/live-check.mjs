@@ -6,6 +6,7 @@
 // Usage: node scripts/live-check.mjs [--cli <path>] [--jev]
 //   --cli <path>  CLI to run (default: src/cli.js in this repo). Point it at
 //                 an installed tarball's bin to check what actually ships.
+//                 Either way it is run through a symlink (see below).
 //   --jev         Keep RWXMAP_JEV_KEY and run from the repo root so its .env
 //                 is read. Spends the key's owner's money. Every host must
 //                 then report Jev mode "on" with 0 failed.
@@ -17,8 +18,14 @@
 // Per host: a fresh temp dir (removed afterwards) is the -o output dir and
 // the child's XDG_CACHE_HOME, so discovery's 30-day on-disk cache (which
 // stores the found ops) is bypassed, every run really hits the network, and
-// the user's own ~/.cache/rwxmap is neither read nor written. The CLI runs as `node <cli> <address> -o <tmp> --force`, 120 s timeout, one
-// host at a time.
+// the user's own ~/.cache/rwxmap is neither read nor written.
+//
+// The CLI is run the way npm installs it: a symlink <tmp>/bin/rwxmap points
+// at the --cli path and that symlink is executed directly (its shebang picks
+// node), as `<tmp>/bin/rwxmap <address> -o <tmp> --force`, not
+// `node <cli>`. npm's bin link and npx both go through a symlink, and a
+// main-module check that breaks under one exits 0 doing nothing. 120 s
+// timeout, one host at a time.
 //
 // HARD failures (exit 1): non-zero exit; an output file named on the CLI's
 // "wrote" line (or the required <vendor>.rwxmap.json and
@@ -81,9 +88,9 @@ const cliPath = path.resolve(values.cli ?? path.join(root, 'src/cli.js'));
 const useJev = values.jev;
 
 /** Run the CLI once; resolves {code, stdout, stderr, timedOut}. */
-function runCli(address, outDir, cwd, env) {
+function runCli(binPath, address, outDir, cwd, env) {
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, [cliPath, address, '-o', outDir, '--force'], { cwd, env });
+    const child = spawn(binPath, [address, '-o', outDir, '--force'], { cwd, env });
     let stdout = '';
     let stderr = '';
     let timedOut = false;
@@ -117,7 +124,11 @@ async function checkHost(h) {
   let got = null;
 
   try {
-    const res = await runCli(h.address, tmp, cwd, env);
+    const binDir = path.join(tmp, 'bin');
+    fs.mkdirSync(binDir);
+    const binPath = path.join(binDir, 'rwxmap');
+    fs.symlinkSync(cliPath, binPath); // run what npm installs, see header
+    const res = await runCli(binPath, h.address, tmp, cwd, env);
     if (res.timedOut) hard.push(`timed out after ${TIMEOUT_MS / 1000} s`);
     else if (res.code !== 0) hard.push(`exit ${res.code}: ${res.stderr.trim().split('\n').pop() || '(no stderr)'}`);
 

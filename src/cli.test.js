@@ -5,6 +5,8 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import fsDefault from 'node:fs';
 import { syncBuiltinESMExports } from 'node:module';
+import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 
 import { run } from './cli.js';
 import { JEV_LOWER_THRESHOLD, JEV_RAISE_WX_THRESHOLD, JEV_RAISE_GET_THRESHOLD } from './jev.js';
@@ -1396,4 +1398,69 @@ test('run: no leftover files means no leftover line', async () => {
   const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr: captureStream() });
   assert.equal(code, 0);
   assert.doesNotMatch(stdout.text(), /leftover/);
+});
+
+// ---------------------------------------------------------------------
+// Process entry point — the real CLI spawned as a child process. npm's bin
+// entry and npx run src/cli.js through a symlink; Node resolves the main
+// module through it but leaves argv[1] unresolved, so a plain path compare
+// made the installed `rwxmap` exit 0 doing nothing. Each spawn: a temp cwd
+// with no .env, RWXMAP_JEV_KEY removed, XDG_CACHE_HOME in a temp dir, and a
+// local spec file (no network).
+// ---------------------------------------------------------------------
+
+const CLI_PATH = path.join(import.meta.dirname, 'cli.js');
+
+function childEnv(cacheDir) {
+  /** @type {NodeJS.ProcessEnv} */
+  const env = { ...process.env, XDG_CACHE_HOME: cacheDir };
+  delete env.RWXMAP_JEV_KEY;
+  return env;
+}
+
+function spawnCli(command, args) {
+  const cwd = mkScratch();
+  assert.equal(fs.existsSync(path.join(cwd, '.env')), false);
+  const outDir = mkScratch();
+  const specPath = writeSpecFile(mkScratch(), 'spec.json', SPEC_DOC);
+  const res = spawnSync(command, [...args, specPath, '-o', outDir, '--vendor', 'example'], {
+    cwd, env: childEnv(mkScratch()), encoding: 'utf8', timeout: 30_000,
+  });
+  return { res, outDir };
+}
+
+function assertFullRun({ res, outDir }) {
+  assert.equal(res.status, 0, res.stderr);
+  assert.match(res.stdout, /^rwxmap: example — 3 operations \(r 1 · w 1 · x 1\)$/m);
+  assert.match(res.stdout, /rwxmap: wrote example\.rwxmap\.json \+ example\.rwxmap\.review\.json \+ example\.openapi\.rwx\.json\n/);
+  for (const f of ['example.rwxmap.json', 'example.rwxmap.review.json', 'example.openapi.rwx.json']) {
+    assert.ok(fs.existsSync(path.join(outDir, f)), `${f} missing`);
+    readJson(path.join(outDir, f));
+  }
+}
+
+test('process: run through a symlink the way npm installs the bin, the CLI runs', () => {
+  assert.match(fs.readFileSync(CLI_PATH, 'utf8'), /^#!\/usr\/bin\/env node\n/);
+  fs.accessSync(CLI_PATH, fs.constants.X_OK);
+  const binDir = mkScratch();
+  const link = path.join(binDir, 'rwxmap');
+  fs.symlinkSync(CLI_PATH, link);
+  assertFullRun(spawnCli(link, []));
+});
+
+test('process: `node src/cli.js` runs the CLI', () => {
+  assertFullRun(spawnCli(process.execPath, [CLI_PATH]));
+});
+
+test('process: importing src/cli.js from another module does not run the CLI', () => {
+  const dir = mkScratch();
+  const importer = path.join(dir, 'importer.mjs');
+  fs.writeFileSync(importer, `const m = await import(${JSON.stringify(pathToFileURL(CLI_PATH).href)});\nprocess.stdout.write('imported ' + typeof m.run + '\\n');\n`);
+  // CLI-shaped args are passed on purpose: a misfiring entry point would
+  // read them and write files.
+  const { res, outDir } = spawnCli(process.execPath, [importer]);
+  assert.equal(res.status, 0, res.stderr);
+  assert.equal(res.stdout, 'imported function\n');
+  assert.equal(res.stderr, '');
+  assert.deepEqual(fs.readdirSync(outDir), []);
 });
