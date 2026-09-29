@@ -419,10 +419,18 @@ saves none while costing 51 (D101).
 ## Published output
 
 rwxmap publishes no format for anyone to adopt. It keeps one map of its
-own and fills the slot each existing standard already leaves open (D76).
-The standards below were read on 2026-09-17; field names, defaults and
-schema constraints must be re-checked against the targeted revision
-before anything emits, because all four are moving.
+own and fills the slot each existing standard already leaves open (D76),
+emitting the exact fragment that slot takes so adoption is a copy
+(D124). The standards below were re-read on 2026-09-28; field names,
+defaults and schema constraints are re-checked against each new
+revision, because all four are moving.
+
+| Standard | Revision read against | Read on |
+|---|---|---|
+| OpenAPI | 3.2.1 (2026-09-10) | 2026-09-28 |
+| MCP | specification 2026-07-28 | 2026-09-28 |
+| WebMCP | W3C WebML CG editor's draft of 2026-09-28 | 2026-09-28 |
+| ARD | v0.91 "Proposal" (2026-08-26) — parked | 2026-09-28 |
 
 ### The map
 
@@ -486,10 +494,14 @@ config, written by the operator.
 
 ### Carrier 1 — OpenAPI, per operation
 
-OpenAPI allows `x-` extension keys on any object, including an
-operation. rwxmap writes a new file beside the original, never over it
-(keep-originals rule; amends the earlier "writes back into the same
-file it read"):
+OpenAPI 3.2.1 (2026-09-10) allows `x-` extension keys on the Operation
+Object; `x-rwx` is unregistered and unused by anyone else. rwxmap
+writes a new file beside the original, never over it (keep-originals
+rule; amends the earlier "writes back into the same file it read"):
+the CLI's `<vendor>.openapi.rwx.json`, a JSON copy of the parsed input
+with `x-rwx` set on every operation from the final letters (D124). An
+adopter serves the copy in place of the original. An `x-rwx` already in
+the input is overwritten in the copy and the count is printed.
 
 ```yaml
 /v1/accounts/{account}:
@@ -561,12 +573,13 @@ bareguard is what enforces.
 
 ### Carrier 3 — WebMCP, per tool
 
-WebMCP (W3C Web Machine Learning Community Group, Draft Community Group
-Report of 2026-04-23) hands tools to the agent through
-`navigator.modelContext`. Its `ToolAnnotations` are `readOnlyHint`,
-`untrustedContentHint`, `consequentialHint` and `debugging`, with no
-`_meta` and no extension slot. Two flags carry all three classes with
-nothing left over:
+WebMCP (W3C Web Machine Learning Community Group, editor's draft of
+2026-09-28) hands tools to the agent through
+`document.modelContext.registerTool(tool)`, which returns a Promise; a
+tool's `description` is required. Its `ToolAnnotations` are
+`readOnlyHint`, `untrustedContentHint`, `consequentialHint` and
+`debugging`, all defaulting to false, with no `_meta` and no extension
+slot. Two flags carry all three classes with nothing left over:
 
 | class | `readOnlyHint` | `consequentialHint` |
 |---|---|---|
@@ -577,36 +590,54 @@ nothing left over:
 `consequentialHint` is the closest fit to `x` (cannot be undone) of any
 hint in any carrier.
 
+Because every hint defaults to false, an omitted `consequentialHint`
+reads as "can be undone" — the loose reading, unlike MCP. rwxmap
+therefore always emits both flags explicitly.
+
 ```js
-navigator.modelContext.registerTool({
+await document.modelContext.registerTool({
   name: "delete_account",
+  description: "Delete an account permanently.",
   annotations: { readOnlyHint: false, consequentialHint: true },
   execute: /* ... */
 });
 ```
 
+The CLI's combined output emits this carrier as the `webmcp` dict,
+keyed `"METHOD path"` like `mcp` (D124): each entry is
+`{ annotations: { readOnlyHint, consequentialHint } }` from the final
+letter, ready to copy into `registerTool`.
+
 ### Carrier 4 — Agentic Resource Discovery, per domain
 
-ARD (Google and ten others, published 2026-06-17) has a domain serve
-`/.well-known/ai-catalog.json` with `specVersion`, `host` and `entries`,
-one entry per whole resource. Per-operation data cannot go inside an
-entry: the entry schema sets `additionalProperties: false`, has no `x-`
-support, and its one free slot, `metadata`, takes flat scalar values
-only. So the map is its own resource, listed beside the OpenAPI
-document it describes:
+**PARKED (D124).** ARD v0.91 is a "Proposal" (2026-08-26) whose
+well-known path has already changed once: a domain now serves
+`/.well-known/ard.json` (`/.well-known/ai-catalog.json` is its
+predecessor), `specVersion` and `host` are gone, and `entries` lists one
+entry per whole resource. The entry schema now allows additional
+properties, `@context` namespaced terms and inline `data`, but
+`metadata` is still flat scalars only and there is no per-operation
+slot. An entry's `identifier` must match
+`^urn:air:<publisher-domain>:...`. An entry also needs the URL the map
+is served from, which rwxmap cannot know, so rwxmap emits nothing here.
+If it is picked up later, the map would be its own resource, listed
+beside the OpenAPI document it describes:
 
 ```json
-{ "identifier": "urn:stripe:rwxmap",
+{ "identifier": "urn:air:stripe.com:rwxmap",
   "displayName": "Stripe API — rwx map",
   "type": "application/vnd.rwxmap+json",
   "url": "https://stripe.com/.well-known/rwxmap.json",
   "metadata": { "rwxmapVersion": "0.1", "operations": 1309 } }
 ```
 
+listed from `https://stripe.com/.well-known/ard.json`.
+
 Only two of the four slots are rwxmap's own (OpenAPI `x-rwx`, MCP
-`_meta`); in the other two it sets fields the spec already defines.
-Today the exporter covers the bareguard file only; no carrier is
-emitted yet (see What is next).
+`_meta`); in the other two it sets fields the spec already defines
+(WebMCP's `readOnlyHint` and `consequentialHint`; ARD's entry fields,
+parked). The CLI emits the bareguard file, the MCP and WebMCP dicts and
+the OpenAPI copy; ARD is not emitted (D124).
 
 ## How it runs (D105)
 
@@ -945,13 +976,83 @@ answered row's `usage` is summed into `jev.tokens: { input, output }`
 and printed on the "Jev: on" line; a failed row adds nothing, and usage
 never reaches a sidecar row.
 
-e. **Remaining carriers**: OpenAPI `x-rwx`, WebMCP and ARD (MCP moved
-   into item d, D122). Re-check all four standards against their
-   current revisions before emitting. For OpenAPI output, write a new
-   file beside the original, never over it (keep-originals rule); see
-   the amended sentence in Carrier 1 below.
-f. **Next:** c is built and its bar is met. e needs its go/no-go set
-   before it is built.
+e. **Remaining carriers** (D124): BUILT on `docs/post-0.5.0`, not yet
+   released; bar 10 pending. OpenAPI `x-rwx`, WebMCP and ARD (MCP
+   moved into item d, D122). All four standards were re-read on
+   2026-09-28 (see Published output). Design: each carrier is the exact
+   fragment its standard's slot takes, so adoption is a copy. The CLI
+   writes a third file, `<vendor>.openapi.rwx.json` — a JSON copy of
+   the parsed input with `x-rwx: { class, destructive, evidence,
+   review }` on every operation from the final letters, never over the
+   original (keep-originals rule) — and the combined JSON gains a
+   `webmcp` dict keyed `"METHOD path"` like `mcp`. For a discovered
+   spec the CLI reloads the spec URL once (redirect refused) and takes
+   operations, letters and the copy from that one document. ARD is
+   parked. A one-off conformance check follows in `poc/conformance/`.
+
+### Go/no-go for item e — approved 2026-09-29
+
+1. The input spec file is byte-identical before and after a run; the
+   new file is written atomically and never overwrites without
+   `--force`.
+2. Stripping every `x-rwx` from the new file gives exactly the parsed
+   input (nothing else changed).
+3. Every operation's `x-rwx` equals its final letter, destructive,
+   evidence and marker in the review file — proof over 37 spec files /
+   11,505 operations, printing a count of anything skipped.
+4. `webmcp` hints follow r → `{readOnlyHint: true, consequentialHint:
+   false}`, w → `{false, false}`, x → `{false, true}` for every
+   operation, same proof.
+5. bareguard and mcp output unchanged (`proof-cli` 0 differences).
+6. With Jev on (`proof-cli`'s seeded fake-Jev pass), `x-rwx` and
+   `webmcp` carry the final letters.
+7. An `x-rwx` already present in the input is overwritten in the copy,
+   counted and reported on stdout, never silently dropped.
+8. Each new check broken once by hand and seen to fail; suite,
+   typecheck and the 3 proofs pass; the orchestrator runs intercom live
+   once.
+9. PRD Published output corrected.
+10. One-off conformance in `poc/conformance/` with its own
+    `package.json` (validators installed there only, not in rwxmap's
+    `package.json`, `npm test` or CI): the official OpenAPI JSON Schema
+    gives the same result on the input and the copy; every `mcp` entry
+    built into a Tool validates against MCP `schema.json` 2026-07-28,
+    plus a real MCP SDK server/client round trip; `webmcp` values are
+    checked against the IDL (and in a real browser if Chrome ships
+    WebMCP behind a flag, else stated as IDL-only); results are recorded
+    with each standard's revision; each check is seen to fail once; it
+    is re-run when a standard publishes a new revision. (A separate,
+    later pass.)
+
+Met (bars 1-9; bar 10 is a separate pass). Checked by the orchestrator
+on 2026-09-29: npm test 396/396, typecheck 0, `proof-load` 722 files,
+`proof-match` 0 differences, `proof-cli` 0 differences with "11505
+operations checked, 0 skipped" in both the mechanical and the fake-Jev
+pass; 0 inputs already carried `x-rwx`. Each new check was broken by
+hand: 15 breaks by the worker, plus one by the orchestrator (keeping an
+input's `x-rwx` instead of overwriting it failed the bar 7 test). Bar 8
+live (2026-09-29, no Jev, fresh cache): `rwxmap https://api.intercom.io`
+exit 0, 166 operations, three files written; `openapi.rwx.json` is
+1,285,068 bytes from an OpenAPI 3.0.1 input; 166 operations carry
+`x-rwx`, 0 letter mismatches against the review file; `webmcp` has 166
+entries: read-only 84, neither 23, consequential 59 (= r 84, w 23,
+x 59).
+
+f. **Next:** c and e are built (e's bars 1-9 met). e's bar 10, the
+   one-off conformance check, is the next pass.
+g. **OpenAPI 3.2 `query` and `additionalOperations`** (unscheduled).
+   OpenAPI 3.2 adds a `query` method and an `additionalOperations` map
+   on the path item; `operationsFrom`'s method set (`src/exporter.js`)
+   reads neither, so a 3.2 spec's QUERY operations (and any other
+   additional operation) get no letter and no key today. Logged only.
+
+**Release checks.** Before each release, run `npm run check:live` by
+hand. It runs the CLI against four bare API addresses (intercom,
+ibanforge, openvan.camp, scrapingant) with a fresh discovery cache and
+no Jev. A FAIL exits 1; drift on the small sites prints CHANGED and
+does not fail. It is not in `npm test` or CI because it hits the
+network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
+(commit 001be9a).
 
 ## Open questions
 

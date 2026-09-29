@@ -220,7 +220,11 @@ The address can be three kinds of input:
   load as a spec, or loads with zero operations. Discovery
   (`findSpec`) runs instead, with its own address safety rule still in
   force (no non-https URL, IP-literal host, `localhost` or
-  single-label host). Nothing found → exit 1, no file written.
+  single-label host). Nothing found → exit 1, no file written. A spec
+  discovery finds is fetched once more to build the output, with
+  redirects refused (a redirect → exit 1, no file written); if its
+  bytes changed since discovery cached it, the fresh copy is used and
+  stdout says so.
 
 **Vendor**, in this order: `--vendor` if given; else, for a URL, the
 URL's own host; else, for a local file, the spec's first declared
@@ -229,7 +233,7 @@ server host (`firstServerHost`); if none resolve, exit 1 asking for
 
 **Output**, written to `-o <dir>` (default: the current directory):
 
-- `<vendor>.rwxmap.json` — the combined bareguard + MCP map:
+- `<vendor>.rwxmap.json` — the combined bareguard + MCP + WebMCP map:
 
   ```json
   {
@@ -251,6 +255,11 @@ server host (`firstServerHost`); if none resolve, exit 1 asking for
         }
       }
     },
+    "webmcp": {
+      "DELETE /v1/orders/{id}": {
+        "annotations": { "readOnlyHint": false, "consequentialHint": true }
+      }
+    },
     "jev": { "mode": "off", "model": null, "sent": 0, "answered": 0, "failed": 0, "changed": 0, "tokens": { "input": 0, "output": 0 } }
   }
   ```
@@ -259,11 +268,60 @@ server host (`firstServerHost`); if none resolve, exit 1 asking for
   `inputSchema` — meant for an MCP server generated from the same
   OpenAPI spec. It is advisory: a client may ignore it. bareguard is
   what enforces, reading `bareguard.tools`.
+  The `webmcp` dict is keyed the same way; each entry is the WebMCP
+  `annotations` for that operation: r → `readOnlyHint: true,
+  consequentialHint: false`; w → both false; x → `readOnlyHint: false,
+  consequentialHint: true`. Both flags are always written, because
+  WebMCP reads an omitted hint as false.
 - `<vendor>.rwxmap.review.json` — the human-facing sidecar: per-row
   evidence and review marker, counts, and the review list.
+- `<vendor>.openapi.rwx.json` — a copy of your spec with
+  `x-rwx: { class, destructive, evidence, review }` on every
+  operation. Always JSON (2-space indent), even for a YAML input. Your
+  own spec file is only read, never written. An `x-rwx` already in your
+  spec is replaced in the copy, and stdout says how many
+  (`rwxmap: N existing x-rwx overwritten in the copy`).
 
-Both files are written atomically (nothing partial on a crash). An
-existing file at either path is left alone unless you pass `--force`.
+All three files are written atomically, as one set (nothing partial on a
+crash). An existing file at any of the three paths is left alone unless
+you pass `--force`.
+
+**Who reads what.** Only bareguard reads rwxmap's output directly today
+(`bareguard.tools`). The other three are hints you copy into place
+yourself; nothing reads them for you, and a client may ignore a hint.
+
+- **MCP** — copy an `mcp` entry's `annotations` and `_meta` onto the
+  tool with the same operation:
+
+  ```js
+  server.registerTool('delete_order', {
+    description: 'Delete an order.',
+    inputSchema: { /* yours */ },
+    annotations: { readOnlyHint: false, destructiveHint: true },
+    _meta: {
+      'io.github.hamr0.rwxmap/class': 'x',
+      'io.github.hamr0.rwxmap/destructive': true,
+      'io.github.hamr0.rwxmap/evidence': 'floor',
+      'io.github.hamr0.rwxmap/review': 'settled',
+    },
+  }, handler);
+  ```
+
+- **WebMCP** — copy a `webmcp` entry's `annotations` into
+  `registerTool`:
+
+  ```js
+  await document.modelContext.registerTool({
+    name: 'delete_order',
+    description: 'Delete an order.',
+    annotations: { readOnlyHint: false, consequentialHint: true },
+    execute: async (input) => { /* yours */ },
+  });
+  ```
+
+- **OpenAPI** — serve `<vendor>.openapi.rwx.json` where you served the
+  original spec (or diff it in); the `x-rwx` keys are OpenAPI
+  extensions, which any OpenAPI tool that doesn't know them ignores.
 
 **Exit codes**: 0 on success, 1 on any failure (no spec found, a load
 error, an existing file without `--force`, no vendor resolvable) —
@@ -298,7 +356,7 @@ rwxmap: Jev: on — sends method, path, operationId, summary, description of 40 
 rwxmap: api.example.com — 50 operations (r 20 · w 18 · x 12)
 rwxmap: settled 38 (76%) · loose 5 (10%) · tight 7 (14%)
 rwxmap: Jev: on — 40 sent · 39 answered · 1 failed (kept mechanical) · 6 letters changed · 41200 in / 2100 out tokens
-rwxmap: wrote api.example.com.rwxmap.json + api.example.com.rwxmap.review.json
+rwxmap: wrote api.example.com.rwxmap.json + api.example.com.rwxmap.review.json + api.example.com.openapi.rwx.json
 ```
 
 Without a key, the Jev line reads `rwxmap: Jev: off (mechanical)`.
@@ -406,9 +464,9 @@ package root, so `import 'rwxmap'` stays offline and dependency-free.
 
 rwxmap does not invent a format. Every standard an agent already reads
 leaves an extension slot open, and rwxmap fills that slot: OpenAPI
-`x-`, MCP `_meta`, WebMCP hints, and the Agentic Resource Discovery
-catalog pointer. The four carriers are described in
-`docs/product/prd.md`.
+`x-`, MCP `_meta` and WebMCP hints; the fourth, an Agentic Resource
+Discovery catalog entry, is parked while that standard is a proposal
+(D124). The carriers are described in `docs/product/prd.md`.
 
 Two consequences worth stating:
 
@@ -416,7 +474,10 @@ Two consequences worth stating:
   fields their existing documents already allow.
 - MCP hints default to the tightest reading when a field is omitted, so
   publishing only the rows you are confident in is safe — a row you
-  leave out is read as the tight answer, not the loose one.
+  leave out is read as the tight answer, not the loose one. WebMCP is
+  the opposite: its hints default to false, so an omitted
+  `consequentialHint` reads as "can be undone". Copy both WebMCP flags
+  on every tool.
 
 ## The delegation draft
 

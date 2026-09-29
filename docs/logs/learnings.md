@@ -5637,6 +5637,43 @@ class).
   - The wrong-length `verdicts` fallback was fail-open: it silently
     dropped every Jev move, so letters got looser with nothing saying so.
 
+### CLI pass 3: item e built (2026-09-29)
+
+- Goal: build item e (D124) — emit the exact fragment each standard's
+  own slot takes, so adoption is a copy: an OpenAPI copy with `x-rwx`
+  on every operation and a `webmcp` dict beside `mcp`. ARD is parked.
+  A one-off conformance check (bar 10) follows as its own pass.
+- Tried: re-read the four standards before building; added the
+  `<vendor>.openapi.rwx.json` copy and the `webmcp` dict to the CLI;
+  extended `tools/proof-cli.js` to check `x-rwx` and `webmcp` on every
+  operation in both the mechanical and fake-Jev passes; broke each new
+  check by hand; ran intercom live once.
+- Outcome: npm test 396/396, typecheck 0, `proof-load` 722 files,
+  `proof-match` 0 differences, `proof-cli` 0 differences with "11505
+  operations checked, 0 skipped" in both passes; 0 inputs already
+  carried `x-rwx`. 15 breaks by the worker, plus one by the
+  orchestrator (keeping an input's `x-rwx` instead of overwriting it
+  failed the bar 7 test). Live (no Jev, fresh cache):
+  `rwxmap https://api.intercom.io` exit 0, 166 operations, three files
+  written; `openapi.rwx.json` 1,285,068 bytes from an OpenAPI 3.0.1
+  input; 166 operations carry `x-rwx`, 0 letter mismatches against the
+  review file; `webmcp` 166 entries: read-only 84, neither 23,
+  consequential 59 (= r 84, w 23, x 59). Bars 1-9 met; bar 10 pending.
+- Lessons:
+  - Carriers must be re-read before emitting. The re-read found WebMCP
+    had moved to `document.modelContext`, and ARD v0.91 changed its
+    path, identifier and schema within three months.
+  - Discovery's cache holds the operations, not the document. So the
+    CLI reloads the spec once (redirect `'manual'`) and builds the
+    letters and the copy from that one fetch.
+  - YAML aliases share one JS object. `structuredClone` keeps that
+    sharing, so writing `x-rwx` would land on two operations at once; a
+    JSON round trip splits them.
+  - A live check that answers from the discovery cache proves nothing.
+    The live check sets `XDG_CACHE_HOME` to a fresh folder per host.
+  - OpenAPI 3.2 `QUERY` and `additionalOperations` are not read (item
+    g).
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.
