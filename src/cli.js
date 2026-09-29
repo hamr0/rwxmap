@@ -349,32 +349,39 @@ function buildHintDicts(ops, sidecarRows) {
 }
 
 /**
- * Count the values in a parsed document that JSON cannot hold exactly: a
- * number that is not finite (YAML `.inf`, `-.inf`, `.nan` -> JSON.stringify
- * writes null) or an integer that is not a safe integer (past 2^53, already
- * rounded when parsed). Walked the way JSON.stringify walks it: a value
- * reached twice through a YAML alias is written twice, so it counts twice.
- * An object already on the current walk path (a self-referencing alias) is
- * skipped here; JSON.stringify throws on it anyway.
+ * Count two kinds of number in a parsed document, separately:
+ *   - `nonFinite`: YAML `.inf`, `-.inf`, `.nan`. JSON cannot hold them;
+ *     JSON.stringify writes null, so the copy loses them.
+ *   - `bigIntegers`: integers past +-2^53 (not safe integers). Precision
+ *     is lost at YAML/JSON PARSE time, not at the copy, so it cannot be
+ *     detected after parsing: such a value MAY already be rounded (which
+ *     affects what the letters were computed from too), or may be exact
+ *     (1e21 is held exactly and still counts here). Reported as "may".
+ * Walked the way JSON.stringify walks it: a value reached twice through a
+ * YAML alias is written twice, so it counts twice. An object already on
+ * the current walk path (a self-referencing alias) is skipped here;
+ * JSON.stringify throws on it anyway.
  *
  * @param {any} doc
- * @returns {number}
+ * @returns {{nonFinite: number, bigIntegers: number}}
  */
-function countInexactJsonValues(doc) {
+function countJsonNumberIssues(doc) {
+  const counts = { nonFinite: 0, bigIntegers: 0 };
   const onPath = new Set();
-  /** @param {any} v @returns {number} */
+  /** @param {any} v */
   const walk = (v) => {
     if (typeof v === 'number') {
-      return !Number.isFinite(v) || (Number.isInteger(v) && !Number.isSafeInteger(v)) ? 1 : 0;
+      if (!Number.isFinite(v)) counts.nonFinite += 1;
+      else if (Number.isInteger(v) && !Number.isSafeInteger(v)) counts.bigIntegers += 1;
+      return;
     }
-    if (!v || typeof v !== 'object' || onPath.has(v)) return 0;
+    if (!v || typeof v !== 'object' || onPath.has(v)) return;
     onPath.add(v);
-    let n = 0;
-    for (const child of Object.values(v)) n += walk(child);
+    for (const child of Object.values(v)) walk(child);
     onPath.delete(v);
-    return n;
   };
-  return walk(doc);
+  walk(doc);
+  return counts;
 }
 
 /**
@@ -419,18 +426,19 @@ function countUnlabelledOperations(doc) {
  * match) and a mismatch THROWS rather than labelling the wrong object.
  *
  * The round trip is lossy where JSON cannot hold a value (see
- * countInexactJsonValues); the copy stays JSON (D124) and `inexact`
- * counts those values so the run can say so.
+ * countJsonNumberIssues); the copy stays JSON (D124) and `nonFinite` /
+ * `bigIntegers` count those values so the run can say so.
  *
  * @param {any} doc  The parsed input document `ops` came from.
  * @param {import('./exporter.js').SidecarRow[]} sidecarRows  One per
  *   operation, same order as operationsFrom(doc).
- * @returns {{copy: any, overwritten: number, inexact: number}}
+ * @returns {{copy: any, overwritten: number, nonFinite: number, bigIntegers: number}}
  *   `overwritten` counts the operations that already carried an `x-rwx`
- *   in the input; `inexact` the values written as null or rounded.
+ *   in the input; `nonFinite` the values written as null; `bigIntegers`
+ *   the integers past 2^53 that may already have been rounded at parse.
  */
 function buildOpenApiCopy(doc, sidecarRows) {
-  const inexact = countInexactJsonValues(doc);
+  const { nonFinite, bigIntegers } = countJsonNumberIssues(doc);
   const copy = JSON.parse(JSON.stringify(doc));
   const entries = operationEntries(copy);
   if (entries.length !== sidecarRows.length) {
@@ -446,27 +454,36 @@ function buildOpenApiCopy(doc, sidecarRows) {
     if (Object.prototype.hasOwnProperty.call(operation, 'x-rwx')) overwritten += 1;
     operation['x-rwx'] = xRwxForRow(row);
   }
-  return { copy, overwritten, inexact };
+  return { copy, overwritten, nonFinite, bigIntegers };
 }
 
 /**
- * Write every file in `files` atomically (tmp file + rename), all or
- * nothing, old files included:
+ * Write every file in `files` atomically (tmp file + rename), and roll the
+ * whole set back on any failure:
  *   1. every tmp file is written first; if any write fails, the tmp files
  *      already written are removed and nothing else is touched;
- *   2. then, per file, an existing target (anything but a directory) is
- *      renamed aside to a unique backup name in the same directory, and
- *      the tmp file is renamed into place;
- *   3. on any failure in step 2, every newly placed file is removed, every
- *      backup is renamed back to its target, and the leftover tmp files are
- *      removed — so a failed --force leaves the old files byte-identical;
+ *   2. then, per file, an existing target (anything but a directory) gets
+ *      a backup under a unique name in the same directory — a HARD LINK
+ *      to it (fs.linkSync), or a copy where hard links are not supported —
+ *      and the tmp file is renamed onto the target. That rename replaces
+ *      the target atomically, so the target path exists at every instant:
+ *      the old file is never moved away first;
+ *   3. on any failure in step 2, every file already replaced is restored
+ *      by renaming its backup back onto it (atomic too), a file that had
+ *      no old version is removed, and every leftover tmp file and backup
+ *      is removed — so a failed --force leaves the old files byte-identical;
  *   4. on success, the backups are deleted.
- * A directory at a target path is never moved aside (it could not be
- * deleted as a backup); the rename onto it fails and step 3 rolls back.
+ * Each file is replaced atomically, but the set is not: a hard kill
+ * mid-set can leave a mix of old and new files plus stray .tmp/.bak
+ * files — never a missing one. A directory at a target path gets no
+ * backup; the rename onto it fails and step 3 rolls back.
  *
  * @param {Array<{targetPath: string, content: string}>} files
+ * @param {(targetPath: string) => void} [beforeReplace]  Test-only seam
+ *   (run's `env.beforeReplace`): called after a file's backup is made and
+ *   before its tmp file is renamed onto it. The real CLI never passes it.
  */
-function atomicWriteFiles(files) {
+function atomicWriteFiles(files, beforeReplace) {
   const withTmp = files.map((f) => {
     const unique = `${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}`;
     return { ...f, tmpPath: `${f.targetPath}.${unique}.tmp`, backupPath: `${f.targetPath}.${unique}.bak` };
@@ -486,27 +503,38 @@ function atomicWriteFiles(files) {
   }
 
   /** @type {string[]} */
-  const placed = [];
-  /** @type {Array<{backupPath: string, targetPath: string}>} */
-  const backedUp = [];
+  const backups = [];
+  /** @type {Array<{targetPath: string, backupPath: string|null}>} */
+  const replaced = [];
   try {
     for (const f of withTmp) {
       /** @type {fs.Stats|null} */
       let existing = null;
       try { existing = fs.lstatSync(f.targetPath); } catch { /* no old file */ }
+      /** @type {string|null} */
+      let backupPath = null;
       if (existing && !existing.isDirectory()) {
-        fs.renameSync(f.targetPath, f.backupPath);
-        backedUp.push({ backupPath: f.backupPath, targetPath: f.targetPath });
+        try {
+          fs.linkSync(f.targetPath, f.backupPath);
+        } catch {
+          fs.copyFileSync(f.targetPath, f.backupPath);
+        }
+        backupPath = f.backupPath;
+        backups.push(f.backupPath);
       }
+      if (beforeReplace) beforeReplace(f.targetPath);
       fs.renameSync(f.tmpPath, f.targetPath);
-      placed.push(f.targetPath);
+      replaced.push({ targetPath: f.targetPath, backupPath });
     }
   } catch (err) {
-    for (const p of placed) {
-      try { fs.unlinkSync(p); } catch { /* best effort */ }
+    for (const r of replaced) {
+      try {
+        if (r.backupPath) fs.renameSync(r.backupPath, r.targetPath);
+        else fs.unlinkSync(r.targetPath);
+      } catch { /* best effort */ }
     }
-    for (const b of backedUp) {
-      try { fs.renameSync(b.backupPath, b.targetPath); } catch { /* best effort */ }
+    for (const p of backups) {
+      try { fs.unlinkSync(p); } catch { /* best effort, may already be restored */ }
     }
     for (const f of withTmp) {
       try { fs.unlinkSync(f.tmpPath); } catch { /* best effort, may already be gone */ }
@@ -514,8 +542,8 @@ function atomicWriteFiles(files) {
     throw err;
   }
 
-  for (const b of backedUp) {
-    try { fs.unlinkSync(b.backupPath); } catch { /* best effort */ }
+  for (const p of backups) {
+    try { fs.unlinkSync(p); } catch { /* best effort */ }
   }
 }
 
@@ -548,18 +576,19 @@ function jevOffSummary() {
  *   defaults to the "off" shape. `doc` is the parsed document `ops`
  *   came from (`ops` must be operationsFrom(doc)); given, the result
  *   also carries the OpenAPI copy (D124) as `openapiCopy` plus
- *   `xRwxOverwritten` and `openapiInexact`; omitted, they are null/0/0.
- *   A non-zero `openapiInexact` is also written into the sidecar's
- *   `counts` (absent when 0, like `mcpCollisions`).
- * @returns {{combined: any, sidecarOut: any, collisions: import('./exporter.js').Collision[], mcpCollisions: Array<{key: string, kept: string, dropped: string}>, openapiCopy: any, xRwxOverwritten: number, openapiInexact: number}}
+ *   `xRwxOverwritten`, `openapiNonFinite` and `openapiBigIntegers`;
+ *   omitted, they are null/0/0/0. Each of the last two, when non-zero, is
+ *   also written into the sidecar's `counts` (absent when 0, like
+ *   `mcpCollisions`).
+ * @returns {{combined: any, sidecarOut: any, collisions: import('./exporter.js').Collision[], mcpCollisions: Array<{key: string, kept: string, dropped: string}>, openapiCopy: any, xRwxOverwritten: number, openapiNonFinite: number, openapiBigIntegers: number}}
  */
 export function buildOutput(ops, vendor, source, options = {}) {
   const { verdicts, jevSummary = jevOffSummary(), doc } = options;
   const { tools, collisions } = exportGate(ops, { vendor, verdicts });
   const sidecar = exportSidecar(ops, { vendor, verdicts });
   const { mcp, webmcp, mcpCollisions } = buildHintDicts(ops, sidecar.rows);
-  const { copy: openapiCopy, overwritten: xRwxOverwritten, inexact: openapiInexact } = doc === undefined
-    ? { copy: null, overwritten: 0, inexact: 0 }
+  const { copy: openapiCopy, overwritten: xRwxOverwritten, nonFinite: openapiNonFinite, bigIntegers: openapiBigIntegers } = doc === undefined
+    ? { copy: null, overwritten: 0, nonFinite: 0, bigIntegers: 0 }
     : buildOpenApiCopy(doc, sidecar.rows);
 
   const combined = {
@@ -572,13 +601,15 @@ export function buildOutput(ops, vendor, source, options = {}) {
     jev: jevSummary,
   };
   let sidecarOut = mcpCollisions.length > 0 ? { ...sidecar, mcpCollisions } : sidecar;
-  if (openapiInexact > 0) {
+  if (openapiNonFinite > 0 || openapiBigIntegers > 0) {
     /** @type {any} */
-    const counts = { ...sidecarOut.counts, openapiInexact };
+    const counts = { ...sidecarOut.counts };
+    if (openapiNonFinite > 0) counts.openapiNonFinite = openapiNonFinite;
+    if (openapiBigIntegers > 0) counts.openapiBigIntegers = openapiBigIntegers;
     sidecarOut = { ...sidecarOut, counts };
   }
 
-  return { combined, sidecarOut, collisions, mcpCollisions, openapiCopy, xRwxOverwritten, openapiInexact };
+  return { combined, sidecarOut, collisions, mcpCollisions, openapiCopy, xRwxOverwritten, openapiNonFinite, openapiBigIntegers };
 }
 
 /**
@@ -589,7 +620,8 @@ export function buildOutput(ops, vendor, source, options = {}) {
  * proxy or any other variable in it never changes this process), and an
  * already-set environment variable always wins. A missing, unreadable or
  * malformed `.env` means no key, and the run stays mechanical (D118's
- * "no key -> mechanical, never stops").
+ * "no key -> mechanical, never stops"). An EMPTY RWXMAP_JEV_KEY in the
+ * environment counts as unset, so a `.env` key is still used (D125).
  *
  * @param {string} cwd
  * @returns {string|undefined}
@@ -679,7 +711,7 @@ const USAGE = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir
  * tests never have to spawn a process.
  *
  * @param {string[]} argv  Arguments only (no "node"/script path).
- * @param {{cwd: string, stdout: {write: (s: string) => void}, stderr: {write: (s: string) => void}, cacheDir?: string, jevKey?: string, fetchImpl?: typeof fetch, jevConcurrency?: number}} env
+ * @param {{cwd: string, stdout: {write: (s: string) => void}, stderr: {write: (s: string) => void}, cacheDir?: string, jevKey?: string, fetchImpl?: typeof fetch, jevConcurrency?: number, beforeReplace?: (targetPath: string) => void}} env
  *   `jevKey`, `fetchImpl` and `jevConcurrency` are test-only overrides for
  *   the Jev wiring (D118), the same pattern `cacheDir` already uses for
  *   discovery: `jevKey` bypasses loadJevKey's environment/.env read
@@ -687,7 +719,9 @@ const USAGE = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir
  *   `.env` file), and `fetchImpl` bypasses the real network `fetch` (so no
  *   test may reach the real Jev endpoint). Neither is a documented CLI
  *   flag; the real entry point below never passes either, so a real run
- *   always uses loadJevKey and the real global fetch.
+ *   always uses loadJevKey and the real global fetch. `beforeReplace` is
+ *   the same kind of test-only seam for atomicWriteFiles (called between
+ *   a file's backup and its replacing rename); a real run never passes it.
  * @returns {Promise<number>}  Process exit code.
  */
 export async function run(argv, env) {
@@ -733,8 +767,15 @@ export async function run(argv, env) {
   }
 
   // One rule for every input kind: nothing to classify -> exit 1, no file.
+  // A spec whose only operations sit under OpenAPI 3.2 query/
+  // additionalOperations (not read yet, item g) says so instead.
   if (ops.length === 0) {
-    stderr.write(`rwxmap: no operations found in ${source}\n`);
+    const unread = countUnlabelledOperations(doc);
+    stderr.write(
+      unread > 0
+        ? `rwxmap: no labelled operations in ${source} — ${unread} operation(s) under OpenAPI 3.2 query/additionalOperations are not read yet (item g)\n`
+        : `rwxmap: no operations found in ${source}\n`,
+    );
     return 1;
   }
 
@@ -791,7 +832,7 @@ export async function run(argv, env) {
     stderr.write(`rwxmap: could not build output: ${reason}\n`);
     return 1;
   }
-  const { combined, sidecarOut, collisions, mcpCollisions, openapiCopy, xRwxOverwritten, openapiInexact } = built;
+  const { combined, sidecarOut, collisions, mcpCollisions, openapiCopy, xRwxOverwritten, openapiNonFinite, openapiBigIntegers } = built;
 
   try {
     fs.mkdirSync(outDir, { recursive: true });
@@ -799,7 +840,7 @@ export async function run(argv, env) {
       { targetPath: mapPath, content: `${JSON.stringify(combined, null, 2)}\n` },
       { targetPath: reviewPath, content: `${JSON.stringify(sidecarOut, null, 2)}\n` },
       { targetPath: openapiPath, content: `${JSON.stringify(openapiCopy, null, 2)}\n` },
-    ]);
+    ], env.beforeReplace);
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
     stderr.write(`rwxmap: could not write output: ${reason}\n`);
@@ -824,9 +865,14 @@ export async function run(argv, env) {
   if (xRwxOverwritten > 0) {
     stdout.write(`rwxmap: ${xRwxOverwritten} existing x-rwx overwritten in the copy\n`);
   }
-  if (openapiInexact > 0) {
+  if (openapiNonFinite > 0) {
     stdout.write(
-      `rwxmap: ${openapiInexact} value(s) in the spec can't be written exactly as JSON (.inf/.nan or integers past 2^53); the copy holds null or a rounded number there; your original is unchanged\n`,
+      `rwxmap: ${openapiNonFinite} value(s) can't be written as JSON (.inf/.nan); the copy holds null there; your original is unchanged\n`,
+    );
+  }
+  if (openapiBigIntegers > 0) {
+    stdout.write(
+      `rwxmap: ${openapiBigIntegers} integer(s) past 2^53 in the spec may already be rounded (JavaScript numbers); check them in the copy\n`,
     );
   }
   const unlabelled = countUnlabelledOperations(doc);

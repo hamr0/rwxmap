@@ -1004,7 +1004,7 @@ test('run: a redirect when reloading a discovered spec exits 1 and writes no fil
 // unlabelled OpenAPI 3.2 operations, .env isolation, zero operations.
 // ---------------------------------------------------------------------
 
-test('run: values JSON cannot hold exactly (.inf, -.inf, .nan, int past 2^53) are counted and reported', async () => {
+test('run: non-finite values (.inf, -.inf, .nan) and integers past 2^53 are counted and reported separately', async () => {
   const dir = mkScratch();
   const specPath = path.join(dir, 'spec.yaml');
   fs.writeFileSync(specPath, `openapi: 3.0.0
@@ -1018,6 +1018,7 @@ paths:
       x-big: 9007199254740993
       x-safe: 9007199254740991
       x-float: 1.5
+      x-exact-big: 1e21
 `);
   const before = fs.readFileSync(specPath);
   const outDir = mkScratch();
@@ -1026,26 +1027,33 @@ paths:
 
   const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
   assert.equal(code, 0, stderr.text());
-  assert.match(stdout.text(), /\nrwxmap: 4 value\(s\) in the spec can't be written exactly as JSON \(\.inf\/\.nan or integers past 2\^53\); the copy holds null or a rounded number there; your original is unchanged\n/);
-  assert.equal(readJson(path.join(outDir, 'example.rwxmap.review.json')).counts.openapiInexact, 4);
+  assert.match(stdout.text(), /\nrwxmap: 3 value\(s\) can't be written as JSON \(\.inf\/\.nan\); the copy holds null there; your original is unchanged\n/);
+  assert.match(stdout.text(), /\nrwxmap: 2 integer\(s\) past 2\^53 in the spec may already be rounded \(JavaScript numbers\); check them in the copy\n/);
+  const counts = readJson(path.join(outDir, 'example.rwxmap.review.json')).counts;
+  assert.equal(counts.openapiNonFinite, 3);
+  assert.equal(counts.openapiBigIntegers, 2);
+  assert.equal('openapiInexact' in counts, false);
   const op = readJson(path.join(outDir, 'example.openapi.rwx.json')).paths['/things'].get;
   assert.equal(op['x-pos'], null);
   assert.equal(op['x-neg'], null);
   assert.equal(op['x-nan'], null);
   assert.equal(op['x-big'], 9007199254740992);
   assert.equal(op['x-safe'], 9007199254740991);
+  assert.equal(op['x-exact-big'], 1e21);
   assert.ok(fs.readFileSync(specPath).equals(before), 'input spec changed');
 });
 
-test('run: a clean spec prints no inexact line and has no openapiInexact count', async () => {
+test('run: a clean spec prints neither number line and has no openapiNonFinite/openapiBigIntegers count', async () => {
   const dir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
   const outDir = mkScratch();
   const stdout = captureStream();
   const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr: captureStream() });
   assert.equal(code, 0);
-  assert.doesNotMatch(stdout.text(), /exactly as JSON/);
-  assert.equal('openapiInexact' in readJson(path.join(outDir, 'example.rwxmap.review.json')).counts, false);
+  assert.doesNotMatch(stdout.text(), /written as JSON|past 2\^53/);
+  const counts = readJson(path.join(outDir, 'example.rwxmap.review.json')).counts;
+  assert.equal('openapiNonFinite' in counts, false);
+  assert.equal('openapiBigIntegers' in counts, false);
 });
 
 test('run: a failed --force leaves every old output byte-identical and no tmp or backup file behind', async () => {
@@ -1189,4 +1197,85 @@ test('run: a discovered spec with no operations on reload exits 1 with the same 
   assert.equal(code, 1);
   assert.equal(stderr.text(), 'rwxmap: no operations found in https://api.example.test/openapi.json\n');
   assert.deepEqual(fs.readdirSync(outDir), []);
+});
+
+// ---------------------------------------------------------------------
+// Debrief round 2 fixes (2026-09-29).
+// ---------------------------------------------------------------------
+
+test('run: --force never leaves a target absent — between backup and rename the old file is still there', async () => {
+  const dir = mkScratch();
+  const outDir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  const names = ['example.rwxmap.json', 'example.rwxmap.review.json', 'example.openapi.rwx.json'];
+  for (const name of names) fs.writeFileSync(path.join(outDir, name), `OLD ${name}`);
+
+  // The hook runs after each file's backup and before its replacing
+  // rename; it only records (a throw here would roll the run back).
+  /** @type {Array<{target: string, content: string|null, backups: number}>} */
+  const seen = [];
+  const beforeReplace = (targetPath) => {
+    const name = path.basename(targetPath);
+    seen.push({
+      target: name,
+      content: fs.existsSync(targetPath) ? fs.readFileSync(targetPath, 'utf8') : null,
+      backups: fs.readdirSync(outDir).filter((e) => e.startsWith(`${name}.`) && e.endsWith('.bak')).length,
+    });
+  };
+  const stderr = captureStream();
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--force'], { cwd: dir, stdout: captureStream(), stderr, beforeReplace });
+
+  assert.equal(code, 0, stderr.text());
+  assert.deepEqual(seen, names.map((name) => ({ target: name, content: `OLD ${name}`, backups: 1 })));
+  assert.deepEqual(fs.readdirSync(outDir).sort(), [...names].sort());
+  for (const name of names) readJson(path.join(outDir, name));
+});
+
+test('run: a spec whose only operations are OpenAPI 3.2 query/additionalOperations exits 1, says so, and writes no file', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', {
+    openapi: '3.2.0',
+    paths: {
+      '/things': {
+        query: { operationId: 'queryThings' },
+        additionalOperations: { COPY: { operationId: 'copyThings' } },
+      },
+    },
+  });
+  const outDir = mkScratch();
+  const stderr = captureStream();
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout: captureStream(), stderr });
+  assert.equal(code, 1);
+  assert.equal(
+    stderr.text(),
+    `rwxmap: no labelled operations in ${specPath} — 2 operation(s) under OpenAPI 3.2 query/additionalOperations are not read yet (item g)\n`,
+  );
+  assert.deepEqual(fs.readdirSync(outDir), []);
+});
+
+test('run: an empty RWXMAP_JEV_KEY counts as unset, so a .env key is still used', async (t) => {
+  const saved = process.env.RWXMAP_JEV_KEY;
+  process.env.RWXMAP_JEV_KEY = '';
+  t.after(() => {
+    if (saved === undefined) delete process.env.RWXMAP_JEV_KEY;
+    else process.env.RWXMAP_JEV_KEY = saved;
+  });
+
+  const dir = mkScratch();
+  fs.writeFileSync(path.join(dir, '.env'), 'RWXMAP_JEV_KEY=sk-from-dotenv\n');
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
+  const auth = [];
+  const { fetchImpl: routed } = routedJevFetch({ listThings: { p: 0 }, updateThing: { p: 0 }, doMystery: { p: 1 } });
+  const fetchImpl = async (url, init) => {
+    auth.push(init.headers.Authorization);
+    return routed(url, init);
+  };
+  const stdout = captureStream();
+  const stderr = captureStream();
+
+  const code = await run([specPath, '-o', mkScratch(), '--vendor', 'example'], { cwd: dir, stdout, stderr, fetchImpl });
+  assert.equal(code, 0, stderr.text());
+  assert.match(stdout.text(), /Jev: on — 3 sent/);
+  assert.deepEqual(auth, ['Bearer sk-from-dotenv', 'Bearer sk-from-dotenv', 'Bearer sk-from-dotenv']);
 });

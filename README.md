@@ -283,19 +283,28 @@ server host (`firstServerHost`); if none resolve, exit 1 asking for
   letter, no key, no `x-rwx` — and stdout counts them
   (`rwxmap: N operation(s) under OpenAPI 3.2 query/additionalOperations
   are not labelled yet ...`). Always JSON (2-space indent), even for a
-  YAML input. JSON cannot hold every YAML value exactly: `.inf`, `-.inf`
-  and `.nan` become `null` in the copy, and an integer past 2^53 is
-  rounded; stdout says how many (`rwxmap: N value(s) in the spec can't
-  be written exactly as JSON ...`) and the sidecar's `counts` carries
-  `openapiInexact: N` (absent when 0). Your own spec file is only read,
+  YAML input. JSON cannot hold `.inf`, `-.inf` or `.nan`: they become
+  `null` in the copy, stdout says how many (`rwxmap: N value(s) can't
+  be written as JSON (.inf/.nan) ...`) and the sidecar's `counts`
+  carries `openapiNonFinite: N`. An integer past 2^53 may already have
+  been rounded when the spec was parsed (JavaScript numbers), before any
+  letter was worked out, and that cannot be detected afterwards; stdout
+  says how many such integers there are (`rwxmap: M integer(s) past 2^53
+  in the spec may already be rounded ...`), and `counts` carries
+  `openapiBigIntegers: M`. Both counts are absent when 0. Your own spec file is only read,
   never written. An `x-rwx` already in your spec is replaced in the
   copy, and stdout says how many
   (`rwxmap: N existing x-rwx overwritten in the copy`).
 
-All three files are written atomically, as one set (nothing partial on a
-crash). An existing file at any of the three paths is left alone unless
-you pass `--force`. With `--force`, the old files are moved aside first
-and put back if any write fails, so a failed run leaves them unchanged.
+Each of the three files is replaced atomically (tmp file plus rename),
+so none is ever half-written. An existing file at any of the three paths
+is left alone unless you pass `--force`. With `--force`, each old file
+is first kept as a hard-linked backup (a copy where hard links are not
+supported) and stays in place until the new one replaces it; if any
+write fails, all three are rolled back, so a failed run leaves them
+unchanged. A hard kill mid-set (power loss, `kill -9`) can leave a mix
+of old and new files plus stray `.tmp`/`.bak` files, but never a
+missing file.
 
 **Who reads what.** Only bareguard reads rwxmap's output directly today
 (`bareguard.tools`). The other three are hints you copy into place
@@ -341,7 +350,10 @@ yourself; nothing reads them for you, and a client may ignore a hint.
 
 **Exit codes**: 0 on success, 1 on any failure (no spec found, a load
 error, a spec with no operations — `rwxmap: no operations found in
-<source>` — an existing file without `--force`, no vendor resolvable) —
+<source>`, or, when its only operations are OpenAPI 3.2 `query`/
+`additionalOperations`, `rwxmap: no labelled operations in <source> — N
+operation(s) under OpenAPI 3.2 query/additionalOperations are not read
+yet (item g)` — an existing file without `--force`, no vendor resolvable) —
 never a partial write.
 
 ### Jev (optional)
@@ -353,7 +365,8 @@ Without a key, rwxmap runs mechanically and says so.
 **The key.** Set `RWXMAP_JEV_KEY`. rwxmap also reads a `.env` file in
 the folder you run it from, and takes only its `RWXMAP_JEV_KEY` line;
 no other `.env` variable (a proxy, say) touches the run. A variable
-already set in your shell wins. A `.env` that cannot be read or parsed
+already set in your shell wins. An empty one (`RWXMAP_JEV_KEY=`) counts
+as unset, so a `.env` key is still used. A `.env` that cannot be read or parsed
 means no key: the run stays mechanical.
 
 Careful: unsetting the variable does **not** turn Jev off if a `.env`
