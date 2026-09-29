@@ -891,8 +891,9 @@ c. **Jev** (D118-D120), wired into the CLI: BUILT on `docs/post-0.5.0`,
    what it knows. rwxmap calls the Jev endpoint itself with plain Node
    `fetch` (D118): a per-request timeout, a retry with backoff on
    429/529 only, no bareagent dependency. The key is read from the
-   environment via Node's built-in `process.loadEnvFile()`, no dotenv
-   dependency; the variable name is fixed when this item is built. All
+   environment, else from `.env` (read with `fs.readFileSync` and
+   Node's built-in `util.parseEnv`, no dotenv dependency); only
+   `RWXMAP_JEV_KEY` is taken and nothing is written to `process.env`. All
    three tiers (`jev-lower`, `jev-raise-wx`, `jev-raise-get`) ship on
    when a key is set (D119). Jev is separate and bring-your-own-key: the
    README and the CLI output both say Jev is optional, the key and cost
@@ -902,8 +903,10 @@ c. **Jev** (D118-D120), wired into the CLI: BUILT on `docs/post-0.5.0`,
 ### Go/no-go for item c — approved 2026-09-28, all bars met
 
 Design: the key variable is `RWXMAP_JEV_KEY`, read from the environment,
-else from `.env` in the current directory via `process.loadEnvFile()`; an
-already-set variable wins. With a key, every run prints: "Jev: on — sends
+else from `.env` in the current directory, read with `fs.readFileSync`
+and Node's `util.parseEnv`. Only that one variable is taken from
+`.env`; nothing is written to `process.env`, and an already-set
+variable wins. With a key, every run prints: "Jev: on — sends
 method, path, operationId, summary, description of N operations to
 api.typesafe.ai. Your key, your cost." A row whose call fails keeps its
 mechanical letter; the run never stops. The combined JSON gets a

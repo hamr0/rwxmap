@@ -5725,6 +5725,40 @@ class).
     raw shape or `{}`. Only running the snippet found that; the README
     now says so.
 
+### CLI pass 5: debrief fixes (2026-09-29)
+
+- Goal: fix what the debrief found. The debrief covered
+  `abffdcd..870fdd6`; the full suite was 396/396 and the proofs green,
+  yet it found 5 items. All 5 are fixed.
+- Tried:
+  1. YAML `.inf`, `-.inf`, `.nan` and integers past 2^53 became `null`
+     or were rounded in the JSON copy, with no notice. The copy stays
+     JSON (D124); the run now counts these values, prints a line, and
+     the sidecar gets `counts.openapiInexact`.
+  2. A failed `--force` rename deleted the user's older outputs. Old
+     targets are now moved aside first and restored on failure.
+  3. OpenAPI 3.2 `query` and `additionalOperations` operations were
+     left unlabelled with no notice. They are now counted and a line is
+     printed. Reading them is still item g.
+  4. `process.loadEnvFile()` put every `.env` variable into
+     `process.env`, so an `HTTPS_PROXY` in `.env` would reach the
+     process. Now `.env` is read with `fs.readFileSync` and
+     `util.parseEnv`, only `RWXMAP_JEV_KEY` is taken, and nothing is
+     written to `process.env`. An already-set variable still wins.
+  5. Zero operations: a local file exited 0 with 3 empty files, while a
+     bare address exited 1. Now one rule for every input: exit 1,
+     nothing written.
+- Outcome: npm test 405/405, typecheck 0, proofs 0 differences,
+  conformance 6/6, `check:live` 4 PASS. Each fix's test was broken once
+  by hand and failed. The orchestrator also broke the rollback restore
+  itself, and test 35 failed.
+- Lessons:
+  - An "all or nothing" write needs a backup of what it replaces, or the
+    rollback destroys the user's older files.
+  - A convenience loader (`loadEnvFile`) can import far more than the
+    one value needed.
+  - A JSON copy of a YAML spec is not lossless.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.
