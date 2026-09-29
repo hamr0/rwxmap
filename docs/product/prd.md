@@ -425,12 +425,17 @@ emitting the exact fragment that slot takes so adoption is a copy
 defaults and schema constraints are re-checked against each new
 revision, because all four are moving.
 
-| Standard | Revision read against | Read on |
-|---|---|---|
-| OpenAPI | 3.2.1 (2026-09-10) | 2026-09-28 |
-| MCP | specification 2026-07-28 | 2026-09-28 |
-| WebMCP | W3C WebML CG editor's draft of 2026-09-28 | 2026-09-28 |
-| ARD | v0.91 "Proposal" (2026-08-26) — parked | 2026-09-28 |
+| Standard | Revision read against | Read on | Validated by `poc/conformance` |
+|---|---|---|---|
+| OpenAPI | 3.2.1 (2026-09-10) | 2026-09-28 | 2026-09-29, OAI schemas 2.0, 3.0, 3.1 (no 3.2 input) |
+| MCP | specification 2026-07-28 | 2026-09-28 | 2026-09-29, `schema.json` 2026-07-28 + SDK 1.31.0 round trip |
+| WebMCP | W3C WebML CG editor's draft of 2026-09-28 | 2026-09-28 | 2026-09-29, IDL + Chrome for Testing 154 and Canary 156 |
+| ARD | v0.91 "Proposal" (2026-08-26) — parked | 2026-09-28 | — (not emitted) |
+
+- MCP: no SDK release negotiates 2026-07-28 yet; the SDK round trip ran
+  on protocol 2025-11-25.
+- WebMCP: Chromium 153 silently drops `consequentialHint` (an x tool
+  reads back as a plain write); Chrome 154+ keeps it.
 
 ### The map
 
@@ -977,7 +982,7 @@ and printed on the "Jev: on" line; a failed row adds nothing, and usage
 never reaches a sidecar row.
 
 e. **Remaining carriers** (D124): BUILT on `docs/post-0.5.0`, not yet
-   released; bar 10 pending. OpenAPI `x-rwx`, WebMCP and ARD (MCP
+   released; all bars met. OpenAPI `x-rwx`, WebMCP and ARD (MCP
    moved into item d, D122). All four standards were re-read on
    2026-09-28 (see Published output). Design: each carrier is the exact
    fragment its standard's slot takes, so adoption is a copy. The CLI
@@ -988,9 +993,9 @@ e. **Remaining carriers** (D124): BUILT on `docs/post-0.5.0`, not yet
    `webmcp` dict keyed `"METHOD path"` like `mcp`. For a discovered
    spec the CLI reloads the spec URL once (redirect refused) and takes
    operations, letters and the copy from that one document. ARD is
-   parked. A one-off conformance check follows in `poc/conformance/`.
+   parked. A one-off conformance check ran in `poc/conformance/` (bar 10).
 
-### Go/no-go for item e — approved 2026-09-29
+### Go/no-go for item e — approved 2026-09-29, all bars met
 
 1. The input spec file is byte-identical before and after a run; the
    new file is written atomically and never overwrites without
@@ -1024,7 +1029,7 @@ e. **Remaining carriers** (D124): BUILT on `docs/post-0.5.0`, not yet
     is re-run when a standard publishes a new revision. (A separate,
     later pass.)
 
-Met (bars 1-9; bar 10 is a separate pass). Checked by the orchestrator
+Met (bars 1-9). Checked by the orchestrator
 on 2026-09-29: npm test 396/396, typecheck 0, `proof-load` 722 files,
 `proof-match` 0 differences, `proof-cli` 0 differences with "11505
 operations checked, 0 skipped" in both the mechanical and the fake-Jev
@@ -1038,8 +1043,39 @@ exit 0, 166 operations, three files written; `openapi.rwx.json` is
 entries: read-only 84, neither 23, consequential 59 (= r 84, w 23,
 x 59).
 
-f. **Next:** c and e are built (e's bars 1-9 met). e's bar 10, the
-   one-off conformance check, is the next pass.
+Bar 10 met. Checked by the orchestrator on 2026-09-29: `cd
+poc/conformance && CHROME=<Chrome for Testing 154.0.8037.57> node
+run.mjs`, 7/7 checks pass, exit 0. Inputs: 37 spec files via
+`buildOutput` plus one live intercom CLI run = 38 files, 11,671
+operations. Schemas are pinned with sha256 in
+`poc/conformance/schemas/README.md`.
+
+- **OpenAPI** (official OAI schemas 2.0 of 2017-08-27, 3.0 of
+  2024-10-18, 3.1 of 2026-08-03; no 3.2 input): the copy gives the same
+  errors as the input in 38/38 files (3.0: 31, 3.1: 4, 2.0: 3). 11
+  inputs are already invalid — the vendor's own errors, the same in the
+  copy: digitalocean, meta-whatsapp, paypal (5), spotify, square, okta,
+  zendesk. Ajv 8.20 mis-resolves the 3.1 schema's `$dynamicRef:
+  "#meta"`, so `run.mjs` swaps it for a static `$ref` to the one
+  `$dynamicAnchor`, in memory, guarded by a check that a minimal valid
+  3.1 document passes.
+- **MCP**: 11,671/11,671 Tools valid against `schema.json` 2026-07-28;
+  46,684/46,684 `_meta` keys follow the key rule. A
+  `@modelcontextprotocol/sdk` 1.31.0 server→client round trip returned
+  166/166 intercom tools with `annotations` and `_meta` deep-equal, on
+  protocol 2025-11-25 (no SDK release negotiates 2026-07-28 yet).
+- **WebMCP**: 11,671/11,671 entries match the IDL (4 boolean members,
+  parsed from the pinned 2026-09-28 draft). In a real browser, Chrome
+  for Testing 154.0.8037.57 and Canary 156.0.8077.0 with
+  `--enable-features=WebMCPTesting` register r, w and x tools and read
+  the same hints back via `getTools()`. Chromium 153.0.8010.36 silently
+  drops `consequentialHint` (an x tool reads back as a plain write): the
+  browser lags the spec, not an rwxmap fault.
+- Every check was broken once via `--break=<name>` and seen to fail;
+  the orchestrator re-ran the webmcp and browser breaks.
+
+f. **Next:** c and e are built, all bars met. Next is the release
+   decision.
 g. **OpenAPI 3.2 `query` and `additionalOperations`** (unscheduled).
    OpenAPI 3.2 adds a `query` method and an `additionalOperations` map
    on the path item; `operationsFrom`'s method set (`src/exporter.js`)

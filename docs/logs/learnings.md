@@ -5674,6 +5674,57 @@ class).
   - OpenAPI 3.2 `QUERY` and `additionalOperations` are not read (item
     g).
 
+### CLI pass 4: item e bar 10, one-off conformance (2026-09-29)
+
+- Goal: check that what item e emits is valid against each standard's
+  own schema, a real MCP SDK and a real browser (bar 10). The check
+  lives in `poc/conformance/` with its own `package.json`, outside
+  rwxmap's tests and CI.
+- Tried: built `poc/conformance/run.mjs`; pinned every schema with
+  sha256 in `poc/conformance/schemas/README.md`; fed it 37 spec files
+  through `buildOutput` plus one live intercom CLI run (38 files,
+  11,671 operations); ran `cd poc/conformance && CHROME=<Chrome for
+  Testing 154.0.8037.57> node run.mjs`; broke every check once with
+  `--break=<name>`.
+- Outcome: 7/7 checks pass, exit 0.
+  - OpenAPI (official OAI schemas 2.0 of 2017-08-27, 3.0 of 2024-10-18,
+    3.1 of 2026-08-03; no 3.2 input): the copy gives the same errors as
+    the input in 38/38 files (3.0: 31, 3.1: 4, 2.0: 3). 11 inputs are
+    already invalid, the vendor's own errors and the same in the copy:
+    digitalocean, meta-whatsapp, paypal (5), spotify, square, okta,
+    zendesk.
+  - MCP: 11,671/11,671 Tools valid against `schema.json` 2026-07-28;
+    46,684/46,684 `_meta` keys follow the key rule. An
+    `@modelcontextprotocol/sdk` 1.31.0 server→client round trip
+    returned 166/166 intercom tools with `annotations` and `_meta`
+    deep-equal, on protocol 2025-11-25.
+  - WebMCP: 11,671/11,671 entries match the IDL (4 boolean members,
+    parsed from the pinned 2026-09-28 draft). Chrome for Testing
+    154.0.8037.57 and Canary 156.0.8077.0 with
+    `--enable-features=WebMCPTesting` register r, w and x tools and
+    read the same hints back via `getTools()`. Chromium 153.0.8010.36
+    silently drops `consequentialHint`, so an x tool reads back as a
+    plain write.
+  - Every check failed when broken; the orchestrator re-ran the webmcp
+    and browser breaks itself.
+- Lessons:
+  - A validator can be wrong about the standard. Ajv 8.20 mis-resolves
+    the 3.1 schema's `$dynamicRef: "#meta"`. `run.mjs` swaps it for a
+    static `$ref` to the one `$dynamicAnchor`, in memory, and first
+    checks that a minimal valid 3.1 document passes. That sanity check
+    catches a broken validator before its errors get blamed on the
+    input.
+  - A browser build can lag the spec and silently drop a hint.
+    Chromium 153 loses `consequentialHint` with no error. Test on the
+    version that ships the member (154+), and say which one.
+  - SDKs trail the spec revision. Tools were validated against the
+    2026-07-28 schema, but no SDK release negotiates 2026-07-28 yet, so
+    the round trip ran on 2025-11-25.
+  - The README's MCP snippet was wrong for the real SDK: 1.31's
+    `registerTool` refuses a JSON Schema `inputSchema` and wants a Zod
+    raw shape or `{}`. Only running the snippet found that; the README
+    now says so.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.

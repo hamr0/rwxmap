@@ -291,12 +291,15 @@ you pass `--force`.
 yourself; nothing reads them for you, and a client may ignore a hint.
 
 - **MCP** — copy an `mcp` entry's `annotations` and `_meta` onto the
-  tool with the same operation:
+  tool with the same operation. With `@modelcontextprotocol/sdk` 1.31,
+  `inputSchema` must be a Zod raw shape (`import { z } from 'zod'`,
+  then e.g. `{ id: z.string() }`), or `{}` for no arguments; it
+  refuses a plain JSON Schema object:
 
   ```js
   server.registerTool('delete_order', {
     description: 'Delete an order.',
-    inputSchema: { /* yours */ },
+    inputSchema: { /* yours */ }, // Zod raw shape, e.g. { id: z.string() }; {} for none
     annotations: { readOnlyHint: false, destructiveHint: true },
     _meta: {
       'io.github.hamr0.rwxmap/class': 'x',
@@ -308,7 +311,9 @@ yourself; nothing reads them for you, and a client may ignore a hint.
   ```
 
 - **WebMCP** — copy a `webmcp` entry's `annotations` into
-  `registerTool`:
+  `registerTool`. Needs Chrome 154+ with WebMCP enabled
+  (`--enable-features=WebMCPTesting` today); Chromium 153 drops
+  `consequentialHint`.
 
   ```js
   await document.modelContext.registerTool({
