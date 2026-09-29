@@ -5759,6 +5759,38 @@ class).
     one value needed.
   - A JSON copy of a YAML spec is not lossless.
 
+### CLI pass 6: debrief round 2 fixes (2026-09-29)
+
+- Goal: fix the five round-2 debrief findings on CLI pass 5.
+- Tried:
+  1. `--force` moved each old target away before renaming the new file
+     in, so a kill between the two steps left no target. The backup is
+     now a hard link (`fs.linkSync`, a copy where links are not
+     supported) and the rename replaces the target atomically; a failure
+     renames each backup back. A test-only seam (`env.beforeReplace`)
+     checks the old file is still there between backup and rename. A
+     real SIGKILL at that point left the old `<vendor>.rwxmap.json` in
+     place, plus stray `.tmp`/`.bak` files.
+  2. Precision past 2^53 is lost at parse time, not at the copy, so it
+     cannot be detected afterwards. The one count is split:
+     `openapiNonFinite` (`.inf`/`.nan`, written as null) and
+     `openapiBigIntegers` (may already be rounded; 1e21, which is exact,
+     also counts). Each gets its own stdout line.
+  3. A spec whose only operations are OpenAPI 3.2 `query`/
+     `additionalOperations` now says so ("no labelled operations ... not
+     read yet (item g)") instead of "no operations found"; still exit 1,
+     nothing written.
+  4. An empty `RWXMAP_JEV_KEY` counts as unset, so `.env` still supplies
+     the key. Now documented and pinned by a test.
+  5. The D118 row is restored verbatim to its 870fdd6 text; the change
+     is recorded as D125, which amends it.
+- Outcome: npm test 408/408, typecheck 0, proof-load, proof-match and
+  proof-cli all pins hold, conformance 6/6, `check:live` 4 PASS. Each
+  new test was broken once by hand and failed.
+- Lesson: a backup made by moving the old file away opens a crash
+  window where the target is missing; a hard link keeps the target
+  present at every instant.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.

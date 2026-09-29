@@ -893,7 +893,8 @@ c. **Jev** (D118-D120), wired into the CLI: BUILT on `docs/post-0.5.0`,
    429/529 only, no bareagent dependency. The key is read from the
    environment, else from `.env` (read with `fs.readFileSync` and
    Node's built-in `util.parseEnv`, no dotenv dependency); only
-   `RWXMAP_JEV_KEY` is taken and nothing is written to `process.env`. All
+   `RWXMAP_JEV_KEY` is taken and nothing is written to `process.env`
+   (D125, amending D118). All
    three tiers (`jev-lower`, `jev-raise-wx`, `jev-raise-get`) ship on
    when a key is set (D119). Jev is separate and bring-your-own-key: the
    README and the CLI output both say Jev is optional, the key and cost
@@ -906,7 +907,7 @@ Design: the key variable is `RWXMAP_JEV_KEY`, read from the environment,
 else from `.env` in the current directory, read with `fs.readFileSync`
 and Node's `util.parseEnv`. Only that one variable is taken from
 `.env`; nothing is written to `process.env`, and an already-set
-variable wins. With a key, every run prints: "Jev: on — sends
+variable wins; an empty one counts as unset (D125). With a key, every run prints: "Jev: on — sends
 method, path, operationId, summary, description of N operations to
 api.typesafe.ai. Your key, your cost." A row whose call fails keeps its
 mechanical letter; the run never stops. The combined JSON gets a
