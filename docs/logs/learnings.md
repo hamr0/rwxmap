@@ -5821,6 +5821,30 @@ class).
   can own the files; a test pins that `example.rwxmap.json.1.2..bak` is
   not counted.
 
+### CLI pass 8: the installed bin ran nothing (2026-09-29)
+
+- Goal: fix the blocker a branch review found in `src/cli.js`: the
+  installed `rwxmap` command exited 0 and printed nothing.
+- Tried: `isMain` compared the realpath'd `import.meta.url` with the
+  un-realpath'd `process.argv[1]`. npm's bin link and npx run the file
+  through a symlink, so the two never matched and `run` never started.
+  Both sides now go through `fs.realpathSync` (false if either throws).
+  Three spawn tests: through a symlink, `node src/cli.js`, and an import
+  from another module that must run nothing. `npm run check:live` now
+  runs the CLI through a symlink too, so a release check sees what npm
+  ships. Every earlier pass tested `run()` by import, or ran
+  `node src/cli.js`, so none could see this.
+- Outcome: the review re-ran it: a symlinked `src/cli.js` and a packed
+  tarball installed into a temp project (`node_modules/.bin/rwxmap`)
+  both exit 0, print the summary and write 3 files; the pre-fix source
+  through a symlink exits 0 with no output and no files. The symlink
+  test goes red against the pre-fix source; the other two pass on both.
+  npm test 415/415, typecheck 0, proof-load, proof-match, proof-cli all
+  pins hold.
+- Lesson: a test that imports the code and a run of `node <file>` both
+  miss an entry-point bug that only the installed path triggers; spawn
+  the entry the way users get it.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.

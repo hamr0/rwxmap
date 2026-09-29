@@ -1091,7 +1091,8 @@ g. **OpenAPI 3.2 `query` and `additionalOperations`** (unscheduled).
 **Release checks.** Before each release, run `npm run check:live` by
 hand. It runs the CLI against four bare API addresses (intercom,
 ibanforge, openvan.camp, scrapingant) with a fresh discovery cache and
-no Jev. A FAIL exits 1; drift on the small sites prints CHANGED and
+no Jev, through a symlink to `src/cli.js` the way npm's bin link and
+npx run it (a direct `node src/cli.js` run cannot see a symlink bug). A FAIL exits 1; drift on the small sites prints CHANGED and
 does not fail. It is not in `npm test` or CI because it hits the
 network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
 (commit 001be9a).
