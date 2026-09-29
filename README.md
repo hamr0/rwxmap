@@ -70,6 +70,11 @@ WebMCP flags are always written.
 
 Each works with or without a Jev key.
 
+**The shape it reads.** rwxmap reads OpenAPI 3.x or Swagger 2.0, JSON or
+YAML. If your API is described some other way, convert it to OpenAPI
+first and pass the file. With no spec at all, per-request classification
+still works, less exactly.
+
 ## Quick start
 
 ```
