@@ -5791,6 +5791,29 @@ class).
   window where the target is missing; a hard link keeps the target
   present at every instant.
 
+### CLI pass 7: debrief round 3 fixes (2026-09-29)
+
+- Goal: fix three round-3 debrief findings on CLI pass 6.
+- Tried:
+  1. Where hard links fail, the backup was a `copyFileSync`, which
+     follows a symlink, so a rollback turned a symlink target into a
+     plain file. The fallback now recreates a symlink as the same
+     symlink (`symlinkSync(readlinkSync(target))`) and copies anything
+     else. Two tests force the fallback by patching `fs.linkSync` and
+     calling `syncBuiltinESMExports()`.
+  2. PRD item d still said "both files ... tmp file plus rename" as if
+     current; it keeps its build-time text plus a dated note pointing to
+     the three-file, hard-link-backup behaviour.
+  3. A killed `--force` run left `.bak`/`.tmp` files silently. Each run
+     now counts files matching the tool's own naming
+     (`<target>.<pid>.<ms>.<base36>.bak|.tmp`) before writing and prints
+     one stdout line; they are never deleted (keep-originals).
+- Outcome: npm test 412/412, typecheck 0, proof-load, proof-match and
+  proof-cli all pins hold, conformance 6/6, `check:live` 4 PASS. Each
+  new test was broken once by hand and failed.
+- Lesson: a copy fallback must copy the file type, not just the bytes;
+  `copyFileSync` silently dereferences a symlink.
+
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
 The PRD was rewritten to carry one current shape (user rule). Everything below is copied verbatim from `docs/product/prd.md` as of commit 3a728d3, grouped under the PRD heading it came from. Old in-document cross-references ("above", "below") point into that version of the PRD.

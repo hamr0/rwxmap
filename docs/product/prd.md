@@ -833,7 +833,9 @@ d. **CLI + combined output** (D121, D122, D123): BUILT on
    `"METHOD path"`, D122) and `<vendor>.rwxmap.review.json` (the
    sidecar, also carrying any gate-key collisions as `mcpCollisions`).
    An existing file without `--force` → exit 1, nothing written. Both
-   files are written atomically (tmp file plus rename). stdout reports
+   files are written atomically (tmp file plus rename) (since item e and
+   the debrief fixes of 2026-09-29: three files, each replaced atomically
+   with a hard-link backup and a rollback on failure; see README). stdout reports
    the files written, counts by letter, the review count, any
    collisions, and "Jev: off (mechanical)". Mechanical only; Jev is
    wired in with item c.
