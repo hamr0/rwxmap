@@ -1359,16 +1359,18 @@ test('run: with no hard links, a failed --force restores a symlink target as the
   assert.deepEqual(fs.readdirSync(outDir).sort(), ['example.openapi.rwx.json', 'example.rwxmap.json', 'example.rwxmap.review.json']);
 });
 
-test('run: leftover .bak/.tmp files from an interrupted run are reported and never touched', async () => {
+test('run: possible leftover .bak/.tmp files are reported and never touched', async () => {
   const dir = mkScratch();
   const outDir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
   const bak = path.join(outDir, 'example.rwxmap.json.4242.1759100000000.k3j9x2a.bak');
   const tmp = path.join(outDir, 'example.openapi.rwx.json.4242.1759100000000.p0q1r2.tmp');
   const unrelated = path.join(outDir, 'foo.bak');
+  const emptySegment = path.join(outDir, 'example.rwxmap.json.1.2..bak');
   fs.writeFileSync(bak, 'PREVIOUS');
   fs.writeFileSync(tmp, 'PARTIAL');
   fs.writeFileSync(unrelated, 'NOT OURS');
+  fs.writeFileSync(emptySegment, 'NOT OURS EITHER');
 
   const stdout = captureStream();
   const stderr = captureStream();
@@ -1377,11 +1379,12 @@ test('run: leftover .bak/.tmp files from an interrupted run are reported and nev
   assert.equal(code, 0, stderr.text());
   const lines = stdout.text().split('\n').filter((l) => l.includes('leftover'));
   assert.deepEqual(lines, [
-    `rwxmap: 2 leftover .bak/.tmp file(s) from an interrupted run in ${outDir} (a .bak holds the previous version of that file); not touched, remove them when done`,
+    `rwxmap: 2 possible leftover .bak/.tmp file(s) in ${outDir} (from an interrupted run, or another rwxmap run still writing; a .bak holds the previous version of that file); not touched, remove them when done`,
   ]);
   assert.equal(fs.readFileSync(bak, 'utf8'), 'PREVIOUS');
   assert.equal(fs.readFileSync(tmp, 'utf8'), 'PARTIAL');
   assert.equal(fs.readFileSync(unrelated, 'utf8'), 'NOT OURS');
+  assert.equal(fs.readFileSync(emptySegment, 'utf8'), 'NOT OURS EITHER');
 });
 
 test('run: no leftover files means no leftover line', async () => {

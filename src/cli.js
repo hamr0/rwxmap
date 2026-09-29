@@ -486,7 +486,9 @@ function buildOpenApiCopy(doc, sidecarRows) {
  */
 function atomicWriteFiles(files, beforeReplace) {
   const withTmp = files.map((f) => {
-    const unique = `${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}`;
+    // Math.random() can return 0, whose base-36 digits are empty; '0' keeps
+    // the segment non-empty so countLeftovers' `+` still matches it.
+    const unique = `${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2) || '0'}`;
     return { ...f, tmpPath: `${f.targetPath}.${unique}.tmp`, backupPath: `${f.targetPath}.${unique}.bak` };
   });
 
@@ -566,7 +568,7 @@ function atomicWriteFiles(files, beforeReplace) {
 function countLeftovers(dir, basenames) {
   let entries;
   try { entries = fs.readdirSync(dir); } catch { return 0; }
-  const suffix = /^\.\d+\.\d+\.[0-9a-z]*\.(?:bak|tmp)$/;
+  const suffix = /^\.\d+\.\d+\.[0-9a-z]+\.(?:bak|tmp)$/;
   return entries.filter((e) => basenames.some((b) => e.startsWith(b) && suffix.test(e.slice(b.length)))).length;
 }
 
@@ -823,7 +825,7 @@ export async function run(argv, env) {
   const leftovers = countLeftovers(outDir, [mapPath, reviewPath, openapiPath].map((p) => path.basename(p)));
   if (leftovers > 0) {
     stdout.write(
-      `rwxmap: ${leftovers} leftover .bak/.tmp file(s) from an interrupted run in ${outDir} (a .bak holds the previous version of that file); not touched, remove them when done\n`,
+      `rwxmap: ${leftovers} possible leftover .bak/.tmp file(s) in ${outDir} (from an interrupted run, or another rwxmap run still writing; a .bak holds the previous version of that file); not touched, remove them when done\n`,
     );
   }
 
