@@ -998,3 +998,195 @@ test('run: a redirect when reloading a discovered spec exits 1 and writes no fil
   assert.match(stderr.text(), /could not reload the discovered spec https:\/\/api\.example\.test\/openapi\.json \(a redirect on reload is refused, never followed\): .*http 302/);
   assert.deepEqual(fs.readdirSync(outDir), []);
 });
+
+// ---------------------------------------------------------------------
+// Debrief fixes (2026-09-29): lossy JSON copy, all-or-nothing --force,
+// unlabelled OpenAPI 3.2 operations, .env isolation, zero operations.
+// ---------------------------------------------------------------------
+
+test('run: values JSON cannot hold exactly (.inf, -.inf, .nan, int past 2^53) are counted and reported', async () => {
+  const dir = mkScratch();
+  const specPath = path.join(dir, 'spec.yaml');
+  fs.writeFileSync(specPath, `openapi: 3.0.0
+paths:
+  /things:
+    get:
+      operationId: listThings
+      x-pos: .inf
+      x-neg: -.inf
+      x-nan: .nan
+      x-big: 9007199254740993
+      x-safe: 9007199254740991
+      x-float: 1.5
+`);
+  const before = fs.readFileSync(specPath);
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
+  assert.equal(code, 0, stderr.text());
+  assert.match(stdout.text(), /\nrwxmap: 4 value\(s\) in the spec can't be written exactly as JSON \(\.inf\/\.nan or integers past 2\^53\); the copy holds null or a rounded number there; your original is unchanged\n/);
+  assert.equal(readJson(path.join(outDir, 'example.rwxmap.review.json')).counts.openapiInexact, 4);
+  const op = readJson(path.join(outDir, 'example.openapi.rwx.json')).paths['/things'].get;
+  assert.equal(op['x-pos'], null);
+  assert.equal(op['x-neg'], null);
+  assert.equal(op['x-nan'], null);
+  assert.equal(op['x-big'], 9007199254740992);
+  assert.equal(op['x-safe'], 9007199254740991);
+  assert.ok(fs.readFileSync(specPath).equals(before), 'input spec changed');
+});
+
+test('run: a clean spec prints no inexact line and has no openapiInexact count', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr: captureStream() });
+  assert.equal(code, 0);
+  assert.doesNotMatch(stdout.text(), /exactly as JSON/);
+  assert.equal('openapiInexact' in readJson(path.join(outDir, 'example.rwxmap.review.json')).counts, false);
+});
+
+test('run: a failed --force leaves every old output byte-identical and no tmp or backup file behind', async () => {
+  const dir = mkScratch();
+  const outDir = mkScratch();
+  const firstSpec = writeSpecFile(dir, 'first.json', SPEC_DOC);
+  const code1 = await run([firstSpec, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout: captureStream(), stderr: captureStream() });
+  assert.equal(code1, 0);
+
+  // The last target becomes a directory, so the first two renames succeed
+  // before the third fails: the rollback must restore both old files.
+  const blocked = path.join(outDir, 'example.openapi.rwx.json');
+  fs.unlinkSync(blocked);
+  fs.mkdirSync(blocked);
+  fs.writeFileSync(path.join(blocked, 'keep.txt'), 'KEEP');
+  const oldMap = fs.readFileSync(path.join(outDir, 'example.rwxmap.json'));
+  const oldReview = fs.readFileSync(path.join(outDir, 'example.rwxmap.review.json'));
+
+  // A different spec, so a new file left in place would not match the old bytes.
+  const secondSpec = writeSpecFile(dir, 'second.json', {
+    openapi: '3.0.0',
+    paths: { '/other': { post: { operationId: 'createOther' } } },
+  });
+  const stderr = captureStream();
+  const code2 = await run([secondSpec, '-o', outDir, '--vendor', 'example', '--force'], { cwd: dir, stdout: captureStream(), stderr });
+
+  assert.equal(code2, 1);
+  assert.match(stderr.text(), /could not write output/);
+  assert.ok(fs.readFileSync(path.join(outDir, 'example.rwxmap.json')).equals(oldMap), 'old map changed');
+  assert.ok(fs.readFileSync(path.join(outDir, 'example.rwxmap.review.json')).equals(oldReview), 'old review changed');
+  assert.equal(fs.readFileSync(path.join(blocked, 'keep.txt'), 'utf8'), 'KEEP');
+  assert.deepEqual(fs.readdirSync(outDir).sort(), ['example.openapi.rwx.json', 'example.rwxmap.json', 'example.rwxmap.review.json']);
+});
+
+test('run: a successful --force leaves no backup file behind', async () => {
+  const dir = mkScratch();
+  const outDir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  for (const name of ['example.rwxmap.json', 'example.rwxmap.review.json', 'example.openapi.rwx.json']) {
+    fs.writeFileSync(path.join(outDir, name), 'OLD');
+  }
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--force'], { cwd: dir, stdout: captureStream(), stderr: captureStream() });
+  assert.equal(code, 0);
+  assert.deepEqual(fs.readdirSync(outDir).sort(), ['example.openapi.rwx.json', 'example.rwxmap.json', 'example.rwxmap.review.json']);
+  readJson(path.join(outDir, 'example.openapi.rwx.json'));
+});
+
+test('run: OpenAPI 3.2 query/additionalOperations operations are counted as not labelled, and stay unlabelled', async () => {
+  const doc = {
+    openapi: '3.2.0',
+    paths: {
+      '/things': {
+        get: { operationId: 'listThings' },
+        query: { operationId: 'queryThings' },
+        additionalOperations: { COPY: { operationId: 'copyThings' }, PURGE: { operationId: 'purgeThings' } },
+      },
+      '/plain': { delete: { operationId: 'deletePlain' } },
+    },
+  };
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', doc);
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
+  assert.equal(code, 0, stderr.text());
+  assert.match(stdout.text(), /\nrwxmap: 3 operation\(s\) under OpenAPI 3\.2 query\/additionalOperations are not labelled yet \(no letter, no key, no x-rwx\)\n/);
+  const review = readJson(path.join(outDir, 'example.rwxmap.review.json'));
+  assert.equal(review.counts.rows, 2);
+  const copy = readJson(path.join(outDir, 'example.openapi.rwx.json'));
+  assert.equal('x-rwx' in copy.paths['/things'].query, false);
+  assert.equal('x-rwx' in copy.paths['/things'].additionalOperations.COPY, false);
+});
+
+test('run: a spec with no 3.2-only operations prints no not-labelled line', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  const stdout = captureStream();
+  const code = await run([specPath, '-o', mkScratch(), '--vendor', 'example'], { cwd: dir, stdout, stderr: captureStream() });
+  assert.equal(code, 0);
+  assert.doesNotMatch(stdout.text(), /not labelled yet/);
+});
+
+test('run: a .env supplies only RWXMAP_JEV_KEY (CRLF), and no .env variable reaches process.env', async (t) => {
+  const names = ['RWXMAP_JEV_KEY', 'HTTPS_PROXY', 'FOO_LEAK'];
+  const saved = Object.fromEntries(names.map((n) => [n, process.env[n]]));
+  for (const n of names) delete process.env[n];
+  t.after(() => {
+    for (const n of names) {
+      if (saved[n] === undefined) delete process.env[n];
+      else process.env[n] = saved[n];
+    }
+  });
+
+  const dir = mkScratch();
+  fs.writeFileSync(path.join(dir, '.env'), 'RWXMAP_JEV_KEY=sk-from-dotenv\r\nHTTPS_PROXY=http://proxy.invalid:1\r\nFOO_LEAK=leaked\r\n');
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
+  const auth = [];
+  const { fetchImpl: routed } = routedJevFetch({ listThings: { p: 0 }, updateThing: { p: 0 }, doMystery: { p: 1 } });
+  const fetchImpl = async (url, init) => {
+    auth.push(init.headers.Authorization);
+    return routed(url, init);
+  };
+  const stdout = captureStream();
+  const stderr = captureStream();
+
+  const code = await run([specPath, '-o', mkScratch(), '--vendor', 'example'], { cwd: dir, stdout, stderr, fetchImpl });
+  assert.equal(code, 0, stderr.text());
+  assert.match(stdout.text(), /Jev: on — 3 sent/);
+  assert.deepEqual(auth, ['Bearer sk-from-dotenv', 'Bearer sk-from-dotenv', 'Bearer sk-from-dotenv']);
+  for (const n of names) assert.equal(process.env[n], undefined, `${n} leaked into process.env`);
+});
+
+test('run: a local file with no operations exits 1, says so, and writes no file', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', { openapi: '3.0.0', servers: [{ url: 'https://api.example.com' }], paths: {} });
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+
+  const code = await run([specPath, '-o', outDir], { cwd: dir, stdout, stderr });
+  assert.equal(code, 1);
+  assert.equal(stderr.text(), `rwxmap: no operations found in ${specPath}\n`);
+  assert.deepEqual(fs.readdirSync(outDir), []);
+});
+
+test('run: a discovered spec with no operations on reload exits 1 with the same message', async (t) => {
+  const { fetchImpl } = stubDiscoveryFetch([
+    { status: 200, text: JSON.stringify(SPEC_DOC) },
+    { status: 200, text: JSON.stringify({ openapi: '3.0.0', paths: {} }) },
+  ]);
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = /** @type {typeof fetch} */ (/** @type {unknown} */ (fetchImpl));
+  t.after(() => { globalThis.fetch = originalFetch; });
+
+  const outDir = mkScratch();
+  const stderr = captureStream();
+  const code = await run(['https://api.example.test', '-o', outDir], { cwd: outDir, stdout: captureStream(), stderr, cacheDir: mkScratch() });
+
+  assert.equal(code, 1);
+  assert.equal(stderr.text(), 'rwxmap: no operations found in https://api.example.test/openapi.json\n');
+  assert.deepEqual(fs.readdirSync(outDir), []);
+});

@@ -277,14 +277,25 @@ server host (`firstServerHost`); if none resolve, exit 1 asking for
   evidence and review marker, counts, and the review list.
 - `<vendor>.openapi.rwx.json` — a copy of your spec with
   `x-rwx: { class, destructive, evidence, review }` on every
-  operation. Always JSON (2-space indent), even for a YAML input. Your
-  own spec file is only read, never written. An `x-rwx` already in your
-  spec is replaced in the copy, and stdout says how many
+  operation under a standard HTTP method (`get`, `put`, `post`,
+  `delete`, `options`, `head`, `patch`, `trace`). OpenAPI 3.2 `query`
+  and `additionalOperations` operations are not labelled yet — no
+  letter, no key, no `x-rwx` — and stdout counts them
+  (`rwxmap: N operation(s) under OpenAPI 3.2 query/additionalOperations
+  are not labelled yet ...`). Always JSON (2-space indent), even for a
+  YAML input. JSON cannot hold every YAML value exactly: `.inf`, `-.inf`
+  and `.nan` become `null` in the copy, and an integer past 2^53 is
+  rounded; stdout says how many (`rwxmap: N value(s) in the spec can't
+  be written exactly as JSON ...`) and the sidecar's `counts` carries
+  `openapiInexact: N` (absent when 0). Your own spec file is only read,
+  never written. An `x-rwx` already in your spec is replaced in the
+  copy, and stdout says how many
   (`rwxmap: N existing x-rwx overwritten in the copy`).
 
 All three files are written atomically, as one set (nothing partial on a
 crash). An existing file at any of the three paths is left alone unless
-you pass `--force`.
+you pass `--force`. With `--force`, the old files are moved aside first
+and put back if any write fails, so a failed run leaves them unchanged.
 
 **Who reads what.** Only bareguard reads rwxmap's output directly today
 (`bareguard.tools`). The other three are hints you copy into place
@@ -329,7 +340,8 @@ yourself; nothing reads them for you, and a client may ignore a hint.
   extensions, which any OpenAPI tool that doesn't know them ignores.
 
 **Exit codes**: 0 on success, 1 on any failure (no spec found, a load
-error, an existing file without `--force`, no vendor resolvable) —
+error, a spec with no operations — `rwxmap: no operations found in
+<source>` — an existing file without `--force`, no vendor resolvable) —
 never a partial write.
 
 ### Jev (optional)
@@ -339,7 +351,10 @@ letter one step. It is bring-your-own-key: your key, your cost (D120).
 Without a key, rwxmap runs mechanically and says so.
 
 **The key.** Set `RWXMAP_JEV_KEY`. rwxmap also reads a `.env` file in
-the folder you run it from. A variable already set in your shell wins.
+the folder you run it from, and takes only its `RWXMAP_JEV_KEY` line;
+no other `.env` variable (a proxy, say) touches the run. A variable
+already set in your shell wins. A `.env` that cannot be read or parsed
+means no key: the run stays mechanical.
 
 Careful: unsetting the variable does **not** turn Jev off if a `.env`
 with the key sits in the folder you run from. To run without Jev, run

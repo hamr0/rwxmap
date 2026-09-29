@@ -39,10 +39,10 @@
 //
 // JEV (PRD item c, D118-120): key configured -> used; no key -> mechanical,
 // never stops, and every run says loudly which mode ran. The key is
-// RWXMAP_JEV_KEY from the environment, else a `.env` file in `cwd` read
-// through Node's own process.loadEnvFile (no dotenv dependency) -- an
-// already-set variable wins and this file never reads or logs `.env`'s
-// contents itself (loadEnvFile writes straight into process.env). With a
+// RWXMAP_JEV_KEY from the environment, else the RWXMAP_JEV_KEY line of a
+// `.env` file in `cwd`, parsed with Node's own util.parseEnv (no dotenv
+// dependency) -- an already-set variable wins, only that one variable is
+// taken, and nothing from `.env` is ever written to process.env. With a
 // key: classify every operation mechanically ONCE (exporter.js's
 // classifyOperations, the same pass classifyAll runs by default), ask
 // jev-client.js's runJevBatch about exactly the rows jev.js's needsJev
@@ -69,7 +69,10 @@
 // the SAME loop (buildHintDicts), so the two dicts can never disagree on
 // keys or on which operation won a collision. A third file,
 // `<vendor>.openapi.rwx.json`, is a JSON copy of the parsed input with
-// `x-rwx` set on every operation object (buildOpenApiCopy). The input
+// `x-rwx` set on every operation object under a standard HTTP method
+// field (buildOpenApiCopy). OpenAPI 3.2 `query`/`additionalOperations`
+// operations are not labelled yet; the run counts them and says so
+// (countUnlabelledOperations). The input
 // file itself is only ever read. For a discovered spec the parsed
 // document is not in findSpec's result (nor its cache), so resolveInput
 // reloads `specUrl` once with redirects refused and takes operations,
@@ -78,7 +81,7 @@
 // Dependency rule (CLAUDE.md): vanilla Node >= 22 ESM, node:util's
 // parseArgs, node:fs/path. No new dependency.
 
-import { parseArgs } from 'node:util';
+import { parseArgs, parseEnv } from 'node:util';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -194,6 +197,8 @@ class CliError extends Error {}
  *   the letters describe one and the same spec. `specChanged` is true
  *   only on the discovered path, when the reloaded bytes' sha256 differs
  *   from the one discovery recorded (a cached result can be stale).
+ *   `ops` may be empty (a local file, or a discovered spec on reload);
+ *   run() refuses that in one place for every input kind.
  */
 async function resolveInput(address, findSpecOpts = {}) {
   if (!isHttpUrl(address)) {
@@ -243,10 +248,9 @@ async function resolveInput(address, findSpecOpts = {}) {
     const reason = err instanceof Error ? err.message : String(err);
     throw new CliError(`could not reload the discovered spec ${found.specUrl} (a redirect on reload is refused, never followed): ${reason}`);
   }
+  // Zero operations on reload is refused by run()'s one zero-operations
+  // check, the same one every input kind goes through.
   const ops = operationsFrom(reloaded.doc);
-  if (ops.length === 0) {
-    throw new CliError(`the discovered spec ${found.specUrl} has no operations on reload`);
-  }
   return {
     ops,
     source: found.specUrl,
@@ -345,6 +349,59 @@ function buildHintDicts(ops, sidecarRows) {
 }
 
 /**
+ * Count the values in a parsed document that JSON cannot hold exactly: a
+ * number that is not finite (YAML `.inf`, `-.inf`, `.nan` -> JSON.stringify
+ * writes null) or an integer that is not a safe integer (past 2^53, already
+ * rounded when parsed). Walked the way JSON.stringify walks it: a value
+ * reached twice through a YAML alias is written twice, so it counts twice.
+ * An object already on the current walk path (a self-referencing alias) is
+ * skipped here; JSON.stringify throws on it anyway.
+ *
+ * @param {any} doc
+ * @returns {number}
+ */
+function countInexactJsonValues(doc) {
+  const onPath = new Set();
+  /** @param {any} v @returns {number} */
+  const walk = (v) => {
+    if (typeof v === 'number') {
+      return !Number.isFinite(v) || (Number.isInteger(v) && !Number.isSafeInteger(v)) ? 1 : 0;
+    }
+    if (!v || typeof v !== 'object' || onPath.has(v)) return 0;
+    onPath.add(v);
+    let n = 0;
+    for (const child of Object.values(v)) n += walk(child);
+    onPath.delete(v);
+    return n;
+  };
+  return walk(doc);
+}
+
+/**
+ * Count the OpenAPI 3.2 operations operationEntries does not walk (item g
+ * will label them): each `paths[p].query` that is an object, plus each
+ * object entry of `paths[p].additionalOperations`. Reporting only — this
+ * never changes which operations are classified.
+ *
+ * @param {any} doc
+ * @returns {number}
+ */
+function countUnlabelledOperations(doc) {
+  const paths = doc && typeof doc === 'object' ? doc.paths : undefined;
+  if (!paths || typeof paths !== 'object') return 0;
+  let n = 0;
+  for (const item of Object.values(paths)) {
+    if (!item || typeof item !== 'object') continue;
+    if (item.query && typeof item.query === 'object') n += 1;
+    const extra = item.additionalOperations;
+    if (extra && typeof extra === 'object') {
+      for (const op of Object.values(extra)) if (op && typeof op === 'object') n += 1;
+    }
+  }
+  return n;
+}
+
+/**
  * The OpenAPI copy (D124, PRD Carrier 1): a deep copy of the parsed input
  * document with `x-rwx` set on every operation object. Never touches
  * `doc` itself.
@@ -361,13 +418,19 @@ function buildHintDicts(ops, sidecarRows) {
  * index with `sidecarRows`. Each pairing is checked (method and path must
  * match) and a mismatch THROWS rather than labelling the wrong object.
  *
+ * The round trip is lossy where JSON cannot hold a value (see
+ * countInexactJsonValues); the copy stays JSON (D124) and `inexact`
+ * counts those values so the run can say so.
+ *
  * @param {any} doc  The parsed input document `ops` came from.
  * @param {import('./exporter.js').SidecarRow[]} sidecarRows  One per
  *   operation, same order as operationsFrom(doc).
- * @returns {{copy: any, overwritten: number}}  `overwritten` counts the
- *   operations that already carried an `x-rwx` in the input.
+ * @returns {{copy: any, overwritten: number, inexact: number}}
+ *   `overwritten` counts the operations that already carried an `x-rwx`
+ *   in the input; `inexact` the values written as null or rounded.
  */
 function buildOpenApiCopy(doc, sidecarRows) {
+  const inexact = countInexactJsonValues(doc);
   const copy = JSON.parse(JSON.stringify(doc));
   const entries = operationEntries(copy);
   if (entries.length !== sidecarRows.length) {
@@ -383,23 +446,31 @@ function buildOpenApiCopy(doc, sidecarRows) {
     if (Object.prototype.hasOwnProperty.call(operation, 'x-rwx')) overwritten += 1;
     operation['x-rwx'] = xRwxForRow(row);
   }
-  return { copy, overwritten };
+  return { copy, overwritten, inexact };
 }
 
 /**
  * Write every file in `files` atomically (tmp file + rename), all or
- * nothing: if any tmp write fails, every tmp file already written is
- * removed and nothing is renamed; if any rename fails after some already
- * succeeded, the already-renamed targets are removed too (best-effort),
- * so a partial pair is never left behind.
+ * nothing, old files included:
+ *   1. every tmp file is written first; if any write fails, the tmp files
+ *      already written are removed and nothing else is touched;
+ *   2. then, per file, an existing target (anything but a directory) is
+ *      renamed aside to a unique backup name in the same directory, and
+ *      the tmp file is renamed into place;
+ *   3. on any failure in step 2, every newly placed file is removed, every
+ *      backup is renamed back to its target, and the leftover tmp files are
+ *      removed — so a failed --force leaves the old files byte-identical;
+ *   4. on success, the backups are deleted.
+ * A directory at a target path is never moved aside (it could not be
+ * deleted as a backup); the rename onto it fails and step 3 rolls back.
  *
  * @param {Array<{targetPath: string, content: string}>} files
  */
 function atomicWriteFiles(files) {
-  const withTmp = files.map((f) => ({
-    ...f,
-    tmpPath: `${f.targetPath}.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}.tmp`,
-  }));
+  const withTmp = files.map((f) => {
+    const unique = `${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}`;
+    return { ...f, tmpPath: `${f.targetPath}.${unique}.tmp`, backupPath: `${f.targetPath}.${unique}.bak` };
+  });
 
   const tmpWritten = [];
   try {
@@ -414,20 +485,37 @@ function atomicWriteFiles(files) {
     throw err;
   }
 
-  const renamed = [];
+  /** @type {string[]} */
+  const placed = [];
+  /** @type {Array<{backupPath: string, targetPath: string}>} */
+  const backedUp = [];
   try {
     for (const f of withTmp) {
+      /** @type {fs.Stats|null} */
+      let existing = null;
+      try { existing = fs.lstatSync(f.targetPath); } catch { /* no old file */ }
+      if (existing && !existing.isDirectory()) {
+        fs.renameSync(f.targetPath, f.backupPath);
+        backedUp.push({ backupPath: f.backupPath, targetPath: f.targetPath });
+      }
       fs.renameSync(f.tmpPath, f.targetPath);
-      renamed.push(f.targetPath);
+      placed.push(f.targetPath);
     }
   } catch (err) {
-    for (const p of renamed) {
+    for (const p of placed) {
       try { fs.unlinkSync(p); } catch { /* best effort */ }
+    }
+    for (const b of backedUp) {
+      try { fs.renameSync(b.backupPath, b.targetPath); } catch { /* best effort */ }
     }
     for (const f of withTmp) {
       try { fs.unlinkSync(f.tmpPath); } catch { /* best effort, may already be gone */ }
     }
     throw err;
+  }
+
+  for (const b of backedUp) {
+    try { fs.unlinkSync(b.backupPath); } catch { /* best effort */ }
   }
 }
 
@@ -460,16 +548,18 @@ function jevOffSummary() {
  *   defaults to the "off" shape. `doc` is the parsed document `ops`
  *   came from (`ops` must be operationsFrom(doc)); given, the result
  *   also carries the OpenAPI copy (D124) as `openapiCopy` plus
- *   `xRwxOverwritten`; omitted, both are null/0.
- * @returns {{combined: any, sidecarOut: any, collisions: import('./exporter.js').Collision[], mcpCollisions: Array<{key: string, kept: string, dropped: string}>, openapiCopy: any, xRwxOverwritten: number}}
+ *   `xRwxOverwritten` and `openapiInexact`; omitted, they are null/0/0.
+ *   A non-zero `openapiInexact` is also written into the sidecar's
+ *   `counts` (absent when 0, like `mcpCollisions`).
+ * @returns {{combined: any, sidecarOut: any, collisions: import('./exporter.js').Collision[], mcpCollisions: Array<{key: string, kept: string, dropped: string}>, openapiCopy: any, xRwxOverwritten: number, openapiInexact: number}}
  */
 export function buildOutput(ops, vendor, source, options = {}) {
   const { verdicts, jevSummary = jevOffSummary(), doc } = options;
   const { tools, collisions } = exportGate(ops, { vendor, verdicts });
   const sidecar = exportSidecar(ops, { vendor, verdicts });
   const { mcp, webmcp, mcpCollisions } = buildHintDicts(ops, sidecar.rows);
-  const { copy: openapiCopy, overwritten: xRwxOverwritten } = doc === undefined
-    ? { copy: null, overwritten: 0 }
+  const { copy: openapiCopy, overwritten: xRwxOverwritten, inexact: openapiInexact } = doc === undefined
+    ? { copy: null, overwritten: 0, inexact: 0 }
     : buildOpenApiCopy(doc, sidecar.rows);
 
   const combined = {
@@ -481,19 +571,25 @@ export function buildOutput(ops, vendor, source, options = {}) {
     webmcp,
     jev: jevSummary,
   };
-  const sidecarOut = mcpCollisions.length > 0 ? { ...sidecar, mcpCollisions } : sidecar;
+  let sidecarOut = mcpCollisions.length > 0 ? { ...sidecar, mcpCollisions } : sidecar;
+  if (openapiInexact > 0) {
+    /** @type {any} */
+    const counts = { ...sidecarOut.counts, openapiInexact };
+    sidecarOut = { ...sidecarOut, counts };
+  }
 
-  return { combined, sidecarOut, collisions, mcpCollisions, openapiCopy, xRwxOverwritten };
+  return { combined, sidecarOut, collisions, mcpCollisions, openapiCopy, xRwxOverwritten, openapiInexact };
 }
 
 /**
- * The Jev key (D118): RWXMAP_JEV_KEY from the environment, else a `.env`
- * file in `cwd` via Node's own process.loadEnvFile — an already-set
- * environment variable always wins and this function never reads or logs
- * `.env`'s own contents (loadEnvFile writes straight into process.env; a
- * malformed or unreadable `.env` is treated the same as no `.env` at all,
- * per D118's "no key -> mechanical, never stops"). A missing `.env` file
- * is not an error: `.env` is optional.
+ * The Jev key (D118): RWXMAP_JEV_KEY from the environment, else the
+ * RWXMAP_JEV_KEY entry of a `.env` file in `cwd`, read with
+ * fs.readFileSync and parsed with Node's own util.parseEnv. Only that one
+ * entry is taken: nothing from `.env` is ever written to process.env (so a
+ * proxy or any other variable in it never changes this process), and an
+ * already-set environment variable always wins. A missing, unreadable or
+ * malformed `.env` means no key, and the run stays mechanical (D118's
+ * "no key -> mechanical, never stops").
  *
  * @param {string} cwd
  * @returns {string|undefined}
@@ -502,17 +598,14 @@ function loadJevKey(cwd) {
   if (typeof process.env.RWXMAP_JEV_KEY === 'string' && process.env.RWXMAP_JEV_KEY !== '') {
     return process.env.RWXMAP_JEV_KEY;
   }
-  const envPath = path.join(cwd, '.env');
-  if (fs.existsSync(envPath)) {
-    try {
-      process.loadEnvFile(envPath);
-    } catch {
-      // malformed .env: no key, the run stays mechanical.
-    }
+  let parsed;
+  try {
+    parsed = parseEnv(fs.readFileSync(path.join(cwd, '.env'), 'utf8'));
+  } catch {
+    return undefined; // missing, unreadable or malformed .env: no key.
   }
-  return typeof process.env.RWXMAP_JEV_KEY === 'string' && process.env.RWXMAP_JEV_KEY !== ''
-    ? process.env.RWXMAP_JEV_KEY
-    : undefined;
+  const key = parsed.RWXMAP_JEV_KEY;
+  return typeof key === 'string' && key !== '' ? key : undefined;
 }
 
 /**
@@ -639,6 +732,12 @@ export async function run(argv, env) {
     return 1;
   }
 
+  // One rule for every input kind: nothing to classify -> exit 1, no file.
+  if (ops.length === 0) {
+    stderr.write(`rwxmap: no operations found in ${source}\n`);
+    return 1;
+  }
+
   if (specChanged) {
     stdout.write('rwxmap: spec changed since discovery cached it (sha256 differs); used the fresh copy\n');
   }
@@ -692,7 +791,7 @@ export async function run(argv, env) {
     stderr.write(`rwxmap: could not build output: ${reason}\n`);
     return 1;
   }
-  const { combined, sidecarOut, collisions, mcpCollisions, openapiCopy, xRwxOverwritten } = built;
+  const { combined, sidecarOut, collisions, mcpCollisions, openapiCopy, xRwxOverwritten, openapiInexact } = built;
 
   try {
     fs.mkdirSync(outDir, { recursive: true });
@@ -724,6 +823,17 @@ export async function run(argv, env) {
   stdout.write(`rwxmap: wrote ${path.basename(mapPath)} + ${path.basename(reviewPath)} + ${path.basename(openapiPath)}\n`);
   if (xRwxOverwritten > 0) {
     stdout.write(`rwxmap: ${xRwxOverwritten} existing x-rwx overwritten in the copy\n`);
+  }
+  if (openapiInexact > 0) {
+    stdout.write(
+      `rwxmap: ${openapiInexact} value(s) in the spec can't be written exactly as JSON (.inf/.nan or integers past 2^53); the copy holds null or a rounded number there; your original is unchanged\n`,
+    );
+  }
+  const unlabelled = countUnlabelledOperations(doc);
+  if (unlabelled > 0) {
+    stdout.write(
+      `rwxmap: ${unlabelled} operation(s) under OpenAPI 3.2 query/additionalOperations are not labelled yet (no letter, no key, no x-rwx)\n`,
+    );
   }
   if (collisions.length > 0 || mcpCollisions.length > 0) {
     stdout.write(
