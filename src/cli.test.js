@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import fsDefault from 'node:fs';
+import { syncBuiltinESMExports } from 'node:module';
 
 import { run } from './cli.js';
 import { JEV_LOWER_THRESHOLD, JEV_RAISE_WX_THRESHOLD, JEV_RAISE_GET_THRESHOLD } from './jev.js';
@@ -1278,4 +1280,117 @@ test('run: an empty RWXMAP_JEV_KEY counts as unset, so a .env key is still used'
   assert.equal(code, 0, stderr.text());
   assert.match(stdout.text(), /Jev: on — 3 sent/);
   assert.deepEqual(auth, ['Bearer sk-from-dotenv', 'Bearer sk-from-dotenv', 'Bearer sk-from-dotenv']);
+});
+
+// Forces atomicWriteFiles' no-hard-link fallback: patch the CommonJS fs
+// object and sync it into the ESM namespace cli.js imports (`import * as
+// fs`), then restore both. Returns how many times linkSync was refused.
+async function withoutHardLinks(fn) {
+  const realLink = fsDefault.linkSync;
+  let refused = 0;
+  fsDefault.linkSync = () => {
+    refused += 1;
+    throw Object.assign(new Error('EPERM: operation not permitted, link (test)'), { code: 'EPERM' });
+  };
+  syncBuiltinESMExports();
+  try {
+    await fn();
+  } finally {
+    fsDefault.linkSync = realLink;
+    syncBuiltinESMExports();
+  }
+  return refused;
+}
+
+test('run: with no hard links, a successful --force still replaces a plain file and leaves no backup', async () => {
+  const dir = mkScratch();
+  const outDir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  const names = ['example.rwxmap.json', 'example.rwxmap.review.json', 'example.openapi.rwx.json'];
+  for (const name of names) fs.writeFileSync(path.join(outDir, name), `OLD ${name}`);
+
+  let code;
+  const stderr = captureStream();
+  const refused = await withoutHardLinks(async () => {
+    code = await run([specPath, '-o', outDir, '--vendor', 'example', '--force'], { cwd: dir, stdout: captureStream(), stderr });
+  });
+
+  assert.equal(code, 0, stderr.text());
+  assert.equal(refused, 3, 'the copy fallback was not exercised for every file');
+  for (const name of names) {
+    const text = fs.readFileSync(path.join(outDir, name), 'utf8');
+    assert.ok(!text.includes('OLD'), `${name} still holds the old content`);
+    readJson(path.join(outDir, name));
+  }
+  assert.deepEqual(fs.readdirSync(outDir).sort(), [...names].sort());
+});
+
+test('run: with no hard links, a failed --force restores a symlink target as the same symlink', async () => {
+  const dir = mkScratch();
+  const outDir = mkScratch();
+  const refDir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+
+  // The map target is a symlink to a file elsewhere; the openapi target is
+  // a directory, so the third rename fails after the symlink was replaced.
+  const referent = path.join(refDir, 'real-map.json');
+  fs.writeFileSync(referent, 'REFERENT');
+  const mapPath = path.join(outDir, 'example.rwxmap.json');
+  fs.symlinkSync(referent, mapPath);
+  fs.writeFileSync(path.join(outDir, 'example.rwxmap.review.json'), 'OLD REVIEW');
+  const blocked = path.join(outDir, 'example.openapi.rwx.json');
+  fs.mkdirSync(blocked);
+
+  let code;
+  const stderr = captureStream();
+  const refused = await withoutHardLinks(async () => {
+    code = await run([specPath, '-o', outDir, '--vendor', 'example', '--force'], { cwd: dir, stdout: captureStream(), stderr });
+  });
+
+  assert.equal(code, 1);
+  assert.match(stderr.text(), /could not write output/);
+  assert.equal(refused, 2, 'the fallback was not exercised for the two non-directory targets');
+  assert.ok(fs.lstatSync(mapPath).isSymbolicLink(), 'the symlink became a plain file');
+  assert.equal(fs.readlinkSync(mapPath), referent);
+  assert.equal(fs.readFileSync(referent, 'utf8'), 'REFERENT');
+  assert.deepEqual(fs.readdirSync(refDir), ['real-map.json']);
+  assert.equal(fs.readFileSync(path.join(outDir, 'example.rwxmap.review.json'), 'utf8'), 'OLD REVIEW');
+  assert.deepEqual(fs.readdirSync(blocked), []);
+  assert.deepEqual(fs.readdirSync(outDir).sort(), ['example.openapi.rwx.json', 'example.rwxmap.json', 'example.rwxmap.review.json']);
+});
+
+test('run: leftover .bak/.tmp files from an interrupted run are reported and never touched', async () => {
+  const dir = mkScratch();
+  const outDir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  const bak = path.join(outDir, 'example.rwxmap.json.4242.1759100000000.k3j9x2a.bak');
+  const tmp = path.join(outDir, 'example.openapi.rwx.json.4242.1759100000000.p0q1r2.tmp');
+  const unrelated = path.join(outDir, 'foo.bak');
+  fs.writeFileSync(bak, 'PREVIOUS');
+  fs.writeFileSync(tmp, 'PARTIAL');
+  fs.writeFileSync(unrelated, 'NOT OURS');
+
+  const stdout = captureStream();
+  const stderr = captureStream();
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
+
+  assert.equal(code, 0, stderr.text());
+  const lines = stdout.text().split('\n').filter((l) => l.includes('leftover'));
+  assert.deepEqual(lines, [
+    `rwxmap: 2 leftover .bak/.tmp file(s) from an interrupted run in ${outDir} (a .bak holds the previous version of that file); not touched, remove them when done`,
+  ]);
+  assert.equal(fs.readFileSync(bak, 'utf8'), 'PREVIOUS');
+  assert.equal(fs.readFileSync(tmp, 'utf8'), 'PARTIAL');
+  assert.equal(fs.readFileSync(unrelated, 'utf8'), 'NOT OURS');
+});
+
+test('run: no leftover files means no leftover line', async () => {
+  const dir = mkScratch();
+  const outDir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  fs.writeFileSync(path.join(outDir, 'foo.bak'), 'NOT OURS');
+  const stdout = captureStream();
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr: captureStream() });
+  assert.equal(code, 0);
+  assert.doesNotMatch(stdout.text(), /leftover/);
 });

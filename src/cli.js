@@ -464,7 +464,8 @@ function buildOpenApiCopy(doc, sidecarRows) {
  *      already written are removed and nothing else is touched;
  *   2. then, per file, an existing target (anything but a directory) gets
  *      a backup under a unique name in the same directory — a HARD LINK
- *      to it (fs.linkSync), or a copy where hard links are not supported —
+ *      to it (fs.linkSync), or where hard links are not supported a copy
+ *      (a symlink target is recreated as the same symlink) —
  *      and the tmp file is renamed onto the target. That rename replaces
  *      the target atomically, so the target path exists at every instant:
  *      the old file is never moved away first;
@@ -517,7 +518,11 @@ function atomicWriteFiles(files, beforeReplace) {
         try {
           fs.linkSync(f.targetPath, f.backupPath);
         } catch {
-          fs.copyFileSync(f.targetPath, f.backupPath);
+          // No hard links here: back up by file type. A symlink is
+          // recreated as a symlink (copyFileSync would follow it and the
+          // rollback would turn the link into a plain file).
+          if (existing.isSymbolicLink()) fs.symlinkSync(fs.readlinkSync(f.targetPath), f.backupPath);
+          else fs.copyFileSync(f.targetPath, f.backupPath);
         }
         backupPath = f.backupPath;
         backups.push(f.backupPath);
@@ -545,6 +550,24 @@ function atomicWriteFiles(files, beforeReplace) {
   for (const p of backups) {
     try { fs.unlinkSync(p); } catch { /* best effort */ }
   }
+}
+
+/**
+ * Count stray .tmp/.bak files an interrupted atomicWriteFiles run left in
+ * `dir` — only this tool's own naming (`<target>.<pid>.<ms>.<base36>.tmp`
+ * or `.bak`, as atomicWriteFiles builds them) for the given target
+ * basenames. Read-only: the files are reported, never touched (a .bak can
+ * be the user's only copy of a previous version). A missing or unreadable
+ * dir counts as none.
+ * @param {string} dir
+ * @param {string[]} basenames
+ * @returns {number}
+ */
+function countLeftovers(dir, basenames) {
+  let entries;
+  try { entries = fs.readdirSync(dir); } catch { return 0; }
+  const suffix = /^\.\d+\.\d+\.[0-9a-z]*\.(?:bak|tmp)$/;
+  return entries.filter((e) => basenames.some((b) => e.startsWith(b) && suffix.test(e.slice(b.length)))).length;
 }
 
 /**
@@ -796,6 +819,13 @@ export async function run(argv, env) {
   const mapPath = path.join(outDir, `${vendor}.rwxmap.json`);
   const reviewPath = path.join(outDir, `${vendor}.rwxmap.review.json`);
   const openapiPath = path.join(outDir, `${vendor}.openapi.rwx.json`);
+
+  const leftovers = countLeftovers(outDir, [mapPath, reviewPath, openapiPath].map((p) => path.basename(p)));
+  if (leftovers > 0) {
+    stdout.write(
+      `rwxmap: ${leftovers} leftover .bak/.tmp file(s) from an interrupted run in ${outDir} (a .bak holds the previous version of that file); not touched, remove them when done\n`,
+    );
+  }
 
   if (!values.force) {
     const existing = [mapPath, reviewPath, openapiPath].filter((p) => fs.existsSync(p));

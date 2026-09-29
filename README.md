@@ -299,12 +299,14 @@ server host (`firstServerHost`); if none resolve, exit 1 asking for
 Each of the three files is replaced atomically (tmp file plus rename),
 so none is ever half-written. An existing file at any of the three paths
 is left alone unless you pass `--force`. With `--force`, each old file
-is first kept as a hard-linked backup (a copy where hard links are not
-supported) and stays in place until the new one replaces it; if any
+is first kept as a hard-linked backup (where hard links are not
+supported, a copy, or the same symlink for a symlink) and stays in place until the new one replaces it; if any
 write fails, all three are rolled back, so a failed run leaves them
 unchanged. A hard kill mid-set (power loss, `kill -9`) can leave a mix
 of old and new files plus stray `.tmp`/`.bak` files, but never a
-missing file.
+missing file. The next run reports any such leftovers on stdout (a
+`.bak` holds the previous version of that file) and never touches
+them; remove them yourself when done.
 
 **Who reads what.** Only bareguard reads rwxmap's output directly today
 (`bareguard.tools`). The other three are hints you copy into place
