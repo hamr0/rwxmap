@@ -202,13 +202,11 @@ file classifies on method+path alone (D106). It ships as the separate
 `rwxmap/load` subpath, not from the package root, so `import 'rwxmap'`
 never loads its one dependency, the `yaml` parser (D107).
 
-## Command line [unreleased]
+## Command line
 
 ```
 rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--force]
 ```
-
-Not yet published to npm — built, not released.
 
 The address can be three kinds of input:
 
@@ -237,7 +235,7 @@ server host (`firstServerHost`); if none resolve, exit 1 asking for
 
   ```json
   {
-    "rwxmapVersion": "0.5.0",
+    "rwxmapVersion": "0.6.0",
     "source": "https://api.example.com/openapi.yaml",
     "vendor": "api.example.com",
     "bareguard": {
