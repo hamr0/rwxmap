@@ -188,9 +188,7 @@ avoid it.
 
 ## Status
 
-WIP. `rwxmap@0.6.0` is on npm. The design and numbers are in
-[`docs/product/prd.md`](docs/product/prd.md); every experiment is logged
-in [`docs/logs/learnings.md`](docs/logs/learnings.md).
+WIP. `rwxmap@0.6.0` is on npm.
 
 The author's Internet-Draft, [An Attenuated Delegation Profile for
 Automated Agents](https://datatracker.ietf.org/doc/draft-hamr-oauth-agent-delegation/),
