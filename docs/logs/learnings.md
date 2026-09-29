@@ -5813,6 +5813,13 @@ class).
   new test was broken once by hand and failed.
 - Lesson: a copy fallback must copy the file type, not just the bytes;
   `copyFileSync` silently dereferences a symlink.
+- Follow-up (round 4): README now says the symlink survives only a
+  rolled-back run (a successful `--force` writes a regular file, target
+  untouched); the leftover match needs a non-empty random segment
+  (`[0-9a-z]+`, generator falls back to `'0'` when `Math.random()` is 0),
+  and the stdout line now says "possible leftover" since another live run
+  can own the files; a test pins that `example.rwxmap.json.1.2..bak` is
+  not counted.
 
 ## 2026-09-25 — PRD history moved out in the one-current-shape cleanup
 
