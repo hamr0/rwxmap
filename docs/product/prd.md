@@ -55,7 +55,7 @@ with Jev 93.0% / 0.5% / 6.5%.
 | API providers | Scope all your APIs, get markers where the loose and tight rows are, correct them | Released in `rwxmap@0.6.0`: the CLI writes the letters, the review file and a copy of the spec with `x-rwx` | None open. Keeping a person's edits across re-runs is out of scope. |
 | Agentic automation | Scope APIs on the fly for a scoped agent through bareguard | Released: `bareguard.tools` from the CLI; `rwxmap/discover` (`findSpec`, `classifyCall`, `requestKey`) in `rwxmap@0.5.0`; bareguard's end-to-end check passes (bareguard 0.18.1) | Discovery is hard: the first probe found a spec for 8 of 25 vendors, 6 of them through a list since ruled out (D108). With no spec, per-request classification keeps safety: the too-loose rate stays 0.8% on the M3 exam (4279) at full spec, method+path and method only |
 | Secondary: MCP hints, WebMCP, OpenAPI `x-rwx` | The same letters in each standard's own extension slot | Released in `rwxmap@0.6.0`; conformance check 7/7 | None open |
-| Inputs | Spec URL, local OpenAPI file (JSON or YAML), bare API address (discovery), per-request fallback; with or without a Jev key | Released in `rwxmap@0.5.0` and `0.6.0` | Discovery finds few specs; framework default paths for self-hosted APIs are unmeasured (plan item 1) |
+| Inputs | Spec URL, local OpenAPI file (JSON or YAML), bare API address (discovery), per-request fallback; with or without a Jev key | Released in `rwxmap@0.5.0` and `0.6.0` | Discovery finds few specs; the per-request fallback covers the rest at the same too-loose rate. Framework default paths are out of scope. |
 
 ## Out of scope
 
@@ -71,6 +71,11 @@ with Jev 93.0% / 0.5% / 6.5%.
 - A claim of coverage beyond the vendors actually measured.
 - Keeping a provider's hand edits across re-runs: a re-run replaces every
   `x-rwx` in the copy, and the provider owns any edits (ruled 2026-09-29).
+- Framework-default spec paths for self-hosted APIs (Spring `/v3/api-docs`,
+  .NET, NestJS, Django, Laravel and the like), unless someone asks (ruled
+  2026-09-29). Converters and default paths mostly yield method + path,
+  which the per-request fallback already covers at the same too-loose
+  rate.
 - Hand-written MCP tools. MCP is an output, not an input: a tool with a
   name and a description but no method or path has nothing to classify
   from (D122).
@@ -768,21 +773,7 @@ Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
 ## What is next
 
-The plan. Nothing here touches the frozen core.
-
-1. **Framework-default spec paths for self-hosted APIs.** Discovery
-   guesses only `/openapi.json`, `/openapi.yaml` and `/swagger.json`
-   (D116). Framework defaults were probed on public APIs and found 0:
-   Spring `/v3/api-docs` (0 on 25 vendors, 0 on the 200-API sample),
-   `/v2/api-docs`, .NET `/swagger/v1/swagger.json`, `/api-docs` (0 on
-   25 and 0 on 200), `/swagger.yaml`, `/.well-known/openapi.json` (not
-   an IANA-registered well-known URI; checked 2026-09-28). Some
-   defaults were never probed: `/openapi`, `/v3/api-docs.yaml`, NestJS
-   `/api-json`, Django drf-spectacular `/api/schema/`, Laravel
-   `/api/documentation`. These defaults are where self-hosted and
-   internal APIs serve their spec, and we have no self-hosted sample,
-   so the 0s say nothing about them. Add them only after measuring them
-   on a self-hosted sample. Getting that sample comes first.
+Nothing is planned. Parked items and known limits are below.
 
 ### Parked
 
@@ -862,5 +853,4 @@ network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
 
 ## Open questions
 
-None open beyond the plan above: item 1 needs a self-hosted sample
-first.
+None open.

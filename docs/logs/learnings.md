@@ -7224,3 +7224,29 @@ Later the same day the user ruled corrections-survive-a-re-run out of
 scope: nobody has adopted it or asked for it, and a provider who edits
 the letters owns those edits. Framework-default spec paths is now the
 only planned item.
+
+Later the same day the user ruled framework-default spec paths for
+self-hosted APIs out of scope unless someone asks. Converters that turn
+other API descriptions into OpenAPI exist (traffic captures via
+mitmproxy2swagger, Postman-collection converters, gRPC via grpc-gateway's
+protoc-gen-openapiv2; GraphQL has no real mapping), but they mostly yield
+method + path, which the per-request fallback already classifies; the
+PRD's input-shape table shows dropping to method + path or method only
+costs exactness, not safety (too-loose stays 0.8% mechanical on the M3
+exam). The plan now has no planned items.
+
+Moved from prd.md 'What is next':
+
+1. **Framework-default spec paths for self-hosted APIs.** Discovery
+   guesses only `/openapi.json`, `/openapi.yaml` and `/swagger.json`
+   (D116). Framework defaults were probed on public APIs and found 0:
+   Spring `/v3/api-docs` (0 on 25 vendors, 0 on the 200-API sample),
+   `/v2/api-docs`, .NET `/swagger/v1/swagger.json`, `/api-docs` (0 on
+   25 and 0 on 200), `/swagger.yaml`, `/.well-known/openapi.json` (not
+   an IANA-registered well-known URI; checked 2026-09-28). Some
+   defaults were never probed: `/openapi`, `/v3/api-docs.yaml`, NestJS
+   `/api-json`, Django drf-spectacular `/api/schema/`, Laravel
+   `/api/documentation`. These defaults are where self-hosted and
+   internal APIs serve their spec, and we have no self-hosted sample,
+   so the 0s say nothing about them. Add them only after measuring them
+   on a self-hosted sample. Getting that sample comes first.
