@@ -1,12 +1,13 @@
 // Equivalence proof for the CLI (PRD "Go/no-go for item d", bars 1, 2, 5;
 // and item c's own bar 7 — see the second pass below).
 //
-// For every spec file the same four sets use (data/provider-corpus-
+// For every spec file in the four sets it walks (data/provider-corpus-
 // 2026-09-16, data/exam-2026-09-17, data/exam-2026-09-20,
-// data/exam-2026-09-22 — the same 722 files tools/proof-load.js and
-// tools/proof-match.js cover), this builds the CLI's combined object
-// through src/cli.js's OWN buildOutput function — never a re-derived
-// copy of it — and checks, per file:
+// data/exam-2026-09-22) that loads and has operations — 37 files, 11,505
+// operations; the other files fail to load and are excluded, and this
+// proof's own output lists them as load errors — it builds the CLI's
+// combined object through src/cli.js's OWN buildOutput function — never
+// a re-derived copy of it — and checks, per file:
 //
 //   1. combined.bareguard.tools deep-equals exportGate(ops, { vendor
 //      }).tools called directly (0 differences) — bar 1.
