@@ -58,6 +58,23 @@
 // they should be), so a bug in either file's Jev wiring is caught here
 // exactly as bars 1-5 catch a bug in the mechanical-only wiring.
 //
+// ITEM E (D124), bars 2, 3, 4 and 6, over the SAME files, in BOTH passes
+// (mechanical and seeded fake Jev). buildOutput is called with the parsed
+// `doc`, so it also returns the OpenAPI copy. This proof walks the copy's
+// `paths` with its OWN method list (OPENAPI_METHODS below, not
+// exporter.js's operationEntries) and checks, for EVERY operation:
+//   - bar 3: its `x-rwx` equals BOTH the sidecar row (letter,
+//     destructive, evidence, marker) AND the independent truth (the
+//     verdict's class, destructive === true, source, review);
+//   - bar 4: its `webmcp` entry equals the D124 table for the truth
+//     letter, and `webmcp` has exactly one entry per operation;
+//   - bar 2: stripping every operation's `x-rwx` from the copy leaves
+//     exactly the parsed input (minus any `x-rwx` the input carried);
+//   - bar 6: all of the above again against the post-fake-Jev verdicts.
+// An operation whose "METHOD path" is ambiguous in the copy (two fields
+// differing only by case) is SKIPPED and COUNTED, never silently passed;
+// so is any `x-rwx` found on an object that is not one of the operations.
+//
 // Run with: node tools/proof-cli.js
 // Prints the total compared (operations checked, collided operations,
 // collided keys), then the TRUE differences count per comparison (never
@@ -94,6 +111,124 @@ const SETS = [
 // exporter.js's own idea of "tighter". A 3-entry ordering, not the
 // classification logic itself.
 const TIGHTNESS = { r: 0, w: 1, x: 2 };
+
+// Item e: this proof's OWN list of OpenAPI 3.x path-item method fields,
+// restated here on purpose rather than imported, so a bug in
+// exporter.js's operation walk would show as a mismatch.
+const OPENAPI_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'];
+
+// Item e bar 4: D124's WebMCP table, restated independently.
+const WEBMCP_TABLE = {
+  r: { readOnlyHint: true, consequentialHint: false },
+  w: { readOnlyHint: false, consequentialHint: false },
+  x: { readOnlyHint: false, consequentialHint: true },
+};
+
+/**
+ * Index a parsed doc's operation objects by "METHOD path" with this
+ * proof's own walk. Keys seen more than once are returned in `ambiguous`.
+ * @param {any} doc
+ * @returns {{byKey: Map<string, any>, ambiguous: Set<string>}}
+ */
+function indexOperations(doc) {
+  /** @type {Map<string, any>} */
+  const byKey = new Map();
+  /** @type {Set<string>} */
+  const ambiguous = new Set();
+  for (const [p, item] of Object.entries((doc && doc.paths) || {})) {
+    if (!item || typeof item !== 'object') continue;
+    for (const [field, op] of Object.entries(item)) {
+      if (!OPENAPI_METHODS.includes(field.toLowerCase()) || !op || typeof op !== 'object') continue;
+      const key = `${field.toUpperCase()} ${p}`;
+      if (byKey.has(key)) ambiguous.add(key);
+      byKey.set(key, op);
+    }
+  }
+  return { byKey, ambiguous };
+}
+
+/**
+ * Delete `x-rwx` from every operation object this proof's own walk
+ * finds; returns how many were removed.
+ * @param {any} doc
+ * @returns {number}
+ */
+function stripOperationXRwx(doc) {
+  let removed = 0;
+  for (const op of indexOperations(doc).byKey.values()) {
+    if (Object.prototype.hasOwnProperty.call(op, 'x-rwx')) {
+      delete op['x-rwx'];
+      removed += 1;
+    }
+  }
+  return removed;
+}
+
+/**
+ * Count every `x-rwx` key anywhere in a document (any depth).
+ * @param {any} node
+ * @returns {number}
+ */
+function countXRwxAnywhere(node) {
+  if (!node || typeof node !== 'object') return 0;
+  let n = 0;
+  if (!Array.isArray(node) && Object.prototype.hasOwnProperty.call(node, 'x-rwx')) n += 1;
+  for (const v of Object.values(node)) n += countXRwxAnywhere(v);
+  return n;
+}
+
+/**
+ * Item e bars 2-4 (and 6, when `verdicts` is the post-Jev list) for one
+ * file: every check recomputed against `verdicts`, the proof's own truth.
+ * @param {{filePath: string, doc: any, ops: any[], verdicts: any[], out: any, pass: string, diffs: {filePath: string, detail: string}[], tally: {checked: number, skipped: number, preexisting: number}}} a
+ */
+function checkCarriers({ filePath, doc, ops, verdicts, out, pass, diffs, tally }) {
+  const { openapiCopy, sidecarOut, combined } = out;
+  if (!openapiCopy) {
+    diffs.push({ filePath, detail: `${pass}: no OpenAPI copy returned` });
+    return;
+  }
+  const { byKey, ambiguous } = indexOperations(openapiCopy);
+  if (Object.keys(combined.webmcp).length !== ops.length) {
+    diffs.push({ filePath, detail: `${pass}: webmcp has ${Object.keys(combined.webmcp).length} entries for ${ops.length} operations` });
+  }
+  const anywhere = countXRwxAnywhere(openapiCopy);
+  if (anywhere !== byKey.size) {
+    diffs.push({ filePath, detail: `${pass}: ${anywhere} x-rwx in the copy but ${byKey.size} operation objects` });
+  }
+  for (let i = 0; i < ops.length; i += 1) {
+    const op = ops[i];
+    const key = `${op.method} ${op.path}`;
+    if (ambiguous.has(key)) {
+      tally.skipped += 1;
+      continue;
+    }
+    tally.checked += 1;
+    const v = verdicts[i];
+    const truth = { class: v.class, destructive: v.destructive === true, evidence: v.source, review: v.review };
+    const row = sidecarOut.rows[i];
+    const fromRow = { class: row.letter, destructive: row.destructive, evidence: row.evidence, review: row.marker };
+    const obj = byKey.get(key);
+    const got = obj ? obj['x-rwx'] : undefined;
+    if (!deepEqual(got, truth)) {
+      diffs.push({ filePath, detail: `${pass}: ${key}: x-rwx ${JSON.stringify(got)} !== truth ${JSON.stringify(truth)}` });
+    } else if (!deepEqual(got, fromRow)) {
+      diffs.push({ filePath, detail: `${pass}: ${key}: x-rwx ${JSON.stringify(got)} !== review-file row ${JSON.stringify(fromRow)}` });
+    }
+    const hint = combined.webmcp[key];
+    if (!hint || !deepEqual(hint, { annotations: WEBMCP_TABLE[v.class] })) {
+      diffs.push({ filePath, detail: `${pass}: ${key}: webmcp ${JSON.stringify(hint)} !== table for "${v.class}"` });
+    }
+  }
+  // Bar 2: nothing but x-rwx changed. The input's own x-rwx (if any) is
+  // stripped from a clone of it, counted, and compared the same way.
+  const input = structuredClone(doc);
+  tally.preexisting += stripOperationXRwx(input);
+  stripOperationXRwx(openapiCopy);
+  if (!deepEqual(openapiCopy, input)) {
+    diffs.push({ filePath, detail: `${pass}: copy with x-rwx stripped !== parsed input` });
+  }
+}
 
 /**
  * @param {Array<'r'|'w'|'x'>} letters  Non-empty.
@@ -184,6 +319,14 @@ async function main() {
   /** @type {{filePath: string, detail: string}[]} */
   const jevBareguardTightestDiffs = [];
 
+  // Item e (D124): OpenAPI copy + webmcp, both passes.
+  /** @type {{filePath: string, detail: string}[]} */
+  const carrierDiffs = [];
+  /** @type {{filePath: string, detail: string}[]} */
+  const jevCarrierDiffs = [];
+  const carrierTally = { checked: 0, skipped: 0, preexisting: 0 };
+  const jevCarrierTally = { checked: 0, skipped: 0, preexisting: 0 };
+
   for (const { filePath, provider } of files) {
     let doc;
     try {
@@ -201,7 +344,8 @@ async function main() {
 
     // Bar 1: bareguard.tools deep-equals a direct exportGate call.
     const direct = exportGate(ops, { vendor });
-    const { combined } = buildOutput(ops, vendor, filePath);
+    const mechanicalOut = buildOutput(ops, vendor, filePath, { doc });
+    const { combined } = mechanicalOut;
     if (!deepEqual(combined.bareguard.tools, direct.tools)) {
       toolsDiffs.push({ filePath, detail: 'combined.bareguard.tools !== exportGate(ops, {vendor}).tools' });
     }
@@ -287,7 +431,16 @@ async function main() {
       if (moved.class !== verdict.class) jevMovedRows += 1;
       return moved;
     });
-    const { combined: jevCombined } = buildOutput(ops, vendor, filePath, { verdicts: finalVerdicts });
+    const jevOut = buildOutput(ops, vendor, filePath, { verdicts: finalVerdicts, doc });
+    const { combined: jevCombined } = jevOut;
+
+    // Item e, bars 2-4 (mechanical) and 6 (post-Jev).
+    checkCarriers({
+      filePath, doc, ops, verdicts: mechanicalVerdicts, out: mechanicalOut, pass: 'mechanical', diffs: carrierDiffs, tally: carrierTally,
+    });
+    checkCarriers({
+      filePath, doc, ops, verdicts: finalVerdicts, out: jevOut, pass: 'fake-jev', diffs: jevCarrierDiffs, tally: jevCarrierTally,
+    });
 
     for (let i = 0; i < ops.length; i += 1) {
       const op = ops[i];
@@ -334,7 +487,13 @@ async function main() {
     + `tier's threshold).`,
   );
 
-  const totalDiffs = toolsDiffs.length + mcpCountDiffs.length + mcpMissingDiffs.length
+  console.log(
+    `Item e (x-rwx + webmcp): mechanical ${carrierTally.checked} operations checked, ${carrierTally.skipped} skipped; `
+    + `fake-Jev ${jevCarrierTally.checked} checked, ${jevCarrierTally.skipped} skipped; `
+    + `${carrierTally.preexisting} operation(s) already carried x-rwx in the input.`,
+  );
+
+  const totalDiffs = carrierDiffs.length + jevCarrierDiffs.length + toolsDiffs.length + mcpCountDiffs.length + mcpMissingDiffs.length
     + mcpTruthDiffs.length + bareguardMissingDiffs.length + bareguardTightestDiffs.length
     + jevMcpTruthDiffs.length + jevBareguardMissingDiffs.length + jevBareguardTightestDiffs.length;
   if (totalDiffs === 0) {
@@ -357,6 +516,8 @@ async function main() {
   report('post-jev mcp class !== final verdict (item c bar 7)', jevMcpTruthDiffs);
   report('post-jev bareguard entries missing for a gate key (item c bar 7)', jevBareguardMissingDiffs);
   report('post-jev bareguard letter !== tightest-of-group final verdict (item c bar 7)', jevBareguardTightestDiffs);
+  report('x-rwx / webmcp / copy mismatches, mechanical (item e bars 2-4)', carrierDiffs);
+  report('x-rwx / webmcp / copy mismatches, fake Jev (item e bar 6)', jevCarrierDiffs);
   process.exit(1);
 }
 

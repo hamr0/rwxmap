@@ -94,12 +94,48 @@ const HTTP_METHODS = new Set(['get', 'put', 'post', 'delete', 'options', 'head',
 const TIGHTNESS = { r: 0, w: 1, x: 2 };
 
 /**
+ * THE ONE WRITER of "which objects in a document are operations" (D124).
+ * Walks `paths` in document order and yields each real HTTP-method
+ * field of each path item, with the operation object itself (a live
+ * reference into `spec`, not a copy). operationsFrom below is built on
+ * this, and the CLI's OpenAPI copy (`x-rwx`) walks the same entries, so
+ * the i-th operation row and the i-th object that gets `x-rwx` can never
+ * disagree about which operation they mean.
+ *
+ * No `$ref` is resolved, on a path item or anywhere else (D106): a path
+ * item that is only a `$ref` has no method fields and yields nothing.
+ * `field` is the key exactly as it appears in the document (it may be
+ * upper case); the method is its upper-cased form.
+ *
+ * @param {any} spec  A parsed OpenAPI document (untrusted).
+ * @returns {{path: string, field: string, operation: any}[]} in document
+ *   order; [] when there is no usable `paths` object at all.
+ */
+export function operationEntries(spec) {
+  const paths = spec && typeof spec === 'object' ? spec.paths : undefined;
+  if (!paths || typeof paths !== 'object') return [];
+
+  /** @type {{path: string, field: string, operation: any}[]} */
+  const entries = [];
+  for (const [path, pathItem] of Object.entries(paths)) {
+    if (!pathItem || typeof pathItem !== 'object') continue;
+    for (const [field, operation] of Object.entries(pathItem)) {
+      if (!HTTP_METHODS.has(field.toLowerCase())) continue;
+      if (!operation || typeof operation !== 'object') continue;
+      entries.push({ path, field, operation });
+    }
+  }
+  return entries;
+}
+
+/**
  * Read the operations out of a parsed OpenAPI document.
  *
  * This function does NO I/O and NO parsing: the caller has already read
  * the file and turned it into an object (JSON.parse, or a YAML parser of
  * their choosing). Keeping file and format handling out of the library is
- * what lets rwxmap stay dependency-free.
+ * what lets rwxmap stay dependency-free. Which objects count as
+ * operations is operationEntries' call above, never re-decided here.
  *
  * A missing operationId STAYS MISSING here. Synthesising a name is the key
  * builder's job (gateKey below) and it is the only writer of that
@@ -112,29 +148,17 @@ const TIGHTNESS = { r: 0, w: 1, x: 2 };
  *   usable `paths` object at all.
  */
 export function operationsFrom(spec) {
-  const paths = spec && typeof spec === 'object' ? spec.paths : undefined;
-  if (!paths || typeof paths !== 'object') return [];
-
-  /** @type {Operation[]} */
-  const operations = [];
-  for (const [path, pathItem] of Object.entries(paths)) {
-    if (!pathItem || typeof pathItem !== 'object') continue;
-    for (const [field, operation] of Object.entries(pathItem)) {
-      if (!HTTP_METHODS.has(field.toLowerCase())) continue;
-      if (!operation || typeof operation !== 'object') continue;
-
-      /** @type {Operation} */
-      const row = { method: field.toUpperCase(), path };
-      // Only real strings are copied across. An absent field stays absent
-      // rather than becoming `undefined`, so a row carries no key it
-      // cannot answer for.
-      if (typeof operation.operationId === 'string') row.operationId = operation.operationId;
-      if (typeof operation.summary === 'string') row.summary = operation.summary;
-      if (typeof operation.description === 'string') row.description = operation.description;
-      operations.push(row);
-    }
-  }
-  return operations;
+  return operationEntries(spec).map(({ path, field, operation }) => {
+    /** @type {Operation} */
+    const row = { method: field.toUpperCase(), path };
+    // Only real strings are copied across. An absent field stays absent
+    // rather than becoming `undefined`, so a row carries no key it
+    // cannot answer for.
+    if (typeof operation.operationId === 'string') row.operationId = operation.operationId;
+    if (typeof operation.summary === 'string') row.summary = operation.summary;
+    if (typeof operation.description === 'string') row.description = operation.description;
+    return row;
+  });
 }
 
 /**

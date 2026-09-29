@@ -241,12 +241,13 @@ test('run: an existing output file without --force exits 1 and leaves it untouch
   assert.equal(fs.existsSync(path.join(outDir, 'example.rwxmap.review.json')), false);
 });
 
-test('run: --force overwrites an existing pair', async () => {
+test('run: --force overwrites existing output files', async () => {
   const dir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
   const outDir = mkScratch();
   fs.writeFileSync(path.join(outDir, 'example.rwxmap.json'), 'SENTINEL');
   fs.writeFileSync(path.join(outDir, 'example.rwxmap.review.json'), 'SENTINEL');
+  fs.writeFileSync(path.join(outDir, 'example.openapi.rwx.json'), 'SENTINEL');
 
   const stdout = captureStream();
   const stderr = captureStream();
@@ -254,6 +255,7 @@ test('run: --force overwrites an existing pair', async () => {
 
   assert.equal(code, 0, stderr.text());
   assert.notEqual(fs.readFileSync(path.join(outDir, 'example.rwxmap.json'), 'utf8'), 'SENTINEL');
+  assert.notEqual(fs.readFileSync(path.join(outDir, 'example.openapi.rwx.json'), 'utf8'), 'SENTINEL');
 });
 
 test('run: a local file with no servers and no --vendor exits 1', async () => {
@@ -304,7 +306,7 @@ test('run: a local file with a Swagger 2 host defaults vendor to that host', asy
 // Atomic write path.
 // ---------------------------------------------------------------------
 
-test('run: writes both files via tmp+rename, leaving no tmp files behind', async () => {
+test('run: writes all three files via tmp+rename, leaving no tmp files behind', async () => {
   const dir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
   const outDir = mkScratch();
@@ -315,10 +317,12 @@ test('run: writes both files via tmp+rename, leaving no tmp files behind', async
 
   assert.equal(code, 0, stderr.text());
   const entries = fs.readdirSync(outDir).sort();
-  assert.deepEqual(entries, ['example.rwxmap.json', 'example.rwxmap.review.json']);
-  // both parse as JSON — a partially-written file would fail this.
+  assert.deepEqual(entries, ['example.openapi.rwx.json', 'example.rwxmap.json', 'example.rwxmap.review.json']);
+  // all parse as JSON — a partially-written file would fail this.
   readJson(path.join(outDir, 'example.rwxmap.json'));
   readJson(path.join(outDir, 'example.rwxmap.review.json'));
+  readJson(path.join(outDir, 'example.openapi.rwx.json'));
+  assert.match(stdout.text(), /rwxmap: wrote example\.rwxmap\.json \+ example\.rwxmap\.review\.json \+ example\.openapi\.rwx\.json\n/);
 });
 
 test('run: a write failure (target path is not a directory) exits 1 and writes no file', async () => {
@@ -674,4 +678,323 @@ test('run: jev.tokens sums answered rows usage, skips failed rows, and stays out
   assert.equal(/usage|input_tokens|tokens/.test(sidecarText), false);
   const { jev, ...rest } = combined;
   assert.equal(/usage|input_tokens|tokens/.test(JSON.stringify(rest)), false);
+});
+
+// ---------------------------------------------------------------------
+// Item e (D124): the WebMCP dict and the OpenAPI copy.
+// ---------------------------------------------------------------------
+
+/**
+ * Strip `x-rwx` from every operation object in a parsed doc, walking
+ * `paths` with this test's OWN method list (not exporter.js's), and
+ * return how many were removed.
+ * @param {any} doc
+ * @returns {number}
+ */
+function stripOperationXRwx(doc) {
+  const methods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'];
+  let removed = 0;
+  for (const item of Object.values(doc.paths || {})) {
+    if (!item || typeof item !== 'object') continue;
+    for (const [field, op] of Object.entries(item)) {
+      if (!methods.includes(field.toLowerCase()) || !op || typeof op !== 'object') continue;
+      if (Object.prototype.hasOwnProperty.call(op, 'x-rwx')) {
+        delete op['x-rwx'];
+        removed += 1;
+      }
+    }
+  }
+  return removed;
+}
+
+const SPEC_YAML = `openapi: 3.0.0
+servers:
+  - url: https://api.example.com
+paths:
+  /things:
+    get:
+      operationId: listThings
+      summary: List things
+  /things/{id}:
+    put:
+      operationId: updateThing
+  /things/{id}/permission:
+    delete:
+      operationId: deleteThingPermission
+`;
+
+test('run: the webmcp dict follows r/w/x -> readOnlyHint/consequentialHint on every operation (item e bar 4)', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
+  assert.equal(code, 0, stderr.text());
+
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.deepEqual(Object.keys(combined.webmcp).sort(), Object.keys(combined.mcp).sort());
+  assert.deepEqual(combined.webmcp['GET /things'], { annotations: { readOnlyHint: true, consequentialHint: false } });
+  assert.deepEqual(combined.webmcp['PUT /things/{id}'], { annotations: { readOnlyHint: false, consequentialHint: false } });
+  assert.deepEqual(combined.webmcp['DELETE /things/{id}/permission'], { annotations: { readOnlyHint: false, consequentialHint: true } });
+});
+
+test('run: the input file is byte-identical after a run, and stripping x-rwx from the copy gives the parsed input (item e bars 1, 2)', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  const before = fs.readFileSync(specPath);
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
+  assert.equal(code, 0, stderr.text());
+  assert.ok(fs.readFileSync(specPath).equals(before), 'input spec changed');
+
+  const copyText = fs.readFileSync(path.join(outDir, 'example.openapi.rwx.json'), 'utf8');
+  assert.equal(copyText, `${JSON.stringify(JSON.parse(copyText), null, 2)}\n`, 'copy is 2-space JSON');
+  const copy = JSON.parse(copyText);
+  const review = readJson(path.join(outDir, 'example.rwxmap.review.json'));
+  // Every operation's x-rwx equals its sidecar row.
+  for (const row of review.rows) {
+    const op = copy.paths[row.path][row.method.toLowerCase()];
+    assert.deepEqual(op['x-rwx'], { class: row.letter, destructive: row.destructive, evidence: row.evidence, review: row.marker });
+  }
+  assert.equal(stripOperationXRwx(copy), 3);
+  assert.deepEqual(copy, SPEC_DOC);
+  assert.doesNotMatch(stdout.text(), /existing x-rwx/);
+});
+
+test('run: a YAML input gets a JSON copy whose x-rwx-stripped form equals the parsed YAML (item e bars 1, 2)', async () => {
+  const dir = mkScratch();
+  const specPath = path.join(dir, 'spec.yaml');
+  fs.writeFileSync(specPath, SPEC_YAML);
+  const before = fs.readFileSync(specPath);
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
+  assert.equal(code, 0, stderr.text());
+  assert.ok(fs.readFileSync(specPath).equals(before), 'input spec changed');
+
+  const copy = JSON.parse(fs.readFileSync(path.join(outDir, 'example.openapi.rwx.json'), 'utf8'));
+  assert.equal(copy.paths['/things'].get['x-rwx'].class, 'r');
+  assert.equal(copy.paths['/things/{id}'].put['x-rwx'].class, 'w');
+  assert.equal(copy.paths['/things/{id}/permission'].delete['x-rwx'].class, 'x');
+  assert.equal(stripOperationXRwx(copy), 3);
+  const { parse } = await import('yaml');
+  assert.deepEqual(copy, parse(SPEC_YAML));
+});
+
+test('run: YAML-aliased operations each get their own x-rwx in the copy', async () => {
+  // Two path items share ONE operation object through a YAML alias; the
+  // yaml parser hands back the same JS object for both. The copy must
+  // still label each operation from its own row (a shared object would
+  // leave the first with the second's x-rwx).
+  const dir = mkScratch();
+  const specPath = path.join(dir, 'spec.yaml');
+  fs.writeFileSync(specPath, `openapi: 3.0.0
+paths:
+  /things:
+    get: &op
+      summary: shared
+  /things/{id}:
+    delete: *op
+`);
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
+  assert.equal(code, 0, stderr.text());
+  const copy = JSON.parse(fs.readFileSync(path.join(outDir, 'example.openapi.rwx.json'), 'utf8'));
+  assert.equal(copy.paths['/things'].get['x-rwx'].class, 'r');
+  assert.equal(copy.paths['/things/{id}'].delete['x-rwx'].class, 'x');
+});
+
+test('run: an x-rwx already in the input is overwritten in the copy, counted and reported (item e bar 7)', async () => {
+  const doc = {
+    openapi: '3.0.0',
+    paths: {
+      '/things': { get: { operationId: 'listThings', 'x-rwx': { class: 'x', note: 'stale' } } },
+      '/things/{id}': { put: { operationId: 'updateThing', 'x-rwx': 'w' } },
+      '/things/{id}/permission': { delete: { operationId: 'deleteThingPermission' } },
+    },
+  };
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', doc);
+  const before = fs.readFileSync(specPath);
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
+  assert.equal(code, 0, stderr.text());
+  assert.ok(fs.readFileSync(specPath).equals(before), 'input spec changed');
+  assert.match(stdout.text(), /^rwxmap: 2 existing x-rwx overwritten in the copy$/m);
+
+  const copy = JSON.parse(fs.readFileSync(path.join(outDir, 'example.openapi.rwx.json'), 'utf8'));
+  assert.deepEqual(copy.paths['/things'].get['x-rwx'], { class: 'r', destructive: false, evidence: 'floor', review: copy.paths['/things'].get['x-rwx'].review });
+  assert.equal(copy.paths['/things/{id}'].put['x-rwx'].class, 'w');
+  assert.equal(typeof copy.paths['/things/{id}'].put['x-rwx'], 'object');
+  // Stripping gives the input minus its own x-rwx, and nothing else changed.
+  stripOperationXRwx(copy);
+  const expected = JSON.parse(JSON.stringify(doc));
+  stripOperationXRwx(expected);
+  assert.deepEqual(copy, expected);
+});
+
+test('run: an existing .openapi.rwx.json without --force exits 1 and writes nothing (item e bar 1)', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  const outDir = mkScratch();
+  const copyPath = path.join(outDir, 'example.openapi.rwx.json');
+  fs.writeFileSync(copyPath, 'SENTINEL');
+  const stdout = captureStream();
+  const stderr = captureStream();
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
+  assert.equal(code, 1);
+  assert.equal(fs.readFileSync(copyPath, 'utf8'), 'SENTINEL');
+  assert.deepEqual(fs.readdirSync(outDir), ['example.openapi.rwx.json']);
+});
+
+test('run: with Jev on, x-rwx and webmcp carry the final (post-Jev) letters (item e bar 6)', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+  // raise-get moves r -> w, raise-wx moves w -> x, lower moves x -> w.
+  const { fetchImpl } = routedJevFetch({
+    listThings: { p: 0.99 },
+    updateThing: { p: 0.99 },
+    doMystery: { p: 0.01 },
+  });
+
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr, jevKey: 'k', fetchImpl });
+  assert.equal(code, 0, stderr.text());
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  const copy = readJson(path.join(outDir, 'example.openapi.rwx.json'));
+  const expected = { 'GET /things': 'w', 'PUT /things/{id}': 'x', 'POST /mystery': 'w' };
+  const hints = { w: { readOnlyHint: false, consequentialHint: false }, x: { readOnlyHint: false, consequentialHint: true } };
+  for (const [key, letter] of Object.entries(expected)) {
+    const [method, p] = key.split(' ');
+    assert.equal(copy.paths[p][method.toLowerCase()]['x-rwx'].class, letter, key);
+    assert.equal(copy.paths[p][method.toLowerCase()]['x-rwx'].evidence, 'jev', key);
+    assert.deepEqual(combined.webmcp[key].annotations, hints[letter], key);
+  }
+});
+
+// ---------------------------------------------------------------------
+// Item e (D124): the discovered path reloads the spec once.
+// ---------------------------------------------------------------------
+
+/**
+ * A routed globalThis.fetch stub for discovery: the api-catalog names
+ * https://api.example.test/openapi.json, whose GET answers come from
+ * `specGets` in order (one per GET; the last repeats). Everything else
+ * is a 404, so no test here can reach a real network.
+ * @param {Array<{status: number, text?: string, location?: string}>} specGets
+ */
+function stubDiscoveryFetch(specGets) {
+  const specUrl = 'https://api.example.test/openapi.json';
+  let n = 0;
+  const calls = [];
+  const res = (status, text = '', headers = {}) => ({
+    ok: status >= 200 && status < 300,
+    status,
+    headers: { get: (name) => headers[name.toLowerCase()] ?? null },
+    body: undefined,
+    text: async () => text,
+    arrayBuffer: async () => new TextEncoder().encode(text).buffer,
+  });
+  const fetchImpl = async (url, init) => {
+    const method = (init && init.method) || 'GET';
+    calls.push({ method, url: String(url), redirect: init && init.redirect });
+    if (String(url) === 'https://api.example.test/.well-known/api-catalog') {
+      return res(200, JSON.stringify({ 'service-desc': [{ href: specUrl }] }));
+    }
+    if (String(url) === specUrl) {
+      if (method === 'HEAD') return res(200);
+      const g = specGets[Math.min(n, specGets.length - 1)];
+      n += 1;
+      return res(g.status, g.text || '', g.location ? { location: g.location } : {});
+    }
+    return res(404);
+  };
+  return { fetchImpl, calls, specUrl };
+}
+
+test('run: a discovered spec that changed since discovery uses the fresh copy and says so', async (t) => {
+  const original = { ...SPEC_DOC, paths: { '/things': { get: { operationId: 'listThings' } } } };
+  const fresh = SPEC_DOC; // 3 operations, different bytes
+  const { fetchImpl, calls, specUrl } = stubDiscoveryFetch([
+    { status: 200, text: JSON.stringify(original) },
+    { status: 200, text: JSON.stringify(fresh) },
+  ]);
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = /** @type {typeof fetch} */ (/** @type {unknown} */ (fetchImpl));
+  t.after(() => { globalThis.fetch = originalFetch; });
+
+  const outDir = mkScratch();
+  const cacheDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+  const code = await run(['https://api.example.test', '-o', outDir], { cwd: outDir, stdout, stderr, cacheDir });
+
+  assert.equal(code, 0, stderr.text());
+  assert.match(stdout.text(), /^rwxmap: spec changed since discovery cached it \(sha256 differs\); used the fresh copy$/m);
+  // The reload asked for no redirect-following.
+  const specGets = calls.filter((c) => c.method === 'GET' && c.url === specUrl);
+  assert.equal(specGets.length, 2);
+  assert.equal(specGets[1].redirect, 'manual');
+  // Ops, letters and copy all come from the fresh document — never mixed.
+  const combined = readJson(path.join(outDir, 'api.example.test.rwxmap.json'));
+  const copy = readJson(path.join(outDir, 'api.example.test.openapi.rwx.json'));
+  assert.equal(Object.keys(combined.mcp).length, 3);
+  assert.equal(Object.keys(combined.webmcp).length, 3);
+  stripOperationXRwx(copy);
+  assert.deepEqual(copy, fresh);
+});
+
+test('run: an unchanged discovered spec prints no spec-changed line', async (t) => {
+  const { fetchImpl } = stubDiscoveryFetch([{ status: 200, text: JSON.stringify(SPEC_DOC) }]);
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = /** @type {typeof fetch} */ (/** @type {unknown} */ (fetchImpl));
+  t.after(() => { globalThis.fetch = originalFetch; });
+
+  const outDir = mkScratch();
+  const cacheDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+  const code = await run(['https://api.example.test', '-o', outDir], { cwd: outDir, stdout, stderr, cacheDir });
+
+  assert.equal(code, 0, stderr.text());
+  assert.doesNotMatch(stdout.text(), /spec changed/);
+  const copy = readJson(path.join(outDir, 'api.example.test.openapi.rwx.json'));
+  stripOperationXRwx(copy);
+  assert.deepEqual(copy, SPEC_DOC);
+});
+
+test('run: a redirect when reloading a discovered spec exits 1 and writes no file', async (t) => {
+  const { fetchImpl } = stubDiscoveryFetch([
+    { status: 200, text: JSON.stringify(SPEC_DOC) },
+    { status: 302, location: 'https://elsewhere.example.test/openapi.json' },
+  ]);
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = /** @type {typeof fetch} */ (/** @type {unknown} */ (fetchImpl));
+  t.after(() => { globalThis.fetch = originalFetch; });
+
+  const outDir = mkScratch();
+  const cacheDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+  const code = await run(['https://api.example.test', '-o', outDir], { cwd: outDir, stdout, stderr, cacheDir });
+
+  assert.equal(code, 1);
+  assert.match(stderr.text(), /could not reload the discovered spec https:\/\/api\.example\.test\/openapi\.json \(a redirect on reload is refused, never followed\): .*http 302/);
+  assert.deepEqual(fs.readdirSync(outDir), []);
 });

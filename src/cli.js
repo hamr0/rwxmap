@@ -63,6 +63,18 @@
 // resolve to a real http(s) URL) -> null -> this file's own "no vendor,
 // pass --vendor" error, same as before.
 //
+// D124 — THE REMAINING CARRIERS. Each is the exact fragment its
+// standard's own slot takes, so adoption is a copy. The combined JSON
+// gains `webmcp`, keyed "METHOD path" exactly like `mcp` and built in
+// the SAME loop (buildHintDicts), so the two dicts can never disagree on
+// keys or on which operation won a collision. A third file,
+// `<vendor>.openapi.rwx.json`, is a JSON copy of the parsed input with
+// `x-rwx` set on every operation object (buildOpenApiCopy). The input
+// file itself is only ever read. For a discovered spec the parsed
+// document is not in findSpec's result (nor its cache), so resolveInput
+// reloads `specUrl` once with redirects refused and takes operations,
+// letters and the copy all from that one reloaded document.
+//
 // Dependency rule (CLAUDE.md): vanilla Node >= 22 ESM, node:util's
 // parseArgs, node:fs/path. No new dependency.
 
@@ -73,7 +85,7 @@ import { fileURLToPath } from 'node:url';
 
 import { loadSpec } from './load.js';
 import { findSpec, firstServerHost } from './discover.js';
-import { operationsFrom, exportGate, exportSidecar, classifyOperations } from './exporter.js';
+import { operationsFrom, operationEntries, exportGate, exportSidecar, classifyOperations } from './exporter.js';
 import { needsJev, applyJev } from './jev.js';
 import { runJevBatch } from './jev-client.js';
 
@@ -125,6 +137,33 @@ function annotationsForClass(letter) {
 }
 
 /**
+ * D124's WebMCP mapping (PRD Carrier 3). WebMCP's ToolAnnotations all
+ * default to FALSE, so an omitted `consequentialHint` would read as "can
+ * be undone" — the loose reading. Both flags are therefore always
+ * emitted, on every class.
+ *
+ * @param {'r'|'w'|'x'} letter
+ * @returns {{readOnlyHint: boolean, consequentialHint: boolean}}
+ */
+function webmcpAnnotationsForClass(letter) {
+  if (letter === 'r') return { readOnlyHint: true, consequentialHint: false };
+  if (letter === 'w') return { readOnlyHint: false, consequentialHint: false };
+  if (letter === 'x') return { readOnlyHint: false, consequentialHint: true };
+  throw new Error(`cli: unknown class "${letter}"`);
+}
+
+/**
+ * The OpenAPI `x-rwx` value (PRD Carrier 1): the four published fields
+ * of one sidecar row.
+ *
+ * @param {import('./exporter.js').SidecarRow} row
+ * @returns {{class: 'r'|'w'|'x', destructive: boolean, evidence: string, review: string}}
+ */
+function xRwxForRow(row) {
+  return { class: row.letter, destructive: row.destructive, evidence: row.evidence, review: row.marker };
+}
+
+/**
  * @param {import('./exporter.js').SidecarRow} row
  * @returns {Record<string, string|boolean>}
  */
@@ -149,12 +188,12 @@ class CliError extends Error {}
  *
  * @param {string} address
  * @param {{cacheDir?: string}} [findSpecOpts]
- * @returns {Promise<{ops: import('./types.js').Operation[], source: string, viaDiscover: boolean, isLocalFile: boolean, doc: any}>}
- *   `doc` is the parsed document for a local file (so resolveVendor can
- *   read its own `servers`), and null for anything loaded over HTTP(S) —
- *   a URL/bare-address vendor never reads the spec, it's the address's
- *   own host (see resolveVendor), so there is no reason to carry a
- *   (possibly large) parsed doc through that path.
+ * @returns {Promise<{ops: import('./types.js').Operation[], source: string, viaDiscover: boolean, isLocalFile: boolean, doc: any, specChanged: boolean}>}
+ *   `doc` is the parsed document on EVERY path (D124): `ops` is always
+ *   operationsFrom(doc) of that same document, so the OpenAPI copy and
+ *   the letters describe one and the same spec. `specChanged` is true
+ *   only on the discovered path, when the reloaded bytes' sha256 differs
+ *   from the one discovery recorded (a cached result can be stale).
  */
 async function resolveInput(address, findSpecOpts = {}) {
   if (!isHttpUrl(address)) {
@@ -168,20 +207,20 @@ async function resolveInput(address, findSpecOpts = {}) {
       const reason = err instanceof Error ? err.message : String(err);
       throw new CliError(reason);
     }
-    return { ops: operationsFrom(loaded.doc), source: address, viaDiscover: false, isLocalFile: true, doc: loaded.doc };
+    return { ops: operationsFrom(loaded.doc), source: address, viaDiscover: false, isLocalFile: true, doc: loaded.doc, specChanged: false };
   }
 
   // http(s) URL: try it as a spec first.
-  /** @type {{ops: import('./types.js').Operation[], source: string}|null} */
+  /** @type {{ops: import('./types.js').Operation[], source: string, doc: any}|null} */
   let asSpec = null;
   try {
     const loaded = await loadSpec(address);
     const ops = operationsFrom(loaded.doc);
-    if (ops.length > 0) asSpec = { ops, source: address };
+    if (ops.length > 0) asSpec = { ops, source: address, doc: loaded.doc };
   } catch {
     asSpec = null;
   }
-  if (asSpec) return { ...asSpec, viaDiscover: false, isLocalFile: false, doc: null };
+  if (asSpec) return { ...asSpec, viaDiscover: false, isLocalFile: false, specChanged: false };
 
   // Not a loadable spec, or a spec with zero operations: treat as a bare
   // API address and run discovery.
@@ -190,7 +229,32 @@ async function resolveInput(address, findSpecOpts = {}) {
     const reason = found.reason ? `: ${found.reason}` : '';
     throw new CliError(`no spec found for ${address}${reason}`);
   }
-  return { ops: found.ops, source: found.specUrl, viaDiscover: true, isLocalFile: false, doc: null };
+
+  // D124: findSpec's result (and its cache) carries operations but not
+  // the parsed document, so reload the spec it found ONCE, with
+  // redirects refused (`redirect: 'manual'` makes load.js throw on any
+  // 3xx — the reload is not run through discovery's per-hop safety walk,
+  // so it must not follow anywhere). Operations, letters and the copy
+  // all come from THIS document; found.ops is never mixed with it.
+  let reloaded;
+  try {
+    reloaded = await loadSpec(found.specUrl, { headers: { 'User-Agent': `rwxmap/${packageVersion()}` }, redirect: 'manual' });
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    throw new CliError(`could not reload the discovered spec ${found.specUrl} (a redirect on reload is refused, never followed): ${reason}`);
+  }
+  const ops = operationsFrom(reloaded.doc);
+  if (ops.length === 0) {
+    throw new CliError(`the discovered spec ${found.specUrl} has no operations on reload`);
+  }
+  return {
+    ops,
+    source: found.specUrl,
+    viaDiscover: true,
+    isLocalFile: false,
+    doc: reloaded.doc,
+    specChanged: reloaded.sha256 !== found.sha256,
+  };
 }
 
 /**
@@ -220,8 +284,10 @@ function defaultVendor(address, isLocalFile, doc) {
 }
 
 /**
- * Build the `mcp` dict (D122): one entry per operation, keyed
- * `"METHOD path"`. `ops` and `sidecarRows` MUST be the same length and in
+ * Build the `mcp` dict (D122) and the `webmcp` dict (D124): one entry
+ * each per operation, keyed `"METHOD path"`. Both are filled in this ONE
+ * loop from the same row, so they share keys and every collision
+ * decision — `mcpCollisions` therefore covers `webmcp` too. `ops` and `sidecarRows` MUST be the same length and in
  * the same order — exportSidecar's classifyAll pushes exactly one row per
  * input operation, in input order, so zipping by index reads the
  * operationId (only `ops` carries it) beside the letter/marker/evidence
@@ -237,11 +303,13 @@ function defaultVendor(address, isLocalFile, doc) {
  *
  * @param {import('./types.js').Operation[]} ops
  * @param {import('./exporter.js').SidecarRow[]} sidecarRows
- * @returns {{mcp: Record<string, any>, mcpCollisions: Array<{key: string, kept: string, dropped: string}>}}
+ * @returns {{mcp: Record<string, any>, webmcp: Record<string, any>, mcpCollisions: Array<{key: string, kept: string, dropped: string}>}}
  */
-function buildMcp(ops, sidecarRows) {
+function buildHintDicts(ops, sidecarRows) {
   /** @type {Record<string, any>} */
   const mcp = {};
+  /** @type {Record<string, any>} */
+  const webmcp = {};
   /** @type {Array<{key: string, kept: string, dropped: string}>} */
   const mcpCollisions = [];
 
@@ -255,21 +323,67 @@ function buildMcp(ops, sidecarRows) {
       _meta: metaForRow(row),
     };
 
+    const webmcpEntry = { annotations: webmcpAnnotationsForClass(row.letter) };
+
     const existing = mcp[key];
     if (!existing) {
       mcp[key] = entry;
+      webmcp[key] = webmcpEntry;
       continue;
     }
     const existingLetter = existing._meta['io.github.hamr0.rwxmap/class'];
     if (TIGHTNESS[row.letter] > TIGHTNESS[existingLetter]) {
       mcpCollisions.push({ key, kept: row.letter, dropped: existingLetter });
       mcp[key] = entry;
+      webmcp[key] = webmcpEntry;
     } else {
       mcpCollisions.push({ key, kept: existingLetter, dropped: row.letter });
     }
   }
 
-  return { mcp, mcpCollisions };
+  return { mcp, webmcp, mcpCollisions };
+}
+
+/**
+ * The OpenAPI copy (D124, PRD Carrier 1): a deep copy of the parsed input
+ * document with `x-rwx` set on every operation object. Never touches
+ * `doc` itself.
+ *
+ * The copy is a JSON round trip, not structuredClone, ON PURPOSE: a YAML
+ * alias makes two operations the SAME JS object, and structuredClone
+ * keeps that sharing, so writing one operation's `x-rwx` would silently
+ * overwrite the other's. A JSON round trip splits them, and the output
+ * is JSON anyway. (A self-referencing YAML alias cannot be written as
+ * JSON at all; JSON.stringify throws and the run fails loudly.)
+ *
+ * The copy's operation objects are found by exporter.js's
+ * operationEntries — the same walk operationsFrom uses — and zipped by
+ * index with `sidecarRows`. Each pairing is checked (method and path must
+ * match) and a mismatch THROWS rather than labelling the wrong object.
+ *
+ * @param {any} doc  The parsed input document `ops` came from.
+ * @param {import('./exporter.js').SidecarRow[]} sidecarRows  One per
+ *   operation, same order as operationsFrom(doc).
+ * @returns {{copy: any, overwritten: number}}  `overwritten` counts the
+ *   operations that already carried an `x-rwx` in the input.
+ */
+function buildOpenApiCopy(doc, sidecarRows) {
+  const copy = JSON.parse(JSON.stringify(doc));
+  const entries = operationEntries(copy);
+  if (entries.length !== sidecarRows.length) {
+    throw new Error(`cli: OpenAPI copy has ${entries.length} operation(s) but ${sidecarRows.length} verdict row(s)`);
+  }
+  let overwritten = 0;
+  for (let i = 0; i < entries.length; i += 1) {
+    const { path: p, field, operation } = entries[i];
+    const row = sidecarRows[i];
+    if (field.toUpperCase() !== row.method || p !== row.path) {
+      throw new Error(`cli: OpenAPI copy operation ${i} is ${field.toUpperCase()} ${p}, verdict row is ${row.method} ${row.path}`);
+    }
+    if (Object.prototype.hasOwnProperty.call(operation, 'x-rwx')) overwritten += 1;
+    operation['x-rwx'] = xRwxForRow(row);
+  }
+  return { copy, overwritten };
 }
 
 /**
@@ -337,20 +451,26 @@ function jevOffSummary() {
  * @param {import('./types.js').Operation[]} ops
  * @param {string} vendor
  * @param {string} source
- * @param {{verdicts?: import('./types.js').Verdict[], jevSummary?: object}} [options]
+ * @param {{verdicts?: import('./types.js').Verdict[], jevSummary?: object, doc?: any}} [options]
  *   `verdicts` is the FINAL (post-Jev, or plain mechanical) verdict list,
  *   same order as `ops` — omitted (mechanical-only callers, e.g.
  *   tools/proof-cli.js) falls back to exportGate/exportSidecar's own
  *   default of classifying `ops` themselves, unchanged from item d.
  *   `jevSummary` is the combined JSON's top-level `jev` field; omitted
- *   defaults to the "off" shape.
- * @returns {{combined: any, sidecarOut: any, collisions: import('./exporter.js').Collision[], mcpCollisions: Array<{key: string, kept: string, dropped: string}>}}
+ *   defaults to the "off" shape. `doc` is the parsed document `ops`
+ *   came from (`ops` must be operationsFrom(doc)); given, the result
+ *   also carries the OpenAPI copy (D124) as `openapiCopy` plus
+ *   `xRwxOverwritten`; omitted, both are null/0.
+ * @returns {{combined: any, sidecarOut: any, collisions: import('./exporter.js').Collision[], mcpCollisions: Array<{key: string, kept: string, dropped: string}>, openapiCopy: any, xRwxOverwritten: number}}
  */
 export function buildOutput(ops, vendor, source, options = {}) {
-  const { verdicts, jevSummary = jevOffSummary() } = options;
+  const { verdicts, jevSummary = jevOffSummary(), doc } = options;
   const { tools, collisions } = exportGate(ops, { vendor, verdicts });
   const sidecar = exportSidecar(ops, { vendor, verdicts });
-  const { mcp, mcpCollisions } = buildMcp(ops, sidecar.rows);
+  const { mcp, webmcp, mcpCollisions } = buildHintDicts(ops, sidecar.rows);
+  const { copy: openapiCopy, overwritten: xRwxOverwritten } = doc === undefined
+    ? { copy: null, overwritten: 0 }
+    : buildOpenApiCopy(doc, sidecar.rows);
 
   const combined = {
     rwxmapVersion: packageVersion(),
@@ -358,11 +478,12 @@ export function buildOutput(ops, vendor, source, options = {}) {
     vendor,
     bareguard: { tools },
     mcp,
+    webmcp,
     jev: jevSummary,
   };
   const sidecarOut = mcpCollisions.length > 0 ? { ...sidecar, mcpCollisions } : sidecar;
 
-  return { combined, sidecarOut, collisions, mcpCollisions };
+  return { combined, sidecarOut, collisions, mcpCollisions, openapiCopy, xRwxOverwritten };
 }
 
 /**
@@ -509,12 +630,17 @@ export async function run(argv, env) {
   let source;
   let isLocalFile;
   let doc;
+  let specChanged;
   try {
-    ({ ops, source, isLocalFile, doc } = await resolveInput(address, findSpecOpts));
+    ({ ops, source, isLocalFile, doc, specChanged } = await resolveInput(address, findSpecOpts));
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
     stderr.write(`rwxmap: ${reason}\n`);
     return 1;
+  }
+
+  if (specChanged) {
+    stdout.write('rwxmap: spec changed since discovery cached it (sha256 differs); used the fresh copy\n');
   }
 
   const vendor = values.vendor ? String(values.vendor) : defaultVendor(address, isLocalFile, doc);
@@ -529,9 +655,10 @@ export async function run(argv, env) {
 
   const mapPath = path.join(outDir, `${vendor}.rwxmap.json`);
   const reviewPath = path.join(outDir, `${vendor}.rwxmap.review.json`);
+  const openapiPath = path.join(outDir, `${vendor}.openapi.rwx.json`);
 
   if (!values.force) {
-    const existing = [mapPath, reviewPath].filter((p) => fs.existsSync(p));
+    const existing = [mapPath, reviewPath, openapiPath].filter((p) => fs.existsSync(p));
     if (existing.length > 0) {
       stderr.write(`rwxmap: refusing to overwrite existing file(s) without --force: ${existing.join(', ')}\n`);
       return 1;
@@ -557,13 +684,22 @@ export async function run(argv, env) {
     jevSummary = result.summary;
   }
 
-  const { combined, sidecarOut, collisions, mcpCollisions } = buildOutput(ops, vendor, source, { verdicts, jevSummary });
+  let built;
+  try {
+    built = buildOutput(ops, vendor, source, { verdicts, jevSummary, doc });
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    stderr.write(`rwxmap: could not build output: ${reason}\n`);
+    return 1;
+  }
+  const { combined, sidecarOut, collisions, mcpCollisions, openapiCopy, xRwxOverwritten } = built;
 
   try {
     fs.mkdirSync(outDir, { recursive: true });
     atomicWriteFiles([
       { targetPath: mapPath, content: `${JSON.stringify(combined, null, 2)}\n` },
       { targetPath: reviewPath, content: `${JSON.stringify(sidecarOut, null, 2)}\n` },
+      { targetPath: openapiPath, content: `${JSON.stringify(openapiCopy, null, 2)}\n` },
     ]);
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
@@ -585,7 +721,10 @@ export async function run(argv, env) {
       ? `rwxmap: Jev: on — ${jevSummary.sent} sent · ${jevSummary.answered} answered · ${jevSummary.failed} failed (kept mechanical) · ${jevSummary.changed} letters changed · ${jevSummary.tokens.input} in / ${jevSummary.tokens.output} out tokens\n`
       : 'rwxmap: Jev: off (mechanical)\n',
   );
-  stdout.write(`rwxmap: wrote ${path.basename(mapPath)} + ${path.basename(reviewPath)}\n`);
+  stdout.write(`rwxmap: wrote ${path.basename(mapPath)} + ${path.basename(reviewPath)} + ${path.basename(openapiPath)}\n`);
+  if (xRwxOverwritten > 0) {
+    stdout.write(`rwxmap: ${xRwxOverwritten} existing x-rwx overwritten in the copy\n`);
+  }
   if (collisions.length > 0 || mcpCollisions.length > 0) {
     stdout.write(
       `rwxmap: ${collisions.length} bareguard key collision(s), ${mcpCollisions.length} mcp key collision(s) — see the sidecar\n`,
