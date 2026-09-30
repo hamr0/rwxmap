@@ -60,7 +60,9 @@ evidence. The spec interview is prose, never choice boxes. Every
 experiment is appended to `docs/logs/learnings.md` before the next one
 starts, with its numbers and what it taught; a result that changes a
 feature or a decision goes into `docs/product/prd.md`, never only into
-the learnings file.
+the learnings file. Before any release, run `docs/release-checklist.md`
+item by item and report each result; a release is not cut with any item
+unrun.
 
 ## Dev Rules
 

@@ -131,41 +131,8 @@ Trimmed example of the combined JSON, one entry each:
 Exit 0 on success, 1 on any failure. An existing output file is not
 overwritten without `--force`.
 
-**Who reads what.** Only bareguard reads `bareguard.tools` directly. The
-rest are hints you copy into place; a client may ignore them.
-
-- **MCP** — copy an `mcp` entry's `annotations` and `_meta` onto the
-  tool with the same operation. `inputSchema` must be a Zod raw shape
-  (`{ id: z.string() }`, or `{}` for none), not plain JSON Schema:
-
-  ```js
-  server.registerTool('delete_order', {
-    description: 'Delete an order.',
-    inputSchema: { /* yours */ }, // Zod raw shape, e.g. { id: z.string() }; {} for none
-    annotations: { readOnlyHint: false, destructiveHint: true },
-    _meta: {
-      'io.github.hamr0.rwxmap/class': 'x',
-      'io.github.hamr0.rwxmap/destructive': true,
-      'io.github.hamr0.rwxmap/evidence': 'floor',
-      'io.github.hamr0.rwxmap/review': 'settled',
-    },
-  }, handler);
-  ```
-
-- **WebMCP** — copy a `webmcp` entry's `annotations` into
-  `registerTool` (Chrome 154+ with WebMCP enabled):
-
-  ```js
-  await document.modelContext.registerTool({
-    name: 'delete_order',
-    description: 'Delete an order.',
-    annotations: { readOnlyHint: false, consequentialHint: true },
-    execute: async (input) => { /* yours */ },
-  });
-  ```
-
-- **OpenAPI** — serve `<vendor>.openapi.rwx.json` where you served the
-  original spec; the `x-rwx` keys are extensions other tools ignore.
+Only bareguard reads `bareguard.tools` directly. The MCP, WebMCP and
+OpenAPI parts are hints you copy into place; a client may ignore them.
 
 ## Review markers
 
