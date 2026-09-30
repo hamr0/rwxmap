@@ -823,6 +823,14 @@ Nothing is planned. Parked items and known limits are below.
   file. A URL the caller types is fetched as given. Vendor (D123):
   `--vendor`, else a URL's own host, else a local spec's first server
   host (`firstServerHost`), else exit 1 asking for `--vendor`.
+  A document with no `openapi` or `swagger` key is not a spec: a local
+  file or a discovered spec that reloads that way exits 1; a URL that
+  serves one falls through to discovery. `--vendor` must be a plain
+  name (no `/` or `\`, not `.`, `..` or empty), refused before any I/O.
+  OpenAPI 3.1 `webhooks` operations are counted in a stdout notice and
+  never labelled. `-h`/`--help` and `-v`/`--version` exit 0; error text
+  is plain (`no such file`, `not a file`, `unknown option`, `-o needs a
+  value`).
 - **Jev in the CLI** (D118-D120, D125; `rwxmap@0.6.0`). A key in
   `RWXMAP_JEV_KEY` (environment, else `.env`) turns on all three tiers
   (D119). No key: mechanical, and the run says so. Bring your own key;

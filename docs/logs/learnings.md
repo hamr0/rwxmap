@@ -7299,3 +7299,27 @@ so CI has not run on it.
 
 This pass closed two fix-ledger items: the 503 swallowed by discovery,
 and CI not running the installed bin.
+
+### Debrief 6 fixes (commit b3feb7e)
+
+The second debrief pass after the polish above found six more rough
+spots, all fixed in b3feb7e:
+
+- A document with `paths` but no `openapi` or `swagger` key was
+  labelled as a spec. Now a local file and a discovered-spec reload exit
+  1; a spec URL falls through to discovery.
+- OpenAPI 3.1 `webhooks` operations were silently unlabelled. They are
+  now counted in a stdout notice, never labelled.
+- `--vendor` with `/` or `\`, `.`, `..` or empty is refused before any
+  I/O.
+- Plain messages: no `loadSpec:` prefix on local files, `not a file` for
+  a directory, `-o needs a value`, `unknown option: --x`.
+- The `(as a spec: ...)` note is dropped when the address loaded but was
+  not a spec.
+- Help lists `-h`/`--help` and `-v`/`--version` on their own lines.
+
+The suite is now 429 of 429 (the polish entry above says 420). Nine new
+tests each fail against the old cli.js. Still open, in the fix ledger:
+whitespace-only and all-dot `--vendor` names, a `swagger`/`openapi` key
+checked for presence only, and the message-text coupling to load.js and
+Node.
