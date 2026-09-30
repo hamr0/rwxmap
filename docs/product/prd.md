@@ -768,6 +768,9 @@ above.
   (2026-09-28).
 - **The command line, Jev in the CLI and the carriers** (items c, d and
   e) — released as `rwxmap@0.6.0` on 2026-09-29.
+- **CLI polish and the release checklist** — `--help`, `--version`,
+  plain error messages, the `openapi`/`swagger` key check and
+  `docs/release-checklist.md` — released as `rwxmap@0.7.0` on 2026-09-30.
 
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 

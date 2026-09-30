@@ -7323,3 +7323,47 @@ tests each fail against the old cli.js. Still open, in the fix ledger:
 whitespace-only and all-dot `--vendor` names, a `swagger`/`openapi` key
 checked for presence only, and the message-text coupling to load.js and
 Node.
+
+## 2026-09-30 — v0.7.0 released; release checklist in place
+
+- Goal: release the CLI polish, the debrief 6 fixes and the docs cleanup
+  that followed 0.6.0.
+- Released: `rwxmap@0.7.0`. PR #12, merged with a merge commit 3d9c0fd
+  (not squashed, the user's choice), release commit 9cd111a, tag v0.7.0
+  on 3d9c0fd, npm `latest` is 0.7.0.
+- Why 0.7.0 and not 0.6.1 (the user's ruling): the new flags are Added,
+  which is a minor; and refusing a document with no `openapi` or
+  `swagger` key is a tightening.
+- What it contains: the CLI polish (015d15f) and the debrief 6 fixes
+  (b3feb7e), both in the entries above; the PRD cut to one shape and the
+  README rescoped; `docs/release-checklist.md` (12 items) and the
+  CLAUDE.md line that a release is not cut with any item unrun
+  (9fcfea2); `poc/conformance` reading its own `hint-snippets.md`
+  instead of the README; the openvan.camp `check:live` record
+  re-recorded at 32 operations and the proof-cli header stating 37 files
+  / 11,505 operations (f70b5a5).
+- Numbers at release: `npm test` 429 of 429; typecheck 0 errors;
+  proof-load, proof-match and proof-cli all hold over 11,505 operations;
+  conformance 6 of 6 with the browser check skipped because Chrome is
+  not installed; `npm run check:live` 4 PASS; `npm audit` 0.
+- CI was green on the PR, including the first real run of the new step
+  that packs, installs and runs the bin.
+- After publish: from a scratch folder with no `.env`, `--version`
+  printed 0.7.0, and a spec run exited 0, wrote 3 files and printed
+  "Jev: off (mechanical)".
+- Why the checklist exists: 0.6.0 shipped without `--help` or
+  `--version` because five debrief rounds and a review never ran the CLI
+  as a new user would; and the README rescope broke the conformance
+  readme check, which was not re-run before the commit and which CI does
+  not run.
+- Lesson 1: the 0.6.0 post-publish smoke test was run from the repo
+  root, where `.env` holds the Jev key, so unsetting `RWXMAP_JEV_KEY`
+  was not enough and it sent 189 real Jev rows, about 452k input
+  tokens. Mechanical smoke tests run from a scratch folder with no
+  `.env`, and the run must print "Jev: off (mechanical)".
+- Lesson 2: fixing every Later item makes new edge cases for the next
+  debrief round. Stop polishing once Fix-now is 0.
+- Still open, in the fix ledger (`.claude/remember/fix-ledger.md`): 5
+  items, 4 nits and 1 change (Windows untested).
+- Plan: nothing is planned in the PRD; the parked items wait on a core
+  change.
