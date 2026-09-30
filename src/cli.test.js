@@ -256,6 +256,95 @@ test('run: no spec found keeps the load error of the address itself', async (t) 
   assert.equal(stderr.text(), 'rwxmap: no spec found for https://down.example.test (as a spec: http 503)\n');
 });
 
+/** Run the CLI on one input in a scratch dir; returns the exit code, both streams and the dir. */
+async function runIn(argv, dir = mkScratch()) {
+  const stdout = captureStream();
+  const stderr = captureStream();
+  const code = await run(argv, { cwd: dir, stdout, stderr });
+  return { code, stdout: stdout.text(), stderr: stderr.text(), dir };
+}
+
+test('run: a --vendor with a path separator, or . / .. / empty, is refused before any I/O', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  for (const vendor of ['a/b', 'a\\b', '.', '..', '']) {
+    const r = await runIn([specPath, '--vendor', vendor], dir);
+    assert.equal(r.code, 1);
+    assert.equal(r.stderr, `rwxmap: --vendor must be a plain name (no / or \\): ${vendor}\n`);
+  }
+  assert.deepEqual(fs.readdirSync(dir), ['spec.json']);
+});
+
+test('run: JSON with paths but no openapi or swagger key is not a spec', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'notspec.json', { paths: { '/things': { get: { operationId: 'listThings' } } } });
+  const r = await runIn([specPath, '--vendor', 'x'], dir);
+  assert.equal(r.code, 1);
+  assert.equal(r.stderr, `rwxmap: not an OpenAPI or Swagger document: ${specPath}\n`);
+  assert.deepEqual(fs.readdirSync(dir), ['notspec.json']);
+});
+
+test('run: OpenAPI 3.1 webhook operations are counted as not labelled', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', {
+    ...SPEC_DOC,
+    openapi: '3.1.0',
+    webhooks: { newThing: { post: { operationId: 'onNewThing' } }, gone: { post: {}, delete: {} } },
+  });
+  const r = await runIn([specPath, '--vendor', 'x'], dir);
+  assert.equal(r.code, 0, r.stderr);
+  assert.match(r.stdout, /\nrwxmap: 3 webhook operation\(s\) are not labelled \(they are calls the API makes, not calls to it\)\n/);
+  const review = readJson(path.join(dir, 'x.rwxmap.review.json'));
+  assert.equal(review.counts.rows, 3);
+});
+
+test('run: a local file that is not JSON or YAML says so without the loader prefix', async () => {
+  const dir = mkScratch();
+  const p = path.join(dir, 'bad.json');
+  fs.writeFileSync(p, '{ not: [valid');
+  const r = await runIn([p, '--vendor', 'x'], dir);
+  assert.equal(r.code, 1);
+  assert.match(r.stderr, /^rwxmap: could not parse as JSON or YAML \(/);
+  assert.doesNotMatch(r.stderr, /loadSpec:/);
+});
+
+test('run: a directory is not a file', async () => {
+  const dir = mkScratch();
+  const r = await runIn([dir, '--vendor', 'x'], dir);
+  assert.equal(r.code, 1);
+  assert.equal(r.stderr, `rwxmap: not a file: ${dir}\n`);
+});
+
+test('run: an option with no value, and an unknown option, are named as the user typed them', async () => {
+  const usage = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--force]';
+  const cases = [
+    [['spec.json', '-o'], 'rwxmap: -o needs a value'],
+    [['spec.json', '--vendor'], 'rwxmap: --vendor needs a value'],
+    [['spec.json', '--bogus'], 'rwxmap: unknown option: --bogus'],
+  ];
+  for (const [argv, message] of cases) {
+    const r = await runIn(argv);
+    assert.equal(r.code, 1);
+    assert.equal(r.stderr, `${message}\n${usage}\n`);
+  }
+});
+
+test('run: a bare address whose own page loaded but is not a spec drops the "(as a spec:" note', async (t) => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = fetchAll(200, '<html><body>welcome</body></html>');
+  t.after(() => { globalThis.fetch = originalFetch; });
+  const stderr = captureStream();
+  const code = await run(['https://home.example.test'], { cwd: mkScratch(), stdout: captureStream(), stderr, cacheDir: mkScratch() });
+  assert.equal(code, 1);
+  assert.equal(stderr.text(), 'rwxmap: no spec found for https://home.example.test\n');
+});
+
+test('run: the help lists -h and -v on their own lines', async () => {
+  const r = await runIn(['--help']);
+  assert.match(r.stdout, /^ {2}-h, --help {5}this help$/m);
+  assert.match(r.stdout, /^ {2}-v, --version {2}the version$/m);
+});
+
 test('run: --help and -h print the usage to stdout and exit 0', async () => {
   for (const flag of ['--help', '-h']) {
     const stdout = captureStream();
@@ -1025,6 +1114,24 @@ test('run: a discovered spec that changed since discovery uses the fresh copy an
   assert.equal(Object.keys(combined.webmcp).length, 3);
   stripOperationXRwx(copy);
   assert.deepEqual(copy, fresh);
+});
+
+test('run: a discovered spec that reloads without an openapi or swagger key exits 1 and writes no file', async (t) => {
+  const { fetchImpl, specUrl } = stubDiscoveryFetch([
+    { status: 200, text: JSON.stringify(SPEC_DOC) },
+    { status: 200, text: JSON.stringify({ paths: SPEC_DOC.paths }) },
+  ]);
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = /** @type {typeof fetch} */ (/** @type {unknown} */ (fetchImpl));
+  t.after(() => { globalThis.fetch = originalFetch; });
+
+  const outDir = mkScratch();
+  const stderr = captureStream();
+  const code = await run(['https://api.example.test', '-o', outDir], { cwd: outDir, stdout: captureStream(), stderr, cacheDir: mkScratch() });
+
+  assert.equal(code, 1);
+  assert.equal(stderr.text(), `rwxmap: not an OpenAPI or Swagger document: ${specUrl}\n`);
+  assert.deepEqual(fs.readdirSync(outDir), []);
 });
 
 test('run: an unchanged discovered spec prints no spec-changed line', async (t) => {

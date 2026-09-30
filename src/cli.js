@@ -201,6 +201,7 @@ class CliError extends Error {}
  *   run() refuses that in one place for every input kind.
  */
 async function resolveInput(address, findSpecOpts = {}) {
+  const notSpec = (at) => new CliError(`not an OpenAPI or Swagger document: ${at}`);
   if (!isHttpUrl(address)) {
     // "An argument that is an existing local path -> loadSpec(path)."
     // No fallback to findSpec for a local path — a bare address is
@@ -210,9 +211,11 @@ async function resolveInput(address, findSpecOpts = {}) {
       loaded = await loadSpec(address);
     } catch (err) {
       if (err && err.code === 'ENOENT') throw new CliError(`no such file: ${address}`);
-      const reason = err instanceof Error ? err.message : String(err);
-      throw new CliError(reason);
+      if (err && err.code === 'EISDIR') throw new CliError(`not a file: ${address}`);
+      const reason = loadReason(err, address);
+      throw reason === NO_PATHS ? notSpec(address) : new CliError(reason);
     }
+    if (!isSpecDoc(loaded.doc)) throw notSpec(address);
     return { ops: operationsFrom(loaded.doc), source: address, viaDiscover: false, isLocalFile: true, doc: loaded.doc, specChanged: false };
   }
 
@@ -223,9 +226,11 @@ async function resolveInput(address, findSpecOpts = {}) {
   try {
     const loaded = await loadSpec(address);
     const ops = operationsFrom(loaded.doc);
-    if (ops.length > 0) asSpec = { ops, source: address, doc: loaded.doc };
+    if (isSpecDoc(loaded.doc) && ops.length > 0) asSpec = { ops, source: address, doc: loaded.doc };
   } catch (err) {
-    loadError = (err instanceof Error ? err.message : String(err)).replace(`loadSpec: ${address}: `, '');
+    // A page that loaded but is not a spec has nothing useful to add to the note.
+    const reason = loadReason(err, address);
+    if (reason !== NO_PATHS) loadError = reason;
   }
   if (asSpec) return { ...asSpec, viaDiscover: false, isLocalFile: false, specChanged: false };
 
@@ -251,6 +256,7 @@ async function resolveInput(address, findSpecOpts = {}) {
     const reason = err instanceof Error ? err.message : String(err);
     throw new CliError(`could not reload the discovered spec ${found.specUrl} (a redirect on reload is refused, never followed): ${reason}`);
   }
+  if (!isSpecDoc(reloaded.doc)) throw notSpec(found.specUrl);
   // Zero operations on reload is refused by run()'s one zero-operations
   // check, the same one every input kind goes through.
   const ops = operationsFrom(reloaded.doc);
@@ -262,6 +268,20 @@ async function resolveInput(address, findSpecOpts = {}) {
     doc: reloaded.doc,
     specChanged: reloaded.sha256 !== found.sha256,
   };
+}
+
+// load.js's message for a document with no `paths` object, and the
+// prefix it puts on every message; the CLI's own wording replaces both.
+const NO_PATHS = 'parsed document has no usable "paths" object';
+
+/** @param {unknown} err @param {string} address */
+function loadReason(err, address) {
+  return (err instanceof Error ? err.message : String(err)).replace(`loadSpec: ${address}: `, '');
+}
+
+/** The one key an OpenAPI 3.x or Swagger 2.0 document must carry. @param {any} doc */
+function isSpecDoc(doc) {
+  return Boolean(doc.openapi || doc.swagger);
 }
 
 /**
@@ -409,6 +429,18 @@ function countUnlabelledOperations(doc) {
     }
   }
   return n;
+}
+
+/**
+ * Count OpenAPI 3.1 `webhooks` operations, walked the way operationEntries
+ * walks `paths`. They are calls the API makes, not calls to it, so they
+ * are reported, never labelled.
+ *
+ * @param {any} doc
+ * @returns {number}
+ */
+function countWebhookOperations(doc) {
+  return operationEntries({ paths: doc && typeof doc === 'object' ? doc.webhooks : undefined }).length;
 }
 
 /**
@@ -731,6 +763,21 @@ async function runJev(ops, verdicts, jevOpts) {
   };
 }
 
+/**
+ * parseArgs's own message names the option by its internal key (outDir);
+ * say what the user typed instead. Anything unrecognised keeps Node's text.
+ * @param {unknown} err
+ */
+function argError(err) {
+  const message = err instanceof Error ? err.message : String(err);
+  const code = err && typeof err === 'object' && 'code' in err ? err.code : '';
+  const unknown = /^Unknown option '([^']*)'/.exec(message);
+  if (code === 'ERR_PARSE_ARGS_UNKNOWN_OPTION' && unknown) return `unknown option: ${unknown[1]}`;
+  const missing = /^Option '(-\w|--[\w-]+)[^']*' argument missing/.exec(message);
+  if (code === 'ERR_PARSE_ARGS_INVALID_OPTION_VALUE' && missing) return `${missing[1]} needs a value`;
+  return message;
+}
+
 const USAGE = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--force]';
 
 const HELP = `${USAGE}
@@ -744,7 +791,8 @@ Options:
   -o <dir>       write the output files here (default: the current folder)
   --vendor <n>   name for the output files and tool keys (default: the host)
   --force        overwrite existing output files
-  -h, -v         this help; the version
+  -h, --help     this help
+  -v, --version  the version
 
 Writes <vendor>.rwxmap.json, <vendor>.rwxmap.review.json, <vendor>.openapi.rwx.json.
 
@@ -791,8 +839,7 @@ export async function run(argv, env) {
       },
     }));
   } catch (err) {
-    const reason = err instanceof Error ? err.message : String(err);
-    stderr.write(`rwxmap: ${reason}\n${USAGE}\n`);
+    stderr.write(`rwxmap: ${argError(err)}\n${USAGE}\n`);
     return 1;
   }
 
@@ -810,6 +857,11 @@ export async function run(argv, env) {
     return 1;
   }
   const address = positionals[0];
+  const named = values.vendor;
+  if (named !== undefined && (named === '' || named === '.' || named === '..' || /[/\\]/.test(named))) {
+    stderr.write(`rwxmap: --vendor must be a plain name (no / or \\): ${named}\n`);
+    return 1;
+  }
   const outDir = values.outDir ? path.resolve(cwd, values.outDir) : cwd;
 
   let ops;
@@ -945,6 +997,12 @@ export async function run(argv, env) {
   if (unlabelled > 0) {
     stdout.write(
       `rwxmap: ${unlabelled} operation(s) under OpenAPI 3.2 query/additionalOperations are not labelled yet (no letter, no key, no x-rwx)\n`,
+    );
+  }
+  const webhooks = countWebhookOperations(doc);
+  if (webhooks > 0) {
+    stdout.write(
+      `rwxmap: ${webhooks} webhook operation(s) are not labelled (they are calls the API makes, not calls to it)\n`,
     );
   }
   if (collisions.length > 0 || mcpCollisions.length > 0) {
