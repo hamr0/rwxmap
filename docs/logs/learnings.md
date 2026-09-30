@@ -7367,3 +7367,65 @@ Node.
   items, 4 nits and 1 change (Windows untested).
 - Plan: nothing is planned in the PRD; the parked items wait on a core
   change.
+
+## 2026-09-30 — Fix-ledger pass: vendor guard, -o=, spec key value
+
+- Goal: work the fix ledger after 0.7.0. It held 5 items: 4 nits and 1
+  change.
+- `/refactor` stopped before any edit. All 5 bullets still held, but
+  none of the 4 nits was a refactor. Each needed a behaviour change,
+  and `/refactor` allows none. The user ruled (2026-09-30) to fix two
+  as small behaviour changes with tests, drop one and retag one.
+- The bar, set before building: blank and all-dot `--vendor` names
+  exit 1 before any I/O while `a.b` still passes; an `-o` value
+  starting with `=` exits 1 and writes nothing; `openapi` must read as
+  3.x or `swagger` as 2.x, compared as text so an unquoted YAML number
+  passes; no real corpus file newly refused; every new test fails
+  against the old `cli.js`.
+- Measured before the change: of 721 spec files in `data/`, 37 load,
+  and all 37 carry the version as a string: `3.0.x` in 30, `3.1.0` in
+  4, swagger `2.0` in 3. The other 684 fail to load for having no
+  usable `paths` object, as before.
+- What changed in `src/cli.js`: the vendor guard now refuses a
+  whitespace-only name and any all-dot name. `--vendor ' '` used to
+  exit 1 with the internal "exporter: options.vendor is required";
+  `--vendor ...` used to write `....rwxmap.json` and exit 0.
+- An `-o` value starting with `=` is refused with
+  `-o takes a space, not "=": -o <dir>`. `-o=foo` used to write into a
+  folder named `=foo` and exit 0. The long form `--outDir=foo` parses
+  correctly and still works.
+- `isSpecDoc` now checks the value: `"openapi":"banana"`, `"4.0.0"`,
+  `true` and swagger `"1.2"` are refused with the existing "not an
+  OpenAPI or Swagger document" message. `swagger: 2` and `openapi: 3.1`
+  as bare numbers are accepted.
+- Results: `npm test` 433 of 433 (was 429; 4 new tests and 1
+  extended). Typecheck 0 errors. proof-load, proof-match and proof-cli
+  all hold; proof-cli still checks 37 files and 11,505 operations, so
+  no corpus file is newly refused.
+- The orchestrator put each old line back by hand, one at a time, and
+  saw exactly 1 of the 69 tests in `src/cli.test.js` fail each time:
+  the vendor test, the `-o=` test and the spec-version test. The
+  bare-number test does not fail on the old `isSpecDoc`; it guards
+  against a future check that is too strict.
+- Ledger after the pass: 2 items, 0 nits and 2 changes. Fixed: the
+  vendor guard and `isSpecDoc`. Dropped: the webhook-shape bullet, not
+  a defect (a malformed `webhooks` value prints no notice, nothing
+  crashes, nothing is mislabelled). Retagged change: the `NO_PATHS` /
+  `argError` message-text coupling, because decoupling needs `load.js`
+  to expose an error code on the public `rwxmap/load` surface, and
+  Node's parseArgs gives no structured field for the option name.
+  Left: Windows untested.
+- The user then ruled on the last two (2026-09-30). The message-text
+  coupling is closed as a known limit with no code change: the failure
+  is cosmetic, the tests pin the exact text, a fix for `load.js` would
+  add a field to the public `rwxmap/load` surface, and a fix for Node's
+  half means replacing `parseArgs` with a hand parser. Windows is
+  parked until someone asks. Both are now in the PRD, and the ledger is
+  empty: 0 items.
+- Not core: none of the files that can move a row's letter or marker
+  changed, so no D-number and no fresh exam (D109).
+- Not yet done: not committed, not reviewed, no CHANGELOG entry, not
+  released.
+- Lesson: a ledger item tagged nit can still need a behaviour change.
+  Check what the fix does to a run that exits 0 today before calling it
+  a refactor.

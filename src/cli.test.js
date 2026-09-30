@@ -264,15 +264,56 @@ async function runIn(argv, dir = mkScratch()) {
   return { code, stdout: stdout.text(), stderr: stderr.text(), dir };
 }
 
-test('run: a --vendor with a path separator, or . / .. / empty, is refused before any I/O', async () => {
+test('run: a --vendor with a path separator, or blank, or all dots, is refused before any I/O', async () => {
   const dir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
-  for (const vendor of ['a/b', 'a\\b', '.', '..', '']) {
+  for (const vendor of ['a/b', 'a\\b', '.', '..', '', ' ', '\t', '...', '....']) {
     const r = await runIn([specPath, '--vendor', vendor], dir);
     assert.equal(r.code, 1);
     assert.equal(r.stderr, `rwxmap: --vendor must be a plain name (no / or \\): ${vendor}\n`);
   }
   assert.deepEqual(fs.readdirSync(dir), ['spec.json']);
+});
+
+test('run: a --vendor with dots inside is accepted', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  const r = await runIn([specPath, '--vendor', 'a.b'], dir);
+  assert.equal(r.code, 0, r.stderr);
+  assert.ok(fs.existsSync(path.join(dir, 'a.b.rwxmap.json')));
+});
+
+test('run: -o=<dir> is refused, it takes a space, and nothing is written', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  for (const arg of ['-o=', '-o=foo']) {
+    const r = await runIn([specPath, '--vendor', 'x', arg], dir);
+    assert.equal(r.code, 1);
+    assert.equal(r.stderr, 'rwxmap: -o takes a space, not "=": -o <dir>\n');
+  }
+  assert.deepEqual(fs.readdirSync(dir), ['spec.json']);
+});
+
+test('run: an openapi or swagger key with a value that is not 3.x or 2.x is not a spec', async () => {
+  const paths = { '/things': { get: { operationId: 'listThings' } } };
+  for (const version of [{ openapi: 'banana' }, { openapi: '4.0.0' }, { openapi: true }, { swagger: '1.2' }]) {
+    const dir = mkScratch();
+    const specPath = writeSpecFile(dir, 'bad.json', { ...version, paths });
+    const r = await runIn([specPath, '--vendor', 'x'], dir);
+    assert.equal(r.code, 1, JSON.stringify(version));
+    assert.equal(r.stderr, `rwxmap: not an OpenAPI or Swagger document: ${specPath}\n`);
+    assert.deepEqual(fs.readdirSync(dir), ['bad.json']);
+  }
+});
+
+test('run: a version written as a bare number (swagger: 2, openapi: 3.1) is still a spec', async () => {
+  const { openapi, ...rest } = SPEC_DOC;
+  for (const version of [{ swagger: 2 }, { openapi: 3.1 }]) {
+    const dir = mkScratch();
+    const specPath = writeSpecFile(dir, 'num.json', { ...rest, ...version });
+    const r = await runIn([specPath, '--vendor', 'x'], dir);
+    assert.equal(r.code, 0, r.stderr);
+  }
 });
 
 test('run: JSON with paths but no openapi or swagger key is not a spec', async () => {

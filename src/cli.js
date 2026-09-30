@@ -279,9 +279,9 @@ function loadReason(err, address) {
   return (err instanceof Error ? err.message : String(err)).replace(`loadSpec: ${address}: `, '');
 }
 
-/** The one key an OpenAPI 3.x or Swagger 2.0 document must carry. @param {any} doc */
+/** A document is a spec when it carries openapi 3.x or swagger 2.x (read as text, so an unquoted YAML number passes). @param {any} doc */
 function isSpecDoc(doc) {
-  return Boolean(doc.openapi || doc.swagger);
+  return /^3(\.|$)/.test(String(doc.openapi)) || /^2(\.|$)/.test(String(doc.swagger));
 }
 
 /**
@@ -858,8 +858,12 @@ export async function run(argv, env) {
   }
   const address = positionals[0];
   const named = values.vendor;
-  if (named !== undefined && (named === '' || named === '.' || named === '..' || /[/\\]/.test(named))) {
+  if (named !== undefined && (named.trim() === '' || /^\.+$/.test(named) || /[/\\]/.test(named))) {
     stderr.write(`rwxmap: --vendor must be a plain name (no / or \\): ${named}\n`);
+    return 1;
+  }
+  if (values.outDir?.startsWith('=')) {
+    stderr.write('rwxmap: -o takes a space, not "=": -o <dir>\n');
     return 1;
   }
   const outDir = values.outDir ? path.resolve(cwd, values.outDir) : cwd;

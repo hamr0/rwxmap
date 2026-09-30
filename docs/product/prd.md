@@ -790,6 +790,10 @@ Nothing is planned. Parked items and known limits are below.
   two raise tiers (`jev-raise-wx`, `jev-raise-get`) is settled (D119);
   a fresh exam is required for any future change to D100's tiers,
   D101's review rule, or the frozen core.
+- **Windows.** Untested: CI runs on Linux only, two tests create
+  symlinks (which need privileges on Windows), and the entry-point
+  check and the `--force` hard-link and rename path have never run
+  there. Parked until someone asks for it (user ruling, 2026-09-30).
 
 ### Known limits (not planned)
 
@@ -797,6 +801,11 @@ Nothing is planned. Parked items and known limits are below.
   (`src/exporter.js`) reads neither, so those operations get no letter
   and no key. Few specs use 3.2 today, and stdout already counts the
   operations it skips.
+- **Two plain error messages depend on wording.** The CLI recognises
+  `load.js`'s "no usable paths" error and Node's `parseArgs` errors by
+  their text. If either is reworded the user sees the raw message
+  again; the exit code is still 1 and no letter changes. The tests pin
+  the exact text, so a reword fails the suite first.
 
 ### Released
 
