@@ -42,6 +42,21 @@ proof-of-concept for the author's Internet-Draft (the -02 delegation
 profile's `actionClass` axis and declared menu), but it is not
 load-bearing for that draft and not normative in it.
 
+## Goals and where we stand
+
+rwxmap scopes API operations as r / w / x. It is a head start for
+scoping APIs on the fly, not a finished grade. Measured on the one
+clean exam (M3, 4279 operations across cloudflare, pagerduty and
+sentry): mechanical 82.3% exact / 0.8% too loose / 16.9% too tight;
+with Jev 93.0% / 0.5% / 6.5%.
+
+| Mode | What it is | Status | Gap |
+|---|---|---|---|
+| API providers | Scope all your APIs, get markers where the loose and tight rows are, correct them | Released in `rwxmap@0.6.0`: the CLI writes the letters, the review file and a copy of the spec with `x-rwx` | None open. Keeping a person's edits across re-runs is out of scope. |
+| Agentic automation | Scope APIs on the fly for a scoped agent through bareguard | Released: `bareguard.tools` from the CLI; `rwxmap/discover` (`findSpec`, `classifyCall`, `requestKey`) in `rwxmap@0.5.0`; bareguard's end-to-end check passes (bareguard 0.18.1) | Discovery is hard: the first probe found a spec for 8 of 25 vendors, 6 of them through a list since ruled out (D108). With no spec, per-request classification keeps safety: the too-loose rate stays 0.8% on the M3 exam (4279) at full spec, method+path and method only |
+| Secondary: MCP hints, WebMCP, OpenAPI `x-rwx` | The same letters in each standard's own extension slot | Released in `rwxmap@0.6.0`; conformance check 7/7 | None open |
+| Inputs | Spec URL, local OpenAPI file (JSON or YAML), bare API address (discovery), per-request fallback; with or without a Jev key | Released in `rwxmap@0.5.0` and `0.6.0` | Discovery finds few specs; the per-request fallback covers the rest at the same too-loose rate. Framework default paths are out of scope. |
+
 ## Out of scope
 
 - A model/LLM required to run. The ladder is deterministic and works
@@ -54,6 +69,16 @@ load-bearing for that draft and not normative in it.
 - Being a standard: nothing normative in an Internet-Draft, no third
   standards track, no mandated conformance harness.
 - A claim of coverage beyond the vendors actually measured.
+- Keeping a provider's hand edits across re-runs: a re-run replaces every
+  `x-rwx` in the copy, and the provider owns any edits (ruled 2026-09-29).
+- Framework-default spec paths for self-hosted APIs (Spring `/v3/api-docs`,
+  .NET, NestJS, Django, Laravel and the like), unless someone asks (ruled
+  2026-09-29). Converters and default paths mostly yield method + path,
+  which the per-request fallback already covers at the same too-loose
+  rate.
+- Hand-written MCP tools. MCP is an output, not an input: a tool with a
+  name and a description but no method or path has nothing to classify
+  from (D122).
 
 ## The one invariant and the two error directions
 
@@ -109,7 +134,7 @@ Core is the files that can change a row's letter or its review marker
 any of them needs a new D-number and a fresh clean exam (D24, D96); the
 M3 exam (cloudflare, pagerduty, sentry) is burned and cannot score a
 change. `src/load.js`, `src/exporter.js`, `src/index.js` and `src/types.js`
-(exports and type definitions) are not core, and neither are the coming
+(exports and type definitions) are not core, and neither are the
 discovery, cache, request key, matcher and emitters — they change under
 their own tests and proofs, with no exam. In one line: if a change can
 move a row's letter or marker, it is core.
@@ -667,6 +692,9 @@ roughly 1 in 100.
 5. **No GET special rule.** `classifyRow` already sends GET to r through
    the method floor; the harness carries no second copy of that
    decision.
+6. **Two keyspaces.** A spec's keys (`<host>.<operationId>`) and
+   per-request keys are separate; never build one from the other (a
+   bareguard guard-session finding). A gate caps at 10,000 keys.
 
 **The cache** (built, `rwxmap/discover`), owned by rwxmap: one JSON file
 per cache key under `opts.cacheDir ?? $XDG_CACHE_HOME/rwxmap ??
@@ -738,355 +766,88 @@ above.
 - **Input and discovery** — `rwxmap/load` (D106, D107) and
   `rwxmap/discover` (D108, D112-D117) released as `rwxmap@0.5.0`
   (2026-09-28).
+- **The command line, Jev in the CLI and the carriers** (items c, d and
+  e) — released as `rwxmap@0.6.0` on 2026-09-29.
 
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
-## Input and discovery — released in 0.5.0
-
-a. **Input.** Point it at a URL or a file path; JSON or YAML in, JSON
-   out. URL fetching uses Node 22's built-in `fetch` (no dependency).
-   YAML needs the `yaml` package, a runtime dependency of the I/O
-   layer only, allowed by the dependency rule because the standard
-   library cannot parse YAML in under 100 lines. The classifier
-   library itself stays dependency-free. External `$ref`s are not
-   followed (D106); those operations fall back to method+path, and a
-   download over 64 MB (compressed or decoded) or binary content is
-   refused. Built as `rwxmap/load` (D107); released in `rwxmap@0.5.0`.
-b. **Spec discovery** at the usual locations (a best guess, not a
-   standard), the 30-day cache, and the per-request key. Released in
-   `rwxmap@0.5.0` as the subpath export
-   `rwxmap/discover` (D113): `findSpec`, `classifyCall`, `requestKey`,
-   `firstServerHost` (D123's vendor default for a local file).
-   The discovery order is D108's; no curated list, and no third-party
-   directory. It reads OpenAPI and Swagger only; Postman is not read
-   (D112). Every discovery request is checked before it is sent — no
-   non-https URL, IP-literal host, `localhost` or single-label host,
-   checked on the API URL and on every redirect hop and service-desc
-   link (D114); such a host gets `status: 'none'`
-   uncached, and its calls fall through to per-request classification.
-   A cache entry that passes 30 days or a version bump rediscovers and
-   reclassifies from scratch rather than reusing the old verdict
-   (D115, amends D105 item 2) — mechanical classification is cheap, so
-   only the network trip was worth caching. Discovery is limited
-   (D116): 3 guessed paths (`/openapi.json`, `/openapi.yaml`,
-   `/swagger.json`), at most 3 service-desc links followed per
-   api-catalog/Link list, and a 60 s wall-clock budget per `findSpec`
-   call (up to one request timeout of overrun) — a live re-run over 25
-   vendors cut discovery from 2758 requests to 675, per-site median 97
-   to 26, with 0 unsafe requests and the right spec still found for
-   intercom.
-
-### Go/no-go for items a and b
-
-No go/no-go bar was set before either item was built — a process gap.
-The bars below were written after the fact (2026-09-28), each line
-next to the number it was measured against.
-
-**Item a (`rwxmap/load`)**, from "Input pass 3: the loader graduates
-as rwxmap/load" (learnings, 2026-09-26) — no bar was set before
-building; this reconstructs one from what pass 1-3 recorded:
-1. Loaded operations match the labelled corpus exactly — 20 of 20
-   sampled vendors, 9,149 operations, 0 missing, 0 extra.
-2. `src/load.js` matches the frozen POC byte-for-byte — proof
-   722/722 spec files, "All pins hold" (seen red under a swapped
-   hash).
-3. `import 'rwxmap'` never loads `yaml` — a resolve-hook test (seen
-   red with `import 'yaml'` added).
-4. A malformed or oversized URL body cannot crash the process — cap
-   and binary-check tests (5/5), hubspot's 85 MB gunzip refused in
-   1.6 s instead of dying out of heap.
-5. A tarball smoke test loads a real spec end to end — figma YAML,
-   54 operations.
-
-**Item b (`rwxmap/discover`)**, set after building (2026-09-28), not
-before:
-1. Zero unsafe requests in a live run — 0 of 675 (D116).
-2. A call matched to a discovered spec is never looser than truth in
-   the live run — 0 of 165 (intercom).
-3. A right spec reachable by the D108 discovery order is found —
-   intercom found right.
-4. The spec-less cost is bounded and cached — median 26 requests per
-   site (D116), cache recheck 0 requests over 3 vendors.
-5. bareguard's end-to-end check passes — all items pass (bareguard
-   0.18.1).
-
 ## What is next
 
-The forward plan for a standalone npm release, in this order: **d,
-then c, then e.**
+Nothing is planned. Parked items and known limits are below.
 
-d. **CLI + combined output** (D121, D122, D123): BUILT on
-   `docs/post-0.5.0`, not yet released. One command,
-   `rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--force]`
-   (bin `rwxmap`, `src/cli.js`). A local path loads with `loadSpec`. An
-   http(s) URL is tried as a spec first (`loadSpec`, at least 1
-   operation); if that fails or finds zero operations it is treated as
-   a bare API address and `findSpec` runs; nothing found → exit 1,
-   writing no file. A URL the caller types is explicit input and is
-   fetched as given (D114's exemption for a caller-given spec);
-   discovery's own address safety rule (D114) still applies when
-   `findSpec` runs. Vendor default (D123, approved 2026-09-28):
-   `--vendor` wins; else a URL's own host; else, for a local file, the
-   spec's first server host via `firstServerHost`; none → exit 1 asking
-   for `--vendor`. Output, in `-o <dir>` (default cwd): `<vendor>.rwxmap.json`
-   (`rwxmapVersion`, `source`, `vendor`, `bareguard.tools`, `mcp` keyed
-   `"METHOD path"`, D122) and `<vendor>.rwxmap.review.json` (the
-   sidecar, also carrying any gate-key collisions as `mcpCollisions`).
-   An existing file without `--force` → exit 1, nothing written. Both
-   files are written atomically (tmp file plus rename) (since item e and
-   the debrief fixes of 2026-09-29: three files, each replaced atomically
-   with a hard-link backup and a rollback on failure; see README). stdout reports
-   the files written, counts by letter, the review count, any
-   collisions, and "Jev: off (mechanical)". Mechanical only; Jev is
-   wired in with item c.
+### Parked
 
-### Go/no-go for item d — approved 2026-09-28, all bars met
+- **The lead-position blind spot.** Word lists match the lead token
+  only (see Known limits above). Parked because leaks are already under
+  1% (0.8% mechanical, 0.5% with Jev on the M3 exam) and a fix changes
+  the core: it needs a new D-number and a fresh exam.
+- **The fresh clean exam.** Needed only when the core changes. It is
+  drawn from vendors no set has seen; the ten locked away for it are
+  named in `docs/logs/pre-registered-split-2026-09-18.md`. Shipping the
+  two raise tiers (`jev-raise-wx`, `jev-raise-get`) is settled (D119);
+  a fresh exam is required for any future change to D100's tiers,
+  D101's review rule, or the frozen core.
 
-Each bar is checkable by a command (`node tools/proof-cli.js`, exit 0).
+### Known limits (not planned)
 
-1. For every spec file in the tuning and exam spec sets that
-   `tools/proof-cli.js` covers, the CLI's `bareguard.tools` deep-equals
-   `exportGate` on the same operations: 0 differences. Met — 37 spec
-   files, 11,505 operations. (The proof's own bar text once said "722
-   files"; that count is the spec *entries* `proof-load` checks, of
-   which 685 are digitalocean per-resource fragments and hubspot's
-   tar.gz — files with no top-level paths, excluded here the same way
-   `proof-match` excludes them.)
-2. On those same files, the `mcp` dict has exactly one entry per
-   operation (count equals the operation count), and every entry's
-   class equals the bareguard letter for that operation: 0 mismatches.
-   Met, including the tie-break rule: every gate key holds the
-   tightest `classifyRow` letter of its operations — 521 collided
-   operations across 178 collided gate keys, all checked. Seen to
-   fail: mapping `mcp` x to w gave 3,619 and 3,830 mismatches on two
-   independent broken builds; keeping a collided key's looser letter
-   gave 143 mismatches.
-3. The hint mapping matches D104's table on every row. There's a test
-   for each of r, w and x, and the test is seen to fail when the
-   mapping is broken by hand. Met.
-4. A bare API address with no findable spec exits non-zero and writes
-   no file. A load failure (a bad URL, a file over the cap, binary
-   content) exits non-zero and writes no file. Output files are
-   written atomically. Met — tests cover no spec found, a missing
-   file, binary content, an existing file without `--force`, no
-   vendor, and atomic-write failure; all exit 1 with no file.
-5. No row's letter differs from the library's own classification
-   (`classifyRow`, as used by `exportGate`): the CLI adds nothing and
-   loosens nothing. Met.
-6. One live run of a bare API address that discovery can resolve
-   (intercom's API host) writes a JSON whose operation count equals the
-   found spec's. Met — `rwxmap https://api.intercom.io` exit 0, found
-   via discovery (developers.intercom.com bundle @2.15), 166
-   operations, 166 mcp entries, 165 bareguard keys (1 collision), r 84
-   / w 23 / x 59, 56 flagged for review. (An earlier discovery-only
-   live run the same morning recorded 162 operations for the same URL;
-   today's load gives 166 both through `operationsFrom` and a raw
-   method+path count. Most likely cause: intercom updated the spec
-   during the day; unconfirmed.)
-7. The full suite, typecheck and both proofs still pass. Met — npm
-   test 348/348, typecheck 0, `proof-load` 722/722, `proof-match` 0
-   differences.
+- **OpenAPI 3.2 `query` and `additionalOperations`.** `operationsFrom`
+  (`src/exporter.js`) reads neither, so those operations get no letter
+  and no key. Few specs use 3.2 today, and stdout already counts the
+  operations it skips.
 
-c. **Jev** (D118-D120), wired into the CLI: BUILT on `docs/post-0.5.0`,
-   not yet released. Key configured → used; no
-   key → mechanical, never stops, says loudly which mode ran and shows
-   what it knows. rwxmap calls the Jev endpoint itself with plain Node
-   `fetch` (D118): a per-request timeout, a retry with backoff on
-   429/529 only, no bareagent dependency. The key is read from the
-   environment, else from `.env` (read with `fs.readFileSync` and
-   Node's built-in `util.parseEnv`, no dotenv dependency); only
-   `RWXMAP_JEV_KEY` is taken and nothing is written to `process.env`
-   (D125, amending D118). All
-   three tiers (`jev-lower`, `jev-raise-wx`, `jev-raise-get`) ship on
-   when a key is set (D119). Jev is separate and bring-your-own-key: the
-   README and the CLI output both say Jev is optional, the key and cost
-   are the adopter's own, and it sends spec text (method, path,
-   operationId, summary, description) to an outside service (D120).
+### Released
 
-### Go/no-go for item c — approved 2026-09-28, all bars met
-
-Design: the key variable is `RWXMAP_JEV_KEY`, read from the environment,
-else from `.env` in the current directory, read with `fs.readFileSync`
-and Node's `util.parseEnv`. Only that one variable is taken from
-`.env`; nothing is written to `process.env`, and an already-set
-variable wins; an empty one counts as unset (D125). With a key, every run prints: "Jev: on — sends
-method, path, operationId, summary, description of N operations to
-api.typesafe.ai. Your key, your cost." A row whose call fails keeps its
-mechanical letter; the run never stops. The combined JSON gets a
-top-level `jev: { mode: "on"|"off", model, sent, answered, failed,
-changed, tokens: { input, output } }`. Each moved row's `p` and `model`
-go into the review file (sidecar). The stdout summary is four lines, percentages over the
-operation count:
-
-```
-rwxmap: api.intercom.io — 166 operations (r 84 · w 23 · x 59)
-rwxmap: settled 110 (66%) · loose 16 (10%) · tight 40 (24%)
-rwxmap: Jev: off (mechanical)            | or: Jev: on — 129 sent · 127 answered · 2 failed (kept mechanical) · 31 letters changed · <in> in / <out> out tokens
-rwxmap: wrote <vendor>.rwxmap.json + .review.json
-```
-
-(settled = trust; loose = may be too permissive, review first; tight =
-may be too strict). Collisions, if any, can be one extra line.
-
-Bars: (1) no key → output identical to item d on all 37 spec files
-(proof-cli passes) and "Jev: off (mechanical)"; (2) each tier moves only
-its own way at its threshold (lower x→w p ≤ 0.10; raise-wx w→x p ≥ 0.80;
-raise-get r→w p ≥ 0.50), tested against a stub Jev, each test seen to
-fail when broken; (3) a bad answer never moves a letter: NaN, p outside
-[0,1], missing model, HTTP error, timeout, malformed JSON, one test each;
-(4) only rows in a tier are sent: request count == needsJev count,
-checked with the stub; (5) only method, path, operationId, summary and
-description (plus the tier question) leave the machine, checked by a
-test on each request body, and the key never appears in output, sidecar,
-stdout, stderr or error messages; (6) never stops: with every call
-failing → exit 0, all letters mechanical, the failed count printed; (7)
-after Jev moves rows, every mcp class equals its operation's final
-letter, and every bareguard key holds the tightest final letter of its
-operations; (8) live: intercom with the real key, run twice; both runs 0
-failed; moved rows reported per tier for both runs; no move in the wrong
-direction; the request count, time and cost measured and reported (the
-orchestrator does this); (9) the suite, typecheck and all three proofs
-pass. Not required: the same rows moving on both runs (Jev isn't
-deterministic).
-
-**Met.** Bars 1-7 and 9 by test and proof; each bar was broken by hand
-once, seen to fail, and restored. The client is `src/jev-client.js` (not
-core, D109). `src/cli.js` classifies once, asks Jev only about the rows
-`needsJev` names, applies answers through the unchanged `applyJev`, and
-hands the final letters to the exporter's `verdicts` option.
-`proof-cli` adds a network-free fake-Jev pass over the same 37 files:
-9266 of 11,505 operations in a tier's pile, 3287 moved, 0 differences.
-`npm test` 386/386, typecheck 0, `proof-load` 722/722, `proof-match` and
-`proof-cli` 0 differences.
-
-Bar 8, live (the orchestrator's run). Intercom, 166 operations, 129 sent
-per run (raise-get 78, lower 35, raise-wx 16), model `jev-1.13.0`.
-
-| | r · w · x | settled · loose · tight | failed | changed | time |
-|---|---|---|---|---|---|
-| Mechanical | 84 · 23 · 59 | 110 (66%) · 16 (10%) · 40 (24%) | — | — | — |
-| Run 1 | 84 · 41 · 41 | 77% · 10% · 13% | 0 of 129 | 18, all x→w | 12.6 s |
-| Run 2 | 84 · 42 · 40 | — | 0 of 129 | 19, all x→w | 9.7 s |
-
-Every move was x→w by the lower tier; no move went the wrong way. The
-one row that differed between runs was `POST /contacts/{contact_id}/block`.
-The two raise tiers moved 0 rows on intercom. A probe of 2 invented rows
-(a GET that archives, a PUT that permanently deletes) came back with the
-right answer keys at p 0.95 and 0.96, so the raise tiers can fire. Cost
-is counted in tokens only, from the new `jev.tokens` field: a third
-live run (after the tokens field was added) used 306,288 input / 2,631
-output tokens for 129 rows (about 2,370 in and 20 out per row), 10.3 s,
-18 changed, 0 failed; the per-token price is set by the Jev provider
-and is not in rwxmap.
-
-Two fixes found in review, both with a test seen to fail when broken:
-(1) the exporter's `verdicts` option used to fall back to mechanical
-when the list had the wrong length, silently dropping every Jev move
-(fail-open); it now throws. (2) Jev token usage is now recorded: each
-answered row's `usage` is summed into `jev.tokens: { input, output }`
-and printed on the "Jev: on" line; a failed row adds nothing, and usage
-never reaches a sidecar row.
-
-e. **Remaining carriers** (D124): BUILT on `docs/post-0.5.0`, not yet
-   released; all bars met. OpenAPI `x-rwx`, WebMCP and ARD (MCP
-   moved into item d, D122). All four standards were re-read on
-   2026-09-28 (see Published output). Design: each carrier is the exact
-   fragment its standard's slot takes, so adoption is a copy. The CLI
-   writes a third file, `<vendor>.openapi.rwx.json` — a JSON copy of
-   the parsed input with `x-rwx: { class, destructive, evidence,
-   review }` on every operation from the final letters, never over the
-   original (keep-originals rule) — and the combined JSON gains a
-   `webmcp` dict keyed `"METHOD path"` like `mcp`. For a discovered
-   spec the CLI reloads the spec URL once (redirect refused) and takes
-   operations, letters and the copy from that one document. ARD is
-   parked. A one-off conformance check ran in `poc/conformance/` (bar 10).
-
-### Go/no-go for item e — approved 2026-09-29, all bars met
-
-1. The input spec file is byte-identical before and after a run; the
-   new file is written atomically and never overwrites without
-   `--force`.
-2. Stripping every `x-rwx` from the new file gives exactly the parsed
-   input (nothing else changed).
-3. Every operation's `x-rwx` equals its final letter, destructive,
-   evidence and marker in the review file — proof over 37 spec files /
-   11,505 operations, printing a count of anything skipped.
-4. `webmcp` hints follow r → `{readOnlyHint: true, consequentialHint:
-   false}`, w → `{false, false}`, x → `{false, true}` for every
-   operation, same proof.
-5. bareguard and mcp output unchanged (`proof-cli` 0 differences).
-6. With Jev on (`proof-cli`'s seeded fake-Jev pass), `x-rwx` and
-   `webmcp` carry the final letters.
-7. An `x-rwx` already present in the input is overwritten in the copy,
-   counted and reported on stdout, never silently dropped.
-8. Each new check broken once by hand and seen to fail; suite,
-   typecheck and the 3 proofs pass; the orchestrator runs intercom live
-   once.
-9. PRD Published output corrected.
-10. One-off conformance in `poc/conformance/` with its own
-    `package.json` (validators installed there only, not in rwxmap's
-    `package.json`, `npm test` or CI): the official OpenAPI JSON Schema
-    gives the same result on the input and the copy; every `mcp` entry
-    built into a Tool validates against MCP `schema.json` 2026-07-28,
-    plus a real MCP SDK server/client round trip; `webmcp` values are
-    checked against the IDL (and in a real browser if Chrome ships
-    WebMCP behind a flag, else stated as IDL-only); results are recorded
-    with each standard's revision; each check is seen to fail once; it
-    is re-run when a standard publishes a new revision. (A separate,
-    later pass.)
-
-Met (bars 1-9). Checked by the orchestrator
-on 2026-09-29: npm test 396/396, typecheck 0, `proof-load` 722 files,
-`proof-match` 0 differences, `proof-cli` 0 differences with "11505
-operations checked, 0 skipped" in both the mechanical and the fake-Jev
-pass; 0 inputs already carried `x-rwx`. Each new check was broken by
-hand: 15 breaks by the worker, plus one by the orchestrator (keeping an
-input's `x-rwx` instead of overwriting it failed the bar 7 test). Bar 8
-live (2026-09-29, no Jev, fresh cache): `rwxmap https://api.intercom.io`
-exit 0, 166 operations, three files written; `openapi.rwx.json` is
-1,285,068 bytes from an OpenAPI 3.0.1 input; 166 operations carry
-`x-rwx`, 0 letter mismatches against the review file; `webmcp` has 166
-entries: read-only 84, neither 23, consequential 59 (= r 84, w 23,
-x 59).
-
-Bar 10 met. Checked by the orchestrator on 2026-09-29: `cd
-poc/conformance && CHROME=<Chrome for Testing 154.0.8037.57> node
-run.mjs`, 7/7 checks pass, exit 0. Inputs: 37 spec files via
-`buildOutput` plus one live intercom CLI run = 38 files, 11,671
-operations. Schemas are pinned with sha256 in
-`poc/conformance/schemas/README.md`.
-
-- **OpenAPI** (official OAI schemas 2.0 of 2017-08-27, 3.0 of
-  2024-10-18, 3.1 of 2026-08-03; no 3.2 input): the copy gives the same
-  errors as the input in 38/38 files (3.0: 31, 3.1: 4, 2.0: 3). 11
-  inputs are already invalid — the vendor's own errors, the same in the
-  copy: digitalocean, meta-whatsapp, paypal (5), spotify, square, okta,
-  zendesk. Ajv 8.20 mis-resolves the 3.1 schema's `$dynamicRef:
-  "#meta"`, so `run.mjs` swaps it for a static `$ref` to the one
-  `$dynamicAnchor`, in memory, guarded by a check that a minimal valid
-  3.1 document passes.
-- **MCP**: 11,671/11,671 Tools valid against `schema.json` 2026-07-28;
-  46,684/46,684 `_meta` keys follow the key rule. A
-  `@modelcontextprotocol/sdk` 1.31.0 server→client round trip returned
-  166/166 intercom tools with `annotations` and `_meta` deep-equal, on
-  protocol 2025-11-25 (no SDK release negotiates 2026-07-28 yet).
-- **WebMCP**: 11,671/11,671 entries match the IDL (4 boolean members,
-  parsed from the pinned 2026-09-28 draft). In a real browser, Chrome
-  for Testing 154.0.8037.57 and Canary 156.0.8077.0 with
-  `--enable-features=WebMCPTesting` register r, w and x tools and read
-  the same hints back via `getTools()`. Chromium 153.0.8010.36 silently
-  drops `consequentialHint` (an x tool reads back as a plain write): the
-  browser lags the spec, not an rwxmap fault.
-- Every check was broken once via `--break=<name>` and seen to fail;
-  the orchestrator re-ran the webmcp and browser breaks.
-
-f. **Next:** c and e are built, all bars met. Next is the release
-   decision.
-g. **OpenAPI 3.2 `query` and `additionalOperations`** (unscheduled).
-   OpenAPI 3.2 adds a `query` method and an `additionalOperations` map
-   on the path item; `operationsFrom`'s method set (`src/exporter.js`)
-   reads neither, so a 3.2 spec's QUERY operations (and any other
-   additional operation) get no letter and no key today. Logged only.
+- **Input** (`rwxmap/load`, D106, D107; `rwxmap@0.5.0`). A URL or a file
+  path in, JSON or YAML, using Node 22's `fetch`. `yaml` is a runtime
+  dependency of this I/O layer only. External `$ref`s are not followed;
+  those operations fall back to method+path. A download over 64 MB
+  (compressed or decoded) or binary content is refused.
+- **Spec discovery** (`rwxmap/discover`, D108, D112-D117;
+  `rwxmap@0.5.0`). `findSpec`, `classifyCall`, `requestKey` and
+  `firstServerHost`. Order: a caller-given spec, the 30-day cache,
+  `/.well-known/api-catalog`, the `Link: rel="service-desc"` header,
+  then `/openapi.json`, `/openapi.yaml`, `/swagger.json`. No curated
+  list, no third-party directory, no Postman. Every request is checked
+  before it is sent, on every redirect hop and service-desc link (D114).
+  Limits: 3 guessed paths, 3 service-desc links, 60 s per call (D116).
+  A live run over 25 vendors: 675 requests, per-site median 26, 0
+  unsafe.
+- **CLI and combined output** (D121-D123; `rwxmap@0.6.0`, 2026-09-29).
+  `rwxmap <spec URL | local file | bare API address> [-o <dir>]
+  [--vendor <name>] [--force]`. Writes `<vendor>.rwxmap.json`
+  (`bareguard.tools`, `mcp`, `webmcp`, `jev`) and
+  `<vendor>.rwxmap.review.json`. An existing file without `--force`
+  exits 1. A local path loads with `loadSpec`; an http(s) URL is tried
+  as a spec first, and if that fails or finds no operations it is a
+  bare address and `findSpec` runs; nothing found exits 1 and writes no
+  file. A URL the caller types is fetched as given. Vendor (D123):
+  `--vendor`, else a URL's own host, else a local spec's first server
+  host (`firstServerHost`), else exit 1 asking for `--vendor`.
+  A document with no `openapi` or `swagger` key is not a spec: a local
+  file or a discovered spec that reloads that way exits 1; a URL that
+  serves one falls through to discovery. `--vendor` must be a plain
+  name (no `/` or `\`, not `.`, `..` or empty), refused before any I/O.
+  OpenAPI 3.1 `webhooks` operations are counted in a stdout notice and
+  never labelled. `-h`/`--help` and `-v`/`--version` exit 0; error text
+  is plain (`no such file`, `not a file`, `unknown option`, `-o needs a
+  value`).
+- **Jev in the CLI** (D118-D120, D125; `rwxmap@0.6.0`). A key in
+  `RWXMAP_JEV_KEY` (environment, else `.env`) turns on all three tiers
+  (D119). No key: mechanical, and the run says so. Bring your own key;
+  spec text (method, path, operationId, summary, description) goes to
+  `api.typesafe.ai` (D120). A failed row keeps its mechanical letter.
+  A `.env` that cannot be read or parsed means no key: the run stays
+  mechanical.
+- **Carriers** (D124; `rwxmap@0.6.0`). The third file,
+  `<vendor>.openapi.rwx.json`, is a copy of the spec with
+  `x-rwx: { class, destructive, evidence, review }` on every operation;
+  the input is never written. In the copy, `.inf` and `.nan` become
+  `null` and are counted. An integer past 2^53 may already be rounded
+  when the spec is parsed; that cannot be detected afterwards, so such
+  integers are counted. `--force` keeps a hard-link backup of each old
+  output file and restores all three if any write fails. `webmcp` hints
+  sit beside `mcp` in the combined JSON. ARD stays parked. One-off conformance in
+  `poc/conformance/`: 7/7 checks pass.
 
 **Release checks.** Before each release, run `npm run check:live` by
 hand. It runs the CLI against four bare API addresses (intercom,
@@ -1097,31 +858,7 @@ does not fail. It is not in `npm test` or CI because it hits the
 network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
 (commit 001be9a).
 
+
 ## Open questions
 
-- **`openWorldHint` has no evidence source.** It is the slot "touches
-  others" would map to; it may return as an evidence-only flag beside
-  `destructive`, never emitted as false, if a source is ever found (D87).
-- **The fresh exam.** Shipping the two raise tiers (`jev-raise-wx`,
-  `jev-raise-get`) is settled (D119). A fresh clean exam, drawn from
-  vendors no set has seen, is still required for any future change to
-  D100's tiers, D101's review rule, or the frozen core.
-- **Hand-written MCP tools** (D122). A tool with a name and a
-  description but no method or path has no method floor to classify
-  from; this needs its own module, its own labelled set and its own
-  exam.
-- **The lead-position blind spot** is the first post-freeze candidate:
-  a fix changes the core, so it needs a new D-number and a new exam.
-- **Framework-default spec paths for self-hosted APIs.** Discovery
-  guesses only `/openapi.json`, `/openapi.yaml` and `/swagger.json`
-  (D116). Framework defaults were probed on public APIs and found 0:
-  Spring `/v3/api-docs` (0 on 25 vendors, 0 on the 200-API sample),
-  `/v2/api-docs`, .NET `/swagger/v1/swagger.json`, `/api-docs` (0 on
-  25 and 0 on 200), `/swagger.yaml`, `/.well-known/openapi.json` (not
-  an IANA-registered well-known URI; checked 2026-09-28). Some
-  defaults were never probed: `/openapi`, `/v3/api-docs.yaml`, NestJS
-  `/api-json`, Django drf-spectacular `/api/schema/`, Laravel
-  `/api/documentation`. These defaults are where self-hosted and
-  internal APIs serve their spec, and we have no self-hosted sample,
-  so the 0s say nothing about them. Add them only after measuring them
-  on a self-hosted sample.
+None open.

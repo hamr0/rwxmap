@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-09-30
+
+### Added
+
+- **`-h`/`--help` and `-v`/`--version`** on the CLI: `--help` prints a short guide (inputs, options, the three output files, Jev, exit codes); `--version` prints the package version. Both exit 0.
+- **OpenAPI 3.1 webhooks notice**: webhook operations are counted in a stdout notice and never labelled, the same way 3.2 `query`/`additionalOperations` operations are.
+- **CI installs the packed tarball**: CI now packs the package, installs the tarball and runs the installed `rwxmap` bin on a tracked spec.
+- **`docs/release-checklist.md`**: a repo process document, not shipped in the package.
+
+### Changed
+
+- **A document without an `openapi` or `swagger` key is refused, not classified** (a tightening: less input is accepted). A local file, or a discovered spec on reload, that has no such key exits 1 with "not an OpenAPI or Swagger document"; an http(s) address that loads as such a document falls through to discovery as before.
+- **`--vendor` must be a plain name.** A value containing `/` or `\`, `.`, `..` or an empty value is refused before any input is read or file written.
+- **Plainer error messages**: a missing local file says `no such file: <path>` instead of a raw `ENOENT`; a directory says "not a file"; a local file's error no longer carries a `loadSpec` prefix; `-o` without a value says "-o needs a value"; an unknown flag says `unknown option: --x`.
+- **README rescoped**: shorter and marked WIP, with three example commands, a note that per-request classification is for library use and the CLI needs a spec.
+- **`poc/conformance`**: the MCP snippet check reads its own `hint-snippets.md` (check renamed `readme` to `snippets`), so a README edit can no longer break it silently.
+
+### Fixed
+
+- **A spec URL's load error is no longer swallowed** when discovery then finds nothing: the error is kept, for example `(as a spec: http 503)`. It is left out when the address loaded but is not a spec.
+- **"no spec found" no longer repeats itself.**
+- **`check:live` record for openvan.camp** re-recorded at 32 operations (it added `POST calculateRouteCost`, classed `r`); `check:live` is 4 PASS.
+- **`tools/proof-cli.js` header** now says what it checks: 37 spec files, 11,505 operations, the rest listed as load errors.
+
 ## [0.6.0] - 2026-09-29
 
 ### Added

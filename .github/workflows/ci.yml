@@ -21,3 +21,9 @@ jobs:
       - run: npm run typecheck        # tsc --noEmit
       - run: npm run build:types      # prove the .d.ts generate from the JSDoc
       - run: npm test                 # node --test
+      - name: Packed tarball installs and its bin runs
+        run: |
+          d=$(mktemp -d)
+          zcat data/provider-corpus-2026-09-16/specs/paypal/notifications_webhooks_v1.json.gz > "$d/spec.json"
+          npm pack --silent --pack-destination "$d"
+          (cd "$d" && npm init -y >/dev/null && npm install --silent ./rwxmap-*.tgz && npx rwxmap spec.json --vendor demo && ls demo.rwxmap.json)

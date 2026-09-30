@@ -13,7 +13,7 @@
 //                  @modelcontextprotocol/sdk server, listed by a real client
 //                  over the SDK's in-memory transport; annotations and
 //                  _meta must come back deep-equal.
-//      readme    — the README's MCP snippet ("Who reads what") run as
+//      snippets  — the MCP snippet in hint-snippets.md run as
 //                  written against the SDK's real McpServer.registerTool.
 //   3. webmcp    — every `webmcp` entry against the WebMCP WebIDL
 //                  (ModelContextTool / ToolAnnotations, parsed from the
@@ -30,7 +30,7 @@
 // no .env is read).
 //
 // --break=<name> corrupts rwxmap's output IN MEMORY before one check, to
-// see that check fail: openapi | mcp | metakey | roundtrip | readme |
+// see that check fail: openapi | mcp | metakey | roundtrip | snippets |
 // webmcp | browser. src/ is never touched.
 //
 // Run: node run.mjs            (exits 1 on any failure)
@@ -64,7 +64,7 @@ const SETS = [
   'data/exam-2026-09-20',
   'data/exam-2026-09-22',
 ];
-const BREAKS = ['openapi', 'mcp', 'metakey', 'roundtrip', 'readme', 'webmcp', 'browser'];
+const BREAKS = ['openapi', 'mcp', 'metakey', 'roundtrip', 'snippets', 'webmcp', 'browser'];
 const MAX_SHOWN = 5;
 
 const breakArg = process.argv.find((a) => a.startsWith('--break='));
@@ -364,17 +364,16 @@ async function checkRoundTrip(live) {
     `${equal}/${built.length} intercom tools came back with annotations and _meta deep-equal; ${listed.length} listed; negotiated protocol ${negotiated}`);
 }
 
-async function checkReadme() {
-  const readme = fs.readFileSync(path.join(REPO, 'README.md'), 'utf8');
-  const section = readme.slice(readme.indexOf('**Who reads what.**'));
+async function checkSnippets() {
+  const section = fs.readFileSync(path.join(HERE, 'hint-snippets.md'), 'utf8');
   const m = /- \*\*MCP\*\*[\s\S]*?```js\n([\s\S]*?)```/.exec(section);
   const failures = [];
   if (!m) {
-    record('readme (MCP snippet vs SDK registerTool)', ['MCP snippet not found under "Who reads what"'], 'not run');
+    record('snippets (MCP snippet vs SDK registerTool)', ['MCP snippet not found in hint-snippets.md'], 'not run');
     return;
   }
   const placeholder = '{ /* yours */ }';
-  const stand = BREAK === 'readme' ? "{ type: 'object' }" : '{}';
+  const stand = BREAK === 'snippets' ? "{ type: 'object' }" : '{}';
   const code = m[1].replace(placeholder, stand);
   if (!m[1].includes(placeholder)) failures.push(`placeholder ${placeholder} not found; snippet changed`);
   let recorded;
@@ -397,7 +396,7 @@ async function checkReadme() {
   if (got && !deepEqual({ a: got.annotations, m: got._meta }, { a: recorded.config.annotations, m: recorded.config._meta })) {
     failures.push(`${recorded.name}: listed annotations/_meta differ from the snippet's`);
   }
-  record('readme (MCP snippet vs SDK registerTool)', failures,
+  record('snippets (MCP snippet vs SDK registerTool)', failures,
     got ? `snippet ran as written (inputSchema placeholder -> ${stand}); ${got.name} listed with its annotations and _meta` : 'snippet did not complete');
 }
 
@@ -527,7 +526,7 @@ checkOpenApi(inputs);
 checkMcpSchema(inputs);
 checkMetaKeys(inputs);
 await checkRoundTrip(live);
-await checkReadme();
+await checkSnippets();
 checkWebmcp(inputs, idl);
 await checkBrowser(live);
 

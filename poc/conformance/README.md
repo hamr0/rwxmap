@@ -11,7 +11,7 @@ cd poc/conformance && npm install && node run.mjs
 # add the real-browser WebMCP check:
 CHROME=/path/to/chrome-156-or-later node run.mjs
 # see one check fail on purpose (rwxmap output corrupted in memory only):
-node run.mjs --break=openapi   # or mcp | metakey | roundtrip | readme | webmcp | browser
+node run.mjs --break=openapi   # or mcp | metakey | roundtrip | snippets | webmcp | browser
 ```
 
 The script exits 1 if any check fails. The schemas are pinned in
@@ -39,7 +39,7 @@ This is rwxmap's real output, not a copy of it:
 | `mcp` | Each `mcp` entry is built into a full Tool (`name`, `description`, `inputSchema: {type:'object'}`, `annotations`, `_meta`). Each Tool must validate against `$defs/Tool` in MCP `schema.json` 2026-07-28. |
 | `metakey` | Every `_meta` key must follow that schema's MetaObject key rule. The rule is written in prose there, not in the JSON Schema. It covers the label/name syntax and reserves prefixes whose second label is `mcp` or `modelcontextprotocol`. |
 | `roundtrip` | A real `@modelcontextprotocol/sdk` `McpServer` registers intercom's 166 tools with rwxmap's `annotations` and `_meta`. A real `Client` calls `tools/list` over the SDK's in-memory transport. Every tool's `annotations` and `_meta` must come back deep-equal. |
-| `readme` | The README's MCP snippet ("Who reads what") is run as written against the SDK's `McpServer.registerTool`. `inputSchema: { /* yours */ }` is replaced by `{}`. The tool must list with the snippet's `annotations` and `_meta`. |
+| `snippets` | The MCP snippet in `hint-snippets.md` is run as written against the SDK's `McpServer.registerTool`. `inputSchema: { /* yours */ }` is replaced by `{}`. The tool must list with the snippet's `annotations` and `_meta`. |
 | `webmcp` | Every `webmcp` entry is checked against the WebIDL, which is parsed from the pinned spec page. It may use only `ModelContextTool` members, and only `ToolAnnotations` members inside `annotations`. Every value must have the IDL type (all booleans). This is stricter than a browser: WebIDL silently drops unknown dictionary members. |
 | `browser` | This check runs only with `CHROME=`. A headless Chrome runs with `--enable-features=WebMCPTesting`. It registers one r, one w and one x intercom tool with rwxmap's annotations via `document.modelContext.registerTool`, then reads them back with `getTools()`. Every member sent must come back with the same value. |
 
@@ -66,7 +66,7 @@ corpus + 1 live) and 11,671 operations.
 | MCP (schema.json 2026-07-28) | Tool schema | 11,671/11,671 Tools valid |
 | MCP (schema.json 2026-07-28) | `_meta` key rule | 46,684/46,684 keys conform |
 | MCP (SDK 1.31.0) | server → client round trip | 166/166 deep-equal. The negotiated protocol was 2025-11-25, the SDK's latest. |
-| MCP (SDK 1.31.0) | README snippet | Runs as written, with `{}` for the placeholder |
+| MCP (SDK 1.31.0) | hint-snippets.md snippet | Runs as written, with `{}` for the placeholder |
 | WebMCP (CG draft 28 Sep 2026) | IDL | 11,671/11,671 entries conform |
 | WebMCP | Chrome for Testing 154.0.8037.57 (Stable), `WebMCPTesting` | r, w and x all read back equal. `debugging` is not in this build, and rwxmap does not send it. |
 | WebMCP | Chrome for Testing 156.0.8077.0 (Canary), `WebMCPTesting` | r, w and x all read back equal, 4 runs of 4. All four IDL members come back. |
@@ -92,11 +92,11 @@ their error counts. They are the same in the copy.
   `schema.json` 2026-07-28. The newest SDK (1.31.0) negotiates 2025-11-25
   at most, and so does `@modelcontextprotocol/server` 2.2.0. So the
   round trip is on 2025-11-25.
-- **README snippet.** The call shape is right: `registerTool(name,
+- **Snippets.** The call shape is right: `registerTool(name,
   config, handler)`. But in SDK 1.x, `inputSchema` must be a Zod raw
   shape or a Zod schema. A JSON Schema object such as
   `{ type: 'object' }` is refused with "inputSchema must be a Zod schema
-  or raw shape, received an unrecognized object". `--break=readme` shows
+  or raw shape, received an unrecognized object". `--break=snippets` shows
   this.
 - **Chromium 153** (the local Fedora build) knows only `readOnlyHint`
   and `untrustedContentHint`. It silently drops `consequentialHint`,
