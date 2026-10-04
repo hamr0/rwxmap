@@ -7425,7 +7425,15 @@ Node.
 - Not core: none of the files that can move a row's letter or marker
   changed, so no D-number and no fresh exam (D109).
 - Not yet done (at the time of writing): not committed, not reviewed,
-  no CHANGELOG entry, not released. Since then: committed as cae419f.
+  no CHANGELOG entry, not released. Since then: committed as cae419f and
+  reviewed (/branch-review, ready, no blockers). That review left 4 new
+  ledger items: 2 changes (the vendor guard still lets a zero-width or
+  padded name through; `-o ""` writes to the current folder), 1 idea,
+  1 nit.
+- After the review: the openvan.camp `check:live` record moved from 32
+  to 40 operations (all r, by the method floor) because the vendor added
+  8 GET operations; `npm run check:live` re-run 4 PASS. The README status
+  line no longer names a version.
 - Lesson: a ledger item tagged nit can still need a behaviour change.
   Check what the fix does to a run that exits 0 today before calling it
   a refactor.
