@@ -7,6 +7,13 @@
 ╚═╝  ╚═╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     
 
    r ─ w ─ x   what a call does, before it is made
+```
+
+<p align="center">
+  <a href="https://github.com/hamr0/rwxmap/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/hamr0/rwxmap/ci.yml?label=CI" alt="CI"></a>
+  <img src="https://img.shields.io/github/package-json/v/hamr0/rwxmap?label=version&color=2a4f8c" alt="version (auto from package.json)">
+  <img src="https://img.shields.io/badge/license-Apache%202.0-2a4f8c" alt="license: Apache 2.0">
+</p>
 
 **[WIP] Scopes every API operation as r / w / x, so an agent knows what a call does before it is made.**
 
@@ -101,7 +108,7 @@ Trimmed example of the combined JSON, one entry each:
 
 ```json
 {
-  "rwxmapVersion": "0.6.0",
+  "rwxmapVersion": "x.y.z",
   "source": "https://api.example.com/openapi.yaml",
   "vendor": "api.example.com",
   "bareguard": {
