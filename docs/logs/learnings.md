@@ -7424,8 +7424,8 @@ Node.
   empty: 0 items.
 - Not core: none of the files that can move a row's letter or marker
   changed, so no D-number and no fresh exam (D109).
-- Not yet done: not committed, not reviewed, no CHANGELOG entry, not
-  released.
+- Not yet done (at the time of writing): not committed, not reviewed,
+  no CHANGELOG entry, not released. Since then: committed as cae419f.
 - Lesson: a ledger item tagged nit can still need a behaviour change.
   Check what the fix does to a run that exits 0 today before calling it
   a refactor.
