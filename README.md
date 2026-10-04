@@ -201,7 +201,7 @@ avoid it.
 
 ## Status
 
-WIP. `rwxmap@0.6.0` is on npm.
+WIP. Published on npm as `rwxmap`.
 
 The author's Internet-Draft, [An Attenuated Delegation Profile for
 Automated Agents](https://datatracker.ietf.org/doc/draft-hamr-oauth-agent-delegation/),
