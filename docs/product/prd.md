@@ -768,6 +768,9 @@ above.
   (2026-09-28).
 - **The command line, Jev in the CLI and the carriers** (items c, d and
   e) — released as `rwxmap@0.6.0` on 2026-09-29.
+- **CLI polish and the release checklist** — `--help`, `--version`,
+  plain error messages, the `openapi`/`swagger` key check and
+  `docs/release-checklist.md` — released as `rwxmap@0.7.0` on 2026-09-30.
 
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
@@ -787,6 +790,10 @@ Nothing is planned. Parked items and known limits are below.
   two raise tiers (`jev-raise-wx`, `jev-raise-get`) is settled (D119);
   a fresh exam is required for any future change to D100's tiers,
   D101's review rule, or the frozen core.
+- **Windows.** Untested: CI runs on Linux only, two tests create
+  symlinks (which need privileges on Windows), and the entry-point
+  check and the `--force` hard-link and rename path have never run
+  there. Parked until someone asks for it (user ruling, 2026-09-30).
 
 ### Known limits (not planned)
 
@@ -794,6 +801,11 @@ Nothing is planned. Parked items and known limits are below.
   (`src/exporter.js`) reads neither, so those operations get no letter
   and no key. Few specs use 3.2 today, and stdout already counts the
   operations it skips.
+- **Two plain error messages depend on wording.** The CLI recognises
+  `load.js`'s "no usable paths" error and Node's `parseArgs` errors by
+  their text. If either is reworded the user sees the raw message
+  again; the exit code is still 1 and no letter changes. The tests pin
+  the exact text, so a reword fails the suite first.
 
 ### Released
 
@@ -823,10 +835,14 @@ Nothing is planned. Parked items and known limits are below.
   file. A URL the caller types is fetched as given. Vendor (D123):
   `--vendor`, else a URL's own host, else a local spec's first server
   host (`firstServerHost`), else exit 1 asking for `--vendor`.
-  A document with no `openapi` or `swagger` key is not a spec: a local
+  A document whose `openapi` does not read as 3.x and whose `swagger`
+  does not read as 2.x (missing, `banana`, `4.0.0`, `true`; read as text,
+  so a bare number `3.1` or `2` passes) is not a spec: a local
   file or a discovered spec that reloads that way exits 1; a URL that
   serves one falls through to discovery. `--vendor` must be a plain
-  name (no `/` or `\`, not `.`, `..` or empty), refused before any I/O.
+  name (no `/` or `\`, not blank, not all dots), refused before any I/O.
+  `-o=<dir>` (an `-o` value starting with `=`) exits 1 before any I/O:
+  `-o` takes a space.
   OpenAPI 3.1 `webhooks` operations are counted in a stdout notice and
   never labelled. `-h`/`--help` and `-v`/`--version` exit 0; error text
   is plain (`no such file`, `not a file`, `unknown option`, `-o needs a

@@ -7323,3 +7323,117 @@ tests each fail against the old cli.js. Still open, in the fix ledger:
 whitespace-only and all-dot `--vendor` names, a `swagger`/`openapi` key
 checked for presence only, and the message-text coupling to load.js and
 Node.
+
+## 2026-09-30 — v0.7.0 released; release checklist in place
+
+- Goal: release the CLI polish, the debrief 6 fixes and the docs cleanup
+  that followed 0.6.0.
+- Released: `rwxmap@0.7.0`. PR #12, merged with a merge commit 3d9c0fd
+  (not squashed, the user's choice), release commit 9cd111a, tag v0.7.0
+  on 3d9c0fd, npm `latest` is 0.7.0.
+- Why 0.7.0 and not 0.6.1 (the user's ruling): the new flags are Added,
+  which is a minor; and refusing a document with no `openapi` or
+  `swagger` key is a tightening.
+- What it contains: the CLI polish (015d15f) and the debrief 6 fixes
+  (b3feb7e), both in the entries above; the PRD cut to one shape and the
+  README rescoped; `docs/release-checklist.md` (12 items) and the
+  CLAUDE.md line that a release is not cut with any item unrun
+  (9fcfea2); `poc/conformance` reading its own `hint-snippets.md`
+  instead of the README; the openvan.camp `check:live` record
+  re-recorded at 32 operations and the proof-cli header stating 37 files
+  / 11,505 operations (f70b5a5).
+- Numbers at release: `npm test` 429 of 429; typecheck 0 errors;
+  proof-load, proof-match and proof-cli all hold over 11,505 operations;
+  conformance 6 of 6 with the browser check skipped because Chrome is
+  not installed; `npm run check:live` 4 PASS; `npm audit` 0.
+- CI was green on the PR, including the first real run of the new step
+  that packs, installs and runs the bin.
+- After publish: from a scratch folder with no `.env`, `--version`
+  printed 0.7.0, and a spec run exited 0, wrote 3 files and printed
+  "Jev: off (mechanical)".
+- Why the checklist exists: 0.6.0 shipped without `--help` or
+  `--version` because five debrief rounds and a review never ran the CLI
+  as a new user would; and the README rescope broke the conformance
+  readme check, which was not re-run before the commit and which CI does
+  not run.
+- Lesson 1: the 0.6.0 post-publish smoke test was run from the repo
+  root, where `.env` holds the Jev key, so unsetting `RWXMAP_JEV_KEY`
+  was not enough and it sent 189 real Jev rows, about 452k input
+  tokens. Mechanical smoke tests run from a scratch folder with no
+  `.env`, and the run must print "Jev: off (mechanical)".
+- Lesson 2: fixing every Later item makes new edge cases for the next
+  debrief round. Stop polishing once Fix-now is 0.
+- Still open, in the fix ledger (`.claude/remember/fix-ledger.md`): 5
+  items, 4 nits and 1 change (Windows untested).
+- Plan: nothing is planned in the PRD; the parked items wait on a core
+  change.
+
+## 2026-09-30 — Fix-ledger pass: vendor guard, -o=, spec key value
+
+- Goal: work the fix ledger after 0.7.0. It held 5 items: 4 nits and 1
+  change.
+- `/refactor` stopped before any edit. All 5 bullets still held, but
+  none of the 4 nits was a refactor. Each needed a behaviour change,
+  and `/refactor` allows none. The user ruled (2026-09-30) to fix two
+  as small behaviour changes with tests, drop one and retag one.
+- The bar, set before building: blank and all-dot `--vendor` names
+  exit 1 before any I/O while `a.b` still passes; an `-o` value
+  starting with `=` exits 1 and writes nothing; `openapi` must read as
+  3.x or `swagger` as 2.x, compared as text so an unquoted YAML number
+  passes; no real corpus file newly refused; every new test fails
+  against the old `cli.js`.
+- Measured before the change: of 721 spec files in `data/`, 37 load,
+  and all 37 carry the version as a string: `3.0.x` in 30, `3.1.0` in
+  4, swagger `2.0` in 3. The other 684 fail to load for having no
+  usable `paths` object, as before.
+- What changed in `src/cli.js`: the vendor guard now refuses a
+  whitespace-only name and any all-dot name. `--vendor ' '` used to
+  exit 1 with the internal "exporter: options.vendor is required";
+  `--vendor ...` used to write `....rwxmap.json` and exit 0.
+- An `-o` value starting with `=` is refused with
+  `-o takes a space, not "=": -o <dir>`. `-o=foo` used to write into a
+  folder named `=foo` and exit 0. The long form `--outDir=foo` parses
+  correctly and still works.
+- `isSpecDoc` now checks the value: `"openapi":"banana"`, `"4.0.0"`,
+  `true` and swagger `"1.2"` are refused with the existing "not an
+  OpenAPI or Swagger document" message. `swagger: 2` and `openapi: 3.1`
+  as bare numbers are accepted.
+- Results: `npm test` 433 of 433 (was 429; 4 new tests and 1
+  extended). Typecheck 0 errors. proof-load, proof-match and proof-cli
+  all hold; proof-cli still checks 37 files and 11,505 operations, so
+  no corpus file is newly refused.
+- The orchestrator put each old line back by hand, one at a time, and
+  saw exactly 1 of the 69 tests in `src/cli.test.js` fail each time:
+  the vendor test, the `-o=` test and the spec-version test. The
+  bare-number test does not fail on the old `isSpecDoc`; it guards
+  against a future check that is too strict.
+- Ledger after the pass: 2 items, 0 nits and 2 changes. Fixed: the
+  vendor guard and `isSpecDoc`. Dropped: the webhook-shape bullet, not
+  a defect (a malformed `webhooks` value prints no notice, nothing
+  crashes, nothing is mislabelled). Retagged change: the `NO_PATHS` /
+  `argError` message-text coupling, because decoupling needs `load.js`
+  to expose an error code on the public `rwxmap/load` surface, and
+  Node's parseArgs gives no structured field for the option name.
+  Left: Windows untested.
+- The user then ruled on the last two (2026-09-30). The message-text
+  coupling is closed as a known limit with no code change: the failure
+  is cosmetic, the tests pin the exact text, a fix for `load.js` would
+  add a field to the public `rwxmap/load` surface, and a fix for Node's
+  half means replacing `parseArgs` with a hand parser. Windows is
+  parked until someone asks. Both are now in the PRD, and the ledger is
+  empty: 0 items.
+- Not core: none of the files that can move a row's letter or marker
+  changed, so no D-number and no fresh exam (D109).
+- Not yet done (at the time of writing): not committed, not reviewed,
+  no CHANGELOG entry, not released. Since then: committed as cae419f and
+  reviewed (/branch-review, ready, no blockers). That review left 4 new
+  ledger items: 2 changes (the vendor guard still lets a zero-width or
+  padded name through; `-o ""` writes to the current folder), 1 idea,
+  1 nit.
+- After the review: the openvan.camp `check:live` record moved from 32
+  to 40 operations (all r, by the method floor) because the vendor added
+  8 GET operations; `npm run check:live` re-run 4 PASS. The README status
+  line no longer names a version.
+- Lesson: a ledger item tagged nit can still need a behaviour change.
+  Check what the fix does to a run that exits 0 today before calling it
+  a refactor.
