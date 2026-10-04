@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.2] - 2026-10-04
+
+### Fixed
+
+- **README renders again on GitHub and npm.** The 0.7.0 README rescope dropped the closing fence of the logo's code block, so everything from the logo down to the quick start rendered as one code block. The fence is restored.
+
+### Changed
+
+- **README version badges.** A badge row under the logo shows CI status, the version read from `package.json`, and the license, as in the other bare* projects. The README text names no version number (the JSON example shows `x.y.z`), so a release needs no README edit.
+
 ## [0.7.1] - 2026-10-04
 
 ### Changed
