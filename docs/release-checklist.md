@@ -33,7 +33,7 @@ a release is not cut with any item unrun. Each line: what, command, pass.
    print "Jev: off (mechanical)".
 8. README examples. Every command in README.md runs as written; same
    scratch folder, same pass rule as item 7.
-9. Review gates. `/debrief` until 0 Fix-now, then `/branch-review` says
+9. Review gates. `/self-review` until 0 Fix-now, then `/branch-review` says
    ready at HEAD.
 10. CHANGELOG entry and version bump: `/release`.
 
