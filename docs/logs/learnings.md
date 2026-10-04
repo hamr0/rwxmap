@@ -7466,11 +7466,17 @@ Node.
   scratch folder with no `.env`, `--version` printed 0.7.1, a spec run
   exited 0 with 3 files and `rwxmapVersion` 0.7.1, and `--vendor ...`
   was refused with exit 1.
-- The README status line and the trimmed JSON example no longer carry a
-  version number. The status line shows an npm version badge, which
-  reads the published `package.json`; the example shows `x.y.z`. A
-  release no longer needs a manual README edit (user ruling,
-  2026-10-04).
+- The README now carries its version the way the other bare* projects
+  do: a badge row under the logo with the CI status, the version read
+  from `package.json` on GitHub, and the license. The JSON example
+  shows `x.y.z`, and the Status line names no version, so a release
+  needs no manual README edit (user ruling, 2026-10-04).
+- Found while adding the badges: the 0.7.0 README rescope dropped the
+  closing fence of the logo's code block. Since 0.7.0 the README's top
+  80 lines rendered as one code block on GitHub and npm, and the later
+  fences paired up wrong. The fence is restored. Nothing caught it:
+  conformance reads its own snippets file, and no check renders the
+  README.
 - Fix ledger after the release: 4 items, 1 nit, 2 changes, 1 idea. The
   nit is the generated `docs/index.md` map with stale line counts. The
   changes are a zero-width or padded `--vendor` name and `-o ""`

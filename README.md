@@ -7,6 +7,13 @@
 ╚═╝  ╚═╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     
 
    r ─ w ─ x   what a call does, before it is made
+```
+
+<p align="center">
+  <a href="https://github.com/hamr0/rwxmap/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/hamr0/rwxmap/ci.yml?label=CI" alt="CI"></a>
+  <img src="https://img.shields.io/github/package-json/v/hamr0/rwxmap?label=version&color=2a4f8c" alt="version (auto from package.json)">
+  <img src="https://img.shields.io/badge/license-Apache%202.0-2a4f8c" alt="license: Apache 2.0">
+</p>
 
 **[WIP] Scopes every API operation as r / w / x, so an agent knows what a call does before it is made.**
 
@@ -201,7 +208,7 @@ avoid it.
 
 ## Status
 
-WIP. Published on npm as `rwxmap`: [![npm](https://img.shields.io/npm/v/rwxmap)](https://www.npmjs.com/package/rwxmap)
+WIP. Published on npm as `rwxmap`.
 
 The author's Internet-Draft, [An Attenuated Delegation Profile for
 Automated Agents](https://datatracker.ietf.org/doc/draft-hamr-oauth-agent-delegation/),
