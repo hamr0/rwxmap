@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.1] - 2026-10-04
+
+### Changed
+
+- **`--vendor` also refuses a blank name and an all-dot name.** A whitespace-only value or one made only of dots (`...`) is refused before any input is read or file written. Before, `--vendor ' '` exited 1 with an internal "exporter: options.vendor is required" and `--vendor ...` wrote `....rwxmap.json`.
+- **`-o=dir` is refused.** `-o` given with `=` exits 1 with `-o takes a space, not "=": -o <dir>`. Before, it wrote into a folder named `=dir`. The long form `--outDir=dir` is unaffected.
+- **The spec check reads the version, not just the key** (a tightening: less input is accepted). `openapi` must read as 3.x or `swagger` as 2.x, read as text so an unquoted YAML `2.0` still passes. A document with, say, `"openapi": "banana"` or `"swagger": "1.2"` is refused as "not an OpenAPI or Swagger document".
+- **README**: the Status line no longer names a version.
+
+### Fixed
+
+- **`check:live` record for openvan.camp** re-recorded at 40 operations (it added 8 GET operations, all `r`); `check:live` is 4 PASS.
+
 ## [0.7.0] - 2026-09-30
 
 ### Added
