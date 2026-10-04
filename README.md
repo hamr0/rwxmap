@@ -101,7 +101,7 @@ Trimmed example of the combined JSON, one entry each:
 
 ```json
 {
-  "rwxmapVersion": "0.6.0",
+  "rwxmapVersion": "x.y.z",
   "source": "https://api.example.com/openapi.yaml",
   "vendor": "api.example.com",
   "bareguard": {
@@ -201,7 +201,7 @@ avoid it.
 
 ## Status
 
-WIP. Published on npm as `rwxmap`.
+WIP. Published on npm as `rwxmap`: [![npm](https://img.shields.io/npm/v/rwxmap)](https://www.npmjs.com/package/rwxmap)
 
 The author's Internet-Draft, [An Attenuated Delegation Profile for
 Automated Agents](https://datatracker.ietf.org/doc/draft-hamr-oauth-agent-delegation/),

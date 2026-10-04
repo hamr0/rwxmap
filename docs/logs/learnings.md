@@ -7437,3 +7437,45 @@ Node.
 - Lesson: a ledger item tagged nit can still need a behaviour change.
   Check what the fix does to a run that exits 0 today before calling it
   a refactor.
+
+## 2026-10-04 — v0.7.1 released
+
+- Released: `rwxmap@0.7.1`. PR #13, merged with a merge commit bf719c1,
+  release commit c92db2b, tag v0.7.1 on bf719c1, npm `latest` is 0.7.1,
+  and the publish workflow passed.
+- Contents: the fix-ledger pass (vendor guard, `-o=`, spec version
+  check), the openvan.camp `check:live` re-record at 40 operations, the
+  release checklist naming `/self-review`, and the README status line
+  without a version. The 0.7.0 docs commit 244889b, unpushed on `main`
+  until then, went up with this PR.
+- Cut as a patch: only Changed and Fixed entries, no new flags or
+  exports.
+- Release checklist, all 12 items run. Items 1–3: tree clean on the
+  branch, `npm test` 433 of 433, typecheck 0, the three proofs hold.
+  Item 4: conformance 6 of 6, browser check skipped (no Chrome). Item 5:
+  `check:live` first 3 PASS and 1 CHANGED (openvan 32 to 40 operations;
+  the 8 new ones are GETs, `r` by the method floor; the one POST is
+  still `calculateRouteCost`, `r`), then 4 PASS after the re-record.
+  Item 6: the install check exit 0. Item 7: the new-user hand run read
+  plainly, and every successful run printed "Jev: off (mechanical)".
+  Item 8: the README examples are placeholders (`./openapi.yaml`,
+  `api.example.com`) and fail plainly with exit 1. Item 9:
+  `/self-review` found 0 Fix-now; `/branch-review` said ready, then
+  ready again on a re-review after the live-check re-record. Item 10:
+  `/release`. Items 11–12: CI green on the PR; after publish, from a
+  scratch folder with no `.env`, `--version` printed 0.7.1, a spec run
+  exited 0 with 3 files and `rwxmapVersion` 0.7.1, and `--vendor ...`
+  was refused with exit 1.
+- The README status line and the trimmed JSON example no longer carry a
+  version number. The status line shows an npm version badge, which
+  reads the published `package.json`; the example shows `x.y.z`. A
+  release no longer needs a manual README edit (user ruling,
+  2026-10-04).
+- Fix ledger after the release: 4 items, 1 nit, 2 changes, 1 idea. The
+  nit is the generated `docs/index.md` map with stale line counts. The
+  changes are a zero-width or padded `--vendor` name and `-o ""`
+  writing to the current folder. The idea is that error order across
+  several bad arguments is untested.
+- Lesson: a review record goes stale on any non-docs commit, a one-line
+  live-check re-record included. Run `check:live` before
+  `/branch-review`, not after, or the review has to run twice.
