@@ -98,6 +98,14 @@ test('tie: matchOperation\'s tie flag, and two sidecars on one host', () => {
   assert.deepEqual(two.match('GET', 'https://h/t'), { key: 'v2.read', letter: 'w', marker: 'loose', source: 'spec', tie: true });
 });
 
+test('two sidecars on one host with equal letters: the FIRST sidecar\'s key wins, and tie is true', () => {
+  const m = matcherFrom([
+    { vendor: 'v1', servers: ['https://h'], rows: [row('v1.read', 'GET', '/t', 'w', 'loose')] },
+    { vendor: 'v2', servers: ['https://h'], rows: [row('v2.read', 'GET', '/t', 'w', 'loose')] },
+  ]);
+  assert.deepEqual(m.match('GET', 'https://h/t'), { key: 'v1.read', letter: 'w', marker: 'loose', source: 'spec', tie: true });
+});
+
 test('servers [] (or absent) falls back to https://<vendor>', () => {
   const rows = [row('h.api.getThing', 'GET', '/thing', 'r')];
   for (const servers of [[], undefined]) {

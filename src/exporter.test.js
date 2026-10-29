@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { operationsFrom, exportGate, exportSidecar, classifyOperations } from './exporter.js';
+import { operationsFrom, exportGate, exportSidecar, classifyOperations, gateEntriesFromRows } from './exporter.js';
 
 // ---- operationsFrom -----------------------------------------------------
 
@@ -166,6 +166,24 @@ test('exportGate: equal letters keep the first, and the collision still gets rep
   assert.equal(collisions[0].keptLetter, 'w');
   assert.equal(collisions[0].existing.method, 'PUT');
   assert.equal(collisions[0].incoming.method, 'PATCH');
+});
+
+test('gateEntriesFromRows: a tie on letter keeps the FIRST entry (marker and all), not the later one', () => {
+  const entries = gateEntriesFromRows([
+    { key: 'acme.id', letter: 'w', marker: 'tight' },
+    { key: 'acme.id', letter: 'w', marker: 'loose' },
+  ]);
+  assert.deepEqual(entries.get('acme.id'), { letter: 'w', marker: 'tight' });
+});
+
+test('exportGate: a tie leaves the FIRST row holding the key, so a later collision reports it as existing', () => {
+  const { collisions } = exportGate([
+    { method: 'PUT', path: '/things/{id}' },     // w, places the key
+    { method: 'PATCH', path: '/things/{id}' },   // w, ties: must NOT take the key
+    { method: 'DELETE', path: '/things/{id}' },  // x, takes it from the current holder
+  ], { vendor: 'acme' });
+  assert.equal(collisions.length, 2);
+  assert.equal(collisions[1].existing.method, 'PUT');
 });
 
 test('exportGate: a three-way collision reports the CURRENT holder, not the first row seen', () => {
