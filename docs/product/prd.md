@@ -537,11 +537,13 @@ on any disagreement; this is the copy.
   by default and the bare letter on request.
 - **Never emitted:** `flags`, the `agents` section, any deny rule.
   Denial is the human's call at grant time.
-- **The sidecar** carries `evidence` and `destructive` for every row, a
-  review list (`loose` first, then `tight`), collisions, and the
-  `destructive: true` rows as a clearly-labelled suggestion, never as
-  config. It is human-facing only; bareguard never reads it (an unlisted
-  tool already denies with `rwx.unlisted`).
+- **The sidecar** carries `evidence` and `destructive` for every row, the
+  spec's resolved `servers` (and `serverTemplates` when it has tenant
+  hosts) for `rwxmap/match` (D126), a review list (`loose` first, then
+  `tight`), collisions, and the `destructive: true` rows as a
+  clearly-labelled suggestion, never as config. Apart from `rwxmap/match`
+  it is human-facing only; bareguard never reads it (an unlisted tool
+  already denies with `rwx.unlisted`).
 - bareguard's opt-in `rwx.askOn` knob, default off, reads the marker;
   it is bareguard's design and its default is bareguard's call (D103).
   bareguard never runs rwxmap and never depends on it.
@@ -786,8 +788,9 @@ a vendor's domain from a public suffix, so a template such as
 `{x}.github.io` routes every host under it, and a stranger's host there
 takes that spec's letter, which can be looser than the request-only
 label; no corpus spec does this, and there is no public-suffix list by
-design. A local spec's relative server resolves against
-`https://<vendor>`. LLM-inference allowlists are barebox's, not
+design. A relative server URL in a local spec resolves against the
+API address when `findSpec` is given one, and against `https://<vendor>`
+in the CLI (a file path is no URL base). LLM-inference allowlists are barebox's, not
 rwxmap's: no hand-curated endpoint lists, and changing a letter is core
 work.
 

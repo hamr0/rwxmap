@@ -100,7 +100,8 @@ npx rwxmap https://api.example.com
 It writes three files, in `-o` (default: the current folder):
 
 - `<vendor>.rwxmap.json` — the combined map: bareguard, MCP, WebMCP.
-- `<vendor>.rwxmap.review.json` — per-row evidence and review marker.
+- `<vendor>.rwxmap.review.json` — per-row evidence and review marker,
+  plus the spec's `servers` (read by `rwxmap/match`, below).
 - `<vendor>.openapi.rwx.json` — a copy of your spec with `x-rwx` on
   every operation. Your own file is never written.
 
