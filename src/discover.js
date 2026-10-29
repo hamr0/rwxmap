@@ -656,15 +656,18 @@ function writeCache(cacheDir, key, version, result) {
  * @param {string} specUrl
  * @param {import('./load.js').LoadResult} loaded
  * @param {Operation[]} ops
+ * @param {string|null} [serverBase]  Base a relative server URL resolves
+ *   against; defaults to specUrl (right for a fetched spec). A local-file
+ *   opts.spec passes the API address instead, or null when it has none.
  * @returns {any}
  */
-function buildFoundResult(vendor, specUrl, loaded, ops) {
+function buildFoundResult(vendor, specUrl, loaded, ops, serverBase = specUrl) {
   // `entries` is exportGate's own `tools` map (D105 item 3: "the tools
   // map with letter and marker") — the same GateEntry shape D103 defined,
   // looked up here, never rebuilt.
   const { tools: entries } = exportGate(ops, { vendor, form: 'object' });
   const opKeys = ops.map((op) => gateKey(vendor, op));
-  const servers = serversOrVendorHost(resolvedServers(loaded.doc, specUrl), vendor);
+  const servers = serversOrVendorHost(resolvedServers(loaded.doc, serverBase ?? undefined), vendor);
   return {
     status: 'found',
     host: vendor,
@@ -691,6 +694,21 @@ function tryParseHostname(u) {
     // not a URL at all — fine, the caller has other fallbacks.
   }
   return null;
+}
+
+/**
+ * Base for resolving a spec's relative server URLs. A fetched (http/s)
+ * spec resolves against itself; a local path is no URL base, so it
+ * resolves against the API address the caller gave. null = no usable base
+ * (a relative server is then skipped).
+ *
+ * @param {string} apiUrl
+ * @param {string} specAddr
+ * @returns {string|null}
+ */
+function serverBaseFor(apiUrl, specAddr) {
+  if (tryParseHostname(specAddr)) return specAddr;
+  return tryParseHostname(apiUrl) ? String(apiUrl) : null;
 }
 
 /**
@@ -792,7 +810,7 @@ export async function findSpec(apiUrl, opts = {}) {
     const vendor = determineVendor(apiUrl, loaded.doc, String(opts.spec));
     const ops = operationsFrom(loaded.doc);
     const result = ops.length > 0
-      ? buildFoundResult(vendor, String(opts.spec), loaded, ops)
+      ? buildFoundResult(vendor, String(opts.spec), loaded, ops, serverBaseFor(apiUrl, String(opts.spec)))
       : { status: 'none', host: vendor, reason: 'spec has no operations', mode: 'mechanical' };
     const wrote = writeCache(cacheDir, key, version, result);
     return { ...result, fromCache: false, cached: wrote };

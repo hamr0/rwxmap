@@ -863,3 +863,78 @@ test('classifyCall: no spec (status "none") always falls back to per-request cla
 test('discover.js re-exports requestKey verbatim from key.js', () => {
   assert.equal(discoverRequestKey, requestKey);
 });
+
+// ---------------------------------------------------------------------
+// opts.spec — relative server URLs resolve against the API address
+// ---------------------------------------------------------------------
+
+function writeLocalSpec(servers) {
+  const fixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rwxmap-discover-fixture-'));
+  const specPath = path.join(fixtureDir, 'spec.json');
+  fs.writeFileSync(specPath, JSON.stringify({
+    openapi: '3.0.0',
+    servers,
+    paths: { '/things': { get: { operationId: 'listThings' } } },
+  }));
+  return { fixtureDir, specPath };
+}
+
+test('local opts.spec with a relative server resolves it against apiUrl, so classifyCall matches the spec', async () => {
+  const cacheDir = mkTmpCacheDir();
+  const { fixtureDir, specPath } = writeLocalSpec([{ url: '/v1' }]);
+  try {
+    const found = await findSpec('https://acme.example', { spec: specPath, cacheDir });
+    assert.equal(found.status, 'found');
+    assert.equal(found.specUrl, specPath, 'specUrl stays the caller\'s opts.spec string');
+    assert.deepEqual(found.servers, ['https://acme.example/v1']);
+    const c = classifyCall(found, 'GET', 'https://acme.example/v1/things');
+    assert.equal(c.source, 'spec');
+    assert.equal(c.key, 'acme.example.listThings');
+  } finally {
+    fs.rmSync(cacheDir, { recursive: true, force: true });
+    fs.rmSync(fixtureDir, { recursive: true, force: true });
+  }
+});
+
+test('local opts.spec with an absolute server keeps that server', async () => {
+  const cacheDir = mkTmpCacheDir();
+  const { fixtureDir, specPath } = writeLocalSpec([{ url: 'https://api.other.example/v2' }]);
+  try {
+    const found = await findSpec('https://acme.example', { spec: specPath, cacheDir });
+    assert.deepEqual(found.servers, ['https://api.other.example/v2']);
+  } finally {
+    fs.rmSync(cacheDir, { recursive: true, force: true });
+    fs.rmSync(fixtureDir, { recursive: true, force: true });
+  }
+});
+
+test('http(s) opts.spec with a relative server still resolves against the spec URL, not apiUrl', async () => {
+  const cacheDir = mkTmpCacheDir();
+  const specUrl = 'https://specs.example/docs/openapi.json';
+  const body = JSON.stringify({
+    openapi: '3.0.0',
+    servers: [{ url: '/v1' }],
+    paths: { '/things': { get: { operationId: 'listThings' } } },
+  });
+  const { restore } = stubFetch({ [`GET ${specUrl}`]: { text: body } });
+  try {
+    const found = await findSpec('https://acme.example', { spec: specUrl, cacheDir });
+    assert.equal(found.status, 'found');
+    assert.deepEqual(found.servers, ['https://specs.example/v1']);
+  } finally {
+    restore();
+    fs.rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+test('local opts.spec with an absolute server and an apiUrl that is no URL still keeps the server', async () => {
+  const cacheDir = mkTmpCacheDir();
+  const { fixtureDir, specPath } = writeLocalSpec([{ url: 'https://api.other.example/v2' }]);
+  try {
+    const found = await findSpec('not-a-url-at-all', { spec: specPath, cacheDir });
+    assert.deepEqual(found.servers, ['https://api.other.example/v2']);
+  } finally {
+    fs.rmSync(cacheDir, { recursive: true, force: true });
+    fs.rmSync(fixtureDir, { recursive: true, force: true });
+  }
+});
