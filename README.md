@@ -242,6 +242,12 @@ m.match('POST', 'https://api.example.com/v1/orders/123');
   covered; there is no placeholder-word guessing. Set the sidecar's
   `servers` (or `serverTemplates`) to your tenant before passing it to
   `matcherFrom`; a call no route claims takes the request-only label.
+  Also a limit: the 2-label rule cannot tell a vendor's own domain from
+  a shared one, so a spec that writes a template over a public suffix
+  such as `{x}.github.io` or `{x}.co.uk` routes every host under it, and
+  a stranger's host there gets that spec's letter (which can be looser
+  than the request-only label). No spec in the corpus does this; there
+  is no public-suffix list by design (no hand-curated lists).
 - `tie` is true when several operations (or several sidecars) matched
   equally well and the tightest was taken.
 - Sidecars from rwxmap 0.8.0 on carry a top-level `servers` list. A sidecar
