@@ -90,7 +90,7 @@ import { fileURLToPath } from 'node:url';
 import { loadSpec } from './load.js';
 import { findSpec, firstServerHost } from './discover.js';
 import { operationsFrom, operationEntries, exportGate, exportSidecar, classifyOperations } from './exporter.js';
-import { resolvedServers } from './servers.js';
+import { resolvedServers, tenantServerTemplates } from './servers.js';
 import { needsJev, applyJev } from './jev.js';
 import { runJevBatch } from './jev-client.js';
 
@@ -649,9 +649,10 @@ export function buildOutput(ops, vendor, source, options = {}) {
   const { tools, collisions } = exportGate(ops, { vendor, verdicts });
   // The spec's own resolved servers go in the sidecar so `rwxmap/match`
   // can route a call by host. `source` is a base only when it is a URL; a
-  // local path is no base, so a relative server URL is skipped.
-  const base = /^https?:\/\//i.test(source) ? source : undefined;
-  const sidecar = exportSidecar(ops, { vendor, verdicts, servers: resolvedServers(doc, base) });
+  // local path is no base, so a relative server URL resolves against
+  // https://<vendor>, the host serversOrVendorHost falls back to.
+  const base = /^https?:\/\//i.test(source) ? source : `https://${vendor}`;
+  const sidecar = exportSidecar(ops, { vendor, verdicts, servers: resolvedServers(doc, base), serverTemplates: tenantServerTemplates(doc) });
   const { mcp, webmcp, mcpCollisions } = buildHintDicts(ops, sidecar.rows);
   const { copy: openapiCopy, overwritten: xRwxOverwritten, nonFinite: openapiNonFinite, bigIntegers: openapiBigIntegers } = doc === undefined
     ? { copy: null, overwritten: 0, nonFinite: 0, bigIntegers: 0 }

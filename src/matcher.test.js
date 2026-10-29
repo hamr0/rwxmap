@@ -106,13 +106,100 @@ test('two sidecars on one host with equal letters: the FIRST sidecar\'s key wins
   assert.deepEqual(m.match('GET', 'https://h/t'), { key: 'v1.read', letter: 'w', marker: 'loose', source: 'spec', tie: true });
 });
 
-test('servers [] (or absent) falls back to https://<vendor>', () => {
+test('servers [] falls back to https://<vendor>', () => {
   const rows = [row('h.api.getThing', 'GET', '/thing', 'r')];
-  for (const servers of [[], undefined]) {
-    const m = matcherFrom([{ vendor: 'api.h', ...(servers ? { servers } : {}), rows }]);
-    assert.equal(m.match('GET', 'https://api.h/thing').source, 'spec');
-    assert.equal(m.match('GET', 'https://other/thing').source, 'request');
+  const m = matcherFrom([{ vendor: 'api.h', servers: [], rows }]);
+  assert.equal(m.match('GET', 'https://api.h/thing').source, 'spec');
+  assert.equal(m.match('GET', 'https://other/thing').source, 'request');
+});
+
+test('a sidecar with NO servers key (written before 0.8.0) is refused, naming its index', () => {
+  const rows = [row('stripe.deleteCustomer', 'DELETE', '/v1/customers/{id}', 'x')];
+  const good = { vendor: 'h', servers: ['https://h'], rows: [row('h.a', 'GET', '/a', 'r')] };
+  assert.throws(
+    () => matcherFrom([good, { vendor: 'stripe', rows }]),
+    /sidecar 1: no servers list.*regenerate it with rwxmap 0\.8\.0 or later/,
+  );
+});
+
+// ---- tenant templates (suffix routes) and per-host base paths ----
+
+const sentry = (extra = {}) => ({
+  vendor: 'sentry.io',
+  servers: ['https://us.sentry.io/'],
+  serverTemplates: ['https://{region}.sentry.io/'],
+  rows: [row('sentry.deleteIssue', 'DELETE', '/api/0/issues/{id}', 'x')],
+  ...extra,
+});
+
+test('serverTemplates: any host under the fixed suffix routes, the bare suffix does not', () => {
+  const m = matcherFrom([sentry()]);
+  for (const host of ['us.sentry.io', 'de.sentry.io', 'a.b.sentry.io', 'DE.Sentry.IO']) {
+    const got = m.match('DELETE', `https://${host}/api/0/issues/9`);
+    assert.equal(got.source, 'spec', host);
+    assert.equal(got.key, 'sentry.deleteIssue');
+    assert.equal(got.tie, false, host); // one sidecar by two routes is one candidate
   }
+  assert.equal(m.match('DELETE', 'https://sentry.io/api/0/issues/9').source, 'request');
+  assert.equal(m.match('DELETE', 'https://de.notsentry.io/api/0/issues/9').source, 'request');
+  assert.equal(m.match('DELETE', 'https://de.sentry.io.evil.test/api/0/issues/9').source, 'request');
+});
+
+test('serverTemplates: the port must match the template\'s port, default port if none', () => {
+  const m = matcherFrom([sentry({ servers: [], serverTemplates: ['https://{r}.sentry.io:8443/'] })]);
+  assert.equal(m.match('DELETE', 'https://de.sentry.io:8443/api/0/issues/9').source, 'spec');
+  assert.equal(m.match('DELETE', 'https://de.sentry.io/api/0/issues/9').source, 'request');
+  const plain = matcherFrom([sentry()]);
+  assert.equal(plain.match('DELETE', 'https://de.sentry.io:443/api/0/issues/9').source, 'spec');
+  assert.equal(plain.match('DELETE', 'https://de.sentry.io:8443/api/0/issues/9').source, 'request');
+});
+
+test('serverTemplates: a template\'s own base path is tried only for its tenant hosts', () => {
+  const m = matcherFrom([{
+    vendor: 'b.com',
+    servers: ['https://a.com/v1'],
+    serverTemplates: ['https://{t}.b.com/admin'],
+    rows: [row('b.deleteUser', 'DELETE', '/users', 'x')],
+  }]);
+  assert.equal(m.match('DELETE', 'https://x.b.com/admin/users').source, 'spec');
+  assert.equal(m.match('DELETE', 'https://a.com/v1/users').source, 'spec');
+  assert.equal(m.match('DELETE', 'https://x.b.com/v1/users').source, 'request'); // a.com's base on a tenant host
+  assert.equal(m.match('DELETE', 'https://a.com/admin/users').source, 'request'); // the template's base on a.com
+});
+
+test('a routed host tries only the base paths of the servers that route it', () => {
+  const m = matcherFrom([{
+    vendor: 'a.com',
+    servers: ['https://a.com/v1', 'https://b.com/admin'],
+    rows: [row('a.deleteUsers', 'DELETE', '/users', 'x')],
+  }]);
+  assert.equal(m.match('DELETE', 'https://a.com/v1/users').source, 'spec');
+  assert.equal(m.match('DELETE', 'https://b.com/admin/users').source, 'spec');
+  assert.equal(m.match('DELETE', 'https://a.com/admin/users').source, 'request');
+  assert.equal(m.match('DELETE', 'https://b.com/v1/users').source, 'request');
+});
+
+test('serverTemplates across sidecars: sidecar order decides a tie, whichever route reached it', () => {
+  const exact = { vendor: 'e', servers: ['https://de.sentry.io'], rows: [row('e.read', 'GET', '/t', 'w', 'loose')] };
+  const tenant = { vendor: 't', servers: [], serverTemplates: ['https://{r}.sentry.io'], rows: [row('t.read', 'GET', '/t', 'w', 'loose')] };
+  assert.equal(matcherFrom([tenant, exact]).match('GET', 'https://de.sentry.io/t').key, 't.read');
+  assert.equal(matcherFrom([exact, tenant]).match('GET', 'https://de.sentry.io/t').key, 'e.read');
+  assert.equal(matcherFrom([exact, tenant]).match('GET', 'https://de.sentry.io/t').tie, true);
+  const tighter = { ...tenant, rows: [row('t.read', 'GET', '/t', 'x', 'settled')] };
+  assert.equal(matcherFrom([exact, tighter]).match('GET', 'https://de.sentry.io/t').letter, 'x');
+});
+
+test('serverTemplates: entries that do not satisfy the suffix rule throw at matcherFrom', () => {
+  const bad = [
+    'https://{yourOktaDomain}', 'https://{subdomain}.{site}', 'https://{a}.{b}.com', 'https://{sub}.{domain}.com',
+    'https://{a}.sentry.{tld}', 'https://api-{x}.foo.com', 'https://acme.sentry.io', 'https://your-domain.atlassian.net',
+    '/v1', 'https://{a}.sentry.io?x=1',
+  ];
+  for (const t of bad) {
+    assert.throws(() => matcherFrom([sentry({ serverTemplates: [t] })]), /sidecar 0: serverTemplates entry/, t);
+  }
+  assert.throws(() => matcherFrom([sentry({ serverTemplates: 'https://{a}.sentry.io' })]), /serverTemplates must be an array of strings/);
+  assert.throws(() => matcherFrom([sentry({ serverTemplates: [1] })]), /serverTemplates must be an array of strings/);
 });
 
 test('input errors throw at matcherFrom time', () => {

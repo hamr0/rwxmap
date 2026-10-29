@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
 import { run } from './cli.js';
+import { matcherFrom } from './matcher.js';
 import { JEV_LOWER_THRESHOLD, JEV_RAISE_WX_THRESHOLD, JEV_RAISE_GET_THRESHOLD } from './jev.js';
 
 // ---------------------------------------------------------------------
@@ -1725,7 +1726,7 @@ test('process: importing src/cli.js from another module does not run the CLI', (
   assert.deepEqual(fs.readdirSync(outDir), []);
 });
 
-test('run: the sidecar carries the spec\'s resolved servers (a relative one from a local file is skipped)', async () => {
+test('run: the sidecar carries the spec\'s resolved servers (a relative one from a local file resolves against https://<vendor>)', async () => {
   const dir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', { ...SPEC_OPENAPI3_SERVERS_DOC, servers: [{ url: 'https://api.acme.example/v1' }, { url: '/relative' }] });
   const outDir = mkScratch();
@@ -1734,5 +1735,47 @@ test('run: the sidecar carries the spec\'s resolved servers (a relative one from
 
   assert.equal(code, 0);
   const sidecar = readJson(path.join(outDir, 'api.acme.example.rwxmap.review.json'));
-  assert.deepEqual(sidecar.servers, ['https://api.acme.example/v1']);
+  assert.deepEqual(sidecar.servers, ['https://api.acme.example/v1', 'https://api.acme.example/relative']);
+});
+
+test('run: a local spec with a relative server and --vendor writes https://<vendor><path>, and the matcher routes its base path', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', {
+    openapi: '3.0.0',
+    servers: [{ url: '/v1' }],
+    paths: { '/orders/{id}': { get: { operationId: 'getOrder' } } },
+  });
+  const outDir = mkScratch();
+
+  const code = await run([specPath, '--vendor', 'acme.example', '-o', outDir], { cwd: dir, stdout: captureStream(), stderr: captureStream() });
+
+  assert.equal(code, 0);
+  const sidecar = readJson(path.join(outDir, 'acme.example.rwxmap.review.json'));
+  assert.deepEqual(sidecar.servers, ['https://acme.example/v1']);
+  const m = matcherFrom([sidecar]);
+  assert.equal(m.match('GET', 'https://acme.example/v1/orders/7').source, 'spec');
+  assert.equal(m.match('GET', 'https://acme.example/orders/7').source, 'request');
+});
+
+test('run: tenant-templated servers land in serverTemplates (and only those); other sidecars have no such field', async () => {
+  const dir = mkScratch();
+  const paths = { '/things/{id}': { delete: { operationId: 'deleteThing' } } };
+  const tenant = writeSpecFile(dir, 'tenant.json', {
+    openapi: '3.0.0',
+    servers: [{ url: 'https://{region}.sentry.io/api/{v}', variables: { region: { default: 'us' }, v: { default: '0' } } }, { url: 'https://{sub}.{domain}.com', variables: { sub: { default: 'a' }, domain: { default: 'b' } } }],
+    paths,
+  });
+  const fixed = writeSpecFile(dir, 'fixed.json', { openapi: '3.0.0', servers: [{ url: 'https://api.fixed.example' }], paths });
+  const outDir = mkScratch();
+  for (const [spec, vendor] of [[tenant, 'sentry.io'], [fixed, 'fixed.example']]) {
+    const code = await run([spec, '--vendor', vendor, '-o', outDir], { cwd: dir, stdout: captureStream(), stderr: captureStream() });
+    assert.equal(code, 0);
+  }
+  const sc = readJson(path.join(outDir, 'sentry.io.rwxmap.review.json'));
+  assert.deepEqual(sc.servers, ['https://us.sentry.io/api/0', 'https://a.b.com/']);
+  assert.deepEqual(sc.serverTemplates, ['https://{region}.sentry.io/api/0']);
+  assert.equal('serverTemplates' in readJson(path.join(outDir, 'fixed.example.rwxmap.review.json')), false);
+  const m = matcherFrom([sc]);
+  assert.equal(m.match('DELETE', 'https://de.sentry.io/api/0/things/9').source, 'spec');
+  assert.equal(m.match('DELETE', 'https://x.b.com/things/9').source, 'request'); // 1-label suffix: no route
 });

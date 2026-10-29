@@ -68,3 +68,59 @@ export function resolvedServers(doc, specUrl) {
 export function serversOrVendorHost(servers, vendor) {
   return servers.length === 0 ? [`https://${vendor}`] : servers;
 }
+
+// A tenant server URL: scheme, one or more LEADING host labels that are each
+// exactly `{var}`, then a fixed host (no braces) and an optional path.
+// Anything else templated (a whole-host var, a var in the suffix or mid-label,
+// a query or fragment) does not match.
+const TENANT_TEMPLATE = /^(https?):\/\/((?:\{[^{}./]+\}\.)+)([^{}/?#@\s]+)(\/[^?#]*)?$/i;
+
+/**
+ * THE ONE READER of the suffix-routing rule (D126): a server URL whose host
+ * is leading `{var}` labels over a fixed suffix of AT LEAST 2 labels routes
+ * every host ending in `.<suffix>`. Used by tenantServerTemplates (the
+ * writer of the sidecar's `serverTemplates`) and by matcher.js (which
+ * validates them), so the two never disagree about what is routable.
+ *
+ * @param {string} url
+ * @returns {{scheme: string, vars: string, host: string, suffix: string, path: string}|null}
+ *   `suffix` is the normalized `host[:port]` (default port dropped) the
+ *   routed hosts must end in; null when `url` is not suffix-routable.
+ */
+export function tenantTemplate(url) {
+  const m = TENANT_TEMPLATE.exec(url);
+  if (!m) return null;
+  const [, scheme, vars, host, path = ''] = m;
+  const hostname = host.replace(/:\d+$/, '');
+  const labels = hostname.split('.');
+  if (labels.length < 2 || labels.includes('')) return null;
+  let parsed;
+  try {
+    parsed = new URL(`${scheme}://x.${host}`);
+  } catch {
+    return null;
+  }
+  return { scheme: scheme.toLowerCase(), vars, host, suffix: parsed.host.slice(2), path };
+}
+
+/**
+ * THE ONE WRITER of the sidecar's `serverTemplates`: the doc's OpenAPI 3
+ * server URLs that tenantTemplate accepts, host `{var}` labels left as
+ * written and the path's variables resolved with their defaults, exactly as
+ * resolvedServers does.
+ *
+ * @param {any} doc
+ * @returns {string[]}
+ */
+export function tenantServerTemplates(doc) {
+  /** @type {string[]} */
+  const out = [];
+  if (doc && Array.isArray(doc.servers)) {
+    for (const s of doc.servers) {
+      if (!s || typeof s.url !== 'string') continue;
+      const t = tenantTemplate(s.url);
+      if (t) out.push(`${t.scheme}://${t.vars}${t.host}${resolveServerVariables(t.path, s.variables)}`);
+    }
+  }
+  return [...new Set(out)];
+}

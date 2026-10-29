@@ -2,6 +2,16 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { operationsFrom, exportGate, exportSidecar, classifyOperations, gateEntriesFromRows } from './exporter.js';
 
+test('exportSidecar: serverTemplates is emitted only when non-empty', () => {
+  const ops = [{ method: 'GET', path: '/a', operationId: 'getA' }];
+  const withT = exportSidecar(ops, { vendor: 'v', servers: ['https://us.v.io/'], serverTemplates: ['https://{r}.v.io/'] });
+  assert.deepEqual(withT.serverTemplates, ['https://{r}.v.io/']);
+  for (const serverTemplates of [undefined, []]) {
+    const without = exportSidecar(ops, { vendor: 'v', servers: ['https://us.v.io/'], serverTemplates });
+    assert.equal('serverTemplates' in without, false);
+  }
+});
+
 // ---- operationsFrom -----------------------------------------------------
 
 test('operationsFrom: takes only real HTTP methods, skipping every other path-item field', () => {

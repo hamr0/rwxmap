@@ -389,16 +389,20 @@ export function exportGate(operations, options = {}) {
  * for a reviewer rather than for a parser.
  *
  * @param {Operation[]} operations
- * @param {{vendor?: string, verdicts?: Verdict[], servers?: string[]}} options
+ * @param {{vendor?: string, verdicts?: Verdict[], servers?: string[], serverTemplates?: string[]}} options
  *   `vendor` is required, same as the gate. `verdicts` is the same
  *   optional precomputed-verdicts escape hatch classifyAll documents above
  *   (omitted: classifies `operations` itself; wrong length: throws).
  *   `servers` is the spec's resolved server URLs (servers.js's
  *   resolvedServers); written to the sidecar as-is so `rwxmap/match` can
  *   find a call's host without the spec. Absent -> `[]`.
+ *   `serverTemplates` is servers.js's tenantServerTemplates (the suffix-routable
+ *   tenant hosts, D126); written as a top-level field ONLY when non-empty,
+ *   absent otherwise (like `mcpCollisions`).
  * @returns {{
  *   vendor: string,
  *   servers: string[],
+ *   serverTemplates?: string[],
  *   counts: {
  *     rows: number,
  *     byLetter: {r: number, w: number, x: number},
@@ -442,6 +446,7 @@ export function exportSidecar(operations, options = {}) {
   return {
     vendor,
     servers: options.servers ?? [],
+    ...(options.serverTemplates?.length ? { serverTemplates: options.serverTemplates } : {}),
     counts,
     rows,
     review,

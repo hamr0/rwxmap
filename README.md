@@ -227,12 +227,27 @@ m.match('POST', 'https://api.example.com/v1/orders/123');
   (e.g. `api.anthropic.com.POST /v1/messages`) is stable and public;
   consumers may key their lists on it.
 - A call matches a sidecar only on the exact host and port its servers
-  name.
+  name, and only the base paths of the servers on that host apply (a call
+  to `a.com` never tries `b.com`'s `/admin`). One more route: a server
+  written as one or more leading `{var}` labels over a fixed suffix of at
+  least 2 labels (sentry's `https://{region}.sentry.io`) is stored in the
+  sidecar's `serverTemplates` and also routes every host ending in
+  `.<suffix>` (`de.sentry.io`, `a.b.sentry.io`; same port rule, not the bare
+  `sentry.io`). Any other templated host (a whole-host variable such as
+  okta's, `{subdomain}.{site}`, a variable in the suffix or mid-label, a
+  one-label suffix such as `{subdomain}.{domain}.com`) gets no such route.
+- Limit: a per-tenant vendor whose spec names a placeholder host without
+  braces (jira's `your-domain.atlassian.net`, mailchimp's
+  `server.api.mailchimp.com`) or a host with no fixed suffix is not
+  covered; there is no placeholder-word guessing. Set the sidecar's
+  `servers` (or `serverTemplates`) to your tenant before passing it to
+  `matcherFrom`; a call no route claims takes the request-only label.
 - `tie` is true when several operations (or several sidecars) matched
   equally well and the tightest was taken.
-- Sidecars from rwxmap 0.8.0 on carry a top-level `servers` list; an
-  older sidecar has none, so matching falls back to `https://<vendor>`
-  (regenerate with 0.8.0).
+- Sidecars from rwxmap 0.8.0 on carry a top-level `servers` list. A sidecar
+  without one (written before 0.8.0) makes `matcherFrom` throw, naming the
+  sidecar; regenerate it with 0.8.0 or later. `servers: []` is valid and
+  means `https://<vendor>`.
 - Bad sidecars throw at `matcherFrom`; `match` throws only on a URL that
   is not http(s).
 

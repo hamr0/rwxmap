@@ -190,9 +190,13 @@ export function compileOps(ops, servers) {
  * @param {CompiledOps} compiled
  * @param {string} method
  * @param {string|URL} url
+ * @param {Set<number>} [only]  Indexes into `compiled.servers` that may be
+ *   tried; every other server's base path is ignored. rwxmap/match passes the
+ *   servers that route the call's host; matchOperation passes nothing, so
+ *   every server is tried whatever the host (see HOST MATCHING above).
  * @returns {{op: Operation, serverBase: string, hostMatched: boolean, tie: boolean, tieCount: number} | null}
  */
-export function matchCompiled(compiled, method, url) {
+export function matchCompiled(compiled, method, url, only) {
   let target;
   try {
     target = typeof url === 'string' ? new URL(url) : url;
@@ -209,7 +213,8 @@ export function matchCompiled(compiled, method, url) {
   // Per server, the target's remainder after the server's base path,
   // split once for this call (null: the base is not a prefix).
   const host = target.hostname.toLowerCase();
-  const remainders = compiled.servers.map((server) => {
+  const remainders = compiled.servers.map((server, i) => {
+    if (only && !only.has(i)) return null;
     const remainder = stripBase(target.pathname, server.basePath);
     return remainder === null ? null : pathSegments(remainder);
   });

@@ -756,7 +756,7 @@ anything else gets `classifyCall`'s request-only label. It reads only
 the exported sidecars: no spec, no YAML, no network. The sidecar gains a
 top-level `servers` (written only by `exportSidecar`; resolution lives in
 `src/servers.js`, shared by discover and the CLI; a sidecar without it
-falls back to `https://<vendor>`). The request-only key format above is a
+falls back to `https://<vendor>`; a sidecar with no `servers` key at all, written before 0.8.0, makes `matcherFrom` throw and ask for a regenerate). The request-only key format above is a
 stable public contract consumers may key lists on. Two found-by-proof
 rules: the tie-break ranks a candidate by the row's own stored letter
 (rows lack operationId and summary, so reclassifying them loosened x to w
@@ -767,7 +767,16 @@ servers name (found end to end: ibanforge's real spec lists
 `http://localhost:3000`, so before the fix Ollama on :11434 and llama.cpp
 on :8080 took ibanforge's key). Known limit: a public spec that lists a
 loopback dev server (e.g. localhost:3000) still claims a local service on
-that exact port; a consumer loads only the sidecars of vendors it uses.
+that exact port; a consumer loads only the sidecars of vendors it uses. Routing inside a matched host: only the base paths of the servers on that host are tried (`matchOperation`/`classifyCall` keep their cross-host path matching). One
+suffix route: a server URL that is leading `{var}` labels over a fixed
+suffix of at least 2 labels (sentry `https://{region}.sentry.io`) is kept
+as written in the sidecar's optional `serverTemplates` (one writer,
+`tenantServerTemplates` in `src/servers.js`) and also routes every host
+ending in `.<suffix>`, same port rule; any other templated host gets no
+route, and no placeholder-word heuristics (jira's
+`your-domain.atlassian.net`, mailchimp's `server.api.mailchimp.com` are
+not covered: set `servers` or `serverTemplates` to your tenant before
+`matcherFrom`; an unrouted call takes the request-only label). A local spec's relative server resolves against `https://<vendor>`.
 LLM-inference allowlists are barebox's, not rwxmap's: no
 hand-curated endpoint lists, and changing a letter is core work.
 
