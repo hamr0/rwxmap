@@ -100,7 +100,8 @@ npx rwxmap https://api.example.com
 It writes three files, in `-o` (default: the current folder):
 
 - `<vendor>.rwxmap.json` — the combined map: bareguard, MCP, WebMCP.
-- `<vendor>.rwxmap.review.json` — per-row evidence and review marker.
+- `<vendor>.rwxmap.review.json` — per-row evidence and review marker,
+  plus the spec's `servers` (read by `rwxmap/match`, below).
 - `<vendor>.openapi.rwx.json` — a copy of your spec with `x-rwx` on
   every operation. Your own file is never written.
 
@@ -205,6 +206,68 @@ separate keyspaces; never build one from the other. A gate holds at most
 same domain, and a call that matches it takes that spec's letter (4 of
 414,180 cross-vendor test calls came out looser). Pass the spec URL to
 avoid it.
+
+## Proxy use (`rwxmap/match`)
+
+For a proxy that sees only METHOD + absolute URL, with no spec, no YAML and
+no network at runtime. Feed it the `<vendor>.rwxmap.review.json` sidecars
+the CLI wrote:
+
+```js
+import { matcherFrom } from 'rwxmap/match';
+const m = matcherFrom([sidecarA, sidecarB]);   // parsed sidecar objects
+m.match('POST', 'https://api.example.com/v1/orders/123');
+// -> { key, letter: 'r'|'w'|'x', marker: 'tight'|'loose'|'settled', source: 'spec'|'request', tie: boolean }
+```
+
+- It never returns null. `source: 'spec'` means a sidecar documents the
+  call: `key` is that operation's gate key and `letter`/`marker` are its
+  gate entry. `source: 'request'` means nothing documents it: the label
+  comes from the method and path alone.
+- The request-only key format `<host>.<METHOD> <path with ids as {id}>`
+  (e.g. `api.anthropic.com.POST /v1/messages`) is stable and public;
+  consumers may key their lists on it.
+- A call matches a sidecar only on the exact host and port its servers
+  name, and only the base paths of the servers on that host apply (a call
+  to `a.com` never tries `b.com`'s `/admin`). One more route: a server
+  written as one or more leading `{var}` labels over a fixed suffix of at
+  least 2 labels (sentry's `https://{region}.sentry.io`) is stored in the
+  sidecar's `serverTemplates` and also routes every host ending in
+  `.<suffix>` (`de.sentry.io`, `a.b.sentry.io`; same port rule, not the bare
+  `sentry.io`). Any other templated host (a whole-host variable such as
+  okta's, `{subdomain}.{site}`, a variable in the suffix or mid-label, a
+  one-label suffix such as `{subdomain}.{domain}.com`) gets no such route.
+- Limit: a per-tenant vendor whose spec names a placeholder host without
+  braces (jira's `your-domain.atlassian.net`, mailchimp's
+  `server.api.mailchimp.com`) or a host with no fixed suffix is not
+  covered; there is no placeholder-word guessing. Set the sidecar's
+  `servers` (or `serverTemplates`) to your tenant before passing it to
+  `matcherFrom`; a call no route claims takes the request-only label.
+  Also a limit: the 2-label rule cannot tell a vendor's own domain from
+  a shared one, so a spec that writes a template over a public suffix
+  such as `{x}.github.io` or `{x}.co.uk` routes every host under it, and
+  a stranger's host there gets that spec's letter (which can be looser
+  than the request-only label). No spec in the corpus does this; there
+  is no public-suffix list by design (no hand-curated lists).
+- Limit: the call URL is matched as written. A trailing host dot
+  (`api.acme.com.`), a percent-escaped letter or digit in the path
+  (`%74hings`), or a `;params` tail (`/state;x=1`) does not match the
+  spec row, so the call takes the request-only label, which can be looser
+  (a PUT the spec calls x comes back w). Seen only in tests, never in
+  live traffic; a consumer that wants the tighter answer should apply its
+  own per-method letter to every `source: 'request'` call (barebox
+  does).
+- `tie` is true when several operations (or several sidecars) matched
+  equally well and the tightest was taken.
+- Sidecars from rwxmap 0.8.0 on carry a top-level `servers` list. A sidecar
+  without one (written before 0.8.0) makes `matcherFrom` throw, naming the
+  sidecar; regenerate it with 0.8.0 or later. `servers: []` is valid and
+  means `https://<vendor>`.
+- Bad sidecars throw at `matcherFrom`; `match` throws only on a URL that
+  is not http(s).
+
+Cost, measured: loading the import is about 1 MB, a 166-operation sidecar
+adds about 0.1 MB, and a call takes about 7 µs.
 
 ## Status
 

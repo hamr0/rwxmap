@@ -34,8 +34,9 @@
 // shape). Every `mcp` letter equals the `bareguard` letter for the same
 // operation because both are read off the SAME exportGate/exportSidecar
 // call — this file never re-derives a class. Plus a sidecar file, exactly
-// exportSidecar's own return value, unchanged (it already carries
-// `collisions`, so nothing here duplicates that).
+// exportSidecar's own return value (it already carries `collisions`, so
+// nothing here duplicates that), plus the spec's resolved `servers` (D126)
+// from servers.js, so `rwxmap/match` can route a call by host.
 //
 // JEV (PRD item c, D118-120): key configured -> used; no key -> mechanical,
 // never stops, and every run says loudly which mode ran. The key is
@@ -89,6 +90,7 @@ import { fileURLToPath } from 'node:url';
 import { loadSpec } from './load.js';
 import { findSpec, firstServerHost } from './discover.js';
 import { operationsFrom, operationEntries, exportGate, exportSidecar, classifyOperations } from './exporter.js';
+import { resolvedServers, tenantServerTemplates } from './servers.js';
 import { needsJev, applyJev } from './jev.js';
 import { runJevBatch } from './jev-client.js';
 
@@ -645,7 +647,12 @@ function jevOffSummary() {
 export function buildOutput(ops, vendor, source, options = {}) {
   const { verdicts, jevSummary = jevOffSummary(), doc } = options;
   const { tools, collisions } = exportGate(ops, { vendor, verdicts });
-  const sidecar = exportSidecar(ops, { vendor, verdicts });
+  // The spec's own resolved servers go in the sidecar so `rwxmap/match`
+  // can route a call by host. `source` is a base only when it is a URL; a
+  // local path is no base, so a relative server URL resolves against
+  // https://<vendor>, the host serversOrVendorHost falls back to.
+  const base = /^https?:\/\//i.test(source) ? source : `https://${vendor}`;
+  const sidecar = exportSidecar(ops, { vendor, verdicts, servers: resolvedServers(doc, base), serverTemplates: tenantServerTemplates(doc) });
   const { mcp, webmcp, mcpCollisions } = buildHintDicts(ops, sidecar.rows);
   const { copy: openapiCopy, overwritten: xRwxOverwritten, nonFinite: openapiNonFinite, bigIntegers: openapiBigIntegers } = doc === undefined
     ? { copy: null, overwritten: 0, nonFinite: 0, bigIntegers: 0 }
@@ -796,7 +803,9 @@ Options:
 
 Writes <vendor>.rwxmap.json, <vendor>.rwxmap.review.json, <vendor>.openapi.rwx.json.
 
-Jev (optional model pass): set RWXMAP_JEV_KEY, or put it in a .env in the run folder. Without it the run is mechanical.
+Jev (optional model pass): set RWXMAP_JEV_KEY, or put it in a .env in the run folder.
+With a key, each run sends method, path, operationId, summary and description of the
+rows it checks to api.typesafe.ai; your key, your cost. Without it the run is mechanical.
 
 Exit 0 on success; 1 on failure, with nothing written.
 `;
@@ -858,12 +867,19 @@ export async function run(argv, env) {
   }
   const address = positionals[0];
   const named = values.vendor;
-  if (named !== undefined && (named.trim() === '' || /^\.+$/.test(named) || /[/\\]/.test(named))) {
+  if (
+    named !== undefined &&
+    (named.trim() === '' || named !== named.trim() || /^\.+$/.test(named) || /[/\\]/.test(named) || /[\p{Cc}\p{Cf}]/u.test(named))
+  ) {
     stderr.write(`rwxmap: --vendor must be a plain name (no / or \\): ${named}\n`);
     return 1;
   }
   if (values.outDir?.startsWith('=')) {
     stderr.write('rwxmap: -o takes a space, not "=": -o <dir>\n');
+    return 1;
+  }
+  if (values.outDir === '') {
+    stderr.write('rwxmap: -o needs a directory: -o <dir>\n');
     return 1;
   }
   const outDir = values.outDir ? path.resolve(cwd, values.outDir) : cwd;

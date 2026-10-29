@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { matchOperation } from './match.js';
+import { matchOperation, compileOps, matchCompiled } from './match.js';
 
 const SERVERS = ['https://api.example.com/v1'];
 
@@ -196,4 +196,25 @@ test('throws on a non-http(s) URL', () => {
 test('throws on an unparseable URL', () => {
   const ops = [{ method: 'GET', path: '/x' }];
   assert.throws(() => matchOperation(ops, SERVERS, 'GET', 'not a url'), /unparseable URL/);
+});
+
+test('tie-break ranks by the op\'s own letter when it carries one, and reports the tie', () => {
+  const ops = [
+    { method: 'POST', path: '/{a}/{b}', letter: 'w' },
+    { method: 'POST', path: '/{c}/{d}', letter: 'x' },
+  ];
+  const got = matchOperation(ops, ['https://h'], 'POST', 'https://h/1/2');
+  assert.equal(got?.op, ops[1]);
+  assert.equal(got?.tie, true);
+});
+
+test('matchCompiled: `only` limits which servers\' base paths are tried; matchOperation tries all', () => {
+  const ops = [{ method: 'DELETE', path: '/users', letter: 'x' }];
+  const servers = ['https://a.com/v1', 'https://b.com/admin'];
+  const compiled = compileOps(ops, servers);
+  const url = 'https://a.com/admin/users';
+  assert.equal(matchCompiled(compiled, 'DELETE', url, new Set([0])), null);
+  assert.equal(matchCompiled(compiled, 'DELETE', url, new Set([1]))?.serverBase, 'https://b.com/admin');
+  assert.equal(matchCompiled(compiled, 'DELETE', url)?.hostMatched, false); // unfiltered: cross-host, as before
+  assert.equal(matchOperation(ops, servers, 'DELETE', url)?.serverBase, 'https://b.com/admin');
 });

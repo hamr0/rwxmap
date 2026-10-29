@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-10-29
+
+### Added
+
+- **`rwxmap/match`, a runtime matcher for proxies.** `matcherFrom(sidecars).match(method, url)` takes the `<vendor>.rwxmap.review.json` sidecars the CLI wrote and returns `{key, letter, marker, source, tie}` for a live call. It never returns null: a call no spec covers gets the request-only label. No spec, YAML or network access at runtime.
+- **The sidecar now carries `servers`**, and an optional `serverTemplates`, so a call can be routed to its vendor by host.
+- **Tenant suffix routes.** A server written as leading `{var}` labels over a fixed suffix of two or more labels (sentry's `{region}.sentry.io`) is recorded in `serverTemplates` and routes every host under that suffix.
+- **Per-host base paths.** A routed call tries only the base paths of the servers on its own host.
+
+### Changed
+
+- **Breaking: a sidecar without `servers` (written before 0.8.0) makes `matcherFrom` throw.** Regenerate the sidecars with 0.8.0.
+- **The CLI refuses an empty `-o` and padded or invisible `--vendor` names.** `-o ""` (a script's unset `"$OUT"`) used to write into the current folder with exit 0; it now exits 1 with "-o needs a directory" and writes nothing. A missing `-o` still means the current folder. `--vendor` with leading or trailing whitespace, or control or format characters (NUL, U+200B, U+FEFF), is refused with the existing plain-name message; names like `café` still pass.
+- **`--help` says what Jev sends**: the fields sent and the host (`api.typesafe.ai`).
+- **A local spec's relative servers resolve against the API address** in discovery (`findSpec`), and against `https://<vendor>` in the CLI. Before, `findSpec` with a local spec resolved them against the file path, which dropped both relative and absolute servers, so calls under `/v1` missed the spec and took the request-only label. A fetched spec still resolves against itself.
+- **Upgrading clears the discover cache.** Entries are keyed by rwxmap version, so entries cached by 0.7.2 (with the old server resolution) are not reused.
+
+### Fixed
+
+- **`rwxmap/match` matches on exact host and port.** It grouped sidecars by hostname only, so a spec listing `http://localhost:3000` claimed every local port (Ollama on `:11434` took that spec's key). Hosts are now compared as host plus port, with default ports dropped.
+- **`check:live` record for openvan** re-recorded at 51 operations (r 50, x 1); the vendor's spec grew.
+
+### Known limits
+
+- A call is matched as written: a trailing host dot, a path with an escaped letter (`%74`) or `;` parameters miss the spec and take the request-only label.
+- A placeholder host such as jira's `your-domain.atlassian.net` is not routed; set `servers` to your tenant.
+- Tenant suffix routes use the literal suffix and do not consult the public-suffix list.
+
 ## [0.7.2] - 2026-10-04
 
 ### Fixed

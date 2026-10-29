@@ -1,6 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { operationsFrom, exportGate, exportSidecar, classifyOperations } from './exporter.js';
+import { operationsFrom, exportGate, exportSidecar, classifyOperations, gateEntriesFromRows } from './exporter.js';
+
+test('exportSidecar: serverTemplates is emitted only when non-empty', () => {
+  const ops = [{ method: 'GET', path: '/a', operationId: 'getA' }];
+  const withT = exportSidecar(ops, { vendor: 'v', servers: ['https://us.v.io/'], serverTemplates: ['https://{r}.v.io/'] });
+  assert.deepEqual(withT.serverTemplates, ['https://{r}.v.io/']);
+  for (const serverTemplates of [undefined, []]) {
+    const without = exportSidecar(ops, { vendor: 'v', servers: ['https://us.v.io/'], serverTemplates });
+    assert.equal('serverTemplates' in without, false);
+  }
+});
 
 // ---- operationsFrom -----------------------------------------------------
 
@@ -166,6 +176,24 @@ test('exportGate: equal letters keep the first, and the collision still gets rep
   assert.equal(collisions[0].keptLetter, 'w');
   assert.equal(collisions[0].existing.method, 'PUT');
   assert.equal(collisions[0].incoming.method, 'PATCH');
+});
+
+test('gateEntriesFromRows: a tie on letter keeps the FIRST entry (marker and all), not the later one', () => {
+  const entries = gateEntriesFromRows([
+    { key: 'acme.id', letter: 'w', marker: 'tight' },
+    { key: 'acme.id', letter: 'w', marker: 'loose' },
+  ]);
+  assert.deepEqual(entries.get('acme.id'), { letter: 'w', marker: 'tight' });
+});
+
+test('exportGate: a tie leaves the FIRST row holding the key, so a later collision reports it as existing', () => {
+  const { collisions } = exportGate([
+    { method: 'PUT', path: '/things/{id}' },     // w, places the key
+    { method: 'PATCH', path: '/things/{id}' },   // w, ties: must NOT take the key
+    { method: 'DELETE', path: '/things/{id}' },  // x, takes it from the current holder
+  ], { vendor: 'acme' });
+  assert.equal(collisions.length, 2);
+  assert.equal(collisions[1].existing.method, 'PUT');
 });
 
 test('exportGate: a three-way collision reports the CURRENT holder, not the first row seen', () => {
@@ -353,4 +381,10 @@ test('verdicts of the wrong length throw instead of silently re-classifying (fai
   assert.deepEqual(exportGate(ops, { vendor: 'acme' }), exportGate(ops, { vendor: 'acme', verdicts }));
   const raised = verdicts.map((v) => ({ ...v, class: /** @type {'x'} */ ('x') }));
   for (const row of exportSidecar(ops, { vendor: 'acme', verdicts: raised }).rows) assert.equal(row.letter, 'x');
+});
+
+test('exportSidecar: `servers` is always present — [] when not given, the given list otherwise', () => {
+  const ops = [{ method: 'GET', path: '/things', operationId: 'listThings' }];
+  assert.deepEqual(exportSidecar(ops, { vendor: 'acme' }).servers, []);
+  assert.deepEqual(exportSidecar(ops, { vendor: 'acme', servers: ['https://api.acme.test/v1'] }).servers, ['https://api.acme.test/v1']);
 });

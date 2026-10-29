@@ -197,6 +197,40 @@ export function gateKey(vendor, row) {
 }
 
 /**
+ * THE ONE WRITER of the collision rule: given the entry already holding a
+ * key (or none) and an incoming one, does the incoming one take the key?
+ * The tighter letter wins and on a tie the first one stays — loosening an
+ * already-placed key would be fail-open, so strictly greater-than, never
+ * greater-or-equal. classifyAll and gateEntriesFromRows both ask this.
+ *
+ * @param {GateEntry|undefined} held
+ * @param {{letter: 'r'|'w'|'x'}} incoming
+ * @returns {boolean}
+ */
+function takesKey(held, incoming) {
+  return !held || TIGHTNESS[incoming.letter] > TIGHTNESS[held.letter];
+}
+
+/**
+ * The gate entry per key, derived from sidecar rows (`key`, `letter`,
+ * `marker`) with the same collision rule exportGate applies. Exported
+ * (internally — not re-exported from src/index.js) so `rwxmap/match` can
+ * rebuild exportGate's entries from a stored sidecar without
+ * re-implementing that rule.
+ *
+ * @param {{key: string, letter: 'r'|'w'|'x', marker: 'tight'|'loose'|'settled'}[]} rows
+ * @returns {Map<string, GateEntry>}
+ */
+export function gateEntriesFromRows(rows) {
+  /** @type {Map<string, GateEntry>} */
+  const entries = new Map();
+  for (const row of rows) {
+    if (takesKey(entries.get(row.key), row)) entries.set(row.key, { letter: row.letter, marker: row.marker });
+  }
+  return entries;
+}
+
+/**
  * Require a usable vendor. An unkeyed file would collide across vendors the
  * moment a second one was added, and bareguard cannot detect that for us,
  * so this throws rather than defaulting to something plausible.
@@ -294,11 +328,9 @@ function classifyAll(operations, vendor, verdicts) {
       continue;
     }
 
-    // COLLISION. Never a silent overwrite: the tighter letter wins, and on
-    // a tie the first one stays. Loosening an already-placed key would be
-    // fail-open — exactly what the invariant forbids — so the comparison is
-    // strictly greater-than, never greater-or-equal.
-    const takeIncoming = TIGHTNESS[verdict.class] > TIGHTNESS[held.letter];
+    // COLLISION. Never a silent overwrite: takesKey says whether the
+    // incoming operation wins (tighter letter; a tie keeps the first).
+    const takeIncoming = takesKey(held, { letter: verdict.class });
     collisions.push({
       key,
       existing: { method: holder.method, path: holder.path, letter: held.letter },
@@ -357,12 +389,20 @@ export function exportGate(operations, options = {}) {
  * for a reviewer rather than for a parser.
  *
  * @param {Operation[]} operations
- * @param {{vendor?: string, verdicts?: Verdict[]}} options  `vendor` is
- *   required, same as the gate. `verdicts` is the same optional
- *   precomputed-verdicts escape hatch classifyAll documents above
+ * @param {{vendor?: string, verdicts?: Verdict[], servers?: string[], serverTemplates?: string[]}} options
+ *   `vendor` is required, same as the gate. `verdicts` is the same
+ *   optional precomputed-verdicts escape hatch classifyAll documents above
  *   (omitted: classifies `operations` itself; wrong length: throws).
+ *   `servers` is the spec's resolved server URLs (servers.js's
+ *   resolvedServers); written to the sidecar as-is so `rwxmap/match` can
+ *   find a call's host without the spec. Absent -> `[]`.
+ *   `serverTemplates` is servers.js's tenantServerTemplates (the suffix-routable
+ *   tenant hosts, D126); written as a top-level field ONLY when non-empty,
+ *   absent otherwise (like `mcpCollisions`).
  * @returns {{
  *   vendor: string,
+ *   servers: string[],
+ *   serverTemplates?: string[],
  *   counts: {
  *     rows: number,
  *     byLetter: {r: number, w: number, x: number},
@@ -405,6 +445,8 @@ export function exportSidecar(operations, options = {}) {
 
   return {
     vendor,
+    servers: options.servers ?? [],
+    ...(options.serverTemplates?.length ? { serverTemplates: options.serverTemplates } : {}),
     counts,
     rows,
     review,

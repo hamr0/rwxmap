@@ -157,6 +157,31 @@ decides it.
 | 3 | step 3, w | POST whose verb is in `KEEP_W` | `modify-verb`, `modify-verb-summary` | list |
 | last | step 2's floor, x | anything unclaimed: a POST with no word, or any other method | `floor-post` | floor |
 
+**Why each floor sits where it does.** Truth per method under the D87
+definition, and which step decides the rows. Tuning set first (6557
+rows, `data/combined-2026-09-21/labelled.csv`), then the burned M3 exam
+(4279 rows, `data/exam-2026-09-22/labelled.csv`); re-derived 2026-10-29
+with the current `classifyRow`.
+
+| method | set | n | truth r | truth w | truth x | floor | decided by (rows) |
+|---|---|---|---|---|---|---|---|
+| GET | tuning | 2543 | 2541 (100%) | 2 (0%) | 0 | r | method floor 2543 |
+| GET | M3 exam | 2099 | 2094 (100%) | 5 (0%) | 0 | r | method floor 2099 |
+| POST | tuning | 1994 | 169 (8%) | 1333 (67%) | 492 (25%) | x | no word → floor x 1336; step 3 `KEEP_W` → w 378; step 2 `CANT_UNDO` → x 178; step 1 read verb → r 102 |
+| POST | M3 exam | 892 | 128 (14%) | 636 (71%) | 128 (14%) | x | no word → floor x 808; step 2 `CANT_UNDO` → x 27; step 1 read verb → r 36; step 3 `KEEP_W` → w 21 |
+| DELETE | tuning | 951 | 1 (0%) | 26 (3%) | 924 (97%) | x | method floor 951 |
+| DELETE | M3 exam | 558 | 3 (1%) | 7 (1%) | 548 (98%) | x | method floor 558 |
+| PUT | tuning | 766 | 1 (0%) | 718 (94%) | 47 (6%) | w | method floor 753; step 2 `CANT_UNDO` → x 13 |
+| PUT | M3 exam | 460 | 2 (0%) | 441 (96%) | 17 (4%) | w | method floor 456; step 2 `CANT_UNDO` → x 4 |
+| PATCH | tuning | 303 | 0 | 299 (99%) | 4 (1%) | w | method floor 301; step 2 `CANT_UNDO` → x 2 |
+| PATCH | M3 exam | 270 | 0 | 258 (96%) | 12 (4%) | w | method floor 268; step 2 `CANT_UNDO` → x 2 |
+
+Every floor follows its method's majority except POST: most POSTs are
+truly w, but a POST with no verb word cannot be told from a create
+(x), so the invariant takes the tighter class. Those floor rows (1336
+of 1994 on tuning) carry most of the too-tight cost and are the pile
+`jev-lower` lowers.
+
 **The method floor, as the code has it.**
 
 | method | floor | what can move it |
@@ -262,6 +287,9 @@ outside service, and the adopter must say so.
 | `src/flow.js` | `classifyRow` (the order, written once) and `reviewHint` (the one writer of `review`) |
 | `src/jev.js` | the three Jev tiers, thresholds, `applyJev`, `needsJev`, `jevState`, `jevQuestions` |
 | `src/exporter.js` | the bareguard exporter: `operationsFrom`, `exportGate`, `exportSidecar` |
+| `src/servers.js` | `resolvedServers`, `serversOrVendorHost`: the one writer of a spec's servers and the vendor-host fallback (D126) |
+| `src/match.js` | `compileOps`, `matchCompiled`, `matchOperation`: matching a call to an operation (D126 split) |
+| `src/matcher.js` | `matcherFrom`, shipped as `rwxmap/match` (D126) |
 | `src/index.js` | the package entry: `classifyRow`, `reviewHint`, the Jev exports, the exporter exports |
 | `src/types.js` | the `Operation`, `Verdict` and `StepVerdict` typedefs |
 | `tools/corpus.js`, `tools/csv.js` | corpus loading and CSV reading, dev only, never shipped |
@@ -509,11 +537,13 @@ on any disagreement; this is the copy.
   by default and the bare letter on request.
 - **Never emitted:** `flags`, the `agents` section, any deny rule.
   Denial is the human's call at grant time.
-- **The sidecar** carries `evidence` and `destructive` for every row, a
-  review list (`loose` first, then `tight`), collisions, and the
-  `destructive: true` rows as a clearly-labelled suggestion, never as
-  config. It is human-facing only; bareguard never reads it (an unlisted
-  tool already denies with `rwx.unlisted`).
+- **The sidecar** carries `evidence` and `destructive` for every row, the
+  spec's resolved `servers` (and `serverTemplates` when it has tenant
+  hosts) for `rwxmap/match` (D126), a review list (`loose` first, then
+  `tight`), collisions, and the `destructive: true` rows as a
+  clearly-labelled suggestion, never as config. Apart from `rwxmap/match`
+  it is human-facing only; bareguard never reads it (an unlisted tool
+  already denies with `rwx.unlisted`).
 - bareguard's opt-in `rwx.askOn` knob, default off, reads the marker;
   it is bareguard's design and its default is bareguard's call (D103).
   bareguard never runs rwxmap and never depends on it.
@@ -718,6 +748,59 @@ UUIDs, long hex strings — so a map does not grow one entry per order
 id. rwxmap is the one writer of that key; the harness never builds it
 by hand.
 
+**The proxy matcher** (D126, built, not yet released): `rwxmap/match`
+exports `matcherFrom(sidecars)`, for a proxy (barebox's) that sees only
+METHOD + absolute URL. `match(method, url)` returns `{ key, letter,
+marker, source: 'spec'|'request', tie }` and never null. A call a
+sidecar documents gets the row's gate key and the gate entry for that
+key (collision rule from `exporter.js`, one writer); anything else gets
+`classifyCall`'s request-only label. It reads only the exported
+sidecars: no spec, no YAML, no network. The sidecar gains a top-level
+`servers` (written only by `exportSidecar`; resolution lives in
+`src/servers.js`, shared by discover and the CLI; a sidecar without it
+falls back to `https://<vendor>`; a sidecar with no `servers` key at
+all, written before 0.8.0, makes `matcherFrom` throw and ask for a
+regenerate). The request-only key format above is a stable public
+contract consumers may key lists on. Two found-by-proof rules: the
+tie-break ranks a candidate by the row's own stored letter (rows lack
+operationId and summary, so reclassifying them loosened x to w on 7 of
+11,579 calls on meta-whatsapp), and `match.js` is split into
+`compileOps` / `matchCompiled` with `matchOperation` kept as their
+composition. A call matches a sidecar only on the exact host and port
+its servers name (found end to end: ibanforge's real spec lists
+`http://localhost:3000`, so before the fix Ollama on :11434 and
+llama.cpp on :8080 took ibanforge's key). Known limit: a public spec
+that lists a loopback dev server (e.g. localhost:3000) still claims a
+local service on that exact port; a consumer loads only the sidecars of
+vendors it uses. Routing inside a matched host: only the base paths of
+the servers on that host are tried (`matchOperation`/`classifyCall` keep
+their cross-host path matching). One suffix route: a server URL that is
+leading `{var}` labels over a fixed suffix of at least 2 labels (sentry
+`https://{region}.sentry.io`) is kept as written in the sidecar's
+optional `serverTemplates` (one writer, `tenantServerTemplates` in
+`src/servers.js`) and also routes every host ending in `.<suffix>`, same
+port rule; any other templated host gets no route, and no
+placeholder-word heuristics (jira's `your-domain.atlassian.net`,
+mailchimp's `server.api.mailchimp.com` are not covered: set `servers` or
+`serverTemplates` to your tenant before `matcherFrom`; an unrouted call
+takes the request-only label). Known limit: the 2-label rule cannot tell
+a vendor's domain from a public suffix, so a template such as
+`{x}.github.io` routes every host under it, and a stranger's host there
+takes that spec's letter, which can be looser than the request-only
+label; no corpus spec does this, and there is no public-suffix list by
+design. Known limit: the call URL is matched as written — a trailing
+host dot, a percent-escaped unreserved character or a `;params` tail
+misses the spec row and takes the request-only label, which can be
+looser (PUT x comes back w); shown only in tests, not seen live; a
+consumer that needs the tighter answer applies its own per-method letter
+to `source: 'request'` calls. A normalise-or-flag fix was built and
+reverted (e4d52be); it stays in the fix ledger. A relative server URL
+in a local spec resolves against the
+API address when `findSpec` is given one, and against `https://<vendor>`
+in the CLI (a file path is no URL base). LLM-inference allowlists are barebox's, not
+rwxmap's: no hand-curated endpoint lists, and changing a letter is core
+work.
+
 **Who owns what.**
 
 | party | owns | never |
@@ -771,6 +854,8 @@ above.
 - **CLI polish and the release checklist** — `--help`, `--version`,
   plain error messages, the `openapi`/`swagger` key check and
   `docs/release-checklist.md` — released as `rwxmap@0.7.0` on 2026-09-30.
+- **The proxy matcher** — `rwxmap/match` (D126) built, not yet
+  released.
 
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 

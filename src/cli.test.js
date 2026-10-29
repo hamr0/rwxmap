@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
 import { run } from './cli.js';
+import { matcherFrom } from './matcher.js';
 import { JEV_LOWER_THRESHOLD, JEV_RAISE_WX_THRESHOLD, JEV_RAISE_GET_THRESHOLD } from './jev.js';
 
 // ---------------------------------------------------------------------
@@ -283,6 +284,49 @@ test('run: a --vendor with dots inside is accepted', async () => {
   assert.ok(fs.existsSync(path.join(dir, 'a.b.rwxmap.json')));
 });
 
+test('run: a --vendor with edge whitespace or a control/format character is refused, ordinary Unicode and internal spaces are not', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  for (const vendor of ['\u200b', ' a ', 'a ', ' a', 'a\u0000b', 'a\u200bb', '\ufeffa']) {
+    const r = await runIn([specPath, '--vendor', vendor], dir);
+    assert.equal(r.code, 1);
+    assert.equal(r.stderr, `rwxmap: --vendor must be a plain name (no / or \\): ${vendor}\n`);
+  }
+  assert.deepEqual(fs.readdirSync(dir), ['spec.json']);
+  for (const vendor of ['café', 'acme-prod']) {
+    const r = await runIn([specPath, '--vendor', vendor], dir);
+    assert.equal(r.code, 0, r.stderr);
+    assert.ok(fs.existsSync(path.join(dir, `${vendor}.rwxmap.json`)));
+  }
+});
+
+test('run: an empty -o is refused and nothing is written; a missing -o still means the current folder', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  const r = await runIn([specPath, '--vendor', 'x', '-o', ''], dir);
+  assert.equal(r.code, 1);
+  assert.equal(r.stderr, 'rwxmap: -o needs a directory: -o <dir>\n');
+  assert.deepEqual(fs.readdirSync(dir), ['spec.json']);
+  const ok = await runIn([specPath, '--vendor', 'x'], dir);
+  assert.equal(ok.code, 0, ok.stderr);
+  assert.ok(fs.existsSync(path.join(dir, 'x.rwxmap.json')));
+});
+
+test('run: bad arguments are reported in a fixed order: address count, then --vendor, then -o', async () => {
+  /** @type {[string[], string][]} */
+  const cases = [
+    [['a.json', 'b.json', '--vendor', '/', '-o', '=x'], 'rwxmap: expected exactly one address, got 2\n'],
+    [['a.json', '--vendor', '/', '-o', '=x'], 'rwxmap: --vendor must be a plain name (no / or \\): /\n'],
+    [['a.json', '--vendor', 'ok', '-o', '=x'], 'rwxmap: -o takes a space, not "=": -o <dir>\n'],
+    [['a.json', '--vendor', 'ok', '-o', ''], 'rwxmap: -o needs a directory: -o <dir>\n'],
+  ];
+  for (const [argv, message] of cases) {
+    const r = await runIn(argv);
+    assert.equal(r.code, 1);
+    assert.ok(r.stderr.startsWith(message), r.stderr);
+  }
+});
+
 test('run: -o=<dir> is refused, it takes a space, and nothing is written', async () => {
   const dir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
@@ -384,6 +428,12 @@ test('run: the help lists -h and -v on their own lines', async () => {
   const r = await runIn(['--help']);
   assert.match(r.stdout, /^ {2}-h, --help {5}this help$/m);
   assert.match(r.stdout, /^ {2}-v, --version {2}the version$/m);
+});
+
+test('run: the help says what Jev sends and where', async () => {
+  const r = await runIn(['--help']);
+  assert.match(r.stdout, /sends method, path, operationId, summary and description/);
+  assert.match(r.stdout, /api\.typesafe\.ai/);
 });
 
 test('run: --help and -h print the usage to stdout and exit 0', async () => {
@@ -1674,4 +1724,58 @@ test('process: importing src/cli.js from another module does not run the CLI', (
   assert.equal(res.stdout, 'imported function\n');
   assert.equal(res.stderr, '');
   assert.deepEqual(fs.readdirSync(outDir), []);
+});
+
+test('run: the sidecar carries the spec\'s resolved servers (a relative one from a local file resolves against https://<vendor>)', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', { ...SPEC_OPENAPI3_SERVERS_DOC, servers: [{ url: 'https://api.acme.example/v1' }, { url: '/relative' }] });
+  const outDir = mkScratch();
+
+  const code = await run([specPath, '-o', outDir], { cwd: dir, stdout: captureStream(), stderr: captureStream() });
+
+  assert.equal(code, 0);
+  const sidecar = readJson(path.join(outDir, 'api.acme.example.rwxmap.review.json'));
+  assert.deepEqual(sidecar.servers, ['https://api.acme.example/v1', 'https://api.acme.example/relative']);
+});
+
+test('run: a local spec with a relative server and --vendor writes https://<vendor><path>, and the matcher routes its base path', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', {
+    openapi: '3.0.0',
+    servers: [{ url: '/v1' }],
+    paths: { '/orders/{id}': { get: { operationId: 'getOrder' } } },
+  });
+  const outDir = mkScratch();
+
+  const code = await run([specPath, '--vendor', 'acme.example', '-o', outDir], { cwd: dir, stdout: captureStream(), stderr: captureStream() });
+
+  assert.equal(code, 0);
+  const sidecar = readJson(path.join(outDir, 'acme.example.rwxmap.review.json'));
+  assert.deepEqual(sidecar.servers, ['https://acme.example/v1']);
+  const m = matcherFrom([sidecar]);
+  assert.equal(m.match('GET', 'https://acme.example/v1/orders/7').source, 'spec');
+  assert.equal(m.match('GET', 'https://acme.example/orders/7').source, 'request');
+});
+
+test('run: tenant-templated servers land in serverTemplates (and only those); other sidecars have no such field', async () => {
+  const dir = mkScratch();
+  const paths = { '/things/{id}': { delete: { operationId: 'deleteThing' } } };
+  const tenant = writeSpecFile(dir, 'tenant.json', {
+    openapi: '3.0.0',
+    servers: [{ url: 'https://{region}.sentry.io/api/{v}', variables: { region: { default: 'us' }, v: { default: '0' } } }, { url: 'https://{sub}.{domain}.com', variables: { sub: { default: 'a' }, domain: { default: 'b' } } }],
+    paths,
+  });
+  const fixed = writeSpecFile(dir, 'fixed.json', { openapi: '3.0.0', servers: [{ url: 'https://api.fixed.example' }], paths });
+  const outDir = mkScratch();
+  for (const [spec, vendor] of [[tenant, 'sentry.io'], [fixed, 'fixed.example']]) {
+    const code = await run([spec, '--vendor', vendor, '-o', outDir], { cwd: dir, stdout: captureStream(), stderr: captureStream() });
+    assert.equal(code, 0);
+  }
+  const sc = readJson(path.join(outDir, 'sentry.io.rwxmap.review.json'));
+  assert.deepEqual(sc.servers, ['https://us.sentry.io/api/0', 'https://a.b.com/']);
+  assert.deepEqual(sc.serverTemplates, ['https://{region}.sentry.io/api/0']);
+  assert.equal('serverTemplates' in readJson(path.join(outDir, 'fixed.example.rwxmap.review.json')), false);
+  const m = matcherFrom([sc]);
+  assert.equal(m.match('DELETE', 'https://de.sentry.io/api/0/things/9').source, 'spec');
+  assert.equal(m.match('DELETE', 'https://x.b.com/things/9').source, 'request'); // 1-label suffix: no route
 });

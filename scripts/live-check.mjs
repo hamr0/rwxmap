@@ -67,7 +67,7 @@ const HOSTS = [
   {
     address: 'https://openvan.camp',
     spec: 'https://openvan.camp/.well-known/openapi.json',
-    ops: 40, r: 40, w: 0, x: 0,
+    ops: 51, r: 50, w: 0, x: 1,
     why: 'found through Link rel=service-desc, a different discovery step',
   },
   {
