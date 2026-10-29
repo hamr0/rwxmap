@@ -34,8 +34,9 @@
 // shape). Every `mcp` letter equals the `bareguard` letter for the same
 // operation because both are read off the SAME exportGate/exportSidecar
 // call — this file never re-derives a class. Plus a sidecar file, exactly
-// exportSidecar's own return value, unchanged (it already carries
-// `collisions`, so nothing here duplicates that).
+// exportSidecar's own return value (it already carries `collisions`, so
+// nothing here duplicates that), plus the spec's resolved `servers` (D126)
+// from servers.js, so `rwxmap/match` can route a call by host.
 //
 // JEV (PRD item c, D118-120): key configured -> used; no key -> mechanical,
 // never stops, and every run says loudly which mode ran. The key is
@@ -89,6 +90,7 @@ import { fileURLToPath } from 'node:url';
 import { loadSpec } from './load.js';
 import { findSpec, firstServerHost } from './discover.js';
 import { operationsFrom, operationEntries, exportGate, exportSidecar, classifyOperations } from './exporter.js';
+import { resolvedServers } from './servers.js';
 import { needsJev, applyJev } from './jev.js';
 import { runJevBatch } from './jev-client.js';
 
@@ -645,7 +647,11 @@ function jevOffSummary() {
 export function buildOutput(ops, vendor, source, options = {}) {
   const { verdicts, jevSummary = jevOffSummary(), doc } = options;
   const { tools, collisions } = exportGate(ops, { vendor, verdicts });
-  const sidecar = exportSidecar(ops, { vendor, verdicts });
+  // The spec's own resolved servers go in the sidecar so `rwxmap/match`
+  // can route a call by host. `source` is a base only when it is a URL; a
+  // local path is no base, so a relative server URL is skipped.
+  const base = /^https?:\/\//i.test(source) ? source : undefined;
+  const sidecar = exportSidecar(ops, { vendor, verdicts, servers: resolvedServers(doc, base) });
   const { mcp, webmcp, mcpCollisions } = buildHintDicts(ops, sidecar.rows);
   const { copy: openapiCopy, overwritten: xRwxOverwritten, nonFinite: openapiNonFinite, bigIntegers: openapiBigIntegers } = doc === undefined
     ? { copy: null, overwritten: 0, nonFinite: 0, bigIntegers: 0 }

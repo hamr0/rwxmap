@@ -1675,3 +1675,15 @@ test('process: importing src/cli.js from another module does not run the CLI', (
   assert.equal(res.stderr, '');
   assert.deepEqual(fs.readdirSync(outDir), []);
 });
+
+test('run: the sidecar carries the spec\'s resolved servers (a relative one from a local file is skipped)', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', { ...SPEC_OPENAPI3_SERVERS_DOC, servers: [{ url: 'https://api.acme.example/v1' }, { url: '/relative' }] });
+  const outDir = mkScratch();
+
+  const code = await run([specPath, '-o', outDir], { cwd: dir, stdout: captureStream(), stderr: captureStream() });
+
+  assert.equal(code, 0);
+  const sidecar = readJson(path.join(outDir, 'api.acme.example.rwxmap.review.json'));
+  assert.deepEqual(sidecar.servers, ['https://api.acme.example/v1']);
+});

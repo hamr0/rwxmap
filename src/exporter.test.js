@@ -354,3 +354,9 @@ test('verdicts of the wrong length throw instead of silently re-classifying (fai
   const raised = verdicts.map((v) => ({ ...v, class: /** @type {'x'} */ ('x') }));
   for (const row of exportSidecar(ops, { vendor: 'acme', verdicts: raised }).rows) assert.equal(row.letter, 'x');
 });
+
+test('exportSidecar: `servers` is always present — [] when not given, the given list otherwise', () => {
+  const ops = [{ method: 'GET', path: '/things', operationId: 'listThings' }];
+  assert.deepEqual(exportSidecar(ops, { vendor: 'acme' }).servers, []);
+  assert.deepEqual(exportSidecar(ops, { vendor: 'acme', servers: ['https://api.acme.test/v1'] }).servers, ['https://api.acme.test/v1']);
+});

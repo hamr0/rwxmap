@@ -89,6 +89,7 @@ import { operationsFrom, exportGate, gateKey } from './exporter.js';
 import { requestKey } from './key.js';
 import { matchOperation } from './match.js';
 import { classifyRow } from './flow.js';
+import { resolvedServers, serversOrVendorHost } from './servers.js';
 
 /** @typedef {import('./types.js').Operation} Operation */
 /** @typedef {import('./exporter.js').GateEntry} GateEntry */
@@ -575,66 +576,6 @@ async function stepGuessPaths(host, twoLabelParent, userAgent, deadline) {
 }
 
 // ---------------------------------------------------------------------
-// Server resolution (OpenAPI 3 servers[] with variable defaults resolved,
-// relative server URLs resolved against specUrl; Swagger 2
-// schemes+host+basePath; none declared -> https://<host>). Duplicated
-// from poc/match/measure.mjs's resolvedServers/resolveServerVariables on
-// purpose (src/ never imports poc/); this is the production-shaped version
-// of that logic, now the one writer of it inside src/.
-// ---------------------------------------------------------------------
-
-
-/**
- * @param {string} url
- * @param {any} variables
- * @returns {string}
- */
-function resolveServerVariables(url, variables) {
-  if (!variables || typeof variables !== 'object') return url;
-  return url.replace(/\{([^}]+)\}/g, (whole, name) => {
-    const v = variables[name];
-    if (!v) return whole;
-    if (typeof v.default === 'string') return v.default;
-    if (Array.isArray(v.enum) && v.enum.length > 0) return String(v.enum[0]);
-    return name;
-  });
-}
-
-/**
- * The doc's OWN declared servers, resolved to absolute URLs — no
- * fallback host baked in here (that decision moved to buildFoundResult,
- * once a vendor is actually known; determineVendor below also reads this
- * raw list, before a vendor exists at all).
- *
- * @param {any} doc
- * @param {string} [specUrl]  Base for a relative server URL; omitted
- *   (rather than a non-URL like a local file path) when there is no
- *   usable base — a relative server URL then fails to resolve and is
- *   skipped, same as any other unresolvable one.
- * @returns {string[]}
- */
-function resolvedServers(doc, specUrl) {
-  /** @type {string[]} */
-  const urls = [];
-  if (doc && Array.isArray(doc.servers) && doc.servers.length > 0) {
-    for (const s of doc.servers) {
-      if (!s || typeof s.url !== 'string') continue;
-      const resolved = resolveServerVariables(s.url, s.variables);
-      try {
-        urls.push(new URL(resolved, specUrl).toString());
-      } catch {
-        // an unresolvable server URL template is skipped, not fatal.
-      }
-    }
-  } else if (doc && typeof doc.host === 'string' && doc.host) {
-    const scheme = Array.isArray(doc.schemes) && doc.schemes.length > 0 ? doc.schemes[0] : 'https';
-    const basePath = typeof doc.basePath === 'string' ? doc.basePath : '';
-    urls.push(`${scheme}://${doc.host}${basePath}`);
-  }
-  return [...new Set(urls)];
-}
-
-// ---------------------------------------------------------------------
 // Cache
 // ---------------------------------------------------------------------
 
@@ -723,8 +664,7 @@ function buildFoundResult(vendor, specUrl, loaded, ops) {
   // looked up here, never rebuilt.
   const { tools: entries } = exportGate(ops, { vendor, form: 'object' });
   const opKeys = ops.map((op) => gateKey(vendor, op));
-  let servers = resolvedServers(loaded.doc, specUrl);
-  if (servers.length === 0) servers = [`https://${vendor}`];
+  const servers = serversOrVendorHost(resolvedServers(loaded.doc, specUrl), vendor);
   return {
     status: 'found',
     host: vendor,

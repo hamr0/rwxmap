@@ -7485,3 +7485,34 @@ Node.
 - Lesson: a review record goes stale on any non-docs commit, a one-line
   live-check re-record included. Run `check:live` before
   `/branch-review`, not after, or the review has to run twice.
+
+## 2026-10-14 — v0.7.2 released
+
+- Released: `rwxmap@0.7.2`. PR #14, merge d1367d3, tag v0.7.2, the publish
+  workflow green, tarball smoke test 0.7.2 OK.
+- Contents: the README renders again (the logo's closing fence restored)
+  and the version badges.
+- Release checklist items 9 and 10 were not run as typed commands; stated
+  at the time.
+
+## 2026-10-29 — rwxmap/match for barebox's proxy (D126)
+
+- Goal: a proxy that sees only METHOD + URL gets rwxmap's key and letter
+  from the exported sidecars alone, within a tight memory budget.
+- Tried: `rwxmap/match` (`matcherFrom`), a `servers` field in the sidecar,
+  `src/servers.js`, and a proof comparing the matcher with `classifyCall`.
+  Import cost: `rwxmap/discover` +14.0 MB, `rwxmap/match` +0.7-0.9 MB.
+- Outcome: the proof first showed 7 differences in 11,579 calls, all
+  meta-whatsapp, x loosened to w: the tie-break reclassified sidecar rows
+  that lack operationId and summary. Fixed by ranking a row by its stored
+  letter; then 0 of 11,579. RSS after 300k calls was +22.4 MB against +9.8
+  MB for a URL-only loop; after splitting `match.js` into
+  `compileOps`/`matchCompiled` it was +10.0-10.2 MB against +9.8-10.2 MB,
+  and a call went from 397 to 6.9 µs. `match.js` against main: 0 differences
+  on 11,655 calls; CLI output against main: identical on 37 specs apart from
+  `servers`. Each proof was broken by hand once and failed.
+- Lesson: (a) a matcher fed less text than the original can break ties
+  differently; carry the classified letter, do not reclassify. (b) A flat
+  heapUsed with growing RSS is allocation churn, not a leak, and it still
+  counts against a memory budget; measure against a baseline doing the same
+  unavoidable work.

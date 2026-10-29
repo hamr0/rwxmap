@@ -206,6 +206,37 @@ same domain, and a call that matches it takes that spec's letter (4 of
 414,180 cross-vendor test calls came out looser). Pass the spec URL to
 avoid it.
 
+## Proxy use (`rwxmap/match`)
+
+For a proxy that sees only METHOD + absolute URL, with no spec, no YAML and
+no network at runtime. Feed it the `<vendor>.rwxmap.review.json` sidecars
+the CLI wrote:
+
+```js
+import { matcherFrom } from 'rwxmap/match';
+const m = matcherFrom([sidecarA, sidecarB]);   // parsed sidecar objects
+m.match('POST', 'https://api.example.com/v1/orders/123');
+// -> { key, letter: 'r'|'w'|'x', marker: 'tight'|'loose'|'settled', source: 'spec'|'request', tie: boolean }
+```
+
+- It never returns null. `source: 'spec'` means a sidecar documents the
+  call: `key` is that operation's gate key and `letter`/`marker` are its
+  gate entry. `source: 'request'` means nothing documents it: the label
+  comes from the method and path alone.
+- The request-only key format `<host>.<METHOD> <path with ids as {id}>`
+  (e.g. `api.anthropic.com.POST /v1/messages`) is stable and public;
+  consumers may key their lists on it.
+- `tie` is true when several operations (or several sidecars) matched
+  equally well and the tightest was taken.
+- Sidecars from rwxmap 0.8.0 on carry a top-level `servers` list; an
+  older sidecar has none, so matching falls back to `https://<vendor>`
+  (regenerate with 0.8.0).
+- Bad sidecars throw at `matcherFrom`; `match` throws only on a URL that
+  is not http(s).
+
+Cost, measured: loading the import is about 1 MB, a 166-operation sidecar
+adds about 0.1 MB, and a call takes about 7 µs.
+
 ## Status
 
 WIP. Published on npm as `rwxmap`.

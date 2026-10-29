@@ -197,3 +197,13 @@ test('throws on an unparseable URL', () => {
   const ops = [{ method: 'GET', path: '/x' }];
   assert.throws(() => matchOperation(ops, SERVERS, 'GET', 'not a url'), /unparseable URL/);
 });
+
+test('tie-break ranks by the op\'s own letter when it carries one, and reports the tie', () => {
+  const ops = [
+    { method: 'POST', path: '/{a}/{b}', letter: 'w' },
+    { method: 'POST', path: '/{c}/{d}', letter: 'x' },
+  ];
+  const got = matchOperation(ops, ['https://h'], 'POST', 'https://h/1/2');
+  assert.equal(got?.op, ops[1]);
+  assert.equal(got?.tie, true);
+});

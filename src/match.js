@@ -93,19 +93,17 @@ function isTemplateParam(segment) {
 /**
  * @param {string[]} templateSegs
  * @param {string[]} actualSegs
- * @returns {number|null}  The literal-segment count on a match, or null
- *   when the templates and actual segments don't line up.
+ * @returns {boolean}  Whether the template lines up with the actual
+ *   segments (same count, every literal equal).
  */
 function templateMatches(templateSegs, actualSegs) {
-  if (templateSegs.length !== actualSegs.length) return null;
-  let literalCount = 0;
+  if (templateSegs.length !== actualSegs.length) return false;
   for (let i = 0; i < templateSegs.length; i++) {
     const t = templateSegs[i];
     if (isTemplateParam(t)) continue; // matches exactly one non-empty segment, already guaranteed by pathSegments filtering out ''
-    if (t !== actualSegs[i]) return null;
-    literalCount++;
+    if (t !== actualSegs[i]) return false;
   }
-  return literalCount;
+  return true;
 }
 
 /**
@@ -123,16 +121,81 @@ function stripBase(targetPathname, basePath) {
 }
 
 /**
+ * The letter that ranks a tied candidate. A row that already carries its
+ * own `letter` (a sidecar row, as rwxmap/match passes) is ranked by it —
+ * it was classified with the full operation text, which the row no longer
+ * has. Ops from operationsFrom carry no `letter`, so classifyCall is
+ * unchanged: those are classified here as before.
+ *
+ * @param {Operation} op
+ * @returns {string}
+ */
+function tieLetter(op) {
+  const letter = /** @type {any} */ (op).letter;
+  return letter === 'r' || letter === 'w' || letter === 'x' ? letter : classifyRow(op).class;
+}
+
+/**
+ * @typedef {Object} CompiledOps
+ * @property {{serverBase: string, host: string, basePath: string}[]} servers
+ *   Each distinct, parseable server once, in the caller's order.
+ * @property {Map<string, {op: Operation, idx: number, segs: string[], literalCount: number}[]>} byMethod
+ *   Operations bucketed by upper-cased method, document order kept.
+ */
+
+/**
+ * The compile step: everything matchCompiled would otherwise redo on every
+ * call — parsing each server URL, splitting each template, counting its
+ * literal segments. Pure; compile once per spec and reuse.
+ *
  * @param {Operation[]} ops
  * @param {string[]} servers
+ * @returns {CompiledOps}
+ */
+export function compileOps(ops, servers) {
+  /** @type {CompiledOps['servers']} */
+  const compiledServers = [];
+  for (const serverBase of new Set(servers || [])) {
+    let serverUrl;
+    try {
+      serverUrl = new URL(serverBase);
+    } catch {
+      continue; // an unparseable server URL is skipped, not fatal to the whole match
+    }
+    compiledServers.push({
+      serverBase,
+      host: serverUrl.hostname.toLowerCase(),
+      basePath: serverUrl.pathname === '' ? '/' : serverUrl.pathname,
+    });
+  }
+
+  /** @type {CompiledOps['byMethod']} */
+  const byMethod = new Map();
+  ops.forEach((op, idx) => {
+    const segs = pathSegments(op.path || '');
+    const literalCount = segs.reduce((n, seg) => (isTemplateParam(seg) ? n : n + 1), 0);
+    const method = String(op.method || '').toUpperCase();
+    const bucket = byMethod.get(method);
+    if (bucket) bucket.push({ op, idx, segs, literalCount });
+    else byMethod.set(method, [{ op, idx, segs, literalCount }]);
+  });
+  return { servers: compiledServers, byMethod };
+}
+
+/**
+ * The run step: the one implementation of the matching rules (see the
+ * header). `url` may be a string or an already-parsed URL (a caller that
+ * parsed it for its own routing passes it on rather than parsing twice).
+ *
+ * @param {CompiledOps} compiled
  * @param {string} method
- * @param {string} url
+ * @param {string|URL} url
  * @returns {{op: Operation, serverBase: string, hostMatched: boolean, tie: boolean, tieCount: number} | null}
  */
-export function matchOperation(ops, servers, method, url) {
+export function matchCompiled(compiled, method, url) {
   let target;
   try {
-    target = new URL(url);
+    target = typeof url === 'string' ? new URL(url) : url;
   } catch (err) {
     throw new Error(`matchOperation: ${url}: unparseable URL (${err instanceof Error ? err.message : String(err)})`);
   }
@@ -140,57 +203,71 @@ export function matchOperation(ops, servers, method, url) {
     throw new Error(`matchOperation: ${url}: not an http(s) URL (protocol ${target.protocol})`);
   }
 
-  const upperMethod = String(method).toUpperCase();
-  const uniqueServers = [...new Set(servers || [])];
+  const bucket = compiled.byMethod.get(String(method).toUpperCase());
+  if (!bucket) return null;
 
-  /** @type {Map<number, {op: Operation, idx: number, literalCount: number, serverBase: string, hostMatched: boolean}>} */
-  const byIdx = new Map();
+  // Per server, the target's remainder after the server's base path,
+  // split once for this call (null: the base is not a prefix).
+  const host = target.hostname.toLowerCase();
+  const remainders = compiled.servers.map((server) => {
+    const remainder = stripBase(target.pathname, server.basePath);
+    return remainder === null ? null : pathSegments(remainder);
+  });
 
-  for (const serverBase of uniqueServers) {
-    let serverUrl;
-    try {
-      serverUrl = new URL(serverBase);
-    } catch {
-      continue; // an unparseable server URL is skipped, not fatal to the whole match
-    }
-    const basePath = serverUrl.pathname === '' ? '/' : serverUrl.pathname;
-    const remainder = stripBase(target.pathname, basePath);
-    if (remainder === null) continue;
-    const actualSegs = pathSegments(remainder);
-    const hostMatched = target.hostname.toLowerCase() === serverUrl.hostname.toLowerCase();
-
-    ops.forEach((op, idx) => {
-      if (byIdx.has(idx)) return; // an earlier server already claimed this operation index
-      if (String(op.method || '').toUpperCase() !== upperMethod) return;
-      const templateSegs = pathSegments(op.path || '');
-      const literalCount = templateMatches(templateSegs, actualSegs);
-      if (literalCount !== null) {
-        byIdx.set(idx, { op, idx, literalCount, serverBase, hostMatched });
+  // The candidates with the most literal segments so far. An operation is
+  // claimed by the FIRST server (in the caller's order) it matches.
+  /** @type {{op: Operation, idx: number, serverIdx: number}[]} */
+  let tied = [];
+  let maxLiteralCount = -1;
+  for (const entry of bucket) {
+    if (entry.literalCount < maxLiteralCount) continue; // cannot tie or win
+    for (let s = 0; s < remainders.length; s++) {
+      const actualSegs = remainders[s];
+      if (actualSegs === null || !templateMatches(entry.segs, actualSegs)) continue;
+      if (entry.literalCount > maxLiteralCount) {
+        maxLiteralCount = entry.literalCount;
+        tied = [];
       }
-    });
+      tied.push({ op: entry.op, idx: entry.idx, serverIdx: s });
+      break;
+    }
   }
+  if (tied.length === 0) return null;
 
-  if (byIdx.size === 0) return null;
-
-  const candidates = [...byIdx.values()];
-  const maxLiteralCount = Math.max(...candidates.map((c) => c.literalCount));
   // tie/tieCount are keyed on this group — the most-literal-segments
-  // candidates; the class tie-break below only decides which one of them
-  // wins, it never narrows the count.
-  const tieCandidates = candidates.filter((c) => c.literalCount === maxLiteralCount);
-
-  // Tied candidates (never every op) are classified once each to break
-  // the tie: tightest class wins, then earliest document order. An
-  // unknown class counts as x, the project's invariant.
-  const withTightness = tieCandidates.map((c) => ({ c, tightness: CLASS_TIGHTNESS[classifyRow(c.op).class] ?? CLASS_TIGHTNESS.x }));
-  withTightness.sort((a, b) => b.tightness - a.tightness || a.c.idx - b.c.idx);
-  const top = withTightness[0].c;
-
+  // candidates; the class tie-break only decides which one of them wins,
+  // it never narrows the count. Tied candidates (never every op) are
+  // ranked once each: tightest class wins, then earliest document order.
+  // An unknown class counts as x, the project's invariant. A lone
+  // candidate needs no ranking.
+  let top = tied[0];
+  if (tied.length > 1) {
+    let topTightness = -1;
+    for (const c of tied) {
+      const tightness = CLASS_TIGHTNESS[tieLetter(c.op)] ?? CLASS_TIGHTNESS.x;
+      if (tightness > topTightness || (tightness === topTightness && c.idx < top.idx)) {
+        top = c;
+        topTightness = tightness;
+      }
+    }
+  }
+  const server = compiled.servers[top.serverIdx];
   return {
     op: top.op,
-    serverBase: top.serverBase,
-    hostMatched: top.hostMatched,
-    tie: tieCandidates.length > 1,
-    tieCount: tieCandidates.length,
+    serverBase: server.serverBase,
+    hostMatched: host === server.host,
+    tie: tied.length > 1,
+    tieCount: tied.length,
   };
+}
+
+/**
+ * @param {Operation[]} ops
+ * @param {string[]} servers
+ * @param {string} method
+ * @param {string} url
+ * @returns {{op: Operation, serverBase: string, hostMatched: boolean, tie: boolean, tieCount: number} | null}
+ */
+export function matchOperation(ops, servers, method, url) {
+  return matchCompiled(compileOps(ops, servers), method, url);
 }

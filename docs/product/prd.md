@@ -262,6 +262,9 @@ outside service, and the adopter must say so.
 | `src/flow.js` | `classifyRow` (the order, written once) and `reviewHint` (the one writer of `review`) |
 | `src/jev.js` | the three Jev tiers, thresholds, `applyJev`, `needsJev`, `jevState`, `jevQuestions` |
 | `src/exporter.js` | the bareguard exporter: `operationsFrom`, `exportGate`, `exportSidecar` |
+| `src/servers.js` | `resolvedServers`, `serversOrVendorHost`: the one writer of a spec's servers and the vendor-host fallback (D126) |
+| `src/match.js` | `compileOps`, `matchCompiled`, `matchOperation`: matching a call to an operation (D126 split) |
+| `src/matcher.js` | `matcherFrom`, shipped as `rwxmap/match` (D126) |
 | `src/index.js` | the package entry: `classifyRow`, `reviewHint`, the Jev exports, the exporter exports |
 | `src/types.js` | the `Operation`, `Verdict` and `StepVerdict` typedefs |
 | `tools/corpus.js`, `tools/csv.js` | corpus loading and CSV reading, dev only, never shipped |
@@ -718,6 +721,25 @@ UUIDs, long hex strings — so a map does not grow one entry per order
 id. rwxmap is the one writer of that key; the harness never builds it
 by hand.
 
+**The proxy matcher** (D126, built on branch `feat/match-entry`, not yet
+released): `rwxmap/match` exports `matcherFrom(sidecars)`, for a proxy
+(barebox's) that sees only METHOD + absolute URL. `match(method, url)`
+returns `{ key, letter, marker, source: 'spec'|'request', tie }` and
+never null. A call a sidecar documents gets the row's gate key and the
+gate entry for that key (collision rule from `exporter.js`, one writer);
+anything else gets `classifyCall`'s request-only label. It reads only
+the exported sidecars: no spec, no YAML, no network. The sidecar gains a
+top-level `servers` (written only by `exportSidecar`; resolution lives in
+`src/servers.js`, shared by discover and the CLI; a sidecar without it
+falls back to `https://<vendor>`). The request-only key format above is a
+stable public contract consumers may key lists on. Two found-by-proof
+rules: the tie-break ranks a candidate by the row's own stored letter
+(rows lack operationId and summary, so reclassifying them loosened x to w
+on 7 of 11,579 calls on meta-whatsapp), and `match.js` is split into
+`compileOps` / `matchCompiled` with `matchOperation` kept as their
+composition. LLM-inference allowlists are barebox's, not rwxmap's: no
+hand-curated endpoint lists, and changing a letter is core work.
+
 **Who owns what.**
 
 | party | owns | never |
@@ -771,6 +793,8 @@ above.
 - **CLI polish and the release checklist** — `--help`, `--version`,
   plain error messages, the `openapi`/`swagger` key check and
   `docs/release-checklist.md` — released as `rwxmap@0.7.0` on 2026-09-30.
+- **The proxy matcher** — `rwxmap/match` (D126) built on branch
+  `feat/match-entry`, not yet released.
 
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
