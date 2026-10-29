@@ -137,3 +137,18 @@ test('equal-literal candidates in rows without operationId: the tighter row lett
   const got = m.match('POST', 'https://h/1/2');
   assert.deepEqual(got, { key: 'h.edit', letter: 'x', marker: 'tight', source: 'spec', tie: true });
 });
+
+test('host AND port: a localhost:3000 server claims only that port', () => {
+  const m = matcherFrom([sidecarFor('api.ibanforge.com', ['http://localhost:3000'])]);
+  assert.equal(m.match('GET', 'http://localhost:3000/orders').source, 'spec');
+  assert.equal(m.match('GET', 'http://localhost:11434/orders').source, 'request');
+  assert.equal(m.match('GET', 'http://localhost/orders').source, 'request');
+});
+
+test('a default port is the same host as none', () => {
+  const m = matcherFrom([sidecarFor('h', ['https://h'])]);
+  assert.equal(m.match('GET', 'https://h:443/orders').source, 'spec');
+  assert.equal(m.match('GET', 'https://h/orders').source, 'spec');
+  const explicit = matcherFrom([sidecarFor('h', ['https://h:443'])]);
+  assert.equal(explicit.match('GET', 'https://h/orders').source, 'spec');
+});

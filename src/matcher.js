@@ -79,7 +79,8 @@ export function matcherFrom(sidecars) {
   if (!Array.isArray(sidecars)) throw new Error('matcherFrom: expects an array of parsed sidecar objects');
   const built = sidecars.map(buildEntry);
 
-  // Lowercased server hostname -> the sidecars naming it, so a call only
+  // Lowercased server host (hostname plus any non-default port: a call to
+  // another port is another service) -> the sidecars naming it, so a call only
   // tries sidecars that can own its host.
   /** @type {Map<string, Entry[]>} */
   const byHost = new Map();
@@ -87,7 +88,7 @@ export function matcherFrom(sidecars) {
     for (const server of entry.servers) {
       let host;
       try {
-        host = new URL(server).hostname.toLowerCase();
+        host = new URL(server).host.toLowerCase();
       } catch {
         continue; // an unparseable server is skipped, as matchOperation does
       }
@@ -112,7 +113,7 @@ export function matcherFrom(sidecars) {
       /** @type {MatchResult|null} */
       let best = null;
       let hits = 0;
-      for (const entry of byHost.get(target.hostname.toLowerCase()) ?? []) {
+      for (const entry of byHost.get(target.host.toLowerCase()) ?? []) {
         const matched = matchCompiled(entry.compiled, method, target);
         if (!matched) continue;
         hits += 1;

@@ -737,7 +737,13 @@ rules: the tie-break ranks a candidate by the row's own stored letter
 (rows lack operationId and summary, so reclassifying them loosened x to w
 on 7 of 11,579 calls on meta-whatsapp), and `match.js` is split into
 `compileOps` / `matchCompiled` with `matchOperation` kept as their
-composition. LLM-inference allowlists are barebox's, not rwxmap's: no
+composition. A call matches a sidecar only on the exact host and port its
+servers name (found end to end: ibanforge's real spec lists
+`http://localhost:3000`, so before the fix Ollama on :11434 and llama.cpp
+on :8080 took ibanforge's key). Known limit: a public spec that lists a
+loopback dev server (e.g. localhost:3000) still claims a local service on
+that exact port; a consumer loads only the sidecars of vendors it uses.
+LLM-inference allowlists are barebox's, not rwxmap's: no
 hand-curated endpoint lists, and changing a letter is core work.
 
 **Who owns what.**

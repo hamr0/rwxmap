@@ -226,6 +226,8 @@ m.match('POST', 'https://api.example.com/v1/orders/123');
 - The request-only key format `<host>.<METHOD> <path with ids as {id}>`
   (e.g. `api.anthropic.com.POST /v1/messages`) is stable and public;
   consumers may key their lists on it.
+- A call matches a sidecar only on the exact host and port its servers
+  name.
 - `tie` is true when several operations (or several sidecars) matched
   equally well and the tightest was taken.
 - Sidecars from rwxmap 0.8.0 on carry a top-level `servers` list; an

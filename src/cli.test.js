@@ -386,6 +386,12 @@ test('run: the help lists -h and -v on their own lines', async () => {
   assert.match(r.stdout, /^ {2}-v, --version {2}the version$/m);
 });
 
+test('run: the help says what Jev sends and where', async () => {
+  const r = await runIn(['--help']);
+  assert.match(r.stdout, /sends method, path, operationId, summary and description/);
+  assert.match(r.stdout, /api\.typesafe\.ai/);
+});
+
 test('run: --help and -h print the usage to stdout and exit 0', async () => {
   for (const flag of ['--help', '-h']) {
     const stdout = captureStream();

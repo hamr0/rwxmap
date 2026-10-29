@@ -802,7 +802,9 @@ Options:
 
 Writes <vendor>.rwxmap.json, <vendor>.rwxmap.review.json, <vendor>.openapi.rwx.json.
 
-Jev (optional model pass): set RWXMAP_JEV_KEY, or put it in a .env in the run folder. Without it the run is mechanical.
+Jev (optional model pass): set RWXMAP_JEV_KEY, or put it in a .env in the run folder.
+With a key, each run sends method, path, operationId, summary and description of the
+rows it checks to api.typesafe.ai; your key, your cost. Without it the run is mechanical.
 
 Exit 0 on success; 1 on failure, with nothing written.
 `;
