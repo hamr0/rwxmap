@@ -157,6 +157,31 @@ decides it.
 | 3 | step 3, w | POST whose verb is in `KEEP_W` | `modify-verb`, `modify-verb-summary` | list |
 | last | step 2's floor, x | anything unclaimed: a POST with no word, or any other method | `floor-post` | floor |
 
+**Why each floor sits where it does.** Truth per method under the D87
+definition, and which step decides the rows. Tuning set first (6557
+rows, `data/combined-2026-09-21/labelled.csv`), then the burned M3 exam
+(4279 rows, `data/exam-2026-09-22/labelled.csv`); re-derived 2026-10-29
+with the current `classifyRow`.
+
+| method | set | n | truth r | truth w | truth x | floor | decided by (rows) |
+|---|---|---|---|---|---|---|---|
+| GET | tuning | 2543 | 2541 (100%) | 2 (0%) | 0 | r | method floor 2543 |
+| GET | M3 exam | 2099 | 2094 (100%) | 5 (0%) | 0 | r | method floor 2099 |
+| POST | tuning | 1994 | 169 (8%) | 1333 (67%) | 492 (25%) | x | no word → floor x 1336; step 3 `KEEP_W` → w 378; step 2 `CANT_UNDO` → x 178; step 1 read verb → r 102 |
+| POST | M3 exam | 892 | 128 (14%) | 636 (71%) | 128 (14%) | x | no word → floor x 808; step 2 `CANT_UNDO` → x 27; step 1 read verb → r 36; step 3 `KEEP_W` → w 21 |
+| DELETE | tuning | 951 | 1 (0%) | 26 (3%) | 924 (97%) | x | method floor 951 |
+| DELETE | M3 exam | 558 | 3 (1%) | 7 (1%) | 548 (98%) | x | method floor 558 |
+| PUT | tuning | 766 | 1 (0%) | 718 (94%) | 47 (6%) | w | method floor 753; step 2 `CANT_UNDO` → x 13 |
+| PUT | M3 exam | 460 | 2 (0%) | 441 (96%) | 17 (4%) | w | method floor 456; step 2 `CANT_UNDO` → x 4 |
+| PATCH | tuning | 303 | 0 | 299 (99%) | 4 (1%) | w | method floor 301; step 2 `CANT_UNDO` → x 2 |
+| PATCH | M3 exam | 270 | 0 | 258 (96%) | 12 (4%) | w | method floor 268; step 2 `CANT_UNDO` → x 2 |
+
+Every floor follows its method's majority except POST: most POSTs are
+truly w, but a POST with no verb word cannot be told from a create
+(x), so the invariant takes the tighter class. Those floor rows (1336
+of 1994 on tuning) carry most of the too-tight cost and are the pile
+`jev-lower` lowers.
+
 **The method floor, as the code has it.**
 
 | method | floor | what can move it |
