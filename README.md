@@ -218,7 +218,6 @@ import { matcherFrom } from 'rwxmap/match';
 const m = matcherFrom([sidecarA, sidecarB]);   // parsed sidecar objects
 m.match('POST', 'https://api.example.com/v1/orders/123');
 // -> { key, letter: 'r'|'w'|'x', marker: 'tight'|'loose'|'settled', source: 'spec'|'request', tie: boolean }
-//    (plus `malformed: <reason>` on an oddly written path, see below)
 ```
 
 - It never returns null. `source: 'spec'` means a sidecar documents the
@@ -250,15 +249,6 @@ m.match('POST', 'https://api.example.com/v1/orders/123');
   a stranger's host there gets that spec's letter (which can be looser
   than the request-only label). No spec in the corpus does this; there
   is no public-suffix list by design (no hand-curated lists).
-- A trailing dot on the host (`api.example.com.`) is dropped before
-  routing, matching and keying. A call whose path has an escaped
-  unreserved character (`%74` for `t`, `%7e`) or a `;` is not matched
-  against any spec: it gets `source: 'request'`, letter `x`, marker
-  `tight` (GET, HEAD and OPTIONS keep their request-only label) and
-  `malformed: <reason>`, e.g. `escaped unreserved character in path
-  (%74)`. Reject it and ask the caller to retry with the plain URL.
-  Reserved escapes (`%2F`, `%20`, `%3B`) are ordinary. Clean calls carry
-  no `malformed` field. `classifyCall` does the same.
 - `tie` is true when several operations (or several sidecars) matched
   equally well and the tightest was taken.
 - Sidecars from rwxmap 0.8.0 on carry a top-level `servers` list. A sidecar

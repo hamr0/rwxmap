@@ -790,19 +790,7 @@ takes that spec's letter, which can be looser than the request-only
 label; no corpus spec does this, and there is no public-suffix list by
 design. A relative server URL in a local spec resolves against the
 API address when `findSpec` is given one, and against `https://<vendor>`
-in the CLI (a file path is no URL base). Odd call URLs (one writer,
-`callUrlProblem` and `requestOnly` in `src/key.js`, used by `match` and
-`classifyCall` alike): one trailing `.` on the host is dropped before
-routing, matching and keying; a call whose path has an escaped
-unreserved character (A-Z a-z 0-9 - . _ ~) or a `;` is never matched
-against the spec, because a spelling the spec's paths do not use could
-land it on a looser label. It gets `source: 'request'`, `x`, `tight`
-(GET, HEAD and OPTIONS keep their request-only label) and `malformed:
-<reason>`, so the consumer can reject it and ask the caller to retry
-with the plain URL; reserved escapes (%2F, %20, %3B) are ordinary and a
-clean call has no `malformed` field. Measured on all 9,833 corpus
-operation paths and 46 servers: none contains `%` or `;`.
-LLM-inference allowlists are barebox's, not
+in the CLI (a file path is no URL base). LLM-inference allowlists are barebox's, not
 rwxmap's: no hand-curated endpoint lists, and changing a letter is core
 work.
 

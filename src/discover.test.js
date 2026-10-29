@@ -8,8 +8,6 @@ import { createHash } from 'node:crypto';
 import { findSpec, classifyCall, requestKey as discoverRequestKey } from './discover.js';
 import { requestKey } from './key.js';
 import { gateKey } from './exporter.js';
-import { matcherFrom } from './matcher.js';
-import { classifyRow } from './flow.js';
 
 // ---------------------------------------------------------------------
 // Fixtures / helpers
@@ -939,94 +937,4 @@ test('local opts.spec with an absolute server and an apiUrl that is no URL still
     fs.rmSync(cacheDir, { recursive: true, force: true });
     fs.rmSync(fixtureDir, { recursive: true, force: true });
   }
-});
-
-// ---------------------------------------------------------------------
-// classifyCall: odd call URLs (same rules and results as the matcher)
-// ---------------------------------------------------------------------
-
-const ODD_FOUND = {
-  status: 'found',
-  ops: [{ method: 'PUT', path: '/things/{id}/state' }],
-  servers: ['https://api.acme.com/v1'],
-  opKeys: ['acme.putState'],
-  entries: { 'acme.putState': { letter: 'x', marker: 'settled' } },
-};
-const ODD_SIDECAR = {
-  vendor: 'acme',
-  servers: ODD_FOUND.servers,
-  rows: [{ key: 'acme.putState', method: 'PUT', path: '/things/{id}/state', letter: 'x', marker: 'settled' }],
-};
-const ODD_BASE = 'https://api.acme.com/v1/things/1/state';
-
-test('classifyCall odd URL: plain call is the spec x, no malformed field', () => {
-  const got = classifyCall(ODD_FOUND, 'PUT', ODD_BASE);
-  assert.deepEqual(got, { key: 'acme.putState', letter: 'x', marker: 'settled', source: 'spec' });
-  assert.equal('malformed' in got, false);
-});
-
-test('classifyCall odd URL: trailing host dot dropped, spec x, not flagged', () => {
-  const got = classifyCall(ODD_FOUND, 'PUT', 'https://api.acme.com./v1/things/1/state');
-  assert.equal(got.source, 'spec');
-  assert.equal(got.letter, 'x');
-  assert.equal('malformed' in got, false);
-  const req = classifyCall({ status: 'none' }, 'GET', 'https://other.example.com./a/b');
-  assert.equal(req.key, requestKey('GET', 'https://other.example.com/a/b'));
-  assert.equal('malformed' in req, false);
-});
-
-test('classifyCall odd URL: %74 and ";" are malformed: x, request, tight', () => {
-  const a = classifyCall(ODD_FOUND, 'PUT', 'https://api.acme.com/v1/%74hings/1/state');
-  assert.deepEqual(a, {
-    key: requestKey('PUT', 'https://api.acme.com/v1/%74hings/1/state'),
-    letter: 'x', marker: 'tight', source: 'request', malformed: 'escaped unreserved character in path (%74)',
-  });
-  for (const method of ['PUT', 'DELETE', 'POST', 'PATCH']) {
-    const b = classifyCall(ODD_FOUND, method, `${ODD_BASE};x=1`);
-    assert.equal(b.letter, 'x', method);
-    assert.equal(b.source, 'request', method);
-    assert.equal(b.malformed, "';' in path", method);
-  }
-});
-
-test('classifyCall odd URL: GET/HEAD/OPTIONS keep the request label; reserved escapes and queries are not flagged', () => {
-  for (const method of ['GET', 'HEAD', 'OPTIONS']) {
-    const url = 'https://api.acme.com/v1/%74hings/1';
-    const v = classifyRow({ method, path: new URL(url).pathname });
-    const got = classifyCall(ODD_FOUND, method, url);
-    assert.equal(got.letter, v.class, method);
-    assert.equal(got.marker, v.review, method);
-    assert.equal(typeof got.malformed, 'string', method);
-  }
-  for (const esc of ['%2F', '%20', '%3B']) {
-    assert.equal('malformed' in classifyCall(ODD_FOUND, 'PUT', `https://api.acme.com/v1/things/a${esc}b/state`), false, esc);
-  }
-  for (const esc of ['%7E', '%7e']) {
-    assert.equal(typeof classifyCall(ODD_FOUND, 'PUT', `https://api.acme.com/v1/things/a${esc}b/state`).malformed, 'string', esc);
-  }
-  assert.equal('malformed' in classifyCall(ODD_FOUND, 'PUT', `${ODD_BASE}?a=%74;b`), false);
-});
-
-test('classifyCall odd URL: still throws the named error on an unparseable or non-http URL', () => {
-  assert.throws(() => classifyCall(ODD_FOUND, 'GET', 'not a url'), /requestKey: .*unparseable/);
-  assert.throws(() => classifyCall(ODD_FOUND, 'GET', 'ftp://h/a'), /not an http/);
-});
-
-test('classifyCall and matcher agree on every odd URL', () => {
-  const m = matcherFrom([ODD_SIDECAR]);
-  const urls = [
-    ODD_BASE, 'https://api.acme.com./v1/things/1/state', 'https://api.acme.com/v1/%74hings/1/state',
-    `${ODD_BASE};x=1`, 'https://api.acme.com./v1/%74hings/1/state', 'https://api.acme.com/v1/things/a%2Fb/state',
-    'https://api.acme.com/v1/things/a%20b/state', 'https://api.acme.com/v1/things/a%7Eb/state',
-    'https://api.acme.com/v1/things/a%7eb/state', 'https://other.example.com./a/b%61',
-  ];
-  let n = 0;
-  for (const method of ['GET', 'HEAD', 'OPTIONS', 'PUT', 'DELETE', 'POST', 'PATCH']) {
-    for (const url of urls) {
-      const { tie, ...a } = m.match(method, url);
-      assert.deepEqual(classifyCall(ODD_FOUND, method, url), a, `${method} ${url}`);
-      n++;
-    }
-  }
-  assert.equal(n, 70);
 });

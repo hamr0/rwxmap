@@ -14,7 +14,8 @@
 // exporter.js (which itself imports only flow.js) — never discover.js,
 // load.js or the yaml package, so a memory-tight proxy loads little.
 import { compileOps, matchCompiled } from './match.js';
-import { callUrlProblem, requestOnly } from './key.js';
+import { requestKey } from './key.js';
+import { classifyRow } from './flow.js';
 import { serversOrVendorHost, tenantTemplate } from './servers.js';
 import { gateEntriesFromRows } from './exporter.js';
 
@@ -31,11 +32,6 @@ const MARKERS = new Set(['tight', 'loose', 'settled']);
  * @property {'spec'|'request'} source
  * @property {boolean} tie  matchOperation's own tie flag for the winning
  *   match; true too when two sidecars both matched and the tighter won.
- * @property {string} [malformed]  Present only on a malformed call (an
- *   escaped unreserved character or a ";" in the path): why. Such a call
- *   is not matched against any spec (source 'request') and is x, tight,
- *   except GET, HEAD and OPTIONS, which keep their request-only label.
- *   Clean calls have no such field.
  */
 
 /**
@@ -108,15 +104,6 @@ function buildEntry(sidecar, i) {
 }
 
 /**
- * @param {ReturnType<typeof requestOnly>} r
- * @returns {MatchResult}
- */
-function withTie(r) {
-  r.tie = false;
-  return /** @type {MatchResult} */ (r);
-}
-
-/**
  * @param {any[]} sidecars  Parsed `<vendor>.rwxmap.review.json` objects.
  * @returns {{match: (method: string, url: string) => MatchResult}}
  */
@@ -139,7 +126,6 @@ export function matcherFrom(sidecars) {
 
   return {
     match(method, url) {
-      /** @type {URL} */
       let target;
       try {
         target = new URL(url);
@@ -148,15 +134,6 @@ export function matcherFrom(sidecars) {
       }
       if (target.protocol !== 'http:' && target.protocol !== 'https:') {
         throw new Error(`match: ${url}: not an http(s) URL (protocol ${target.protocol})`);
-      }
-
-      // A trailing host dot is dropped; a malformed path is never matched
-      // against a spec (key.js is the one writer of both rules).
-      const odd = callUrlProblem(target, url);
-      if (odd) {
-        target = odd.target;
-        url = odd.url;
-        if (odd.malformed !== null) return withTie(requestOnly(method, url, target, odd.malformed));
       }
 
       // Candidates: the sidecars on the call's exact host, plus those with a
@@ -200,7 +177,8 @@ export function matcherFrom(sidecars) {
         return best;
       }
 
-      return withTie(requestOnly(method, url, target, null));
+      const verdict = classifyRow({ method, path: target.pathname });
+      return { key: requestKey(method, url), letter: verdict.class, marker: verdict.review, source: 'request', tie: false };
     },
   };
 }
