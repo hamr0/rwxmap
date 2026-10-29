@@ -866,12 +866,19 @@ export async function run(argv, env) {
   }
   const address = positionals[0];
   const named = values.vendor;
-  if (named !== undefined && (named.trim() === '' || /^\.+$/.test(named) || /[/\\]/.test(named))) {
+  if (
+    named !== undefined &&
+    (named.trim() === '' || named !== named.trim() || /^\.+$/.test(named) || /[/\\]/.test(named) || /[\p{Cc}\p{Cf}]/u.test(named))
+  ) {
     stderr.write(`rwxmap: --vendor must be a plain name (no / or \\): ${named}\n`);
     return 1;
   }
   if (values.outDir?.startsWith('=')) {
     stderr.write('rwxmap: -o takes a space, not "=": -o <dir>\n');
+    return 1;
+  }
+  if (values.outDir === '') {
+    stderr.write('rwxmap: -o needs a directory: -o <dir>\n');
     return 1;
   }
   const outDir = values.outDir ? path.resolve(cwd, values.outDir) : cwd;

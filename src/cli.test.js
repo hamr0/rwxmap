@@ -283,6 +283,49 @@ test('run: a --vendor with dots inside is accepted', async () => {
   assert.ok(fs.existsSync(path.join(dir, 'a.b.rwxmap.json')));
 });
 
+test('run: a --vendor with edge whitespace or a control/format character is refused, ordinary Unicode and internal spaces are not', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  for (const vendor of ['\u200b', ' a ', 'a ', ' a', 'a\u0000b', 'a\u200bb', '\ufeffa']) {
+    const r = await runIn([specPath, '--vendor', vendor], dir);
+    assert.equal(r.code, 1);
+    assert.equal(r.stderr, `rwxmap: --vendor must be a plain name (no / or \\): ${vendor}\n`);
+  }
+  assert.deepEqual(fs.readdirSync(dir), ['spec.json']);
+  for (const vendor of ['café', 'acme-prod']) {
+    const r = await runIn([specPath, '--vendor', vendor], dir);
+    assert.equal(r.code, 0, r.stderr);
+    assert.ok(fs.existsSync(path.join(dir, `${vendor}.rwxmap.json`)));
+  }
+});
+
+test('run: an empty -o is refused and nothing is written; a missing -o still means the current folder', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
+  const r = await runIn([specPath, '--vendor', 'x', '-o', ''], dir);
+  assert.equal(r.code, 1);
+  assert.equal(r.stderr, 'rwxmap: -o needs a directory: -o <dir>\n');
+  assert.deepEqual(fs.readdirSync(dir), ['spec.json']);
+  const ok = await runIn([specPath, '--vendor', 'x'], dir);
+  assert.equal(ok.code, 0, ok.stderr);
+  assert.ok(fs.existsSync(path.join(dir, 'x.rwxmap.json')));
+});
+
+test('run: bad arguments are reported in a fixed order: address count, then --vendor, then -o', async () => {
+  /** @type {[string[], string][]} */
+  const cases = [
+    [['a.json', 'b.json', '--vendor', '/', '-o', '=x'], 'rwxmap: expected exactly one address, got 2\n'],
+    [['a.json', '--vendor', '/', '-o', '=x'], 'rwxmap: --vendor must be a plain name (no / or \\): /\n'],
+    [['a.json', '--vendor', 'ok', '-o', '=x'], 'rwxmap: -o takes a space, not "=": -o <dir>\n'],
+    [['a.json', '--vendor', 'ok', '-o', ''], 'rwxmap: -o needs a directory: -o <dir>\n'],
+  ];
+  for (const [argv, message] of cases) {
+    const r = await runIn(argv);
+    assert.equal(r.code, 1);
+    assert.ok(r.stderr.startsWith(message), r.stderr);
+  }
+});
+
 test('run: -o=<dir> is refused, it takes a space, and nothing is written', async () => {
   const dir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
