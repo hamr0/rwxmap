@@ -788,7 +788,14 @@ a vendor's domain from a public suffix, so a template such as
 `{x}.github.io` routes every host under it, and a stranger's host there
 takes that spec's letter, which can be looser than the request-only
 label; no corpus spec does this, and there is no public-suffix list by
-design. A relative server URL in a local spec resolves against the
+design. Known limit: the call URL is matched as written — a trailing
+host dot, a percent-escaped unreserved character or a `;params` tail
+misses the spec row and takes the request-only label, which can be
+looser (PUT x comes back w); shown only in tests, not seen live; a
+consumer that needs the tighter answer applies its own per-method letter
+to `source: 'request'` calls. A normalise-or-flag fix was built and
+reverted (e4d52be); it stays in the fix ledger. A relative server URL
+in a local spec resolves against the
 API address when `findSpec` is given one, and against `https://<vendor>`
 in the CLI (a file path is no URL base). LLM-inference allowlists are barebox's, not
 rwxmap's: no hand-curated endpoint lists, and changing a letter is core

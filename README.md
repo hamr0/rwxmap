@@ -249,6 +249,14 @@ m.match('POST', 'https://api.example.com/v1/orders/123');
   a stranger's host there gets that spec's letter (which can be looser
   than the request-only label). No spec in the corpus does this; there
   is no public-suffix list by design (no hand-curated lists).
+- Limit: the call URL is matched as written. A trailing host dot
+  (`api.acme.com.`), a percent-escaped letter or digit in the path
+  (`%74hings`), or a `;params` tail (`/state;x=1`) does not match the
+  spec row, so the call takes the request-only label, which can be looser
+  (a PUT the spec calls x comes back w). Seen only in tests, never in
+  live traffic; a consumer that wants the tighter answer should apply its
+  own per-method letter to every `source: 'request'` call (barebox
+  does).
 - `tie` is true when several operations (or several sidecars) matched
   equally well and the tightest was taken.
 - Sidecars from rwxmap 0.8.0 on carry a top-level `servers` list. A sidecar
