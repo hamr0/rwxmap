@@ -48,6 +48,8 @@
 // Throws on a non-http(s) URL (checked via `.protocol`) or one `new URL`
 // itself cannot parse.
 
+import { classifyRow } from './flow.js';
+
 const UNRESERVED_CODE = new Set();
 for (let c = 0x30; c <= 0x39; c++) UNRESERVED_CODE.add(c); // 0-9
 for (let c = 0x41; c <= 0x5a; c++) UNRESERVED_CODE.add(c); // A-Z
@@ -171,4 +173,76 @@ export function requestKey(method, url) {
   const path = replaceIdSegments(normalizePath(parsed.pathname));
 
   return `${host}.${upperMethod} ${path}`;
+}
+
+// ---------------------------------------------------------------------
+// Odd call URLs (the one writer of both rules, and of the result a call
+// with one gets). An oddly written URL must not reach the spec's
+// operations: it could slip past the route that carries the spec's
+// evidence and land on a looser label. Two rules:
+//   1. A trailing "." on the host (`api.acme.com.`) is the same host:
+//      one dot is dropped before routing, matching and keying.
+//   2. A path with an escaped UNRESERVED byte (`%74` for "t") or a ";"
+//      is "malformed": it is never matched against the spec, and gets
+//      the tightest request-only answer (see requestOnly).
+// A reserved escape (%2F, %20, %3B) is an ordinary escaped byte, not odd.
+// ---------------------------------------------------------------------
+
+// An escape of an unreserved byte: 0-9 A-Z a-z - . _ ~ (hex either case).
+const UNRESERVED_ESCAPE_RE = /%(?:3\d|4[1-9a-f]|5[\daf]|6[1-9a-f]|7[\dae]|2[de])/i;
+
+/**
+ * @typedef {Object} CallUrlFix
+ * @property {URL} target  The call URL, the trailing host dot dropped.
+ * @property {string} url  The same, as a string (for requestKey).
+ * @property {string|null} malformed  Why the path is malformed, or null.
+ */
+
+/**
+ * @param {URL} target  The parsed call URL.
+ * @param {string} url  The call URL as the caller wrote it.
+ * @returns {CallUrlFix|null}  null for the ordinary call (no allocation,
+ *   no URL rebuilt): nothing to drop and nothing malformed.
+ */
+export function callUrlProblem(target, url) {
+  const host = target.hostname;
+  const dotted = host.length > 1 && host.charCodeAt(host.length - 1) === 0x2e;
+  const path = target.pathname;
+  /** @type {string|null} */
+  let malformed = null;
+  if (path.indexOf('%') >= 0 || path.indexOf(';') >= 0) {
+    const esc = UNRESERVED_ESCAPE_RE.exec(path);
+    if (esc) malformed = `escaped unreserved character in path (${esc[0]})`;
+    else if (path.indexOf(';') >= 0) malformed = "';' in path";
+  }
+  if (!dotted && malformed === null) return null;
+  if (!dotted) return { target, url, malformed };
+  const fixed = new URL(target);
+  fixed.hostname = host.slice(0, -1);
+  return { target: fixed, url: fixed.href, malformed };
+}
+
+/**
+ * The request-only answer for a call no spec operation owns: the
+ * method/path ladder for an ordinary call; for a malformed one the
+ * tightest class (x) with a "tight" marker, except GET, HEAD and OPTIONS,
+ * which keep their ladder label. The result carries `malformed: <reason>`
+ * only when the call is malformed.
+ *
+ * @param {string} method
+ * @param {string} url  The call URL string (trailing host dot already dropped).
+ * @param {URL} target  The same URL, parsed.
+ * @param {string|null} malformed
+ * @returns {{key: string, letter: 'r'|'w'|'x', marker: 'tight'|'loose'|'settled', source: 'request', malformed?: string, tie?: boolean}}
+ *   No `tie` field: matcher.js adds its own, classifyCall has none.
+ */
+export function requestOnly(method, url, target, malformed) {
+  const key = requestKey(method, url);
+  const m = String(method).toUpperCase();
+  if (malformed !== null && m !== 'GET' && m !== 'HEAD' && m !== 'OPTIONS') {
+    return { key, letter: 'x', marker: 'tight', source: 'request', malformed };
+  }
+  const verdict = classifyRow({ method, path: target.pathname });
+  const out = { key, letter: verdict.class, marker: verdict.review, source: /** @type {'request'} */ ('request') };
+  return malformed === null ? out : { ...out, malformed };
 }

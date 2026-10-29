@@ -86,9 +86,8 @@ import * as path from 'node:path';
 import { createHash } from 'node:crypto';
 import { loadSpec } from './load.js';
 import { operationsFrom, exportGate, gateKey } from './exporter.js';
-import { requestKey } from './key.js';
+import { requestKey, callUrlProblem, requestOnly } from './key.js';
 import { matchOperation } from './match.js';
-import { classifyRow } from './flow.js';
 import { resolvedServers, serversOrVendorHost } from './servers.js';
 
 /** @typedef {import('./types.js').Operation} Operation */
@@ -854,10 +853,29 @@ export async function findSpec(apiUrl, opts = {}) {
  * @param {any} found  A findSpec() result.
  * @param {string} method
  * @param {string} url
- * @returns {{key: string, letter: 'r'|'w'|'x', marker: 'tight'|'loose'|'settled', source: 'spec'|'request'}}
+ * @returns {{key: string, letter: 'r'|'w'|'x', marker: 'tight'|'loose'|'settled', source: 'spec'|'request', malformed?: string}}
+ *   `malformed` is present only on a malformed call (an escaped
+ *   unreserved character or a ";" in the path): it is not matched
+ *   against the spec (source 'request'), is x tight except GET, HEAD and
+ *   OPTIONS, and carries the reason. A trailing host dot is dropped.
  */
 export function classifyCall(found, method, url) {
-  if (found && found.status === 'found') {
+  /** @type {string|null} */
+  let malformed = null;
+  /** @type {URL|null} */
+  let target = null;
+  try {
+    target = new URL(url);
+  } catch {
+    // unparseable: requestKey below throws the named error
+  }
+  const odd = target && callUrlProblem(target, url);
+  if (odd) {
+    target = odd.target;
+    url = odd.url;
+    malformed = odd.malformed;
+  }
+  if (malformed === null && found && found.status === 'found') {
     /** @type {ReturnType<typeof matchOperation>} */
     let matched = null;
     try {
@@ -882,8 +900,6 @@ export function classifyCall(found, method, url) {
     }
   }
 
-  const key = requestKey(method, url);
-  const pathname = new URL(url).pathname;
-  const verdict = classifyRow({ method, path: pathname });
-  return { key, letter: verdict.class, marker: verdict.review, source: 'request' };
+  if (target === null) requestKey(method, url); // unparseable: throws the named error
+  return requestOnly(method, url, /** @type {URL} */ (target), malformed);
 }

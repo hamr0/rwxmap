@@ -247,3 +247,98 @@ test('a default port is the same host as none', () => {
   const explicit = matcherFrom([sidecarFor('h', ['https://h:443'])]);
   assert.equal(explicit.match('GET', 'https://h/orders').source, 'spec');
 });
+
+// ---------------------------------------------------------------------
+// Odd call URLs: a trailing host dot is dropped; a path with an escaped
+// unreserved character or a ";" is malformed, not matched, x tight
+// (GET/HEAD/OPTIONS keep their request-only label) with a reason.
+// ---------------------------------------------------------------------
+
+const ODD_SIDECAR = {
+  vendor: 'acme',
+  servers: ['https://api.acme.com/v1'],
+  rows: [row('acme.putState', 'PUT', '/things/{id}/state', 'x')],
+};
+const oddMatcher = () => matcherFrom([ODD_SIDECAR]);
+const BASE = 'https://api.acme.com/v1/things/1/state';
+
+test('odd URL: the plain call is the spec x', () => {
+  const got = oddMatcher().match('PUT', BASE);
+  assert.deepEqual(got, { key: 'acme.putState', letter: 'x', marker: 'settled', source: 'spec', tie: false });
+  assert.equal('malformed' in got, false);
+});
+
+test('odd URL: a trailing host dot is dropped, still the spec x, not flagged', () => {
+  const got = oddMatcher().match('PUT', 'https://api.acme.com./v1/things/1/state');
+  assert.equal(got.source, 'spec');
+  assert.equal(got.letter, 'x');
+  assert.equal('malformed' in got, false);
+  const withPort = matcherFrom([{ ...ODD_SIDECAR, servers: ['https://api.acme.com:8443/v1'] }]);
+  assert.equal(withPort.match('PUT', 'https://api.acme.com.:8443/v1/things/1/state').source, 'spec');
+});
+
+test('odd URL: a trailing-dot request-only call is keyed without the dot', () => {
+  const got = oddMatcher().match('GET', 'https://other.example.com./a/b');
+  assert.equal(got.key, requestKey('GET', 'https://other.example.com/a/b'));
+  assert.equal('malformed' in got, false);
+});
+
+test('odd URL: an escaped unreserved character is malformed: x, request, tight', () => {
+  const got = oddMatcher().match('PUT', 'https://api.acme.com/v1/%74hings/1/state');
+  assert.equal(got.source, 'request');
+  assert.equal(got.letter, 'x');
+  assert.equal(got.marker, 'tight');
+  assert.equal(got.tie, false);
+  assert.equal(got.malformed, 'escaped unreserved character in path (%74)');
+  assert.equal(got.key, requestKey('PUT', 'https://api.acme.com/v1/%74hings/1/state'));
+});
+
+test('odd URL: a ";" in the path is malformed: x for PUT, DELETE, POST, PATCH', () => {
+  for (const method of ['PUT', 'DELETE', 'POST', 'PATCH']) {
+    const got = oddMatcher().match(method, `${BASE};x=1`);
+    assert.equal(got.source, 'request', method);
+    assert.equal(got.letter, 'x', method);
+    assert.equal(got.marker, 'tight', method);
+    assert.equal(got.malformed, "';' in path", method);
+  }
+});
+
+test('odd URL: GET, HEAD, OPTIONS keep their request-only label but carry malformed', () => {
+  for (const method of ['GET', 'HEAD', 'OPTIONS']) {
+    const url = 'https://api.acme.com/v1/%74hings/1';
+    const v = classifyRow({ method, path: new URL(url).pathname });
+    const got = oddMatcher().match(method, url);
+    assert.equal(got.letter, v.class, method);
+    assert.equal(got.marker, v.review, method);
+    assert.equal(got.source, 'request', method);
+    assert.equal(got.malformed, 'escaped unreserved character in path (%74)', method);
+  }
+  assert.equal(oddMatcher().match('GET', 'https://api.acme.com/v1/things/1;x').letter, 'r');
+});
+
+test('odd URL: reserved escapes (%2F, %20, %3B) are not malformed', () => {
+  for (const esc of ['%2F', '%20', '%3B', '%2f']) {
+    const got = oddMatcher().match('PUT', `https://api.acme.com/v1/things/a${esc}b/state`);
+    assert.equal('malformed' in got, false, esc);
+  }
+});
+
+test('odd URL: unreserved escapes in either hex case are malformed', () => {
+  for (const esc of ['%7E', '%7e', '%41', '%5f', '%2D', '%2e', '%30', '%7A']) {
+    const got = oddMatcher().match('PUT', `https://api.acme.com/v1/things/a${esc}b/state`);
+    assert.equal(typeof got.malformed, 'string', esc);
+    assert.equal(got.letter, 'x', esc);
+  }
+});
+
+test('odd URL: an escape in the query string only is not malformed (path only)', () => {
+  const got = oddMatcher().match('PUT', `${BASE}?a=%74;b`);
+  assert.equal(got.source, 'spec');
+  assert.equal('malformed' in got, false);
+});
+
+test('odd URL: a dotted host with a malformed path is both fixed and flagged', () => {
+  const got = oddMatcher().match('PUT', 'https://api.acme.com./v1/%74hings/1/state');
+  assert.equal(got.malformed, 'escaped unreserved character in path (%74)');
+  assert.equal(got.key, requestKey('PUT', 'https://api.acme.com/v1/%74hings/1/state'));
+});
