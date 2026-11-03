@@ -259,6 +259,11 @@ for debugging and are never published (D28/D76/D77).
     needed", also covering rows the second pass could not decide.
   - `loose` — class w on a PUT or PATCH decided by the method floor.
     Where most of the too-loose rows live.
+    Planned, not built (D133): it widens to "mechanical lowered it". It
+    also covers any POST row a word list lowered below the POST floor
+    of x (class w or r, evidence `list`). Needs a change to
+    `reviewHint` in `src/flow.js`. `settled` then means nothing
+    lowered the row, mostly GET r and DELETE x floor rows.
   - `settled` — neither of the other two. It is NOT signed or
     confirmed by anyone. A signed state would be a fourth value only a
     human writes after the export; rwxmap never emits it.
@@ -904,10 +909,11 @@ decided; everything marked "proposal" or "open" is not decided.
   The rows mechanical marks for a human today go to the second pass
   first.
 - **Three modes.**
-  - **a (default): mechanical -> rwxlite.** Only rows mechanical marks
-    `loose` or `tight` get the second pass. `settled` rows stay exactly
-    as today and are not sent. On a `loose` row rwxlite is asked whether
-    it is really x (raise or keep). On a `tight` row rwxlite is asked
+  - **a (default): mechanical -> rwxlite.** Every row marked `loose`
+    or `tight` gets the second pass, with `loose` widened (see "The
+    `loose` marker widens" below). `settled` rows are not sent and
+    stay exactly as today. Mode c uses the same scope. On a `loose`
+    row rwxlite is asked whether it is really x (raise or keep). On a `tight` row rwxlite is asked
     whether it can be lowered; a lowering is accepted only at max p >=
     0.97 (rwxlite's measured cut-off). If rwxlite cannot decide, the row
     is x and marked for review. Raised, lowered and undecided rows all
@@ -935,9 +941,20 @@ decided; everything marked "proposal" or "open" is not decided.
   undecided PUT/PATCH pushed to x, which today's `reviewHint` marks
   `settled`. This needs a change to `reviewHint` in `src/flow.js`
   (core-adjacent, its one writer). Output format is unchanged.
-- **No model, no stop.** If the model cannot be downloaded, or
-  mechanical is chosen, mechanical runs alone and rows are marked as
-  today. The run prints "rwxlite: off (mechanical)". It never stops.
+- **The `loose` marker widens (planned, not built).** It will mean
+  "mechanical lowered it". It covers PUT/PATCH rows left at w by the
+  method floor (today's `loose`) plus any POST row a word list lowered
+  below the POST floor of x (class w or r, evidence `list`). `tight`
+  stays "x, possibly tighter than needed, review". `settled` is rows
+  nothing lowered. Output format is unchanged. Same `reviewHint`
+  change as above.
+- **Errors count as undecided.** An errored or timed-out call on a row
+  counts as undecided: the row is x plus review. This holds for the
+  rwxlite and Jev engines.
+- **No model, no stop.** If the model is missing for the whole run
+  (cannot be downloaded), or mechanical is chosen, mechanical runs
+  alone and rows are marked as today. The run prints "rwxlite: off
+  (mechanical)". It never stops.
 - **rwxmap is the adapter for all modes**, including rwxlite on its own.
   It consumes the OpenAPI catalogue and specs, discovers APIs on the
   fly, and emits WebMCP, MCP hints and the other carriers. rwxlite is
@@ -974,10 +991,23 @@ decided; everything marked "proposal" or "open" is not decided.
     trade-off).
   - Mechanical -> Jev: unchanged (the existing Jev bars).
 
-> Note (not a decision): `settled` holds 27 of 82 too-loose rows on the
-> tuning set (8 of 34 on the M3 exam), which the second pass never
-> reaches by this scope. R2 (logout) is the candidate route for some of
-> them.
+> Evidence for the widened `loose` (measured 2026-11-03, tuning pool
+> 8376 = combined-2026-09-21 6557 + relabel-buildset-2026-09-23 1819,
+> classified with src v0.9.0 `classifyRow`). Current buckets, rows /
+> too loose / too tight: `settled` 4608 / 27 / 42; `loose` 1652 / 51 /
+> 1; `tight` 2116 / 0 / 1524. Of the 27 `settled` leaks, 25 are POST
+> rows a word list lowered (24 to w by step-3 modify-verb or
+> modify-verb-summary, 1 to r by step-1 read-verb-anywhere). Those
+> POST-lowered rows are 577 of 4608 `settled` rows (12.5%), with 4.3%
+> leak density against 0.59% for all `settled`. 15 vendors hold the
+> leaks; one-vendor-held-out coverage is 0.90-0.96. The other 2 are GET
+> method-floor rows (datadog GET /api/v1/graph/snapshot, intercom GET
+> /contacts/{id}/banners), left as accepted risk: catching them means
+> sending all 2543 GET floor rows. With the widened `loose`, about
+> 4345 of 8376 rows (52%) get the second pass. Caveat: tuning-set
+> figures. The rule follows the principle "every lowered row gets a
+> second pass" but is proven only on tuning data; the D133 exam is its
+> test.
 
 ### Proposals (not decided)
 
@@ -987,8 +1017,6 @@ decided; everything marked "proposal" or "open" is not decided.
 - **Interface to pin with rwxlite** (rwxlite's proposed defaults):
   - Model string: `rwxlite-<semver>+<sha8 of int8 weights>`, recorded on
     every run (D88-style).
-  - Error behaviour: fail closed on error or timeout; the row keeps its
-    mechanical letter. Agreed.
   - Latency: at most 20 ms per operation on a laptop CPU, int8, no GPU.
     Their bar, to be measured.
   - Shipping: npm, with `onnxruntime-node` as an optional dependency

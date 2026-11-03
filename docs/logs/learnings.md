@@ -8263,3 +8263,36 @@ Node.
   model cache and hash check, shared exam #3 vendor list.
 - The PRD planned section became the D133 module spec; the engine-order
   question is now decided and left the open questions.
+
+## 2026-11-03 — D133 settled-leak breakdown
+
+- Question: which rows does the second pass miss? The old scope sent
+  only `loose` and `tight` rows, and `settled` held 27 of 82
+  too-loose rows.
+- Method: classifyRow (src v0.9.0) over the two labelled CSVs
+  (data/combined-2026-09-21/labelled.csv 6557 rows and
+  data/relabel-buildset-2026-09-23/labelled.csv 1819 rows, 8376 total).
+  Marker from reviewHint. Too loose = predicted class looser than
+  truth_class. Scratch script, not kept.
+- Buckets, rows / too loose / too tight: settled 4608 / 27 / 42; loose
+  1652 / 51 / 1; tight 2116 / 0 / 1524.
+- The 27 settled leaks: 25 are POST rows a word list lowered (24 to w by
+  step-3 modify-verb or modify-verb-summary, 1 to r by step-1
+  read-verb-anywhere). Those rows are 577 of 4608 settled (12.5%), leak
+  density 4.3% against 0.59% for all settled. 15 vendors hold them;
+  one-vendor-held-out coverage 0.90-0.96. The other 2 are GET floor
+  rows (datadog GET /api/v1/graph/snapshot, intercom GET
+  /contacts/{id}/banners), accepted as risk: catching them means sending
+  all 2543 GET floor rows.
+- Rulings (user, 2026-11-03): (A) `loose` widens to "mechanical lowered
+  it": PUT/PATCH w floor plus any POST a word list lowered to w or r;
+  `tight` and `settled` keep their meaning; planned `reviewHint`
+  change. (B) Modes a and c send every `loose` and `tight` row, not
+  `settled`; about 4345 of 8376 rows (52%). (C) An errored or timed-out
+  call is undecided: x plus review; only a model missing for the whole
+  run falls back to mechanical alone.
+- Caveat: tuning-set figures. The rule is proven only on tuning data;
+  the D133 exam is its test. PRD updated.
+- Lesson: the leak is not in the marker's old definition but in rows a
+  word list lowered; "every lowered row gets a second pass" covers 25 of
+  the 27.
