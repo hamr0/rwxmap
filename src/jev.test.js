@@ -14,6 +14,8 @@ import {
   JEV_RAISE_GET_THRESHOLD,
 } from './jev.js';
 import { classifyRow } from './flow.js';
+// The frozen poc references are loaded by a computed specifier so tsc (rootDir src) does not follow them.
+const ref = (f) => import(new URL(f, import.meta.url).href);
 
 // ---- one verdict per pile, exactly as the mechanical steps emit them ----
 
@@ -297,14 +299,19 @@ test('jevQuestions: no argument gives the isX Noul, as every pre-D95 caller expe
   assert.ok(q.isX.criteria.false);
 });
 
-test('jevQuestions: the two x-boundary tiers share the isX Noul, and it carries the method table', () => {
-  for (const tier of ['jev-lower', 'jev-raise-wx']) {
-    /** @type {any} */
-    const q = jevQuestions(tier);
-    assert.deepEqual(Object.keys(q), ['isX']);
-    assert.ok(q.isX.criteria.true.methods, `${tier}: these piles hold GET/POST/PUT/PATCH rows`);
-    assert.ok(q.isX.criteria.false.can_be_set_back);
-  }
+test('jevQuestions: jev-lower carries the method table; jev-raise-wx asks isX without it or the tripwires', () => {
+  /** @type {any} */
+  const lower = jevQuestions('jev-lower');
+  assert.deepEqual(Object.keys(lower), ['isX']);
+  assert.ok(lower.isX.criteria.true.methods, 'jev-lower: this pile holds GET/POST/PUT/PATCH rows');
+  assert.ok(lower.isX.criteria.false.can_be_set_back);
+  /** @type {any} */
+  const wx = jevQuestions('jev-raise-wx');
+  assert.deepEqual(Object.keys(wx), ['isX']);
+  assert.equal(wx.isX.criteria.true.methods, undefined, 'the method table pre-answers PUT/PATCH as w');
+  assert.equal(wx.isX.instructions.ignore, undefined);
+  assert.equal(wx.isX.criteria.false.can_be_set_back, undefined);
+  assert.ok(wx.isX.criteria.true.cannot_be_undone);
 });
 
 test('jevQuestions: jev-raise-get asks a different question — does it change anything', () => {
@@ -399,4 +406,14 @@ test('a fail-closed applyJev call leaves BOTH the class and the hint untouched',
   assert.equal(listRow.review, 'tight');
   assert.equal(needsJev(listRow), null);
   assert.deepEqual(applyJev(listRow, { p: 0, model: MODEL }, { method: 'POST' }), listRow);
+});
+
+test('each tier sends exactly its frozen poc question (D127)', async () => {
+  const lower = await ref('../poc/jev-tiers/criteria-x.mjs');
+  const raiseWx = await ref('../poc/jev-tiers/criteria-x-raise.mjs');
+  const raiseGet = await ref('../poc/jev-tiers/criteria-changes.mjs');
+  assert.equal(JSON.stringify(jevQuestions('jev-lower')), JSON.stringify(lower.questions()));
+  assert.equal(JSON.stringify(jevQuestions('jev-raise-wx')), JSON.stringify(raiseWx.questions()));
+  assert.equal(JSON.stringify(jevQuestions('jev-raise-get')), JSON.stringify(raiseGet.questions()));
+  assert.equal(JSON.stringify(jevQuestions()), JSON.stringify(lower.questions()));
 });

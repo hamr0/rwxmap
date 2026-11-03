@@ -24,7 +24,7 @@
 //
 //   tier            pile (mechanical rule)        move          question
 //   jev-lower       'floor-post'        (x)       x -> w only   isX
-//   jev-raise-wx    'method-floor'      (w)       w -> x only   isX
+//   jev-raise-wx    'method-floor'      (w)       w -> x only   isX (x-only variant, D127)
 //   jev-raise-get   'method' + class r  (r)       r -> w only   changes
 //
 // jev-raise-get asks a DIFFERENT question from the other two. The GET
@@ -239,7 +239,7 @@ const CHANGES_TRIPWIRES = [
 const FRAMING =
   'Each row is one HTTP operation. Decide what happens when a caller who holds a normal API key for this provider calls it.';
 
-/** The "is this operation x" Noul — jev-lower and jev-raise-wx. */
+/** The "is this operation x" Noul — jev-lower (the loaded criteria). */
 function isXQuestion() {
   return {
     isX: {
@@ -287,6 +287,70 @@ function isXQuestion() {
   };
 }
 
+// ---- the x-only variant, for jev-raise-wx (D100, D127).
+// SOLE SOURCE: poc/jev-tiers/criteria-x-raise.mjs, an ablation of the isX
+// criteria adopted by D100: the method table, the tripwires and the w-side
+// list are removed. The method table's "PUT and PATCH are w" pre-answers the
+// question on a pile that is all PUT/PATCH and suppresses the raise (see
+// docs/logs/learnings.md, "The LOADED criteria were suppressing
+// jev-raise-wx"). The M3 exam was scored with this question; D127 makes src
+// send it. Same answer key (isX) as isXQuestion. ----
+function isXRaiseQuestion() {
+  return {
+    isX: {
+      type: 'noul',
+      instructions: {
+        framing: FRAMING,
+        question: 'Is this operation x?',
+        definition: `${LETTERS.x} A pure read is not x.`,
+        inspect: ['description', 'summary', 'operationId', 'path', 'method'],
+        focus:
+          'Apply the cannot-be-undone list in criteria.true. Say true only when the row does one of those things.',
+      },
+      criteria: {
+        true: {
+          what: 'The operation cannot be undone (x).',
+          cannot_be_undone: CANT_UNDO,
+          examples: [
+            'Delete a record, the text names no trash or restore (a)',
+            'Revoke a credential, key, token or consent (b)',
+            'Send a message, email or notification to a person (c)',
+            'Charge a payment or refund one (d)',
+            'Trigger a pipeline run or sync (e)',
+            'Cancel a running job whose progress is lost by stopping it (f)',
+            'A create that also sends an invite, charges a card, or runs a job (iv)',
+          ],
+        },
+        false: {
+          what: 'The operation does not do any of those things. Either it only reads, or a later call of the same API can set the change back.',
+        },
+      },
+    },
+  };
+}
+
+// ---- jev-raise-get's own constants (D127). SOLE SOURCE:
+// poc/jev-tiers/criteria-changes.mjs, the question D100's M3 exam scored.
+// Its x list (clauses a-f) is the shared CANT_UNDO's, but its `what` line and
+// its w-side list differ from CAN_SET_BACK's, so they are kept apart: the
+// isX question (jev-lower) must keep using CANT_UNDO and CAN_SET_BACK as is. ----
+const CHANGES_CANT_UNDO = {
+  ...CANT_UNDO,
+  what: 'These change something AND cannot be undone. The text must say, or make plain, that one of them happens.',
+};
+
+const CHANGES_CAN_SET_BACK = {
+  what: 'These change something too; the change can be set back (w), even when it touches another person. A change that can be set back is still a change — it is not r.',
+  list: [
+    "editing plain details, settings, configuration, names, fields, preferences, prices, plans, templates, definitions or containers, yours or anyone's",
+    'changing a role, permission, membership, assignment, owner or collaborator, when the text says nothing about a notification, an invite being sent, or a session being ended: the previous value can be set again',
+    'a toggle with a named opposite in the same API (enable/disable, activate/deactivate, suspend/unsuspend, archive/unarchive, pause/resume, lock/unlock, block/unblock, assign/unassign, attach/detach, hide/unhide, mute/unmute)',
+    'removing one item from a list, set or membership where adding it back is one more call (remove a tag from a contact, remove a track from a playlist)',
+    'stopping or pausing something that can be started again: stop own transcoder, pause a campaign, stop a server',
+    'a plain create: a new record, resource, definition, container, subscription, webhook, key, token, file, upload or draft. Create, add, register, provision, upload, insert, import into own store all count as creating',
+  ],
+};
+
 /** The "does this operation change anything" Noul — jev-raise-get. */
 function changesQuestion() {
   return {
@@ -304,8 +368,8 @@ function changesQuestion() {
       criteria: {
         true: {
           what: 'Something is different after the call: it writes, deletes, sends, runs, charges or otherwise changes state. It is w or x, not r.',
-          changes_and_cannot_be_undone: CANT_UNDO,
-          changes_but_can_be_set_back: CAN_SET_BACK,
+          changes_and_cannot_be_undone: CHANGES_CANT_UNDO,
+          changes_but_can_be_set_back: CHANGES_CAN_SET_BACK,
           examples: [
             'A GET whose text says it sends, triggers, resets or deletes something',
             'A call that starts, runs or dispatches a job',
@@ -341,7 +405,8 @@ export function jevQuestions(tier) {
   if (tier === undefined) return isXQuestion();
   const spec = TIERS[tier];
   if (!spec) throw new Error(`unknown jev tier ${tier}`);
-  return spec.question === 'changes' ? changesQuestion() : isXQuestion();
+  if (spec.question === 'changes') return changesQuestion();
+  return tier === 'jev-raise-wx' ? isXRaiseQuestion() : isXQuestion();
 }
 
 /**

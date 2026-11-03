@@ -748,7 +748,7 @@ UUIDs, long hex strings — so a map does not grow one entry per order
 id. rwxmap is the one writer of that key; the harness never builds it
 by hand.
 
-**The proxy matcher** (D126, built, not yet released): `rwxmap/match`
+**The proxy matcher** (D126, released in `rwxmap@0.8.0` on 2026-10-29): `rwxmap/match`
 exports `matcherFrom(sidecars)`, for a proxy (barebox's) that sees only
 METHOD + absolute URL. `match(method, url)` returns `{ key, letter,
 marker, source: 'spec'|'request', tie }` and never null. A call a
@@ -854,8 +854,8 @@ above.
 - **CLI polish and the release checklist** — `--help`, `--version`,
   plain error messages, the `openapi`/`swagger` key check and
   `docs/release-checklist.md` — released as `rwxmap@0.7.0` on 2026-09-30.
-- **The proxy matcher** — `rwxmap/match` (D126) built, not yet
-  released.
+- **The proxy matcher** — `rwxmap/match` (D126) released as
+  `rwxmap@0.8.0` on 2026-10-29.
 
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
