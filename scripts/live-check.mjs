@@ -90,7 +90,7 @@ const useJev = values.jev;
 /** Run the CLI once; resolves {code, stdout, stderr, timedOut}. */
 function runCli(binPath, address, outDir, cwd, env) {
   return new Promise((resolve) => {
-    const child = spawn(binPath, [address, '-o', outDir, '--force'], { cwd, env });
+    const child = spawn(binPath, [address, '-o', outDir, '--force', ...(useJev ? ['--engine', 'jev'] : [])], { cwd, env });
     let stdout = '';
     let stderr = '';
     let timedOut = false;

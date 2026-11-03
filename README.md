@@ -76,7 +76,7 @@ WebMCP flags are always written.
   not safety. That is for library use, a harness classifying call by call;
   the CLI needs a spec and exits 1 when it finds none.
 
-Each works with or without a Jev key.
+Each works without a Jev key.
 
 **The shape it reads.** rwxmap reads OpenAPI 3.x or Swagger 2.0, JSON or
 YAML. If your API is described some other way, convert it to OpenAPI
@@ -86,7 +86,8 @@ still works, less exactly.
 ## Quick start
 
 ```
-npx rwxmap <spec URL | file | API address> [-o dir] [--vendor name] [--force]
+npx rwxmap <spec URL | file | API address> [-o dir] [--vendor name]
+  [--engine rwxlite|jev|mechanical] [--confidence 0-99] [--force]
 ```
 
 ```
@@ -139,13 +140,31 @@ Trimmed example of the combined JSON, one entry each:
 Exit 0 on success, 1 on any failure. An existing output file is not
 overwritten without `--force`.
 
+**Engines.** `--engine` picks who looks at the rows mechanical marks
+`loose` or `tight`:
+
+- No flag: mechanical first, then the rwxlite model on those rows. The
+  model is not shipped yet, so today a run with no model in the cache
+  (`$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`) prints
+  `rwxlite: off (mechanical)` and runs mechanically. A cached model
+  whose hash does not match its name is not used, and the run says so.
+- `--engine mechanical`: mechanical only, never looks for a model.
+- `--engine jev`: the paid Jev pass, below.
+- `--engine rwxlite` is accepted, with `--confidence <0-99>` (only valid
+  with it; anything else fails). Running rwxlite on its own is not built
+  yet, so today it behaves like the default.
+
+An unknown `--engine` value, or a bad `--confidence`, exits 1 with
+nothing written.
+
 Only bareguard reads `bareguard.tools` directly. The MCP, WebMCP and
 OpenAPI parts are hints you copy into place; a client may ignore them.
 
 ## Review markers
 
-Each verdict carries `review`, which rows to look at first. Measured on
-the 4279-operation exam with Jev running:
+Each verdict carries `review`, which rows to look at first. The table is
+measured on the 4279-operation exam with Jev running, before `loose` was
+widened (see below), so its row counts describe the older, narrower `loose`:
 
 | | what it is | rows | how many are wrong |
 |---|---|---|---|
@@ -156,6 +175,10 @@ the 4279-operation exam with Jev running:
 - `tight` is where the fishing is: six in ten are tighter than needed.
 - `loose` is mostly false alarms, but its 3% are three quarters of every
   too-loose row. It turns a 4279-row search into a 713-row one.
+- `loose` now also covers a POST that a word list lowered below the
+  POST floor of x (class w or r). `tight` also covers any row a second
+  pass could not decide. This applies in every mode, including
+  `--engine mechanical`. Letters are not changed by this.
 - `settled` only means neither of the other two fired. It is not signed
   and not verified.
 
@@ -163,14 +186,15 @@ the 4279-operation exam with Jev running:
 
 Jev is an optional model pass that can lower an x to w, or on a
 second question to r. Bring
-your own key; your key, your cost. Without one, rwxmap runs mechanically
-and says so.
+your own key; your key, your cost. Jev runs only with `--engine jev`.
+A key alone does not turn it on: the run says so and sends nothing.
+`--engine jev` without a key exits 1.
 
 - **The key.** Set `RWXMAP_JEV_KEY`, or put it in a `.env` in the folder
   you run from. Only that one variable is read from `.env`.
-- **Careful:** unsetting the variable does not turn Jev off if a `.env`
-  with the key sits in the folder you run from. Run from another
-  folder, or remove the line.
+- **Careful:** unsetting the variable does not make `--engine jev`
+  work if a `.env` with the key sits in the folder you run from. Run
+  from another folder, or remove the line.
 - **What leaves your machine.** For each row Jev checks: method, path,
   operationId, summary and description, plus the question and the model
   name. They go to `https://api.typesafe.ai/v1/systemone`. Nothing else

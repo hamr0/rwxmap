@@ -30,7 +30,7 @@ a release is not cut with any item unrun. Each line: what, command, pass.
    `unset RWXMAP_JEV_KEY`. Run with `npx rwxmap`: `--help`, `--version`,
    a local spec, a spec URL, a bare API address, a missing file, a
    non-spec file. Pass: each output reads plainly; the successful runs
-   print "Jev: off (mechanical)".
+   print "rwxlite: off (mechanical)".
 8. README examples. Every command in README.md runs as written; same
    scratch folder, same pass rule as item 7.
 9. Review gates. `/self-review` until 0 Fix-now, then `/branch-review` says

@@ -75,14 +75,25 @@ function readGzJson(p) {
 // reuses the implementation it is checking is not a proof. If the two ever
 // disagree, one of them changed and a human has to say which.
 //
-// Specification:
+// Specification (D133 widening: loose = "mechanical lowered it"):
 //   class 'x' AND method POST                            -> 'tight'
 //   class 'w' AND method PUT|PATCH AND source 'floor'     -> 'loose'
+//   class 'w'|'r' AND method POST AND source 'list'       -> 'loose'
 //   otherwise                                             -> 'settled'
-// Method is compared case-insensitively.
+// Method is compared case-insensitively. The pre-D133 rule (no POST-lowered
+// clause) is restated as oldHint so the proof can count how many rows the
+// widening moved; it is a count only, never a check.
 const LEGAL_HINTS = new Set(['tight', 'loose', 'settled']);
 
 function expectedHint(method, cls, source) {
+  const m = String(method ?? '').toUpperCase();
+  if (cls === 'x' && m === 'POST') return 'tight';
+  if (cls === 'w' && (m === 'PUT' || m === 'PATCH') && source === 'floor') return 'loose';
+  if ((cls === 'w' || cls === 'r') && m === 'POST' && source === 'list') return 'loose';
+  return 'settled';
+}
+
+function oldHint(method, cls, source) {
   const m = String(method ?? '').toUpperCase();
   if (cls === 'x' && m === 'POST') return 'tight';
   if (cls === 'w' && (m === 'PUT' || m === 'PATCH') && source === 'floor') return 'loose';
@@ -135,6 +146,7 @@ function checkSrcVsPoc() {
   const allowedFailures = [];
   const allowedSeen = new Set();
   let hintMismatches = 0;
+  let hintChangedVsOld = 0;
   let illegalHints = 0;
   const samples = [];
   const hintSamples = [];
@@ -180,6 +192,7 @@ function checkSrcVsPoc() {
       }
     }
     const wantHint = expectedHint(row.method, srcVerdict.class, srcVerdict.source);
+    if (wantHint !== oldHint(row.method, srcVerdict.class, srcVerdict.source)) hintChangedVsOld += 1;
     if (review !== wantHint) {
       hintMismatches += 1;
       if (hintSamples.length < 5) {
@@ -202,6 +215,7 @@ function checkSrcVsPoc() {
     `rows compared ${rows.length}, classification differences ${differences}, hint mismatches ${hintMismatches}, illegal hint values ${illegalHints}`,
   );
 
+  console.log(`hint changed vs the pre-D133 rule: ${hintChangedVsOld} of ${rows.length} rows (letters unchanged)`);
   console.log(`allowed differences (D131): ${allowed.length}`);
   for (const a of allowed) {
     console.log(`  ${a.row_id} (${a.provider}) src ${JSON.stringify(a.srcClassification)} poc ${JSON.stringify(a.pocVerdict)}`);

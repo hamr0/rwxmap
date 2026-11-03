@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **`--engine rwxlite|jev|mechanical` and `--confidence <0-99>`.** `--confidence` is valid only with `--engine rwxlite`; elsewhere, out of range or non-integer, it exits 1. An unknown `--engine` exits 1.
+- **A second pass for the rows marked `loose` or `tight` (D133, mode a).** `src/secondpass.js` asks an engine about those rows only. A raise is accepted, a lowering only at p >= 0.97, and an error, timeout or malformed answer leaves the row x with review `tight`. The rwxlite model is not shipped yet, so a normal run prints `rwxlite: off (mechanical)` and runs mechanically. `--engine rwxlite` on its own is not built yet and behaves like the default.
+- **A model cache check (`src/modelcache.js`).** The cache is `$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`. A model file is named `rwxlite-<semver>+<sha8>.int8`; if the first 8 hex characters of its sha256 do not equal sha8, it is not used, the run warns on stderr and runs mechanically. Nothing is downloaded.
+
+### Changed
+
+- **BREAKING: a Jev key alone no longer turns Jev on.** Jev runs only with `--engine jev`. With a key and no `--engine jev` the run prints that Jev stays off and sends nothing. `--engine jev` without a key exits 1. `scripts/live-check.mjs --jev` now passes `--engine jev`.
+- **The run summary prints `rwxlite: off (mechanical)` (with a reason) instead of `Jev: off (mechanical)`** on every run that does not use Jev. The `jev` field in the combined JSON is unchanged.
+- **The `review` marker widened, in every mode (D133).** `loose` now also covers a POST row a word list lowered below the POST floor of x (class w or r, evidence `list`). `tight` also covers a row the second pass could not decide. Letters do not change; on the 6557-row tuning set 480 rows get a different marker.
+
 ## [0.9.0] - 2026-11-03
 
 ### Added

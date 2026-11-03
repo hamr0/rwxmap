@@ -39,8 +39,10 @@
 // nothing here duplicates that), plus the spec's resolved `servers` (D126)
 // from servers.js, so `rwxmap/match` can route a call by host.
 //
-// JEV (PRD item c, D118-120): key configured -> used; no key -> mechanical,
-// never stops, and every run says loudly which mode ran. The key is
+// JEV (PRD item c, D118-120; D133): runs ONLY with --engine jev (a key alone
+// leaves it off and says so); --engine jev without a key exits 1; every run
+// says loudly which mode ran. Without Jev the default is the D133 rwxlite
+// second pass (secondpass.js), which finds no model yet and stays mechanical. The key is
 // RWXMAP_JEV_KEY from the environment, else the RWXMAP_JEV_KEY line of a
 // `.env` file in `cwd`, parsed with Node's own util.parseEnv (no dotenv
 // dependency) -- an already-set variable wins, only that one variable is
@@ -94,6 +96,8 @@ import { operationsFrom, operationEntries, exportGate, exportSidecar, classifyOp
 import { resolvedServers, tenantServerTemplates } from './servers.js';
 import { needsJev, applyJev, jevTier } from './jev.js';
 import { runJevBatch } from './jev-client.js';
+import { secondPass } from './secondpass.js';
+import { findModel } from './modelcache.js';
 
 // ---------------------------------------------------------------------
 // Small local helpers — each one trivial enough (a regex, a URL-API call,
@@ -827,7 +831,9 @@ function argError(err) {
   return message;
 }
 
-const USAGE = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--force]';
+const ENGINES = ['rwxlite', 'jev', 'mechanical'];
+
+const USAGE = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--engine rwxlite|jev|mechanical] [--confidence <0-99>] [--force]';
 
 const HELP = `${USAGE}
 
@@ -839,15 +845,21 @@ Input:
 Options:
   -o <dir>       write the output files here (default: the current folder)
   --vendor <n>   name for the output files and tool keys (default: the host)
+  --engine <e>   rwxlite | jev | mechanical (default: mechanical, then rwxlite on the rows marked loose or tight)
+  --confidence <0-99>  only with --engine rwxlite
   --force        overwrite existing output files
   -h, --help     this help
   -v, --version  the version
 
 Writes <vendor>.rwxmap.json, <vendor>.rwxmap.review.json, <vendor>.openapi.rwx.json.
 
-Jev (optional model pass): set RWXMAP_JEV_KEY, or put it in a .env in the run folder.
-With a key, each run sends method, path, operationId, summary and description of the
-rows it checks to api.typesafe.ai; your key, your cost. Without it the run is mechanical.
+rwxlite: the default run asks the rwxlite model about the rows marked loose or tight.
+No model in the cache means "rwxlite: off (mechanical)" and the run is mechanical; the model is not shipped yet.
+--engine mechanical never looks for a model.
+
+Jev (paid, optional): --engine jev, with RWXMAP_JEV_KEY set or in a .env in the run folder.
+It sends method, path, operationId, summary and description of the rows it checks to
+api.typesafe.ai; your key, your cost. A key alone does not turn Jev on.
 
 Exit 0 on success; 1 on failure, with nothing written.
 `;
@@ -858,7 +870,7 @@ Exit 0 on success; 1 on failure, with nothing written.
  * tests never have to spawn a process.
  *
  * @param {string[]} argv  Arguments only (no "node"/script path).
- * @param {{cwd: string, stdout: {write: (s: string) => void}, stderr: {write: (s: string) => void}, cacheDir?: string, jevKey?: string, fetchImpl?: typeof fetch, jevConcurrency?: number, beforeReplace?: (targetPath: string) => void}} env
+ * @param {{cwd: string, stdout: {write: (s: string) => void}, stderr: {write: (s: string) => void}, cacheDir?: string, jevKey?: string, fetchImpl?: typeof fetch, jevConcurrency?: number, beforeReplace?: (targetPath: string) => void, rwxliteEngine?: {model: string, run: import('./secondpass.js').Engine}, xdgCacheHome?: string}} env
  *   `jevKey`, `fetchImpl` and `jevConcurrency` are test-only overrides for
  *   the Jev wiring (D118), the same pattern `cacheDir` already uses for
  *   discovery: `jevKey` bypasses loadJevKey's environment/.env read
@@ -869,6 +881,10 @@ Exit 0 on success; 1 on failure, with nothing written.
  *   always uses loadJevKey and the real global fetch. `beforeReplace` is
  *   the same kind of test-only seam for atomicWriteFiles (called between
  *   a file's backup and its replacing rename); a real run never passes it.
+ *   `rwxliteEngine` (an engine function plus its model string) and
+ *   `xdgCacheHome` (where to look for a cached model) are test-only seams of
+ *   the same kind: a real run finds its model in the cache and never passes
+ *   either.
  * @returns {Promise<number>}  Process exit code.
  */
 export async function run(argv, env) {
@@ -885,6 +901,8 @@ export async function run(argv, env) {
         outDir: { type: 'string', short: 'o' },
         vendor: { type: 'string' },
         force: { type: 'boolean', default: false },
+        engine: { type: 'string' },
+        confidence: { type: 'string' },
         help: { type: 'boolean', short: 'h', default: false },
         version: { type: 'boolean', short: 'v', default: false },
       },
@@ -908,6 +926,28 @@ export async function run(argv, env) {
     return 1;
   }
   const address = positionals[0];
+
+  // D133 engine flags. Anything invalid fails loudly, before any work.
+  const engineName = values.engine;
+  if (engineName !== undefined && !ENGINES.includes(engineName)) {
+    stderr.write(`rwxmap: unknown --engine: ${engineName} (want rwxlite, jev or mechanical)\n${USAGE}\n`);
+    return 1;
+  }
+  if (values.confidence !== undefined) {
+    if (engineName !== 'rwxlite') {
+      stderr.write('rwxmap: --confidence is valid only with --engine rwxlite\n');
+      return 1;
+    }
+    if (!/^\d{1,2}$/.test(values.confidence)) {
+      stderr.write(`rwxmap: --confidence must be a whole number from 0 to 99: ${values.confidence}\n`);
+      return 1;
+    }
+  }
+  const jevKeyFound = typeof env.jevKey === 'string' ? env.jevKey : loadJevKey(cwd);
+  if (engineName === 'jev' && !jevKeyFound) {
+    stderr.write('rwxmap: --engine jev needs a key: set RWXMAP_JEV_KEY, or put it in a .env in the run folder\n');
+    return 1;
+  }
   const named = values.vendor;
   if (
     named !== undefined &&
@@ -992,7 +1032,37 @@ export async function run(argv, env) {
   const verdicts = classifyOperations(ops);
   /** @type {{mode: 'off'|'on', model: string|null, sent: number, answered: number, failed: number, changed: number, tokens: {input: number, output: number}}} */
   let jevSummary = jevOffSummary();
-  const key = typeof env.jevKey === 'string' ? env.jevKey : loadJevKey(cwd);
+  // Jev (paid) runs ONLY with --engine jev; a key alone never turns it on.
+  const key = engineName === 'jev' ? jevKeyFound : undefined;
+  if (engineName !== 'jev' && jevKeyFound) {
+    stdout.write('rwxmap: Jev: off — a Jev key is set, but Jev runs only with --engine jev; nothing was sent\n');
+  }
+  // The rwxlite line of the run summary (every non-Jev run prints one).
+  let engineLine = 'rwxmap: rwxlite: off (mechanical)\n';
+  if (engineName === 'rwxlite' && env.rwxliteEngine) {
+    stderr.write('rwxmap: --engine rwxlite on its own (mode b) is not built yet\n');
+    return 1;
+  }
+  if (engineName !== 'jev' && engineName !== 'mechanical') {
+    // Mode a (default): mechanical -> rwxlite. No model, no stop.
+    let engine = env.rwxliteEngine;
+    if (!engine) {
+      const found = findModel({ XDG_CACHE_HOME: env.xdgCacheHome ?? process.env.XDG_CACHE_HOME });
+      if (found.status === 'none') {
+        engineLine = 'rwxmap: rwxlite: off (mechanical) — no model in the cache\n';
+      } else if (found.status === 'bad') {
+        stderr.write(`rwxmap: WARNING: rwxlite model rejected (${found.reason}); ${found.file} was NOT used\n`);
+        engineLine = 'rwxmap: rwxlite: off (mechanical) — cached model rejected, see the warning above\n';
+      } else {
+        engineLine = `rwxmap: rwxlite: off (mechanical) — model ${found.model} is cached, but this build has no way to run it yet\n`;
+      }
+    } else {
+      const result = await secondPass(ops, verdicts, engine.run, { model: engine.model });
+      verdicts.splice(0, verdicts.length, ...result.verdicts);
+      const s = result.summary;
+      engineLine = `rwxmap: rwxlite: on (${s.model}) — ${s.sent} sent · ${s.raised} raised · ${s.lowered} lowered · ${s.kept} kept · ${s.undecided} undecided (x, review tight)\n`;
+    }
+  }
   if (key) {
     const targetCount = verdicts.reduce((n, v) => (needsJev(v) ? n + 1 : n), 0);
     stdout.write(
@@ -1039,7 +1109,7 @@ export async function run(argv, env) {
   stdout.write(
     jevSummary.mode === 'on'
       ? `rwxmap: Jev: on — ${jevSummary.sent} sent · ${jevSummary.answered} answered · ${jevSummary.failed} failed (letter kept) · ${jevSummary.changed} letters changed · ${jevSummary.tokens.input} in / ${jevSummary.tokens.output} out tokens\n`
-      : 'rwxmap: Jev: off (mechanical)\n',
+      : engineLine,
   );
   stdout.write(`rwxmap: wrote ${path.basename(mapPath)} + ${path.basename(reviewPath)} + ${path.basename(openapiPath)}\n`);
   if (xRwxOverwritten > 0) {

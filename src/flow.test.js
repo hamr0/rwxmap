@@ -12,7 +12,7 @@ test('classifyRow: a GET comes back from step 1 as r/method, on the floor', () =
 test('classifyRow: a POST read verb comes back from step 1, reporting the word it read', () => {
   assert.deepEqual(
     classifyRow({ method: 'POST', operationId: 'SearchThings', path: '/things/search' }),
-    { class: 'r', step: 1, rule: 'read-verb', source: 'list', matched: ['search'], review: 'settled' },
+    { class: 'r', step: 1, rule: 'read-verb', source: 'list', matched: ['search'], review: 'loose' },
   );
 });
 
@@ -48,7 +48,7 @@ test('classifyRow: a PUT setting a password is claimed x by step 2 credential-se
 test('classifyRow: a POST with a KEEP_W verb is claimed w by step 3 (step 2 has nothing to say)', () => {
   assert.deepEqual(
     classifyRow({ method: 'POST', operationId: 'restoreThing', path: '/things/{id}/restore' }),
-    { class: 'w', step: 3, rule: 'modify-verb', source: 'list', matched: ['restore'], review: 'settled' },
+    { class: 'w', step: 3, rule: 'modify-verb', source: 'list', matched: ['restore'], review: 'loose' },
   );
 });
 
@@ -71,7 +71,7 @@ test('classifyRow: summary fallback works through the whole ladder for both step
     method: 'POST', operationId: 'PostLists', path: '/lists', summary: 'Update a list',
   });
   assert.deepEqual(threeFallback, {
-    class: 'w', step: 3, rule: 'modify-verb-summary', source: 'list', matched: ['update'], review: 'settled',
+    class: 'w', step: 3, rule: 'modify-verb-summary', source: 'list', matched: ['update'], review: 'loose',
   });
 });
 
@@ -85,7 +85,7 @@ test('classifyRow: an unclaimed POST falls to step 2\'s floor-post pile', () => 
 test('classifyRow: no "whose" gate anywhere — a POST reaching another party with no evidence still just floors', () => {
   assert.deepEqual(
     classifyRow({ method: 'POST', operationId: 'removeUserForTeam', path: '/teams/{t}/users/{u}' }),
-    { class: 'w', step: 3, rule: 'modify-verb', source: 'list', matched: ['remove'], review: 'settled' },
+    { class: 'w', step: 3, rule: 'modify-verb', source: 'list', matched: ['remove'], review: 'loose' },
   );
 });
 
@@ -100,17 +100,17 @@ test('classifyRow: a rebuilt words override reaches every step — an emptied ke
 test('classifyRow: passing nothing is unchanged — the same POST still claims w via KEEP_W', () => {
   assert.deepEqual(
     classifyRow({ method: 'POST', operationId: 'updateThing', path: '/things/{id}' }),
-    { class: 'w', step: 3, rule: 'modify-verb', source: 'list', matched: ['update'], review: 'settled' },
+    { class: 'w', step: 3, rule: 'modify-verb', source: 'list', matched: ['update'], review: 'loose' },
   );
 });
 
 // ---- the review hint (one writer: reviewHint in flow.js) ---------------
 
 test('reviewHint: every method x every class x floor/list/jev, and the method check is case-insensitive', () => {
-  // The whole rule, restated as a table rather than as code: only two cells
-  // are anything but 'settled'.
+  // The whole rule, restated as a table rather than as code (D133 widening):
   //   class x + POST                         -> tight
   //   class w + PUT/PATCH + source 'floor'   -> loose
+  //   class w|r + POST + source 'list'       -> loose (a word list lowered the POST floor)
   /** @type {Array<[string, 'r'|'w'|'x', 'floor'|'list'|'jev', 'tight'|'loose'|'settled']>} */
   const table = [];
   const methods = ['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE', ''];
@@ -124,6 +124,7 @@ test('reviewHint: every method x every class x floor/list/jev, and the method ch
         let want = /** @type {'tight'|'loose'|'settled'} */ ('settled');
         if (cls === 'x' && method === 'POST') want = 'tight';
         else if (cls === 'w' && (method === 'PUT' || method === 'PATCH') && source === 'floor') want = 'loose';
+        else if ((cls === 'w' || cls === 'r') && method === 'POST' && source === 'list') want = 'loose';
         table.push([method, cls, source, want]);
       }
     }
@@ -143,7 +144,7 @@ test('reviewHint: every method x every class x floor/list/jev, and the method ch
   // The two non-settled cells actually occur in the table, so a reviewHint
   // that returned 'settled' for everything would fail this test.
   assert.equal(table.filter(([, , , w]) => w === 'tight').length, 3);
-  assert.equal(table.filter(([, , , w]) => w === 'loose').length, 2);
+  assert.equal(table.filter(([, , , w]) => w === 'loose').length, 4);
 });
 
 /** "post" -> "PoSt", so the case-insensitivity check is not just two cases. */
@@ -151,7 +152,17 @@ function mixedCase(s) {
   return [...s].map((c, i) => (i % 2 === 0 ? c.toUpperCase() : c.toLowerCase())).join('');
 }
 
-test('classifyRow: the two non-settled hints reach real rows through the whole ladder', () => {
+test('reviewHint: the second pass argument decides tight/loose, and wins over method and source', () => {
+  assert.equal(reviewHint('PUT', 'x', 'floor', 'undecided'), 'tight');
+  assert.equal(reviewHint('GET', 'x', 'floor', 'undecided'), 'tight');
+  assert.equal(reviewHint('PUT', 'x', 'floor', 'raised'), 'tight');
+  assert.equal(reviewHint('GET', 'w', 'floor', 'raised'), 'loose');
+  assert.equal(reviewHint('POST', 'w', 'list', 'lowered'), 'loose');
+  assert.equal(reviewHint('POST', 'x', 'floor', 'lowered'), 'loose');
+  assert.equal(reviewHint('GET', 'r', 'floor', undefined), 'settled');
+});
+
+test('classifyRow: the non-settled hints reach real rows through the whole ladder', () => {
   // tight: a POST that floors at x with no evidence.
   assert.equal(classifyRow({ method: 'POST', operationId: 'createThing', path: '/things' }).review, 'tight');
   // tight again: a POST claimed x by a word list.
@@ -159,6 +170,9 @@ test('classifyRow: the two non-settled hints reach real rows through the whole l
   // loose: a PUT on step 3's method floor, no word either way.
   assert.equal(classifyRow({ method: 'PUT', operationId: 'putThing', path: '/things/{id}' }).review, 'loose');
   assert.equal(classifyRow({ method: 'patch', operationId: 'patchThing', path: '/things/{id}' }).review, 'loose');
+  // loose (D133): a POST a word list lowered below the floor, to w and to r.
+  assert.equal(classifyRow({ method: 'POST', operationId: 'updateThing', path: '/things/{id}' }).review, 'loose');
+  assert.equal(classifyRow({ method: 'POST', operationId: 'searchThings', path: '/things/search' }).review, 'loose');
   // settled: a PUT claimed x by a word list is not a POST, so no 'tight',
   // and not a w, so no 'loose'.
   const revoke = classifyRow({ method: 'PUT', operationId: 'revokeCertificate', path: '/certs/{id}' });

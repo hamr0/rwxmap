@@ -26,30 +26,40 @@ import { step3 } from './step3.js';
 /**
  * The REVIEW HINT for one decided row: which rows a provider should look at
  * before publishing the map. It is derived, not measured — method + class +
- * source and nothing else — and it asserts nothing the tool does not already
- * publish.
+ * source (+ what the second pass did, if it ran) and nothing else — and it
+ * asserts nothing the tool does not already publish.
  *
  * THE ONE WRITER of the `review` field. classifyRow below sets it, and
- * jev.js's applyJev recomputes it through THIS function whenever it moves a
- * verdict's class. Nothing else may decide a hint.
+ * jev.js's applyJev and secondpass.js recompute it through THIS function
+ * whenever they move a verdict. Nothing else may decide a hint.
  *
- *   'tight'   class x on a POST — likely tighter than needed, review to
- *             loosen, and it is safe to review because no leak has ever been
- *             observed in this bucket.
- *   'loose'   class w on a PUT/PATCH decided by the method floor — no
- *             evidence either way, review to confirm.
- *   'settled' neither.
+ *   'tight'   "x, possibly tighter than needed": class x on a POST, or any
+ *             row the second pass could not decide (D133). Review to
+ *             loosen; safe to review, no leak has been observed in the
+ *             x-on-POST bucket.
+ *   'loose'   "mechanical lowered it" (D133): class w on a PUT/PATCH decided
+ *             by the method floor, or a POST that a word list lowered below
+ *             the POST floor of x (class w or r, source 'list').
+ *   'settled' nothing lowered it and nobody was unsure.
  *
  * @param {string|undefined} method the row's HTTP method, read
  *   case-insensitively like every other method check in this library.
  * @param {'r'|'w'|'x'} cls the verdict's class.
  * @param {'floor'|'list'|'jev'} source the verdict's source.
+ * @param {'raised'|'lowered'|'undecided'} [secondPass] what the second pass
+ *   did to this row, absent when it did not touch it (or did not run).
+ *   undecided -> tight; raised -> tight if the final class is x, else loose;
+ *   lowered -> loose.
  * @returns {'tight'|'loose'|'settled'}
  */
-export function reviewHint(method, cls, source) {
+export function reviewHint(method, cls, source, secondPass) {
+  if (secondPass === 'undecided') return 'tight';
+  if (secondPass === 'raised') return cls === 'x' ? 'tight' : 'loose';
+  if (secondPass === 'lowered') return 'loose';
   const m = (method || '').toUpperCase();
   if (cls === 'x' && m === 'POST') return 'tight';
   if (cls === 'w' && (m === 'PUT' || m === 'PATCH') && source === 'floor') return 'loose';
+  if ((cls === 'w' || cls === 'r') && m === 'POST' && source === 'list') return 'loose';
   return 'settled';
 }
 

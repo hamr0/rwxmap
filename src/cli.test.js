@@ -6,6 +6,7 @@ import * as path from 'node:path';
 import fsDefault from 'node:fs';
 import { syncBuiltinESMExports } from 'node:module';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 
 import { run } from './cli.js';
@@ -405,7 +406,7 @@ test('run: a directory is not a file', async () => {
 });
 
 test('run: an option with no value, and an unknown option, are named as the user typed them', async () => {
-  const usage = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--force]';
+  const usage = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--engine rwxlite|jev|mechanical] [--confidence <0-99>] [--force]';
   const cases = [
     [['spec.json', '-o'], 'rwxmap: -o needs a value'],
     [['spec.json', '--vendor'], 'rwxmap: --vendor needs a value'],
@@ -598,17 +599,18 @@ test('run: a write failure (target path is not a directory) exits 1 and writes n
 // Stdout summary always names the mode.
 // ---------------------------------------------------------------------
 
-test('run: stdout always says Jev is off (mechanical)', async () => {
+test('run: stdout always says rwxlite is off (mechanical) when no model is cached', async () => {
   const dir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
   const outDir = mkScratch();
   const stdout = captureStream();
   const stderr = captureStream();
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr, xdgCacheHome: mkScratch() });
 
   assert.equal(code, 0, stderr.text());
-  assert.match(stdout.text(), /Jev: off \(mechanical\)/);
+  assert.match(stdout.text(), /^rwxmap: rwxlite: off \(mechanical\) — no model in the cache$/m);
+  assert.doesNotMatch(stdout.text(), /Jev: on/);
   const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
   assert.deepEqual(combined.jev, {
     mode: 'off', model: null, sent: 0, answered: 0, failed: 0, changed: 0, tokens: { input: 0, output: 0 },
@@ -633,7 +635,7 @@ test('run: with a key, only the rows in a Jev tier are sent (bar 4)', async () =
     doMystery: { p: 0.1 },
   });
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
   });
 
@@ -658,7 +660,7 @@ test('run: jev-lower moves x -> w at p <= threshold, not above it (bar 2)', asyn
   const atThreshold = routedJevFetch({
     listThings: { p: 0 }, updateThing: { p: 0 }, doMystery: { p: JEV_LOWER_THRESHOLD, pChanges: JEV_LOWER_R_THRESHOLD + 0.01 },
   });
-  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example'], {
+  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: atThreshold.fetchImpl,
   });
   assert.equal(codeAt, 0);
@@ -668,7 +670,7 @@ test('run: jev-lower moves x -> w at p <= threshold, not above it (bar 2)', asyn
   const aboveThreshold = routedJevFetch({
     listThings: { p: 0 }, updateThing: { p: 0 }, doMystery: { p: JEV_LOWER_THRESHOLD + 0.01 },
   });
-  const codeAbove = await run([specPath2, '-o', outDir2, '--vendor', 'example'], {
+  const codeAbove = await run([specPath2, '-o', outDir2, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: aboveThreshold.fetchImpl,
   });
   assert.equal(codeAbove, 0);
@@ -686,7 +688,7 @@ test('run: jev-raise-wx moves w -> x at p >= threshold, not below it (bar 2)', a
   const atThreshold = routedJevFetch({
     listThings: { p: 0 }, updateThing: { p: JEV_RAISE_WX_THRESHOLD }, doMystery: { p: 1 },
   });
-  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example'], {
+  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: atThreshold.fetchImpl,
   });
   assert.equal(codeAt, 0);
@@ -696,7 +698,7 @@ test('run: jev-raise-wx moves w -> x at p >= threshold, not below it (bar 2)', a
   const belowThreshold = routedJevFetch({
     listThings: { p: 0 }, updateThing: { p: JEV_RAISE_WX_THRESHOLD - 0.01 }, doMystery: { p: 1 },
   });
-  const codeBelow = await run([specPath2, '-o', outDir2, '--vendor', 'example'], {
+  const codeBelow = await run([specPath2, '-o', outDir2, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: belowThreshold.fetchImpl,
   });
   assert.equal(codeBelow, 0);
@@ -714,7 +716,7 @@ test('run: jev-raise-get moves r -> w at p >= threshold, not below it (bar 2)', 
   const atThreshold = routedJevFetch({
     listThings: { p: JEV_RAISE_GET_THRESHOLD }, updateThing: { p: 0 }, doMystery: { p: 1 },
   });
-  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example'], {
+  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: atThreshold.fetchImpl,
   });
   assert.equal(codeAt, 0);
@@ -724,7 +726,7 @@ test('run: jev-raise-get moves r -> w at p >= threshold, not below it (bar 2)', 
   const belowThreshold = routedJevFetch({
     listThings: { p: JEV_RAISE_GET_THRESHOLD - 0.01 }, updateThing: { p: 0 }, doMystery: { p: 1 },
   });
-  const codeBelow = await run([specPath2, '-o', outDir2, '--vendor', 'example'], {
+  const codeBelow = await run([specPath2, '-o', outDir2, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: belowThreshold.fetchImpl,
   });
   assert.equal(codeBelow, 0);
@@ -754,7 +756,7 @@ test('run: a bad answer (NaN, out-of-range, missing model, HTTP error, timeout-l
       : async () => response;
 
     const stdout = captureStream();
-    const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+    const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
       cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
     });
     assert.equal(code, 0, `[${label}] expected exit 0`);
@@ -777,7 +779,7 @@ test('run: never stops when every Jev call fails (bar 6)', async () => {
   const fetchImpl = async () => { throw new Error('offline'); };
   const stdout = captureStream();
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
   });
 
@@ -806,7 +808,7 @@ test('run: sends only method/path/operationId/summary/description, and the key n
   const stdout = captureStream();
   const stderr = captureStream();
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout, stderr, jevKey: SECRET, fetchImpl,
   });
   assert.equal(code, 0);
@@ -837,7 +839,7 @@ test('run: after Jev moves rows, mcp, bareguard and the sidecar all carry the fi
     doMystery: { p: JEV_LOWER_THRESHOLD, pChanges: JEV_LOWER_R_THRESHOLD + 0.01, model: 'jev-2.0.0' }, // x -> w (changes too high for r)
   });
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
   });
   assert.equal(code, 0);
@@ -887,7 +889,7 @@ test('run: with a key, stdout prints the disclosure banner and the on-mode summa
   });
   const stdout = captureStream();
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
   });
   assert.equal(code, 0);
@@ -912,7 +914,7 @@ test('run: jev.tokens sums answered rows usage, skips failed rows, and stays out
   });
   const stdout = captureStream();
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
   });
   assert.equal(code, 0);
@@ -970,7 +972,7 @@ async function runJevSpec(fetchImpl) {
   const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
   const outDir = mkScratch();
   const stdout = captureStream();
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
   });
   assert.equal(code, 0);
@@ -1248,7 +1250,7 @@ test('run: with Jev on, x-rwx and webmcp carry the final (post-Jev) letters (ite
     doMystery: { p: 0.01, pChanges: 0.99 },
   });
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr, jevKey: 'k', fetchImpl });
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], { cwd: dir, stdout, stderr, jevKey: 'k', fetchImpl });
   assert.equal(code, 0, stderr.text());
   const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
   const copy = readJson(path.join(outDir, 'example.openapi.rwx.json'));
@@ -1553,7 +1555,7 @@ test('run: a .env supplies only RWXMAP_JEV_KEY (CRLF), and no .env variable reac
   const stdout = captureStream();
   const stderr = captureStream();
 
-  const code = await run([specPath, '-o', mkScratch(), '--vendor', 'example'], { cwd: dir, stdout, stderr, fetchImpl });
+  const code = await run([specPath, '-o', mkScratch(), '--vendor', 'example', '--engine', 'jev'], { cwd: dir, stdout, stderr, fetchImpl });
   assert.equal(code, 0, stderr.text());
   assert.match(stdout.text(), /Jev: on — 3 sent/);
   assert.deepEqual(auth, ['Bearer sk-from-dotenv', 'Bearer sk-from-dotenv', 'Bearer sk-from-dotenv']);
@@ -1666,7 +1668,7 @@ test('run: an empty RWXMAP_JEV_KEY counts as unset, so a .env key is still used'
   const stdout = captureStream();
   const stderr = captureStream();
 
-  const code = await run([specPath, '-o', mkScratch(), '--vendor', 'example'], { cwd: dir, stdout, stderr, fetchImpl });
+  const code = await run([specPath, '-o', mkScratch(), '--vendor', 'example', '--engine', 'jev'], { cwd: dir, stdout, stderr, fetchImpl });
   assert.equal(code, 0, stderr.text());
   assert.match(stdout.text(), /Jev: on — 3 sent/);
   assert.deepEqual(auth, ['Bearer sk-from-dotenv', 'Bearer sk-from-dotenv', 'Bearer sk-from-dotenv']);
@@ -1905,4 +1907,182 @@ test('run: tenant-templated servers land in serverTemplates (and only those); ot
   const m = matcherFrom([sc]);
   assert.equal(m.match('DELETE', 'https://de.sentry.io/api/0/things/9').source, 'spec');
   assert.equal(m.match('DELETE', 'https://x.b.com/things/9').source, 'request'); // 1-label suffix: no route
+});
+
+// ---------------------------------------------------------------------
+// D133 pass 1: engines, --confidence, Jev only with --engine jev, the
+// rwxlite second pass (injected engine) and the model cache check.
+// ---------------------------------------------------------------------
+
+const D133_MODEL = 'rwxlite-1.0.0+0123abcd';
+
+/** Run the CLI on SPEC_JEV_DOC; returns {code, stdout, stderr, outDir}. */
+async function runD133(extraArgs, extraEnv = {}) {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', ...extraArgs], {
+    cwd: dir, stdout, stderr, jevKey: '', xdgCacheHome: mkScratch(), ...extraEnv,
+  });
+  return { code, stdout: stdout.text(), stderr: stderr.text(), outDir };
+}
+
+/** marker and letter by operation, off the sidecar. */
+function d133Rows(outDir) {
+  const rows = readJson(path.join(outDir, 'example.rwxmap.review.json')).rows;
+  return Object.fromEntries(rows.map((r) => [`${r.method} ${r.path}`, `${r.letter}/${r.marker}`]));
+}
+
+test('run (D133): no model in the cache -> "rwxlite: off (mechanical)", exit 0, mechanical letters, widened markers', async () => {
+  const { code, stdout, stderr, outDir } = await runD133([]);
+  assert.equal(code, 0, stderr);
+  assert.match(stdout, /^rwxmap: rwxlite: off \(mechanical\) — no model in the cache$/m);
+  assert.deepEqual(d133Rows(outDir), {
+    'DELETE /things/{id}/permission': 'x/settled',
+    'GET /things': 'r/settled',
+    'POST /things/{id}/archive': 'w/loose', // a word list lowered a POST: loose since D133
+    'PUT /things/{id}': 'w/loose',
+    'POST /mystery': 'x/tight',
+  });
+});
+
+test('run (D133): --engine mechanical prints the off line, and never looks for a model or calls an engine', async () => {
+  let called = 0;
+  const { code, stdout, stderr } = await runD133(['--engine', 'mechanical'], {
+    rwxliteEngine: { model: D133_MODEL, run: async () => { called += 1; return []; } },
+  });
+  assert.equal(code, 0, stderr);
+  assert.match(stdout, /^rwxmap: rwxlite: off \(mechanical\)$/m);
+  assert.equal(called, 0);
+});
+
+test('run (D133): default mode a with an engine sends only loose and tight rows and applies the second pass', async () => {
+  const sent = [];
+  const engine = async (items) => {
+    sent.push(items.map((i) => i.operationId).sort());
+    return items.map((i) => {
+      if (i.operationId === 'updateThing') return { pIsX: 0.9, pChanges: 0.95, model: D133_MODEL }; // PUT w -> x
+      if (i.operationId === 'doMystery') return { pIsX: 0.01, pChanges: 0.02, model: D133_MODEL }; // POST x -> r at 0.98
+      return undefined; // updateThingArchive: error -> undecided
+    });
+  };
+  const { code, stdout, stderr, outDir } = await runD133([], { rwxliteEngine: { model: D133_MODEL, run: engine } });
+  assert.equal(code, 0, stderr);
+  assert.deepEqual(sent, [['doMystery', 'updateThing', 'updateThingArchive']]);
+  assert.deepEqual(d133Rows(outDir), {
+    'DELETE /things/{id}/permission': 'x/settled',
+    'GET /things': 'r/settled',
+    'POST /things/{id}/archive': 'x/tight',
+    'PUT /things/{id}': 'x/tight',
+    'POST /mystery': 'r/loose',
+  });
+  assert.match(stdout, new RegExp(`^rwxmap: rwxlite: on \\(${D133_MODEL.replace(/[+.]/g, '\\$&')}\\) — 3 sent · 1 raised · 1 lowered · 0 kept · 1 undecided`, 'm'));
+  assert.doesNotMatch(stdout, /rwxlite: off/);
+});
+
+test('run (D133): --engine rwxlite on its own (mode b) is not built: with an engine it fails loudly, with no model it behaves like no model', async () => {
+  const withEngine = await runD133(['--engine', 'rwxlite'], { rwxliteEngine: { model: D133_MODEL, run: async () => [] } });
+  assert.equal(withEngine.code, 1);
+  assert.match(withEngine.stderr, /mode b\) is not built yet/);
+  assert.deepEqual(fs.readdirSync(withEngine.outDir), []);
+
+  const noModel = await runD133(['--engine', 'rwxlite', '--confidence', '70']);
+  assert.equal(noModel.code, 0, noModel.stderr);
+  assert.match(noModel.stdout, /rwxlite: off \(mechanical\) — no model in the cache/);
+});
+
+test('run (D133): --confidence is valid only with --engine rwxlite, and only as a whole number 0-99', async () => {
+  /** @type {Array<[string[], RegExp]>} */
+  const cases = [
+    [['--confidence', '50'], /--confidence is valid only with --engine rwxlite/],
+    [['--engine', 'jev', '--confidence', '50'], /--confidence is valid only with --engine rwxlite/],
+    [['--engine', 'mechanical', '--confidence', '50'], /--confidence is valid only with --engine rwxlite/],
+    [['--engine', 'rwxlite', '--confidence', '100'], /whole number from 0 to 99/],
+    [['--engine', 'rwxlite', '--confidence=-1'], /whole number from 0 to 99/],
+    [['--engine', 'rwxlite', '--confidence', '7.5'], /whole number from 0 to 99/],
+    [['--engine', 'rwxlite', '--confidence', 'abc'], /whole number from 0 to 99/],
+    [['--engine', 'rwxlite', '--confidence', ''], /whole number from 0 to 99/],
+  ];
+  for (const [args, message] of cases) {
+    const r = await runD133(args);
+    assert.equal(r.code, 1, args.join(' '));
+    assert.match(r.stderr, message, args.join(' '));
+    assert.deepEqual(fs.readdirSync(r.outDir), [], 'nothing written');
+  }
+  for (const ok of ['0', '70', '99']) {
+    const r = await runD133(['--engine', 'rwxlite', '--confidence', ok]);
+    assert.equal(r.code, 0, `${ok}: ${r.stderr}`);
+  }
+});
+
+test('run (D133): an unknown --engine value fails loudly', async () => {
+  const r = await runD133(['--engine', 'gpt']);
+  assert.equal(r.code, 1);
+  assert.match(r.stderr, /unknown --engine: gpt \(want rwxlite, jev or mechanical\)/);
+  assert.deepEqual(fs.readdirSync(r.outDir), []);
+});
+
+test('run (D133): --engine jev without a key fails loudly, sends nothing, writes nothing', async () => {
+  let calls = 0;
+  const r = await runD133(['--engine', 'jev'], { fetchImpl: async () => { calls += 1; throw new Error('must not be called'); } });
+  assert.equal(r.code, 1);
+  assert.match(r.stderr, /--engine jev needs a key/);
+  assert.equal(calls, 0);
+  assert.deepEqual(fs.readdirSync(r.outDir), []);
+});
+
+test('run (D133): a Jev key WITHOUT --engine jev leaves Jev off, says so, and sends no request', async () => {
+  for (const args of [[], ['--engine', 'mechanical'], ['--engine', 'rwxlite']]) {
+    let calls = 0;
+    const fetchImpl = async () => { calls += 1; throw new Error('must not be called'); };
+    const r = await runD133(args, { jevKey: 'sk-fake', fetchImpl });
+    assert.equal(r.code, 0, r.stderr);
+    assert.equal(calls, 0, args.join(' '));
+    assert.match(r.stdout, /^rwxmap: Jev: off — a Jev key is set, but Jev runs only with --engine jev; nothing was sent$/m);
+    assert.doesNotMatch(r.stdout, /Jev: on/);
+    assert.equal(readJson(path.join(r.outDir, 'example.rwxmap.json')).jev.mode, 'off');
+  }
+});
+
+test('run (D133): --engine jev with a key behaves as before and prints no rwxlite line', async () => {
+  const { fetchImpl, calls } = routedJevFetch({ listThings: { p: 0.1 }, updateThing: { p: 0.1 }, doMystery: { p: 0.1 } });
+  const r = await runD133(['--engine', 'jev'], { jevKey: 'sk-fake', fetchImpl });
+  assert.equal(r.code, 0, r.stderr);
+  assert.ok(calls.length > 0);
+  assert.match(r.stdout, /Jev: on — /);
+  assert.doesNotMatch(r.stdout, /rwxlite/);
+});
+
+test('run (D133): a cached model whose hash does not match its name is NOT used: loud warning, mechanical, exit 0', async () => {
+  const xdg = mkScratch();
+  fs.mkdirSync(path.join(xdg, 'rwxmap'));
+  fs.writeFileSync(path.join(xdg, 'rwxmap', 'rwxlite-1.0.0+deadbeef.int8'), 'not the real weights');
+  const r = await runD133([], { xdgCacheHome: xdg });
+  assert.equal(r.code, 0, r.stderr);
+  assert.match(r.stderr, /WARNING: rwxlite model rejected \(hash mismatch/);
+  assert.match(r.stdout, /rwxlite: off \(mechanical\) — cached model rejected/);
+  assert.equal(d133Rows(r.outDir)['POST /mystery'], 'x/tight');
+});
+
+test('run (D133): a cached model that verifies is found, and the run says this build cannot run it yet', async () => {
+  const xdg = mkScratch();
+  const bytes = Buffer.from('weights');
+  const sha8 = createHash('sha256').update(bytes).digest('hex').slice(0, 8);
+  fs.mkdirSync(path.join(xdg, 'rwxmap'));
+  fs.writeFileSync(path.join(xdg, 'rwxmap', `rwxlite-1.0.0+${sha8}.int8`), bytes);
+  const r = await runD133([], { xdgCacheHome: xdg });
+  assert.equal(r.code, 0, r.stderr);
+  assert.equal(r.stderr, '');
+  assert.match(r.stdout, new RegExp(`rwxlite: off \\(mechanical\\) — model rwxlite-1\\.0\\.0\\+${sha8} is cached, but this build has no way to run it yet`));
+});
+
+test('run (D133): --help names the engines, --confidence, and that a key alone does not turn Jev on', async () => {
+  const stdout = captureStream();
+  const code = await run(['--help'], { cwd: mkScratch(), stdout, stderr: captureStream() });
+  assert.equal(code, 0);
+  assert.match(stdout.text(), /--engine <e>/);
+  assert.match(stdout.text(), /--confidence <0-99>/);
+  assert.match(stdout.text(), /A key alone does not turn Jev on/);
 });
