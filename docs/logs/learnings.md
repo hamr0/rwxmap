@@ -7999,3 +7999,126 @@ Node.
 - Lesson: a narrow verb-or-endpoint shape held where the broad noun list
   failed. The one wrong fire (a card PIN update) shows "pin" is a weaker
   word than "password". Gate-3 is now burned for F2.
+
+## 2026-11-04 — Jev cut-off POC (rwxlite's 0.20/0.60/0.20, F3): FAIL, today's cuts stay
+
+- Goal: test rwxlite's proposed Jev cut-offs against today's. Jev-lower
+  0.10 -> 0.20, jev-raise-wx 0.80 -> 0.60, jev-raise-get 0.50 -> 0.20.
+  jev-lower-r stays 0.50 (they proposed none).
+- Tried: poc/cutoffs/score.mjs over the cached Jev answers, two runs.
+  Readouts: poc/cutoffs/readout.txt (combined, 6557 rows) and
+  readout-provider-corpus-only.txt (4171 rows, the burned exam rows
+  dropped). The orchestrator re-ran `node poc/cutoffs/score.mjs`: exit 0,
+  byte-identical. Tests: 5 pass.
+- Bars, set before the run (D100): a loosening move (lower cut up) needs
+  LOVO right/wrong >= 10 on both runs. A raise cut moved down is
+  tighten-only: more right than wrong and too loose never up, on both
+  runs and under LOVO.
+- Outcome: FAIL. Today's cuts stay.
+  - Baseline, today's cuts, combined run1: 6191 exact (94.4%) / 64 too
+    loose (1.0%) / 302 too tight (4.6%) of 6557 rows.
+  - rwxlite's set, combined run1: 6301 exact (96.1%) / 97 too loose
+    (1.5%) / 159 too tight (2.4%) of 6557 rows. Moved 197: right 146,
+    wrong 44, other 7. Run2: moved 197, right 149, wrong 43, other 5;
+    97 too loose of 6557.
+  - Lower tier, rwxlite's 0.20, run1: moved 186 of 1336 pile rows. Right
+    140, wrong 39, ratio 3.6. Pile leaks 14 -> 53. Over-tight 263 -> 115.
+    Run2: right 143, wrong 38, ratio 3.76, leaks 15 -> 53.
+  - Provider-corpus-only (4171 rows), rwxlite's set, run1: too loose 40
+    -> 62 (1.0% -> 1.5% of 4171). Lower tier moved 116 of 819: right 83,
+    wrong 26, ratio 3.19, leaks 10 -> 36.
+  - Lower sweep, run1, ratio by cut: 0.15 is 5.71 (right 97, wrong 17);
+    0.20 is 3.59; 0.25 is 3.51; 0.30 is 3.08; 0.35 is 2.38; 0.40 is
+    2.14. No cut reaches 10. The 0.05 cut is worse: right 12, wrong 621.
+  - Raise-wx sweep, run1: 0.60 moves 8 of 1052, right 6, wrong 2, leaks
+    27 -> 21, over-tight 1 -> 3. It passes in-sample on both runs. The
+    best in-sample pick on both runs is 0.65 (right 6, wrong 2).
+  - Raise-get sweep, run1: 0.20 moves 3 of 2543, all 3 wrong (new
+    over-tight). Cuts 0.35 and up move nothing. All 2543 GET pile rows
+    are truth r.
+  - LOVO (cut picked on the other vendors, pooled over held-out):
+    - Lower: stays 0.10 in all 23 folds, both runs. No move.
+    - Raise-wx: run1 moved 3 of 1052, right 1, wrong 2, FAIL. Run2 moved
+      5, right 3, wrong 2, PASS. So 1/2 vs 3/2 across runs.
+    - Raise-get: stays 0.50 in all 18 folds. No move.
+    - LOVO joint, combined run1: 6190 exact, moved 3 (right 1, wrong
+      2). Run2: 6192 exact, moved 5 (right 3, wrong 2).
+  - F3 (POST truth-w rows sitting at x today), run1: 233 rows, of 1336
+    lower-pile rows. At 0.15, 95 fixed to w for 4 new leaks to r, and the
+    pile leaks go 14 -> 31 (17 new). At 0.20, 135 fixed, 8 to r, pile
+    leaks 14 -> 53 (39 new, 31 of them truth-x rows newly lowered). Run2:
+    231 rows; at 0.20, 135 fixed, 9 to r, leaks 15 -> 53.
+  - Buildset (1819 rows, a separate line): rwxlite's set gives 1724 exact
+    (94.8%) / 20 too loose (1.1%) / 75 too tight (4.1%), up from 1658
+    exact (91.1%) / 14 too loose (0.8%) / 147 too tight (8.1%). Lower
+    tier ratio 8.44 in-sample. Under LOVO it is 8.43 (run1) and 9.67
+    (run2), both under 10: FAIL. Raise-wx LOVO right 1 vs wrong 4 and 5:
+    FAIL.
+  - Note: combined holds the burned x17/x20 exam rows by design (its
+    README). The provider-corpus-only readout is the same test without
+    them. It reaches the same verdict.
+- Lesson: rwxlite's cuts scored fewer leaks on its fresh gates (7 vs 8
+  on gate-1), but on rwxmap's tuning pile they cost leaks. The lower cut
+  buys over-tight rows and pays for them in new leaks, at a ratio near 3.
+  The build decision is taken on tuning under the pre-set bar, so
+  nothing was pre-registered for a fresh exam. Today's cuts stay.
+
+## 2026-11-04 — can't-undo verb POC (27 candidates + archive): FAIL, nothing adopted
+
+- Goal: test whether new can't-undo (x) lead verbs earn a place in step
+  3: 27 candidate verbs rwxlite proposed, plus archive, which I mined.
+- Tried: poc/cantundo-verbs/score.mjs over the combined set (6557 rows),
+  the buildset (1819 rows), LOVO, and APIs.guru prevalence (123,339
+  ops). Readout: poc/cantundo-verbs/score.txt. Re-run exit 0,
+  byte-identical. Tests: 8 pass.
+- Outcome: FAIL. Nothing adopted. Mechanical baseline combined: 5420
+  exact / 62 too loose / 1075 too tight of 6557.
+  - 19 of the 27 never move a letter on combined, in any view: deliver,
+    notify, invite, issue, dispatch, broadcast, post, payout, withdraw,
+    deposit, disburse, settle, confirm, finalize, ban, terminate, kill,
+    invalidate, regenerate.
+  - Why they do not move: a POST already floors at x, so a new x verb
+    adds nothing mechanically. Its only effect is to block jev-lower's
+    correct lowerings. Mechanical moves happen only on PUT/PATCH, and
+    suspend moves only because it overlaps KEEP_W (step 2 would win).
+  - The 8 that move all fail. Per verb, combined, moved/right/wrong as
+    mechanical | Jev run1 | Jev run2:
+    - transfer: 1/0/1 | 1/0/1 | 1/0/1
+    - share: 1/0/1 | 1/0/1 | 1/0/1
+    - submit: 0 | 1/0/1 | 0
+    - disable: 1/1/0 | 4/3/1 | 4/3/1. Fails Jev LOVO (1 moved, 0 right,
+      1 wrong) and buildset mechanical (1 moved, 0 right, 1 wrong).
+    - suspend: 3/0/3 | 3/0/3 | 3/0/3
+    - deactivate: 0 | 28/1/27 | 28/2/26
+    - lock: 2/0/2 | 4/0/4 | 4/0/4
+    - block: 0 | 1/0/1 | 1/0/1
+    - archive (mined, fitted): 2/0/2 | 5/2/3 | 5/2/3. Fails LOVO too.
+  - Joint, all 27, combined: 74 fires of 6557. Mechanical moved 8: right
+    1, wrong 7 (5420 -> 5414 exact). Jev run1 moved 43: right 4, wrong
+    39. Jev run2 moved 42: right 5, wrong 37.
+  - Buildset joint, all 27: 40 fires of 1819. Mechanical moved 16: right
+    0, wrong 16 (1311 -> 1295 exact).
+  - "issue" matches the plural noun "issues": 273 APIs.guru fires, 25
+    buildset rows all truth w (gitea 21 of 25, 84.0%); 11 move
+    mechanically, all wrong.
+  - The 62 mechanical leaks (of 6557) are mostly create, update, set and
+    upsert rows that a lead-verb list cannot reach. Create is truth x on
+    74 of 631 floor rows.
+- Lesson: on POST a new x verb has no mechanical effect and mainly blocks
+  Jev's correct lowerings. rwxlite's "sends/transfers that read as
+  creates" lead with create, which no verb list can separate from a
+  harmless create.
+
+## 2026-11-04 — marker export for rwxlite (read-only)
+
+- Goal: give rwxlite the mechanical markers for its contested-row second
+  pass.
+- Tried: data/markers-2026-11-04/export.mjs, run from commit 0876cf6.
+  It runs the mechanical classifyRow (no Jev) over
+  data/corpus/apis-guru-ops.csv.gz.
+- Outcome: data/markers-2026-11-04/markers.csv.gz, 123,339 rows.
+  - Class: r 62,879 / w 17,312 / x 43,148.
+  - Review: settled 78,556 / tight 29,687 / loose 15,096.
+  - evidence_vs_floor: floor 116,015 / evidence 7,324.
+  - Sent to rwxlite. No rule change.
+- Lesson: none. This is an export, not an experiment.
