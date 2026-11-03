@@ -889,71 +889,92 @@ above.
 
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
-## Planned: rwxmap with rwxlite (after rwxlite's last test)
+## Module D133: rwxmap with rwxlite (three engines)
 
-PLANNED, not adopted and not current behaviour. User statement
-2026-11-03: "we will probably go for it". It becomes the next module
-only after rwxlite's last test, with its own D-number and ruling.
+Status: spec in progress on branch `feat/d133-rwxlite-engines`. Nothing
+is built. Current behaviour is unchanged (mechanical default, Jev
+opt-in) until the module ships. User rulings 2026-11-03 are below as
+decided; everything marked "proposal" or "open" is not decided.
 
-- **Split.** rwxmap stays the adapter: spec import, shaping, flags, all
-  output. rwxlite is a pure classifier: Jev-shaped questions in, p out.
-  It never decides to ask.
-- **Three engines under rwxmap.** (1) mechanical -> rwxlite, the planned
-  default, local and free. (2) rwxlite alone (rwxlite's "mode b").
-  (3) mechanical -> Jev, kept as the paid option. This would reverse
-  today's order (mechanical default, Jev opt-in).
+### Decided (user rulings, 2026-11-03)
+
+- **Three engines.** Default: mechanical -> rwxlite (local, free).
+  Second: rwxlite alone (rwxlite's "mode b"). Third: mechanical -> Jev
+  (paid, BYOK). This reverses today's order (mechanical default, Jev
+  opt-in).
+- **rwxmap is the adapter for all three.** It reads the OpenAPI spec or
+  discovers the API on the fly, and sends shaped questions. rwxlite
+  never reads a spec or an API. rwxlite only returns p.
+- **Everything is chosen through CLI options.** The CLI grows mode
+  options. Names are open.
+- **Distribution.** Ships on npm. The model is downloaded on first use
+  and is always the latest model, not pinned to the rwxmap version.
+  Consequence: the same spec can get different letters after a model
+  update, so every run records the model string.
+- **No model, no stop.** If the model cannot be downloaded, mechanical
+  runs on its own without rwxlite. The run says "rwxlite: off
+  (mechanical)". It never stops.
+- **Accuracy choice, rwxlite-alone mode only.** The user can choose an
+  accuracy rate between 70% and 90%, set from rwxlite's measured
+  figures and the customer's liking. Each choice is backed by rwxlite's
+  measured figures. The too-loose rate is reported separately beside
+  it; under- and over-classification are never folded into one accuracy
+  number.
+- **R1 and R2 are tuning candidates only.** R1: credential replace on
+  PUT/PATCH (last path segment is a credential being replaced: api-key,
+  client-credentials, token, secret), kept narrower than the broad noun
+  rule that failed (6 right, 17 wrong, learnings F2 POC). R2: logout,
+  signout, end-session is x on any method; it touches step 1, so it is
+  a core change. Each gets its own D-number only if it passes tuning
+  (D100 bar, LOVO), after a prevalence check across all vendors first (4
+  of the 5 source rows are workos). rwxlite's burned 949-op exam
+  (coolify, workos, lago, resend) may be used as extra tuning rows.
+
+### Proposals (not decided)
+
 - **One request, both questions** (isX and changes): x = p(isX),
   w = p(changes) - p(isX), r = 1 - p(changes). The Jev engine keeps its
   separate requests, because its cut-offs were measured that way (D127).
 - **Lowerings are flagged, not trusted.** A lowering is accepted only
-  when max p >= 0.97; otherwise the row is marked to ask, beside
-  rwxmap's tight marks. Raises and keeps are trusted. Proposed form: an
-  asked row keeps the stricter letter and carries the existing `tight`
-  review marker, no new output field. To be decided.
-- **Evidence so far** (rwxlite's numbers; its fresh exam on coolify,
-  workos, lago, resend, 949 operations; rwxlite commits 0caa381
-  prereg, 402fea0 score; labels 934 of 949 agreed). Answered 875 rows:
-  92.57% right; 5 too loose (0.57% of 875) against a 0.5% bar (4
-  rows), so NO-GO by one row; 60 too tight (6.9%); asked 74 (7.8% of
-  949). All 13 wrong lowerings of 166 were under 0.97 and asked; all 92
-  accepted lowerings were right. Mechanical alone on the same exam:
-  77.6% right, 6 too loose (0.63%), 21.8% too tight. The 5 misses come
-  from the mechanical letter: 3 PUT/PATCH credential upserts (workos
-  client-credentials, workos api-key, coolify integration-tokens;
-  mechanical w, truth x by clause b) and 2 logout GETs (workos
-  /sso/logout, /user_management/sessions/logout; truth x). Practice rows
-  (rwxlite v3 tuning, LOVO): 93.2% right, 21 too loose (0.41%), 9.6%
-  asked.
-- **Mechanical candidates this points to** (each needs a tuning POC and
-  a fresh exam). R1: credential replace on PUT/PATCH (last path segment
-  is a credential being replaced: api-key, client-credentials, token,
-  secret), kept narrower than the broad noun rule that failed (6 right,
-  17 wrong, learnings F2 POC). R2: logout, signout, end-session is x on
-  any method; it touches step 1, so it is a core change.
-- **The bar** (user note 2026-11-03, open, not decided). The target
-  could be lowered, because the local model is about 92% right and asks
-  on the doubtful rows. The bar for this module is set before it is
-  built.
-- **Interface to pin with rwxlite.** Model string and version format;
-  error behaviour (fail closed: keep the mechanical letter); latency
-  budget; distribution (npm package or model file); `onnxruntime-node`
-  as an optional dependency loaded only for the local engines
-  (dependency rule).
-- **Next steps.** Shared fresh exam #3, agreed by both users: vendors
-  from rwxmap's spares clerk, neon, supabase, mux, netbird, ory, novu;
-  both projects commit candidates before truth is read; each scores
-  once. rwxlite's M1 is an int8 ONNX Node answerer in Jev's
-  request/answer shape.
+  when max p >= 0.97; otherwise the row is marked to ask. Raises and
+  keeps are trusted. Proposed form: an asked row shows the stricter
+  letter and carries the existing `tight` review marker, no new output
+  field.
+- **Interface to pin with rwxlite** (rwxlite's proposed defaults):
+  - Model string: `rwxlite-<semver>+<sha8 of int8 weights>`, recorded on
+    every run (D88-style).
+  - Error behaviour: fail closed on error or timeout; the row keeps its
+    mechanical letter. Agreed.
+  - Latency: at most 20 ms per operation on a laptop CPU, int8, no GPU.
+    Their bar, to be measured.
+  - Shipping: npm, with `onnxruntime-node` as an optional dependency
+    loaded only when a local engine is on (dependency rule). The user
+    ruled download-on-first-use for the model itself.
+
+### Evidence so far
+
+rwxlite's numbers; its fresh exam on coolify, workos, lago, resend, 949
+operations; rwxlite commits 0caa381 prereg, 402fea0 score; labels 934 of
+949 agreed. Answered 875 rows: 92.57% right; 5 too loose (0.57% of 875)
+against a 0.5% bar (4 rows), so NO-GO by one row; 60 too tight (6.9%);
+asked 74 (7.8% of 949). All 13 wrong lowerings of 166 were under 0.97 and
+asked; all 92 accepted lowerings were right. Mechanical alone on the same
+exam: 77.6% right, 6 too loose (0.63%), 21.8% too tight. The 5 misses
+come from the mechanical letter: 3 PUT/PATCH credential upserts (workos
+client-credentials, workos api-key, coolify integration-tokens;
+mechanical w, truth x by clause b) and 2 logout GETs (workos
+/sso/logout, /user_management/sessions/logout; truth x). Practice rows
+(rwxlite v3 tuning, LOVO): 93.2% right, 21 too loose (0.41%), 9.6% asked.
+
+### Open
+
+Five items, listed under Open questions below.
 
 ## What is next
 
-The 0.9.0 candidate carries F1 (D129) and F2 (D131). The gate-4 fresh
-check passed (91.8% vs 85.9% exact, too loose 9 vs 10 of 800). The
-other take-backs were measured and rejected (learnings, 2026-11-03).
-rwxlite's model failed its D128 exam: 36 of 4279 rows too loose (0.84%,
-bar 0.5%), so Jev stays the model tier. Open: invert the D128 order (model
-first, mechanical when unsure), pending rwxlite's brief. Parked items and
-known limits below.
+0.9.0 is released (PR #18, merge e9b697c, npm 0.9.0, 2026-11-03). Next:
+the D133 spec (above), the R1 and R2 tuning POCs, and shared exam #3.
+Parked items and known limits below.
 
 ### Parked
 
@@ -1054,6 +1075,8 @@ network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
 
 ## Open questions
 
-- Default engine order: mechanical first, or rwxlite first.
-- The bar for the rwxlite module (see the planned section).
-- How an asked row is published: the `tight` marker, or a new field.
+- D133: the module's go/no-go bar (set before building).
+- D133: how an "ask" row is published (the `tight` marker, or a new field).
+- D133: the exact CLI option names.
+- D133: where the downloaded model is cached, and how its integrity is checked (hash).
+- D133: the shared fresh exam #3 vendor list, from rwxmap's spares clerk, neon, supabase, mux, netbird, ory, novu; both projects commit candidates before truth is read; each scores once.

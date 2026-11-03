@@ -8246,3 +8246,20 @@ Node.
 - Lesson: the lowering flag removed every wrong lowering; the remaining
   leaks are the mechanical floor's, so mechanical fixes help both
   projects.
+
+## 2026-11-03 — 0.9.0 released; D133 opened (rwxmap with rwxlite, three engines)
+
+- 0.9.0 released: PR #18, merge e9b697c, npm 0.9.0.
+- D133 opened on branch `feat/d133-rwxlite-engines`. User rulings: three
+  engines (mechanical -> rwxlite default, rwxlite alone, mechanical ->
+  Jev); rwxmap is the adapter for all three and rwxlite only returns p;
+  everything chosen by CLI options; the model downloads on first use and
+  is always the latest, so every run records the model string; if the
+  download fails, mechanical runs alone and says "rwxlite: off
+  (mechanical)"; in rwxlite-alone mode only, an accuracy rate between 70%
+  and 90% can be chosen, with the too-loose rate beside it; R1 and R2 are
+  tuning candidates only, each needing its own D-number after tuning.
+- Open: go/no-go bar, how an ask row is published, CLI option names,
+  model cache and hash check, shared exam #3 vendor list.
+- The PRD planned section became the D133 module spec; the engine-order
+  question is now decided and left the open questions.
