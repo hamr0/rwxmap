@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { step2, floorPost, CANT_UNDO, REMOVES } from './step2.js';
+import { step2, floorPost, CANT_UNDO, REMOVES, CREDENTIAL_SET, CREDENTIAL_CHANGE_VERBS } from './step2.js';
 import { KEEP_W } from './step3.js';
 import { stemMatches } from './tokens.js';
 
@@ -124,4 +124,60 @@ test('CANT_UNDO and KEEP_W are disjoint under stem matching (no row can match bo
       assert.ok(!stemMatches(a, b) && !stemMatches(b, a), `${a} vs ${b} unexpectedly stem-match`);
     }
   }
+});
+
+// ---- credential-set (D131) ------------------------------------------------
+
+test('credential-set endpoint form: PUT /users/{id}/password is x', () => {
+  const v = step2({ method: 'PUT', path: '/users/{id}/password', operationId: 'updateUserPassword' });
+  assert.deepEqual(v, { class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: ['password'] });
+});
+
+test('credential-set change form: PATCH changePin, and a summary "Change PIN"', () => {
+  assert.deepEqual(step2({ method: 'PATCH', path: '/cards/{id}', operationId: 'changePin' }), {
+    class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: ['pin'],
+  });
+  assert.deepEqual(step2({ method: 'PATCH', path: '/cards/{id}', operationId: 'changeCard', summary: 'Change PIN' }), {
+    class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: ['pin'],
+  });
+});
+
+test('credential-set does not fire: plurals, trailing non-credential token, api keys, non-change lead', () => {
+  assert.equal(step2({ method: 'PUT', path: '/users/{id}/passwords', operationId: 'putUserPasswords' }), null);
+  assert.equal(step2({ method: 'PUT', path: '/boards/{id}/pins', operationId: 'putBoardPins' }), null);
+  assert.equal(step2({ method: 'PUT', path: '/settings/password_rules', operationId: 'putPasswordRules' }), null);
+  assert.equal(step2({ method: 'PUT', path: '/api_keys/{id}', operationId: 'putApiKey' }), null);
+  assert.equal(step2({ method: 'PATCH', path: '/policies/{id}', operationId: 'updatePasswordPolicy', summary: 'Update the password policy' }), null);
+});
+
+test('credential-set does not fire on POST or GET (PUT/PATCH only)', () => {
+  assert.equal(step2({ method: 'POST', path: '/users/{id}/password', operationId: 'createUserPassword' }), null);
+  assert.equal(step2({ method: 'POST', path: '/cards/{id}', operationId: 'changePin' }), null);
+  assert.equal(step2({ method: 'GET', path: '/users/{id}/password', operationId: 'putUserPassword' }), null);
+});
+
+test('credential-set: a CANT_UNDO lead verb keeps its own rule', () => {
+  assert.deepEqual(step2({ method: 'PUT', path: '/users/{id}/password', operationId: 'resetPassword' }), {
+    class: 'x', step: 2, rule: 'cant-undo-verb', source: 'list', matched: ['reset'],
+  });
+});
+
+test('credential-set words injection overrides CREDENTIAL_SET and CREDENTIAL_CHANGE_VERBS', () => {
+  const row = { method: 'PUT', path: '/users/{id}/secret', operationId: 'swapSecret' };
+  assert.equal(step2(row), null);
+  assert.deepEqual(step2(row, { credentialSet: new Set(['secret']) }), {
+    class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: ['secret'],
+  });
+  const change = { method: 'PATCH', path: '/cards/{id}', operationId: 'swapPin' };
+  assert.equal(step2(change), null);
+  assert.deepEqual(step2(change, { credentialChangeVerbs: new Set(['swap']) }), {
+    class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: ['pin'],
+  });
+  // An emptied set turns the rule off.
+  assert.equal(step2({ method: 'PUT', path: '/users/{id}/password' }, { credentialSet: new Set() }), null);
+});
+
+test('CREDENTIAL_SET and CREDENTIAL_CHANGE_VERBS hold exactly the D131 members', () => {
+  assert.deepEqual([...CREDENTIAL_SET].sort(), ['passcode', 'password', 'pin']);
+  assert.deepEqual([...CREDENTIAL_CHANGE_VERBS].sort(), ['change', 'regen', 'regenerate']);
 });

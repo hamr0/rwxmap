@@ -38,6 +38,13 @@ test('classifyRow: a PUT with a CANT_UNDO verb is claimed x by step 2 before ste
   );
 });
 
+test('classifyRow: a PUT setting a password is claimed x by step 2 credential-set before step 3\'s w floor', () => {
+  assert.deepEqual(
+    classifyRow({ method: 'PUT', operationId: 'updateUserPassword', path: '/users/{id}/password' }),
+    { class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: ['password'], review: 'settled' },
+  );
+});
+
 test('classifyRow: a POST with a KEEP_W verb is claimed w by step 3 (step 2 has nothing to say)', () => {
   assert.deepEqual(
     classifyRow({ method: 'POST', operationId: 'restoreThing', path: '/things/{id}/restore' }),

@@ -56,7 +56,7 @@ export function reviewHint(method, cls, source) {
 /**
  * Classify one row through the whole ladder.
  * @param {Operation} row
- * @param {{readVerbs?: Set<string>, safeVerbs?: Set<string>, cantUndo?: Set<string>, removes?: Set<string>, keepW?: Set<string>}} [words]
+ * @param {{readVerbs?: Set<string>, safeVerbs?: Set<string>, cantUndo?: Set<string>, removes?: Set<string>, credentialSet?: Set<string>, credentialChangeVerbs?: Set<string>, keepW?: Set<string>}} [words]
  *   Word lists to use in place of each step's own — the lists are the
  *   module's own unless a caller passes rebuilt ones (leave-N-vendor-out
  *   measurement); an adopter never passes it.

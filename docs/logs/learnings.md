@@ -7913,3 +7913,42 @@ Node.
     touches does not.
   - Whole-label vendor matching misses a brand's other API domains
     (hubapi.com is HubSpot). A lock check needs known brand aliases too.
+
+## 2026-11-04 — F2 pre-registered as D131 (credential-set) before gate-3 is read
+
+- The rule, in step 2, PUT and PATCH only. It claims x when either:
+  - the last path segment is literal and its last token is password,
+    passcode or pin (PUT /users/{id}/password); or
+  - the lead verb is change, regenerate or regen, and password, passcode
+    or pin is a token of the operationId, a literal path segment or the
+    summary (PATCH changePin).
+- It runs only when the CANT_UNDO lead-verb check did not fire, so
+  resetPassword keeps cant-undo-verb.
+- D130 first: the user ruled that changing or setting a password is x.
+  BRIEF-v3 clause (b) stands over D87's text.
+- Singular only. POC V4 also took plurals. We dropped them by reasoning,
+  before any fresh data: "pins" names pinned items in some APIs, and
+  "passwords" names a collection.
+- Built vs V4 on the tuning sets (mechanical):
+  - combined: the same 2 rows, 2 right, 0 wrong (zoom userPassword,
+    zendesk ChangeOwnPassword). Too loose 64 -> 62.
+  - buildset: 3 fires, 2 right, 1 wrong (dracoon
+    changePasswordPoliciesConfig, truth w). V4 had 3 right, 1 wrong.
+    The lost right row is clearblade ChangeUserInfo, whose only
+    credential word is "passwords" in the summary. Too loose 18 -> 16.
+  - APIs.guru (no truth): 32 fires vs V4's 37. 2 of the 5 were already
+    x by CANT_UNDO. The other 3: clearblade.com ChangeUserInfo (plural)
+    and two windows.net PATCH .../passwordCredentials rows. Those end
+    in "credentials", not "password", so the endpoint form does not
+    take them. V4's endpoint check read the last two tokens.
+- The bar, on gate-3 scored once with the mechanical classifier:
+  credential-set fires right > wrong, and too loose not rising. It must
+  hold on the credential part, the general part and the vendor-clean
+  line.
+- Gate-3 truth became public when the rwxlite repo was made public on
+  2026-11-04. rwxmap has not opened it before scoring.
+- Known gap, not fixed: step 1 claims only GET/HEAD/OPTIONS and POST, so
+  a PUT or PATCH with a read lead verb (say getPassword) reaches the rule
+  and would fire. V4 excluded read-lead rows; it excluded 0 on every
+  tuning set and on APIs.guru, so the built rule and V4 do not differ
+  there on this data.
