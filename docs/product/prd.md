@@ -341,6 +341,8 @@ Run: `npm test`, `npm run typecheck`, `node poc/d87/proof-src.mjs`,
 | fresh gate-2, 600 (rwxlite, BRIEF-v3, D129) | + all three Jev tiers, 0.8.1 | 550 (91.7%) | 3 (0.5%) | 47 (7.8%) |
 | fresh gate-2, 600 (rwxlite, BRIEF-v3, D129) | + all three Jev tiers, F1 (D129) | 567 (94.5%) | 3 (0.5%) | 30 (5.0%) |
 | fresh gate-3, 800 (rwxlite, BRIEF-v3, 200 credential + 600 general, D131) | mechanical | 580 (72.5%) | 23 (2.9%) | 197 (24.6%) |
+| fresh gate-4, 800 (rwxlite, BRIEF-v3, 200 write + 600 general) | + all three Jev tiers, 0.8.1 | 687 (85.9%) | 10 (1.3%) | 103 (12.9%) |
+| fresh gate-4, 800 (rwxlite, BRIEF-v3, 200 write + 600 general) | + all three Jev tiers, 0.9.0 candidate (F1, F2) | 734 (91.8%) | 9 (1.1%) | 57 (7.1%) |
 
 On gate-2's vendor-clean 483 rows, exact goes from 437 (90.5%) to 452
 (93.6%) with F1; too loose is 3 both ways.
@@ -887,11 +889,12 @@ Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 ## What is next
 
 The 0.9.0 candidate carries F1 (D129) and F2 (D131). The gate-4 fresh
-check runs before release. The other take-backs were measured and
-rejected (learnings, 2026-11-04). rwxlite's model failed its D128 exam:
-36 of 4279 rows too loose (0.84%, bar 0.5%), so Jev stays the model
-tier. Open: invert the D128 order (model first, mechanical when
-unsure), pending rwxlite's brief. Parked items and known limits below.
+check passed (91.8% vs 85.9% exact, too loose 9 vs 10 of 800). The
+other take-backs were measured and rejected (learnings, 2026-11-04).
+rwxlite's model failed its D128 exam: 36 of 4279 rows too loose (0.84%,
+bar 0.5%), so Jev stays the model tier. Open: invert the D128 order (model
+first, mechanical when unsure), pending rwxlite's brief. Parked items and
+known limits below.
 
 ### Parked
 

@@ -1,0 +1,105 @@
+missing joins 0 missing part/truth 0
+0.8.1 mech | sent 0 failed 0 input tokens 0 models -
+branch mech | sent 0 failed 0 input tokens 0 models -
+0.8.1 + Jev | sent 743 failed 0 input tokens 1493626 models jev-1.14.0,
+branch + Jev | sent 883 failed 0 input tokens 1790298 models jev-1.14.0,
+
+all
+  0.8.1 mech    n 800 exact 598 (74.8%) loose 11 (1.4%) tight 191 (23.9%)
+  branch mech   n 800 exact 599 (74.9%) loose 10 (1.3%) tight 191 (23.9%)
+  0.8.1 + Jev   n 800 exact 687 (85.9%) loose 10 (1.3%) tight 103 (12.9%)
+  branch + Jev  n 800 exact 734 (91.8%) loose 9 (1.1%) tight 57 (7.1%)
+
+write
+  0.8.1 mech    n 200 exact 125 (62.5%) loose 6 (3.0%) tight 69 (34.5%)
+  branch mech   n 200 exact 125 (62.5%) loose 6 (3.0%) tight 69 (34.5%)
+  0.8.1 + Jev   n 200 exact 161 (80.5%) loose 4 (2.0%) tight 35 (17.5%)
+  branch + Jev  n 200 exact 177 (88.5%) loose 4 (2.0%) tight 19 (9.5%)
+
+general
+  0.8.1 mech    n 600 exact 473 (78.8%) loose 5 (0.8%) tight 122 (20.3%)
+  branch mech   n 600 exact 474 (79.0%) loose 4 (0.7%) tight 122 (20.3%)
+  0.8.1 + Jev   n 600 exact 526 (87.7%) loose 6 (1.0%) tight 68 (11.3%)
+  branch + Jev  n 600 exact 557 (92.8%) loose 5 (0.8%) tight 38 (6.3%)
+
+clean
+  0.8.1 mech    n 641 exact 458 (71.5%) loose 11 (1.7%) tight 172 (26.8%)
+  branch mech   n 641 exact 459 (71.6%) loose 10 (1.6%) tight 172 (26.8%)
+  0.8.1 + Jev   n 641 exact 537 (83.8%) loose 10 (1.6%) tight 94 (14.7%)
+  branch + Jev  n 641 exact 579 (90.3%) loose 9 (1.4%) tight 53 (8.3%)
+
+changed rows by rule {
+ "F1 jev-lower->r": {
+  "n": 46,
+  "right": 46,
+  "wrong": 0
+ },
+ "other": {
+  "n": 8,
+  "right": 3,
+  "wrong": 3
+ },
+ "F2 credential-set (mech differs)": {
+  "n": 1,
+  "right": 1,
+  "wrong": 0
+ }
+}
+id | part | provider | method | path | operationId | truth | 0.8.1 mech>branch mech | 0.8.1 Jev>branch Jev | rule
+gate4-0012 | general | amazonaws.com | POST | /#Action=DescribeAlarmHistory | POST_DescribeAlarmHistory | r | x>x | w>r | F1 jev-lower->r
+gate4-0027 | general | autotask.net | POST | /V1.0/TicketNoteWebhooks/query/count | TicketNoteWebhooks_QueryCount | r | x>x | w>r | F1 jev-lower->r
+gate4-0048 | general | mandrillapp.com | POST | /subaccounts/info.json |  | r | x>x | w>r | F1 jev-lower->r
+gate4-0050 | general | autotask.net | POST | /V1.0/DocumentPlainTextContent/query/count | DocumentPlainTextContent_QueryCount | r | x>x | w>r | F1 jev-lower->r
+gate4-0055 | general | monarchinitiative.org | POST | /mme/fly | post_fly_mme | r | x>x | w>x | other
+gate4-0057 | general | i-cue.solutions | POST | /portfolio/xyz |  | r | x>x | w>r | F1 jev-lower->r
+gate4-0058 | write | daniweb.com | POST | /messages/metadata/filters |  | r | x>x | w>r | F1 jev-lower->r
+gate4-0071 | general | azure.com | POST | /subscriptions/{subscriptionId}/providers/Microsoft.PowerBIDedicated/locations/{location}/checkNameAvailability | Capacities_CheckNameAvailability | r | x>x | w>r | F1 jev-lower->r
+gate4-0122 | write | ljaero.com | POST | /us/v1/airspace/route-query | asp_by_route_us_v1_airspace_route_query_post | r | x>x | w>r | F1 jev-lower->r
+gate4-0141 | general | data2crm.com | POST | /application/entity/post/bulk | createPostEntityBulk | w | x>x | w>x | other
+gate4-0144 | general | autotask.net | POST | /V1.0/TicketAdditionalContacts/query/count | TicketAdditionalContacts_QueryCount | r | x>x | w>r | F1 jev-lower->r
+gate4-0164 | general | azure.com | POST | /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PolicyInsights/policyTrackedResources/{policyTrackedResourcesResource}/queryResults | PolicyTrackedResources_ListQueryResultsForResourceGroup | r | x>x | w>r | F1 jev-lower->r
+gate4-0188 | general | apptigent.com | POST | /CollectionStartsWithString | CollectionStartsWithString | r | x>x | w>r | F1 jev-lower->r
+gate4-0193 | write | apisetu.gov.in | POST | /btcer/certificate | btcer | r | x>x | w>r | F1 jev-lower->r
+gate4-0205 | general | appwrite.io | PATCH | /account/password | accountUpdatePassword | x | w>x | w>x | F2 credential-set (mech differs)
+gate4-0207 | general | apisetu.gov.in | POST | /ewcer/certificate | ewcer | r | x>x | x>r | F1 jev-lower->r
+gate4-0227 | general | clarify.io | POST | /v1/bundles |  | w | x>x | x>w | other
+gate4-0243 | general | autotask.net | POST | /V1.0/ContractRoleCosts/query | ContractRoleCosts_Query | r | x>x | w>r | F1 jev-lower->r
+gate4-0284 | general | autotask.net | POST | /V1.0/Companies/query | Companies_Query | r | x>x | w>r | F1 jev-lower->r
+gate4-0300 | general | spinbot.net | POST | /api/spintax | postSpintax | r | x>x | w>r | F1 jev-lower->r
+gate4-0313 | write | autotask.net | POST | /V1.0/PurchaseOrders/query | PurchaseOrders_Query | r | x>x | w>r | F1 jev-lower->r
+gate4-0333 | general | epa.gov | POST | /dfr_rest_services.get_inspections |  | r | x>x | w>r | F1 jev-lower->r
+gate4-0338 | general | randommer.io | POST | /api/Finance/Vat/Validator |  | r | x>x | w>x | other
+gate4-0350 | general | amazonaws.com | POST | /#X-Amz-Target=GameLift.DescribeFleetAttributes | DescribeFleetAttributes | r | x>x | w>r | F1 jev-lower->r
+gate4-0359 | write | zuora.com | POST | /v1/payment-methods/credit-cards | POST_PaymentMethodsCreditCard | w | x>x | x>w | other
+gate4-0376 | write | autotask.net | POST | /V1.0/ContractMilestones/query/count | ContractMilestones_QueryCount | r | x>x | w>r | F1 jev-lower->r
+gate4-0377 | general | apptigent.com | POST | /GenerateHash | GenerateHash | r | x>x | w>r | F1 jev-lower->r
+gate4-0380 | general | googleapis.com | POST | /v1beta1/{parent}/iosApps | firebase.projects.iosApps.create | w | x>x | w>x | other
+gate4-0387 | write | amazonaws.com | POST | /describeWebsiteCertificateAuthority | DescribeWebsiteCertificateAuthority | r | x>x | w>r | F1 jev-lower->r
+gate4-0389 | general | plaid.com | POST | /income/verification/taxforms/get | incomeVerificationTaxformsGet | r | x>x | w>r | F1 jev-lower->r
+gate4-0396 | write | ljaero.com | POST | /us/v1/ssa/polygon-query | ssa_by_poly_us_v1_ssa_polygon_query_post | r | x>x | w>r | F1 jev-lower->r
+gate4-0405 | write | amazonaws.com | POST | /#X-Amz-Target=AmazonDMSv20160101.DescribeFleetAdvisorSchemas | DescribeFleetAdvisorSchemas | r | x>x | w>r | F1 jev-lower->r
+gate4-0475 | general | portfoliooptimizer.io | POST | /assets/covariance/matrix/exponentially-weighted |  | r | x>x | w>r | F1 jev-lower->r
+gate4-0491 | general | epa.gov | POST | /rest_lookups.wbd_name_lu |  | r | x>x | w>r | F1 jev-lower->r
+gate4-0504 | general | apptigent.com | POST | /ConvertCurrency | ConvertCurrency | r | x>x | w>r | F1 jev-lower->r
+gate4-0526 | write | portfoliooptimizer.io | POST | /portfolio/optimization/inverse-variance-weighted |  | r | x>x | w>r | F1 jev-lower->r
+gate4-0535 | general | motaword.com | POST | /continuous_projects/{projectId}/documents/progress | postContinuousProjectDocumentProgress | r | x>x | x>r | F1 jev-lower->r
+gate4-0537 | write | amazonaws.com | POST | /#Action=DescribeHosts | POST_DescribeHosts | r | x>x | w>r | F1 jev-lower->r
+gate4-0589 | general | autotask.net | POST | /V1.0/UserDefinedFieldDefinitions/query/count | UserDefinedFieldDefinitions_QueryCount | r | x>x | w>r | F1 jev-lower->r
+gate4-0590 | general | portfoliooptimizer.io | POST | /assets/correlation/matrix/effective-rank |  | r | x>x | w>r | F1 jev-lower->r
+gate4-0592 | write | amazonaws.com | POST | /#X-Amz-Target=AWSInsightsIndexService.DescribeCostCategoryDefinition | DescribeCostCategoryDefinition | r | x>x | w>r | F1 jev-lower->r
+gate4-0596 | write | googleapis.com | POST | /v1beta2/{parent}/yumArtifacts:create | artifactregistry.projects.locations.repositories.yumArtifacts.upload | w | x>x | w>x | other
+gate4-0615 | write | reverb.com | POST | /listings |  | w | x>x | x>w | other
+gate4-0637 | general | autotask.net | POST | /V1.0/OrganizationalResources/query/count | OrganizationalResources_QueryCount | r | x>x | w>r | F1 jev-lower->r
+gate4-0647 | general | azure.com | POST | /subscriptions/{subscriptionId}/providers/Microsoft.Blockchain/locations/{locationName}/checkNameAvailability | Locations_CheckNameAvailability | r | x>x | w>r | F1 jev-lower->r
+gate4-0650 | general | autotask.net | POST | /V1.0/ContactBillingProductAssociations/query | ContactBillingProductAssociations_Query | r | x>x | w>r | F1 jev-lower->r
+gate4-0671 | write | autotask.net | POST | /V1.0/ContractNotes/query/count | ContractNotes_QueryCount | r | x>x | w>r | F1 jev-lower->r
+gate4-0682 | general | plaid.com | POST | /link/token/get | linkTokenGet | r | x>x | w>r | F1 jev-lower->r
+gate4-0696 | general | autotask.net | POST | /V1.0/InternalLocations/query | InternalLocations_Query | r | x>x | w>r | F1 jev-lower->r
+gate4-0700 | general | autotask.net | POST | /V1.0/TicketNoteWebhookFields/query/count | TicketNoteWebhookFields_QueryCount | r | x>x | w>r | F1 jev-lower->r
+gate4-0725 | write | microsoft.com | POST | /groups/{group-id}/team/permissionGrants/{resourceSpecificPermissionGrant-id}/microsoft.graph.getMemberGroups | groups.group.team.permissionGrants.resourceSpecificPermissionGrant.getMemberGroups | r | x>x | w>r | F1 jev-lower->r
+gate4-0727 | write | plaid.com | POST | /partner/customer/get | partnerCustomerGet | r | x>x | w>r | F1 jev-lower->r
+gate4-0763 | write | azure.com | POST | /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{name}/listApplicableSchedules | VirtualMachines_ListApplicableSchedules | r | x>x | w>r | F1 jev-lower->r
+gate4-0777 | general | autotask.net | POST | /V1.0/ContractExclusionRoles/query/count | ContractExclusionRoles_QueryCount | r | x>x | w>r | F1 jev-lower->r
+gate4-0783 | general | epa.gov | POST | /dfr_rest_services.get_notices |  | r | x>x | w>r | F1 jev-lower->r
+
+Jev-run disagreements on rows neither F1 nor F2 touched: 8 gate4-0055 gate4-0141 gate4-0227 gate4-0338 gate4-0359 gate4-0380 gate4-0596 gate4-0615

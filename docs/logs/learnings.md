@@ -8172,3 +8172,44 @@ Node.
     pure fallback to mechanical was looser than MECH-THEN-ASK.
 - Lesson: a model that beats the exact bar can still fail on leaks
   concentrated in one vendor. The leak bar, not the exact bar, decides.
+
+## 2026-11-03 — gate-4: the 0.9.0 candidate vs 0.8.1, scored once: PASS
+
+- Goal: score the 0.9.0 candidate (F1 jev-lower->r, D129; F2
+  credential-set, D131) against shipped 0.8.1 on rwxlite's fresh gate-4,
+  once, against a bar set before the run.
+- Tried:
+  - Setup: 800 rows from 250 providers (write 200, general 600), rwxlite
+    commit f1b8a2b. Vendor-clean is 641 rows, the rows left after the
+    24-name list of providers in rwxmap's labelled sets.
+  - Branch at 7c3432c against npm rwxmap@0.8.1, both through the real CLI,
+    mechanical and with Jev (model jev-1.14.0).
+  - Jev runs: 0.8.1 sent 743 requests, 0 failed, 1,493,626 input tokens.
+    Branch sent 883 requests, 0 failed, 1,790,298 input tokens (F1 adds
+    second calls). About 3.28M input tokens in all, about $0.14.
+  - Orchestrator re-scored from run.tar.gz: exit 0, byte-identical.
+  - Pre-set bar: branch + Jev not more too-loose than 0.8.1 + Jev, on all
+    800 and on vendor-clean.
+- Outcome: PASS. Too loose is 9 vs 10 on all 800 and 9 vs 10 on
+  vendor-clean 641. Counts are exact / too loose / too tight.
+
+  | set | 0.8.1 mech | branch mech | 0.8.1 + Jev | branch + Jev |
+  |---|---|---|---|---|
+  | all 800 | 598 / 11 / 191 | 599 / 10 / 191 | 687 / 10 / 103 | 734 / 9 / 57 |
+  | write 200 | 125 / 6 / 69 | 125 / 6 / 69 | 161 / 4 / 35 | 177 / 4 / 19 |
+  | general 600 | 473 / 5 / 122 | 474 / 4 / 122 | 526 / 6 / 68 | 557 / 5 / 38 |
+  | vendor-clean 641 | 458 / 11 / 172 | 459 / 10 / 172 | 537 / 10 / 94 | 579 / 9 / 53 |
+
+  - All 800: exact 74.8 / 74.9 / 85.9 / 91.8 %; too loose 1.4 / 1.3 /
+    1.3 / 1.1 %.
+  - F1: 46 rows changed, all POST. 46 right, 0 wrong.
+  - F2: 1 row changed (appwrite PATCH /account/password, w to x, truth
+    x). Right.
+  - 8 more rows differ only by Jev run-to-run noise, not F1 or F2: 3
+    became exact, 3 became wrong (gate4-0141, 0380, 0596: w to x, truth
+    w), 2 stayed wrong (0055, 0338).
+  - Files: data/gate4-2026-11-04/ (score.txt, README.md, run.tar.gz).
+- Lesson: on fresh rows F1 is the bigger lever (+46 exact of 800) and F2
+  is rare (1 of 800). Jev noise between runs moves about 1% of rows either
+  way, so a one-row too-loose difference (9 vs 10) is within noise. The
+  bar held, but it is not evidence of a leak reduction.
