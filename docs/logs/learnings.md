@@ -7673,3 +7673,77 @@ Node.
   exam, all on rows from providers rwxmap never tuned on.
   An overlap check must run against every labelled set held (the old v1
   corpus included), not the sets that come to mind.
+
+## 2026-11-03 — F1 POC: floor-post rows may drop to r (tuning pass), and gate-2
+
+- Goal: measure take-back F1 on the tuning set before any src build. The
+  bar was set before measuring. F1 can loosen, so the D100 loosening bar
+  applies: leave-one-vendor-out (LOVO) right/wrong >= 10 (at least 91% of
+  moved rows right) on both of two Jev runs.
+- Tried: on rows with rule `floor-post`, also ask the changes question
+  (poc/jev-tiers/criteria-changes.mjs). Variant A: p_isX <= 0.10 gives w
+  (today's jev-lower), then p_changes <= T_r gives r. Variant B:
+  p_changes <= T_r gives r regardless of isX. T_r swept 0.05-0.50.
+  - Data: data/combined-2026-09-21, 6557 rows (v3). The floor-post pile
+    is 1336 rows, all POST: truth r 66 (4.9%), w 970 (72.6%), x 300
+    (22.5%). isX answers are cached in
+    data/jev-tiers-2026-09-23/out-lower.jsonl (jev-1.13.0). Changes
+    answers are new, two runs, in data/f1-post-r-2026-11-03/ (jev-1.14.0;
+    1906 rows each incl. 570 buildset rows; 4,121,386 input tokens per
+    run, about $0.17 each). Every pairing mixes two model versions; a src
+    build asks both questions of one version.
+  - Baseline (mechanical + jev-lower 0.10, raise tiers off), all 6557
+    rows, exact / too loose / too tight: run1 6142 (93.7%) / 77 (1.2%) /
+    338 (5.2%); run2 6143 / 78 / 336.
+- Outcome:
+  - Variant A is flat above 0.10. At T_r 0.50: run1 moves 37, right 36,
+    wrong 1 (truth w); run2 moves 36, right 35, wrong 1. On all 6557 at
+    0.50: 6177 (94.2%) / 78-79 (1.2%) / 301-302 (4.6%); too loose rises by
+    exactly the 1 wrong move. LOVO over 23 vendor folds: every fold picks
+    0.50. Pooled run1: 37 moved, 36 right (97.3%), ratio 36, PASS. Run2:
+    36 moved, 35 right, ratio 35, PASS. Run1 vs run2: 1 of 1336 rows
+    flips.
+  - Variant B: LOVO pooled run1 41 moved, 36 right (87.8%), 5 wrong w,
+    ratio 7.20, FAIL. Run2 43 moved, 37 right, 5 wrong w + 1 wrong x,
+    ratio 6.17, FAIL. The docusign fold picks 0.30 and moves 13 with 5
+    wrong.
+  - The one wrong move on every run and variant: x17-e1059 docusign POST
+    /v2.1/accounts/{accountId}/templates/{templateId}/views/edit
+    Views_PostTemplateEditView, truth w, p_isX 0.08-0.09, p_changes
+    0.07-0.09 ("Gets a URL for a template edit view").
+  - The orchestrator read all 37 run1 moves: batch read, search, preview,
+    verify and count calls (hubspot 11, docusign 7, zendesk 6, stripe 3,
+    openai 2, paypal 2, one each in auth0, digitalocean, jira, klaviyo,
+    mailchimp, okta).
+  - Ceiling: A reaches 36 of 66 truth-r rows (54.5%). The other 30 stay x
+    because isX is 0.15-0.36; most are generation calls (openai
+    createImage/createChatCompletion/createTranscription, digitalocean
+    inference_*) where the changes question also says yes (p 0.5-0.96).
+    F1 fixes search/query/get-shaped reads, not generation reads.
+  - Buildset side check (570 rows, separate, not blended): A at 0.10-0.50
+    moves 18, all right; B at 0.50 moves 34, 28 right, 4 wrong w, 2 wrong
+    x.
+  - Pre-registered for the fresh score, written before any src build or
+    gate-2 scoring by rwxmap: Variant A at T_r = 0.50, both questions
+    asked of one model version. Adoption on gate-2 (rwxlite
+    data/gate-2026-11-04/truth.csv, 600 rows, scored once by rwxmap)
+    needs F1's moves right/wrong >= 10 and total too loose no worse than
+    the shipped line on the same rows; reported on all 600 and on the 483
+    vendor-clean rows.
+  - Gate-2 truth (rwxlite commit f6c985b): 600 fresh BRIEF-v3 rows, A/B
+    labellers agreed on 590 of 600 (98.3%), 10 ruled by rwxlite's user;
+    truth r 353 / w 204 / x 43. Exact / too loose / too tight, all 600:
+    mechanical 476 (79.3%) / 7 / 117, re-derived by the orchestrator with
+    src classifyRow, exact match; shipped rwxmap with Jev 91.5% / 3 / 48
+    (rwxlite's figure); rwxlite round-6 96.5% / 4 / 17. Vendor-clean 483
+    rows (24-name list): mechanical 376 (77.8%) / 7 / 100 (re-derived,
+    match); shipped 90.3% / 3 / 44.
+  - Disclosure: before rwxmap scored, rwxlite's message gave F1
+    aggregates on gate-2 (its own F1 at r cut 0.20 moved 20 rows, all
+    truth r) and named some gate-2 rows its round-6 still misses (zuora
+    billing preview, quickchart /qr, plaid precheck, taggun validate,
+    orthanc shutdown). rwxmap's T_r was picked on tuning only (LOVO 0.50),
+    not from that.
+- Lesson: the isX <= 0.10 gate does most of the work. A second question
+  alone (variant B) loosens too freely and fails LOVO. A two-question
+  rule should keep the stricter first gate.
