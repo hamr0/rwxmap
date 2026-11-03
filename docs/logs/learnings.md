@@ -7747,3 +7747,63 @@ Node.
 - Lesson: the isX <= 0.10 gate does most of the work. A second question
   alone (variant B) loosens too freely and fails LOVO. A two-question
   rule should keep the stricter first gate.
+
+## 2026-11-04 — F1 built (D129) and scored once on gate-2: PASS
+
+- Goal: build the F1 cut that the tuning pass chose (variant A) into the
+  CLI, then score it once on rwxlite's fresh gate-2 against the bar
+  written before scoring.
+- Tried:
+  - Build: when `jev-lower` (pile `floor-post`, POST x) gets isX
+    p <= 0.10, the CLI sends a second, separate request with the changes
+    question (`jevQuestions('jev-raise-get')`, byte-equal). If that
+    answer is usable, from the same model string, and p_changes <= 0.50
+    (`JEV_LOWER_R_THRESHOLD`, override key `jev-lower-r`), the row moves
+    x -> r; otherwise it stops at w as before. The moved verdict records
+    `jev {p, model, pChanges}`; the rule stays `jev-lower`; the review
+    sidecar shows pChanges; published carriers are unchanged. No second
+    call for rows isX does not lower. Code in src/jev.js and src/cli.js
+    (typedefs in src/types.js and src/exporter.js). npm test 492/492
+    (was 476), typecheck 0, proof-src 0 differences over 6557 rows.
+  - Score, run once on 2026-11-04 through the real CLI (branch
+    feat/d128-rwxlite-takeback, uncommitted F1 build). One OpenAPI file
+    per provider, built from rwxlite data/gate-2026-11-04/blind.csv (219
+    providers, 600 rows, 0 duplicate method+path, 0 missing joins).
+    Truth: rwxlite data/gate-2026-11-04/truth.csv (frozen, commit
+    f6c985b). Jev model jev-1.14.0 on every answer. 654 requests, 0
+    failed, 1,360,315 input tokens.
+  - The shipped line comes from the same run: rows F1 moved to r are put
+    back to w. That is exactly what 0.8.1 does, since the second
+    question is only asked after the isX move.
+- Outcome: PASS. Exact / too loose / too tight:
+  - All 600 rows: mechanical 476 (79.3%) / 7 (1.2%) / 117 (19.5%);
+    shipped 550 (91.7%) / 3 (0.5%) / 47 (7.8%); F1 567 (94.5%) /
+    3 (0.5%) / 30 (5.0%).
+  - Vendor-clean 483 rows (24-name list): mechanical 376 (77.8%) / 7 /
+    100; shipped 437 (90.5%) / 3 / 43; F1 452 (93.6%) / 3 / 28.
+  - F1 moved 17 rows, 17 right (truth r), 0 wrong: the ratio has no
+    wrong rows, bar 10. Too loose 3 = 3, no worse than shipped.
+  - The 17: airbyte webBackendCheckUpdates; amazonaws
+    DescribeNotificationConfigurations, DescribeDominantLanguageDetectionJob;
+    azure EnterpriseChannels_CheckNameAvailability; vtex
+    Calculatediscountsandtaxes(Bundles); plaid
+    incomeVerificationPaystubsGet, webhookVerificationKeyGet; apptigent
+    UrlDecode, ConvertDistance; autotask
+    ConfigurationItemWebhookExcludedResources_Query, Tags_QueryCount,
+    CompanyNoteAttachments_QueryCount; botify testUrlRewritingRules;
+    portfoliooptimizer effective-number-of-bets,
+    inverse-volatility-weighted; adyen post-legalEntities-id-termsOfService;
+    signl4 /events/paged.
+  - rwxlite scored shipped on gate-2 at 91.5% / 3 / 48; this run gave
+    91.7% / 3 / 47. The gap is Jev non-determinism between runs.
+  - Disclosure (as logged in the F1 POC entry): rwxlite had shared
+    aggregate F1 results and some miss names before this score. rwxmap's
+    cut was fixed on tuning (LOVO 0.50) and pre-registered in commit
+    c503b05 before scoring.
+  - Run files: data/f1-gate2-2026-11-04/ (build.mjs, score.mjs,
+    score.txt, run.tar.gz, README.md).
+- Lesson: a cut pre-registered from a LOVO tuning pass held on fresh rows
+  (17 of 17). The fresh gain (+2.8 points exact on 600 rows, 91.7% to
+  94.5%) was larger than tuning's (+0.5 on 6557) because fresh
+  APIs.guru POST floor rows hold more reads. The gate-2 score is now
+  burned for F1: a later change to this cut needs a new fresh sample.

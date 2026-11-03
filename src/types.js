@@ -64,9 +64,11 @@
  * @property {true} [destructive]  Present and true only on an x verdict
  *   that removes something (D86's refinement flag inside x, never a fourth
  *   class). Absent, never false, on every other verdict.
- * @property {{p: number, model: string}} [jev]  Present only on a
+ * @property {{p: number, model: string, pChanges?: number}} [jev]  Present only on a
  *   Jev-moved verdict: the model's own p and version string, so a
  *   signed map never changes silently as the model behind it changes (D88).
+ *   `pChanges` is present only on a jev-lower row that went on to r: the
+ *   second (changes) answer's p (D129).
  */
 
 /**

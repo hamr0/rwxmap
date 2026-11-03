@@ -258,12 +258,17 @@ The tool emits no confidence score.
 ### The Jev tiers (optional, D82/D88/D95)
 
 Three independent tiers. Each reads only its own pile of mechanical
-verdicts, makes one one-way move, and keeps its own ledger; no two
-piles overlap, so no tier can undo another.
+verdicts and keeps its own ledger; no two piles overlap, so no tier can
+undo another. The two raise tiers make one one-way move. `jev-lower`
+ends at w or at r (D129): when p(x) ≤ 0.10 fires, a second, separate
+request asks the changes question (`jev-raise-get`'s, byte-equal). A
+usable answer from the same model string with p(changes) ≤ 0.50
+(`JEV_LOWER_R_THRESHOLD`) moves the row x → r; anything else stops it
+at w. Rows isX does not lower get no second call.
 
 | tier | pile (mechanical rule) | move | question | fires at |
 |---|---|---|---|---|
-| `jev-lower` | `floor-post`, class x | x → w | is this x? | p(x) ≤ 0.10 |
+| `jev-lower` | `floor-post`, class x | x → w, or x → r (D129) | is this x?; then, only if it fired, does anything change? | p(x) ≤ 0.10; then p(changes) ≤ 0.50 |
 | `jev-raise-wx` | `method-floor`, class w | w → x | is this x? (x-only criteria) | p(x) ≥ 0.80 |
 | `jev-raise-get` | `method`, class r | r → w, never x | does anything change? | p(changes) ≥ 0.50 |
 
@@ -271,7 +276,7 @@ piles overlap, so no tier can undo another.
 the model's answer and passes it to `applyJev`. Any bad answer — p not a
 finite number in [0, 1], no model string, below threshold — leaves the
 verdict untouched: fail closed. A moved verdict records `jev: {p,
-model}` so a map never changes silently when the model behind it does.
+model}` (plus `pChanges` for an x → r move) so a map never changes silently when the model behind it does.
 The criteria text is transcribed verbatim from BRIEF-v3. Opting in means
 spec text (method, path, operationId, summary, description) goes to an
 outside service, and the adopter must say so.
@@ -326,6 +331,11 @@ Run: `npm test`, `npm run typecheck`, `node poc/d87/proof-src.mjs`,
 | **M3 exam, 4279** | **+ all three Jev tiers** | **3980 (93.0%)** | **22 (0.5%)** | **277 (6.5%)** |
 | fresh gate, 600 (rwxlite, BRIEF-v3, D128) | mechanical | 459 (76.5%) | 13 (2.2%) | 128 (21.3%) |
 | fresh gate, 600 (rwxlite, BRIEF-v3, D128) | + all three Jev tiers | 531 (88.5%) | 8 (1.3%) | 61 (10.2%) |
+| fresh gate-2, 600 (rwxlite, BRIEF-v3, D129) | + all three Jev tiers, 0.8.1 | 550 (91.7%) | 3 (0.5%) | 47 (7.8%) |
+| fresh gate-2, 600 (rwxlite, BRIEF-v3, D129) | + all three Jev tiers, F1 (D129) | 567 (94.5%) | 3 (0.5%) | 30 (5.0%) |
+
+On gate-2's vendor-clean 483 rows, exact goes from 437 (90.5%) to 452
+(93.6%) with F1; too loose is 3 both ways.
 
 The fresh gate holds only 38 truth-x rows of 600, and 19 of its 227
 providers appear in rwxmap's labelled sets; on the 472 rows from the
@@ -871,7 +881,9 @@ Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 rwxlite replacing Jev (D128) is in progress in the rwxlite project.
 rwxmap's part is to check each fresh sample's provider list against the
 locks, and to weigh the take-back candidates in learnings (2026-11-03)
-under their own D-numbers. Parked items and known limits are below.
+under their own D-numbers. F1 (D129) is built and passed gate-2
+(17 of 17 moves right); release is pending. F2 (credential words) is the
+next take-back pass. Parked items and known limits are below.
 
 ### Parked
 

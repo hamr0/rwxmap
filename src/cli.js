@@ -10,13 +10,14 @@
 //
 // THIS IS NOT CORE (D109): it never imports tokens.js, step1-3.js or
 // flow.js, and holds no word list and no r/w/x judgement of its own.
-// jev.js IS imported here, read-only, for exactly the two functions its
-// own header names the caller as owning: needsJev (which rows a tier
-// wants) and applyJev (apply an answer this file already obtained over
-// the network). Neither is a judgement call this file makes itself — the
-// judgement (the tier's pile, threshold and one-way move) is entirely
-// jev.js's, and this file never edits jev.js, never re-derives a
-// threshold, and never moves a class on its own reasoning.
+// jev.js IS imported here, read-only, for exactly the functions its own
+// header names the caller as owning: needsJev (which rows a tier wants),
+// applyJev (apply an answer this file already obtained over the network)
+// and jevTier (whether a tier asks a second question, D129). None is a
+// judgement call this file makes itself — the judgement (the tier's
+// pile, thresholds and one-way move) is entirely jev.js's, and this
+// file never edits jev.js, never re-derives a threshold, and never
+// moves a class on its own reasoning.
 //
 // D121 — ONE COMMAND. A spec URL or local file is read with
 // `rwxmap/load` (loadSpec); a bare API address (an http(s) URL that is
@@ -91,7 +92,7 @@ import { loadSpec } from './load.js';
 import { findSpec, firstServerHost } from './discover.js';
 import { operationsFrom, operationEntries, exportGate, exportSidecar, classifyOperations } from './exporter.js';
 import { resolvedServers, tenantServerTemplates } from './servers.js';
-import { needsJev, applyJev } from './jev.js';
+import { needsJev, applyJev, jevTier } from './jev.js';
 import { runJevBatch } from './jev-client.js';
 
 // ---------------------------------------------------------------------
@@ -716,8 +717,12 @@ function loadJevKey(cwd) {
  * function only has to feed it real answers or nothing at all.
  *
  * Sends ONLY the rows jev.js's needsJev names — one askJev call per such
- * row, never the whole operation list — so the request count this run
- * makes is exactly the count it reports as "sent".
+ * row, never the whole operation list — plus, for a tier with a second
+ * question (jev-lower, D129; read off jev.js's jevTier, never decided
+ * here), one more askJev call per row the first answer moved, and none
+ * for any other row. "sent" is exactly the request count this run makes;
+ * "answered" and "failed" count requests too, so a failed second call
+ * shows as one failure while its row keeps the first answer's move.
  *
  * @param {import('./types.js').Operation[]} ops
  * @param {import('./types.js').Verdict[]} verdicts  mechanical, same
@@ -748,25 +753,62 @@ async function runJev(ops, verdicts, jevOpts) {
   /** @type {string|null} */
   let model = null;
 
+  /** @param {{usage: {input: number, output: number}, model: string}} answer */
+  const count = (answer) => {
+    answered += 1;
+    tokens.input += answer.usage.input;
+    tokens.output += answer.usage.output;
+    if (!model) model = answer.model;
+  };
+
+  // D129: a tier with a second question (jev-lower) asks it ONLY of the
+  // rows its first answer already moved to the tier's first class. Those
+  // rows go out as a second, separate request each; every other row makes
+  // no second call.
+  /** @type {{j: number, index: number, ask: string}[]} */
+  const seconds = [];
+
   for (let j = 0; j < targets.length; j += 1) {
-    const { index } = targets[j];
+    const { index, tier } = targets[j];
     const answer = answers[j];
     if (!answer) {
       failed += 1;
       continue;
     }
-    answered += 1;
-    tokens.input += answer.usage.input;
-    tokens.output += answer.usage.output;
-    if (!model) model = answer.model;
+    count(answer);
     const moved = applyJev(verdicts[index], { p: answer.p, model: answer.model }, { method: ops[index].method });
     finalVerdicts[index] = moved;
-    if (moved.class !== verdicts[index].class) changed += 1;
+    const spec = jevTier(tier);
+    if (spec && spec.second && moved.class === spec.to && moved.class !== verdicts[index].class) {
+      seconds.push({ j, index, ask: spec.second.ask });
+    }
+  }
+
+  const secondItems = seconds.map((s) => ({ row: ops[s.index], tier: s.ask }));
+  const secondAnswers = secondItems.length > 0 ? await runJevBatch(secondItems, jevOpts) : [];
+  for (let k = 0; k < seconds.length; k += 1) {
+    const { j, index } = seconds[k];
+    const second = secondAnswers[k];
+    if (!second) {
+      failed += 1; // the row keeps the first answer's move (w)
+      continue;
+    }
+    count(second);
+    const first = /** @type {{p: number, model: string}} */ (answers[j]);
+    finalVerdicts[index] = applyJev(
+      verdicts[index],
+      { p: first.p, model: first.model, changes: { p: second.p, model: second.model } },
+      { method: ops[index].method },
+    );
+  }
+
+  for (let i = 0; i < verdicts.length; i += 1) {
+    if (finalVerdicts[i].class !== verdicts[i].class) changed += 1;
   }
 
   return {
     verdicts: finalVerdicts,
-    summary: { mode: 'on', model, sent: items.length, answered, failed, changed, tokens },
+    summary: { mode: 'on', model, sent: items.length + secondItems.length, answered, failed, changed, tokens },
   };
 }
 
