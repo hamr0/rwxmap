@@ -7807,3 +7807,109 @@ Node.
   94.5%) was larger than tuning's (+0.5 on 6557) because fresh
   APIs.guru POST floor rows hold more reads. The gate-2 score is now
   burned for F1: a later change to this cut needs a new fresh sample.
+
+## 2026-11-04 — F2 POC: credential nouns raise PUT/PATCH to x (tuning pass): FAIL
+
+- Goal: tuning POC for take-back F2 (BRIEF-v3 clause (b): resetting or
+  rotating a credential, key, token, secret, certificate, session or
+  password is x). Bar set before measuring: D100 tighten-only. Among
+  fires, more right than wrong; too loose never rises; the result holds
+  pooled under LOVO and on the buildset line; flag it if one vendor
+  holds more than 50% of the fires.
+- Tried: three candidates, all on the mechanical letter, no Jev calls
+  (the with-Jev line reuses the cached raise-wx answers, runs jev1 and
+  jev2, which score the same).
+  - C1: PUT/PATCH where a credential noun is in the operationId or path
+    tokens.
+  - C2: C1 plus the summary.
+  - C3: C2's method set plus POST (C3 takes the C1 word source).
+  Run file: poc/f2-credential/score.mjs, output score.txt, 8 tests pass.
+- Outcome: C1, C2 and C3 all FAIL on both sets and under LOVO. "Right" =
+  moved to x and truth x (a leak closed); "wrong" = moved to x and truth
+  w.
+  - Combined (6557 rows). C1: 23 fires, 0 already x, 23 moved, 6 right,
+    17 wrong. C2: 25 fires, 25 moved, 6 right, 19 wrong. C3: 109 fires,
+    76 already x, 33 moved, 7 right, 26 wrong (POST alone: 10 moved,
+    1 right, 9 wrong).
+  - Buildset (1819 rows). C1: 16 fires, 3 already x, 13 moved, 3 right,
+    10 wrong. C2: 19 fires, 3 already x, 16 moved, 6 right, 10 wrong.
+    C3: 45 fires, 29 already x, 16 moved, 3 right, 13 wrong.
+  - Whole set, mechanical, exact / too loose / too tight. Combined
+    before 5418 (82.6%) / 64 (1.0%) / 1075 (16.4%) of 6557. After C1
+    5407 (82.5%) / 58 (0.9%) / 1092 (16.7%); C2 5405 (82.4%) / 58 /
+    1094 (16.7%); C3 5399 (82.3%) / 57 (0.9%) / 1101 (16.8%).
+    Buildset before 1310 (72.0%) / 18 (1.0%) / 491 (27.0%) of 1819.
+    After C1 1303 (71.6%) / 15 (0.8%) / 501 (27.5%); C2 1306 (71.8%) /
+    12 (0.7%) / 501 (27.5%); C3 1300 (71.5%) / 15 / 504 (27.7%).
+  - With Jev (cached raise-wx), combined: before 5428 (82.8%) / 54
+    (0.8%) / 1075 (16.4%). After C1 5415 (82.6%) / 50 / 1092; C2 5413
+    (82.6%) / 50 / 1094; C3 5407 (82.5%) / 49 / 1101. Buildset: before
+    1312 (72.1%) / 15 (0.8%) / 492 (27.0%). After C1 1305 (71.7%) / 12 /
+    502; C2 1307 (71.9%) / 10 / 502; C3 1302 (71.6%) / 12 / 505. Too
+    loose falls a little everywhere; too tight rises by exactly the
+    wrong fires.
+  - C1 per word, combined (fires / right / wrong): apikey 7/2/5,
+    credential 5/1/4, token 5/0/5, password 4/2/2, certificate 1/1/0,
+    secret 1/0/1.
+  - LOVO pooled (literal), combined: C1 moved 4, closed 1, new over-tight
+    3; C2 the same; C3 moved 5, closed 0, new over-tight 5. Buildset: C1
+    moved 7, closed 2, over-tight 5; C2 moved 9, closed 4, over-tight 5
+    (right 4 vs wrong 5); C3 moved 7, closed 2, over-tight 5.
+  - APIs.guru prevalence (123,339 operations, no truth): C1 422 fires
+    across 73 providers (409 would move), github.com 44.1% of the fires,
+    driven by "secret" (201 of 422 fires). C2 436 fires, 75 providers,
+    github.com 42.7%. C3 1889 fires, 167 providers, top apisetu.gov.in
+    27.0%.
+  - The rows: wrong fires are config edits of credential metadata that
+    v3 truth calls w: digitalocean and datadog update API key (name),
+    auth0 hook secrets, docusign password rules, auth0 breached-password
+    detection, token exchange profile, verifiable-credential template,
+    zendesk and okta update API token (network condition), hubspot
+    template token. Right fires replace the credential itself: zoom
+    userPassword, zendesk ChangeOwnPassword, digitalocean
+    regenerate API key (two), okta replaceIdentityProviderKey, okta
+    upsertCertificate.
+- Post-hoc variants V1-V4. Designed after reading the fires, so they are
+  fitted and say so; scored the same way.
+  - V1: C2 plus a lead verb change/regenerate/regen. Combined 1 fire,
+    1 right, 0 wrong (all zendesk, top share 100%, FLAG). Buildset 5
+    fires, 4 right, 1 wrong (clearblade 3 of 5, FLAG).
+  - V2: last path segment is a literal credential noun. Combined 5
+    fires, 3 right, 2 wrong. Buildset 3 fires, 1 moved right, 1 wrong,
+    FAIL (right not above wrong; dracoon 2 of 3, FLAG).
+  - V3: V1 or V2. Combined 5 fires, 3 right, 2 wrong. Buildset 6 fires,
+    5 moved, 4 right, 1 wrong.
+  - V4: V3 limited to password/passcode/pin. Combined 2 fires, 2 right,
+    0 wrong (zoom userPassword, zendesk ChangeOwnPassword; one vendor each,
+    top share 50.0%); too loose 64 -> 62, too tight +0; LOVO 2 right,
+    0 wrong. Buildset 5 fires, 1 already x, 4 moved, 3 right, 1 wrong;
+    too loose 18 -> 15, too tight +1; LOVO 3 right, 1 wrong. APIs.guru
+    37 fires across 27 providers, top britbox.co.uk 8.1%. V4 passes the
+    bar. Five rows in total (2 combined, 3 buildset) is too few to
+    justify a build on tuning alone.
+- Open ruling: D87's text lists "set a user's password" among the
+  PUT/PATCH rows that move x -> w. BRIEF-v3 clause (b) and the v3 truth
+  label such rows x (zoom userPassword, zendesk ChangeOwnPassword).
+  Awaiting the user's ruling on which stands; V4 only makes sense if v3
+  does.
+- Also recorded: gate-3, rwxlite's third fresh sample (data/gate-2026-11-06,
+  seed 20261106).
+  - 800 rows: a credential stratum of 200 (POST 100 / PUT 68 / PATCH 32;
+    pre-registered broad regex on path+operationId+summary, no change
+    verb required) plus a general stratum of 600 (GET 325 / POST 175 /
+    PUT 50 / PATCH 50). Labelled blind together, scored separately.
+  - rwxmap's lock check found hubapi.com (HubSpot's API domain), which
+    whole-label name matching had missed. rwxlite dropped it and redrew
+    2 credential POST rows (commit ec76d1b).
+  - 21 providers overlap rwxmap's labelled sets (20, plus azure) and go
+    on the vendor-clean line.
+  - Gate-3 rows are in rwxlite's MiniLM training data, so gate-3 is
+    rwxmap's exam only.
+- Lesson:
+  - A noun names the thing, not what happens to it. Credential nouns sit
+    mostly on metadata edits, so only the "replace the secret itself"
+    shape is x. This is the same verb-transfers / noun-fails pattern as
+    D81: what the call does carries across vendors, whose thing it
+    touches does not.
+  - Whole-label vendor matching misses a brand's other API domains
+    (hubapi.com is HubSpot). A lock check needs known brand aliases too.

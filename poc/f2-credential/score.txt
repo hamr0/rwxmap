@@ -1,0 +1,639 @@
+
+================ combined: data/combined-2026-09-21/labelled.csv
+read 6557 rows; skipped 0 (truth not r/w/x); scored 6557
+jev jev1 (data/jev-tiers-2026-09-23/out-raise-wx-xonly.jsonl): method-floor pile 1054; answers joined 1054, pile rows with no answer 0 (stay w), unusable/errored 3 (stay w), malformed lines 0; answers for rows not in this set 603 (ignored); raised to x at 0.80: 10
+jev jev2 (data/jev-tiers-2026-09-23/out-raise-wx-xonly-run2.jsonl): method-floor pile 1054; answers joined 1054, pile rows with no answer 0 (stay w), unusable/errored 3 (stay w), malformed lines 0; answers for rows not in this set 603 (ignored); raised to x at 0.80: 10
+
+---- combined C1 (PUT/PATCH, noun in operationId+path)
+rows with a credential noun excluded for a read lead verb: 0
+[1] fires vs mech: 23 fires of 6557 rows; already x 0; moved 23 -> right (truth x, leak closed) 6, wrong truth w 17, wrong truth r 0; moved from r 0
+[1] fires vs jev1: 23 fires of 6557 rows; already x 2; moved 21 -> right (truth x, leak closed) 4, wrong truth w 17, wrong truth r 0; moved from r 0
+[1] fires vs jev2: 23 fires of 6557 rows; already x 2; moved 21 -> right (truth x, leak closed) 4, wrong truth w 17, wrong truth r 0; moved from r 0
+    PUT: fires 16, already x 0, moved 16, right 6, wrong w 10, wrong r 0
+    PATCH: fires 7, already x 0, moved 7, right 0, wrong w 7, wrong r 0
+[2] mech: before 5418 exact (82.6%) / 64 too loose (1.0%) / 1075 too tight (16.4%) | after 5407 exact (82.5%) / 58 too loose (0.9%) / 1092 too tight (16.7%)  of 6557
+[2] jev1: before 5428 exact (82.8%) / 54 too loose (0.8%) / 1075 too tight (16.4%) | after 5415 exact (82.6%) / 50 too loose (0.8%) / 1092 too tight (16.7%)  of 6557
+[2] jev2: before 5428 exact (82.8%) / 54 too loose (0.8%) / 1075 too tight (16.4%) | after 5415 exact (82.6%) / 50 too loose (0.8%) / 1092 too tight (16.7%)  of 6557
+[3] per word (mechanical): word fires alreadyX moved right wrong vendors
+    apikey          7    0    7    2    5  datadog,digitalocean
+    credential      5    0    5    1    4  auth0,digitalocean,okta
+    token           5    0    5    0    5  auth0,hubspot,okta,zendesk
+    password        4    0    4    2    2  auth0,docusign,zendesk,zoom
+    certificate     1    0    1    1    0  okta
+    secret          1    0    1    0    1  auth0
+[4] LOVO literal (right>=wrong): pooled moved 4, leaks closed 1, new over-tight 3 (w 3, r 0); right <= wrong
+    fold auth0: moved 2, right 0, wrong 2; words dropped credential,token
+    fold datadog: moved 0, right 0, wrong 0; words dropped apikey
+    fold digitalocean: moved 0, right 0, wrong 0; words dropped apikey,credential
+    fold docusign: moved 1, right 0, wrong 1
+    fold hubspot: moved 0, right 0, wrong 0; words dropped token
+    fold okta: moved 1, right 1, wrong 0; words dropped credential,token
+    fold zendesk: moved 0, right 0, wrong 0; words dropped password,token
+    fold zoom: moved 0, right 0, wrong 0; words dropped password
+[4] LOVO strict (right>=wrong and right>0): pooled moved 2, leaks closed 0, new over-tight 2 (w 2, r 0); right <= wrong
+    fold auth0: moved 1, right 0, wrong 1; words dropped credential,secret,token
+    fold datadog: moved 0, right 0, wrong 0; words dropped apikey
+    fold digitalocean: moved 0, right 0, wrong 0; words dropped apikey,credential
+    fold docusign: moved 1, right 0, wrong 1
+    fold hubspot: moved 0, right 0, wrong 0; words dropped token
+    fold okta: moved 0, right 0, wrong 0; words dropped certificate,credential,token
+    fold zendesk: moved 0, right 0, wrong 0; words dropped password,token
+    fold zoom: moved 0, right 0, wrong 0; words dropped password
+    fires per vendor: digitalocean 7, auth0 6, okta 4, zendesk 2, zoom 1, datadog 1, docusign 1, hubspot 1; top share 30.4%
+[6] all 23 fires:
+    row_id | provider | method | path | operationId | summary | truth | before(mech rule) | after | words
+    pc-r1389 | zoom | PUT | /users/{userId}/password | userPassword | Update a user's password | x | w(method-floor) | x | password
+    pc-r1896 | digitalocean | PUT | /v2/databases/metrics/credentials | databases_update_cluster_metrics_credentials | Update Database Clusters' Metrics Endpoint Credentials | w | w(method-floor) | x | credential
+    pc-r2283 | digitalocean | PUT | /v2/gen-ai/agents/{agent_uuid}/api_keys/{api_key_uuid} | genai_update_agent_api_key | Update API Key for an Agent | w | w(method-floor) | x | apikey
+    pc-r2285 | digitalocean | PUT | /v2/gen-ai/agents/{agent_uuid}/api_keys/{api_key_uuid}/regenerate | genai_regenerate_agent_api_key | Regenerate API Key for an Agent | x | w(method-floor) | x | apikey
+    pc-r2308 | digitalocean | PUT | /v2/gen-ai/anthropic/keys/{api_key_uuid} | genai_update_anthropic_api_key | Update Anthropic API Key | w | w(method-floor) | x | apikey
+    pc-r2366 | digitalocean | PUT | /v2/gen-ai/models/api_keys/{api_key_uuid} | genai_update_model_api_key | Update API Key for a Model | w | w(method-floor) | x | apikey
+    pc-r2368 | digitalocean | PUT | /v2/gen-ai/models/api_keys/{api_key_uuid}/regenerate | genai_regenerate_model_api_key | Regenerate API Key for a Model | x | w(method-floor) | x | apikey
+    pc-r2383 | digitalocean | PUT | /v2/gen-ai/openai/keys/{api_key_uuid} | genai_update_openai_api_key | Update OpenAI API Key | w | w(method-floor) | x | apikey
+    pc-r3597 | datadog | PUT | /api/v1/api_key/{key} | UpdateAPIKey | Edit an API key | w | w(method-floor) | x | apikey
+    x17-e0024 | okta | PUT | /api/v1/api-tokens/{apiTokenId} | upsertApiToken | Upsert an API token network condition | w | w(method-floor) | x | token
+    x17-e0269 | okta | PUT | /api/v1/domains/{domainId}/certificate | upsertCertificate | Upsert the custom domain's certificate | x | w(method-floor) | x | certificate
+    x17-e0407 | okta | PUT | /api/v1/idps/credentials/keys/{kid} | replaceIdentityProviderKey | Replace an IdP key credential | x | w(method-floor) | x | credential
+    x17-e0582 | okta | PATCH | /api/v1/telephony-providers/{customTelephonyProviderId} | updateCustomTelephonyProviderCredential | Update a custom telephony provider credential | w | w(method-floor) | x | credential
+    x17-e0978 | docusign | PUT | /v2.1/accounts/{accountId}/settings/password_rules | AccountPasswordRules_PutAccountPasswordRules | Updates the password rules for an account. | w | w(method-floor) | x | password
+    x20-e0082 | auth0 | PATCH | /attack-protection/breached-password-detection | patch_breached-password-detection | Update Breached Password Detection settings | w | w(method-floor) | x | password
+    x20-e0093 | auth0 | PATCH | /clients/{client_id}/credentials/{credential_id} | patch_credentials_by_credential_id | Update a client credential | w | w(method-floor) | x | credential
+    x20-e0118 | auth0 | PATCH | /hooks/{id}/secrets | patch_secrets | Update hook secrets | w | w(method-floor) | x | secret
+    x20-e0130 | auth0 | PATCH | /refresh-tokens/{id} | patch_refresh-tokens_by_id | Update a refresh token | w | w(method-floor) | x | token
+    x20-e0140 | auth0 | PATCH | /token-exchange-profiles/{id} | patch_token-exchange-profiles_by_id | Update an existing token exchange profile | w | w(method-floor) | x | token
+    x20-e0144 | auth0 | PATCH | /verifiable-credentials/verification/templates/{id} | patch_vc_templates_by_id | Update a verifiable credential template by ID. | w | w(method-floor) | x | credential
+    x20-e0486 | hubspot | PUT | /integrators/timeline/v3/{appId}/event-templates/{eventTemplateId}/tokens/{tokenName} | put-/integrators/timeline/v3/{appId}/event-templates/{eventTemplateId}/tokens/{tokenName}_update | Update a template token | w | w(method-floor) | x | token
+    x20-e0927 | zendesk | PUT | /api/v2/api_tokens/{id} | UpdateApiToken | Update API Token | w | w(method-floor) | x | token
+    x20-e0999 | zendesk | PUT | /api/v2/users/{user_id}/password | ChangeOwnPassword | Change Your Password | x | w(method-floor) | x | password
+
+---- combined C2 (PUT/PATCH, noun in operationId+path+summary)
+rows with a credential noun excluded for a read lead verb: 0
+[1] fires vs mech: 25 fires of 6557 rows; already x 0; moved 25 -> right (truth x, leak closed) 6, wrong truth w 19, wrong truth r 0; moved from r 0
+[1] fires vs jev1: 25 fires of 6557 rows; already x 2; moved 23 -> right (truth x, leak closed) 4, wrong truth w 19, wrong truth r 0; moved from r 0
+[1] fires vs jev2: 25 fires of 6557 rows; already x 2; moved 23 -> right (truth x, leak closed) 4, wrong truth w 19, wrong truth r 0; moved from r 0
+    PUT: fires 18, already x 0, moved 18, right 6, wrong w 12, wrong r 0
+    PATCH: fires 7, already x 0, moved 7, right 0, wrong w 7, wrong r 0
+[2] mech: before 5418 exact (82.6%) / 64 too loose (1.0%) / 1075 too tight (16.4%) | after 5405 exact (82.4%) / 58 too loose (0.9%) / 1094 too tight (16.7%)  of 6557
+[2] jev1: before 5428 exact (82.8%) / 54 too loose (0.8%) / 1075 too tight (16.4%) | after 5413 exact (82.6%) / 50 too loose (0.8%) / 1094 too tight (16.7%)  of 6557
+[2] jev2: before 5428 exact (82.8%) / 54 too loose (0.8%) / 1075 too tight (16.4%) | after 5413 exact (82.6%) / 50 too loose (0.8%) / 1094 too tight (16.7%)  of 6557
+[3] per word (mechanical): word fires alreadyX moved right wrong vendors
+    apikey          7    0    7    2    5  datadog,digitalocean
+    token           7    0    7    0    7  auth0,hubspot,okta,zendesk
+    credential      5    0    5    1    4  auth0,digitalocean,okta
+    password        4    0    4    2    2  auth0,docusign,zendesk,zoom
+    certificate     1    0    1    1    0  okta
+    secret          1    0    1    0    1  auth0
+[4] LOVO literal (right>=wrong): pooled moved 4, leaks closed 1, new over-tight 3 (w 3, r 0); right <= wrong
+    fold auth0: moved 2, right 0, wrong 2; words dropped credential,token
+    fold datadog: moved 0, right 0, wrong 0; words dropped apikey
+    fold digitalocean: moved 0, right 0, wrong 0; words dropped apikey,credential
+    fold docusign: moved 1, right 0, wrong 1
+    fold hubspot: moved 0, right 0, wrong 0; words dropped token
+    fold okta: moved 1, right 1, wrong 0; words dropped credential,token
+    fold zendesk: moved 0, right 0, wrong 0; words dropped password,token
+    fold zoom: moved 0, right 0, wrong 0; words dropped password
+[4] LOVO strict (right>=wrong and right>0): pooled moved 2, leaks closed 0, new over-tight 2 (w 2, r 0); right <= wrong
+    fold auth0: moved 1, right 0, wrong 1; words dropped credential,secret,token
+    fold datadog: moved 0, right 0, wrong 0; words dropped apikey
+    fold digitalocean: moved 0, right 0, wrong 0; words dropped apikey,credential
+    fold docusign: moved 1, right 0, wrong 1
+    fold hubspot: moved 0, right 0, wrong 0; words dropped token
+    fold okta: moved 0, right 0, wrong 0; words dropped certificate,credential,token
+    fold zendesk: moved 0, right 0, wrong 0; words dropped password,token
+    fold zoom: moved 0, right 0, wrong 0; words dropped password
+    fires per vendor: digitalocean 7, okta 6, auth0 6, zendesk 2, zoom 1, datadog 1, docusign 1, hubspot 1; top share 28.0%
+[6] all 25 fires:
+    row_id | provider | method | path | operationId | summary | truth | before(mech rule) | after | words
+    pc-r1389 | zoom | PUT | /users/{userId}/password | userPassword | Update a user's password | x | w(method-floor) | x | password
+    pc-r1896 | digitalocean | PUT | /v2/databases/metrics/credentials | databases_update_cluster_metrics_credentials | Update Database Clusters' Metrics Endpoint Credentials | w | w(method-floor) | x | credential
+    pc-r2283 | digitalocean | PUT | /v2/gen-ai/agents/{agent_uuid}/api_keys/{api_key_uuid} | genai_update_agent_api_key | Update API Key for an Agent | w | w(method-floor) | x | apikey
+    pc-r2285 | digitalocean | PUT | /v2/gen-ai/agents/{agent_uuid}/api_keys/{api_key_uuid}/regenerate | genai_regenerate_agent_api_key | Regenerate API Key for an Agent | x | w(method-floor) | x | apikey
+    pc-r2308 | digitalocean | PUT | /v2/gen-ai/anthropic/keys/{api_key_uuid} | genai_update_anthropic_api_key | Update Anthropic API Key | w | w(method-floor) | x | apikey
+    pc-r2366 | digitalocean | PUT | /v2/gen-ai/models/api_keys/{api_key_uuid} | genai_update_model_api_key | Update API Key for a Model | w | w(method-floor) | x | apikey
+    pc-r2368 | digitalocean | PUT | /v2/gen-ai/models/api_keys/{api_key_uuid}/regenerate | genai_regenerate_model_api_key | Regenerate API Key for a Model | x | w(method-floor) | x | apikey
+    pc-r2383 | digitalocean | PUT | /v2/gen-ai/openai/keys/{api_key_uuid} | genai_update_openai_api_key | Update OpenAI API Key | w | w(method-floor) | x | apikey
+    pc-r3597 | datadog | PUT | /api/v1/api_key/{key} | UpdateAPIKey | Edit an API key | w | w(method-floor) | x | apikey
+    x17-e0024 | okta | PUT | /api/v1/api-tokens/{apiTokenId} | upsertApiToken | Upsert an API token network condition | w | w(method-floor) | x | token
+    x17-e0132 | okta | PUT | /api/v1/authorizationServers/{authServerId}/claims/{claimId} | replaceOAuth2Claim | Replace a custom token claim | w | w(method-floor) | x | token
+    x17-e0167 | okta | PUT | /api/v1/authorizationServers/{authServerId}/scopes/{scopeId} | replaceOAuth2Scope | Replace a custom token scope | w | w(method-floor) | x | token
+    x17-e0269 | okta | PUT | /api/v1/domains/{domainId}/certificate | upsertCertificate | Upsert the custom domain's certificate | x | w(method-floor) | x | certificate
+    x17-e0407 | okta | PUT | /api/v1/idps/credentials/keys/{kid} | replaceIdentityProviderKey | Replace an IdP key credential | x | w(method-floor) | x | credential
+    x17-e0582 | okta | PATCH | /api/v1/telephony-providers/{customTelephonyProviderId} | updateCustomTelephonyProviderCredential | Update a custom telephony provider credential | w | w(method-floor) | x | credential
+    x17-e0978 | docusign | PUT | /v2.1/accounts/{accountId}/settings/password_rules | AccountPasswordRules_PutAccountPasswordRules | Updates the password rules for an account. | w | w(method-floor) | x | password
+    x20-e0082 | auth0 | PATCH | /attack-protection/breached-password-detection | patch_breached-password-detection | Update Breached Password Detection settings | w | w(method-floor) | x | password
+    x20-e0093 | auth0 | PATCH | /clients/{client_id}/credentials/{credential_id} | patch_credentials_by_credential_id | Update a client credential | w | w(method-floor) | x | credential
+    x20-e0118 | auth0 | PATCH | /hooks/{id}/secrets | patch_secrets | Update hook secrets | w | w(method-floor) | x | secret
+    x20-e0130 | auth0 | PATCH | /refresh-tokens/{id} | patch_refresh-tokens_by_id | Update a refresh token | w | w(method-floor) | x | token
+    x20-e0140 | auth0 | PATCH | /token-exchange-profiles/{id} | patch_token-exchange-profiles_by_id | Update an existing token exchange profile | w | w(method-floor) | x | token
+    x20-e0144 | auth0 | PATCH | /verifiable-credentials/verification/templates/{id} | patch_vc_templates_by_id | Update a verifiable credential template by ID. | w | w(method-floor) | x | credential
+    x20-e0486 | hubspot | PUT | /integrators/timeline/v3/{appId}/event-templates/{eventTemplateId}/tokens/{tokenName} | put-/integrators/timeline/v3/{appId}/event-templates/{eventTemplateId}/tokens/{tokenName}_update | Update a template token | w | w(method-floor) | x | token
+    x20-e0927 | zendesk | PUT | /api/v2/api_tokens/{id} | UpdateApiToken | Update API Token | w | w(method-floor) | x | token
+    x20-e0999 | zendesk | PUT | /api/v2/users/{user_id}/password | ChangeOwnPassword | Change Your Password | x | w(method-floor) | x | password
+
+---- combined C3 (PUT/PATCH/POST, noun in operationId+path)
+rows with a credential noun excluded for a read lead verb: 4 [pc-r0943 POST RetrieveTokenStatus truth r; pc-r2591 POST getBulkPinStatus truth r; pc-r4109 POST introspectToken truth r; x20-e0849 POST ValidateToken truth r]
+[1] fires vs mech: 109 fires of 6557 rows; already x 76; moved 33 -> right (truth x, leak closed) 7, wrong truth w 26, wrong truth r 0; moved from r 0
+[1] fires vs jev1: 109 fires of 6557 rows; already x 78; moved 31 -> right (truth x, leak closed) 5, wrong truth w 26, wrong truth r 0; moved from r 0
+[1] fires vs jev2: 109 fires of 6557 rows; already x 78; moved 31 -> right (truth x, leak closed) 5, wrong truth w 26, wrong truth r 0; moved from r 0
+    POST: fires 86, already x 76, moved 10, right 1, wrong w 9, wrong r 0
+    PUT: fires 16, already x 0, moved 16, right 6, wrong w 10, wrong r 0
+    PATCH: fires 7, already x 0, moved 7, right 0, wrong w 7, wrong r 0
+[2] mech: before 5418 exact (82.6%) / 64 too loose (1.0%) / 1075 too tight (16.4%) | after 5399 exact (82.3%) / 57 too loose (0.9%) / 1101 too tight (16.8%)  of 6557
+[2] jev1: before 5428 exact (82.8%) / 54 too loose (0.8%) / 1075 too tight (16.4%) | after 5407 exact (82.5%) / 49 too loose (0.7%) / 1101 too tight (16.8%)  of 6557
+[2] jev2: before 5428 exact (82.8%) / 54 too loose (0.8%) / 1075 too tight (16.4%) | after 5407 exact (82.5%) / 49 too loose (0.7%) / 1101 too tight (16.8%)  of 6557
+[3] per word (mechanical): word fires alreadyX moved right wrong vendors
+    credential     37   27   10    1    9  auth0,digitalocean,okta,openai
+    token          30   23    7    1    6  auth0,canva,digitalocean,docusign,hubspot,klaviyo,miro,okta,openai,paypal,square,stripe,zendesk
+    secret         15   12    3    0    3  auth0,docusign,okta,openai,stripe
+    apikey         14    7    7    2    5  datadog,digitalocean,openai
+    password       11    7    4    2    2  auth0,docusign,okta,zendesk,zoom
+    certificate     8    4    4    1    3  digitalocean,okta,openai
+    pin             3    3    0    0    0  jira,okta,zendesk
+[4] LOVO literal (right>=wrong): pooled moved 5, leaks closed 0, new over-tight 5 (w 5, r 0); right <= wrong
+    fold auth0: moved 1, right 0, wrong 1; words dropped credential,secret,token
+    fold canva: moved 0, right 0, wrong 0; words dropped token
+    fold datadog: moved 0, right 0, wrong 0; words dropped apikey
+    fold digitalocean: moved 0, right 0, wrong 0; words dropped apikey,certificate,credential,token
+    fold docusign: moved 1, right 0, wrong 1; words dropped secret,token
+    fold hubspot: moved 0, right 0, wrong 0; words dropped token
+    fold klaviyo: moved 0, right 0, wrong 0; words dropped token
+    fold miro: moved 0, right 0, wrong 0; words dropped token
+    fold okta: moved 0, right 0, wrong 0; words dropped certificate,credential,secret,token
+    fold openai: moved 3, right 0, wrong 3; words dropped apikey,credential,secret,token
+    fold paypal: moved 0, right 0, wrong 0; words dropped token
+    fold square: moved 0, right 0, wrong 0; words dropped token
+    fold stripe: moved 0, right 0, wrong 0; words dropped secret,token
+    fold zendesk: moved 0, right 0, wrong 0; words dropped password,token
+    fold zoom: moved 0, right 0, wrong 0; words dropped password
+[4] LOVO strict (right>=wrong and right>0): pooled moved 5, leaks closed 0, new over-tight 5 (w 5, r 0); right <= wrong
+    fold auth0: moved 1, right 0, wrong 1; words dropped credential,secret,token
+    fold canva: moved 0, right 0, wrong 0; words dropped token
+    fold datadog: moved 0, right 0, wrong 0; words dropped apikey
+    fold digitalocean: moved 0, right 0, wrong 0; words dropped apikey,certificate,credential,token
+    fold docusign: moved 1, right 0, wrong 1; words dropped secret,token
+    fold hubspot: moved 0, right 0, wrong 0; words dropped token
+    fold jira: moved 0, right 0, wrong 0; words dropped pin
+    fold klaviyo: moved 0, right 0, wrong 0; words dropped token
+    fold miro: moved 0, right 0, wrong 0; words dropped token
+    fold okta: moved 0, right 0, wrong 0; words dropped certificate,credential,pin,secret,token
+    fold openai: moved 3, right 0, wrong 3; words dropped apikey,credential,secret,token
+    fold paypal: moved 0, right 0, wrong 0; words dropped token
+    fold square: moved 0, right 0, wrong 0; words dropped token
+    fold stripe: moved 0, right 0, wrong 0; words dropped secret,token
+    fold zendesk: moved 0, right 0, wrong 0; words dropped password,pin,token
+    fold zoom: moved 0, right 0, wrong 0; words dropped password
+    fires per vendor: okta 38, openai 14, digitalocean 14, auth0 14, stripe 7, docusign 3, klaviyo 3, zendesk 3, square 2, paypal 2, datadog 2, canva 2, miro 2, zoom 1, jira 1, hubspot 1; top share 34.9%
+[6] all 109 fires:
+    row_id | provider | method | path | operationId | summary | truth | before(mech rule) | after | words
+    pc-r0046 | stripe | POST | /v1/apps/secrets | PostAppsSecrets | Set a Secret | w | x(floor-post) | x | secret
+    pc-r0047 | stripe | POST | /v1/apps/secrets/delete | PostAppsSecretsDelete | Delete a Secret | x | x(cant-undo-verb-summary) | x | secret
+    pc-r0286 | stripe | POST | /v1/issuing/tokens/{token} | PostIssuingTokensToken | Update a token status | x | w(modify-verb-summary) | x | token
+    pc-r0417 | stripe | POST | /v1/shipping_rates/{shipping_rate_token} | PostShippingRatesShippingRateToken | Update a shipping rate | w | w(modify-verb-summary) | x | token
+    pc-r0477 | stripe | POST | /v1/terminal/connection_tokens | PostTerminalConnectionTokens | Create a Connection Token | w | x(floor-post) | x | token
+    pc-r0498 | stripe | POST | /v1/test_helpers/confirmation_tokens | PostTestHelpersConfirmationTokens | Create a test Confirmation Token | w | x(floor-post) | x | token
+    pc-r0542 | stripe | POST | /v1/tokens | PostTokens | Create a bank account token | w | x(floor-post) | x | token
+    pc-r0678 | openai | POST | /organization/admin_api_keys | admin-api-keys-create | Create admin API key | w | x(floor-post) | x | apikey
+    pc-r0683 | openai | POST | /organization/certificates | uploadCertificate | Upload certificate | w | x(floor-post) | x | certificate
+    pc-r0684 | openai | POST | /organization/certificates/activate | activateOrganizationCertificates | Activate certificates for organization | w | w(modify-verb) | x | certificate
+    pc-r0685 | openai | POST | /organization/certificates/deactivate | deactivateOrganizationCertificates | Deactivate certificates for organization | w | x(floor-post) | x | certificate
+    pc-r0687 | openai | POST | /organization/certificates/{certificate_id} | modifyCertificate | Modify certificate | w | w(modify-verb) | x | certificate
+    pc-r0718 | openai | POST | /organization/projects/{project_id}/certificates/activate | activateProjectCertificates | Activate certificates for project | w | w(modify-verb) | x | certificate
+    pc-r0719 | openai | POST | /organization/projects/{project_id}/certificates/deactivate | deactivateProjectCertificates | Deactivate certificates for project | x | x(floor-post) | x | certificate
+    pc-r0794 | openai | POST | /realtime/client_secrets | create-realtime-client-secret | Create client secret | w | x(floor-post) | x | secret
+    pc-r0797 | openai | POST | /realtime/translations/client_secrets | create-realtime-translation-client-secret | Create translation client secret | w | x(floor-post) | x | secret
+    pc-r0853 | openai | POST | /organization/projects/{project_id}/service_accounts/{service_account_id}/api_keys | CreateanAPIkeyforaserviceaccount | Create an API key for a service account | w | x(floor-post) | x | apikey
+    pc-r0865 | openai | POST | /responses/input_tokens | Getinputtokencounts | Get input token counts | r | x(floor-post) | x | token
+    pc-r0922 | openai | POST | /vaults/{vault_id}/credentials | createVaultCredential | Create a vault credential | w | x(floor-post) | x | credential
+    pc-r0924 | openai | POST | /vaults/{vault_id}/credentials/{credential_id} | rotateVaultCredential | Rotate a vault credential | x | x(cant-undo-verb) | x | credential
+    pc-r0931 | openai | POST | /webhook_endpoints/{webhook_endpoint_id}/rotate_secret | RotateWebhookEndpointSigningSecret | Rotate Webhook Endpoint Signing Secret | x | x(cant-undo-verb) | x | secret
+    pc-r0941 | square | POST | /oauth2/revoke | RevokeToken | RevokeToken | x | x(cant-undo-verb) | x | token
+    pc-r0942 | square | POST | /oauth2/token | ObtainToken | ObtainToken | w | x(floor-post) | x | token
+    pc-r1389 | zoom | PUT | /users/{userId}/password | userPassword | Update a user's password | x | w(method-floor) | x | password
+    pc-r1538 | paypal | POST | /v3/vault/payment-tokens | payment-tokens.create | Create payment token for a given payment source | w | x(floor-post) | x | token
+    pc-r1541 | paypal | POST | /v3/vault/setup-tokens | setup-tokens.create | Create a setup token | w | x(floor-post) | x | token
+    pc-r1815 | digitalocean | POST | /v2/certificates | certificates_create | Create a New Certificate | w | x(floor-post) | x | certificate
+    pc-r1896 | digitalocean | PUT | /v2/databases/metrics/credentials | databases_update_cluster_metrics_credentials | Update Database Clusters' Metrics Endpoint Credentials | w | w(method-floor) | x | credential
+    pc-r1908 | digitalocean | POST | /v2/dedicated-inferences/{dedicated_inference_id}/tokens | dedicatedInferences_create_tokens | Create a Dedicated Inference Token | w | x(floor-post) | x | token
+    pc-r2282 | digitalocean | POST | /v2/gen-ai/agents/{agent_uuid}/api_keys | genai_create_agent_api_key | Create an Agent API Key | w | x(floor-post) | x | apikey
+    pc-r2283 | digitalocean | PUT | /v2/gen-ai/agents/{agent_uuid}/api_keys/{api_key_uuid} | genai_update_agent_api_key | Update API Key for an Agent | w | w(method-floor) | x | apikey
+    pc-r2285 | digitalocean | PUT | /v2/gen-ai/agents/{agent_uuid}/api_keys/{api_key_uuid}/regenerate | genai_regenerate_agent_api_key | Regenerate API Key for an Agent | x | w(method-floor) | x | apikey
+    pc-r2306 | digitalocean | POST | /v2/gen-ai/anthropic/keys | genai_create_anthropic_api_key | Create Anthropic API Key | w | x(floor-post) | x | apikey
+    pc-r2308 | digitalocean | PUT | /v2/gen-ai/anthropic/keys/{api_key_uuid} | genai_update_anthropic_api_key | Update Anthropic API Key | w | w(method-floor) | x | apikey
+    pc-r2365 | digitalocean | POST | /v2/gen-ai/models/api_keys | genai_create_model_api_key | Create a Model API Key | w | x(floor-post) | x | apikey
+    pc-r2366 | digitalocean | PUT | /v2/gen-ai/models/api_keys/{api_key_uuid} | genai_update_model_api_key | Update API Key for a Model | w | w(method-floor) | x | apikey
+    pc-r2368 | digitalocean | PUT | /v2/gen-ai/models/api_keys/{api_key_uuid}/regenerate | genai_regenerate_model_api_key | Regenerate API Key for a Model | x | w(method-floor) | x | apikey
+    pc-r2378 | digitalocean | POST | /v2/gen-ai/oauth2/dropbox/tokens | genai_create_oauth2_dropbox_tokens | Get Oauth2 Dropbox Tokens | w | x(floor-post) | x | token
+    pc-r2381 | digitalocean | POST | /v2/gen-ai/openai/keys | genai_create_openai_api_key | Create OpenAI API Key | w | x(floor-post) | x | apikey
+    pc-r2383 | digitalocean | PUT | /v2/gen-ai/openai/keys/{api_key_uuid} | genai_update_openai_api_key | Update OpenAI API Key | w | w(method-floor) | x | apikey
+    pc-r2590 | jira | POST | /rest/api/2/forge/panel/action/bulk/async | bulkPinUnpinProjectsAsync | Bulk pin or unpin issue panel to projects | w | x(floor-post) | x | pin
+    pc-r3595 | datadog | POST | /api/v1/api_key | CreateAPIKey | Create an API key | w | x(floor-post) | x | apikey
+    pc-r3597 | datadog | PUT | /api/v1/api_key/{key} | UpdateAPIKey | Edit an API key | w | w(method-floor) | x | apikey
+    pc-r4108 | canva | POST | /v1/oauth/token | exchangeAccessToken |  | w | x(floor-post) | x | token
+    pc-r4110 | canva | POST | /v1/oauth/revoke | revokeTokens |  | x | x(cant-undo-verb) | x | token
+    x17-e0024 | okta | PUT | /api/v1/api-tokens/{apiTokenId} | upsertApiToken | Upsert an API token network condition | w | w(method-floor) | x | token
+    x17-e0037 | okta | POST | /api/v1/apps/{appId}/credentials/csrs | generateCsrForApplication | Generate a certificate signing request | w | x(floor-post) | x | credential
+    x17-e0040 | okta | POST | /api/v1/apps/{appId}/credentials/csrs/{csrId}/lifecycle/publish | publishCsrFromApplication | Publish a certificate signing request | x | x(cant-undo-verb) | x | credential
+    x17-e0042 | okta | POST | /api/v1/apps/{appId}/credentials/jwks | addJwk | Add a JSON Web Key | w | w(modify-verb) | x | credential
+    x17-e0045 | okta | POST | /api/v1/apps/{appId}/credentials/jwks/{keyId}/lifecycle/activate | activateOAuth2ClientJsonWebKey | Activate an OAuth 2.0 client JSON Web Key | w | w(modify-verb) | x | credential
+    x17-e0046 | okta | POST | /api/v1/apps/{appId}/credentials/jwks/{keyId}/lifecycle/deactivate | deactivateOAuth2ClientJsonWebKey | Deactivate an OAuth 2.0 client JSON Web Key | w | x(floor-post) | x | credential
+    x17-e0048 | okta | POST | /api/v1/apps/{appId}/credentials/keys/generate | generateApplicationKey | Generate a key credential | w | x(floor-post) | x | credential
+    x17-e0050 | okta | POST | /api/v1/apps/{appId}/credentials/keys/{keyId}/clone | cloneApplicationKey | Clone a key credential | w | x(floor-post) | x | credential
+    x17-e0052 | okta | POST | /api/v1/apps/{appId}/credentials/secrets | createOAuth2ClientSecret | Create an OAuth 2.0 client secret | w | x(floor-post) | x | credential,secret
+    x17-e0055 | okta | POST | /api/v1/apps/{appId}/credentials/secrets/{secretId}/lifecycle/activate | activateOAuth2ClientSecret | Activate an OAuth 2.0 client secret | w | w(modify-verb) | x | credential,secret
+    x17-e0056 | okta | POST | /api/v1/apps/{appId}/credentials/secrets/{secretId}/lifecycle/deactivate | deactivateOAuth2ClientSecret | Deactivate an OAuth 2.0 client secret | x | x(floor-post) | x | credential,secret
+    x17-e0141 | okta | POST | /api/v1/authorizationServers/{authServerId}/credentials/lifecycle/keyRotate | rotateAuthorizationServerKeys | Rotate all credential keys | x | x(cant-undo-verb) | x | credential
+    x17-e0269 | okta | PUT | /api/v1/domains/{domainId}/certificate | upsertCertificate | Upsert the custom domain's certificate | x | w(method-floor) | x | certificate
+    x17-e0405 | okta | POST | /api/v1/idps/credentials/keys | createIdentityProviderKey | Create an IdP key credential | w | x(floor-post) | x | credential
+    x17-e0407 | okta | PUT | /api/v1/idps/credentials/keys/{kid} | replaceIdentityProviderKey | Replace an IdP key credential | x | w(method-floor) | x | credential
+    x17-e0413 | okta | POST | /api/v1/idps/{idpId}/credentials/csrs | generateCsrForIdentityProvider | Generate a certificate signing request | w | x(floor-post) | x | credential
+    x17-e0416 | okta | POST | /api/v1/idps/{idpId}/credentials/csrs/{idpCsrId}/lifecycle/publish | publishCsrForIdentityProvider | Publish a certificate signing request | x | x(cant-undo-verb) | x | credential
+    x17-e0419 | okta | POST | /api/v1/idps/{idpId}/credentials/keys/generate | generateIdentityProviderSigningKey | Generate a new signing key credential for IdP | w | x(floor-post) | x | credential
+    x17-e0421 | okta | POST | /api/v1/idps/{idpId}/credentials/keys/{kid}/clone | cloneIdentityProviderKey | Clone a signing key credential for IdP | w | x(floor-post) | x | credential
+    x17-e0483 | okta | POST | /api/v1/org/factors/yubikey_token/tokens | uploadYubikeyOtpTokenSeed | Upload a YubiKey OTP seed | w | x(floor-post) | x | token
+    x17-e0579 | okta | POST | /api/v1/telephony-providers | createCustomTelephonyProviderCredentials | Create a custom telephony provider | w | x(floor-post) | x | credential
+    x17-e0582 | okta | PATCH | /api/v1/telephony-providers/{customTelephonyProviderId} | updateCustomTelephonyProviderCredential | Update a custom telephony provider credential | w | w(method-floor) | x | credential
+    x17-e0583 | okta | POST | /api/v1/telephony-providers/{customTelephonyProviderId}/lifecycle/activate | activateCustomTelephonyCredential | Activate a custom telephony provider | w | w(modify-verb) | x | credential
+    x17-e0584 | okta | POST | /api/v1/telephony-providers/{customTelephonyProviderId}/lifecycle/deactivate | deactivateCustomTelephonyCredential | Deactivate a custom telephony provider | w | x(floor-post) | x | credential
+    x17-e0585 | okta | POST | /api/v1/telephony-providers/{customTelephonyProviderId}/setAsPrimary | setAsPrimaryCustomTelephonyCredential | Set a custom telephony provider as a primary telephony provider | w | x(floor-post) | x | credential
+    x17-e0586 | okta | POST | /api/v1/telephony-providers/{customTelephonyProviderId}/test | sendTestCustomTelephonyProviderCredential | Send a test message from a custom telephony provider | x | x(cant-undo-verb) | x | credential
+    x17-e0614 | okta | POST | /api/v1/users/{id}/lifecycle/expire_password | expirePassword | Expire the password | x | x(cant-undo-verb) | x | password
+    x17-e0615 | okta | POST | /api/v1/users/{id}/lifecycle/expire_password_with_temp_password | expirePasswordWithTempPassword | Expire the password with a temporary password | x | x(cant-undo-verb) | x | password
+    x17-e0618 | okta | POST | /api/v1/users/{id}/lifecycle/reset_password | resetPassword | Reset a password | x | x(cant-undo-verb) | x | password
+    x17-e0639 | okta | POST | /api/v1/users/{userId}/credentials/change_password | changePassword | Update password | x | x(floor-post) | x | credential,password
+    x17-e0640 | okta | POST | /api/v1/users/{userId}/credentials/change_recovery_question | changeRecoveryQuestion | Update recovery question | x | x(floor-post) | x | credential
+    x17-e0641 | okta | POST | /api/v1/users/{userId}/credentials/forgot_password | forgotPassword | Start forgot password flow | x | x(floor-post) | x | credential,password
+    x17-e0642 | okta | POST | /api/v1/users/{userId}/credentials/forgot_password_recovery_question | forgotPasswordSetNewPassword | Reset password with recovery question | x | x(floor-post) | x | credential,password
+    x17-e0698 | okta | POST | /integrations/api/v1/api-services/{apiServiceId}/credentials/secrets | createApiServiceIntegrationInstanceSecret | Create an API service integration instance secret | w | x(floor-post) | x | credential,secret
+    x17-e0700 | okta | POST | /integrations/api/v1/api-services/{apiServiceId}/credentials/secrets/{secretId}/lifecycle/activate | activateApiServiceIntegrationInstanceSecret | Activate an API service integration instance secret | w | w(modify-verb) | x | credential,secret
+    x17-e0701 | okta | POST | /integrations/api/v1/api-services/{apiServiceId}/credentials/secrets/{secretId}/lifecycle/deactivate | deactivateApiServiceIntegrationInstanceSecret | Deactivate an API service integration instance secret | x | x(floor-post) | x | credential,secret
+    x17-e0727 | okta | POST | /security/api/v1/security-events | publishSecurityEventTokens | Publish a security event token | x | x(cant-undo-verb) | x | token
+    x17-e0731 | okta | POST | /webauthn-registration/api/v1/send-pin | sendPin | Send a PIN to user | x | x(cant-undo-verb) | x | pin
+    x17-e0805 | docusign | POST | /v2.1/accounts/{accountId}/connect/secret | ConnectHMAC_CreateConnectSecret | Generates a new connect HMAC Secret. | w | x(floor-post) | x | secret
+    x17-e0880 | docusign | POST | /v2.1/accounts/{accountId}/envelopes/{envelopeId}/recipients/{recipientId}/identity_proof_token | Recipients_PostRecipientProofFileResourceToken | Creates a resource token for a sender to request ID Evidence data. | w | x(floor-post) | x | token
+    x17-e0978 | docusign | PUT | /v2.1/accounts/{accountId}/settings/password_rules | AccountPasswordRules_PutAccountPasswordRules | Updates the password rules for an account. | w | w(method-floor) | x | password
+    x20-e0082 | auth0 | PATCH | /attack-protection/breached-password-detection | patch_breached-password-detection | Update Breached Password Detection settings | w | w(method-floor) | x | password
+    x20-e0093 | auth0 | PATCH | /clients/{client_id}/credentials/{credential_id} | patch_credentials_by_credential_id | Update a client credential | w | w(method-floor) | x | credential
+    x20-e0118 | auth0 | PATCH | /hooks/{id}/secrets | patch_secrets | Update hook secrets | w | w(method-floor) | x | secret
+    x20-e0130 | auth0 | PATCH | /refresh-tokens/{id} | patch_refresh-tokens_by_id | Update a refresh token | w | w(method-floor) | x | token
+    x20-e0140 | auth0 | PATCH | /token-exchange-profiles/{id} | patch_token-exchange-profiles_by_id | Update an existing token exchange profile | w | w(method-floor) | x | token
+    x20-e0144 | auth0 | PATCH | /verifiable-credentials/verification/templates/{id} | patch_vc_templates_by_id | Update a verifiable credential template by ID. | w | w(method-floor) | x | credential
+    x20-e0159 | auth0 | POST | /clients/{client_id}/credentials | post_credentials | Create a client credential | w | x(floor-post) | x | credential
+    x20-e0160 | auth0 | POST | /clients/{id}/rotate-secret | post_rotate-secret | Rotate a client secret | x | x(cant-undo-verb) | x | secret
+    x20-e0167 | auth0 | POST | /connections/{id}/scim-configuration/tokens | post_scim_token | Create a SCIM Token | w | x(floor-post) | x | token
+    x20-e0171 | auth0 | POST | /device-credentials | post_device-credentials | Create a device public key credential | w | x(floor-post) | x | credential
+    x20-e0190 | auth0 | POST | /hooks/{id}/secrets | post_secrets | Add hook secrets | w | x(floor-post) | x | secret
+    x20-e0204 | auth0 | POST | /refresh-tokens/revoke | revoke_refresh_tokens | Revoke refresh tokens | x | x(cant-undo-verb) | x | token
+    x20-e0212 | auth0 | POST | /tickets/password-change | post_password-change | Create a password change ticket | w | x(floor-post) | x | password
+    x20-e0213 | auth0 | POST | /token-exchange-profiles | post_token-exchange-profiles | Create a token exchange profile | w | x(floor-post) | x | token
+    x20-e0486 | hubspot | PUT | /integrators/timeline/v3/{appId}/event-templates/{eventTemplateId}/tokens/{tokenName} | put-/integrators/timeline/v3/{appId}/event-templates/{eventTemplateId}/tokens/{tokenName}_update | Update a template token | w | w(method-floor) | x | token
+    x20-e0618 | klaviyo | POST | /api/push-tokens | create_push_token | Create or Update Push Token | w | x(floor-post) | x | token
+    x20-e0638 | klaviyo | POST | /client/push-token-unregister | unregister_client_push_token | Unregister Client Push Token | x | x(floor-post) | x | token
+    x20-e0639 | klaviyo | POST | /client/push-tokens | create_client_push_token | Create or Update Client Push Token | w | x(floor-post) | x | token
+    x20-e0708 | miro | POST | /v1/oauth/revoke | revoke-token | Revoke token (v1) | x | x(cant-undo-verb) | x | token
+    x20-e0732 | miro | POST | /v2/oauth/revoke | revoke-token-v2 | Revoke token (v2) | x | x(cant-undo-verb) | x | token
+    x20-e0902 | zendesk | POST | /api/v2/ticket_content_pins | CreateTicketContentPin | Create Ticket Content Pin | w | x(floor-post) | x | pin
+    x20-e0927 | zendesk | PUT | /api/v2/api_tokens/{id} | UpdateApiToken | Update API Token | w | w(method-floor) | x | token
+    x20-e0999 | zendesk | PUT | /api/v2/users/{user_id}/password | ChangeOwnPassword | Change Your Password | x | w(method-floor) | x | password
+
+---- combined V1 (PUT/PATCH, noun in operationId+path+summary) [variant: C2 + lead verb change/regenerate/regen]
+rows with a credential noun excluded for a read lead verb: 0
+[1] fires vs mech: 1 fires of 6557 rows; already x 0; moved 1 -> right (truth x, leak closed) 1, wrong truth w 0, wrong truth r 0; moved from r 0
+[1] fires vs jev1: 1 fires of 6557 rows; already x 0; moved 1 -> right (truth x, leak closed) 1, wrong truth w 0, wrong truth r 0; moved from r 0
+[1] fires vs jev2: 1 fires of 6557 rows; already x 0; moved 1 -> right (truth x, leak closed) 1, wrong truth w 0, wrong truth r 0; moved from r 0
+    PUT: fires 1, already x 0, moved 1, right 1, wrong w 0, wrong r 0
+[2] mech: before 5418 exact (82.6%) / 64 too loose (1.0%) / 1075 too tight (16.4%) | after 5419 exact (82.6%) / 63 too loose (1.0%) / 1075 too tight (16.4%)  of 6557
+[2] jev1: before 5428 exact (82.8%) / 54 too loose (0.8%) / 1075 too tight (16.4%) | after 5429 exact (82.8%) / 53 too loose (0.8%) / 1075 too tight (16.4%)  of 6557
+[2] jev2: before 5428 exact (82.8%) / 54 too loose (0.8%) / 1075 too tight (16.4%) | after 5429 exact (82.8%) / 53 too loose (0.8%) / 1075 too tight (16.4%)  of 6557
+[3] per word (mechanical): word fires alreadyX moved right wrong vendors
+    password        1    0    1    1    0  zendesk
+[4] LOVO literal (right>=wrong): pooled moved 1, leaks closed 1, new over-tight 0 (w 0, r 0); right > wrong
+    fold zendesk: moved 1, right 1, wrong 0
+[4] LOVO strict (right>=wrong and right>0): pooled moved 0, leaks closed 0, new over-tight 0 (w 0, r 0); right <= wrong
+    fold zendesk: moved 0, right 0, wrong 0; words dropped password
+    fires per vendor: zendesk 1; top share 100.0% FLAG: >50% one vendor (fitting)
+[6] all 1 fires:
+    row_id | provider | method | path | operationId | summary | truth | before(mech rule) | after | words
+    x20-e0999 | zendesk | PUT | /api/v2/users/{user_id}/password | ChangeOwnPassword | Change Your Password | x | w(method-floor) | x | password
+
+---- combined V2 (PUT/PATCH, noun in operationId+path) [variant: last path segment is a literal credential noun]
+rows with a credential noun excluded for a read lead verb: 0
+[1] fires vs mech: 5 fires of 6557 rows; already x 0; moved 5 -> right (truth x, leak closed) 3, wrong truth w 2, wrong truth r 0; moved from r 0
+[1] fires vs jev1: 5 fires of 6557 rows; already x 0; moved 5 -> right (truth x, leak closed) 3, wrong truth w 2, wrong truth r 0; moved from r 0
+[1] fires vs jev2: 5 fires of 6557 rows; already x 0; moved 5 -> right (truth x, leak closed) 3, wrong truth w 2, wrong truth r 0; moved from r 0
+    PUT: fires 4, already x 0, moved 4, right 3, wrong w 1, wrong r 0
+    PATCH: fires 1, already x 0, moved 1, right 0, wrong w 1, wrong r 0
+[2] mech: before 5418 exact (82.6%) / 64 too loose (1.0%) / 1075 too tight (16.4%) | after 5419 exact (82.6%) / 61 too loose (0.9%) / 1077 too tight (16.4%)  of 6557
+[2] jev1: before 5428 exact (82.8%) / 54 too loose (0.8%) / 1075 too tight (16.4%) | after 5429 exact (82.8%) / 51 too loose (0.8%) / 1077 too tight (16.4%)  of 6557
+[2] jev2: before 5428 exact (82.8%) / 54 too loose (0.8%) / 1075 too tight (16.4%) | after 5429 exact (82.8%) / 51 too loose (0.8%) / 1077 too tight (16.4%)  of 6557
+[3] per word (mechanical): word fires alreadyX moved right wrong vendors
+    password        2    0    2    2    0  zendesk,zoom
+    credential      1    0    1    0    1  digitalocean
+    certificate     1    0    1    1    0  okta
+    secret          1    0    1    0    1  auth0
+[4] LOVO literal (right>=wrong): pooled moved 5, leaks closed 3, new over-tight 2 (w 2, r 0); right > wrong
+    fold auth0: moved 1, right 0, wrong 1
+    fold digitalocean: moved 1, right 0, wrong 1
+    fold okta: moved 1, right 1, wrong 0
+    fold zendesk: moved 1, right 1, wrong 0
+    fold zoom: moved 1, right 1, wrong 0
+[4] LOVO strict (right>=wrong and right>0): pooled moved 2, leaks closed 2, new over-tight 0 (w 0, r 0); right > wrong
+    fold auth0: moved 0, right 0, wrong 0; words dropped secret
+    fold digitalocean: moved 0, right 0, wrong 0; words dropped credential
+    fold okta: moved 0, right 0, wrong 0; words dropped certificate
+    fold zendesk: moved 1, right 1, wrong 0
+    fold zoom: moved 1, right 1, wrong 0
+    fires per vendor: zoom 1, digitalocean 1, okta 1, auth0 1, zendesk 1; top share 20.0%
+[6] all 5 fires:
+    row_id | provider | method | path | operationId | summary | truth | before(mech rule) | after | words
+    pc-r1389 | zoom | PUT | /users/{userId}/password | userPassword | Update a user's password | x | w(method-floor) | x | password
+    pc-r1896 | digitalocean | PUT | /v2/databases/metrics/credentials | databases_update_cluster_metrics_credentials | Update Database Clusters' Metrics Endpoint Credentials | w | w(method-floor) | x | credential
+    x17-e0269 | okta | PUT | /api/v1/domains/{domainId}/certificate | upsertCertificate | Upsert the custom domain's certificate | x | w(method-floor) | x | certificate
+    x20-e0118 | auth0 | PATCH | /hooks/{id}/secrets | patch_secrets | Update hook secrets | w | w(method-floor) | x | secret
+    x20-e0999 | zendesk | PUT | /api/v2/users/{user_id}/password | ChangeOwnPassword | Change Your Password | x | w(method-floor) | x | password
+
+---- combined V3 (PUT/PATCH, noun in operationId+path+summary) [variant: V1 or V2]
+rows with a credential noun excluded for a read lead verb: 0
+[1] fires vs mech: 5 fires of 6557 rows; already x 0; moved 5 -> right (truth x, leak closed) 3, wrong truth w 2, wrong truth r 0; moved from r 0
+[1] fires vs jev1: 5 fires of 6557 rows; already x 0; moved 5 -> right (truth x, leak closed) 3, wrong truth w 2, wrong truth r 0; moved from r 0
+[1] fires vs jev2: 5 fires of 6557 rows; already x 0; moved 5 -> right (truth x, leak closed) 3, wrong truth w 2, wrong truth r 0; moved from r 0
+    PUT: fires 4, already x 0, moved 4, right 3, wrong w 1, wrong r 0
+    PATCH: fires 1, already x 0, moved 1, right 0, wrong w 1, wrong r 0
+[2] mech: before 5418 exact (82.6%) / 64 too loose (1.0%) / 1075 too tight (16.4%) | after 5419 exact (82.6%) / 61 too loose (0.9%) / 1077 too tight (16.4%)  of 6557
+[2] jev1: before 5428 exact (82.8%) / 54 too loose (0.8%) / 1075 too tight (16.4%) | after 5429 exact (82.8%) / 51 too loose (0.8%) / 1077 too tight (16.4%)  of 6557
+[2] jev2: before 5428 exact (82.8%) / 54 too loose (0.8%) / 1075 too tight (16.4%) | after 5429 exact (82.8%) / 51 too loose (0.8%) / 1077 too tight (16.4%)  of 6557
+[3] per word (mechanical): word fires alreadyX moved right wrong vendors
+    password        2    0    2    2    0  zendesk,zoom
+    credential      1    0    1    0    1  digitalocean
+    certificate     1    0    1    1    0  okta
+    secret          1    0    1    0    1  auth0
+[4] LOVO literal (right>=wrong): pooled moved 5, leaks closed 3, new over-tight 2 (w 2, r 0); right > wrong
+    fold auth0: moved 1, right 0, wrong 1
+    fold digitalocean: moved 1, right 0, wrong 1
+    fold okta: moved 1, right 1, wrong 0
+    fold zendesk: moved 1, right 1, wrong 0
+    fold zoom: moved 1, right 1, wrong 0
+[4] LOVO strict (right>=wrong and right>0): pooled moved 2, leaks closed 2, new over-tight 0 (w 0, r 0); right > wrong
+    fold auth0: moved 0, right 0, wrong 0; words dropped secret
+    fold digitalocean: moved 0, right 0, wrong 0; words dropped credential
+    fold okta: moved 0, right 0, wrong 0; words dropped certificate
+    fold zendesk: moved 1, right 1, wrong 0
+    fold zoom: moved 1, right 1, wrong 0
+    fires per vendor: zoom 1, digitalocean 1, okta 1, auth0 1, zendesk 1; top share 20.0%
+[6] all 5 fires:
+    row_id | provider | method | path | operationId | summary | truth | before(mech rule) | after | words
+    pc-r1389 | zoom | PUT | /users/{userId}/password | userPassword | Update a user's password | x | w(method-floor) | x | password
+    pc-r1896 | digitalocean | PUT | /v2/databases/metrics/credentials | databases_update_cluster_metrics_credentials | Update Database Clusters' Metrics Endpoint Credentials | w | w(method-floor) | x | credential
+    x17-e0269 | okta | PUT | /api/v1/domains/{domainId}/certificate | upsertCertificate | Upsert the custom domain's certificate | x | w(method-floor) | x | certificate
+    x20-e0118 | auth0 | PATCH | /hooks/{id}/secrets | patch_secrets | Update hook secrets | w | w(method-floor) | x | secret
+    x20-e0999 | zendesk | PUT | /api/v2/users/{user_id}/password | ChangeOwnPassword | Change Your Password | x | w(method-floor) | x | password
+
+---- combined V4 (PUT/PATCH, noun in operationId+path+summary) [variant: V3 limited to password/passcode/pin]
+rows with a credential noun excluded for a read lead verb: 0
+[1] fires vs mech: 2 fires of 6557 rows; already x 0; moved 2 -> right (truth x, leak closed) 2, wrong truth w 0, wrong truth r 0; moved from r 0
+[1] fires vs jev1: 2 fires of 6557 rows; already x 0; moved 2 -> right (truth x, leak closed) 2, wrong truth w 0, wrong truth r 0; moved from r 0
+[1] fires vs jev2: 2 fires of 6557 rows; already x 0; moved 2 -> right (truth x, leak closed) 2, wrong truth w 0, wrong truth r 0; moved from r 0
+    PUT: fires 2, already x 0, moved 2, right 2, wrong w 0, wrong r 0
+[2] mech: before 5418 exact (82.6%) / 64 too loose (1.0%) / 1075 too tight (16.4%) | after 5420 exact (82.7%) / 62 too loose (0.9%) / 1075 too tight (16.4%)  of 6557
+[2] jev1: before 5428 exact (82.8%) / 54 too loose (0.8%) / 1075 too tight (16.4%) | after 5430 exact (82.8%) / 52 too loose (0.8%) / 1075 too tight (16.4%)  of 6557
+[2] jev2: before 5428 exact (82.8%) / 54 too loose (0.8%) / 1075 too tight (16.4%) | after 5430 exact (82.8%) / 52 too loose (0.8%) / 1075 too tight (16.4%)  of 6557
+[3] per word (mechanical): word fires alreadyX moved right wrong vendors
+    password        2    0    2    2    0  zendesk,zoom
+[4] LOVO literal (right>=wrong): pooled moved 2, leaks closed 2, new over-tight 0 (w 0, r 0); right > wrong
+    fold zendesk: moved 1, right 1, wrong 0
+    fold zoom: moved 1, right 1, wrong 0
+[4] LOVO strict (right>=wrong and right>0): pooled moved 2, leaks closed 2, new over-tight 0 (w 0, r 0); right > wrong
+    fold zendesk: moved 1, right 1, wrong 0
+    fold zoom: moved 1, right 1, wrong 0
+    fires per vendor: zoom 1, zendesk 1; top share 50.0%
+[6] all 2 fires:
+    row_id | provider | method | path | operationId | summary | truth | before(mech rule) | after | words
+    pc-r1389 | zoom | PUT | /users/{userId}/password | userPassword | Update a user's password | x | w(method-floor) | x | password
+    x20-e0999 | zendesk | PUT | /api/v2/users/{user_id}/password | ChangeOwnPassword | Change Your Password | x | w(method-floor) | x | password
+
+================ buildset: data/relabel-buildset-2026-09-23/labelled.csv
+read 1819 rows; skipped 0 (truth not r/w/x); scored 1819
+jev jev1 (data/jev-tiers-2026-09-23/out-raise-wx-xonly.jsonl): method-floor pile 603; answers joined 603, pile rows with no answer 0 (stay w), unusable/errored 1 (stay w), malformed lines 0; answers for rows not in this set 1054 (ignored); raised to x at 0.80: 4
+jev jev2 (data/jev-tiers-2026-09-23/out-raise-wx-xonly-run2.jsonl): method-floor pile 603; answers joined 603, pile rows with no answer 0 (stay w), unusable/errored 1 (stay w), malformed lines 0; answers for rows not in this set 1054 (ignored); raised to x at 0.80: 4
+
+---- buildset C1 (PUT/PATCH, noun in operationId+path)
+rows with a credential noun excluded for a read lead verb: 0
+[1] fires vs mech: 16 fires of 1819 rows; already x 3; moved 13 -> right (truth x, leak closed) 3, wrong truth w 10, wrong truth r 0; moved from r 0
+[1] fires vs jev1: 16 fires of 1819 rows; already x 3; moved 13 -> right (truth x, leak closed) 3, wrong truth w 10, wrong truth r 0; moved from r 0
+[1] fires vs jev2: 16 fires of 1819 rows; already x 3; moved 13 -> right (truth x, leak closed) 3, wrong truth w 10, wrong truth r 0; moved from r 0
+    PUT: fires 15, already x 3, moved 12, right 3, wrong w 9, wrong r 0
+    PATCH: fires 1, already x 0, moved 1, right 0, wrong w 1, wrong r 0
+[2] mech: before 1310 exact (72.0%) / 18 too loose (1.0%) / 491 too tight (27.0%) | after 1303 exact (71.6%) / 15 too loose (0.8%) / 501 too tight (27.5%)  of 1819
+[2] jev1: before 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%) | after 1305 exact (71.7%) / 12 too loose (0.7%) / 502 too tight (27.6%)  of 1819
+[2] jev2: before 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%) | after 1305 exact (71.7%) / 12 too loose (0.7%) / 502 too tight (27.6%)  of 1819
+[3] per word (mechanical): word fires alreadyX moved right wrong vendors
+    secret          5    0    5    1    4  clearblade,github
+    password        5    2    3    2    1  clearblade,dracoon,keycloak
+    credential      3    0    3    0    3  clearblade,keycloak
+    token           3    1    2    0    2  dracoon,launchdarkly,trello
+[4] LOVO literal (right>=wrong): pooled moved 7, leaks closed 2, new over-tight 5 (w 5, r 0); right <= wrong
+    fold clearblade: moved 1, right 1, wrong 0; words dropped credential,secret
+    fold dracoon: moved 2, right 1, wrong 1; words dropped token
+    fold github: moved 4, right 0, wrong 4
+    fold keycloak: moved 0, right 0, wrong 0; words dropped credential
+    fold launchdarkly: moved 0, right 0, wrong 0; words dropped token
+    fold trello: moved 0, right 0, wrong 0; words dropped token
+[4] LOVO strict (right>=wrong and right>0): pooled moved 7, leaks closed 2, new over-tight 5 (w 5, r 0); right <= wrong
+    fold clearblade: moved 1, right 1, wrong 0; words dropped credential,secret
+    fold dracoon: moved 2, right 1, wrong 1; words dropped token
+    fold github: moved 4, right 0, wrong 4
+    fold keycloak: moved 0, right 0, wrong 0; words dropped credential
+    fold launchdarkly: moved 0, right 0, wrong 0; words dropped token
+    fold trello: moved 0, right 0, wrong 0; words dropped token
+    fires per vendor: github 4, dracoon 4, clearblade 3, keycloak 3, trello 1, launchdarkly 1; top share 25.0%
+
+---- buildset C2 (PUT/PATCH, noun in operationId+path+summary)
+rows with a credential noun excluded for a read lead verb: 0
+[1] fires vs mech: 19 fires of 1819 rows; already x 3; moved 16 -> right (truth x, leak closed) 6, wrong truth w 10, wrong truth r 0; moved from r 0
+[1] fires vs jev1: 19 fires of 1819 rows; already x 4; moved 15 -> right (truth x, leak closed) 5, wrong truth w 10, wrong truth r 0; moved from r 0
+[1] fires vs jev2: 19 fires of 1819 rows; already x 4; moved 15 -> right (truth x, leak closed) 5, wrong truth w 10, wrong truth r 0; moved from r 0
+    PUT: fires 17, already x 3, moved 14, right 5, wrong w 9, wrong r 0
+    PATCH: fires 2, already x 0, moved 2, right 1, wrong w 1, wrong r 0
+[2] mech: before 1310 exact (72.0%) / 18 too loose (1.0%) / 491 too tight (27.0%) | after 1306 exact (71.8%) / 12 too loose (0.7%) / 501 too tight (27.5%)  of 1819
+[2] jev1: before 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%) | after 1307 exact (71.9%) / 10 too loose (0.5%) / 502 too tight (27.6%)  of 1819
+[2] jev2: before 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%) | after 1307 exact (71.9%) / 10 too loose (0.5%) / 502 too tight (27.6%)  of 1819
+[3] per word (mechanical): word fires alreadyX moved right wrong vendors
+    password        7    2    5    4    1  clearblade,dracoon,keycloak
+    secret          6    0    6    2    4  clearblade,gitea,github
+    credential      3    0    3    0    3  clearblade,keycloak
+    token           3    1    2    0    2  dracoon,launchdarkly,trello
+[4] LOVO literal (right>=wrong): pooled moved 9, leaks closed 4, new over-tight 5 (w 5, r 0); right <= wrong
+    fold clearblade: moved 3, right 3, wrong 0; words dropped credential,secret
+    fold dracoon: moved 2, right 1, wrong 1; words dropped token
+    fold gitea: moved 0, right 0, wrong 0; words dropped secret
+    fold github: moved 4, right 0, wrong 4
+    fold keycloak: moved 0, right 0, wrong 0; words dropped credential
+    fold launchdarkly: moved 0, right 0, wrong 0; words dropped token
+    fold trello: moved 0, right 0, wrong 0; words dropped token
+[4] LOVO strict (right>=wrong and right>0): pooled moved 9, leaks closed 4, new over-tight 5 (w 5, r 0); right <= wrong
+    fold clearblade: moved 3, right 3, wrong 0; words dropped credential,secret
+    fold dracoon: moved 2, right 1, wrong 1; words dropped token
+    fold gitea: moved 0, right 0, wrong 0; words dropped secret
+    fold github: moved 4, right 0, wrong 4
+    fold keycloak: moved 0, right 0, wrong 0; words dropped credential
+    fold launchdarkly: moved 0, right 0, wrong 0; words dropped token
+    fold trello: moved 0, right 0, wrong 0; words dropped token
+    fires per vendor: clearblade 5, github 4, dracoon 4, keycloak 3, gitea 1, trello 1, launchdarkly 1; top share 26.3%
+
+---- buildset C3 (PUT/PATCH/POST, noun in operationId+path)
+rows with a credential noun excluded for a read lead verb: 0
+[1] fires vs mech: 45 fires of 1819 rows; already x 29; moved 16 -> right (truth x, leak closed) 3, wrong truth w 13, wrong truth r 0; moved from r 0
+[1] fires vs jev1: 45 fires of 1819 rows; already x 29; moved 16 -> right (truth x, leak closed) 3, wrong truth w 13, wrong truth r 0; moved from r 0
+[1] fires vs jev2: 45 fires of 1819 rows; already x 29; moved 16 -> right (truth x, leak closed) 3, wrong truth w 13, wrong truth r 0; moved from r 0
+    POST: fires 29, already x 26, moved 3, right 0, wrong w 3, wrong r 0
+    PUT: fires 15, already x 3, moved 12, right 3, wrong w 9, wrong r 0
+    PATCH: fires 1, already x 0, moved 1, right 0, wrong w 1, wrong r 0
+[2] mech: before 1310 exact (72.0%) / 18 too loose (1.0%) / 491 too tight (27.0%) | after 1300 exact (71.5%) / 15 too loose (0.8%) / 504 too tight (27.7%)  of 1819
+[2] jev1: before 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%) | after 1302 exact (71.6%) / 12 too loose (0.7%) / 505 too tight (27.8%)  of 1819
+[2] jev2: before 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%) | after 1302 exact (71.6%) / 12 too loose (0.7%) / 505 too tight (27.8%)  of 1819
+[3] per word (mechanical): word fires alreadyX moved right wrong vendors
+    token          18   15    3    0    3  appcenter,box,dracoon,gitea,github,keycloak,launchdarkly,microsoft,netbox,trello
+    password        8    5    3    2    1  clearblade,dracoon,keycloak
+    secret          7    2    5    1    4  clearblade,github,keycloak
+    certificate     6    6    0    0    0  keycloak,microsoft
+    credential      5    0    5    0    5  clearblade,keycloak
+    apikey          1    1    0    0    0  launchdarkly
+[4] LOVO literal (right>=wrong): pooled moved 7, leaks closed 2, new over-tight 5 (w 5, r 0); right <= wrong
+    fold appcenter: moved 0, right 0, wrong 0; words dropped token
+    fold box: moved 0, right 0, wrong 0; words dropped token
+    fold clearblade: moved 1, right 1, wrong 0; words dropped credential,secret
+    fold dracoon: moved 2, right 1, wrong 1; words dropped token
+    fold gitea: moved 0, right 0, wrong 0; words dropped token
+    fold github: moved 4, right 0, wrong 4; words dropped token
+    fold keycloak: moved 0, right 0, wrong 0; words dropped credential,secret,token
+    fold launchdarkly: moved 0, right 0, wrong 0; words dropped token
+    fold microsoft: moved 0, right 0, wrong 0; words dropped token
+    fold netbox: moved 0, right 0, wrong 0; words dropped token
+    fold trello: moved 0, right 0, wrong 0; words dropped token
+[4] LOVO strict (right>=wrong and right>0): pooled moved 7, leaks closed 2, new over-tight 5 (w 5, r 0); right <= wrong
+    fold appcenter: moved 0, right 0, wrong 0; words dropped token
+    fold box: moved 0, right 0, wrong 0; words dropped token
+    fold clearblade: moved 1, right 1, wrong 0; words dropped credential,secret
+    fold dracoon: moved 2, right 1, wrong 1; words dropped token
+    fold gitea: moved 0, right 0, wrong 0; words dropped token
+    fold github: moved 4, right 0, wrong 4; words dropped token
+    fold keycloak: moved 0, right 0, wrong 0; words dropped certificate,credential,secret,token
+    fold launchdarkly: moved 0, right 0, wrong 0; words dropped apikey,token
+    fold microsoft: moved 0, right 0, wrong 0; words dropped certificate,token
+    fold netbox: moved 0, right 0, wrong 0; words dropped token
+    fold trello: moved 0, right 0, wrong 0; words dropped token
+    fires per vendor: keycloak 12, github 9, dracoon 7, clearblade 4, launchdarkly 4, microsoft 2, appcenter 2, trello 2, gitea 1, netbox 1, box 1; top share 26.7%
+
+---- buildset V1 (PUT/PATCH, noun in operationId+path+summary) [variant: C2 + lead verb change/regenerate/regen]
+rows with a credential noun excluded for a read lead verb: 0
+[1] fires vs mech: 5 fires of 1819 rows; already x 0; moved 5 -> right (truth x, leak closed) 4, wrong truth w 1, wrong truth r 0; moved from r 0
+[1] fires vs jev1: 5 fires of 1819 rows; already x 0; moved 5 -> right (truth x, leak closed) 4, wrong truth w 1, wrong truth r 0; moved from r 0
+[1] fires vs jev2: 5 fires of 1819 rows; already x 0; moved 5 -> right (truth x, leak closed) 4, wrong truth w 1, wrong truth r 0; moved from r 0
+    PUT: fires 5, already x 0, moved 5, right 4, wrong w 1, wrong r 0
+[2] mech: before 1310 exact (72.0%) / 18 too loose (1.0%) / 491 too tight (27.0%) | after 1313 exact (72.2%) / 14 too loose (0.8%) / 492 too tight (27.0%)  of 1819
+[2] jev1: before 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%) | after 1315 exact (72.3%) / 11 too loose (0.6%) / 493 too tight (27.1%)  of 1819
+[2] jev2: before 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%) | after 1315 exact (72.3%) / 11 too loose (0.6%) / 493 too tight (27.1%)  of 1819
+[3] per word (mechanical): word fires alreadyX moved right wrong vendors
+    password        4    0    4    3    1  clearblade,dracoon
+    secret          1    0    1    1    0  clearblade
+[4] LOVO literal (right>=wrong): pooled moved 5, leaks closed 4, new over-tight 1 (w 1, r 0); right > wrong
+    fold clearblade: moved 3, right 3, wrong 0
+    fold dracoon: moved 2, right 1, wrong 1
+[4] LOVO strict (right>=wrong and right>0): pooled moved 4, leaks closed 3, new over-tight 1 (w 1, r 0); right > wrong
+    fold clearblade: moved 2, right 2, wrong 0; words dropped secret
+    fold dracoon: moved 2, right 1, wrong 1
+    fires per vendor: clearblade 3, dracoon 2; top share 60.0% FLAG: >50% one vendor (fitting)
+
+---- buildset V2 (PUT/PATCH, noun in operationId+path) [variant: last path segment is a literal credential noun]
+rows with a credential noun excluded for a read lead verb: 0
+[1] fires vs mech: 3 fires of 1819 rows; already x 1; moved 2 -> right (truth x, leak closed) 1, wrong truth w 1, wrong truth r 0; moved from r 0
+[1] fires vs jev1: 3 fires of 1819 rows; already x 1; moved 2 -> right (truth x, leak closed) 1, wrong truth w 1, wrong truth r 0; moved from r 0
+[1] fires vs jev2: 3 fires of 1819 rows; already x 1; moved 2 -> right (truth x, leak closed) 1, wrong truth w 1, wrong truth r 0; moved from r 0
+    PUT: fires 3, already x 1, moved 2, right 1, wrong w 1, wrong r 0
+[2] mech: before 1310 exact (72.0%) / 18 too loose (1.0%) / 491 too tight (27.0%) | after 1310 exact (72.0%) / 17 too loose (0.9%) / 492 too tight (27.0%)  of 1819
+[2] jev1: before 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%) | after 1312 exact (72.1%) / 14 too loose (0.8%) / 493 too tight (27.1%)  of 1819
+[2] jev2: before 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%) | after 1312 exact (72.1%) / 14 too loose (0.8%) / 493 too tight (27.1%)  of 1819
+[3] per word (mechanical): word fires alreadyX moved right wrong vendors
+    password        3    1    2    1    1  dracoon,keycloak
+[4] LOVO literal (right>=wrong): pooled moved 2, leaks closed 1, new over-tight 1 (w 1, r 0); right <= wrong
+    fold dracoon: moved 2, right 1, wrong 1
+[4] LOVO strict (right>=wrong and right>0): pooled moved 0, leaks closed 0, new over-tight 0 (w 0, r 0); right <= wrong
+    fold dracoon: moved 0, right 0, wrong 0; words dropped password
+    fires per vendor: dracoon 2, keycloak 1; top share 66.7% FLAG: >50% one vendor (fitting)
+
+---- buildset V3 (PUT/PATCH, noun in operationId+path+summary) [variant: V1 or V2]
+rows with a credential noun excluded for a read lead verb: 0
+[1] fires vs mech: 6 fires of 1819 rows; already x 1; moved 5 -> right (truth x, leak closed) 4, wrong truth w 1, wrong truth r 0; moved from r 0
+[1] fires vs jev1: 6 fires of 1819 rows; already x 1; moved 5 -> right (truth x, leak closed) 4, wrong truth w 1, wrong truth r 0; moved from r 0
+[1] fires vs jev2: 6 fires of 1819 rows; already x 1; moved 5 -> right (truth x, leak closed) 4, wrong truth w 1, wrong truth r 0; moved from r 0
+    PUT: fires 6, already x 1, moved 5, right 4, wrong w 1, wrong r 0
+[2] mech: before 1310 exact (72.0%) / 18 too loose (1.0%) / 491 too tight (27.0%) | after 1313 exact (72.2%) / 14 too loose (0.8%) / 492 too tight (27.0%)  of 1819
+[2] jev1: before 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%) | after 1315 exact (72.3%) / 11 too loose (0.6%) / 493 too tight (27.1%)  of 1819
+[2] jev2: before 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%) | after 1315 exact (72.3%) / 11 too loose (0.6%) / 493 too tight (27.1%)  of 1819
+[3] per word (mechanical): word fires alreadyX moved right wrong vendors
+    password        5    1    4    3    1  clearblade,dracoon,keycloak
+    secret          1    0    1    1    0  clearblade
+[4] LOVO literal (right>=wrong): pooled moved 5, leaks closed 4, new over-tight 1 (w 1, r 0); right > wrong
+    fold clearblade: moved 3, right 3, wrong 0
+    fold dracoon: moved 2, right 1, wrong 1
+[4] LOVO strict (right>=wrong and right>0): pooled moved 4, leaks closed 3, new over-tight 1 (w 1, r 0); right > wrong
+    fold clearblade: moved 2, right 2, wrong 0; words dropped secret
+    fold dracoon: moved 2, right 1, wrong 1
+    fires per vendor: clearblade 3, dracoon 2, keycloak 1; top share 50.0%
+
+---- buildset V4 (PUT/PATCH, noun in operationId+path+summary) [variant: V3 limited to password/passcode/pin]
+rows with a credential noun excluded for a read lead verb: 0
+[1] fires vs mech: 5 fires of 1819 rows; already x 1; moved 4 -> right (truth x, leak closed) 3, wrong truth w 1, wrong truth r 0; moved from r 0
+[1] fires vs jev1: 5 fires of 1819 rows; already x 1; moved 4 -> right (truth x, leak closed) 3, wrong truth w 1, wrong truth r 0; moved from r 0
+[1] fires vs jev2: 5 fires of 1819 rows; already x 1; moved 4 -> right (truth x, leak closed) 3, wrong truth w 1, wrong truth r 0; moved from r 0
+    PUT: fires 5, already x 1, moved 4, right 3, wrong w 1, wrong r 0
+[2] mech: before 1310 exact (72.0%) / 18 too loose (1.0%) / 491 too tight (27.0%) | after 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%)  of 1819
+[2] jev1: before 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%) | after 1314 exact (72.2%) / 12 too loose (0.7%) / 493 too tight (27.1%)  of 1819
+[2] jev2: before 1312 exact (72.1%) / 15 too loose (0.8%) / 492 too tight (27.0%) | after 1314 exact (72.2%) / 12 too loose (0.7%) / 493 too tight (27.1%)  of 1819
+[3] per word (mechanical): word fires alreadyX moved right wrong vendors
+    password        5    1    4    3    1  clearblade,dracoon,keycloak
+[4] LOVO literal (right>=wrong): pooled moved 4, leaks closed 3, new over-tight 1 (w 1, r 0); right > wrong
+    fold clearblade: moved 2, right 2, wrong 0
+    fold dracoon: moved 2, right 1, wrong 1
+[4] LOVO strict (right>=wrong and right>0): pooled moved 4, leaks closed 3, new over-tight 1 (w 1, r 0); right > wrong
+    fold clearblade: moved 2, right 2, wrong 0
+    fold dracoon: moved 2, right 1, wrong 1
+    fires per vendor: clearblade 2, dracoon 2, keycloak 1; top share 40.0%
+
+================ APIs.guru prevalence: 123339 ops read (no truth)
+[5] C1: 422 fires (would move 409 not already x) across 73 providers; read-lead excluded 1; top share 44.1%
+    top 10: github.com 186, azure.com 57, microsoft.com 27, amazonaws.com 12, kubernetes.io 8, maif.local 6, clicksend.com 5, dracoon.team 4, googleapis.com 4, kumpeapps.com 4
+    per word: secret 201, certificate 63, token 52, credential 44, password 41, apikey 14, appkey 5, pin 4, cert 4
+[5] C2: 436 fires (would move 420 not already x) across 75 providers; read-lead excluded 1; top share 42.7%
+    top 10: github.com 186, azure.com 60, microsoft.com 27, amazonaws.com 12, kubernetes.io 8, maif.local 6, rumble.run 6, clearblade.com 5, clicksend.com 5, windows.net 5
+    per word: secret 208, certificate 64, token 55, password 47, credential 44, apikey 15, appkey 6, pin 4, cert 4
+[5] C3: 1889 fires (would move 483 not already x) across 167 providers; read-lead excluded 87; top share 27.0%
+    top 10: apisetu.gov.in 510, github.com 356, azure.com 152, amazonaws.com 143, microsoft.com 120, googleapis.com 71, twilio.com 36, plaid.com 15, keycloak.local 12, kubernetes.io 12
+    per word: certificate 745, token 474, secret 275, password 162, credential 159, apikey 49, cert 15, pin 14, passcode 14, appkey 8
+[5] V1: 17 fires (would move 17 not already x) across 11 providers; read-lead excluded 0; top share 17.6%
+    top 10: clearblade.com 3, britbox.co.uk 2, combell.com 2, dracoon.team 2, jira.local 2, clicksend.com 1, conjur.local 1, discourse.local 1, ote-godaddy.com 1, signl4.com 1
+    per word: password 14, pin 1, secret 1, apikey 1
+[5] V2: 86 fires (would move 81 not already x) across 41 providers; read-lead excluded 0; top share 20.9%
+    top 10: github.com 18, microsoft.com 5, amazonaws.com 4, kumpeapps.com 4, windows.net 4, britbox.co.uk 3, unicourt.com 3, appwrite.io 2, blazemeter.com 2, clicksend.com 2
+    per word: password 30, token 25, credential 11, secret 6, certificate 4, pin 4, appkey 4, apikey 3, cert 1
+[5] V3: 90 fires (would move 85 not already x) across 43 providers; read-lead excluded 0; top share 20.0%
+    top 10: github.com 18, microsoft.com 5, amazonaws.com 4, kumpeapps.com 4, windows.net 4, britbox.co.uk 3, clearblade.com 3, unicourt.com 3, appwrite.io 2, blazemeter.com 2
+    per word: password 33, token 25, credential 11, secret 7, certificate 4, pin 4, appkey 4, apikey 3, cert 1
+[5] V4: 37 fires (would move 35 not already x) across 27 providers; read-lead excluded 0; top share 8.1%
+    top 10: britbox.co.uk 3, appwrite.io 2, blazemeter.com 2, clearblade.com 2, combell.com 2, dracoon.team 2, jira.local 2, magento.com 2, windows.net 2, circuitsandbox.net 1
+    per word: password 33, pin 4
+
+================ BAR (D100 tighten-only; mechanical move counts; LOVO literal)
+combined C1: FAIL  NO: moves right 6 > wrong 17; ok: too loose 64 -> 58 not up; ok: too tight +17 == wrong 17; NO: LOVO right 1 > wrong 3; ok: jev jev1 too loose 54 -> 50 not up; ok: jev jev2 too loose 54 -> 50 not up
+combined C2: FAIL  NO: moves right 6 > wrong 19; ok: too loose 64 -> 58 not up; ok: too tight +19 == wrong 19; NO: LOVO right 1 > wrong 3; ok: jev jev1 too loose 54 -> 50 not up; ok: jev jev2 too loose 54 -> 50 not up
+combined C3: FAIL  NO: moves right 7 > wrong 26; ok: too loose 64 -> 57 not up; ok: too tight +26 == wrong 26; NO: LOVO right 0 > wrong 5; ok: jev jev1 too loose 54 -> 49 not up; ok: jev jev2 too loose 54 -> 49 not up
+combined V1: PASS  ok: moves right 1 > wrong 0; ok: too loose 64 -> 63 not up; ok: too tight +0 == wrong 0; ok: LOVO right 1 > wrong 0; ok: jev jev1 too loose 54 -> 53 not up; ok: jev jev2 too loose 54 -> 53 not up; FLAG fitting (top vendor >50%)
+combined V2: PASS  ok: moves right 3 > wrong 2; ok: too loose 64 -> 61 not up; ok: too tight +2 == wrong 2; ok: LOVO right 3 > wrong 2; ok: jev jev1 too loose 54 -> 51 not up; ok: jev jev2 too loose 54 -> 51 not up
+combined V3: PASS  ok: moves right 3 > wrong 2; ok: too loose 64 -> 61 not up; ok: too tight +2 == wrong 2; ok: LOVO right 3 > wrong 2; ok: jev jev1 too loose 54 -> 51 not up; ok: jev jev2 too loose 54 -> 51 not up
+combined V4: PASS  ok: moves right 2 > wrong 0; ok: too loose 64 -> 62 not up; ok: too tight +0 == wrong 0; ok: LOVO right 2 > wrong 0; ok: jev jev1 too loose 54 -> 52 not up; ok: jev jev2 too loose 54 -> 52 not up
+buildset C1: FAIL  NO: moves right 3 > wrong 10; ok: too loose 18 -> 15 not up; ok: too tight +10 == wrong 10; NO: LOVO right 2 > wrong 5; ok: jev jev1 too loose 15 -> 12 not up; ok: jev jev2 too loose 15 -> 12 not up
+buildset C2: FAIL  NO: moves right 6 > wrong 10; ok: too loose 18 -> 12 not up; ok: too tight +10 == wrong 10; NO: LOVO right 4 > wrong 5; ok: jev jev1 too loose 15 -> 10 not up; ok: jev jev2 too loose 15 -> 10 not up
+buildset C3: FAIL  NO: moves right 3 > wrong 13; ok: too loose 18 -> 15 not up; ok: too tight +13 == wrong 13; NO: LOVO right 2 > wrong 5; ok: jev jev1 too loose 15 -> 12 not up; ok: jev jev2 too loose 15 -> 12 not up
+buildset V1: PASS  ok: moves right 4 > wrong 1; ok: too loose 18 -> 14 not up; ok: too tight +1 == wrong 1; ok: LOVO right 4 > wrong 1; ok: jev jev1 too loose 15 -> 11 not up; ok: jev jev2 too loose 15 -> 11 not up; FLAG fitting (top vendor >50%)
+buildset V2: FAIL  NO: moves right 1 > wrong 1; ok: too loose 18 -> 17 not up; ok: too tight +1 == wrong 1; NO: LOVO right 1 > wrong 1; ok: jev jev1 too loose 15 -> 14 not up; ok: jev jev2 too loose 15 -> 14 not up; FLAG fitting (top vendor >50%)
+buildset V3: PASS  ok: moves right 4 > wrong 1; ok: too loose 18 -> 14 not up; ok: too tight +1 == wrong 1; ok: LOVO right 4 > wrong 1; ok: jev jev1 too loose 15 -> 11 not up; ok: jev jev2 too loose 15 -> 11 not up
+buildset V4: PASS  ok: moves right 3 > wrong 1; ok: too loose 18 -> 15 not up; ok: too tight +1 == wrong 1; ok: LOVO right 3 > wrong 1; ok: jev jev1 too loose 15 -> 12 not up; ok: jev jev2 too loose 15 -> 12 not up
