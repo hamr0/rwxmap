@@ -5,11 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.8.1] - 2026-11-03
 
 ### Fixed
 
-- **Two Jev tiers sent a different question than the exam scored.** `jevQuestions('jev-raise-wx')` returned the full loaded criteria shared with `jev-lower`; `jevQuestions('jev-raise-get')` returned a changes question whose w-side list and two `what` lines differed from the measured one. Both now send the exact questions D100's M3 exam scored (D127). With a Jev key, the raise-wx prompt drops from about 2655 to about 1160 input tokens per row, and which PUT/PATCH rows get raised w to x changes to what the M3 exam measured (11 of 724 flagged, 10 right); the raise-get question now matches the scored one.
+- **Two Jev tiers sent a different question than the exam scored.** `jevQuestions('jev-raise-wx')` returned the full loaded criteria shared with `jev-lower`; `jevQuestions('jev-raise-get')` returned a changes question whose w-side list and two `what` lines differed from the measured one. Both now send the exact questions D100's M3 exam scored (D127). With a Jev key, the median raise-wx prompt drops from about 2655 to about 1160 input tokens per row, and which PUT/PATCH rows get raised w to x changes to what the M3 exam measured (11 of 724 flagged, 10 right); the raise-get question now matches the scored one.
 
 ## [0.8.0] - 2026-10-29
 
