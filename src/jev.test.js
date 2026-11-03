@@ -412,8 +412,8 @@ test('each tier sends exactly its frozen poc question (D127)', async () => {
   const lower = await ref('../poc/jev-tiers/criteria-x.mjs');
   const raiseWx = await ref('../poc/jev-tiers/criteria-x-raise.mjs');
   const raiseGet = await ref('../poc/jev-tiers/criteria-changes.mjs');
-  assert.deepEqual(jevQuestions('jev-lower'), lower.questions());
-  assert.deepEqual(jevQuestions('jev-raise-wx'), raiseWx.questions());
-  assert.deepEqual(jevQuestions('jev-raise-get'), raiseGet.questions());
-  assert.deepEqual(jevQuestions(), lower.questions());
+  assert.equal(JSON.stringify(jevQuestions('jev-lower')), JSON.stringify(lower.questions()));
+  assert.equal(JSON.stringify(jevQuestions('jev-raise-wx')), JSON.stringify(raiseWx.questions()));
+  assert.equal(JSON.stringify(jevQuestions('jev-raise-get')), JSON.stringify(raiseGet.questions()));
+  assert.equal(JSON.stringify(jevQuestions()), JSON.stringify(lower.questions()));
 });
