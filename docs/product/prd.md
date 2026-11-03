@@ -929,6 +929,18 @@ decided; everything marked "proposal" or "open" is not decided.
   (D100 bar, LOVO), after a prevalence check across all vendors first (4
   of the 5 source rows are workos). rwxlite's burned 949-op exam
   (coolify, workos, lago, resend) may be used as extra tuning rows.
+- **Go/no-go bar (set before building).** A starting bar ("we can start
+  there"), one per mode. It replaces the old fixed 0.5% too-loose limit
+  for the default mode. Too loose and too tight are counted and
+  reported separately.
+  - Mechanical -> rwxlite (default): too loose must be no more than
+    mechanical alone on the same exam (it must never leak more than
+    mechanical does), AND exact must be at least 5 percentage points
+    above mechanical alone on that exam.
+  - rwxlite alone: no pass/fail bar of its own. The user picks an exact
+    rate in 70-90%, and each choice prints its measured too-loose rate
+    beside it (the user accepts the trade-off).
+  - Mechanical -> Jev: unchanged (the existing Jev bars).
 
 ### Proposals (not decided)
 
@@ -968,7 +980,7 @@ mechanical w, truth x by clause b) and 2 logout GETs (workos
 
 ### Open
 
-Five items, listed under Open questions below.
+Four items, listed under Open questions below.
 
 ## What is next
 
@@ -1075,7 +1087,6 @@ network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
 
 ## Open questions
 
-- D133: the module's go/no-go bar (set before building).
 - D133: how an "ask" row is published (the `tight` marker, or a new field).
 - D133: the exact CLI option names.
 - D133: where the downloaded model is cached, and how its integrity is checked (hash).
