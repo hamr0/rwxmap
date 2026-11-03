@@ -161,7 +161,7 @@ decides it.
 **Why each floor sits where it does.** Truth per method under the D87
 definition, and which step decides the rows. Tuning set first (6557
 rows, `data/combined-2026-09-21/labelled.csv`), then the burned M3 exam
-(4279 rows, `data/exam-2026-09-22/labelled.csv`); re-derived 2026-10-29
+(4279 rows, `data/exam-2026-09-22/labelled.csv`); re-derived 2026-11-04
 with the current `classifyRow`.
 
 | method | set | n | truth r | truth w | truth x | floor | decided by (rows) |
@@ -172,7 +172,7 @@ with the current `classifyRow`.
 | POST | M3 exam | 892 | 128 (14%) | 636 (71%) | 128 (14%) | x | no word → floor x 808; step 2 `CANT_UNDO` → x 27; step 1 read verb → r 36; step 3 `KEEP_W` → w 21 |
 | DELETE | tuning | 951 | 1 (0%) | 26 (3%) | 924 (97%) | x | method floor 951 |
 | DELETE | M3 exam | 558 | 3 (1%) | 7 (1%) | 548 (98%) | x | method floor 558 |
-| PUT | tuning | 766 | 1 (0%) | 718 (94%) | 47 (6%) | w | method floor 753; step 2 `CANT_UNDO` → x 13 |
+| PUT | tuning | 766 | 1 (0%) | 718 (94%) | 47 (6%) | w | method floor 751; step 2 `CANT_UNDO` → x 13; step 2 `credential-set` → x 2 |
 | PUT | M3 exam | 460 | 2 (0%) | 441 (96%) | 17 (4%) | w | method floor 456; step 2 `CANT_UNDO` → x 4 |
 | PATCH | tuning | 303 | 0 | 299 (99%) | 4 (1%) | w | method floor 301; step 2 `CANT_UNDO` → x 2 |
 | PATCH | M3 exam | 270 | 0 | 258 (96%) | 12 (4%) | w | method floor 268; step 2 `CANT_UNDO` → x 2 |
@@ -307,7 +307,9 @@ outside service, and the adopter must say so.
 
 `poc/d87/` is the reference `src/` is proved against: `node
 poc/d87/proof-src.mjs` compares both over all 6557 rows of the combined
-set, must print 0 differences (checked to fail when broken), and
+set, must print 0 unexpected differences and exactly the 2 allowed
+D131 rows (pc-r1389, x20-e0999: the credential-set rule moves them;
+user ruling 2026-11-04), checked to fail when broken, and
 replays the recorded Jev answers through `applyJev` (804 lowered).
 `tools/proof-step1.js` still passes after D99 but is blind to the
 plural-noun guard, so it does not pin step 1's full behaviour (D99).

@@ -9,8 +9,13 @@
 //
 //   1a. CLASSIFICATION UNCHANGED. For every row of
 //       data/combined-2026-09-21/rows.json.gz, the src verdict with its
-//       `review` field removed is deep-equal to the frozen POC verdict.
-//       This is the old claim at its old strength, over the old fields.
+//       `review` field removed is deep-equal to the frozen POC verdict —
+//       EXCEPT the rows named in ALLOWED_D131 below, which D131's
+//       credential-set rule deliberately moves (user ruling 2026-11-04).
+//       An allowlisted row passes only if src gives exactly its listed
+//       verdict; one that no longer differs from the POC at all also fails
+//       (stale allowlist). Every other row is held to the old claim at its
+//       old strength, over the old fields.
 //   1b. REVIEW HINT CORRECT. For every one of those rows, the src verdict's
 //       `review` equals the hint an INDEPENDENT restatement of the rule
 //       (expectedHint, written out below from the specification, not copied
@@ -22,9 +27,12 @@
 //       asserted against the restated rule instead.
 //
 // The two are counted and printed separately, never collapsed into one
-// number: "rows compared N, classification differences D, hint mismatches H".
-// D and H are TRUE totals, never capped by the samples printed below them.
-// Exits 1 if EITHER D > 0 or H > 0.
+// number: "rows compared N, classification differences D, hint mismatches H",
+// then "allowed differences (D131): A" with every allowed row listed. D is the
+// count of UNEXPECTED differences (allowed rows excluded); D and H are TRUE
+// totals, never capped by the samples printed below them. Exits 1 if D > 0,
+// H > 0, an allowlisted row's src verdict is not exactly its listed one, or
+// an allowlisted row is missing or no longer differs from the POC.
 //
 // Check 2 is unchanged:
 //   2. Over data/jev-2026-09-22/rows-floor.json.gz joined with
@@ -81,6 +89,27 @@ function expectedHint(method, cls, source) {
   return 'settled';
 }
 
+// Claim 1a allowlist — D131, user ruling 2026-11-04 (option 1).
+//
+// D131 adopted step 2's credential-set rule, which moves exactly these two
+// rows of the tuning corpus off the frozen POC's verdict (w, method-floor)
+// to x. They are the only differences claim 1a accepts. Each must carry
+// EXACTLY the verdict listed here (the same fields claim 1a compares;
+// `review` is still checked by claim 1b). method/path/operationId are
+// checked too, so the id cannot silently point at a different row. Any other
+// difference on any row still fails, and an entry here whose row no longer
+// differs from the POC fails as stale — remove it, do not leave it.
+const ALLOWED_D131 = new Map([
+  ['pc-r1389', {
+    row: { provider: 'zoom', method: 'PUT', path: '/users/{userId}/password', operationId: 'userPassword' },
+    verdict: { class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: ['password'] },
+  }],
+  ['x20-e0999', {
+    row: { provider: 'zendesk', method: 'PUT', path: '/api/v2/users/{user_id}/password', operationId: 'ChangeOwnPassword' },
+    verdict: { class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: ['password'] },
+  }],
+]);
+
 function deepEqual(a, b) {
   try {
     assert.deepStrictEqual(a, b);
@@ -102,6 +131,9 @@ function checkSrcVsPoc() {
   const rows = readGzJson(rowsPath);
 
   let differences = 0;
+  const allowed = [];
+  const allowedFailures = [];
+  const allowedSeen = new Set();
   let hintMismatches = 0;
   let illegalHints = 0;
   const samples = [];
@@ -115,7 +147,25 @@ function checkSrcVsPoc() {
     // 1a: compare the classification only. `review` is lifted out by
     // destructuring — the verdict object src returned is never mutated.
     const { review, ...srcClassification } = srcVerdict;
-    if (!deepEqual(srcClassification, pocVerdict)) {
+    const allow = ALLOWED_D131.get(row.row_id);
+    if (allow) {
+      allowedSeen.add(row.row_id);
+      const rowId = {
+        provider: row.provider, method: row.method, path: row.path, operationId: row.operationId,
+      };
+      if (deepEqual(srcClassification, pocVerdict)) {
+        allowedFailures.push({ row_id: row.row_id, why: 'stale: src no longer differs from the POC' });
+      } else if (!deepEqual(rowId, allow.row)) {
+        allowedFailures.push({ row_id: row.row_id, why: `row identity mismatch: got ${JSON.stringify(rowId)}` });
+      } else if (!deepEqual(srcClassification, allow.verdict)) {
+        allowedFailures.push({
+          row_id: row.row_id,
+          why: `src ${JSON.stringify(srcClassification)} != allowed ${JSON.stringify(allow.verdict)}`,
+        });
+      } else {
+        allowed.push({ row_id: row.row_id, provider: row.provider, srcClassification, pocVerdict });
+      }
+    } else if (!deepEqual(srcClassification, pocVerdict)) {
       differences += 1;
       if (samples.length < 5) {
         samples.push({ row_id: row.row_id, provider: row.provider, srcClassification, pocVerdict });
@@ -146,14 +196,27 @@ function checkSrcVsPoc() {
     }
   }
 
-  console.log('claim 1a: src verdict minus `review` == frozen poc/d87 verdict (classification unchanged)');
+  console.log('claim 1a: src verdict minus `review` == frozen poc/d87 verdict (classification unchanged, except the D131 allowlist)');
   console.log('claim 1b: src `review` == expectedHint(method, class, source), the rule restated in this file (never imported)');
   console.log(
     `rows compared ${rows.length}, classification differences ${differences}, hint mismatches ${hintMismatches}, illegal hint values ${illegalHints}`,
   );
 
+  console.log(`allowed differences (D131): ${allowed.length}`);
+  for (const a of allowed) {
+    console.log(`  ${a.row_id} (${a.provider}) src ${JSON.stringify(a.srcClassification)} poc ${JSON.stringify(a.pocVerdict)}`);
+  }
+  for (const id of ALLOWED_D131.keys()) {
+    if (!allowedSeen.has(id)) allowedFailures.push({ row_id: id, why: 'stale: row not found in the corpus' });
+  }
+  if (allowedFailures.length > 0) {
+    console.log(`claim 1a FAILED — allowlist (D131) problems: ${allowedFailures.length}`);
+    for (const f of allowedFailures) console.log(`  ${f.row_id}: ${f.why}`);
+    exitCode = 1;
+  }
+
   if (differences > 0) {
-    console.log('claim 1a FAILED — sample of differing rows (up to 5):');
+    console.log('claim 1a FAILED — sample of unexpected differing rows (up to 5):');
     for (const s of samples) {
       console.log(`  ${s.row_id} (${s.provider})`);
       console.log(`    src (minus review): ${JSON.stringify(s.srcClassification)}`);
