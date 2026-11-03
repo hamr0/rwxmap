@@ -7516,3 +7516,28 @@ Node.
   heapUsed with growing RSS is allocation churn, not a leak, and it still
   counts against a memory budget; measure against a baseline doing the same
   unavoidable work.
+
+## 2026-11-03 — two Jev tiers sent a different question than the exam scored (D127)
+
+- Goal: check that `src/jev.js` sends, for each tier, the question the M3
+  exam (D100) scored.
+- Tried: deep-compared `jevQuestions(tier)` with the frozen poc files.
+- Outcome: two gaps, both shipped with the tiers in 4143b6d (v0.4.0) and
+  present through v0.8.0. (1) `jev-raise-wx` sent the full loaded isX
+  criteria shared with jev-lower, not the x-only
+  `poc/jev-tiers/criteria-x-raise.mjs`; the method table's "PUT and PATCH are
+  w" pre-answers the question on an all-PUT/PATCH pile (see "The LOADED
+  criteria were suppressing jev-raise-wx"). (2) `jev-raise-get` sent a
+  changes question whose shared CANT_UNDO/CAN_SET_BACK differed from
+  `criteria-changes.mjs`: the cannot-be-undone `what` line, the set-back
+  `what` line, the toggle item (src added "Do NOT infer an opposite the API
+  does not offer; ... it is x by (a)"), the removing-an-item item (src added
+  "on POST, PUT or PATCH only. On DELETE the method wins ...") and the
+  plain-create item (src shortened it to "a plain create, per (ii)").
+  `jev-lower` already equalled `criteria-x.mjs`. Fixed: `isXRaiseQuestion()`
+  and raise-get's own constants, byte for byte from the poc; `jevTier()` and
+  the public keys are unchanged. A test deep-equals each tier with its poc
+  reference. No new exam: the M3 exam scored exactly these questions, so src
+  now matches what was scored.
+- Lesson: a tier's question must be proved equal to the criteria its bar was
+  measured on; sharing constants across tiers hid the drift.
