@@ -324,6 +324,13 @@ Run: `npm test`, `npm run typecheck`, `node poc/d87/proof-src.mjs`,
 | combined, 6557, fitted | + `jev-lower` only, t=0.10 | 94.2% | 72 (1.1%) | 309 (4.7%) |
 | **M3 exam, 4279** | **mechanical** | **3520 (82.3%)** | **34 (0.8%)** | **725 (16.9%)** |
 | **M3 exam, 4279** | **+ all three Jev tiers** | **3980 (93.0%)** | **22 (0.5%)** | **277 (6.5%)** |
+| fresh gate, 600 (rwxlite, BRIEF-v3, D128) | mechanical | 459 (76.5%) | 13 (2.2%) | 128 (21.3%) |
+| fresh gate, 600 (rwxlite, BRIEF-v3, D128) | + all three Jev tiers | 531 (88.5%) | 8 (1.3%) | 61 (10.2%) |
+
+The fresh gate holds only 38 truth-x rows of 600, and 19 of its 227
+providers appear in rwxmap's labelled sets; on the 472 rows from the
+other 208, mechanical gives 75.4% / 2.8% / 21.8% and Jev 87.9% / 1.7% /
+10.4%.
 
 On the 6557 combined rows, v3 truth is r 2712 / w 2378 / x 1467. Of the
 64 fitted leaks, 23 sit on list rows and 41 on floor rows (39 of them
@@ -861,7 +868,10 @@ Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
 ## What is next
 
-Nothing is planned. Parked items and known limits are below.
+rwxlite replacing Jev (D128) is in progress in the rwxlite project.
+rwxmap's part is to check each fresh sample's provider list against the
+locks, and to weigh the take-back candidates in learnings (2026-11-03)
+under their own D-numbers. Parked items and known limits are below.
 
 ### Parked
 

@@ -7541,3 +7541,135 @@ Node.
   now matches what was scored.
 - Lesson: a tier's question must be proved equal to the criteria its bar was
   measured on; sharing constants across tiers hid the drift.
+
+## 2026-11-03 — rwxlite's full Jev pass, and rwxlite named Jev's replacement (outside input, nothing adopted)
+
+- Goal: record what the rwxlite project (~/PycharmProjects/rwxlite, a small
+  local int8 model) learned from asking Jev once on 109,844 APIs.guru
+  operations (DELETE skipped), then re-asking the 14,188 rows with p in
+  0.1-0.9. It used rwxmap's three poc question files byte for byte from
+  a7bc855. Total cost $11.44. Source: rwxlite docs/wiki/findings.md
+  (2026-11-03 entries), data/m0/parity-report-v3.json, and rwxlite commits
+  e3cd04e and f3163f2 on branch m0.
+- Goal direction, ruled by the user 2026-11-03: rwxlite is the embedded
+  model that will replace Jev; rwxmap and rwxlite share that goal. Second
+  goal: keep the mechanical classifier and use the model only on contested
+  methods. The model is to learn the default leanings (the mechanical
+  floors) on its own, then run a second pass. The two projects help each
+  other. No D-number yet; the interface and bar are not set.
+- Tried: nothing in rwxmap. The figures below are rwxlite's, as reported.
+- Outcome: (1) Jev now answers as jev-1.14.0; rwxmap's cut-offs were tuned
+  on jev-1.13.0. rwxmap records the model per moved row (D88) but has not
+  measured 1.14.0. (2) data/corpus/labelled.csv and
+  data/calibration-2026-09-14 are v1-standard; mechanical scores 55.5% on
+  them (DELETE 24.7%: v1 calls 70% of deletes w). Checked 2026-11-03: no
+  file under src/, scripts/ or package.json reads either. (3) On v3 truth
+  (combined-2026-09-21 + relabel-buildset-2026-09-23 joined to APIs.guru,
+  5,716 rows) mechanical is 76.3% exact / 1.3% too loose / 22.3% too tight
+  of 5,716; DELETE is 99.3% exact. Buildset rows score 72.7%; v3 changed
+  51.8% of the v1 labels the step-2 lists were mined on. Step 2 stays
+  closed (D81). (4) x on the wordless POST floor: v3 truth is x on 399 of
+  1,641 (24%). Jev says not-x on 1,360 of the 1,641 (83%; base confirmed by
+  rwxlite: the v3-truth rows whose mechanical rule is the POST floor). Across
+  all 27,656 APIs.guru POST-floor rows, Jev's p is below 0.10 on 16,224
+  (58.7%). On the 1,641 it agrees with v3 on 1,231 of 1,242 non-x rows. At the
+  lower cut 0.10 it wrongly lowers 31 true-x and leaves 315 w/r at x; the best
+  cut is about 0.20-0.30 (LOVO range 0.1-0.3). Misses read as creates but are
+  sends, transfers or payments: asana create story p0.04, github repo transfer
+  p0.18, squareup card disable p0.08, stripe payment_intents p0.09; these are
+  candidate cannot-undo words. (5) A "minimise too-loose first" cut-off rule
+  per tier degenerates: mechanical has 0 too-loose on the lower pile, so the
+  rule turns lower off. They used "max exact such that TOTAL too-loose
+  across tiers is no worse than mechanical's": lower 0.20 / raise-wx 0.60 /
+  raise-get 0.20 gives 95.5% in-sample, and 94.0% exact / 0.9% too loose /
+  5.0% too tight leave-one-vendor-out, against 92.6% / 1.3% at rwxmap's
+  0.10 / 0.80 / 0.50. (6) Wobble across two asks: 82.5% of the 14,188
+  re-asked rows differ, mean |dp| 0.020, p90 0.04, max 0.17; about 600 rows
+  straddle a cut. (7) Rows with no description give more confident p: 8.4%
+  of them fall in 0.1-0.9 vs 14.0% of rows with a description. (8) On v3
+  truth, POST isX alone at 0.5 is 91.9% exact; GET changes 100%; PUT/PATCH
+  isX 95.8%.
+- Status: nothing adopted. All v3 figures are tuning data, single-labelled,
+  with duplicate snapshots, so under D24 none can move a cut-off or list.
+  Any cut-off or word change needs a D-number and a fresh exam. rwxlite is
+  drawing a fresh blind-labelled 600-row v3 sample and offered to share it;
+  if used as an exam it must exclude the ten vendors locked in
+  docs/logs/pre-registered-split-2026-09-18.md.
+- Lesson: (a) a cut-off rule that minimises one error per tier can switch a
+  tier off when mechanical already has zero of that error; a constraint on
+  the total across tiers avoids it. (b) An outside model version change is
+  invisible to tests; record it and re-measure before trusting old
+  cut-offs.
+
+## 2026-11-03 — first fresh-sample score of shipped rwxmap (rwxlite's 600-row gate, D128)
+
+- Goal: record the first score of shipped rwxmap (main, 0.8.1) on rows it
+  never saw. Source: rwxlite's data/gate-2026-11-03/score.json at commit
+  b9038dd, verified by the orchestrator.
+- Tried: rwxlite drew 600 rows from APIs.guru: GET 325 / POST 175 / PUT 50
+  / PATCH 50, no DELETE; 227 providers, one row per op key, vendor cap 5%.
+  It excluded the exam vendors, the ten locked vendors, every op in
+  combined-2026-09-21 and relabel-buildset-2026-09-23, and 19 rows sharing
+  an op key with an exam. Two labellers labelled blind under BRIEF-v3
+  (byte-equal to rwxmap's brief at 4143b6d) and agreed on 588 of 600
+  (98.0%); rwxlite's user ruled the 12 disputes. Truth mix of 600: r 368 /
+  w 194 / x 38. rwxlite scored it once with rwxmap linked from this repo;
+  the sample is now burned. 19 of the 227 providers appear in some rwxmap
+  labelled set. The seen list has 24 names: adyen, appcenter, atlassian,
+  azure, box, clearblade, dracoon, gitea, github, gitlab, jira, keycloak,
+  linode, microsoft, netbox, notion, openai, slack, trello, twilio,
+  vercel, whatsapp, xero, zoom. The other 208 providers hold 472 rows. A
+  first check with 14 names gave 523 rows; it missed five v1-corpus
+  providers (adyen.com, linode.com, slack.com, twilio.com, vercel.com).
+- Outcome, exact / too loose / too tight, counts of the named denominator:
+  - All 600, mechanical: 459 (76.5%) / 13 (2.2%) / 128 (21.3%).
+  - All 600, + Jev at rwxmap's cuts 0.10/0.80/0.50: 531 (88.5%) / 8 (1.3%)
+    / 61 (10.2%).
+  - All 600, + Jev at rwxlite's cuts 0.20/0.60/0.20: 545 (90.8%) / 7
+    (1.2%) / 48 (8.0%).
+  - 472 vendor-clean rows, mechanical: 356 (75.4%) / 13 (2.8%) / 103
+    (21.8%). All 13 mechanical too-loose rows of the 600 are in the 472;
+    so is every too-loose row of every config.
+  - 472 vendor-clean rows, rwxmap cuts: 415 (87.9%) / 8 (1.7%) / 49
+    (10.4%).
+  - 472 vendor-clean rows, rwxlite cuts: 425 (90.0%) / 7 (1.5%) / 40
+    (8.5%).
+  - By method, mechanical: GET 321 / 4 / 0 of 325; POST 49 / 0 / 126 of
+    175. With rwxmap cuts: GET 325 / 0 / 0 of 325; POST 116 / 0 / 59 of 175.
+  - Only 38 truth-x rows of 600 (6.3%), so the too-loose figures rest on a
+    small pile.
+- Findings rwxlite reported, from its own analysis at its cuts
+  (tuning-grade):
+  - F1: 36 of 55 misses (65.5%) are POST reads (/query, /search, /get,
+    list/retrieve) with truth r. Mechanical puts them at x on the POST
+    floor; Jev says not-x; jev-lower moves x only to w. No isX cut fixes
+    it; the lower tier tops out about 71%. rwxlite's fix: on POST floor
+    rows also ask the changes question (criteria-changes.mjs), so x can
+    drop to w or r.
+  - F2: 5 of 7 too-loose rows (71.4%) are password, PIN or auth-key
+    changes on PUT/PATCH (letmc, blazemeter, britbox, kumpeapps, a
+    kubernetes node proxy). Jev reads w; BRIEF-v3 clause (b) says x.
+    Candidate: a credential-change word rule raising to x.
+  - F3: 10 POST rows of truth w stay x (deregister, restart, transferJobs
+    create, feedback, call create), Jev p 0.2-0.57.
+- Take-back candidates (not adopted; each needs a D-number and a fresh
+  sample):
+  1. F1: on POST floor rows, let the lower tier reach r by also asking the
+     changes question.
+  2. F2: credential-change words raise PUT/PATCH to x.
+  3. rwxlite's cut-offs 0.20/0.60/0.20: +2.3 points exact and -1 leak on
+     600; tuned on rwxlite's tuning data.
+- Rulings confirmed directly by the user 2026-11-03: rwxlite is the
+  embedded model that replaces Jev (D128); mechanical stays and the model
+  is asked only on contested rows; the projects share learnings both ways
+  with no upper hand. rwxlite's trained model is scored once on the M3
+  exam (data/exam-2026-09-22, 4279 rows) as its go/no-go, against 82.3 /
+  0.8 / 16.9 mechanical and 93.0 / 0.5 / 6.5 with Jev, only after it
+  passes a fresh labelled sample. rwxlite will draw a second fresh 600-row
+  sample to measure F1 and send its provider list to rwxmap before
+  labelling.
+- Lesson: shipped rwxmap's first score on unseen rows is 88.5% exact / 1.3%
+  too loose with Jev. Mechanical alone leaks 2.2% here vs 0.8% on the M3
+  exam, all on rows from providers rwxmap never tuned on.
+  An overlap check must run against every labelled set held (the old v1
+  corpus included), not the sets that come to mind.
