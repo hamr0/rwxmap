@@ -7952,3 +7952,50 @@ Node.
   and would fire. V4 excluded read-lead rows; it excluded 0 on every
   tuning set and on APIs.guru, so the built rule and V4 do not differ
   there on this data.
+
+## 2026-11-04 — F2 (D131) scored once on gate-3: PASS, adopted
+
+- Goal: score the credential-set rule (D131), as built in 41cdc55, once
+  on rwxlite's fresh gate-3, against the bar pre-registered before
+  gate-3 truth was read.
+- Tried: the mechanical classifyRow from src, run twice on the same 800
+  rows: F2 on, and F2 off (the same call with words
+  {credentialSet: new Set()}). Truth: rwxlite
+  data/gate-2026-11-06/truth.csv (commits 7323817 and 0f61b68). 800
+  rows, 0 missing joins. Run once on 2026-11-04.
+- Outcome: PASS. Exact / too loose / too tight, off then on:
+  - All 800 rows: 578 (72.3%) / 26 / 196; 580 (72.5%) / 23 / 197.
+  - Credential part, 200 rows: 113 (56.5%) / 16 / 71; 115 (57.5%) /
+    13 / 72.
+  - General part, 600 rows: 465 (77.5%) / 10 / 125 both ways. 0 fires.
+  - Vendor-clean 631 rows (24-name list): 443 (70.2%) / 21 / 167;
+    444 (70.4%) / 19 / 168.
+  - credential-set fired on 4 rows, all in the credential part. 3 right,
+    1 wrong:
+    - gate3-0016 signl4 PUT /users/{userId}/changePassword, "Updates the
+      password of a user", truth x: right.
+    - gate3-0092 sendgrid PUT /user/password (PUT_user-password),
+      "Update your password", truth x: right.
+    - gate3-0594 jira.local PUT /api/2/myself/password
+      (changeMyPassword), truth x: right.
+    - gate3-0206 whapi PUT /account/plusCard/pin (updatePin), "Updates a
+      customer's plus card pin", truth w: wrong.
+  - Against the bar: credential part 3 right > 1 wrong, too loose
+    16 -> 13. Vendor-clean 2 right > 1 wrong, too loose 21 -> 19.
+    General part: 0 fires, neither error moves, so it passes by
+    "neither error worsens" (right > wrong is vacuous there).
+  - Mechanical on the general 600 is 77.5% exact; gate-2's general
+    mechanical was 79.3%.
+  - Disclosure: gate-3 truth was public in the rwxlite repo before
+    scoring; rwxmap did not open it before 41cdc55. Gate-3 is in
+    rwxlite's MiniLM training data, so it is an exam for rwxmap only.
+  - Known gap kept: step 1 does not claim read-lead PUT/PATCH, so a
+    read-lead PUT naming a password reaches credential-set and becomes
+    x. 0 such rows in tuning or APIs.guru. Left as is: it errs tighter.
+  - poc/d87/proof-src.mjs claim 1a now reports 2 differences from the
+    frozen POC: pc-r1389 zoom userPassword and x20-e0999 zendesk
+    ChangeOwnPassword, both w (method-floor) -> x (credential-set), both
+    truth x. These are the 2 combined fires above. How to re-pin is open.
+- Lesson: a narrow verb-or-endpoint shape held where the broad noun list
+  failed. The one wrong fire (a card PIN update) shows "pin" is a weaker
+  word than "password". Gate-3 is now burned for F2.

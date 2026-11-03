@@ -153,6 +153,7 @@ decides it.
 | 1 | step 1, r | POST with a `SAFE_VERBS` word at any position | `read-verb-anywhere` | list |
 | 2 | step 2, x | DELETE, always, `destructive: true` | `method-delete` | floor |
 | 2 | step 2, x | POST, PUT or PATCH whose verb is in `CANT_UNDO` | `cant-undo-verb`, `cant-undo-verb-summary` | list |
+| 2 | step 2, x | PUT or PATCH that sets a password, passcode or pin (D131) | `credential-set` | list |
 | 3 | step 3, w | PUT, PATCH | `method-floor` | floor |
 | 3 | step 3, w | POST whose verb is in `KEEP_W` | `modify-verb`, `modify-verb-summary` | list |
 | last | step 2's floor, x | anything unclaimed: a POST with no word, or any other method | `floor-post` | floor |
@@ -188,7 +189,7 @@ of 1994 on tuning) carry most of the too-tight cost and are the pile
 |---|---|---|
 | GET, HEAD, OPTIONS | r | nothing in the mechanical core |
 | DELETE | x, `destructive: true` | nothing — DELETE beats every word |
-| PUT, PATCH | w | a `CANT_UNDO` verb raises it to x |
+| PUT, PATCH | w | a `CANT_UNDO` verb or `credential-set` raises it to x |
 | POST | none — decided by its verb | `READ_VERBS`/`SAFE_VERBS` → r; `CANT_UNDO` → x; `KEEP_W` → w; no word → x |
 | any other method, or none | x | nothing |
 
@@ -199,7 +200,11 @@ that and calls every DELETE x.
 **Precedence.** Method DELETE beats every word. A word beats a floor.
 `CANT_UNDO` and `KEEP_W` are disjoint by construction (asserted in the
 tests), so steps 2 and 3 never both fire on one row. A POST claimed r
-by step 1 is never reached by step 2.
+by step 1 is never reached by step 2. On a PUT or PATCH that `CANT_UNDO`
+did not claim, `credential-set` claims x when the last literal path
+segment ends in password, passcode or pin, or when the lead verb is
+change, regenerate or regen and one of those words is a token of the
+operationId, a literal path segment or the summary (D131).
 
 **Word lists, and who owns each.**
 
@@ -287,7 +292,7 @@ outside service, and the adopter must say so.
 |---|---|
 | `src/tokens.js` | splitter, tokenizer, verb stemmer, `verbForRow`, `LEAD_MODIFIERS`, `METHOD_WORDS` — readers only |
 | `src/step1.js` | step 1, r: `READ_VERBS`, `SAFE_VERBS`, the plural-noun guard (D74, D99) |
-| `src/step2.js` | step 2, x: `method-delete`, `cant-undo-verb(-summary)`, `floor-post`; `CANT_UNDO` (29), `REMOVES` (6) |
+| `src/step2.js` | step 2, x: `method-delete`, `cant-undo-verb(-summary)`, `credential-set`, `floor-post`; `CANT_UNDO` (29), `REMOVES` (6), `CREDENTIAL_SET` (3), `CREDENTIAL_CHANGE_VERBS` (3) |
 | `src/step3.js` | step 3, w: `method-floor`, `modify-verb(-summary)`; `KEEP_W` (14) |
 | `src/flow.js` | `classifyRow` (the order, written once) and `reviewHint` (the one writer of `review`) |
 | `src/jev.js` | the three Jev tiers, thresholds, `applyJev`, `needsJev`, `jevState`, `jevQuestions` |
@@ -333,6 +338,7 @@ Run: `npm test`, `npm run typecheck`, `node poc/d87/proof-src.mjs`,
 | fresh gate, 600 (rwxlite, BRIEF-v3, D128) | + all three Jev tiers | 531 (88.5%) | 8 (1.3%) | 61 (10.2%) |
 | fresh gate-2, 600 (rwxlite, BRIEF-v3, D129) | + all three Jev tiers, 0.8.1 | 550 (91.7%) | 3 (0.5%) | 47 (7.8%) |
 | fresh gate-2, 600 (rwxlite, BRIEF-v3, D129) | + all three Jev tiers, F1 (D129) | 567 (94.5%) | 3 (0.5%) | 30 (5.0%) |
+| fresh gate-3, 800 (rwxlite, BRIEF-v3, 200 credential + 600 general, D131) | mechanical | 580 (72.5%) | 23 (2.9%) | 197 (24.6%) |
 
 On gate-2's vendor-clean 483 rows, exact goes from 437 (90.5%) to 452
 (93.6%) with F1; too loose is 3 both ways.
@@ -881,9 +887,9 @@ Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 rwxlite replacing Jev (D128) is in progress in the rwxlite project.
 rwxmap's part is to check each fresh sample's provider list against the
 locks, and to weigh the take-back candidates in learnings (2026-11-03)
-under their own D-numbers. F1 (D129) is built and passed gate-2
-(17 of 17 moves right); release is pending. F2 (credential words) is the
-next take-back pass. Parked items and known limits are below.
+under their own D-numbers. F1 (D129) and F2 (D131) are built and passed
+their fresh scores; release pending. Parked items and known limits are
+below.
 
 ### Parked
 
