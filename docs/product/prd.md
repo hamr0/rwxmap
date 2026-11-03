@@ -114,7 +114,10 @@ reading:
   comment or a reaction the same API can delete is w (D98).
 - **x** = execute: cannot be undone. Deletes and removals, revokes,
   expires, voids, sends, publishes, charges, pays, refunds, triggers a
-  run. A create that also sends, charges or runs is x.
+  run. A create that also sends, charges or runs is x. Revoking,
+  expiring, rotating or resetting a credential, key, token, secret,
+  certificate, session or password, and changing or setting a password,
+  is x (D130; BRIEF-v3 clause b).
 - Unsure → **x**.
 
 "Whose thing is it" is not a class test: it cannot be read reliably
@@ -153,6 +156,7 @@ decides it.
 | 1 | step 1, r | POST with a `SAFE_VERBS` word at any position | `read-verb-anywhere` | list |
 | 2 | step 2, x | DELETE, always, `destructive: true` | `method-delete` | floor |
 | 2 | step 2, x | POST, PUT or PATCH whose verb is in `CANT_UNDO` | `cant-undo-verb`, `cant-undo-verb-summary` | list |
+| 2 | step 2, x | PUT or PATCH that sets a password, passcode or pin (D131) | `credential-set` | list |
 | 3 | step 3, w | PUT, PATCH | `method-floor` | floor |
 | 3 | step 3, w | POST whose verb is in `KEEP_W` | `modify-verb`, `modify-verb-summary` | list |
 | last | step 2's floor, x | anything unclaimed: a POST with no word, or any other method | `floor-post` | floor |
@@ -160,7 +164,7 @@ decides it.
 **Why each floor sits where it does.** Truth per method under the D87
 definition, and which step decides the rows. Tuning set first (6557
 rows, `data/combined-2026-09-21/labelled.csv`), then the burned M3 exam
-(4279 rows, `data/exam-2026-09-22/labelled.csv`); re-derived 2026-10-29
+(4279 rows, `data/exam-2026-09-22/labelled.csv`); re-derived 2026-11-03
 with the current `classifyRow`.
 
 | method | set | n | truth r | truth w | truth x | floor | decided by (rows) |
@@ -171,7 +175,7 @@ with the current `classifyRow`.
 | POST | M3 exam | 892 | 128 (14%) | 636 (71%) | 128 (14%) | x | no word → floor x 808; step 2 `CANT_UNDO` → x 27; step 1 read verb → r 36; step 3 `KEEP_W` → w 21 |
 | DELETE | tuning | 951 | 1 (0%) | 26 (3%) | 924 (97%) | x | method floor 951 |
 | DELETE | M3 exam | 558 | 3 (1%) | 7 (1%) | 548 (98%) | x | method floor 558 |
-| PUT | tuning | 766 | 1 (0%) | 718 (94%) | 47 (6%) | w | method floor 753; step 2 `CANT_UNDO` → x 13 |
+| PUT | tuning | 766 | 1 (0%) | 718 (94%) | 47 (6%) | w | method floor 751; step 2 `CANT_UNDO` → x 13; step 2 `credential-set` → x 2 |
 | PUT | M3 exam | 460 | 2 (0%) | 441 (96%) | 17 (4%) | w | method floor 456; step 2 `CANT_UNDO` → x 4 |
 | PATCH | tuning | 303 | 0 | 299 (99%) | 4 (1%) | w | method floor 301; step 2 `CANT_UNDO` → x 2 |
 | PATCH | M3 exam | 270 | 0 | 258 (96%) | 12 (4%) | w | method floor 268; step 2 `CANT_UNDO` → x 2 |
@@ -188,7 +192,7 @@ of 1994 on tuning) carry most of the too-tight cost and are the pile
 |---|---|---|
 | GET, HEAD, OPTIONS | r | nothing in the mechanical core |
 | DELETE | x, `destructive: true` | nothing — DELETE beats every word |
-| PUT, PATCH | w | a `CANT_UNDO` verb raises it to x |
+| PUT, PATCH | w | a `CANT_UNDO` verb or `credential-set` raises it to x |
 | POST | none — decided by its verb | `READ_VERBS`/`SAFE_VERBS` → r; `CANT_UNDO` → x; `KEEP_W` → w; no word → x |
 | any other method, or none | x | nothing |
 
@@ -199,7 +203,11 @@ that and calls every DELETE x.
 **Precedence.** Method DELETE beats every word. A word beats a floor.
 `CANT_UNDO` and `KEEP_W` are disjoint by construction (asserted in the
 tests), so steps 2 and 3 never both fire on one row. A POST claimed r
-by step 1 is never reached by step 2.
+by step 1 is never reached by step 2. On a PUT or PATCH that `CANT_UNDO`
+did not claim, `credential-set` claims x when the last literal path
+segment ends in password, passcode or pin, or when the lead verb is
+change, regenerate or regen and one of those words is a token of the
+operationId, a literal path segment or the summary (D131).
 
 **Word lists, and who owns each.**
 
@@ -258,12 +266,17 @@ The tool emits no confidence score.
 ### The Jev tiers (optional, D82/D88/D95)
 
 Three independent tiers. Each reads only its own pile of mechanical
-verdicts, makes one one-way move, and keeps its own ledger; no two
-piles overlap, so no tier can undo another.
+verdicts and keeps its own ledger; no two piles overlap, so no tier can
+undo another. The two raise tiers make one one-way move. `jev-lower`
+ends at w or at r (D129): when p(x) ≤ 0.10 fires, a second, separate
+request asks the changes question (`jev-raise-get`'s, byte-equal). A
+usable answer from the same model string with p(changes) ≤ 0.50
+(`JEV_LOWER_R_THRESHOLD`) moves the row x → r; anything else stops it
+at w. Rows isX does not lower get no second call.
 
 | tier | pile (mechanical rule) | move | question | fires at |
 |---|---|---|---|---|
-| `jev-lower` | `floor-post`, class x | x → w | is this x? | p(x) ≤ 0.10 |
+| `jev-lower` | `floor-post`, class x | x → w, or x → r (D129) | is this x?; then, only if it fired, does anything change? | p(x) ≤ 0.10; then p(changes) ≤ 0.50 |
 | `jev-raise-wx` | `method-floor`, class w | w → x | is this x? (x-only criteria) | p(x) ≥ 0.80 |
 | `jev-raise-get` | `method`, class r | r → w, never x | does anything change? | p(changes) ≥ 0.50 |
 
@@ -271,7 +284,7 @@ piles overlap, so no tier can undo another.
 the model's answer and passes it to `applyJev`. Any bad answer — p not a
 finite number in [0, 1], no model string, below threshold — leaves the
 verdict untouched: fail closed. A moved verdict records `jev: {p,
-model}` so a map never changes silently when the model behind it does.
+model}` (plus `pChanges` for an x → r move) so a map never changes silently when the model behind it does.
 The criteria text is transcribed verbatim from BRIEF-v3. Opting in means
 spec text (method, path, operationId, summary, description) goes to an
 outside service, and the adopter must say so.
@@ -282,7 +295,7 @@ outside service, and the adopter must say so.
 |---|---|
 | `src/tokens.js` | splitter, tokenizer, verb stemmer, `verbForRow`, `LEAD_MODIFIERS`, `METHOD_WORDS` — readers only |
 | `src/step1.js` | step 1, r: `READ_VERBS`, `SAFE_VERBS`, the plural-noun guard (D74, D99) |
-| `src/step2.js` | step 2, x: `method-delete`, `cant-undo-verb(-summary)`, `floor-post`; `CANT_UNDO` (29), `REMOVES` (6) |
+| `src/step2.js` | step 2, x: `method-delete`, `cant-undo-verb(-summary)`, `credential-set`, `floor-post`; `CANT_UNDO` (29), `REMOVES` (6), `CREDENTIAL_SET` (3), `CREDENTIAL_CHANGE_VERBS` (3) |
 | `src/step3.js` | step 3, w: `method-floor`, `modify-verb(-summary)`; `KEEP_W` (14) |
 | `src/flow.js` | `classifyRow` (the order, written once) and `reviewHint` (the one writer of `review`) |
 | `src/jev.js` | the three Jev tiers, thresholds, `applyJev`, `needsJev`, `jevState`, `jevQuestions` |
@@ -297,7 +310,9 @@ outside service, and the adopter must say so.
 
 `poc/d87/` is the reference `src/` is proved against: `node
 poc/d87/proof-src.mjs` compares both over all 6557 rows of the combined
-set, must print 0 differences (checked to fail when broken), and
+set, must print 0 unexpected differences and exactly the 2 allowed
+D131 rows (pc-r1389, x20-e0999: the credential-set rule moves them;
+user ruling 2026-11-03), checked to fail when broken, and
 replays the recorded Jev answers through `applyJev` (804 lowered).
 `tools/proof-step1.js` still passes after D99 but is blind to the
 plural-noun guard, so it does not pin step 1's full behaviour (D99).
@@ -324,6 +339,21 @@ Run: `npm test`, `npm run typecheck`, `node poc/d87/proof-src.mjs`,
 | combined, 6557, fitted | + `jev-lower` only, t=0.10 | 94.2% | 72 (1.1%) | 309 (4.7%) |
 | **M3 exam, 4279** | **mechanical** | **3520 (82.3%)** | **34 (0.8%)** | **725 (16.9%)** |
 | **M3 exam, 4279** | **+ all three Jev tiers** | **3980 (93.0%)** | **22 (0.5%)** | **277 (6.5%)** |
+| fresh gate, 600 (rwxlite, BRIEF-v3, D128) | mechanical | 459 (76.5%) | 13 (2.2%) | 128 (21.3%) |
+| fresh gate, 600 (rwxlite, BRIEF-v3, D128) | + all three Jev tiers | 531 (88.5%) | 8 (1.3%) | 61 (10.2%) |
+| fresh gate-2, 600 (rwxlite, BRIEF-v3, D129) | + all three Jev tiers, 0.8.1 | 550 (91.7%) | 3 (0.5%) | 47 (7.8%) |
+| fresh gate-2, 600 (rwxlite, BRIEF-v3, D129) | + all three Jev tiers, F1 (D129) | 567 (94.5%) | 3 (0.5%) | 30 (5.0%) |
+| fresh gate-3, 800 (rwxlite, BRIEF-v3, 200 credential + 600 general, D131) | mechanical | 580 (72.5%) | 23 (2.9%) | 197 (24.6%) |
+| fresh gate-4, 800 (rwxlite, BRIEF-v3, 200 write + 600 general) | + all three Jev tiers, 0.8.1 | 687 (85.9%) | 10 (1.3%) | 103 (12.9%) |
+| fresh gate-4, 800 (rwxlite, BRIEF-v3, 200 write + 600 general) | + all three Jev tiers, 0.9.0 candidate (F1, F2) | 734 (91.8%) | 9 (1.1%) | 57 (7.1%) |
+
+On gate-2's vendor-clean 483 rows, exact goes from 437 (90.5%) to 452
+(93.6%) with F1; too loose is 3 both ways.
+
+The fresh gate holds only 38 truth-x rows of 600, and 19 of its 227
+providers appear in rwxmap's labelled sets; on the 472 rows from the
+other 208, mechanical gives 75.4% / 2.8% / 21.8% and Jev 87.9% / 1.7% /
+10.4%.
 
 On the 6557 combined rows, v3 truth is r 2712 / w 2378 / x 1467. Of the
 64 fitted leaks, 23 sit on list rows and 41 on floor rows (39 of them
@@ -859,9 +889,71 @@ above.
 
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
+## Planned: rwxmap with rwxlite (after rwxlite's last test)
+
+PLANNED, not adopted and not current behaviour. User statement
+2026-11-03: "we will probably go for it". It becomes the next module
+only after rwxlite's last test, with its own D-number and ruling.
+
+- **Split.** rwxmap stays the adapter: spec import, shaping, flags, all
+  output. rwxlite is a pure classifier: Jev-shaped questions in, p out.
+  It never decides to ask.
+- **Three engines under rwxmap.** (1) mechanical -> rwxlite, the planned
+  default, local and free. (2) rwxlite alone (rwxlite's "mode b").
+  (3) mechanical -> Jev, kept as the paid option. This would reverse
+  today's order (mechanical default, Jev opt-in).
+- **One request, both questions** (isX and changes): x = p(isX),
+  w = p(changes) - p(isX), r = 1 - p(changes). The Jev engine keeps its
+  separate requests, because its cut-offs were measured that way (D127).
+- **Lowerings are flagged, not trusted.** A lowering is accepted only
+  when max p >= 0.97; otherwise the row is marked to ask, beside
+  rwxmap's tight marks. Raises and keeps are trusted. Proposed form: an
+  asked row keeps the stricter letter and carries the existing `tight`
+  review marker, no new output field. To be decided.
+- **Evidence so far** (rwxlite's numbers; its fresh exam on coolify,
+  workos, lago, resend, 949 operations; rwxlite commits 0caa381
+  prereg, 402fea0 score; labels 934 of 949 agreed). Answered 875 rows:
+  92.57% right; 5 too loose (0.57% of 875) against a 0.5% bar (4
+  rows), so NO-GO by one row; 60 too tight (6.9%); asked 74 (7.8% of
+  949). All 13 wrong lowerings of 166 were under 0.97 and asked; all 92
+  accepted lowerings were right. Mechanical alone on the same exam:
+  77.6% right, 6 too loose (0.63%), 21.8% too tight. The 5 misses come
+  from the mechanical letter: 3 PUT/PATCH credential upserts (workos
+  client-credentials, workos api-key, coolify integration-tokens;
+  mechanical w, truth x by clause b) and 2 logout GETs (workos
+  /sso/logout, /user_management/sessions/logout; truth x). Practice rows
+  (rwxlite v3 tuning, LOVO): 93.2% right, 21 too loose (0.41%), 9.6%
+  asked.
+- **Mechanical candidates this points to** (each needs a tuning POC and
+  a fresh exam). R1: credential replace on PUT/PATCH (last path segment
+  is a credential being replaced: api-key, client-credentials, token,
+  secret), kept narrower than the broad noun rule that failed (6 right,
+  17 wrong, learnings F2 POC). R2: logout, signout, end-session is x on
+  any method; it touches step 1, so it is a core change.
+- **The bar** (user note 2026-11-03, open, not decided). The target
+  could be lowered, because the local model is about 92% right and asks
+  on the doubtful rows. The bar for this module is set before it is
+  built.
+- **Interface to pin with rwxlite.** Model string and version format;
+  error behaviour (fail closed: keep the mechanical letter); latency
+  budget; distribution (npm package or model file); `onnxruntime-node`
+  as an optional dependency loaded only for the local engines
+  (dependency rule).
+- **Next steps.** Shared fresh exam #3, agreed by both users: vendors
+  from rwxmap's spares clerk, neon, supabase, mux, netbird, ory, novu;
+  both projects commit candidates before truth is read; each scores
+  once. rwxlite's M1 is an int8 ONNX Node answerer in Jev's
+  request/answer shape.
+
 ## What is next
 
-Nothing is planned. Parked items and known limits are below.
+The 0.9.0 candidate carries F1 (D129) and F2 (D131). The gate-4 fresh
+check passed (91.8% vs 85.9% exact, too loose 9 vs 10 of 800). The
+other take-backs were measured and rejected (learnings, 2026-11-03).
+rwxlite's model failed its D128 exam: 36 of 4279 rows too loose (0.84%,
+bar 0.5%), so Jev stays the model tier. Open: invert the D128 order (model
+first, mechanical when unsure), pending rwxlite's brief. Parked items and
+known limits below.
 
 ### Parked
 
@@ -870,11 +962,11 @@ Nothing is planned. Parked items and known limits are below.
   1% (0.8% mechanical, 0.5% with Jev on the M3 exam) and a fix changes
   the core: it needs a new D-number and a fresh exam.
 - **The fresh clean exam.** Needed only when the core changes. It is
-  drawn from vendors no set has seen; the ten locked away for it are
-  named in `docs/logs/pre-registered-split-2026-09-18.md`. Shipping the
-  two raise tiers (`jev-raise-wx`, `jev-raise-get`) is settled (D119);
-  a fresh exam is required for any future change to D100's tiers,
-  D101's review rule, or the frozen core.
+  drawn from fresh official specs outside APIs.guru that no set has
+  seen; the ten locked vendors are spent or released to rwxlite (D132).
+  Shipping the two raise tiers (`jev-raise-wx`, `jev-raise-get`) is
+  settled (D119); a fresh exam is required for any future change to
+  D100's tiers, D101's review rule, or the frozen core.
 - **Windows.** Untested: CI runs on Linux only, two tests create
   symlinks (which need privileges on Windows), and the entry-point
   check and the `--force` hard-link and rename path have never run
@@ -962,4 +1054,6 @@ network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
 
 ## Open questions
 
-None open.
+- Default engine order: mechanical first, or rwxlite first.
+- The bar for the rwxlite module (see the planned section).
+- How an asked row is published: the `tight` marker, or a new field.

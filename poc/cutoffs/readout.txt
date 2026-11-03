@@ -1,0 +1,318 @@
+MODEL MISMATCH: lower isX answers are jev-1.13.0, changes answers jev-1.14.0; the changes answer is given the isX model string for this POC (src requires them equal).
+today's cuts {"jev-lower":0.1,"jev-lower-r":0.5,"jev-raise-wx":0.8,"jev-raise-get":0.5}; rwxlite's {"jev-lower":0.2,"jev-lower-r":0.5,"jev-raise-wx":0.6,"jev-raise-get":0.2} (lower-r kept at 0.50, they proposed none)
+bars (D100): loosening (lower cut up) LOVO right/wrong >= 10 on both runs; tighten-only (raise cuts down) more right than wrong and too-loose never up, both runs and LOVO.
+right = row was not exact and becomes exact; wrong = a moved row becomes a NEW error of the direction it moved (looser -> new leak, tighter -> new over-tight); other = the rest of moved rows (partial improvements, deepened errors).
+MODE: full combined (includes the burned exam-2026-09-17 and exam-2026-09-20 source rows)
+join: combined run1 isX: 1906 answers, 0 unparseable lines, 570 answers whose row_id is not in that tier's pile now (ignored)
+join: combined run1 changes: 1906 answers, 0 unparseable lines, 570 answers whose row_id is not in that tier's pile now (ignored)
+join: combined run1 wx: 1657 answers, 0 unparseable lines, 605 answers whose row_id is not in that tier's pile now (ignored)
+join: combined run1 get: 2543 answers, 0 unparseable lines, 0 answers whose row_id is not in that tier's pile now (ignored)
+join: combined run1 piles: {"jev-lower":1336,"jev-raise-wx":1052,"jev-raise-get":2543}; no-answer/unusable (fail closed, never moved): {"jev-lower":{"missing":0,"unusable":0,"chMissing":0,"chUnusable":0},"jev-raise-wx":{"missing":0,"unusable":3},"jev-raise-get":{"missing":0,"unusable":0}}
+join: combined run2 isX: 1906 answers, 0 unparseable lines, 570 answers whose row_id is not in that tier's pile now (ignored)
+join: combined run2 changes: 1906 answers, 0 unparseable lines, 570 answers whose row_id is not in that tier's pile now (ignored)
+join: combined run2 wx: 1657 answers, 0 unparseable lines, 605 answers whose row_id is not in that tier's pile now (ignored)
+join: combined run2 get: 2543 answers, 0 unparseable lines, 0 answers whose row_id is not in that tier's pile now (ignored)
+join: combined run2 piles: {"jev-lower":1336,"jev-raise-wx":1052,"jev-raise-get":2543}; no-answer/unusable (fail closed, never moved): {"jev-lower":{"missing":0,"unusable":0,"chMissing":0,"chUnusable":0},"jev-raise-wx":{"missing":0,"unusable":3},"jev-raise-get":{"missing":0,"unusable":0}}
+join: buildset run1 isX: 1906 answers, 0 unparseable lines, 1336 answers whose row_id is not in that tier's pile now (ignored)
+join: buildset run1 changes: 1906 answers, 0 unparseable lines, 1336 answers whose row_id is not in that tier's pile now (ignored)
+join: buildset run1 wx: 1657 answers, 0 unparseable lines, 1057 answers whose row_id is not in that tier's pile now (ignored)
+join: buildset run1 piles: {"jev-lower":570,"jev-raise-wx":600,"jev-raise-get":0}; no-answer/unusable (fail closed, never moved): {"jev-lower":{"missing":0,"unusable":0,"chMissing":0,"chUnusable":0},"jev-raise-wx":{"missing":0,"unusable":1},"jev-raise-get":{"missing":0,"unusable":0}}
+join: buildset run2 isX: 1906 answers, 0 unparseable lines, 1336 answers whose row_id is not in that tier's pile now (ignored)
+join: buildset run2 changes: 1906 answers, 0 unparseable lines, 1336 answers whose row_id is not in that tier's pile now (ignored)
+join: buildset run2 wx: 1657 answers, 0 unparseable lines, 1057 answers whose row_id is not in that tier's pile now (ignored)
+join: buildset run2 piles: {"jev-lower":570,"jev-raise-wx":600,"jev-raise-get":0}; no-answer/unusable (fail closed, never moved): {"jev-lower":{"missing":0,"unusable":0,"chMissing":0,"chUnusable":0},"jev-raise-wx":{"missing":0,"unusable":1},"jev-raise-get":{"missing":0,"unusable":0}}
+
+################ combined (6557) ################
+
+=== 1/2. combined run1: today's cuts vs rwxlite's cuts ===
+    today combined (all tiers + unmoved rows): before 6191 exact (94.4%) / 64 too loose (1.0%) / 302 too tight (4.6%) of 6557 rows
+    today combined: after  6191 exact (94.4%) / 64 too loose (1.0%) / 302 too tight (4.6%) of 6557 rows; moved 0, right 0, wrong 0, other 0, ratio 0.00
+    jev-lower own ledger: moved 0 of 1336; right 0 wrong 0 other 0 ratio 0.00; leaks 14->14 over 263->263; 1059 exact (79.3%) / 14 too loose (1.0%) / 263 too tight (19.7%) of 1336 pile rows
+    jev-raise-wx own ledger: moved 0 of 1052; right 0 wrong 0 other 0 ratio 0.00; leaks 27->27 over 1->1; 1024 exact (97.3%) / 27 too loose (2.6%) / 1 too tight (0.1%) of 1052 pile rows
+    jev-raise-get own ledger: moved 0 of 2543; right 0 wrong 0 other 0 ratio 0.00; leaks 0->0 over 0->0; 2543 exact (100.0%) / 0 too loose (0.0%) / 0 too tight (0.0%) of 2543 pile rows
+  rwxlite cuts vs today:
+    rwxlite combined (all tiers + unmoved rows): before 6191 exact (94.4%) / 64 too loose (1.0%) / 302 too tight (4.6%) of 6557 rows
+    rwxlite combined: after  6301 exact (96.1%) / 97 too loose (1.5%) / 159 too tight (2.4%) of 6557 rows; moved 197, right 146, wrong 44, other 7, ratio 3.32
+    jev-lower own ledger: moved 186 of 1336; right 140 wrong 39 other 7 ratio 3.59; leaks 14->53 over 263->115; 1168 exact (87.4%) / 53 too loose (4.0%) / 115 too tight (8.6%) of 1336 pile rows
+    jev-raise-wx own ledger: moved 8 of 1052; right 6 wrong 2 other 0 ratio 3.00; leaks 27->21 over 1->3; 1028 exact (97.7%) / 21 too loose (2.0%) / 3 too tight (0.3%) of 1052 pile rows
+    jev-raise-get own ledger: moved 3 of 2543; right 0 wrong 3 other 0 ratio 0.00; leaks 0->0 over 0->3; 2540 exact (99.9%) / 0 too loose (0.0%) / 3 too tight (0.1%) of 2543 pile rows
+
+=== 3. combined run1: per-tier sweeps (others at today's) ===
+  [jev-lower] combined run1, today cut 0.1: 1059 exact (79.3%) / 14 too loose (1.0%) / 263 too tight (19.7%) of 1336 jev-lower pile rows
+    cut 0.05: moved 633 of 1336 pile rows (47.4%); looser 0 tighter 633; right 12, wrong 621, other 0; ratio 0.02; leaks 14->1 (-13), over-tight 263->884 (+621); bar(tighten) fail
+    cut 0.10 (today): moved 0 of 1336 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 14->14 (+0), over-tight 263->263 (+0); bar(none) -
+    cut 0.15: moved 115 of 1336 pile rows (8.6%); looser 115 tighter 0; right 97, wrong 17, other 1; ratio 5.71; leaks 14->31 (+17), over-tight 263->162 (-101); bar(loosen) fail
+    cut 0.20: moved 186 of 1336 pile rows (13.9%); looser 186 tighter 0; right 140, wrong 39, other 7; ratio 3.59; leaks 14->53 (+39), over-tight 263->115 (-148); bar(loosen) fail
+    cut 0.25: moved 240 of 1336 pile rows (18.0%); looser 240 tighter 0; right 179, wrong 51, other 10; ratio 3.51; leaks 14->65 (+51), over-tight 263->74 (-189); bar(loosen) fail
+    cut 0.30: moved 271 of 1336 pile rows (20.3%); looser 271 tighter 0; right 194, wrong 63, other 14; ratio 3.08; leaks 14->77 (+63), over-tight 263->58 (-205); bar(loosen) fail
+    cut 0.35: moved 302 of 1336 pile rows (22.6%); looser 302 tighter 0; right 202, wrong 85, other 15; ratio 2.38; leaks 14->99 (+85), over-tight 263->50 (-213); bar(loosen) fail
+    cut 0.40: moved 331 of 1336 pile rows (24.8%); looser 331 tighter 0; right 214, wrong 100, other 17; ratio 2.14; leaks 14->114 (+100), over-tight 263->38 (-225); bar(loosen) fail
+  [jev-raise-wx] combined run1, today cut 0.8: 1024 exact (97.3%) / 27 too loose (2.6%) / 1 too tight (0.1%) of 1052 jev-raise-wx pile rows
+    cut 0.50: moved 14 of 1052 pile rows (1.3%); looser 0 tighter 14; right 7, wrong 7, other 0; ratio 1.00; leaks 27->20 (-7), over-tight 1->8 (+7); bar(tighten) fail
+    cut 0.55: moved 11 of 1052 pile rows (1.0%); looser 0 tighter 11; right 6, wrong 5, other 0; ratio 1.20; leaks 27->21 (-6), over-tight 1->6 (+5); bar(tighten) PASS
+    cut 0.60: moved 8 of 1052 pile rows (0.8%); looser 0 tighter 8; right 6, wrong 2, other 0; ratio 3.00; leaks 27->21 (-6), over-tight 1->3 (+2); bar(tighten) PASS
+    cut 0.65: moved 8 of 1052 pile rows (0.8%); looser 0 tighter 8; right 6, wrong 2, other 0; ratio 3.00; leaks 27->21 (-6), over-tight 1->3 (+2); bar(tighten) PASS
+    cut 0.70: moved 7 of 1052 pile rows (0.7%); looser 0 tighter 7; right 5, wrong 2, other 0; ratio 2.50; leaks 27->22 (-5), over-tight 1->3 (+2); bar(tighten) PASS
+    cut 0.75: moved 2 of 1052 pile rows (0.2%); looser 0 tighter 2; right 2, wrong 0, other 0; ratio inf; leaks 27->25 (-2), over-tight 1->1 (+0); bar(tighten) PASS
+    cut 0.80 (today): moved 0 of 1052 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 27->27 (+0), over-tight 1->1 (+0); bar(none) -
+    cut 0.85: moved 3 of 1052 pile rows (0.3%); looser 3 tighter 0; right 0, wrong 3, other 0; ratio 0.00; leaks 27->30 (+3), over-tight 1->1 (+0); bar(loosen) fail
+    cut 0.90: moved 7 of 1052 pile rows (0.7%); looser 7 tighter 0; right 0, wrong 7, other 0; ratio 0.00; leaks 27->34 (+7), over-tight 1->1 (+0); bar(loosen) fail
+  [jev-raise-get] combined run1, today cut 0.5: 2543 exact (100.0%) / 0 too loose (0.0%) / 0 too tight (0.0%) of 2543 jev-raise-get pile rows
+    cut 0.20: moved 3 of 2543 pile rows (0.1%); looser 0 tighter 3; right 0, wrong 3, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->3 (+3); bar(tighten) fail
+    cut 0.25: moved 1 of 2543 pile rows (0.0%); looser 0 tighter 1; right 0, wrong 1, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->1 (+1); bar(tighten) fail
+    cut 0.30: moved 1 of 2543 pile rows (0.0%); looser 0 tighter 1; right 0, wrong 1, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->1 (+1); bar(tighten) fail
+    cut 0.35: moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+    cut 0.40: moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+    cut 0.45: moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+    cut 0.50 (today): moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+    cut 0.55: moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+    cut 0.60: moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+    cut 0.65: moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+    cut 0.70: moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+
+=== 1/2. combined run2: today's cuts vs rwxlite's cuts ===
+    today combined (all tiers + unmoved rows): before 6191 exact (94.4%) / 65 too loose (1.0%) / 301 too tight (4.6%) of 6557 rows
+    today combined: after  6191 exact (94.4%) / 65 too loose (1.0%) / 301 too tight (4.6%) of 6557 rows; moved 0, right 0, wrong 0, other 0, ratio 0.00
+    jev-lower own ledger: moved 0 of 1336; right 0 wrong 0 other 0 ratio 0.00; leaks 15->15 over 262->262; 1059 exact (79.3%) / 15 too loose (1.1%) / 262 too tight (19.6%) of 1336 pile rows
+    jev-raise-wx own ledger: moved 0 of 1052; right 0 wrong 0 other 0 ratio 0.00; leaks 27->27 over 1->1; 1024 exact (97.3%) / 27 too loose (2.6%) / 1 too tight (0.1%) of 1052 pile rows
+    jev-raise-get own ledger: moved 0 of 2543; right 0 wrong 0 other 0 ratio 0.00; leaks 0->0 over 0->0; 2543 exact (100.0%) / 0 too loose (0.0%) / 0 too tight (0.0%) of 2543 pile rows
+  rwxlite cuts vs today:
+    rwxlite combined (all tiers + unmoved rows): before 6191 exact (94.4%) / 65 too loose (1.0%) / 301 too tight (4.6%) of 6557 rows
+    rwxlite combined: after  6306 exact (96.2%) / 97 too loose (1.5%) / 154 too tight (2.3%) of 6557 rows; moved 197, right 149, wrong 43, other 5, ratio 3.47
+    jev-lower own ledger: moved 186 of 1336; right 143 wrong 38 other 5 ratio 3.76; leaks 15->53 over 262->110; 1173 exact (87.8%) / 53 too loose (4.0%) / 110 too tight (8.2%) of 1336 pile rows
+    jev-raise-wx own ledger: moved 9 of 1052; right 6 wrong 3 other 0 ratio 2.00; leaks 27->21 over 1->4; 1027 exact (97.6%) / 21 too loose (2.0%) / 4 too tight (0.4%) of 1052 pile rows
+    jev-raise-get own ledger: moved 2 of 2543; right 0 wrong 2 other 0 ratio 0.00; leaks 0->0 over 0->2; 2541 exact (99.9%) / 0 too loose (0.0%) / 2 too tight (0.1%) of 2543 pile rows
+
+=== 3. combined run2: per-tier sweeps (others at today's) ===
+  [jev-lower] combined run2, today cut 0.1: 1059 exact (79.3%) / 15 too loose (1.1%) / 262 too tight (19.6%) of 1336 jev-lower pile rows
+    cut 0.05: moved 619 of 1336 pile rows (46.3%); looser 0 tighter 619; right 12, wrong 607, other 0; ratio 0.02; leaks 15->2 (-13), over-tight 262->869 (+607); bar(tighten) fail
+    cut 0.10 (today): moved 0 of 1336 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 15->15 (+0), over-tight 262->262 (+0); bar(none) -
+    cut 0.15: moved 112 of 1336 pile rows (8.4%); looser 112 tighter 0; right 94, wrong 17, other 1; ratio 5.53; leaks 15->32 (+17), over-tight 262->164 (-98); bar(loosen) fail
+    cut 0.20: moved 186 of 1336 pile rows (13.9%); looser 186 tighter 0; right 143, wrong 38, other 5; ratio 3.76; leaks 15->53 (+38), over-tight 262->110 (-152); bar(loosen) fail
+    cut 0.25: moved 235 of 1336 pile rows (17.6%); looser 235 tighter 0; right 174, wrong 52, other 9; ratio 3.35; leaks 15->67 (+52), over-tight 262->77 (-185); bar(loosen) fail
+    cut 0.30: moved 263 of 1336 pile rows (19.7%); looser 263 tighter 0; right 189, wrong 60, other 14; ratio 3.15; leaks 15->75 (+60), over-tight 262->61 (-201); bar(loosen) fail
+    cut 0.35: moved 298 of 1336 pile rows (22.3%); looser 298 tighter 0; right 200, wrong 82, other 16; ratio 2.44; leaks 15->97 (+82), over-tight 262->49 (-213); bar(loosen) fail
+    cut 0.40: moved 332 of 1336 pile rows (24.9%); looser 332 tighter 0; right 207, wrong 108, other 17; ratio 1.92; leaks 15->123 (+108), over-tight 262->41 (-221); bar(loosen) fail
+  [jev-raise-wx] combined run2, today cut 0.8: 1024 exact (97.3%) / 27 too loose (2.6%) / 1 too tight (0.1%) of 1052 jev-raise-wx pile rows
+    cut 0.50: moved 14 of 1052 pile rows (1.3%); looser 0 tighter 14; right 7, wrong 7, other 0; ratio 1.00; leaks 27->20 (-7), over-tight 1->8 (+7); bar(tighten) fail
+    cut 0.55: moved 10 of 1052 pile rows (1.0%); looser 0 tighter 10; right 6, wrong 4, other 0; ratio 1.50; leaks 27->21 (-6), over-tight 1->5 (+4); bar(tighten) PASS
+    cut 0.60: moved 9 of 1052 pile rows (0.9%); looser 0 tighter 9; right 6, wrong 3, other 0; ratio 2.00; leaks 27->21 (-6), over-tight 1->4 (+3); bar(tighten) PASS
+    cut 0.65: moved 8 of 1052 pile rows (0.8%); looser 0 tighter 8; right 6, wrong 2, other 0; ratio 3.00; leaks 27->21 (-6), over-tight 1->3 (+2); bar(tighten) PASS
+    cut 0.70: moved 6 of 1052 pile rows (0.6%); looser 0 tighter 6; right 5, wrong 1, other 0; ratio 5.00; leaks 27->22 (-5), over-tight 1->2 (+1); bar(tighten) PASS
+    cut 0.75: moved 2 of 1052 pile rows (0.2%); looser 0 tighter 2; right 2, wrong 0, other 0; ratio inf; leaks 27->25 (-2), over-tight 1->1 (+0); bar(tighten) PASS
+    cut 0.80 (today): moved 0 of 1052 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 27->27 (+0), over-tight 1->1 (+0); bar(none) -
+    cut 0.85: moved 3 of 1052 pile rows (0.3%); looser 3 tighter 0; right 0, wrong 3, other 0; ratio 0.00; leaks 27->30 (+3), over-tight 1->1 (+0); bar(loosen) fail
+    cut 0.90: moved 7 of 1052 pile rows (0.7%); looser 7 tighter 0; right 0, wrong 7, other 0; ratio 0.00; leaks 27->34 (+7), over-tight 1->1 (+0); bar(loosen) fail
+  [jev-raise-get] combined run2, today cut 0.5: 2543 exact (100.0%) / 0 too loose (0.0%) / 0 too tight (0.0%) of 2543 jev-raise-get pile rows
+    cut 0.20: moved 2 of 2543 pile rows (0.1%); looser 0 tighter 2; right 0, wrong 2, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->2 (+2); bar(tighten) fail
+    cut 0.25: moved 1 of 2543 pile rows (0.0%); looser 0 tighter 1; right 0, wrong 1, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->1 (+1); bar(tighten) fail
+    cut 0.30: moved 1 of 2543 pile rows (0.0%); looser 0 tighter 1; right 0, wrong 1, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->1 (+1); bar(tighten) fail
+    cut 0.35: moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+    cut 0.40: moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+    cut 0.45: moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+    cut 0.50 (today): moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+    cut 0.55: moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+    cut 0.60: moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+    cut 0.65: moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+    cut 0.70: moved 0 of 2543 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0 (+0), over-tight 0->0 (+0); bar(none) -
+
+=== 4. combined: best per-tier pick passing the bar in-sample on BOTH runs (max of min exact gain; else today's) ===
+  jev-lower: no cut passes on both runs -> 0.1
+  jev-raise-wx: cut 0.65 (min exact gain 4) -> 0.65
+  jev-raise-get: no cut passes on both runs -> 0.5
+  joint best-picks combined run1:
+    best-picks combined (all tiers + unmoved rows): before 6191 exact (94.4%) / 64 too loose (1.0%) / 302 too tight (4.6%) of 6557 rows
+    best-picks combined: after  6195 exact (94.5%) / 58 too loose (0.9%) / 304 too tight (4.6%) of 6557 rows; moved 8, right 6, wrong 2, other 0, ratio 3.00
+    jev-lower own ledger: moved 0 of 1336; right 0 wrong 0 other 0 ratio 0.00; leaks 14->14 over 263->263; 1059 exact (79.3%) / 14 too loose (1.0%) / 263 too tight (19.7%) of 1336 pile rows
+    jev-raise-wx own ledger: moved 8 of 1052; right 6 wrong 2 other 0 ratio 3.00; leaks 27->21 over 1->3; 1028 exact (97.7%) / 21 too loose (2.0%) / 3 too tight (0.3%) of 1052 pile rows
+    jev-raise-get own ledger: moved 0 of 2543; right 0 wrong 0 other 0 ratio 0.00; leaks 0->0 over 0->0; 2543 exact (100.0%) / 0 too loose (0.0%) / 0 too tight (0.0%) of 2543 pile rows
+  joint rwxlite set combined run1:
+    rwxlite combined (all tiers + unmoved rows): before 6191 exact (94.4%) / 64 too loose (1.0%) / 302 too tight (4.6%) of 6557 rows
+    rwxlite combined: after  6301 exact (96.1%) / 97 too loose (1.5%) / 159 too tight (2.4%) of 6557 rows; moved 197, right 146, wrong 44, other 7, ratio 3.32
+    jev-lower own ledger: moved 186 of 1336; right 140 wrong 39 other 7 ratio 3.59; leaks 14->53 over 263->115; 1168 exact (87.4%) / 53 too loose (4.0%) / 115 too tight (8.6%) of 1336 pile rows
+    jev-raise-wx own ledger: moved 8 of 1052; right 6 wrong 2 other 0 ratio 3.00; leaks 27->21 over 1->3; 1028 exact (97.7%) / 21 too loose (2.0%) / 3 too tight (0.3%) of 1052 pile rows
+    jev-raise-get own ledger: moved 3 of 2543; right 0 wrong 3 other 0 ratio 0.00; leaks 0->0 over 0->3; 2540 exact (99.9%) / 0 too loose (0.0%) / 3 too tight (0.1%) of 2543 pile rows
+  joint best-picks combined run2:
+    best-picks combined (all tiers + unmoved rows): before 6191 exact (94.4%) / 65 too loose (1.0%) / 301 too tight (4.6%) of 6557 rows
+    best-picks combined: after  6195 exact (94.5%) / 59 too loose (0.9%) / 303 too tight (4.6%) of 6557 rows; moved 8, right 6, wrong 2, other 0, ratio 3.00
+    jev-lower own ledger: moved 0 of 1336; right 0 wrong 0 other 0 ratio 0.00; leaks 15->15 over 262->262; 1059 exact (79.3%) / 15 too loose (1.1%) / 262 too tight (19.6%) of 1336 pile rows
+    jev-raise-wx own ledger: moved 8 of 1052; right 6 wrong 2 other 0 ratio 3.00; leaks 27->21 over 1->3; 1028 exact (97.7%) / 21 too loose (2.0%) / 3 too tight (0.3%) of 1052 pile rows
+    jev-raise-get own ledger: moved 0 of 2543; right 0 wrong 0 other 0 ratio 0.00; leaks 0->0 over 0->0; 2543 exact (100.0%) / 0 too loose (0.0%) / 0 too tight (0.0%) of 2543 pile rows
+  joint rwxlite set combined run2:
+    rwxlite combined (all tiers + unmoved rows): before 6191 exact (94.4%) / 65 too loose (1.0%) / 301 too tight (4.6%) of 6557 rows
+    rwxlite combined: after  6306 exact (96.2%) / 97 too loose (1.5%) / 154 too tight (2.3%) of 6557 rows; moved 197, right 149, wrong 43, other 5, ratio 3.47
+    jev-lower own ledger: moved 186 of 1336; right 143 wrong 38 other 5 ratio 3.76; leaks 15->53 over 262->110; 1173 exact (87.8%) / 53 too loose (4.0%) / 110 too tight (8.2%) of 1336 pile rows
+    jev-raise-wx own ledger: moved 9 of 1052; right 6 wrong 3 other 0 ratio 2.00; leaks 27->21 over 1->4; 1027 exact (97.6%) / 21 too loose (2.0%) / 4 too tight (0.4%) of 1052 pile rows
+    jev-raise-get own ledger: moved 2 of 2543; right 0 wrong 2 other 0 ratio 0.00; leaks 0->0 over 0->2; 2541 exact (99.9%) / 0 too loose (0.0%) / 2 too tight (0.1%) of 2543 pile rows
+
+=== 5. combined: LOVO per tier (cut picked on the other vendors; pooled over held-out vendors) ===
+  run1 jev-lower: folds 23 vendors, picked cut counts {"0.1":23}; pooled moved 0 of 1336; right 0, wrong 0, other 0; ratio 0.00; leaks 14->14, over 263->263; bar(none) NO MOVE (stays at today)
+  run1 jev-raise-wx: folds 20 vendors, picked cut counts {"0.65":18,"0.8":1,"0.7":1}; pooled moved 3 of 1052; right 1, wrong 2, other 0; ratio 0.50; leaks 27->26, over 1->3; bar(tighten) FAIL
+  run1 jev-raise-get: folds 18 vendors, picked cut counts {"0.5":18}; pooled moved 0 of 2543; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0, over 0->0; bar(none) NO MOVE (stays at today)
+  run2 jev-lower: folds 23 vendors, picked cut counts {"0.1":23}; pooled moved 0 of 1336; right 0, wrong 0, other 0; ratio 0.00; leaks 15->15, over 262->262; bar(none) NO MOVE (stays at today)
+  run2 jev-raise-wx: folds 20 vendors, picked cut counts {"0.7":18,"0.75":1,"0.65":1}; pooled moved 5 of 1052; right 3, wrong 2, other 0; ratio 1.50; leaks 27->24, over 1->3; bar(tighten) PASS
+  run2 jev-raise-get: folds 18 vendors, picked cut counts {"0.5":18}; pooled moved 0 of 2543; right 0, wrong 0, other 0; ratio 0.00; leaks 0->0, over 0->0; bar(none) NO MOVE (stays at today)
+  pass/fail per tier (both runs, LOVO pooled):
+    jev-lower: FAIL (or no move) [run1 none/fail, run2 none/fail]
+    jev-raise-wx: FAIL (or no move) [run1 tighten/fail, run2 tighten/pass]
+    jev-raise-get: FAIL (or no move) [run1 none/fail, run2 none/fail]
+  joint LOVO (all tiers at their LOVO picks) combined run1:
+    LOVO-joint combined (all tiers + unmoved rows): before 6191 exact (94.4%) / 64 too loose (1.0%) / 302 too tight (4.6%) of 6557 rows
+    LOVO-joint combined: after  6190 exact (94.4%) / 63 too loose (1.0%) / 304 too tight (4.6%) of 6557 rows; moved 3, right 1, wrong 2, other 0, ratio 0.50
+    jev-lower own ledger: moved 0 of 1336; right 0 wrong 0 other 0 ratio 0.00; leaks 14->14 over 263->263; 1059 exact (79.3%) / 14 too loose (1.0%) / 263 too tight (19.7%) of 1336 pile rows
+    jev-raise-wx own ledger: moved 3 of 1052; right 1 wrong 2 other 0 ratio 0.50; leaks 27->26 over 1->3; 1023 exact (97.2%) / 26 too loose (2.5%) / 3 too tight (0.3%) of 1052 pile rows
+    jev-raise-get own ledger: moved 0 of 2543; right 0 wrong 0 other 0 ratio 0.00; leaks 0->0 over 0->0; 2543 exact (100.0%) / 0 too loose (0.0%) / 0 too tight (0.0%) of 2543 pile rows
+
+=== 6. run1: rows whose letter changes at LOVO-picked cuts vs today: 3 ===
+  row_id | provider | method | path | operationId | truth | before | after | pIsX | pChanges | (other run pIsX, pChanges)
+  x17-e1160 | xero | PUT | /BatchPayments | createBatchPayment | x | w | x | 0.72 | null | (0.71, null)
+  x17-e1179 | xero | PUT | /BankTransfers | createBankTransfer | w | w | x | 0.73 | null | (0.72, null)
+  x17-e1294 | xero | PUT | /Payments | createPayments | w | w | x | 0.74 | null | (0.69, null)
+  joint LOVO (all tiers at their LOVO picks) combined run2:
+    LOVO-joint combined (all tiers + unmoved rows): before 6191 exact (94.4%) / 65 too loose (1.0%) / 301 too tight (4.6%) of 6557 rows
+    LOVO-joint combined: after  6192 exact (94.4%) / 62 too loose (0.9%) / 303 too tight (4.6%) of 6557 rows; moved 5, right 3, wrong 2, other 0, ratio 1.50
+    jev-lower own ledger: moved 0 of 1336; right 0 wrong 0 other 0 ratio 0.00; leaks 15->15 over 262->262; 1059 exact (79.3%) / 15 too loose (1.1%) / 262 too tight (19.6%) of 1336 pile rows
+    jev-raise-wx own ledger: moved 5 of 1052; right 3 wrong 2 other 0 ratio 1.50; leaks 27->24 over 1->3; 1025 exact (97.4%) / 24 too loose (2.3%) / 3 too tight (0.3%) of 1052 pile rows
+    jev-raise-get own ledger: moved 0 of 2543; right 0 wrong 0 other 0 ratio 0.00; leaks 0->0 over 0->0; 2543 exact (100.0%) / 0 too loose (0.0%) / 0 too tight (0.0%) of 2543 pile rows
+
+=== 6. run2: rows whose letter changes at LOVO-picked cuts vs today: 5 ===
+  row_id | provider | method | path | operationId | truth | before | after | pIsX | pChanges | (other run pIsX, pChanges)
+  pc-r2361 | digitalocean | PUT | /v2/gen-ai/model_evaluation_runs/{eval_run_uuid}/cancel | genai_cancel_model_evaluation_run | x | w | x | 0.78 | null | (0.76, null)
+  pc-r2670 | jira | PUT | /rest/api/2/issues/archive/export | exportArchivedIssues | x | w | x | 0.76 | null | (0.8, null)
+  x17-e1160 | xero | PUT | /BatchPayments | createBatchPayment | x | w | x | 0.71 | null | (0.72, null)
+  x17-e1179 | xero | PUT | /BankTransfers | createBankTransfer | w | w | x | 0.72 | null | (0.73, null)
+  x17-e1294 | xero | PUT | /Payments | createPayments | w | w | x | 0.69 | null | (0.74, null)
+
+=== 7. F3: POST truth-w rows at x today (floor-post, isX not <= 0.10) that move at each lower cut; the new leaks it costs ===
+  run1: 233 POST truth-w rows sit at x today (of 1336 lower-pile rows; 0 have no usable answer); 95 of them have isX p in 0.20-0.57 (rwxlite's F3 band)
+    cut 0.05: F3 rows -> w 0 (fixed), -> r 0 (new leak); of the 633 pile rows moved: right 12, wrong 621 (of which truth-x rows newly lowered 0); pile leaks 14->1
+    cut 0.10: F3 rows -> w 0 (fixed), -> r 0 (new leak); of the 0 pile rows moved: right 0, wrong 0 (of which truth-x rows newly lowered 0); pile leaks 14->14
+    cut 0.15: F3 rows -> w 95 (fixed), -> r 4 (new leak); of the 115 pile rows moved: right 97, wrong 17 (of which truth-x rows newly lowered 13); pile leaks 14->31
+    cut 0.20: F3 rows -> w 135 (fixed), -> r 8 (new leak); of the 186 pile rows moved: right 140, wrong 39 (of which truth-x rows newly lowered 31); pile leaks 14->53
+    cut 0.25: F3 rows -> w 171 (fixed), -> r 10 (new leak); of the 240 pile rows moved: right 179, wrong 51 (of which truth-x rows newly lowered 41); pile leaks 14->65
+    cut 0.30: F3 rows -> w 183 (fixed), -> r 11 (new leak); of the 271 pile rows moved: right 194, wrong 63 (of which truth-x rows newly lowered 52); pile leaks 14->77
+    cut 0.35: F3 rows -> w 190 (fixed), -> r 11 (new leak); of the 302 pile rows moved: right 202, wrong 85 (of which truth-x rows newly lowered 74); pile leaks 14->99
+    cut 0.40: F3 rows -> w 202 (fixed), -> r 11 (new leak); of the 331 pile rows moved: right 214, wrong 100 (of which truth-x rows newly lowered 89); pile leaks 14->114
+  run2: 231 POST truth-w rows sit at x today (of 1336 lower-pile rows; 0 have no usable answer); 93 of them have isX p in 0.20-0.57 (rwxlite's F3 band)
+    cut 0.05: F3 rows -> w 0 (fixed), -> r 0 (new leak); of the 619 pile rows moved: right 12, wrong 607 (of which truth-x rows newly lowered 0); pile leaks 15->2
+    cut 0.10: F3 rows -> w 0 (fixed), -> r 0 (new leak); of the 0 pile rows moved: right 0, wrong 0 (of which truth-x rows newly lowered 0); pile leaks 15->15
+    cut 0.15: F3 rows -> w 89 (fixed), -> r 4 (new leak); of the 112 pile rows moved: right 94, wrong 17 (of which truth-x rows newly lowered 13); pile leaks 15->32
+    cut 0.20: F3 rows -> w 135 (fixed), -> r 9 (new leak); of the 186 pile rows moved: right 143, wrong 38 (of which truth-x rows newly lowered 29); pile leaks 15->53
+    cut 0.25: F3 rows -> w 164 (fixed), -> r 11 (new leak); of the 235 pile rows moved: right 174, wrong 52 (of which truth-x rows newly lowered 41); pile leaks 15->67
+    cut 0.30: F3 rows -> w 177 (fixed), -> r 12 (new leak); of the 263 pile rows moved: right 189, wrong 60 (of which truth-x rows newly lowered 48); pile leaks 15->75
+    cut 0.35: F3 rows -> w 187 (fixed), -> r 13 (new leak); of the 298 pile rows moved: right 200, wrong 82 (of which truth-x rows newly lowered 69); pile leaks 15->97
+    cut 0.40: F3 rows -> w 194 (fixed), -> r 14 (new leak); of the 332 pile rows moved: right 207, wrong 108 (of which truth-x rows newly lowered 94); pile leaks 15->123
+
+################ buildset (1819, separate line) ################
+
+=== 1/2. buildset run1: today's cuts vs rwxlite's cuts ===
+    today combined (all tiers + unmoved rows): before 1658 exact (91.1%) / 14 too loose (0.8%) / 147 too tight (8.1%) of 1819 rows
+    today combined: after  1658 exact (91.1%) / 14 too loose (0.8%) / 147 too tight (8.1%) of 1819 rows; moved 0, right 0, wrong 0, other 0, ratio 0.00
+    jev-lower own ledger: moved 0 of 570; right 0 wrong 0 other 0 ratio 0.00; leaks 1->1 over 123->123; 446 exact (78.2%) / 1 too loose (0.2%) / 123 too tight (21.6%) of 570 pile rows
+    jev-raise-wx own ledger: moved 0 of 600; right 0 wrong 0 other 0 ratio 0.00; leaks 11->11 over 1->1; 588 exact (98.0%) / 11 too loose (1.8%) / 1 too tight (0.2%) of 600 pile rows
+  rwxlite cuts vs today:
+    rwxlite combined (all tiers + unmoved rows): before 1658 exact (91.1%) / 14 too loose (0.8%) / 147 too tight (8.1%) of 1819 rows
+    rwxlite combined: after  1724 exact (94.8%) / 20 too loose (1.1%) / 75 too tight (4.1%) of 1819 rows; moved 92, right 79, wrong 13, other 0, ratio 6.08
+    jev-lower own ledger: moved 85 of 570; right 76 wrong 9 other 0 ratio 8.44; leaks 1->10 over 123->47; 513 exact (90.0%) / 10 too loose (1.8%) / 47 too tight (8.2%) of 570 pile rows
+    jev-raise-wx own ledger: moved 7 of 600; right 3 wrong 4 other 0 ratio 0.75; leaks 11->8 over 1->5; 587 exact (97.8%) / 8 too loose (1.3%) / 5 too tight (0.8%) of 600 pile rows
+
+=== 3. buildset run1: per-tier sweeps (others at today's) ===
+  [jev-lower] buildset run1, today cut 0.1: 446 exact (78.2%) / 1 too loose (0.2%) / 123 too tight (21.6%) of 570 jev-lower pile rows
+    cut 0.05: moved 275 of 570 pile rows (48.2%); looser 0 tighter 275; right 1, wrong 274, other 0; ratio 0.00; leaks 1->0 (-1), over-tight 123->397 (+274); bar(tighten) fail
+    cut 0.10 (today): moved 0 of 570 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 1->1 (+0), over-tight 123->123 (+0); bar(none) -
+    cut 0.15: moved 58 of 570 pile rows (10.2%); looser 58 tighter 0; right 55, wrong 3, other 0; ratio 18.33; leaks 1->4 (+3), over-tight 123->68 (-55); bar(loosen) PASS
+    cut 0.20: moved 85 of 570 pile rows (14.9%); looser 85 tighter 0; right 76, wrong 9, other 0; ratio 8.44; leaks 1->10 (+9), over-tight 123->47 (-76); bar(loosen) fail
+    cut 0.25: moved 101 of 570 pile rows (17.7%); looser 101 tighter 0; right 87, wrong 14, other 0; ratio 6.21; leaks 1->15 (+14), over-tight 123->35 (-88); bar(loosen) fail
+    cut 0.30: moved 116 of 570 pile rows (20.4%); looser 116 tighter 0; right 95, wrong 21, other 0; ratio 4.52; leaks 1->22 (+21), over-tight 123->25 (-98); bar(loosen) fail
+    cut 0.35: moved 135 of 570 pile rows (23.7%); looser 135 tighter 0; right 106, wrong 27, other 2; ratio 3.93; leaks 1->28 (+27), over-tight 123->13 (-110); bar(loosen) fail
+    cut 0.40: moved 141 of 570 pile rows (24.7%); looser 141 tighter 0; right 108, wrong 31, other 2; ratio 3.48; leaks 1->32 (+31), over-tight 123->11 (-112); bar(loosen) fail
+  [jev-raise-wx] buildset run1, today cut 0.8: 588 exact (98.0%) / 11 too loose (1.8%) / 1 too tight (0.2%) of 600 jev-raise-wx pile rows
+    cut 0.50: moved 12 of 600 pile rows (2.0%); looser 0 tighter 12; right 7, wrong 5, other 0; ratio 1.40; leaks 11->4 (-7), over-tight 1->6 (+5); bar(tighten) PASS
+    cut 0.55: moved 11 of 600 pile rows (1.8%); looser 0 tighter 11; right 7, wrong 4, other 0; ratio 1.75; leaks 11->4 (-7), over-tight 1->5 (+4); bar(tighten) PASS
+    cut 0.60: moved 7 of 600 pile rows (1.2%); looser 0 tighter 7; right 3, wrong 4, other 0; ratio 0.75; leaks 11->8 (-3), over-tight 1->5 (+4); bar(tighten) fail
+    cut 0.65: moved 6 of 600 pile rows (1.0%); looser 0 tighter 6; right 2, wrong 4, other 0; ratio 0.50; leaks 11->9 (-2), over-tight 1->5 (+4); bar(tighten) fail
+    cut 0.70: moved 5 of 600 pile rows (0.8%); looser 0 tighter 5; right 2, wrong 3, other 0; ratio 0.67; leaks 11->9 (-2), over-tight 1->4 (+3); bar(tighten) fail
+    cut 0.75: moved 3 of 600 pile rows (0.5%); looser 0 tighter 3; right 2, wrong 1, other 0; ratio 2.00; leaks 11->9 (-2), over-tight 1->2 (+1); bar(tighten) PASS
+    cut 0.80 (today): moved 0 of 600 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 11->11 (+0), over-tight 1->1 (+0); bar(none) -
+    cut 0.85: moved 1 of 600 pile rows (0.2%); looser 1 tighter 0; right 0, wrong 1, other 0; ratio 0.00; leaks 11->12 (+1), over-tight 1->1 (+0); bar(loosen) fail
+    cut 0.90: moved 3 of 600 pile rows (0.5%); looser 3 tighter 0; right 0, wrong 3, other 0; ratio 0.00; leaks 11->14 (+3), over-tight 1->1 (+0); bar(loosen) fail
+  [jev-raise-get] no pile rows / no cached answers in this set: not measurable
+
+=== 1/2. buildset run2: today's cuts vs rwxlite's cuts ===
+    today combined (all tiers + unmoved rows): before 1657 exact (91.1%) / 15 too loose (0.8%) / 147 too tight (8.1%) of 1819 rows
+    today combined: after  1657 exact (91.1%) / 15 too loose (0.8%) / 147 too tight (8.1%) of 1819 rows; moved 0, right 0, wrong 0, other 0, ratio 0.00
+    jev-lower own ledger: moved 0 of 570; right 0 wrong 0 other 0 ratio 0.00; leaks 2->2 over 123->123; 445 exact (78.1%) / 2 too loose (0.4%) / 123 too tight (21.6%) of 570 pile rows
+    jev-raise-wx own ledger: moved 0 of 600; right 0 wrong 0 other 0 ratio 0.00; leaks 11->11 over 1->1; 588 exact (98.0%) / 11 too loose (1.8%) / 1 too tight (0.2%) of 600 pile rows
+  rwxlite cuts vs today:
+    rwxlite combined (all tiers + unmoved rows): before 1657 exact (91.1%) / 15 too loose (0.8%) / 147 too tight (8.1%) of 1819 rows
+    rwxlite combined: after  1726 exact (94.9%) / 18 too loose (1.0%) / 75 too tight (4.1%) of 1819 rows; moved 93, right 81, wrong 12, other 0, ratio 6.75
+    jev-lower own ledger: moved 84 of 570; right 76 wrong 8 other 0 ratio 9.50; leaks 2->10 over 123->47; 513 exact (90.0%) / 10 too loose (1.8%) / 47 too tight (8.2%) of 570 pile rows
+    jev-raise-wx own ledger: moved 9 of 600; right 5 wrong 4 other 0 ratio 1.25; leaks 11->6 over 1->5; 589 exact (98.2%) / 6 too loose (1.0%) / 5 too tight (0.8%) of 600 pile rows
+
+=== 3. buildset run2: per-tier sweeps (others at today's) ===
+  [jev-lower] buildset run2, today cut 0.1: 445 exact (78.1%) / 2 too loose (0.4%) / 123 too tight (21.6%) of 570 jev-lower pile rows
+    cut 0.05: moved 288 of 570 pile rows (50.5%); looser 0 tighter 288; right 2, wrong 286, other 0; ratio 0.01; leaks 2->0 (-2), over-tight 123->409 (+286); bar(tighten) fail
+    cut 0.10 (today): moved 0 of 570 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 2->2 (+0), over-tight 123->123 (+0); bar(none) -
+    cut 0.15: moved 58 of 570 pile rows (10.2%); looser 58 tighter 0; right 56, wrong 2, other 0; ratio 28.00; leaks 2->4 (+2), over-tight 123->67 (-56); bar(loosen) PASS
+    cut 0.20: moved 84 of 570 pile rows (14.7%); looser 84 tighter 0; right 76, wrong 8, other 0; ratio 9.50; leaks 2->10 (+8), over-tight 123->47 (-76); bar(loosen) fail
+    cut 0.25: moved 102 of 570 pile rows (17.9%); looser 102 tighter 0; right 88, wrong 14, other 0; ratio 6.29; leaks 2->16 (+14), over-tight 123->33 (-90); bar(loosen) fail
+    cut 0.30: moved 116 of 570 pile rows (20.4%); looser 116 tighter 0; right 95, wrong 21, other 0; ratio 4.52; leaks 2->23 (+21), over-tight 123->25 (-98); bar(loosen) fail
+    cut 0.35: moved 130 of 570 pile rows (22.8%); looser 130 tighter 0; right 102, wrong 26, other 2; ratio 3.92; leaks 2->28 (+26), over-tight 123->17 (-106); bar(loosen) fail
+    cut 0.40: moved 142 of 570 pile rows (24.9%); looser 142 tighter 0; right 109, wrong 31, other 2; ratio 3.52; leaks 2->33 (+31), over-tight 123->10 (-113); bar(loosen) fail
+  [jev-raise-wx] buildset run2, today cut 0.8: 588 exact (98.0%) / 11 too loose (1.8%) / 1 too tight (0.2%) of 600 jev-raise-wx pile rows
+    cut 0.50: moved 13 of 600 pile rows (2.2%); looser 0 tighter 13; right 7, wrong 6, other 0; ratio 1.17; leaks 11->4 (-7), over-tight 1->7 (+6); bar(tighten) PASS
+    cut 0.55: moved 12 of 600 pile rows (2.0%); looser 0 tighter 12; right 7, wrong 5, other 0; ratio 1.40; leaks 11->4 (-7), over-tight 1->6 (+5); bar(tighten) PASS
+    cut 0.60: moved 9 of 600 pile rows (1.5%); looser 0 tighter 9; right 5, wrong 4, other 0; ratio 1.25; leaks 11->6 (-5), over-tight 1->5 (+4); bar(tighten) PASS
+    cut 0.65: moved 5 of 600 pile rows (0.8%); looser 0 tighter 5; right 2, wrong 3, other 0; ratio 0.67; leaks 11->9 (-2), over-tight 1->4 (+3); bar(tighten) fail
+    cut 0.70: moved 5 of 600 pile rows (0.8%); looser 0 tighter 5; right 2, wrong 3, other 0; ratio 0.67; leaks 11->9 (-2), over-tight 1->4 (+3); bar(tighten) fail
+    cut 0.75: moved 3 of 600 pile rows (0.5%); looser 0 tighter 3; right 2, wrong 1, other 0; ratio 2.00; leaks 11->9 (-2), over-tight 1->2 (+1); bar(tighten) PASS
+    cut 0.80 (today): moved 0 of 600 pile rows (0.0%); looser 0 tighter 0; right 0, wrong 0, other 0; ratio 0.00; leaks 11->11 (+0), over-tight 1->1 (+0); bar(none) -
+    cut 0.85: moved 1 of 600 pile rows (0.2%); looser 1 tighter 0; right 0, wrong 1, other 0; ratio 0.00; leaks 11->12 (+1), over-tight 1->1 (+0); bar(loosen) fail
+    cut 0.90: moved 3 of 600 pile rows (0.5%); looser 3 tighter 0; right 0, wrong 3, other 0; ratio 0.00; leaks 11->14 (+3), over-tight 1->1 (+0); bar(loosen) fail
+  [jev-raise-get] no pile rows / no cached answers in this set: not measurable
+
+=== 4. buildset: best per-tier pick passing the bar in-sample on BOTH runs (max of min exact gain; else today's) ===
+  jev-lower: cut 0.15 (min exact gain 52) -> 0.15
+  jev-raise-wx: cut 0.55 (min exact gain 2) -> 0.55
+  jev-raise-get: not measurable here
+  (buildset joint below uses the cuts picked on combined: {"jev-lower":0.1,"jev-lower-r":0.5,"jev-raise-wx":0.65,"jev-raise-get":0.5})
+  joint best-picks buildset run1:
+    best-picks combined (all tiers + unmoved rows): before 1658 exact (91.1%) / 14 too loose (0.8%) / 147 too tight (8.1%) of 1819 rows
+    best-picks combined: after  1656 exact (91.0%) / 12 too loose (0.7%) / 151 too tight (8.3%) of 1819 rows; moved 6, right 2, wrong 4, other 0, ratio 0.50
+    jev-lower own ledger: moved 0 of 570; right 0 wrong 0 other 0 ratio 0.00; leaks 1->1 over 123->123; 446 exact (78.2%) / 1 too loose (0.2%) / 123 too tight (21.6%) of 570 pile rows
+    jev-raise-wx own ledger: moved 6 of 600; right 2 wrong 4 other 0 ratio 0.50; leaks 11->9 over 1->5; 586 exact (97.7%) / 9 too loose (1.5%) / 5 too tight (0.8%) of 600 pile rows
+  joint rwxlite set buildset run1:
+    rwxlite combined (all tiers + unmoved rows): before 1658 exact (91.1%) / 14 too loose (0.8%) / 147 too tight (8.1%) of 1819 rows
+    rwxlite combined: after  1724 exact (94.8%) / 20 too loose (1.1%) / 75 too tight (4.1%) of 1819 rows; moved 92, right 79, wrong 13, other 0, ratio 6.08
+    jev-lower own ledger: moved 85 of 570; right 76 wrong 9 other 0 ratio 8.44; leaks 1->10 over 123->47; 513 exact (90.0%) / 10 too loose (1.8%) / 47 too tight (8.2%) of 570 pile rows
+    jev-raise-wx own ledger: moved 7 of 600; right 3 wrong 4 other 0 ratio 0.75; leaks 11->8 over 1->5; 587 exact (97.8%) / 8 too loose (1.3%) / 5 too tight (0.8%) of 600 pile rows
+  joint best-picks buildset run2:
+    best-picks combined (all tiers + unmoved rows): before 1657 exact (91.1%) / 15 too loose (0.8%) / 147 too tight (8.1%) of 1819 rows
+    best-picks combined: after  1656 exact (91.0%) / 13 too loose (0.7%) / 150 too tight (8.2%) of 1819 rows; moved 5, right 2, wrong 3, other 0, ratio 0.67
+    jev-lower own ledger: moved 0 of 570; right 0 wrong 0 other 0 ratio 0.00; leaks 2->2 over 123->123; 445 exact (78.1%) / 2 too loose (0.4%) / 123 too tight (21.6%) of 570 pile rows
+    jev-raise-wx own ledger: moved 5 of 600; right 2 wrong 3 other 0 ratio 0.67; leaks 11->9 over 1->4; 587 exact (97.8%) / 9 too loose (1.5%) / 4 too tight (0.7%) of 600 pile rows
+  joint rwxlite set buildset run2:
+    rwxlite combined (all tiers + unmoved rows): before 1657 exact (91.1%) / 15 too loose (0.8%) / 147 too tight (8.1%) of 1819 rows
+    rwxlite combined: after  1726 exact (94.9%) / 18 too loose (1.0%) / 75 too tight (4.1%) of 1819 rows; moved 93, right 81, wrong 12, other 0, ratio 6.75
+    jev-lower own ledger: moved 84 of 570; right 76 wrong 8 other 0 ratio 9.50; leaks 2->10 over 123->47; 513 exact (90.0%) / 10 too loose (1.8%) / 47 too tight (8.2%) of 570 pile rows
+    jev-raise-wx own ledger: moved 9 of 600; right 5 wrong 4 other 0 ratio 1.25; leaks 11->6 over 1->5; 589 exact (98.2%) / 6 too loose (1.0%) / 5 too tight (0.8%) of 600 pile rows
+
+=== 5. buildset: LOVO per tier (cut picked on the other vendors; pooled over held-out vendors) ===
+  run1 jev-lower: folds 12 vendors, picked cut counts {"0.15":10,"0.2":2}; pooled moved 66 of 570; right 59, wrong 7, other 0; ratio 8.43; leaks 1->8, over 123->64; bar(loosen) FAIL
+  run1 jev-raise-wx: folds 13 vendors, picked cut counts {"0.55":11,"0.8":1,"0.75":1}; pooled moved 5 of 600; right 1, wrong 4, other 0; ratio 0.25; leaks 11->10, over 1->5; bar(tighten) FAIL
+  run2 jev-lower: folds 12 vendors, picked cut counts {"0.15":9,"0.2":3}; pooled moved 64 of 570; right 58, wrong 6, other 0; ratio 9.67; leaks 2->8, over 123->65; bar(loosen) FAIL
+  run2 jev-raise-wx: folds 13 vendors, picked cut counts {"0.55":11,"0.8":1,"0.75":1}; pooled moved 6 of 600; right 1, wrong 5, other 0; ratio 0.20; leaks 11->10, over 1->6; bar(tighten) FAIL
+  pass/fail per tier (both runs, LOVO pooled):
+    jev-lower: FAIL (or no move) [run1 loosen/fail, run2 loosen/fail]
+    jev-raise-wx: FAIL (or no move) [run1 tighten/fail, run2 tighten/fail]
+    jev-raise-get: not measurable on buildset
+  joint LOVO (all tiers at their LOVO picks) buildset run1:
+    LOVO-joint combined (all tiers + unmoved rows): before 1658 exact (91.1%) / 14 too loose (0.8%) / 147 too tight (8.1%) of 1819 rows
+    LOVO-joint combined: after  1707 exact (93.8%) / 20 too loose (1.1%) / 92 too tight (5.1%) of 1819 rows; moved 71, right 60, wrong 11, other 0, ratio 5.45
+    jev-lower own ledger: moved 66 of 570; right 59 wrong 7 other 0 ratio 8.43; leaks 1->8 over 123->64; 498 exact (87.4%) / 8 too loose (1.4%) / 64 too tight (11.2%) of 570 pile rows
+    jev-raise-wx own ledger: moved 5 of 600; right 1 wrong 4 other 0 ratio 0.25; leaks 11->10 over 1->5; 585 exact (97.5%) / 10 too loose (1.7%) / 5 too tight (0.8%) of 600 pile rows
+  joint LOVO (all tiers at their LOVO picks) buildset run2:
+    LOVO-joint combined (all tiers + unmoved rows): before 1657 exact (91.1%) / 15 too loose (0.8%) / 147 too tight (8.1%) of 1819 rows
+    LOVO-joint combined: after  1705 exact (93.7%) / 20 too loose (1.1%) / 94 too tight (5.2%) of 1819 rows; moved 70, right 59, wrong 11, other 0, ratio 5.36
+    jev-lower own ledger: moved 64 of 570; right 58 wrong 6 other 0 ratio 9.67; leaks 2->8 over 123->65; 497 exact (87.2%) / 8 too loose (1.4%) / 65 too tight (11.4%) of 570 pile rows
+    jev-raise-wx own ledger: moved 6 of 600; right 1 wrong 5 other 0 ratio 0.20; leaks 11->10 over 1->6; 584 exact (97.3%) / 10 too loose (1.7%) / 6 too tight (1.0%) of 600 pile rows

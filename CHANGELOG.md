@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-11-03
+
+### Added
+
+- **Jev lowering can end at r (D129).** When the first Jev answer lowers an x row to w, a second "changes" request is sent for that row; if its answer is at or under the threshold, the row ends at r. Each such row costs one extra request. The sidecar records the second answer as `jev.pChanges`. If the first call fails the row keeps its mechanical letter; if the second fails it keeps w.
+- **Step 2 credential-set rule (D131, per D130).** A PUT or PATCH whose last literal path segment is `password`, `passcode` or `pin`, or whose lead verb is `change`, `regenerate` or `regen` naming one, is now x: changing or setting a password is x.
+
+### Changed
+
+- **The CLI summary's Jev `sent` count includes second requests.** `answered` and `failed` count requests too, so a failed second call shows as one failure. `letters changed` counts rows whose final letter differs from the mechanical one. The failure note now reads "failed (letter kept)" instead of "failed (kept mechanical)".
+
 ## [0.8.1] - 2026-11-03
 
 ### Fixed

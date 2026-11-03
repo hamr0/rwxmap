@@ -7541,3 +7541,708 @@ Node.
   now matches what was scored.
 - Lesson: a tier's question must be proved equal to the criteria its bar was
   measured on; sharing constants across tiers hid the drift.
+
+## 2026-11-03 — rwxlite's full Jev pass, and rwxlite named Jev's replacement (outside input, nothing adopted)
+
+- Goal: record what the rwxlite project (~/PycharmProjects/rwxlite, a small
+  local int8 model) learned from asking Jev once on 109,844 APIs.guru
+  operations (DELETE skipped), then re-asking the 14,188 rows with p in
+  0.1-0.9. It used rwxmap's three poc question files byte for byte from
+  a7bc855. Total cost $11.44. Source: rwxlite docs/wiki/findings.md
+  (2026-11-03 entries), data/m0/parity-report-v3.json, and rwxlite commits
+  e3cd04e and f3163f2 on branch m0.
+- Goal direction, ruled by the user 2026-11-03: rwxlite is the embedded
+  model that will replace Jev; rwxmap and rwxlite share that goal. Second
+  goal: keep the mechanical classifier and use the model only on contested
+  methods. The model is to learn the default leanings (the mechanical
+  floors) on its own, then run a second pass. The two projects help each
+  other. No D-number yet; the interface and bar are not set.
+- Tried: nothing in rwxmap. The figures below are rwxlite's, as reported.
+- Outcome: (1) Jev now answers as jev-1.14.0; rwxmap's cut-offs were tuned
+  on jev-1.13.0. rwxmap records the model per moved row (D88) but has not
+  measured 1.14.0. (2) data/corpus/labelled.csv and
+  data/calibration-2026-09-14 are v1-standard; mechanical scores 55.5% on
+  them (DELETE 24.7%: v1 calls 70% of deletes w). Checked 2026-11-03: no
+  file under src/, scripts/ or package.json reads either. (3) On v3 truth
+  (combined-2026-09-21 + relabel-buildset-2026-09-23 joined to APIs.guru,
+  5,716 rows) mechanical is 76.3% exact / 1.3% too loose / 22.3% too tight
+  of 5,716; DELETE is 99.3% exact. Buildset rows score 72.7%; v3 changed
+  51.8% of the v1 labels the step-2 lists were mined on. Step 2 stays
+  closed (D81). (4) x on the wordless POST floor: v3 truth is x on 399 of
+  1,641 (24%). Jev says not-x on 1,360 of the 1,641 (83%; base confirmed by
+  rwxlite: the v3-truth rows whose mechanical rule is the POST floor). Across
+  all 27,656 APIs.guru POST-floor rows, Jev's p is below 0.10 on 16,224
+  (58.7%). On the 1,641 it agrees with v3 on 1,231 of 1,242 non-x rows. At the
+  lower cut 0.10 it wrongly lowers 31 true-x and leaves 315 w/r at x; the best
+  cut is about 0.20-0.30 (LOVO range 0.1-0.3). Misses read as creates but are
+  sends, transfers or payments: asana create story p0.04, github repo transfer
+  p0.18, squareup card disable p0.08, stripe payment_intents p0.09; these are
+  candidate cannot-undo words. (5) A "minimise too-loose first" cut-off rule
+  per tier degenerates: mechanical has 0 too-loose on the lower pile, so the
+  rule turns lower off. They used "max exact such that TOTAL too-loose
+  across tiers is no worse than mechanical's": lower 0.20 / raise-wx 0.60 /
+  raise-get 0.20 gives 95.5% in-sample, and 94.0% exact / 0.9% too loose /
+  5.0% too tight leave-one-vendor-out, against 92.6% / 1.3% at rwxmap's
+  0.10 / 0.80 / 0.50. (6) Wobble across two asks: 82.5% of the 14,188
+  re-asked rows differ, mean |dp| 0.020, p90 0.04, max 0.17; about 600 rows
+  straddle a cut. (7) Rows with no description give more confident p: 8.4%
+  of them fall in 0.1-0.9 vs 14.0% of rows with a description. (8) On v3
+  truth, POST isX alone at 0.5 is 91.9% exact; GET changes 100%; PUT/PATCH
+  isX 95.8%.
+- Status: nothing adopted. All v3 figures are tuning data, single-labelled,
+  with duplicate snapshots, so under D24 none can move a cut-off or list.
+  Any cut-off or word change needs a D-number and a fresh exam. rwxlite is
+  drawing a fresh blind-labelled 600-row v3 sample and offered to share it;
+  if used as an exam it must exclude the ten vendors locked in
+  docs/logs/pre-registered-split-2026-09-18.md.
+- Lesson: (a) a cut-off rule that minimises one error per tier can switch a
+  tier off when mechanical already has zero of that error; a constraint on
+  the total across tiers avoids it. (b) An outside model version change is
+  invisible to tests; record it and re-measure before trusting old
+  cut-offs.
+
+## 2026-11-03 — first fresh-sample score of shipped rwxmap (rwxlite's 600-row gate, D128)
+
+- Goal: record the first score of shipped rwxmap (main, 0.8.1) on rows it
+  never saw. Source: rwxlite's data/gate-2026-11-03/score.json at commit
+  b9038dd, verified by the orchestrator.
+- Tried: rwxlite drew 600 rows from APIs.guru: GET 325 / POST 175 / PUT 50
+  / PATCH 50, no DELETE; 227 providers, one row per op key, vendor cap 5%.
+  It excluded the exam vendors, the ten locked vendors, every op in
+  combined-2026-09-21 and relabel-buildset-2026-09-23, and 19 rows sharing
+  an op key with an exam. Two labellers labelled blind under BRIEF-v3
+  (byte-equal to rwxmap's brief at 4143b6d) and agreed on 588 of 600
+  (98.0%); rwxlite's user ruled the 12 disputes. Truth mix of 600: r 368 /
+  w 194 / x 38. rwxlite scored it once with rwxmap linked from this repo;
+  the sample is now burned. 19 of the 227 providers appear in some rwxmap
+  labelled set. The seen list has 24 names: adyen, appcenter, atlassian,
+  azure, box, clearblade, dracoon, gitea, github, gitlab, jira, keycloak,
+  linode, microsoft, netbox, notion, openai, slack, trello, twilio,
+  vercel, whatsapp, xero, zoom. The other 208 providers hold 472 rows. A
+  first check with 14 names gave 523 rows; it missed five v1-corpus
+  providers (adyen.com, linode.com, slack.com, twilio.com, vercel.com).
+- Outcome, exact / too loose / too tight, counts of the named denominator:
+  - All 600, mechanical: 459 (76.5%) / 13 (2.2%) / 128 (21.3%).
+  - All 600, + Jev at rwxmap's cuts 0.10/0.80/0.50: 531 (88.5%) / 8 (1.3%)
+    / 61 (10.2%).
+  - All 600, + Jev at rwxlite's cuts 0.20/0.60/0.20: 545 (90.8%) / 7
+    (1.2%) / 48 (8.0%).
+  - 472 vendor-clean rows, mechanical: 356 (75.4%) / 13 (2.8%) / 103
+    (21.8%). All 13 mechanical too-loose rows of the 600 are in the 472;
+    so is every too-loose row of every config.
+  - 472 vendor-clean rows, rwxmap cuts: 415 (87.9%) / 8 (1.7%) / 49
+    (10.4%).
+  - 472 vendor-clean rows, rwxlite cuts: 425 (90.0%) / 7 (1.5%) / 40
+    (8.5%).
+  - By method, mechanical: GET 321 / 4 / 0 of 325; POST 49 / 0 / 126 of
+    175. With rwxmap cuts: GET 325 / 0 / 0 of 325; POST 116 / 0 / 59 of 175.
+  - Only 38 truth-x rows of 600 (6.3%), so the too-loose figures rest on a
+    small pile.
+- Findings rwxlite reported, from its own analysis at its cuts
+  (tuning-grade):
+  - F1: 36 of 55 misses (65.5%) are POST reads (/query, /search, /get,
+    list/retrieve) with truth r. Mechanical puts them at x on the POST
+    floor; Jev says not-x; jev-lower moves x only to w. No isX cut fixes
+    it; the lower tier tops out about 71%. rwxlite's fix: on POST floor
+    rows also ask the changes question (criteria-changes.mjs), so x can
+    drop to w or r.
+  - F2: 5 of 7 too-loose rows (71.4%) are password, PIN or auth-key
+    changes on PUT/PATCH (letmc, blazemeter, britbox, kumpeapps, a
+    kubernetes node proxy). Jev reads w; BRIEF-v3 clause (b) says x.
+    Candidate: a credential-change word rule raising to x.
+  - F3: 10 POST rows of truth w stay x (deregister, restart, transferJobs
+    create, feedback, call create), Jev p 0.2-0.57.
+- Take-back candidates (not adopted; each needs a D-number and a fresh
+  sample):
+  1. F1: on POST floor rows, let the lower tier reach r by also asking the
+     changes question.
+  2. F2: credential-change words raise PUT/PATCH to x.
+  3. rwxlite's cut-offs 0.20/0.60/0.20: +2.3 points exact and -1 leak on
+     600; tuned on rwxlite's tuning data.
+- Rulings confirmed directly by the user 2026-11-03: rwxlite is the
+  embedded model that replaces Jev (D128); mechanical stays and the model
+  is asked only on contested rows; the projects share learnings both ways
+  with no upper hand. rwxlite's trained model is scored once on the M3
+  exam (data/exam-2026-09-22, 4279 rows) as its go/no-go, against 82.3 /
+  0.8 / 16.9 mechanical and 93.0 / 0.5 / 6.5 with Jev, only after it
+  passes a fresh labelled sample. rwxlite will draw a second fresh 600-row
+  sample to measure F1 and send its provider list to rwxmap before
+  labelling.
+- Lesson: shipped rwxmap's first score on unseen rows is 88.5% exact / 1.3%
+  too loose with Jev. Mechanical alone leaks 2.2% here vs 0.8% on the M3
+  exam, all on rows from providers rwxmap never tuned on.
+  An overlap check must run against every labelled set held (the old v1
+  corpus included), not the sets that come to mind.
+
+## 2026-11-03 — F1 POC: floor-post rows may drop to r (tuning pass), and gate-2
+
+- Goal: measure take-back F1 on the tuning set before any src build. The
+  bar was set before measuring. F1 can loosen, so the D100 loosening bar
+  applies: leave-one-vendor-out (LOVO) right/wrong >= 10 (at least 91% of
+  moved rows right) on both of two Jev runs.
+- Tried: on rows with rule `floor-post`, also ask the changes question
+  (poc/jev-tiers/criteria-changes.mjs). Variant A: p_isX <= 0.10 gives w
+  (today's jev-lower), then p_changes <= T_r gives r. Variant B:
+  p_changes <= T_r gives r regardless of isX. T_r swept 0.05-0.50.
+  - Data: data/combined-2026-09-21, 6557 rows (v3). The floor-post pile
+    is 1336 rows, all POST: truth r 66 (4.9%), w 970 (72.6%), x 300
+    (22.5%). isX answers are cached in
+    data/jev-tiers-2026-09-23/out-lower.jsonl (jev-1.13.0). Changes
+    answers are new, two runs, in data/f1-post-r-2026-11-03/ (jev-1.14.0;
+    1906 rows each incl. 570 buildset rows; 4,121,386 input tokens per
+    run, about $0.17 each). Every pairing mixes two model versions; a src
+    build asks both questions of one version.
+  - Baseline (mechanical + jev-lower 0.10, raise tiers off), all 6557
+    rows, exact / too loose / too tight: run1 6142 (93.7%) / 77 (1.2%) /
+    338 (5.2%); run2 6143 / 78 / 336.
+- Outcome:
+  - Variant A is flat above 0.10. At T_r 0.50: run1 moves 37, right 36,
+    wrong 1 (truth w); run2 moves 36, right 35, wrong 1. On all 6557 at
+    0.50: 6177 (94.2%) / 78-79 (1.2%) / 301-302 (4.6%); too loose rises by
+    exactly the 1 wrong move. LOVO over 23 vendor folds: every fold picks
+    0.50. Pooled run1: 37 moved, 36 right (97.3%), ratio 36, PASS. Run2:
+    36 moved, 35 right, ratio 35, PASS. Run1 vs run2: 1 of 1336 rows
+    flips.
+  - Variant B: LOVO pooled run1 41 moved, 36 right (87.8%), 5 wrong w,
+    ratio 7.20, FAIL. Run2 43 moved, 37 right, 5 wrong w + 1 wrong x,
+    ratio 6.17, FAIL. The docusign fold picks 0.30 and moves 13 with 5
+    wrong.
+  - The one wrong move on every run and variant: x17-e1059 docusign POST
+    /v2.1/accounts/{accountId}/templates/{templateId}/views/edit
+    Views_PostTemplateEditView, truth w, p_isX 0.08-0.09, p_changes
+    0.07-0.09 ("Gets a URL for a template edit view").
+  - The orchestrator read all 37 run1 moves: batch read, search, preview,
+    verify and count calls (hubspot 11, docusign 7, zendesk 6, stripe 3,
+    openai 2, paypal 2, one each in auth0, digitalocean, jira, klaviyo,
+    mailchimp, okta).
+  - Ceiling: A reaches 36 of 66 truth-r rows (54.5%). The other 30 stay x
+    because isX is 0.15-0.36; most are generation calls (openai
+    createImage/createChatCompletion/createTranscription, digitalocean
+    inference_*) where the changes question also says yes (p 0.5-0.96).
+    F1 fixes search/query/get-shaped reads, not generation reads.
+  - Buildset side check (570 rows, separate, not blended): A at 0.10-0.50
+    moves 18, all right; B at 0.50 moves 34, 28 right, 4 wrong w, 2 wrong
+    x.
+  - Pre-registered for the fresh score, written before any src build or
+    gate-2 scoring by rwxmap: Variant A at T_r = 0.50, both questions
+    asked of one model version. Adoption on gate-2 (rwxlite
+    data/gate-2026-11-04/truth.csv, 600 rows, scored once by rwxmap)
+    needs F1's moves right/wrong >= 10 and total too loose no worse than
+    the shipped line on the same rows; reported on all 600 and on the 483
+    vendor-clean rows.
+  - Gate-2 truth (rwxlite commit f6c985b): 600 fresh BRIEF-v3 rows, A/B
+    labellers agreed on 590 of 600 (98.3%), 10 ruled by rwxlite's user;
+    truth r 353 / w 204 / x 43. Exact / too loose / too tight, all 600:
+    mechanical 476 (79.3%) / 7 / 117, re-derived by the orchestrator with
+    src classifyRow, exact match; shipped rwxmap with Jev 91.5% / 3 / 48
+    (rwxlite's figure); rwxlite round-6 96.5% / 4 / 17. Vendor-clean 483
+    rows (24-name list): mechanical 376 (77.8%) / 7 / 100 (re-derived,
+    match); shipped 90.3% / 3 / 44.
+  - Disclosure: before rwxmap scored, rwxlite's message gave F1
+    aggregates on gate-2 (its own F1 at r cut 0.20 moved 20 rows, all
+    truth r) and named some gate-2 rows its round-6 still misses (zuora
+    billing preview, quickchart /qr, plaid precheck, taggun validate,
+    orthanc shutdown). rwxmap's T_r was picked on tuning only (LOVO 0.50),
+    not from that.
+- Lesson: the isX <= 0.10 gate does most of the work. A second question
+  alone (variant B) loosens too freely and fails LOVO. A two-question
+  rule should keep the stricter first gate.
+
+## 2026-11-03 — F1 built (D129) and scored once on gate-2: PASS
+
+- Goal: build the F1 cut that the tuning pass chose (variant A) into the
+  CLI, then score it once on rwxlite's fresh gate-2 against the bar
+  written before scoring.
+- Tried:
+  - Build: when `jev-lower` (pile `floor-post`, POST x) gets isX
+    p <= 0.10, the CLI sends a second, separate request with the changes
+    question (`jevQuestions('jev-raise-get')`, byte-equal). If that
+    answer is usable, from the same model string, and p_changes <= 0.50
+    (`JEV_LOWER_R_THRESHOLD`, override key `jev-lower-r`), the row moves
+    x -> r; otherwise it stops at w as before. The moved verdict records
+    `jev {p, model, pChanges}`; the rule stays `jev-lower`; the review
+    sidecar shows pChanges; published carriers are unchanged. No second
+    call for rows isX does not lower. Code in src/jev.js and src/cli.js
+    (typedefs in src/types.js and src/exporter.js). npm test 492/492
+    (was 476), typecheck 0, proof-src 0 differences over 6557 rows.
+  - Score, run once on 2026-11-03 through the real CLI (branch
+    feat/d128-rwxlite-takeback, uncommitted F1 build). One OpenAPI file
+    per provider, built from rwxlite data/gate-2026-11-04/blind.csv (219
+    providers, 600 rows, 0 duplicate method+path, 0 missing joins).
+    Truth: rwxlite data/gate-2026-11-04/truth.csv (frozen, commit
+    f6c985b). Jev model jev-1.14.0 on every answer. 654 requests, 0
+    failed, 1,360,315 input tokens.
+  - The shipped line comes from the same run: rows F1 moved to r are put
+    back to w. That is exactly what 0.8.1 does, since the second
+    question is only asked after the isX move.
+- Outcome: PASS. Exact / too loose / too tight:
+  - All 600 rows: mechanical 476 (79.3%) / 7 (1.2%) / 117 (19.5%);
+    shipped 550 (91.7%) / 3 (0.5%) / 47 (7.8%); F1 567 (94.5%) /
+    3 (0.5%) / 30 (5.0%).
+  - Vendor-clean 483 rows (24-name list): mechanical 376 (77.8%) / 7 /
+    100; shipped 437 (90.5%) / 3 / 43; F1 452 (93.6%) / 3 / 28.
+  - F1 moved 17 rows, 17 right (truth r), 0 wrong: the ratio has no
+    wrong rows, bar 10. Too loose 3 = 3, no worse than shipped.
+  - The 17: airbyte webBackendCheckUpdates; amazonaws
+    DescribeNotificationConfigurations, DescribeDominantLanguageDetectionJob;
+    azure EnterpriseChannels_CheckNameAvailability; vtex
+    Calculatediscountsandtaxes(Bundles); plaid
+    incomeVerificationPaystubsGet, webhookVerificationKeyGet; apptigent
+    UrlDecode, ConvertDistance; autotask
+    ConfigurationItemWebhookExcludedResources_Query, Tags_QueryCount,
+    CompanyNoteAttachments_QueryCount; botify testUrlRewritingRules;
+    portfoliooptimizer effective-number-of-bets,
+    inverse-volatility-weighted; adyen post-legalEntities-id-termsOfService;
+    signl4 /events/paged.
+  - rwxlite scored shipped on gate-2 at 91.5% / 3 / 48; this run gave
+    91.7% / 3 / 47. The gap is Jev non-determinism between runs.
+  - Disclosure (as logged in the F1 POC entry): rwxlite had shared
+    aggregate F1 results and some miss names before this score. rwxmap's
+    cut was fixed on tuning (LOVO 0.50) and pre-registered in commit
+    c503b05 before scoring.
+  - Run files: data/f1-gate2-2026-11-04/ (build.mjs, score.mjs,
+    score.txt, run.tar.gz, README.md).
+- Lesson: a cut pre-registered from a LOVO tuning pass held on fresh rows
+  (17 of 17). The fresh gain (+2.8 points exact on 600 rows, 91.7% to
+  94.5%) was larger than tuning's (+0.5 on 6557) because fresh
+  APIs.guru POST floor rows hold more reads. The gate-2 score is now
+  burned for F1: a later change to this cut needs a new fresh sample.
+
+## 2026-11-03 — F2 POC: credential nouns raise PUT/PATCH to x (tuning pass): FAIL
+
+- Goal: tuning POC for take-back F2 (BRIEF-v3 clause (b): resetting or
+  rotating a credential, key, token, secret, certificate, session or
+  password is x). Bar set before measuring: D100 tighten-only. Among
+  fires, more right than wrong; too loose never rises; the result holds
+  pooled under LOVO and on the buildset line; flag it if one vendor
+  holds more than 50% of the fires.
+- Tried: three candidates, all on the mechanical letter, no Jev calls
+  (the with-Jev line reuses the cached raise-wx answers, runs jev1 and
+  jev2, which score the same).
+  - C1: PUT/PATCH where a credential noun is in the operationId or path
+    tokens.
+  - C2: C1 plus the summary.
+  - C3: C2's method set plus POST (C3 takes the C1 word source).
+  Run file: poc/f2-credential/score.mjs, output score.txt, 8 tests pass.
+- Outcome: C1, C2 and C3 all FAIL on both sets and under LOVO. "Right" =
+  moved to x and truth x (a leak closed); "wrong" = moved to x and truth
+  w.
+  - Combined (6557 rows). C1: 23 fires, 0 already x, 23 moved, 6 right,
+    17 wrong. C2: 25 fires, 25 moved, 6 right, 19 wrong. C3: 109 fires,
+    76 already x, 33 moved, 7 right, 26 wrong (POST alone: 10 moved,
+    1 right, 9 wrong).
+  - Buildset (1819 rows). C1: 16 fires, 3 already x, 13 moved, 3 right,
+    10 wrong. C2: 19 fires, 3 already x, 16 moved, 6 right, 10 wrong.
+    C3: 45 fires, 29 already x, 16 moved, 3 right, 13 wrong.
+  - Whole set, mechanical, exact / too loose / too tight. Combined
+    before 5418 (82.6%) / 64 (1.0%) / 1075 (16.4%) of 6557. After C1
+    5407 (82.5%) / 58 (0.9%) / 1092 (16.7%); C2 5405 (82.4%) / 58 /
+    1094 (16.7%); C3 5399 (82.3%) / 57 (0.9%) / 1101 (16.8%).
+    Buildset before 1310 (72.0%) / 18 (1.0%) / 491 (27.0%) of 1819.
+    After C1 1303 (71.6%) / 15 (0.8%) / 501 (27.5%); C2 1306 (71.8%) /
+    12 (0.7%) / 501 (27.5%); C3 1300 (71.5%) / 15 / 504 (27.7%).
+  - With Jev (cached raise-wx), combined: before 5428 (82.8%) / 54
+    (0.8%) / 1075 (16.4%). After C1 5415 (82.6%) / 50 / 1092; C2 5413
+    (82.6%) / 50 / 1094; C3 5407 (82.5%) / 49 / 1101. Buildset: before
+    1312 (72.1%) / 15 (0.8%) / 492 (27.0%). After C1 1305 (71.7%) / 12 /
+    502; C2 1307 (71.9%) / 10 / 502; C3 1302 (71.6%) / 12 / 505. Too
+    loose falls a little everywhere; too tight rises by exactly the
+    wrong fires.
+  - C1 per word, combined (fires / right / wrong): apikey 7/2/5,
+    credential 5/1/4, token 5/0/5, password 4/2/2, certificate 1/1/0,
+    secret 1/0/1.
+  - LOVO pooled (literal), combined: C1 moved 4, closed 1, new over-tight
+    3; C2 the same; C3 moved 5, closed 0, new over-tight 5. Buildset: C1
+    moved 7, closed 2, over-tight 5; C2 moved 9, closed 4, over-tight 5
+    (right 4 vs wrong 5); C3 moved 7, closed 2, over-tight 5.
+  - APIs.guru prevalence (123,339 operations, no truth): C1 422 fires
+    across 73 providers (409 would move), github.com 44.1% of the fires,
+    driven by "secret" (201 of 422 fires). C2 436 fires, 75 providers,
+    github.com 42.7%. C3 1889 fires, 167 providers, top apisetu.gov.in
+    27.0%.
+  - The rows: wrong fires are config edits of credential metadata that
+    v3 truth calls w: digitalocean and datadog update API key (name),
+    auth0 hook secrets, docusign password rules, auth0 breached-password
+    detection, token exchange profile, verifiable-credential template,
+    zendesk and okta update API token (network condition), hubspot
+    template token. Right fires replace the credential itself: zoom
+    userPassword, zendesk ChangeOwnPassword, digitalocean
+    regenerate API key (two), okta replaceIdentityProviderKey, okta
+    upsertCertificate.
+- Post-hoc variants V1-V4. Designed after reading the fires, so they are
+  fitted and say so; scored the same way.
+  - V1: C2 plus a lead verb change/regenerate/regen. Combined 1 fire,
+    1 right, 0 wrong (all zendesk, top share 100%, FLAG). Buildset 5
+    fires, 4 right, 1 wrong (clearblade 3 of 5, FLAG).
+  - V2: last path segment is a literal credential noun. Combined 5
+    fires, 3 right, 2 wrong. Buildset 3 fires, 1 moved right, 1 wrong,
+    FAIL (right not above wrong; dracoon 2 of 3, FLAG).
+  - V3: V1 or V2. Combined 5 fires, 3 right, 2 wrong. Buildset 6 fires,
+    5 moved, 4 right, 1 wrong.
+  - V4: V3 limited to password/passcode/pin. Combined 2 fires, 2 right,
+    0 wrong (zoom userPassword, zendesk ChangeOwnPassword; one vendor each,
+    top share 50.0%); too loose 64 -> 62, too tight +0; LOVO 2 right,
+    0 wrong. Buildset 5 fires, 1 already x, 4 moved, 3 right, 1 wrong;
+    too loose 18 -> 15, too tight +1; LOVO 3 right, 1 wrong. APIs.guru
+    37 fires across 27 providers, top britbox.co.uk 8.1%. V4 passes the
+    bar. Five rows in total (2 combined, 3 buildset) is too few to
+    justify a build on tuning alone.
+- Open ruling: D87's text lists "set a user's password" among the
+  PUT/PATCH rows that move x -> w. BRIEF-v3 clause (b) and the v3 truth
+  label such rows x (zoom userPassword, zendesk ChangeOwnPassword).
+  Awaiting the user's ruling on which stands; V4 only makes sense if v3
+  does.
+- Also recorded: gate-3, rwxlite's third fresh sample (data/gate-2026-11-06,
+  seed 20261106).
+  - 800 rows: a credential stratum of 200 (POST 100 / PUT 68 / PATCH 32;
+    pre-registered broad regex on path+operationId+summary, no change
+    verb required) plus a general stratum of 600 (GET 325 / POST 175 /
+    PUT 50 / PATCH 50). Labelled blind together, scored separately.
+  - rwxmap's lock check found hubapi.com (HubSpot's API domain), which
+    whole-label name matching had missed. rwxlite dropped it and redrew
+    2 credential POST rows (commit ec76d1b).
+  - 21 providers overlap rwxmap's labelled sets (20, plus azure) and go
+    on the vendor-clean line.
+  - Gate-3 rows are in rwxlite's MiniLM training data, so gate-3 is
+    rwxmap's exam only.
+- Lesson:
+  - A noun names the thing, not what happens to it. Credential nouns sit
+    mostly on metadata edits, so only the "replace the secret itself"
+    shape is x. This is the same verb-transfers / noun-fails pattern as
+    D81: what the call does carries across vendors, whose thing it
+    touches does not.
+  - Whole-label vendor matching misses a brand's other API domains
+    (hubapi.com is HubSpot). A lock check needs known brand aliases too.
+
+## 2026-11-03 — F2 pre-registered as D131 (credential-set) before gate-3 is read
+
+- The rule, in step 2, PUT and PATCH only. It claims x when either:
+  - the last path segment is literal and its last token is password,
+    passcode or pin (PUT /users/{id}/password); or
+  - the lead verb is change, regenerate or regen, and password, passcode
+    or pin is a token of the operationId, a literal path segment or the
+    summary (PATCH changePin).
+- It runs only when the CANT_UNDO lead-verb check did not fire, so
+  resetPassword keeps cant-undo-verb.
+- D130 first: the user ruled that changing or setting a password is x.
+  BRIEF-v3 clause (b) stands over D87's text.
+- Singular only. POC V4 also took plurals. We dropped them by reasoning,
+  before any fresh data: "pins" names pinned items in some APIs, and
+  "passwords" names a collection.
+- Built vs V4 on the tuning sets (mechanical):
+  - combined: the same 2 rows, 2 right, 0 wrong (zoom userPassword,
+    zendesk ChangeOwnPassword). Too loose 64 -> 62.
+  - buildset: 3 fires, 2 right, 1 wrong (dracoon
+    changePasswordPoliciesConfig, truth w). V4 had 3 right, 1 wrong.
+    The lost right row is clearblade ChangeUserInfo, whose only
+    credential word is "passwords" in the summary. Too loose 18 -> 16.
+  - APIs.guru (no truth): 32 fires vs V4's 37. 2 of the 5 were already
+    x by CANT_UNDO. The other 3: clearblade.com ChangeUserInfo (plural)
+    and two windows.net PATCH .../passwordCredentials rows. Those end
+    in "credentials", not "password", so the endpoint form does not
+    take them. V4's endpoint check read the last two tokens.
+- The bar, on gate-3 scored once with the mechanical classifier:
+  credential-set fires right > wrong, and too loose not rising. It must
+  hold on the credential part, the general part and the vendor-clean
+  line.
+- Gate-3 truth became public when the rwxlite repo was made public on
+  2026-11-03. rwxmap has not opened it before scoring.
+- Known gap, not fixed: step 1 claims only GET/HEAD/OPTIONS and POST, so
+  a PUT or PATCH with a read lead verb (say getPassword) reaches the rule
+  and would fire. V4 excluded read-lead rows; it excluded 0 on every
+  tuning set and on APIs.guru, so the built rule and V4 do not differ
+  there on this data.
+
+## 2026-11-03 — F2 (D131) scored once on gate-3: PASS, adopted
+
+- Goal: score the credential-set rule (D131), as built in 41cdc55, once
+  on rwxlite's fresh gate-3, against the bar pre-registered before
+  gate-3 truth was read.
+- Tried: the mechanical classifyRow from src, run twice on the same 800
+  rows: F2 on, and F2 off (the same call with words
+  {credentialSet: new Set()}). Truth: rwxlite
+  data/gate-2026-11-06/truth.csv (commits 7323817 and 0f61b68). 800
+  rows, 0 missing joins. Run once on 2026-11-03.
+- Outcome: PASS. Exact / too loose / too tight, off then on:
+  - All 800 rows: 578 (72.3%) / 26 / 196; 580 (72.5%) / 23 / 197.
+  - Credential part, 200 rows: 113 (56.5%) / 16 / 71; 115 (57.5%) /
+    13 / 72.
+  - General part, 600 rows: 465 (77.5%) / 10 / 125 both ways. 0 fires.
+  - Vendor-clean 631 rows (24-name list): 443 (70.2%) / 21 / 167;
+    444 (70.4%) / 19 / 168.
+  - credential-set fired on 4 rows, all in the credential part. 3 right,
+    1 wrong:
+    - gate3-0016 signl4 PUT /users/{userId}/changePassword, "Updates the
+      password of a user", truth x: right.
+    - gate3-0092 sendgrid PUT /user/password (PUT_user-password),
+      "Update your password", truth x: right.
+    - gate3-0594 jira.local PUT /api/2/myself/password
+      (changeMyPassword), truth x: right.
+    - gate3-0206 whapi PUT /account/plusCard/pin (updatePin), "Updates a
+      customer's plus card pin", truth w: wrong.
+  - Against the bar: credential part 3 right > 1 wrong, too loose
+    16 -> 13. Vendor-clean 2 right > 1 wrong, too loose 21 -> 19.
+    General part: 0 fires, neither error moves, so it passes by
+    "neither error worsens" (right > wrong is vacuous there).
+  - Mechanical on the general 600 is 77.5% exact; gate-2's general
+    mechanical was 79.3%.
+  - Disclosure: gate-3 truth was public in the rwxlite repo before
+    scoring; rwxmap did not open it before 41cdc55. Gate-3 is in
+    rwxlite's MiniLM training data, so it is an exam for rwxmap only.
+  - Known gap kept: step 1 does not claim read-lead PUT/PATCH, so a
+    read-lead PUT naming a password reaches credential-set and becomes
+    x. 0 such rows in tuning or APIs.guru. Left as is: it errs tighter.
+  - poc/d87/proof-src.mjs claim 1a now reports 2 differences from the
+    frozen POC: pc-r1389 zoom userPassword and x20-e0999 zendesk
+    ChangeOwnPassword, both w (method-floor) -> x (credential-set), both
+    truth x. These are the 2 combined fires above. How to re-pin is open.
+- Lesson: a narrow verb-or-endpoint shape held where the broad noun list
+  failed. The one wrong fire (a card PIN update) shows "pin" is a weaker
+  word than "password". Gate-3 is now burned for F2.
+
+## 2026-11-03 — Jev cut-off POC (rwxlite's 0.20/0.60/0.20, F3): FAIL, today's cuts stay
+
+- Goal: test rwxlite's proposed Jev cut-offs against today's. Jev-lower
+  0.10 -> 0.20, jev-raise-wx 0.80 -> 0.60, jev-raise-get 0.50 -> 0.20.
+  jev-lower-r stays 0.50 (they proposed none).
+- Tried: poc/cutoffs/score.mjs over the cached Jev answers, two runs.
+  Readouts: poc/cutoffs/readout.txt (combined, 6557 rows) and
+  readout-provider-corpus-only.txt (4171 rows, the burned exam rows
+  dropped). The orchestrator re-ran `node poc/cutoffs/score.mjs`: exit 0,
+  byte-identical. Tests: 5 pass.
+- Bars, set before the run (D100): a loosening move (lower cut up) needs
+  LOVO right/wrong >= 10 on both runs. A raise cut moved down is
+  tighten-only: more right than wrong and too loose never up, on both
+  runs and under LOVO.
+- Outcome: FAIL. Today's cuts stay.
+  - Baseline, today's cuts, combined run1: 6191 exact (94.4%) / 64 too
+    loose (1.0%) / 302 too tight (4.6%) of 6557 rows.
+  - rwxlite's set, combined run1: 6301 exact (96.1%) / 97 too loose
+    (1.5%) / 159 too tight (2.4%) of 6557 rows. Moved 197: right 146,
+    wrong 44, other 7. Run2: moved 197, right 149, wrong 43, other 5;
+    97 too loose of 6557.
+  - Lower tier, rwxlite's 0.20, run1: moved 186 of 1336 pile rows. Right
+    140, wrong 39, ratio 3.6. Pile leaks 14 -> 53. Over-tight 263 -> 115.
+    Run2: right 143, wrong 38, ratio 3.76, leaks 15 -> 53.
+  - Provider-corpus-only (4171 rows), rwxlite's set, run1: too loose 40
+    -> 62 (1.0% -> 1.5% of 4171). Lower tier moved 116 of 819: right 83,
+    wrong 26, ratio 3.19, leaks 10 -> 36.
+  - Lower sweep, run1, ratio by cut: 0.15 is 5.71 (right 97, wrong 17);
+    0.20 is 3.59; 0.25 is 3.51; 0.30 is 3.08; 0.35 is 2.38; 0.40 is
+    2.14. No cut reaches 10. The 0.05 cut is worse: right 12, wrong 621.
+  - Raise-wx sweep, run1: 0.60 moves 8 of 1052, right 6, wrong 2, leaks
+    27 -> 21, over-tight 1 -> 3. It passes in-sample on both runs. The
+    best in-sample pick on both runs is 0.65 (right 6, wrong 2).
+  - Raise-get sweep, run1: 0.20 moves 3 of 2543, all 3 wrong (new
+    over-tight). Cuts 0.35 and up move nothing. All 2543 GET pile rows
+    are truth r.
+  - LOVO (cut picked on the other vendors, pooled over held-out):
+    - Lower: stays 0.10 in all 23 folds, both runs. No move.
+    - Raise-wx: run1 moved 3 of 1052, right 1, wrong 2, FAIL. Run2 moved
+      5, right 3, wrong 2, PASS. So 1/2 vs 3/2 across runs.
+    - Raise-get: stays 0.50 in all 18 folds. No move.
+    - LOVO joint, combined run1: 6190 exact, moved 3 (right 1, wrong
+      2). Run2: 6192 exact, moved 5 (right 3, wrong 2).
+  - F3 (POST truth-w rows sitting at x today), run1: 233 rows, of 1336
+    lower-pile rows. At 0.15, 95 fixed to w for 4 new leaks to r, and the
+    pile leaks go 14 -> 31 (17 new). At 0.20, 135 fixed, 8 to r, pile
+    leaks 14 -> 53 (39 new, 31 of them truth-x rows newly lowered). Run2:
+    231 rows; at 0.20, 135 fixed, 9 to r, leaks 15 -> 53.
+  - Buildset (1819 rows, a separate line): rwxlite's set gives 1724 exact
+    (94.8%) / 20 too loose (1.1%) / 75 too tight (4.1%), up from 1658
+    exact (91.1%) / 14 too loose (0.8%) / 147 too tight (8.1%). Lower
+    tier ratio 8.44 in-sample. Under LOVO it is 8.43 (run1) and 9.67
+    (run2), both under 10: FAIL. Raise-wx LOVO right 1 vs wrong 4 and 5:
+    FAIL.
+  - Note: combined holds the burned x17/x20 exam rows by design (its
+    README). The provider-corpus-only readout is the same test without
+    them. It reaches the same verdict.
+- Lesson: rwxlite's cuts scored fewer leaks on its fresh gates (7 vs 8
+  on gate-1), but on rwxmap's tuning pile they cost leaks. The lower cut
+  buys over-tight rows and pays for them in new leaks, at a ratio near 3.
+  The build decision is taken on tuning under the pre-set bar, so
+  nothing was pre-registered for a fresh exam. Today's cuts stay.
+
+## 2026-11-03 — can't-undo verb POC (27 candidates + archive): FAIL, nothing adopted
+
+- Goal: test whether new can't-undo (x) lead verbs earn a place in step
+  3: 27 candidate verbs rwxlite proposed, plus archive, which I mined.
+- Tried: poc/cantundo-verbs/score.mjs over the combined set (6557 rows),
+  the buildset (1819 rows), LOVO, and APIs.guru prevalence (123,339
+  ops). Readout: poc/cantundo-verbs/score.txt. Re-run exit 0,
+  byte-identical. Tests: 8 pass.
+- Outcome: FAIL. Nothing adopted. Mechanical baseline combined: 5420
+  exact / 62 too loose / 1075 too tight of 6557.
+  - 19 of the 27 never move a letter on combined, in any view: deliver,
+    notify, invite, issue, dispatch, broadcast, post, payout, withdraw,
+    deposit, disburse, settle, confirm, finalize, ban, terminate, kill,
+    invalidate, regenerate.
+  - Why they do not move: a POST already floors at x, so a new x verb
+    adds nothing mechanically. Its only effect is to block jev-lower's
+    correct lowerings. Mechanical moves happen only on PUT/PATCH, and
+    suspend moves only because it overlaps KEEP_W (step 2 would win).
+  - The 8 that move all fail. Per verb, combined, moved/right/wrong as
+    mechanical | Jev run1 | Jev run2:
+    - transfer: 1/0/1 | 1/0/1 | 1/0/1
+    - share: 1/0/1 | 1/0/1 | 1/0/1
+    - submit: 0 | 1/0/1 | 0
+    - disable: 1/1/0 | 4/3/1 | 4/3/1. Fails Jev LOVO (1 moved, 0 right,
+      1 wrong) and buildset mechanical (1 moved, 0 right, 1 wrong).
+    - suspend: 3/0/3 | 3/0/3 | 3/0/3
+    - deactivate: 0 | 28/1/27 | 28/2/26
+    - lock: 2/0/2 | 4/0/4 | 4/0/4
+    - block: 0 | 1/0/1 | 1/0/1
+    - archive (mined, fitted): 2/0/2 | 5/2/3 | 5/2/3. Fails LOVO too.
+  - Joint, all 27, combined: 74 fires of 6557. Mechanical moved 8: right
+    1, wrong 7 (5420 -> 5414 exact). Jev run1 moved 43: right 4, wrong
+    39. Jev run2 moved 42: right 5, wrong 37.
+  - Buildset joint, all 27: 40 fires of 1819. Mechanical moved 16: right
+    0, wrong 16 (1311 -> 1295 exact).
+  - "issue" matches the plural noun "issues": 273 APIs.guru fires, 25
+    buildset rows all truth w (gitea 21 of 25, 84.0%); 11 move
+    mechanically, all wrong.
+  - The 62 mechanical leaks (of 6557) are mostly create, update, set and
+    upsert rows that a lead-verb list cannot reach. Create is truth x on
+    74 of 631 floor rows.
+- Lesson: on POST a new x verb has no mechanical effect and mainly blocks
+  Jev's correct lowerings. rwxlite's "sends/transfers that read as
+  creates" lead with create, which no verb list can separate from a
+  harmless create.
+
+## 2026-11-03 — marker export for rwxlite (read-only)
+
+- Goal: give rwxlite the mechanical markers for its contested-row second
+  pass.
+- Tried: data/markers-2026-11-04/export.mjs, run from commit 0876cf6.
+  It runs the mechanical classifyRow (no Jev) over
+  data/corpus/apis-guru-ops.csv.gz.
+- Outcome: data/markers-2026-11-04/markers.csv.gz, 123,339 rows.
+  - Class: r 62,879 / w 17,312 / x 43,148.
+  - Review: settled 78,556 / tight 29,687 / loose 15,096.
+  - evidence_vs_floor: floor 116,015 / evidence 7,324.
+  - Sent to rwxlite. No rule change.
+- Lesson: none. This is an export, not an experiment.
+
+## 2026-11-03 — rwxlite's D128 exam: NO-GO; locked vendors released (D132)
+
+- Goal: close the five rwxlite take-backs, and record rwxlite's one-time
+  D128 go/no-go: its trained model scored once on the M3 exam
+  (data/exam-2026-09-22, 4279 rows).
+- Tried:
+  - Take-backs, all five closed. F1 adopted (D129, gate-2). F2 adopted
+    (D131, gate-3). rwxlite's Jev cut-offs, F3 included, rejected on
+    tuning (2026-11-03 cut-off POC). 27 candidate can't-undo verbs
+    rejected on tuning (2026-11-03 verb POC). Marker export delivered
+    (data/markers-2026-11-04).
+  - rwxlite's D128 exam, in the rwxlite repo: pre-registered in f05ec42,
+    scored in 51d8fb4. Bar: >= 91% exact, <= 0.5% too loose, of the
+    4279 rows.
+  - rwxlite round 9b, tuning only (its d20b956, c30fd3d, 315383f): it
+    relabelled 1,200 of its training rows in the two failure shapes.
+    Agreement 98.8% of the 1,200. Its Jev-recipe label was too loose on
+    32 of the 1,200 (2.7%).
+- Outcome: NO-GO.
+  - rwxlite's model: 95.91% exact (bar 91%), 0.84% too loose = 36 of
+    4279 rows (bar 0.5%). It passes the exact bar and fails the leak bar.
+  - For comparison, same 4279 rows: rwxlite mechanical 82.26% exact /
+    34 too loose; rwxmap mechanical + Jev 93.0% / 0.5% (22 too loose).
+  - 30 of the 36 leaks (83.3%) are cloudflare: lower-tier POST creates
+    (top-up, zone subscription, restore D1, replay deletion job) and
+    raise-wx credential PUTs.
+  - A reported variant, ask-at-0.95: 90.2% of rows answered, 98.73%
+    exact and 0.47% too loose on those. It is not the go/no-go.
+  - The M3 exam is now burned for rwxlite's model too. Jev stays
+    rwxmap's model tier.
+  - Round 9b plan, MECH-THEN-ASK at top p 0.95: keep the mechanical
+    letter when it is at least as strict as the model's, else ask. On
+    5,716 LOVO rows: 91.5% exact on answered, 0.49% too loose, 3.4%
+    asked. Pure fallback to mechanical was worse: 85-96 too loose.
+  - Pre-registered bar for rwxlite's next fresh exam: <= 0.5% too loose,
+    >= 91% exact on answered, <= 15% asked.
+  - User ruling D132: of the ten locked vendors, cloudflare, pagerduty
+    and sentry were the M3 exam; auth0, hubspot, zendesk and miro were
+    the 2026-09-20 exam, now in tuning. Of the last three, dropbox and
+    shopify go to rwxlite for its fresh exam, each only if it publishes
+    a real official OpenAPI spec. linear is GraphQL only, not usable.
+    Once scored they are burned for rwxmap too. rwxmap's next clean exam
+    must come from fresh official specs outside APIs.guru.
+  - Open, not decided (user): invert the D128 order, model first and
+    mechanical when the model is unsure. rwxlite is to brief it and it
+    is measured before any decision. Against it so far: rwxlite's own
+    pure fallback to mechanical was looser than MECH-THEN-ASK.
+- Lesson: a model that beats the exact bar can still fail on leaks
+  concentrated in one vendor. The leak bar, not the exact bar, decides.
+
+## 2026-11-03 — gate-4: the 0.9.0 candidate vs 0.8.1, scored once: PASS
+
+- Goal: score the 0.9.0 candidate (F1 jev-lower->r, D129; F2
+  credential-set, D131) against shipped 0.8.1 on rwxlite's fresh gate-4,
+  once, against a bar set before the run.
+- Tried:
+  - Setup: 800 rows from 250 providers (write 200, general 600), rwxlite
+    commit f1b8a2b. Vendor-clean is 641 rows, the rows left after the
+    24-name list of providers in rwxmap's labelled sets.
+  - Branch at 7c3432c against npm rwxmap@0.8.1, both through the real CLI,
+    mechanical and with Jev (model jev-1.14.0).
+  - Jev runs: 0.8.1 sent 743 requests, 0 failed, 1,493,626 input tokens.
+    Branch sent 883 requests, 0 failed, 1,790,298 input tokens (F1 adds
+    second calls). About 3.28M input tokens in all, about $0.14.
+  - Orchestrator re-scored from run.tar.gz: exit 0, byte-identical.
+  - Pre-set bar: branch + Jev not more too-loose than 0.8.1 + Jev, on all
+    800 and on vendor-clean.
+- Outcome: PASS. Too loose is 9 vs 10 on all 800 and 9 vs 10 on
+  vendor-clean 641. Counts are exact / too loose / too tight.
+
+  | set | 0.8.1 mech | branch mech | 0.8.1 + Jev | branch + Jev |
+  |---|---|---|---|---|
+  | all 800 | 598 / 11 / 191 | 599 / 10 / 191 | 687 / 10 / 103 | 734 / 9 / 57 |
+  | write 200 | 125 / 6 / 69 | 125 / 6 / 69 | 161 / 4 / 35 | 177 / 4 / 19 |
+  | general 600 | 473 / 5 / 122 | 474 / 4 / 122 | 526 / 6 / 68 | 557 / 5 / 38 |
+  | vendor-clean 641 | 458 / 11 / 172 | 459 / 10 / 172 | 537 / 10 / 94 | 579 / 9 / 53 |
+
+  - All 800: exact 74.8 / 74.9 / 85.9 / 91.8 %; too loose 1.4 / 1.3 /
+    1.3 / 1.1 %.
+  - F1: 46 rows changed, all POST. 46 right, 0 wrong.
+  - F2: 1 row changed (appwrite PATCH /account/password, w to x, truth
+    x). Right.
+  - 8 more rows differ only by Jev run-to-run noise, not F1 or F2: 3
+    became exact, 3 became wrong (gate4-0141, 0380, 0596: w to x, truth
+    w), 2 stayed wrong (0055, 0338).
+  - Files: data/gate4-2026-11-04/ (score.txt, README.md, run.tar.gz).
+- Lesson: on fresh rows F1 is the bigger lever (+46 exact of 800) and F2
+  is rare (1 of 800). Jev noise between runs moves about 1% of rows either
+  way, so a one-row too-loose difference (9 vs 10) is within noise. The
+  bar held, but it is not evidence of a leak reduction.
+
+## 2026-11-03 — rwxlite's fresh exam: NO-GO by one row; planned three-engine shape
+
+- Goal: record rwxlite's fresh-exam result and the shape the user leans to.
+- Tried: rwxlite scored its model on a fresh exam (coolify, workos, lago,
+  resend; 949 operations; rwxlite commits 0caa381 prereg, 402fea0 score;
+  labels 934 of 949 agreed). Its lowering flag accepts a lowering only at
+  max p >= 0.97 and marks the rest to ask.
+- Outcome: answered 875 rows, 92.57% right; 5 too loose (0.57% of 875)
+  against a 0.5% bar (4 rows), NO-GO by one row; 60 too tight (6.9%);
+  asked 74 (7.8% of 949). All 13 wrong lowerings of 166 were under 0.97
+  and asked; all 92 accepted lowerings were right. Mechanical alone on
+  the same exam: 77.6% right, 6 too loose (0.63%), 21.8% too tight.
+  Practice rows (rwxlite v3 tuning, LOVO): 93.2% right, 21 too loose
+  (0.41%), 9.6% asked.
+  - The 5 misses come from the mechanical letter: 3 PUT/PATCH credential
+    upserts (workos client-credentials, workos api-key, coolify
+    integration-tokens; mechanical w, truth x by clause b) and 2 logout
+    GETs (workos /sso/logout, /user_management/sessions/logout; truth x).
+  - Candidates, each needs a tuning POC and a fresh exam. R1: credential
+    replace on PUT/PATCH (last path segment api-key, client-credentials,
+    token, secret), narrower than the broad noun rule that failed (6
+    right, 17 wrong, F2 POC). R2: logout/signout/end-session is x on any
+    method; touches step 1, a core change.
+  - Agreed with rwxlite's user: shared fresh exam #3 on rwxmap's spares
+    clerk, neon, supabase, mux, netbird, ory, novu; both projects commit
+    candidates before truth is read; each scores once.
+  - User notes, 2026-11-03: "we will probably go for it"; the target could
+    be lowered, since the local model is about 92% right and asks on the
+    doubtful rows. Recorded in the PRD as PLANNED, not adopted; bar open.
+- Lesson: the lowering flag removed every wrong lowering; the remaining
+  leaks are the mechanical floor's, so mechanical fixes help both
+  projects.

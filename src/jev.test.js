@@ -12,6 +12,8 @@ import {
   JEV_LOWER_THRESHOLD,
   JEV_RAISE_WX_THRESHOLD,
   JEV_RAISE_GET_THRESHOLD,
+  JEV_LOWER_R_THRESHOLD,
+  JEV_LOWER_R_KEY,
 } from './jev.js';
 import { classifyRow } from './flow.js';
 // The frozen poc references are loaded by a computed specifier so tsc (rootDir src) does not follow them.
@@ -61,6 +63,8 @@ test('there are exactly three tiers, each with one pile and one allowed move', (
   assert.deepEqual(JEV_TIERS, ['jev-lower', 'jev-raise-wx', 'jev-raise-get']);
   assert.deepEqual(jevTier('jev-lower'), {
     tier: 'jev-lower', question: 'isX', pile: 'floor-post', from: 'x', to: 'w', direction: 'lower', threshold: 0.10,
+    // D129: may end at r instead, through a second (changes) question.
+    second: { question: 'changes', ask: 'jev-raise-get', then: 'r', threshold: 0.50, thresholdKey: 'jev-lower-r' },
   });
   assert.deepEqual(jevTier('jev-raise-wx'), {
     tier: 'jev-raise-wx', question: 'isX', pile: 'method-floor', from: 'w', to: 'x', direction: 'raise', threshold: 0.80,
@@ -416,4 +420,129 @@ test('each tier sends exactly its frozen poc question (D127)', async () => {
   assert.equal(JSON.stringify(jevQuestions('jev-raise-wx')), JSON.stringify(raiseWx.questions()));
   assert.equal(JSON.stringify(jevQuestions('jev-raise-get')), JSON.stringify(raiseGet.questions()));
   assert.equal(JSON.stringify(jevQuestions()), JSON.stringify(lower.questions()));
+});
+
+// ---- D129 (F1): jev-lower may go on to r through a second question -----
+
+/** The plain jev-lower move to w at isX p = 0.05, as it was before D129. */
+const LOWER_TO_W = {
+  class: 'w', step: 2, rule: 'jev-lower', source: 'jev', matched: [], review: 'settled', jev: { p: 0.05, model: MODEL },
+};
+
+test('D129: JEV_LOWER_R_THRESHOLD is 0.50 and is what jevTier reports as the second threshold', () => {
+  assert.equal(JEV_LOWER_R_THRESHOLD, 0.50);
+  assert.equal(JEV_LOWER_R_KEY, 'jev-lower-r');
+  assert.equal(jevTier('jev-lower')?.second?.threshold, JEV_LOWER_R_THRESHOLD);
+  assert.equal(jevTier('jev-lower')?.second?.then, 'r');
+  assert.equal(jevTier('jev-raise-wx')?.second, undefined);
+  assert.equal(jevTier('jev-raise-get')?.second, undefined);
+});
+
+test('D129: jevTier hands out a copy of the second question, not the table itself', () => {
+  const a = /** @type {any} */ (jevTier('jev-lower'));
+  a.second.threshold = 1;
+  assert.equal(jevTier('jev-lower')?.second?.threshold, 0.50);
+});
+
+test('D129: the second question jev-lower asks is byte-equal to the changes question (criteria-changes.mjs)', async () => {
+  const raiseGet = await ref('../poc/jev-tiers/criteria-changes.mjs');
+  const ask = /** @type {string} */ (jevTier('jev-lower')?.second?.ask);
+  assert.equal(JSON.stringify(jevQuestions(ask)), JSON.stringify(jevQuestions('jev-raise-get')));
+  assert.equal(JSON.stringify(jevQuestions(ask)), JSON.stringify(raiseGet.questions()));
+});
+
+test('D129: isX fires and changes <= 0.50 -> r, recording both answers', () => {
+  for (const pc of [0, 0.2, 0.50]) {
+    assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes: { p: pc, model: MODEL } }, { method: 'POST' }), {
+      class: 'r', step: 2, rule: 'jev-lower', source: 'jev', matched: [], review: 'settled',
+      jev: { p: 0.05, model: MODEL, pChanges: pc },
+    }, `pChanges=${pc}`);
+  }
+});
+
+test('D129: isX fires and changes 0.51 -> w, exactly the pre-D129 move', () => {
+  assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes: { p: 0.51, model: MODEL } }), LOWER_TO_W);
+  assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes: { p: 1, model: MODEL } }), LOWER_TO_W);
+});
+
+test('D129: isX does not fire -> x unchanged, whatever the changes answer says', () => {
+  for (const p of [0.11, 0.5, 1]) {
+    assert.deepEqual(applyJev(FLOOR_VERDICT, { p, model: MODEL, changes: { p: 0, model: MODEL } }), FLOOR_VERDICT, `p=${p}`);
+  }
+  // a changes answer with an unusable isX answer moves nothing either
+  assert.deepEqual(applyJev(FLOOR_VERDICT, { p: NaN, model: MODEL, changes: { p: 0, model: MODEL } }), FLOOR_VERDICT);
+  assert.deepEqual(applyJev(FLOOR_VERDICT, { model: MODEL, changes: { p: 0, model: MODEL } }), FLOOR_VERDICT);
+});
+
+test('D129: a missing, malformed or other-model changes answer leaves the row at w', () => {
+  /** @type {[string, any][]} */
+  const bad = [
+    ['missing', undefined],
+    ['null', null],
+    ['empty', {}],
+    ['not an object', 0.1],
+    ['no p', { model: MODEL }],
+    ['p string', { p: '0.1', model: MODEL }],
+    ['p NaN', { p: NaN, model: MODEL }],
+    ['p Infinity', { p: Infinity, model: MODEL }],
+    ['p -Infinity', { p: -Infinity, model: MODEL }],
+    ['p negative', { p: -0.01, model: MODEL }],
+    ['p above 1', { p: 1.5, model: MODEL }],
+    ['no model', { p: 0.1 }],
+    ['empty model', { p: 0.1, model: '' }],
+    ['non-string model', { p: 0.1, model: 1 }],
+    ['different model', { p: 0.1, model: 'jev-1.14.0' }],
+  ];
+  for (const [name, changes] of bad) {
+    assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes }), LOWER_TO_W, name);
+  }
+});
+
+test('D129: a changes answer never moves a row on a tier without a second question', () => {
+  const changes = { p: 0, model: MODEL };
+  assert.equal(applyJev(METHOD_FLOOR_W, { p: 0.9, model: MODEL, changes }).class, 'x');
+  assert.equal(applyJev(METHOD_FLOOR_W, { p: 0.1, model: MODEL, changes }).class, 'w');
+  assert.equal(applyJev(METHOD_R, { p: 0.9, model: MODEL, changes }).class, 'w');
+  assert.equal(applyJev(METHOD_R, { p: 0.1, model: MODEL, changes }).class, 'r');
+  assert.deepEqual(applyJev(CANT_UNDO_X, { p: 0, model: MODEL, changes }), CANT_UNDO_X);
+});
+
+test('D129: the r threshold is overridden under its own key, never under the isX key', () => {
+  const opts = { thresholds: { [JEV_LOWER_R_KEY]: 0.30 } };
+  const at = (pc, o) => applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes: { p: pc, model: MODEL } }, o).class;
+  assert.equal(at(0.30, opts), 'r');
+  assert.equal(at(0.31, opts), 'w');
+  // the isX threshold keeps its own default under the r override
+  assert.equal(applyJev(FLOOR_VERDICT, { p: 0.11, model: MODEL, changes: { p: 0, model: MODEL } }, opts).class, 'x');
+  // and a 'jev-lower' override moves the isX gate only, not the r gate
+  const lowerOnly = { thresholds: { 'jev-lower': 0.20 } };
+  assert.equal(applyJev(FLOOR_VERDICT, { p: 0.20, model: MODEL, changes: { p: 0.50, model: MODEL } }, lowerOnly).class, 'r');
+  assert.equal(applyJev(FLOOR_VERDICT, { p: 0.20, model: MODEL, changes: { p: 0.51, model: MODEL } }, lowerOnly).class, 'w');
+});
+
+test('D129: an unreadable r threshold override is ignored and 0.50 stands', () => {
+  for (const bad of [NaN, Infinity, -0.1, 1.5, '0.9', null, undefined, {}]) {
+    const opts = { thresholds: { [JEV_LOWER_R_KEY]: bad } };
+    const at = (pc) => applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes: { p: pc, model: MODEL } }, opts).class;
+    assert.equal(at(0.50), 'r', String(bad));
+    assert.equal(at(0.51), 'w', String(bad));
+  }
+});
+
+test('D129: jev-lower only ever lowers, to w or r, across the whole p grid', () => {
+  const grid = [0, 0.01, 0.1, 0.11, 0.5, 0.51, 0.9, 1];
+  for (const p of grid) {
+    for (const pc of grid) {
+      const got = applyJev(FLOOR_VERDICT, { p, model: MODEL, changes: { p: pc, model: MODEL } });
+      assert.ok(['x', 'w', 'r'].includes(got.class), `p=${p} pc=${pc}`);
+      if (p > 0.10) assert.equal(got.class, 'x', `p=${p} pc=${pc}`);
+      if (got.class === 'r') assert.ok(p <= 0.10 && pc <= 0.50, `p=${p} pc=${pc}`);
+    }
+  }
+});
+
+test('D129: assertJevMove lets jev-lower move x -> r and still rejects every other move', () => {
+  assert.equal(assertJevMove('jev-lower', 'x', 'r'), true);
+  assert.throws(() => assertJevMove('jev-lower', 'w', 'r'), /moves from x/);
+  assert.throws(() => assertJevMove('jev-raise-get', 'r', 'r'), /may only move to w/);
 });

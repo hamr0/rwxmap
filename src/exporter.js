@@ -75,7 +75,7 @@ import { classifyRow } from './flow.js';
  *   real boolean here, unlike the verdict's optional `destructive`, because
  *   a report a human reads should not make them wonder what an absent field
  *   meant.
- * @property {{p: number, model: string}} [jev]  Present only when a Jev
+ * @property {{p: number, model: string, pChanges?: number}} [jev]  Present only when a Jev
  *   tier (jev.js's applyJev) moved this row: its own p and model, straight
  *   off the verdict (PRD item c, D118-120). Absent on every mechanical row,
  *   exactly like the verdict's own optional `jev` field.

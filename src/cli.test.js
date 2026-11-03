@@ -10,7 +10,7 @@ import { pathToFileURL } from 'node:url';
 
 import { run } from './cli.js';
 import { matcherFrom } from './matcher.js';
-import { JEV_LOWER_THRESHOLD, JEV_RAISE_WX_THRESHOLD, JEV_RAISE_GET_THRESHOLD } from './jev.js';
+import { JEV_LOWER_THRESHOLD, JEV_LOWER_R_THRESHOLD, JEV_RAISE_WX_THRESHOLD, JEV_RAISE_GET_THRESHOLD, jevQuestions } from './jev.js';
 
 // ---------------------------------------------------------------------
 // Fixtures / helpers
@@ -78,13 +78,16 @@ const SPEC_JEV_DOC = {
 
 /**
  * A fetch stub keyed by operationId. `routes[operationId]` is one of:
- *   { p, model? }        -- a usable answer at that probability
+ *   { p, model?, pChanges? } -- a usable answer at that probability;
+ *                         `pChanges`, when set, answers the changes
+ *                         question instead of `p` (a jev-lower row's
+ *                         second question, D129)
  *   { fail: true }        -- a non-ok HTTP status (never retried, 400)
  *   { malformed: true }   -- 200 OK but no usable answer for the question
  * Any operationId not named in `routes` is a bug in the test (throws),
  * so a stray/unexpected send is never silently answered.
  *
- * @param {Record<string, {p?: number, model?: string, fail?: boolean, malformed?: boolean, usage?: any}>} routes
+ * @param {Record<string, {p?: number, pChanges?: number, model?: string, fail?: boolean, malformed?: boolean, usage?: any}>} routes
  *   `usage` (optional) is sent back verbatim as the response's `usage`.
  * @returns {{fetchImpl: (url: string, init: any) => Promise<any>, calls: Array<{operationId: string, body: any}>}}
  */
@@ -100,10 +103,11 @@ function routedJevFetch(routes) {
     if (route.fail) return { ok: false, status: 400, json: async () => ({}) };
     if (route.malformed) return { ok: true, status: 200, json: async () => ({ model: route.model || 'jev-1.0.0', answers: {}, usage: route.usage }) };
     const qKey = Object.keys(body.questions)[0];
+    const p = qKey === 'changes' && route.pChanges !== undefined ? route.pChanges : route.p;
     return {
       ok: true,
       status: 200,
-      json: async () => ({ model: route.model || 'jev-1.0.0', answers: { [qKey]: { noul: route.p } }, usage: route.usage }),
+      json: async () => ({ model: route.model || 'jev-1.0.0', answers: { [qKey]: { noul: p } }, usage: route.usage }),
     };
   };
   return { fetchImpl, calls };
@@ -635,11 +639,12 @@ test('run: with a key, only the rows in a Jev tier are sent (bar 4)', async () =
 
   assert.equal(code, 0);
   // Exactly the 3 pile rows, never the DELETE (method-delete) or the
-  // list-claimed POST (archiveThing).
-  assert.deepEqual(calls.map((c) => c.operationId).sort(), ['doMystery', 'listThings', 'updateThing']);
+  // list-claimed POST (archiveThing). doMystery is asked twice: its isX
+  // answer (0.1) fired, so jev-lower asks the changes question too (D129).
+  assert.deepEqual(calls.map((c) => c.operationId).sort(), ['doMystery', 'doMystery', 'listThings', 'updateThing']);
 
   const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
-  assert.equal(combined.jev.sent, 3);
+  assert.equal(combined.jev.sent, 4);
 });
 
 // bar 2: each tier moves only its own way at its threshold.
@@ -651,7 +656,7 @@ test('run: jev-lower moves x -> w at p <= threshold, not above it (bar 2)', asyn
   const specPath2 = writeSpecFile(dir, 'spec2.json', SPEC_JEV_DOC);
 
   const atThreshold = routedJevFetch({
-    listThings: { p: 0 }, updateThing: { p: 0 }, doMystery: { p: JEV_LOWER_THRESHOLD },
+    listThings: { p: 0 }, updateThing: { p: 0 }, doMystery: { p: JEV_LOWER_THRESHOLD, pChanges: JEV_LOWER_R_THRESHOLD + 0.01 },
   });
   const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: atThreshold.fetchImpl,
@@ -829,7 +834,7 @@ test('run: after Jev moves rows, mcp, bareguard and the sidecar all carry the fi
   const { fetchImpl } = routedJevFetch({
     listThings: { p: JEV_RAISE_GET_THRESHOLD, model: 'jev-2.0.0' }, // r -> w
     updateThing: { p: JEV_RAISE_WX_THRESHOLD, model: 'jev-2.0.0' }, // w -> x
-    doMystery: { p: JEV_LOWER_THRESHOLD, model: 'jev-2.0.0' }, // x -> w
+    doMystery: { p: JEV_LOWER_THRESHOLD, pChanges: JEV_LOWER_R_THRESHOLD + 0.01, model: 'jev-2.0.0' }, // x -> w (changes too high for r)
   });
 
   const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
@@ -842,8 +847,9 @@ test('run: after Jev moves rows, mcp, bareguard and the sidecar all carry the fi
 
   assert.equal(combined.jev.mode, 'on');
   assert.equal(combined.jev.model, 'jev-2.0.0');
-  assert.equal(combined.jev.sent, 3);
-  assert.equal(combined.jev.answered, 3);
+  // 3 pile rows + doMystery's second (changes) request, D129.
+  assert.equal(combined.jev.sent, 4);
+  assert.equal(combined.jev.answered, 4);
   assert.equal(combined.jev.failed, 0);
   assert.equal(combined.jev.changed, 3);
 
@@ -890,7 +896,7 @@ test('run: with a key, stdout prints the disclosure banner and the on-mode summa
   assert.match(text, /Jev: on — sends method, path, operationId, summary, description of 3 operation/);
   assert.match(text, /api\.typesafe\.ai/);
   assert.match(text, /Your key, your cost\./);
-  assert.match(text, /Jev: on — 3 sent · 3 answered · 0 failed \(kept mechanical\) · 0 letters changed/);
+  assert.match(text, /Jev: on — 3 sent · 3 answered · 0 failed \(letter kept\) · 0 letters changed/);
 });
 
 // Bar 8 cost figure: the `jev` summary sums answered rows' token usage;
@@ -915,7 +921,7 @@ test('run: jev.tokens sums answered rows usage, skips failed rows, and stays out
   assert.equal(combined.jev.answered, 2);
   assert.equal(combined.jev.failed, 1);
   assert.deepEqual(combined.jev.tokens, { input: 1200, output: 50 });
-  assert.match(stdout.text(), /Jev: on — 3 sent · 2 answered · 1 failed \(kept mechanical\) · 1 letters changed · 1200 in \/ 50 out tokens\n/);
+  assert.match(stdout.text(), /Jev: on — 3 sent · 2 answered · 1 failed \(letter kept\) · 1 letters changed · 1200 in \/ 50 out tokens\n/);
 
   // The moved row carries exactly {p, model}; no row carries usage.
   const sidecarText = fs.readFileSync(path.join(outDir, 'example.rwxmap.review.json'), 'utf8');
@@ -925,6 +931,127 @@ test('run: jev.tokens sums answered rows usage, skips failed rows, and stays out
   assert.equal(/usage|input_tokens|tokens/.test(sidecarText), false);
   const { jev, ...rest } = combined;
   assert.equal(/usage|input_tokens|tokens/.test(JSON.stringify(rest)), false);
+});
+
+// ---------------------------------------------------------------------
+// D129 (F1): jev-lower asks the changes question only of rows its isX
+// answer moved, as a separate request, and may take them on to r.
+// ---------------------------------------------------------------------
+
+/**
+ * A fetch stub answering by (operationId, question key). `answers[opId]`
+ * is `{ isX?, changes? }`, each a response builder `(body) => response`.
+ * Records every call with its question key.
+ * @param {Record<string, Record<string, (body: any) => any>>} answers
+ */
+function questionJevFetch(answers) {
+  /** @type {Array<{operationId: string, qKey: string, body: any}>} */
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    const body = JSON.parse(init.body);
+    const opId = body.state.operationId;
+    const qKey = Object.keys(body.questions)[0];
+    calls.push({ operationId: opId, qKey, body });
+    const make = answers[opId] && answers[opId][qKey];
+    if (!make) throw new Error(`questionJevFetch: unexpected ${qKey} request for ${opId}`);
+    return make(body);
+  };
+  return { fetchImpl, calls };
+}
+
+/** A usable answer to whichever question was asked. */
+/** @param {number} p @param {string} [model] @param {any} [usage] */
+const ok = (p, model = 'jev-1.0.0', usage = undefined) => (body) => ({
+  ok: true, status: 200, json: async () => ({ model, answers: { [Object.keys(body.questions)[0]]: { noul: p } }, usage }),
+});
+
+async function runJevSpec(fetchImpl) {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+    cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
+  });
+  assert.equal(code, 0);
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  const sidecar = readJson(path.join(outDir, 'example.rwxmap.review.json'));
+  const mystery = sidecar.rows.find((r) => r.method === 'POST' && r.path === '/mystery');
+  return { combined, mystery, stdout: stdout.text() };
+}
+
+test('run (D129): a jev-lower row whose isX does not fire makes no second call', async () => {
+  const { fetchImpl, calls } = questionJevFetch({
+    listThings: { changes: ok(0) }, updateThing: { isX: ok(0) }, doMystery: { isX: ok(JEV_LOWER_THRESHOLD + 0.01) },
+  });
+  const { combined, mystery } = await runJevSpec(fetchImpl);
+  assert.equal(calls.length, 3);
+  assert.deepEqual(calls.filter((c) => c.operationId === 'doMystery').map((c) => c.qKey), ['isX']);
+  assert.equal(combined.jev.sent, 3);
+  assert.equal(mystery.letter, 'x');
+});
+
+test('run (D129): a fired jev-lower row gets one second call, the changes question byte-equal, and goes to r', async () => {
+  const { fetchImpl, calls } = questionJevFetch({
+    listThings: { changes: ok(0) },
+    updateThing: { isX: ok(0) },
+    doMystery: {
+      isX: ok(JEV_LOWER_THRESHOLD, 'jev-1.0.0', { input_tokens: 100, output_tokens: 1 }),
+      changes: ok(JEV_LOWER_R_THRESHOLD, 'jev-1.0.0', { input_tokens: 40, output_tokens: 2 }),
+    },
+  });
+  const { combined, mystery, stdout } = await runJevSpec(fetchImpl);
+  const mysteryCalls = calls.filter((c) => c.operationId === 'doMystery');
+  assert.deepEqual(mysteryCalls.map((c) => c.qKey), ['isX', 'changes']);
+  // the second request is its own request, carrying the changes question alone
+  assert.equal(JSON.stringify(mysteryCalls[1].body.questions), JSON.stringify(jevQuestions('jev-raise-get')));
+  assert.deepEqual(mysteryCalls[1].body.state, mysteryCalls[0].body.state);
+  assert.equal(calls.length, 4);
+  assert.equal(combined.jev.sent, 4);
+  assert.equal(combined.jev.answered, 4);
+  assert.equal(combined.jev.failed, 0);
+  assert.equal(combined.jev.changed, 1);
+  assert.deepEqual(combined.jev.tokens, { input: 140, output: 3 });
+  assert.equal(mystery.letter, 'r');
+  assert.equal(mystery.marker, 'settled');
+  assert.equal(mystery.evidence, 'jev');
+  assert.deepEqual(mystery.jev, { p: JEV_LOWER_THRESHOLD, model: 'jev-1.0.0', pChanges: JEV_LOWER_R_THRESHOLD });
+  assert.equal(combined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/class'], 'r');
+  assert.match(stdout, /Jev: on — 4 sent · 4 answered · 0 failed \(letter kept\) · 1 letters changed · 140 in \/ 3 out tokens\n/);
+});
+
+test('run (D129): changes above 0.50 leaves a fired jev-lower row at w', async () => {
+  const { fetchImpl } = questionJevFetch({
+    listThings: { changes: ok(0) }, updateThing: { isX: ok(0) },
+    doMystery: { isX: ok(0.01), changes: ok(JEV_LOWER_R_THRESHOLD + 0.01) },
+  });
+  const { mystery } = await runJevSpec(fetchImpl);
+  assert.equal(mystery.letter, 'w');
+  assert.deepEqual(mystery.jev, { p: 0.01, model: 'jev-1.0.0' });
+});
+
+test('run (D129): a failed, malformed or other-model second answer leaves the row at w and is reported', async () => {
+  /** @type {Array<[string, (body: any) => any, number]>} label, response, failed count */
+  const cases = [
+    ['HTTP error', () => ({ ok: false, status: 400, json: async () => ({}) }), 1],
+    ['network failure', () => { throw new Error('offline'); }, 1],
+    ['NaN p', () => ({ ok: true, status: 200, json: async () => ({ model: 'jev-1.0.0', answers: { changes: { noul: NaN } } }) }), 1],
+    ['missing model', () => ({ ok: true, status: 200, json: async () => ({ answers: { changes: { noul: 0 } } }) }), 1],
+    ['other model', ok(0, 'jev-9.9.9'), 0],
+  ];
+  for (const [label, changes, failedCount] of cases) {
+    const { fetchImpl, calls } = questionJevFetch({
+      listThings: { changes: ok(0) }, updateThing: { isX: ok(0) }, doMystery: { isX: ok(0.01), changes },
+    });
+    const { combined, mystery } = await runJevSpec(fetchImpl);
+    assert.equal(calls.length, 4, label);
+    assert.equal(mystery.letter, 'w', label);
+    assert.deepEqual(mystery.jev, { p: 0.01, model: 'jev-1.0.0' }, label);
+    assert.equal(combined.jev.sent, 4, label);
+    assert.equal(combined.jev.failed, failedCount, label);
+    assert.equal(combined.jev.answered, 4 - failedCount, label);
+    assert.equal(combined.jev.changed, 1, label);
+  }
 });
 
 // ---------------------------------------------------------------------
@@ -1118,7 +1245,7 @@ test('run: with Jev on, x-rwx and webmcp carry the final (post-Jev) letters (ite
   const { fetchImpl } = routedJevFetch({
     listThings: { p: 0.99 },
     updateThing: { p: 0.99 },
-    doMystery: { p: 0.01 },
+    doMystery: { p: 0.01, pChanges: 0.99 },
   });
 
   const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr, jevKey: 'k', fetchImpl });

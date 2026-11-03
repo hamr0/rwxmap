@@ -22,10 +22,20 @@
 // can undo another's move, because no two piles overlap and no tier ever
 // reads a verdict another tier produced:
 //
-//   tier            pile (mechanical rule)        move          question
-//   jev-lower       'floor-post'        (x)       x -> w only   isX
-//   jev-raise-wx    'method-floor'      (w)       w -> x only   isX (x-only variant, D127)
-//   jev-raise-get   'method' + class r  (r)       r -> w only   changes
+//   tier            pile (mechanical rule)        move            question
+//   jev-lower       'floor-post'        (x)       x -> w, or r    isX, then changes (D129)
+//   jev-raise-wx    'method-floor'      (w)       w -> x only     isX (x-only variant, D127)
+//   jev-raise-get   'method' + class r  (r)       r -> w only     changes
+//
+// D129 (F1) keeps jev-lower one tier, one pile, one direction (lower). It
+// asks isX first; only when isX fires (p <= 0.10, the row goes to w) is the
+// changes question (jevQuestions('jev-raise-get'), sent as a separate
+// request) asked of the same row. If that second answer is usable, carries
+// the SAME model string as the isX answer, and p(changes) <= 0.50, the row
+// goes on to r instead of stopping at w. Any other second answer leaves the
+// row at w; a changes answer without a firing isX answer moves nothing. No
+// verdict another tier produced is ever read: both answers are about the
+// one floor-post verdict this tier owns.
 //
 // jev-raise-get asks a DIFFERENT question from the other two. The GET
 // pile's leaks are truth w, not truth x, so an "is this x" question
@@ -35,7 +45,9 @@
 //
 // Every moved verdict records the model's own p and version
 // (`jev: {p, model}`), because a signed map must not change silently as
-// the model behind it changes (D88).
+// the model behind it changes (D88). A jev-lower row that went on to r
+// also records the second answer's p as `jev.pChanges` (D129); `p` stays
+// the isX p, so a reader of `{p, model}` keeps working.
 
 import { reviewHint } from './flow.js';
 
@@ -66,15 +78,37 @@ export const JEV_RAISE_WX_THRESHOLD = 0.80;
 // only when p(changes) is at or above this. Same caveat.
 export const JEV_RAISE_GET_THRESHOLD = 0.50;
 
+// jev-lower's second threshold (D129, F1): a row isX already lowered to w
+// goes on to r only when p(changes) is at or under this. Picked by
+// leave-one-vendor-out on the tuning set (every fold picked 0.50; see
+// docs/logs/learnings.md, "F1 POC"). Overridable through applyJev's
+// `thresholds` option under the key JEV_LOWER_R_KEY, not 'jev-lower' —
+// that key is the isX threshold and keeps meaning only that.
+export const JEV_LOWER_R_THRESHOLD = 0.50;
+
+/** The `thresholds` key that overrides JEV_LOWER_R_THRESHOLD. */
+export const JEV_LOWER_R_KEY = 'jev-lower-r';
+
 /** r < w < x — the one ordering the whole project turns on. */
 const RANK = { r: 0, w: 1, x: 2 };
 
 /**
+ * A tier's optional second question (D129, jev-lower only). Asked only of a
+ * row the first question already moved to `to`; `ask` is the tier whose
+ * question is sent (jevQuestions(ask), the same request askJev sends for
+ * that tier), `question` its Noul key, `then` the class a firing answer
+ * takes the row to instead, `thresholdKey` the `thresholds` override key.
+ * @typedef {{question: string, ask: string, then: 'r'|'w'|'x', threshold: number, thresholdKey: string}} JevSecond
+ */
+
+/**
  * The three tiers. `pile` and `from` together select the mechanical
- * verdicts this tier is allowed to read; `to` is the ONLY class it may move
- * a row to; `direction` is the only direction it may move in; `question` is
- * which Noul key its answer must carry.
- * @type {Record<string, {question: string, pile: string, from: 'r'|'w'|'x', to: 'r'|'w'|'x', direction: 'raise'|'lower', threshold: number}>}
+ * verdicts this tier is allowed to read; `to` is the class the first
+ * question moves a row to; `direction` is the only direction it may move
+ * in; `question` is which Noul key its answer must carry. `second`, when
+ * present, is a further question that may take a row already moved to `to`
+ * on to `second.then` — still in `direction`, never back.
+ * @type {Record<string, {question: string, pile: string, from: 'r'|'w'|'x', to: 'r'|'w'|'x', direction: 'raise'|'lower', threshold: number, second?: JevSecond}>}
  */
 const TIERS = {
   'jev-lower': {
@@ -84,6 +118,13 @@ const TIERS = {
     to: 'w',
     direction: 'lower',
     threshold: JEV_LOWER_THRESHOLD,
+    second: {
+      question: 'changes',
+      ask: 'jev-raise-get',
+      then: 'r',
+      threshold: JEV_LOWER_R_THRESHOLD,
+      thresholdKey: JEV_LOWER_R_KEY,
+    },
   },
   'jev-raise-wx': {
     question: 'isX',
@@ -108,14 +149,17 @@ export const JEV_TIERS = Object.freeze(Object.keys(TIERS));
 
 /**
  * What one tier is allowed to do, as a plain copy a caller can read without
- * reaching into this module's own table.
+ * reaching into this module's own table. A tier with a second question
+ * (jev-lower, D129) also carries `second`, so a caller can see the tier may
+ * end at `to` or at `second.then`; the other tiers carry no `second` field.
  * @param {string} tier
- * @returns {{tier: string, question: string, pile: string, from: string, to: string, direction: string, threshold: number}|null}
+ * @returns {{tier: string, question: string, pile: string, from: string, to: string, direction: string, threshold: number, second?: JevSecond}|null}
  */
 export function jevTier(tier) {
   const spec = TIERS[tier];
   if (!spec) return null;
-  return { tier, ...spec };
+  const { second, ...rest } = spec;
+  return second ? { tier, ...rest, second: { ...second } } : { tier, ...rest };
 }
 
 /**
@@ -447,7 +491,9 @@ export function assertJevMove(tier, from, to) {
   if (!spec) throw new Error(`unknown jev tier ${tier}`);
   if (RANK[from] === undefined || RANK[to] === undefined) throw new Error(`bad class ${from}->${to}`);
   if (from !== spec.from) throw new Error(`tier ${tier} moves from ${spec.from}, got ${from}`);
-  if (to !== spec.to) throw new Error(`tier ${tier} may only move to ${spec.to}, got ${to}`);
+  /** @type {string[]} */
+  const allowed = spec.second ? [spec.to, spec.second.then] : [spec.to];
+  if (!allowed.includes(to)) throw new Error(`tier ${tier} may only move to ${allowed.join(' or ')}, got ${to}`);
   const dir = RANK[to] > RANK[from] ? 'raise' : RANK[to] < RANK[from] ? 'lower' : 'none';
   if (dir !== spec.direction) throw new Error(`tier ${tier} may only ${spec.direction}, ${from}->${to} is a ${dir}`);
   return true;
@@ -459,7 +505,9 @@ export function assertJevMove(tier, from, to) {
  * holds: a tier claims the verdict, an answer is present, `answer.p` is a
  * finite number in [0, 1], `answer.model` is a non-empty string, and p is
  * on the firing side of the tier's threshold (p <= t for a lowering tier,
- * p >= t for a raising one).
+ * p >= t for a raising one). On jev-lower a usable second answer
+ * (`answer.changes`, D129) may then take the row on from w to r; it never
+ * moves a row on its own.
  *
  * This must be fail-CLOSED, not merely "not fail-open on the common case":
  * `Number.isFinite` rejects NaN and ±Infinity (a bare `p > t` check lets
@@ -480,26 +528,35 @@ export function assertJevMove(tier, from, to) {
  * report but the model's own p and version.
  *
  * @param {Verdict} verdict
- * @param {{p?: unknown, model?: unknown}|null} [answer] Both fields are typed
- *   loosely (unknown, not number/string) because a malformed answer —
- *   missing, wrong type — is exactly the input the fail-closed checks
- *   below must handle, not a case the type system should rule out before
- *   the checks run.
+ * @param {{p?: unknown, model?: unknown, changes?: {p?: unknown, model?: unknown}|null}|null} [answer]
+ *   Every field is typed loosely (unknown, not number/string) because a
+ *   malformed answer — missing, wrong type — is exactly the input the
+ *   fail-closed checks below must handle, not a case the type system
+ *   should rule out before the checks run.
+ *   `changes` (optional, D129) is the answer to the tier's second question
+ *   (jev-lower only: the changes question). It is read only when `p` has
+ *   already fired; it takes the row on to the second class (r) only when
+ *   its own p is a finite number in [0, 1] at or under the second
+ *   threshold AND its `model` equals `model` exactly. Otherwise the row
+ *   stops at the first class (w), as it did before D129. Omitting it is
+ *   the pre-D129 call, unchanged. On any tier without a second question it
+ *   is ignored.
  * A moved verdict's `review` hint is RECOMPUTED here, through flow.js's
  * reviewHint — the same one writer classifyRow uses — because a row whose
  * class moved must never carry the hint its old class earned. `options.method`
  * supplies the row's method for that recomputation; it is optional because a
  * moved verdict's source is always 'jev', which rules out 'loose' outright,
  * and the one hint the method could still decide ('tight' = x on a POST) is
- * unreachable from every tier: jev-lower and jev-raise-get both end at w, and
- * jev-raise-wx reads only the 'method-floor' pile, which step 3 fills with
- * PUT and PATCH alone. Passing the method costs nothing and keeps that
+ * unreachable from every tier: jev-lower ends at w or r and jev-raise-get at
+ * w, and jev-raise-wx reads only the 'method-floor' pile, which step 3 fills
+ * with PUT and PATCH alone. Passing the method costs nothing and keeps that
  * argument from having to hold.
  *
  * @param {{thresholds?: Record<string, unknown>, method?: string}} [options]
  *   `thresholds` overrides a tier's default by tier name, e.g.
- *   `{thresholds: {'jev-raise-wx': 0.9}}`. An override that is not a finite
- *   number in [0, 1] is ignored and the tier's default stands — an
+ *   `{thresholds: {'jev-raise-wx': 0.9}}`, and jev-lower's second (r)
+ *   threshold under JEV_LOWER_R_KEY ('jev-lower-r'). An override that is
+ *   not a finite number in [0, 1] is ignored and the default stands — an
  *   unreadable threshold must not silently become a permissive one.
  *   `method` is the row's HTTP method, read only to recompute `review`.
  * @returns {Verdict}
@@ -517,34 +574,56 @@ export function applyJev(verdict, answer, options) {
   const model = answer.model;
   if (typeof model !== 'string' || model === '') return verdict;
 
-  const t = thresholdFor(tier, options);
+  const t = thresholdFor(tier, spec.threshold, options);
   const fires = spec.direction === 'lower' ? p <= t : p >= t;
   if (!fires) return verdict;
 
-  assertJevMove(tier, verdict.class, spec.to);
+  // D129: the second question is read ONLY here, after the first fired. It
+  // must be usable on the same terms as the first answer AND carry the same
+  // model string (both answers must come from one model version); anything
+  // else leaves the row at spec.to, exactly as before D129.
+  let to = spec.to;
+  /** @type {number|undefined} */
+  let pChanges;
+  const second = spec.second;
+  const next = answer.changes;
+  if (second && next && typeof next === 'object') {
+    const p2 = next.p;
+    if (typeof p2 === 'number' && Number.isFinite(p2) && p2 >= 0 && p2 <= 1 && next.model === model) {
+      const t2 = thresholdFor(second.thresholdKey, second.threshold, options);
+      const fires2 = spec.direction === 'lower' ? p2 <= t2 : p2 >= t2;
+      if (fires2) {
+        to = second.then;
+        pChanges = p2;
+      }
+    }
+  }
+
+  assertJevMove(tier, verdict.class, to);
 
   return {
-    class: spec.to,
+    class: to,
     step: verdict.step,
     rule: tier,
     source: 'jev',
     matched: [],
-    review: reviewHint(options && options.method, spec.to, 'jev'),
-    jev: { p, model },
+    review: reviewHint(options && options.method, to, 'jev'),
+    jev: pChanges === undefined ? { p, model } : { p, model, pChanges },
   };
 }
 
 /**
- * This tier's threshold: the caller's override when it is a finite number
- * in [0, 1], otherwise the tier's own default.
- * @param {string} tier
+ * A threshold: the caller's override under `key` when it is a finite number
+ * in [0, 1], otherwise `fallback` (the tier's own default).
+ * @param {string} key  a tier name, or a second question's thresholdKey.
+ * @param {number} fallback
  * @param {{thresholds?: Record<string, unknown>}} [options]
  * @returns {number}
  */
-function thresholdFor(tier, options) {
-  const override = options && options.thresholds && options.thresholds[tier];
+function thresholdFor(key, fallback, options) {
+  const override = options && options.thresholds && options.thresholds[key];
   if (typeof override === 'number' && Number.isFinite(override) && override >= 0 && override <= 1) {
     return override;
   }
-  return TIERS[tier].threshold;
+  return fallback;
 }
