@@ -255,6 +255,8 @@ for debugging and are never published (D28/D76/D77).
   the same function when a tier moves a row.
   - `tight` — class x on a POST. Likely tighter than needed; safe to
     review, since no too-loose row has been observed in this bucket.
+    Planned, not built (D133): it widens to "x, possibly tighter than
+    needed", also covering rows the second pass could not decide.
   - `loose` — class w on a PUT or PATCH decided by the method floor.
     Where most of the too-loose rows live.
   - `settled` — neither of the other two. It is NOT signed or
@@ -898,28 +900,57 @@ decided; everything marked "proposal" or "open" is not decided.
 
 ### Decided (user rulings, 2026-11-03)
 
-- **Three engines.** Default: mechanical -> rwxlite (local, free).
-  Second: rwxlite alone (rwxlite's "mode b"). Third: mechanical -> Jev
-  (paid, BYOK). This reverses today's order (mechanical default, Jev
-  opt-in).
-- **rwxmap is the adapter for all three.** It reads the OpenAPI spec or
-  discovers the API on the fly, and sends shaped questions. rwxlite
-  never reads a spec or an API. rwxlite only returns p.
-- **Everything is chosen through CLI options.** The CLI grows mode
-  options. Names are open.
+- **Purpose.** rwxlite is a free, fast classifier for a second pass.
+  The rows mechanical marks for a human today go to the second pass
+  first.
+- **Three modes.**
+  - **a (default): mechanical -> rwxlite.** Only rows mechanical marks
+    `loose` or `tight` get the second pass. `settled` rows stay exactly
+    as today and are not sent. On a `loose` row rwxlite is asked whether
+    it is really x (raise or keep). On a `tight` row rwxlite is asked
+    whether it can be lowered; a lowering is accepted only at max p >=
+    0.97 (rwxlite's measured cut-off). If rwxlite cannot decide, the row
+    is x and marked for review. Raised, lowered and undecided rows all
+    get the review mark.
+  - **b: rwxlite alone.** rwxlite judges every row; rwxmap is still the
+    adapter. The user sets a confidence from 0% to 99%. More confidence
+    means more asks (rows left x and marked for review). 70% is the
+    default, the sweet spot: some too-loose risk, fewer asks. Each
+    setting reports its measured too-loose rate and ask rate from
+    rwxlite's figures. Too loose is never folded into one accuracy
+    number.
+  - **c: mechanical -> Jev (paid, BYOK).** Same flow and scope as mode
+    a, with Jev deciding instead of rwxlite. Undecided means x plus
+    review. Jev's cut-offs stay as measured. Planned, not built: today a
+    Jev row that fails or does not fire keeps its mechanical letter.
+  This reverses today's order (mechanical default, Jev opt-in).
+- **Runtime and files.** At runtime bareguard sees x, and its own
+  gate and ruling decide (for example a human in the loop). rwxmap
+  never emits "ask" or "deny" (D103 exporter contract). In files
+  (WebMCP, MCP hints, OpenAPI x-rwx, exporter) the row is x with the
+  review marker. No new output field or value.
+- **The `tight` marker widens (planned, not built).** It will mean "x,
+  possibly tighter than needed, review". It covers today's x-on-POST
+  rows and rows the second pass could not decide, including an
+  undecided PUT/PATCH pushed to x, which today's `reviewHint` marks
+  `settled`. This needs a change to `reviewHint` in `src/flow.js`
+  (core-adjacent, its one writer). Output format is unchanged.
+- **No model, no stop.** If the model cannot be downloaded, or
+  mechanical is chosen, mechanical runs alone and rows are marked as
+  today. The run prints "rwxlite: off (mechanical)". It never stops.
+- **rwxmap is the adapter for all modes**, including rwxlite on its own.
+  It consumes the OpenAPI catalogue and specs, discovers APIs on the
+  fly, and emits WebMCP, MCP hints and the other carriers. rwxlite is
+  only a classifier; it never reads a spec or an API and only returns p.
+- **CLI names.** `rwxmap spec.json` is mode a. `--engine rwxlite
+  --confidence <0-99>` is mode b (default 70). `--engine jev` is mode c
+  and needs the key. `--engine mechanical` is no model.
+  `--confidence` is valid only with `--engine rwxlite`; elsewhere it
+  fails loudly.
 - **Distribution.** Ships on npm. The model is downloaded on first use
   and is always the latest model, not pinned to the rwxmap version.
   Consequence: the same spec can get different letters after a model
   update, so every run records the model string.
-- **No model, no stop.** If the model cannot be downloaded, mechanical
-  runs on its own without rwxlite. The run says "rwxlite: off
-  (mechanical)". It never stops.
-- **Accuracy choice, rwxlite-alone mode only.** The user can choose an
-  accuracy rate between 70% and 90%, set from rwxlite's measured
-  figures and the customer's liking. Each choice is backed by rwxlite's
-  measured figures. The too-loose rate is reported separately beside
-  it; under- and over-classification are never folded into one accuracy
-  number.
 - **R1 and R2 are tuning candidates only.** R1: credential replace on
   PUT/PATCH (last path segment is a credential being replaced: api-key,
   client-credentials, token, secret), kept narrower than the broad noun
@@ -937,21 +968,16 @@ decided; everything marked "proposal" or "open" is not decided.
     mechanical alone on the same exam (it must never leak more than
     mechanical does), AND exact must be at least 5 percentage points
     above mechanical alone on that exam.
-  - rwxlite alone: no pass/fail bar of its own. The user picks an exact
-    rate in 70-90%, and each choice prints its measured too-loose rate
-    beside it (the user accepts the trade-off).
+  - rwxlite alone: no pass/fail bar of its own. The user sets a
+    confidence from 0% to 99%, and each setting prints its measured
+    too-loose rate and ask rate beside it (the user accepts the
+    trade-off).
   - Mechanical -> Jev: unchanged (the existing Jev bars).
-- **Lowerings are flagged, not trusted; rwxmap decides "ask".** rwxlite
-  only returns p. When rwxlite would lower a letter (x to w, or w to r)
-  but max p is under 0.97 (rwxlite's measured cut-off), rwxmap does not
-  accept the lowering. Raises and keeps are trusted. In file output that
-  row keeps the stricter (mechanical) letter and carries the existing
-  `tight` review marker, the same "not sure, review" flag mechanical
-  rows already get. No new output field; the exporter and the OpenAPI,
-  MCP and WebMCP carriers are unchanged. At runtime bareguard sees only
-  the stricter letter; its own gate config decides whether to ask the
-  human. rwxmap never emits "ask" or "deny" (bareguard owns the gate;
-  D103 exporter contract).
+
+> Note (not a decision): `settled` holds 27 of 82 too-loose rows on the
+> tuning set (8 of 34 on the M3 exam), which the second pass never
+> reaches by this scope. R2 (logout) is the candidate route for some of
+> them.
 
 ### Proposals (not decided)
 
@@ -986,7 +1012,7 @@ mechanical w, truth x by clause b) and 2 logout GETs (workos
 
 ### Open
 
-Three items, listed under Open questions below.
+Two items, listed under Open questions below.
 
 ## What is next
 
@@ -1093,6 +1119,5 @@ network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
 
 ## Open questions
 
-- D133: the exact CLI option names.
 - D133: where the downloaded model is cached, and how its integrity is checked (hash).
 - D133: the shared fresh exam #3 vendor list, from rwxmap's spares clerk, neon, supabase, mux, netbird, ory, novu; both projects commit candidates before truth is read; each scores once.
