@@ -8122,3 +8122,53 @@ Node.
   - evidence_vs_floor: floor 116,015 / evidence 7,324.
   - Sent to rwxlite. No rule change.
 - Lesson: none. This is an export, not an experiment.
+
+## 2026-11-04 — rwxlite's D128 exam: NO-GO; locked vendors released (D132)
+
+- Goal: close the five rwxlite take-backs, and record rwxlite's one-time
+  D128 go/no-go: its trained model scored once on the M3 exam
+  (data/exam-2026-09-22, 4279 rows).
+- Tried:
+  - Take-backs, all five closed. F1 adopted (D129, gate-2). F2 adopted
+    (D131, gate-3). rwxlite's Jev cut-offs, F3 included, rejected on
+    tuning (2026-11-04 cut-off POC). 27 candidate can't-undo verbs
+    rejected on tuning (2026-11-04 verb POC). Marker export delivered
+    (data/markers-2026-11-04).
+  - rwxlite's D128 exam, in the rwxlite repo: pre-registered in f05ec42,
+    scored in 51d8fb4. Bar: >= 91% exact, <= 0.5% too loose, of the
+    4279 rows.
+  - rwxlite round 9b, tuning only (its d20b956, c30fd3d, 315383f): it
+    relabelled 1,200 of its training rows in the two failure shapes.
+    Agreement 98.8% of the 1,200. Its Jev-recipe label was too loose on
+    32 of the 1,200 (2.7%).
+- Outcome: NO-GO.
+  - rwxlite's model: 95.91% exact (bar 91%), 0.84% too loose = 36 of
+    4279 rows (bar 0.5%). It passes the exact bar and fails the leak bar.
+  - For comparison, same 4279 rows: rwxlite mechanical 82.26% exact /
+    34 too loose; rwxmap mechanical + Jev 93.0% / 0.5% (22 too loose).
+  - 30 of the 36 leaks (83.3%) are cloudflare: lower-tier POST creates
+    (top-up, zone subscription, restore D1, replay deletion job) and
+    raise-wx credential PUTs.
+  - A reported variant, ask-at-0.95: 90.2% of rows answered, 98.73%
+    exact and 0.47% too loose on those. It is not the go/no-go.
+  - The M3 exam is now burned for rwxlite's model too. Jev stays
+    rwxmap's model tier.
+  - Round 9b plan, MECH-THEN-ASK at top p 0.95: keep the mechanical
+    letter when it is at least as strict as the model's, else ask. On
+    5,716 LOVO rows: 91.5% exact on answered, 0.49% too loose, 3.4%
+    asked. Pure fallback to mechanical was worse: 85-96 too loose.
+  - Pre-registered bar for rwxlite's next fresh exam: <= 0.5% too loose,
+    >= 91% exact on answered, <= 15% asked.
+  - User ruling D132: of the ten locked vendors, cloudflare, pagerduty
+    and sentry were the M3 exam; auth0, hubspot, zendesk and miro were
+    the 2026-09-20 exam, now in tuning. Of the last three, dropbox and
+    shopify go to rwxlite for its fresh exam, each only if it publishes
+    a real official OpenAPI spec. linear is GraphQL only, not usable.
+    Once scored they are burned for rwxmap too. rwxmap's next clean exam
+    must come from fresh official specs outside APIs.guru.
+  - Open, not decided (user): invert the D128 order, model first and
+    mechanical when the model is unsure. rwxlite is to brief it and it
+    is measured before any decision. Against it so far: rwxlite's own
+    pure fallback to mechanical was looser than MECH-THEN-ASK.
+- Lesson: a model that beats the exact bar can still fail on leaks
+  concentrated in one vendor. The leak bar, not the exact bar, decides.

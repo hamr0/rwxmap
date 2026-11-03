@@ -886,12 +886,12 @@ Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
 ## What is next
 
-rwxlite replacing Jev (D128) is in progress in the rwxlite project.
-rwxmap's part is to check each fresh sample's provider list against the
-locks, and to weigh the take-back candidates in learnings (2026-11-03)
-under their own D-numbers. F1 (D129) and F2 (D131) are built and passed
-their fresh scores; release pending. Parked items and known limits are
-below.
+The 0.9.0 candidate carries F1 (D129) and F2 (D131). The gate-4 fresh
+check runs before release. The other take-backs were measured and
+rejected (learnings, 2026-11-04). rwxlite's model failed its D128 exam:
+36 of 4279 rows too loose (0.84%, bar 0.5%), so Jev stays the model
+tier. Open: invert the D128 order (model first, mechanical when
+unsure), pending rwxlite's brief. Parked items and known limits below.
 
 ### Parked
 
@@ -900,11 +900,11 @@ below.
   1% (0.8% mechanical, 0.5% with Jev on the M3 exam) and a fix changes
   the core: it needs a new D-number and a fresh exam.
 - **The fresh clean exam.** Needed only when the core changes. It is
-  drawn from vendors no set has seen; the ten locked away for it are
-  named in `docs/logs/pre-registered-split-2026-09-18.md`. Shipping the
-  two raise tiers (`jev-raise-wx`, `jev-raise-get`) is settled (D119);
-  a fresh exam is required for any future change to D100's tiers,
-  D101's review rule, or the frozen core.
+  drawn from fresh official specs outside APIs.guru that no set has
+  seen; the ten locked vendors are spent or released to rwxlite (D132).
+  Shipping the two raise tiers (`jev-raise-wx`, `jev-raise-get`) is
+  settled (D119); a fresh exam is required for any future change to
+  D100's tiers, D101's review rule, or the frozen core.
 - **Windows.** Untested: CI runs on Linux only, two tests create
   symlinks (which need privileges on Windows), and the entry-point
   check and the `--force` hard-link and rename path have never run
