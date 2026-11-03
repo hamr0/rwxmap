@@ -1038,7 +1038,7 @@ export async function run(argv, env) {
   );
   stdout.write(
     jevSummary.mode === 'on'
-      ? `rwxmap: Jev: on — ${jevSummary.sent} sent · ${jevSummary.answered} answered · ${jevSummary.failed} failed (kept mechanical) · ${jevSummary.changed} letters changed · ${jevSummary.tokens.input} in / ${jevSummary.tokens.output} out tokens\n`
+      ? `rwxmap: Jev: on — ${jevSummary.sent} sent · ${jevSummary.answered} answered · ${jevSummary.failed} failed (letter kept) · ${jevSummary.changed} letters changed · ${jevSummary.tokens.input} in / ${jevSummary.tokens.output} out tokens\n`
       : 'rwxmap: Jev: off (mechanical)\n',
   );
   stdout.write(`rwxmap: wrote ${path.basename(mapPath)} + ${path.basename(reviewPath)} + ${path.basename(openapiPath)}\n`);

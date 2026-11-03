@@ -896,7 +896,7 @@ test('run: with a key, stdout prints the disclosure banner and the on-mode summa
   assert.match(text, /Jev: on — sends method, path, operationId, summary, description of 3 operation/);
   assert.match(text, /api\.typesafe\.ai/);
   assert.match(text, /Your key, your cost\./);
-  assert.match(text, /Jev: on — 3 sent · 3 answered · 0 failed \(kept mechanical\) · 0 letters changed/);
+  assert.match(text, /Jev: on — 3 sent · 3 answered · 0 failed \(letter kept\) · 0 letters changed/);
 });
 
 // Bar 8 cost figure: the `jev` summary sums answered rows' token usage;
@@ -921,7 +921,7 @@ test('run: jev.tokens sums answered rows usage, skips failed rows, and stays out
   assert.equal(combined.jev.answered, 2);
   assert.equal(combined.jev.failed, 1);
   assert.deepEqual(combined.jev.tokens, { input: 1200, output: 50 });
-  assert.match(stdout.text(), /Jev: on — 3 sent · 2 answered · 1 failed \(kept mechanical\) · 1 letters changed · 1200 in \/ 50 out tokens\n/);
+  assert.match(stdout.text(), /Jev: on — 3 sent · 2 answered · 1 failed \(letter kept\) · 1 letters changed · 1200 in \/ 50 out tokens\n/);
 
   // The moved row carries exactly {p, model}; no row carries usage.
   const sidecarText = fs.readFileSync(path.join(outDir, 'example.rwxmap.review.json'), 'utf8');
@@ -1017,7 +1017,7 @@ test('run (D129): a fired jev-lower row gets one second call, the changes questi
   assert.equal(mystery.evidence, 'jev');
   assert.deepEqual(mystery.jev, { p: JEV_LOWER_THRESHOLD, model: 'jev-1.0.0', pChanges: JEV_LOWER_R_THRESHOLD });
   assert.equal(combined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/class'], 'r');
-  assert.match(stdout, /Jev: on — 4 sent · 4 answered · 0 failed \(kept mechanical\) · 1 letters changed · 140 in \/ 3 out tokens\n/);
+  assert.match(stdout, /Jev: on — 4 sent · 4 answered · 0 failed \(letter kept\) · 1 letters changed · 140 in \/ 3 out tokens\n/);
 });
 
 test('run (D129): changes above 0.50 leaves a fired jev-lower row at w', async () => {

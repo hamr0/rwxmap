@@ -11,7 +11,7 @@
 //       data/combined-2026-09-21/rows.json.gz, the src verdict with its
 //       `review` field removed is deep-equal to the frozen POC verdict —
 //       EXCEPT the rows named in ALLOWED_D131 below, which D131's
-//       credential-set rule deliberately moves (user ruling 2026-11-04).
+//       credential-set rule deliberately moves (user ruling 2026-11-03).
 //       An allowlisted row passes only if src gives exactly its listed
 //       verdict; one that no longer differs from the POC at all also fails
 //       (stale allowlist). Every other row is held to the old claim at its
@@ -89,7 +89,7 @@ function expectedHint(method, cls, source) {
   return 'settled';
 }
 
-// Claim 1a allowlist — D131, user ruling 2026-11-04 (option 1).
+// Claim 1a allowlist — D131, user ruling 2026-11-03 (option 1).
 //
 // D131 adopted step 2's credential-set rule, which moves exactly these two
 // rows of the tuning corpus off the frozen POC's verdict (w, method-floor)

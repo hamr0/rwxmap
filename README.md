@@ -161,7 +161,8 @@ the 4279-operation exam with Jev running:
 
 ## Jev (optional)
 
-Jev is an optional model pass that can move a letter one step. Bring
+Jev is an optional model pass that can lower an x to w, or on a
+second question to r. Bring
 your own key; your key, your cost. Without one, rwxmap runs mechanically
 and says so.
 
@@ -174,8 +175,8 @@ and says so.
   operationId, summary and description, plus the question and the model
   name. They go to `https://api.typesafe.ai/v1/systemone`. Nothing else
   is sent, and the key never appears in any output.
-- **A failed call** keeps that row's mechanical letter. The run never
-  stops.
+- **A failed call** never stops the run. If the first call fails, the
+  row keeps its mechanical letter. If the second call fails, it keeps w.
 
 ## Library use
 
