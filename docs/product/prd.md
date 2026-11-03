@@ -114,7 +114,10 @@ reading:
   comment or a reaction the same API can delete is w (D98).
 - **x** = execute: cannot be undone. Deletes and removals, revokes,
   expires, voids, sends, publishes, charges, pays, refunds, triggers a
-  run. A create that also sends, charges or runs is x.
+  run. A create that also sends, charges or runs is x. Revoking,
+  expiring, rotating or resetting a credential, key, token, secret,
+  certificate, session or password, and changing or setting a password,
+  is x (D130; BRIEF-v3 clause b).
 - Unsure → **x**.
 
 "Whose thing is it" is not a class test: it cannot be read reliably
@@ -161,7 +164,7 @@ decides it.
 **Why each floor sits where it does.** Truth per method under the D87
 definition, and which step decides the rows. Tuning set first (6557
 rows, `data/combined-2026-09-21/labelled.csv`), then the burned M3 exam
-(4279 rows, `data/exam-2026-09-22/labelled.csv`); re-derived 2026-11-04
+(4279 rows, `data/exam-2026-09-22/labelled.csv`); re-derived 2026-11-03
 with the current `classifyRow`.
 
 | method | set | n | truth r | truth w | truth x | floor | decided by (rows) |
@@ -309,7 +312,7 @@ outside service, and the adopter must say so.
 poc/d87/proof-src.mjs` compares both over all 6557 rows of the combined
 set, must print 0 unexpected differences and exactly the 2 allowed
 D131 rows (pc-r1389, x20-e0999: the credential-set rule moves them;
-user ruling 2026-11-04), checked to fail when broken, and
+user ruling 2026-11-03), checked to fail when broken, and
 replays the recorded Jev answers through `applyJev` (804 lowered).
 `tools/proof-step1.js` still passes after D99 but is blind to the
 plural-noun guard, so it does not pin step 1's full behaviour (D99).
@@ -886,11 +889,67 @@ above.
 
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
+## Planned: rwxmap with rwxlite (after rwxlite's last test)
+
+PLANNED, not adopted and not current behaviour. User statement
+2026-11-03: "we will probably go for it". It becomes the next module
+only after rwxlite's last test, with its own D-number and ruling.
+
+- **Split.** rwxmap stays the adapter: spec import, shaping, flags, all
+  output. rwxlite is a pure classifier: Jev-shaped questions in, p out.
+  It never decides to ask.
+- **Three engines under rwxmap.** (1) mechanical -> rwxlite, the planned
+  default, local and free. (2) rwxlite alone (rwxlite's "mode b").
+  (3) mechanical -> Jev, kept as the paid option. This would reverse
+  today's order (mechanical default, Jev opt-in).
+- **One request, both questions** (isX and changes): x = p(isX),
+  w = p(changes) - p(isX), r = 1 - p(changes). The Jev engine keeps its
+  separate requests, because its cut-offs were measured that way (D127).
+- **Lowerings are flagged, not trusted.** A lowering is accepted only
+  when max p >= 0.97; otherwise the row is marked to ask, beside
+  rwxmap's tight marks. Raises and keeps are trusted. Proposed form: an
+  asked row keeps the stricter letter and carries the existing `tight`
+  review marker, no new output field. To be decided.
+- **Evidence so far** (rwxlite's numbers; its fresh exam on coolify,
+  workos, lago, resend, 949 operations; rwxlite commits 0caa381
+  prereg, 402fea0 score; labels 934 of 949 agreed). Answered 875 rows:
+  92.57% right; 5 too loose (0.57% of 875) against a 0.5% bar (4
+  rows), so NO-GO by one row; 60 too tight (6.9%); asked 74 (7.8% of
+  949). All 13 wrong lowerings of 166 were under 0.97 and asked; all 92
+  accepted lowerings were right. Mechanical alone on the same exam:
+  77.6% right, 6 too loose (0.63%), 21.8% too tight. The 5 misses come
+  from the mechanical letter: 3 PUT/PATCH credential upserts (workos
+  client-credentials, workos api-key, coolify integration-tokens;
+  mechanical w, truth x by clause b) and 2 logout GETs (workos
+  /sso/logout, /user_management/sessions/logout; truth x). Practice rows
+  (rwxlite v3 tuning, LOVO): 93.2% right, 21 too loose (0.41%), 9.6%
+  asked.
+- **Mechanical candidates this points to** (each needs a tuning POC and
+  a fresh exam). R1: credential replace on PUT/PATCH (last path segment
+  is a credential being replaced: api-key, client-credentials, token,
+  secret), kept narrower than the broad noun rule that failed (6 right,
+  17 wrong, learnings F2 POC). R2: logout, signout, end-session is x on
+  any method; it touches step 1, so it is a core change.
+- **The bar** (user note 2026-11-03, open, not decided). The target
+  could be lowered, because the local model is about 92% right and asks
+  on the doubtful rows. The bar for this module is set before it is
+  built.
+- **Interface to pin with rwxlite.** Model string and version format;
+  error behaviour (fail closed: keep the mechanical letter); latency
+  budget; distribution (npm package or model file); `onnxruntime-node`
+  as an optional dependency loaded only for the local engines
+  (dependency rule).
+- **Next steps.** Shared fresh exam #3, agreed by both users: vendors
+  from rwxmap's spares clerk, neon, supabase, mux, netbird, ory, novu;
+  both projects commit candidates before truth is read; each scores
+  once. rwxlite's M1 is an int8 ONNX Node answerer in Jev's
+  request/answer shape.
+
 ## What is next
 
 The 0.9.0 candidate carries F1 (D129) and F2 (D131). The gate-4 fresh
 check passed (91.8% vs 85.9% exact, too loose 9 vs 10 of 800). The
-other take-backs were measured and rejected (learnings, 2026-11-04).
+other take-backs were measured and rejected (learnings, 2026-11-03).
 rwxlite's model failed its D128 exam: 36 of 4279 rows too loose (0.84%,
 bar 0.5%), so Jev stays the model tier. Open: invert the D128 order (model
 first, mechanical when unsure), pending rwxlite's brief. Parked items and
@@ -995,4 +1054,6 @@ network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
 
 ## Open questions
 
-None open.
+- Default engine order: mechanical first, or rwxlite first.
+- The bar for the rwxlite module (see the planned section).
+- How an asked row is published: the `tight` marker, or a new field.

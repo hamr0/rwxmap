@@ -7748,7 +7748,7 @@ Node.
   alone (variant B) loosens too freely and fails LOVO. A two-question
   rule should keep the stricter first gate.
 
-## 2026-11-04 — F1 built (D129) and scored once on gate-2: PASS
+## 2026-11-03 — F1 built (D129) and scored once on gate-2: PASS
 
 - Goal: build the F1 cut that the tuning pass chose (variant A) into the
   CLI, then score it once on rwxlite's fresh gate-2 against the bar
@@ -7765,7 +7765,7 @@ Node.
     call for rows isX does not lower. Code in src/jev.js and src/cli.js
     (typedefs in src/types.js and src/exporter.js). npm test 492/492
     (was 476), typecheck 0, proof-src 0 differences over 6557 rows.
-  - Score, run once on 2026-11-04 through the real CLI (branch
+  - Score, run once on 2026-11-03 through the real CLI (branch
     feat/d128-rwxlite-takeback, uncommitted F1 build). One OpenAPI file
     per provider, built from rwxlite data/gate-2026-11-04/blind.csv (219
     providers, 600 rows, 0 duplicate method+path, 0 missing joins).
@@ -7808,7 +7808,7 @@ Node.
   APIs.guru POST floor rows hold more reads. The gate-2 score is now
   burned for F1: a later change to this cut needs a new fresh sample.
 
-## 2026-11-04 — F2 POC: credential nouns raise PUT/PATCH to x (tuning pass): FAIL
+## 2026-11-03 — F2 POC: credential nouns raise PUT/PATCH to x (tuning pass): FAIL
 
 - Goal: tuning POC for take-back F2 (BRIEF-v3 clause (b): resetting or
   rotating a credential, key, token, secret, certificate, session or
@@ -7914,7 +7914,7 @@ Node.
   - Whole-label vendor matching misses a brand's other API domains
     (hubapi.com is HubSpot). A lock check needs known brand aliases too.
 
-## 2026-11-04 — F2 pre-registered as D131 (credential-set) before gate-3 is read
+## 2026-11-03 — F2 pre-registered as D131 (credential-set) before gate-3 is read
 
 - The rule, in step 2, PUT and PATCH only. It claims x when either:
   - the last path segment is literal and its last token is password,
@@ -7946,14 +7946,14 @@ Node.
   hold on the credential part, the general part and the vendor-clean
   line.
 - Gate-3 truth became public when the rwxlite repo was made public on
-  2026-11-04. rwxmap has not opened it before scoring.
+  2026-11-03. rwxmap has not opened it before scoring.
 - Known gap, not fixed: step 1 claims only GET/HEAD/OPTIONS and POST, so
   a PUT or PATCH with a read lead verb (say getPassword) reaches the rule
   and would fire. V4 excluded read-lead rows; it excluded 0 on every
   tuning set and on APIs.guru, so the built rule and V4 do not differ
   there on this data.
 
-## 2026-11-04 — F2 (D131) scored once on gate-3: PASS, adopted
+## 2026-11-03 — F2 (D131) scored once on gate-3: PASS, adopted
 
 - Goal: score the credential-set rule (D131), as built in 41cdc55, once
   on rwxlite's fresh gate-3, against the bar pre-registered before
@@ -7962,7 +7962,7 @@ Node.
   rows: F2 on, and F2 off (the same call with words
   {credentialSet: new Set()}). Truth: rwxlite
   data/gate-2026-11-06/truth.csv (commits 7323817 and 0f61b68). 800
-  rows, 0 missing joins. Run once on 2026-11-04.
+  rows, 0 missing joins. Run once on 2026-11-03.
 - Outcome: PASS. Exact / too loose / too tight, off then on:
   - All 800 rows: 578 (72.3%) / 26 / 196; 580 (72.5%) / 23 / 197.
   - Credential part, 200 rows: 113 (56.5%) / 16 / 71; 115 (57.5%) /
@@ -8000,7 +8000,7 @@ Node.
   failed. The one wrong fire (a card PIN update) shows "pin" is a weaker
   word than "password". Gate-3 is now burned for F2.
 
-## 2026-11-04 — Jev cut-off POC (rwxlite's 0.20/0.60/0.20, F3): FAIL, today's cuts stay
+## 2026-11-03 — Jev cut-off POC (rwxlite's 0.20/0.60/0.20, F3): FAIL, today's cuts stay
 
 - Goal: test rwxlite's proposed Jev cut-offs against today's. Jev-lower
   0.10 -> 0.20, jev-raise-wx 0.80 -> 0.60, jev-raise-get 0.50 -> 0.20.
@@ -8063,7 +8063,7 @@ Node.
   The build decision is taken on tuning under the pre-set bar, so
   nothing was pre-registered for a fresh exam. Today's cuts stay.
 
-## 2026-11-04 — can't-undo verb POC (27 candidates + archive): FAIL, nothing adopted
+## 2026-11-03 — can't-undo verb POC (27 candidates + archive): FAIL, nothing adopted
 
 - Goal: test whether new can't-undo (x) lead verbs earn a place in step
   3: 27 candidate verbs rwxlite proposed, plus archive, which I mined.
@@ -8109,7 +8109,7 @@ Node.
   creates" lead with create, which no verb list can separate from a
   harmless create.
 
-## 2026-11-04 — marker export for rwxlite (read-only)
+## 2026-11-03 — marker export for rwxlite (read-only)
 
 - Goal: give rwxlite the mechanical markers for its contested-row second
   pass.
@@ -8123,7 +8123,7 @@ Node.
   - Sent to rwxlite. No rule change.
 - Lesson: none. This is an export, not an experiment.
 
-## 2026-11-04 — rwxlite's D128 exam: NO-GO; locked vendors released (D132)
+## 2026-11-03 — rwxlite's D128 exam: NO-GO; locked vendors released (D132)
 
 - Goal: close the five rwxlite take-backs, and record rwxlite's one-time
   D128 go/no-go: its trained model scored once on the M3 exam
@@ -8131,8 +8131,8 @@ Node.
 - Tried:
   - Take-backs, all five closed. F1 adopted (D129, gate-2). F2 adopted
     (D131, gate-3). rwxlite's Jev cut-offs, F3 included, rejected on
-    tuning (2026-11-04 cut-off POC). 27 candidate can't-undo verbs
-    rejected on tuning (2026-11-04 verb POC). Marker export delivered
+    tuning (2026-11-03 cut-off POC). 27 candidate can't-undo verbs
+    rejected on tuning (2026-11-03 verb POC). Marker export delivered
     (data/markers-2026-11-04).
   - rwxlite's D128 exam, in the rwxlite repo: pre-registered in f05ec42,
     scored in 51d8fb4. Bar: >= 91% exact, <= 0.5% too loose, of the
@@ -8213,3 +8213,36 @@ Node.
   is rare (1 of 800). Jev noise between runs moves about 1% of rows either
   way, so a one-row too-loose difference (9 vs 10) is within noise. The
   bar held, but it is not evidence of a leak reduction.
+
+## 2026-11-03 — rwxlite's fresh exam: NO-GO by one row; planned three-engine shape
+
+- Goal: record rwxlite's fresh-exam result and the shape the user leans to.
+- Tried: rwxlite scored its model on a fresh exam (coolify, workos, lago,
+  resend; 949 operations; rwxlite commits 0caa381 prereg, 402fea0 score;
+  labels 934 of 949 agreed). Its lowering flag accepts a lowering only at
+  max p >= 0.97 and marks the rest to ask.
+- Outcome: answered 875 rows, 92.57% right; 5 too loose (0.57% of 875)
+  against a 0.5% bar (4 rows), NO-GO by one row; 60 too tight (6.9%);
+  asked 74 (7.8% of 949). All 13 wrong lowerings of 166 were under 0.97
+  and asked; all 92 accepted lowerings were right. Mechanical alone on
+  the same exam: 77.6% right, 6 too loose (0.63%), 21.8% too tight.
+  Practice rows (rwxlite v3 tuning, LOVO): 93.2% right, 21 too loose
+  (0.41%), 9.6% asked.
+  - The 5 misses come from the mechanical letter: 3 PUT/PATCH credential
+    upserts (workos client-credentials, workos api-key, coolify
+    integration-tokens; mechanical w, truth x by clause b) and 2 logout
+    GETs (workos /sso/logout, /user_management/sessions/logout; truth x).
+  - Candidates, each needs a tuning POC and a fresh exam. R1: credential
+    replace on PUT/PATCH (last path segment api-key, client-credentials,
+    token, secret), narrower than the broad noun rule that failed (6
+    right, 17 wrong, F2 POC). R2: logout/signout/end-session is x on any
+    method; touches step 1, a core change.
+  - Agreed with rwxlite's user: shared fresh exam #3 on rwxmap's spares
+    clerk, neon, supabase, mux, netbird, ory, novu; both projects commit
+    candidates before truth is read; each scores once.
+  - User notes, 2026-11-03: "we will probably go for it"; the target could
+    be lowered, since the local model is about 92% right and asks on the
+    doubtful rows. Recorded in the PRD as PLANNED, not adopted; bar open.
+- Lesson: the lowering flag removed every wrong lowering; the remaining
+  leaks are the mechanical floor's, so mechanical fixes help both
+  projects.
