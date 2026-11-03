@@ -968,6 +968,11 @@ decided; everything marked "proposal" or "open" is not decided.
   and is always the latest model, not pinned to the rwxmap version.
   Consequence: the same spec can get different letters after a model
   update, so every run records the model string.
+- **Model cache and integrity.** The downloaded model is cached in a
+  per-user folder, `~/.cache/rwxmap/`. Every download is checked
+  against the hash in rwxlite's model string
+  (`rwxlite-<semver>+<sha8 of int8 weights>`). A mismatch means the
+  model is not used: mechanical runs alone and the run says so loudly.
 - **R1 and R2 are tuning candidates only.** R1: credential replace on
   PUT/PATCH (last path segment is a credential being replaced: api-key,
   client-credentials, token, secret), kept narrower than the broad noun
@@ -1003,8 +1008,12 @@ decided; everything marked "proposal" or "open" is not decided.
 > leaks; one-vendor-held-out coverage is 0.90-0.96. The other 2 are GET
 > method-floor rows (datadog GET /api/v1/graph/snapshot, intercom GET
 > /contacts/{id}/banners), left as accepted risk: catching them means
-> sending all 2543 GET floor rows. With the widened `loose`, about
-> 4345 of 8376 rows (52%) get the second pass. Caveat: tuning-set
+> sending all 2543 GET floor rows. With the widened `loose`, the
+> second pass covers 1734 of 4171 rows (41.6%) on the 15 complete
+> official APIs (median 39.8%, intercom; range 14.8% figma to 60.0%
+> paypal), and 4345 of 8376 (51.9%) pooled over the tuning sets, which
+> hold capped write-heavy samples. At 20 ms per op the largest complete
+> API stripe (297 rows) takes about 5.9 s. Caveat: tuning-set
 > figures. The rule follows the principle "every lowered row gets a
 > second pass" but is proven only on tuning data; the D133 exam is its
 > test.
@@ -1040,7 +1049,7 @@ mechanical w, truth x by clause b) and 2 logout GETs (workos
 
 ### Open
 
-Two items, listed under Open questions below.
+One item, listed under Open questions below.
 
 ## What is next
 
@@ -1147,5 +1156,4 @@ network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
 
 ## Open questions
 
-- D133: where the downloaded model is cached, and how its integrity is checked (hash).
 - D133: the shared fresh exam #3 vendor list, from rwxmap's spares clerk, neon, supabase, mux, netbird, ory, novu; both projects commit candidates before truth is read; each scores once.

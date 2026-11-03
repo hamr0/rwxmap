@@ -8296,3 +8296,30 @@ Node.
 - Lesson: the leak is not in the marker's old definition but in rows a
   word list lowered; "every lowered row gets a second pass" covers 25 of
   the 27.
+
+## 2026-11-03 — D133 second-pass share per API
+
+- Question: what share of rows does the second pass (modes a and c)
+  send, per API, and how long does it take?
+- Method: read-only. classifyRow (src v0.9.0) over
+  data/combined-2026-09-21/labelled.csv and
+  data/relabel-buildset-2026-09-23/labelled.csv (8376 rows). "Sent" =
+  review marker `loose` or `tight`, or a POST with an evidence list
+  and class w or r.
+- Pooled: 4345 of 8376 sent (51.9%). 76 of the 78 too-loose rows fall
+  inside sent rows. The 2 missed: datadog GET /api/v1/graph/snapshot and
+  intercom GET /contacts/{id}/banners.
+- Per vendor, 36 vendors: median 62.8%, range 14.8% (figma) to 84.0%
+  (trello). Most of these vendors are capped write-heavy samples.
+- Complete official APIs (asana, canva, datadog, digitalocean, figma,
+  intercom, jira, mailchimp, meta-whatsapp, openai, paypal, spotify,
+  square, stripe, zoom; provider-corpus-2026-09-16, 4171 ops): 1734 sent
+  (41.6%), median 39.8% (intercom), range 14.8% (figma) to 60.0%
+  (paypal). The share tracks the API's GET share (figma 78% GET; trello
+  sample 0% GET).
+- Time at rwxlite's 20 ms/op bar: largest complete-API stripe 297 rows,
+  about 5.9 s; typical 2-5 s per complete API; one run per spec; local,
+  no money cost.
+- Lesson: a pooled share over a corpus with capped write-heavy samples
+  overstates per-API cost. Measure on complete APIs. PRD D133 evidence
+  updated.
