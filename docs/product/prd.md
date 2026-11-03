@@ -941,17 +941,23 @@ decided; everything marked "proposal" or "open" is not decided.
     rate in 70-90%, and each choice prints its measured too-loose rate
     beside it (the user accepts the trade-off).
   - Mechanical -> Jev: unchanged (the existing Jev bars).
+- **Lowerings are flagged, not trusted; rwxmap decides "ask".** rwxlite
+  only returns p. When rwxlite would lower a letter (x to w, or w to r)
+  but max p is under 0.97 (rwxlite's measured cut-off), rwxmap does not
+  accept the lowering. Raises and keeps are trusted. In file output that
+  row keeps the stricter (mechanical) letter and carries the existing
+  `tight` review marker, the same "not sure, review" flag mechanical
+  rows already get. No new output field; the exporter and the OpenAPI,
+  MCP and WebMCP carriers are unchanged. At runtime bareguard sees only
+  the stricter letter; its own gate config decides whether to ask the
+  human. rwxmap never emits "ask" or "deny" (bareguard owns the gate;
+  D103 exporter contract).
 
 ### Proposals (not decided)
 
 - **One request, both questions** (isX and changes): x = p(isX),
   w = p(changes) - p(isX), r = 1 - p(changes). The Jev engine keeps its
   separate requests, because its cut-offs were measured that way (D127).
-- **Lowerings are flagged, not trusted.** A lowering is accepted only
-  when max p >= 0.97; otherwise the row is marked to ask. Raises and
-  keeps are trusted. Proposed form: an asked row shows the stricter
-  letter and carries the existing `tight` review marker, no new output
-  field.
 - **Interface to pin with rwxlite** (rwxlite's proposed defaults):
   - Model string: `rwxlite-<semver>+<sha8 of int8 weights>`, recorded on
     every run (D88-style).
@@ -980,7 +986,7 @@ mechanical w, truth x by clause b) and 2 logout GETs (workos
 
 ### Open
 
-Four items, listed under Open questions below.
+Three items, listed under Open questions below.
 
 ## What is next
 
@@ -1087,7 +1093,6 @@ network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
 
 ## Open questions
 
-- D133: how an "ask" row is published (the `tight` marker, or a new field).
 - D133: the exact CLI option names.
 - D133: where the downloaded model is cached, and how its integrity is checked (hash).
 - D133: the shared fresh exam #3 vendor list, from rwxmap's spares clerk, neon, supabase, mux, netbird, ory, novu; both projects commit candidates before truth is read; each scores once.
