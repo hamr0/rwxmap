@@ -242,9 +242,12 @@ for debugging and are never published (D28/D76/D77).
   and every DELETE. On the verdict it is absent rather than `false`;
   the map and the sidecar spell it out as a boolean. It is a refinement
   flag inside x, not a fourth class (D86's ruling on D28).
-- **`evidence`** — exactly three values: `floor` (the method alone
+- **`evidence`** — exactly four values: `floor` (the method alone
   decided, no word matched), `list` (a word list fired), `jev` (an
-  optional Jev tier moved the row; appears only when a tier ran). It
+  optional Jev tier moved the row; appears only when a tier ran),
+  `rwxlite` (the D133 second pass moved the row: raised, lowered, or
+  undecided and pushed to x; a row it kept, or left undecided at x,
+  keeps mechanical's value). It
   answers "did a word fire", which is a fact about the implementation,
   not a reliability signal: on the M3 exam `floor` was the cleanest
   bucket (5.6% error) and `list` the dirtiest (23.3%), because `floor`
@@ -934,7 +937,9 @@ decided; everything marked "proposal" or "open" is not decided.
   gate and ruling decide (for example a human in the loop). rwxmap
   never emits "ask" or "deny" (D103 exporter contract). In files
   (WebMCP, MCP hints, OpenAPI x-rwx, exporter) the row is x with the
-  review marker. No new output field or value.
+  review marker. No new per-row field; the two additions below (a
+  fourth `evidence` value and a top-level `rwxlite` block) are the only
+  output changes.
 - **The `tight` marker widens (planned, not built).** It will mean "x,
   possibly tighter than needed, review". It covers today's x-on-POST
   rows and rows the second pass could not decide, including an
@@ -948,6 +953,17 @@ decided; everything marked "proposal" or "open" is not decided.
   stays "x, possibly tighter than needed, review". `settled` is rows
   nothing lowered. Output format is unchanged. Same `reviewHint`
   change as above.
+- **A moved row's evidence is `rwxlite` (user ruling, 2026-11-04).** A
+  row the second pass moved (raised, lowered, or undecided and moved to
+  x) publishes `evidence: "rwxlite"`, a fourth value beside `floor`,
+  `list` and `jev`, added the way `jev` was. A row it kept, or an x row
+  left undecided at x, keeps mechanical's evidence.
+- **The model string is recorded in the combined JSON (user ruling,
+  2026-11-04).** A top-level `rwxlite` block, shaped like `jev`: `mode`
+  (`on`/`off`), `model`, and the counts `sent`, `raised`, `lowered`,
+  `kept`, `undecided`. A run with no model records `mode: "off"`,
+  `model: null` and a `reason`. The bareguard exporter is unaffected (it
+  emits the bare letter or letter+marker only, never evidence).
 - **Errors count as undecided.** An errored or timed-out call on a row
   counts as undecided: the row is x plus review. This holds for the
   rwxlite and Jev engines.

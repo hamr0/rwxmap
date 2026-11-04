@@ -92,7 +92,7 @@ test('an engine that throws, or returns a non-array, leaves every sent row undec
   }
 });
 
-test('raise: accepted at any p; x is tight, w is loose; evidence kept; no destructive', async () => {
+test('raise: accepted at any p; x is tight, w is loose; evidence rwxlite; no destructive', async () => {
   const { engine } = engineOf({
     2: ans('x', 0.34), // POST w(list) -> x
     3: ans('x', 0.9), // PUT w(floor) -> x
@@ -101,11 +101,12 @@ test('raise: accepted at any p; x is tight, w is loose; evidence kept; no destru
   const { verdicts, summary } = await secondPass(OPS, mech(), engine, { model: MODEL });
   assert.equal(verdicts[2].class, 'x');
   assert.equal(verdicts[2].review, 'tight');
-  assert.equal(verdicts[2].source, 'list');
+  assert.equal(verdicts[2].source, 'rwxlite');
   assert.equal(verdicts[3].class, 'x');
   assert.equal(verdicts[3].review, 'tight');
-  assert.equal(verdicts[3].source, 'floor');
+  assert.equal(verdicts[3].source, 'rwxlite');
   assert.equal(verdicts[5].class, 'w');
+  assert.equal(verdicts[5].source, 'rwxlite');
   assert.equal(verdicts[5].review, 'loose');
   assert.equal('destructive' in verdicts[3], false);
   assert.equal(summary.raised, 3);
@@ -126,7 +127,7 @@ test('lower: accepted only at p >= 0.97; below it the row is x, undecided, tight
   // idx4 POST x -> w at p 0.97: accepted, loose.
   assert.equal(verdicts[4].class, 'w');
   assert.equal(verdicts[4].review, 'loose');
-  assert.equal(verdicts[4].source, 'floor');
+  assert.equal(verdicts[4].source, 'rwxlite');
   // idx2 POST w, engine says w: keep (L == M).
   assert.equal(verdicts[2].class, 'w');
   // idx3 PUT w, engine says w: keep.
@@ -181,4 +182,23 @@ test('a bad call fails loudly: malformed model string, non-function engine, leng
   await assert.rejects(() => secondPass(OPS, mech(), async () => [], { model: 'jev-1' }), /malformed rwxlite model string/);
   await assert.rejects(() => secondPass(OPS, mech(), /** @type {any} */ ('x'), { model: MODEL }), /engine must be a function/);
   await assert.rejects(() => secondPass(OPS, mech().slice(1), async () => [], { model: MODEL }), /same length/);
+});
+
+test('evidence: a moved row publishes rwxlite (raise, lower, undecided-moved); kept and x-left-undecided rows keep mechanical\'s', async () => {
+  const before = mech();
+  const { engine } = engineOf({
+    2: ans('x', 0.9), // POST w(list) -> x: raised
+    3: undefined, // PUT w(floor): undecided, moved w -> x
+    4: undefined, // POST x(floor): undecided, left at x
+    5: ans('r', 0.6), // POST r(list): kept
+  });
+  const { verdicts } = await secondPass(OPS, before, engine, { model: MODEL });
+  assert.equal(verdicts[2].source, 'rwxlite');
+  assert.equal(verdicts[3].source, 'rwxlite');
+  assert.equal(verdicts[3].class, 'x');
+  assert.equal(verdicts[4].source, before[4].source); // 'floor', left undecided at x
+  assert.equal(verdicts[4].source, 'floor');
+  assert.equal(verdicts[5].source, 'list'); // kept
+  assert.equal(verdicts[0].source, before[0].source); // settled, never sent
+  assert.equal(before[2].source, 'list'); // input not mutated
 });

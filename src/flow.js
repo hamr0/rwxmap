@@ -45,7 +45,7 @@ import { step3 } from './step3.js';
  * @param {string|undefined} method the row's HTTP method, read
  *   case-insensitively like every other method check in this library.
  * @param {'r'|'w'|'x'} cls the verdict's class.
- * @param {'floor'|'list'|'jev'} source the verdict's source.
+ * @param {'floor'|'list'|'jev'|'rwxlite'} source the verdict's source.
  * @param {'raised'|'lowered'|'undecided'} [secondPass] what the second pass
  *   did to this row, absent when it did not touch it (or did not run).
  *   undecided -> tight; raised -> tight if the final class is x, else loose;

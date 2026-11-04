@@ -70,7 +70,7 @@ import { classifyRow } from './flow.js';
  * @property {string} path
  * @property {'r'|'w'|'x'} letter
  * @property {'tight'|'loose'|'settled'} marker
- * @property {'floor'|'list'|'jev'} evidence  WHY the row was decided (D77).
+ * @property {'floor'|'list'|'jev'|'rwxlite'} evidence  WHY the row was decided (D77).
  * @property {boolean} destructive  D86's refinement flag inside x. Always a
  *   real boolean here, unlike the verdict's optional `destructive`, because
  *   a report a human reads should not make them wonder what an absent field
@@ -407,7 +407,7 @@ export function exportGate(operations, options = {}) {
  *     rows: number,
  *     byLetter: {r: number, w: number, x: number},
  *     byMarker: {tight: number, loose: number, settled: number},
- *     byEvidence: {floor: number, list: number, jev: number},
+ *     byEvidence: {floor: number, list: number, jev: number, rwxlite: number},
  *   },
  *   rows: SidecarRow[],
  *   review: SidecarRow[],
@@ -423,7 +423,7 @@ export function exportSidecar(operations, options = {}) {
     rows: rows.length,
     byLetter: { r: 0, w: 0, x: 0 },
     byMarker: { tight: 0, loose: 0, settled: 0 },
-    byEvidence: { floor: 0, list: 0, jev: 0 },
+    byEvidence: { floor: 0, list: 0, jev: 0, rwxlite: 0 },
   };
   for (const row of rows) {
     counts.byLetter[row.letter] += 1;

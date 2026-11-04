@@ -1946,16 +1946,24 @@ test('run (D133): no model in the cache -> "rwxlite: off (mechanical)", exit 0, 
     'PUT /things/{id}': 'w/loose',
     'POST /mystery': 'x/tight',
   });
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.deepEqual(combined.rwxlite, {
+    mode: 'off', model: null, reason: 'no model in the cache', sent: 0, raised: 0, lowered: 0, kept: 0, undecided: 0,
+  });
 });
 
 test('run (D133): --engine mechanical prints the off line, and never looks for a model or calls an engine', async () => {
   let called = 0;
-  const { code, stdout, stderr } = await runD133(['--engine', 'mechanical'], {
+  const { code, stdout, stderr, outDir } = await runD133(['--engine', 'mechanical'], {
     rwxliteEngine: { model: D133_MODEL, run: async () => { called += 1; return []; } },
   });
   assert.equal(code, 0, stderr);
   assert.match(stdout, /^rwxmap: rwxlite: off \(mechanical\)$/m);
   assert.equal(called, 0);
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.equal(combined.rwxlite.mode, 'off');
+  assert.equal(combined.rwxlite.model, null);
+  assert.equal(combined.rwxlite.reason, 'engine mechanical');
 });
 
 test('run (D133): default mode a with an engine sends only loose and tight rows and applies the second pass', async () => {
@@ -1980,6 +1988,14 @@ test('run (D133): default mode a with an engine sends only loose and tight rows 
   });
   assert.match(stdout, new RegExp(`^rwxmap: rwxlite: on \\(${D133_MODEL.replace(/[+.]/g, '\\$&')}\\) — 3 sent · 1 raised · 1 lowered · 0 kept · 1 undecided`, 'm'));
   assert.doesNotMatch(stdout, /rwxlite: off/);
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.deepEqual(combined.rwxlite, { mode: 'on', model: D133_MODEL, sent: 3, raised: 1, lowered: 1, kept: 0, undecided: 1 });
+  assert.equal(combined.jev.mode, 'off');
+  // Every moved row publishes evidence rwxlite, in the sidecar, the MCP _meta and the OpenAPI copy.
+  const rows = readJson(path.join(outDir, 'example.rwxmap.review.json')).rows;
+  assert.deepEqual(rows.map((r) => r.evidence).sort(), ['floor', 'floor', 'rwxlite', 'rwxlite', 'rwxlite']);
+  assert.equal(readJson(path.join(outDir, 'example.rwxmap.review.json')).counts.byEvidence.rwxlite, 3);
+  assert.equal(combined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/evidence'], 'rwxlite');
 });
 
 test('run (D133): --engine rwxlite on its own (mode b) is not built: with an engine it fails loudly, with no model it behaves like no model', async () => {

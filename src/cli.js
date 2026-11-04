@@ -625,6 +625,22 @@ function jevOffSummary() {
 }
 
 /**
+ * The `rwxlite` top-level field (D133), shaped like `jev`: mode, model and
+ * the second pass's counts. The one writer of this field: "off" carries the
+ * reason no model ran; "on" carries secondPass's own summary.
+ * @param {{reason?: string, summary?: {model: string, sent: number, raised: number, lowered: number, kept: number, undecided: number}}} [from]
+ * @returns {{mode: 'off'|'on', model: string|null, reason?: string, sent: number, raised: number, lowered: number, kept: number, undecided: number}}
+ */
+function rwxliteSummary(from = {}) {
+  const { reason = 'not run', summary } = from;
+  if (summary) {
+    const { model, sent, raised, lowered, kept, undecided } = summary;
+    return { mode: 'on', model, sent, raised, lowered, kept, undecided };
+  }
+  return { mode: 'off', model: null, reason, sent: 0, raised: 0, lowered: 0, kept: 0, undecided: 0 };
+}
+
+/**
  * Build the combined output and the sidecar from an already-resolved
  * operation list. Pure — no I/O, no process exit — so both `run` (which
  * writes the result to disk) and `tools/proof-cli.js` (which never writes
@@ -634,13 +650,14 @@ function jevOffSummary() {
  * @param {import('./types.js').Operation[]} ops
  * @param {string} vendor
  * @param {string} source
- * @param {{verdicts?: import('./types.js').Verdict[], jevSummary?: object, doc?: any}} [options]
+ * @param {{verdicts?: import('./types.js').Verdict[], jevSummary?: object, rwxliteSummary?: object, doc?: any}} [options]
  *   `verdicts` is the FINAL (post-Jev, or plain mechanical) verdict list,
  *   same order as `ops` — omitted (mechanical-only callers, e.g.
  *   tools/proof-cli.js) falls back to exportGate/exportSidecar's own
  *   default of classifying `ops` themselves, unchanged from item d.
  *   `jevSummary` is the combined JSON's top-level `jev` field; omitted
- *   defaults to the "off" shape. `doc` is the parsed document `ops`
+ *   defaults to the "off" shape. `rwxliteSummary` is the top-level
+ *   `rwxlite` field, defaulting to off. `doc` is the parsed document `ops`
  *   came from (`ops` must be operationsFrom(doc)); given, the result
  *   also carries the OpenAPI copy (D124) as `openapiCopy` plus
  *   `xRwxOverwritten`, `openapiNonFinite` and `openapiBigIntegers`;
@@ -650,7 +667,7 @@ function jevOffSummary() {
  * @returns {{combined: any, sidecarOut: any, collisions: import('./exporter.js').Collision[], mcpCollisions: Array<{key: string, kept: string, dropped: string}>, openapiCopy: any, xRwxOverwritten: number, openapiNonFinite: number, openapiBigIntegers: number}}
  */
 export function buildOutput(ops, vendor, source, options = {}) {
-  const { verdicts, jevSummary = jevOffSummary(), doc } = options;
+  const { verdicts, jevSummary = jevOffSummary(), rwxliteSummary: rwxliteField = rwxliteSummary({ reason: 'not run' }), doc } = options;
   const { tools, collisions } = exportGate(ops, { vendor, verdicts });
   // The spec's own resolved servers go in the sidecar so `rwxmap/match`
   // can route a call by host. `source` is a base only when it is a URL; a
@@ -671,6 +688,7 @@ export function buildOutput(ops, vendor, source, options = {}) {
     mcp,
     webmcp,
     jev: jevSummary,
+    rwxlite: rwxliteField,
   };
   let sidecarOut = mcpCollisions.length > 0 ? { ...sidecar, mcpCollisions } : sidecar;
   if (openapiNonFinite > 0 || openapiBigIntegers > 0) {
@@ -1039,6 +1057,7 @@ export async function run(argv, env) {
   }
   // The rwxlite line of the run summary (every non-Jev run prints one).
   let engineLine = 'rwxmap: rwxlite: off (mechanical)\n';
+  let rwxliteField = rwxliteSummary({ reason: engineName === 'jev' ? 'engine jev' : 'engine mechanical' });
   if (engineName === 'rwxlite' && env.rwxliteEngine) {
     stderr.write('rwxmap: --engine rwxlite on its own (mode b) is not built yet\n');
     return 1;
@@ -1050,16 +1069,20 @@ export async function run(argv, env) {
       const found = findModel({ XDG_CACHE_HOME: env.xdgCacheHome ?? process.env.XDG_CACHE_HOME });
       if (found.status === 'none') {
         engineLine = 'rwxmap: rwxlite: off (mechanical) — no model in the cache\n';
+        rwxliteField = rwxliteSummary({ reason: 'no model in the cache' });
       } else if (found.status === 'bad') {
         stderr.write(`rwxmap: WARNING: rwxlite model rejected (${found.reason}); ${found.file} was NOT used\n`);
         engineLine = 'rwxmap: rwxlite: off (mechanical) — cached model rejected, see the warning above\n';
+        rwxliteField = rwxliteSummary({ reason: `cached model rejected (${found.reason})` });
       } else {
         engineLine = `rwxmap: rwxlite: off (mechanical) — model ${found.model} is cached, but this build has no way to run it yet\n`;
+        rwxliteField = rwxliteSummary({ reason: `model ${found.model} is cached, but this build has no way to run it yet` });
       }
     } else {
       const result = await secondPass(ops, verdicts, engine.run, { model: engine.model });
       verdicts.splice(0, verdicts.length, ...result.verdicts);
       const s = result.summary;
+      rwxliteField = rwxliteSummary({ summary: s });
       engineLine = `rwxmap: rwxlite: on (${s.model}) — ${s.sent} sent · ${s.raised} raised · ${s.lowered} lowered · ${s.kept} kept · ${s.undecided} undecided (x, review tight)\n`;
     }
   }
@@ -1076,7 +1099,7 @@ export async function run(argv, env) {
 
   let built;
   try {
-    built = buildOutput(ops, vendor, source, { verdicts, jevSummary, doc });
+    built = buildOutput(ops, vendor, source, { verdicts, jevSummary, rwxliteSummary: rwxliteField, doc });
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
     stderr.write(`rwxmap: could not build output: ${reason}\n`);

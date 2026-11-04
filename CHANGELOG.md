@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **A second pass for the rows marked `loose` or `tight` (D133, mode a).** `src/secondpass.js` asks an engine about those rows only. A raise is accepted, a lowering only at p >= 0.97, and an error, timeout or malformed answer leaves the row x with review `tight`. The rwxlite model is not shipped yet, so a normal run prints `rwxlite: off (mechanical)` and runs mechanically. `--engine rwxlite` on its own is not built yet and behaves like the default.
 - **A model cache check (`src/modelcache.js`).** The cache is `$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`. A model file is named `rwxlite-<semver>+<sha8>.int8`; if the first 8 hex characters of its sha256 do not equal sha8, it is not used, the run warns on stderr and runs mechanically. Nothing is downloaded.
 
+- **A fourth `evidence` value, `rwxlite` (D133).** A row the second pass moved (raised, lowered, or undecided and pushed to x) publishes `evidence: "rwxlite"` in the sidecar, MCP `_meta` and the OpenAPI copy; a kept row keeps mechanical's value. The sidecar's `counts.byEvidence` gains an `rwxlite` count. The bareguard export is unchanged.
+- **A top-level `rwxlite` block in the combined JSON,** beside `jev`: `mode` (`on`/`off`), `model`, and `sent`, `raised`, `lowered`, `kept`, `undecided`. With no model it reads `mode: "off"`, `model: null` and a `reason`.
+
 ### Changed
 
 - **BREAKING: a Jev key alone no longer turns Jev on.** Jev runs only with `--engine jev`. With a key and no `--engine jev` the run prints that Jev stays off and sends nothing. `--engine jev` without a key exits 1. `scripts/live-check.mjs --jev` now passes `--engine jev`.

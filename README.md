@@ -133,7 +133,8 @@ Trimmed example of the combined JSON, one entry each:
       "annotations": { "readOnlyHint": false, "consequentialHint": true }
     }
   },
-  "jev": { "mode": "off", "model": null, "sent": 0, "answered": 0, "failed": 0, "changed": 0, "tokens": { "input": 0, "output": 0 } }
+  "jev": { "mode": "off", "model": null, "sent": 0, "answered": 0, "failed": 0, "changed": 0, "tokens": { "input": 0, "output": 0 } },
+  "rwxlite": { "mode": "off", "model": null, "reason": "no model in the cache", "sent": 0, "raised": 0, "lowered": 0, "kept": 0, "undecided": 0 }
 }
 ```
 
@@ -156,6 +157,11 @@ overwritten without `--force`.
 
 An unknown `--engine` value, or a bad `--confidence`, exits 1 with
 nothing written.
+
+`evidence` is `floor` (the method alone decided), `list` (a word list
+fired), `jev` (Jev moved the row) or `rwxlite` (the rwxlite second pass
+moved the row). The `rwxlite` block in the combined JSON records the
+model string and the pass's counts.
 
 Only bareguard reads `bareguard.tools` directly. The MCP, WebMCP and
 OpenAPI parts are hints you copy into place; a client may ignore them.

@@ -24,8 +24,9 @@
 //
 // WRITERS. The `review` marker is written only by flow.js's reviewHint; this
 // file passes it what the second pass did. `evidence` (the verdict's `source`)
-// is left exactly as mechanical had it. `destructive` follows the same rule as
-// jev.js's applyJev: a moved verdict has no word behind it, so it carries none;
+// is 'rwxlite' on a row the pass MOVED (raised, lowered, or undecided and pushed
+// to x) and exactly as mechanical had it on a row it kept or left undecided at
+// x. `destructive` follows the same rule as jev.js's applyJev: a moved verdict has no word behind it, so it carries none;
 // a row left at x by the second pass keeps what mechanical gave it.
 import { reviewHint } from './flow.js';
 import { parseModelString } from './modelcache.js';
@@ -138,8 +139,9 @@ export async function secondPass(ops, verdicts, engine, options) {
 }
 
 /**
- * A verdict the second pass moved: new class, rule and review; step, source
- * (evidence) and matched stay as mechanical had them; no `destructive`.
+ * A verdict the second pass moved: new class, rule, review and source
+ * (evidence 'rwxlite'); step and matched stay as mechanical had them; no
+ * `destructive`.
  * @param {Verdict} v
  * @param {'r'|'w'|'x'} cls
  * @param {string} rule
@@ -147,5 +149,5 @@ export async function secondPass(ops, verdicts, engine, options) {
  * @returns {Verdict}
  */
 function moved(v, cls, rule, review) {
-  return { class: cls, step: v.step, rule, source: v.source, matched: v.matched, review };
+  return { class: cls, step: v.step, rule, source: 'rwxlite', matched: v.matched, review };
 }
