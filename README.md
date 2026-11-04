@@ -150,9 +150,9 @@ overwritten without `--force`.
   model" below.
 - `--engine mechanical`: mechanical only, never touches the network for a model.
 - `--engine jev`: the paid Jev pass, below.
-- `--engine rwxlite` is accepted, with `--confidence <0-99>` (only valid
-  with it; anything else fails). Running rwxlite on its own is not built
-  yet, so today it behaves like the default.
+- `--engine rwxlite`: rwxlite alone judges every row. `--confidence
+  <0-99>` (only valid with it; default 95) is how sure it must be: a row
+  under that share is x, marked for review.
 
 An unknown `--engine` value, a bad `--confidence`, or a `--model` other
 than `small` (or used with `--engine jev` or `mechanical`) exits 1 with
@@ -232,8 +232,8 @@ A key alone does not turn it on: the run says so and sends nothing.
   operationId, summary and description, plus the question and the model
   name. They go to `https://api.typesafe.ai/v1/systemone`. Nothing else
   is sent, and the key never appears in any output.
-- **A failed call** never stops the run. If the first call fails, the
-  row keeps its mechanical letter. If the second call fails, it keeps w.
+- **A failed call** never stops the run. If either call for a row fails,
+  the row is x, marked for review.
 
 ## Library use
 

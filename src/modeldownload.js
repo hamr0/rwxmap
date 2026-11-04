@@ -5,10 +5,13 @@
 //
 // Which manifest: the default is rwxlite's fp32 "exact" model
 // (manifest-exact.json), `small` is the int8 per-channel one (manifest.json).
-// Asset URLs: the manifest only gives file NAMES, so each file's URL is the
-// manifest URL's directory + the name (.../releases/latest/download/<name>).
-// If `latest` moves between the two requests, the sha256 check fails and the
-// run falls back; it never uses unverified bytes.
+// Asset URLs: the manifest only gives file NAMES. The manifest request is
+// redirected from .../releases/latest/download/<name> to
+// .../releases/download/<tag>/<name>; that tag is read off the redirect and the
+// files are fetched from the same tag's URL, so a release published while the
+// download runs cannot mix files from two releases. If no hop shows a tag, the
+// files come from the manifest URL's directory (latest) as before; the sha256
+// check still stops any mix. It never uses unverified bytes.
 //
 // Safety: https only; redirects are walked by hand (never `redirect:
 // 'follow'`) and EVERY hop, the first URL included, must be github.com or a
@@ -25,6 +28,9 @@ import * as path from 'node:path';
 import { randomBytes } from 'node:crypto';
 
 import { cacheDir, findModel, parseModelString, verifyModelDir } from './modelcache.js';
+
+/** The modelFile each variant's manifest names (rwxlite's release assets); how a cached folder is told apart by variant. */
+export const VARIANT_MODEL_FILE = { exact: 'model-fp32.onnx', small: 'model-int8-pc.onnx' };
 
 const RELEASE_BASE = 'https://github.com/hamr0/rwxlite/releases/latest/download/';
 export const MANIFEST_URLS = {
@@ -62,19 +68,22 @@ function refusal(u) {
 
 /**
  * GET a URL, walking redirects by hand; every hop passes `refusal` before a
- * request is made. Returns the final 2xx Response (body unread). Throws an
- * Error whose message is the reason otherwise.
+ * request is made. Returns the final 2xx Response (body unread) and every URL
+ * requested, in order. Throws an Error whose message is the reason otherwise.
  * @param {string} url
  * @param {{fetchImpl: typeof fetch, timeoutMs: number}} o
- * @returns {Promise<Response>}
+ * @returns {Promise<{res: Response, hops: string[]}>}
  */
 async function guardedGet(url, { fetchImpl, timeoutMs }) {
   const signal = AbortSignal.timeout(timeoutMs);
   let current = url;
+  /** @type {string[]} */
+  const hops = [];
   for (let hop = 0; ; hop++) {
     const bad = refusal(current);
     if (bad) throw new Error(`refused: ${bad}`);
     if (hop > MAX_REDIRECTS) throw new Error(`too many redirects (> ${MAX_REDIRECTS})`);
+    hops.push(current);
     const res = await fetchImpl(current, { redirect: 'manual', signal, headers: { 'User-Agent': 'rwxmap' } });
     if (res.status >= 300 && res.status < 400) {
       const loc = res.headers.get('location');
@@ -87,8 +96,23 @@ async function guardedGet(url, { fetchImpl, timeoutMs }) {
       try { await res.body?.cancel(); } catch { /* nothing to cancel */ }
       throw new Error(`HTTP ${res.status} from ${current}`);
     }
-    return res;
+    return { res, hops };
   }
+}
+
+/**
+ * The release a manifest request was redirected to, as the base URL its asset
+ * files are fetched from (.../releases/download/<tag>/), or null when no hop
+ * is a github.com release-download URL with a tag.
+ * @param {string[]} hops
+ * @returns {string|null}
+ */
+function pinnedBase(hops) {
+  for (const h of hops) {
+    const m = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/releases\/download\/([^/]+)\/[^/]+$/.exec(h);
+    if (m) return `https://github.com/${m[1]}/${m[2]}/releases/download/${m[3]}/`;
+  }
+  return null;
 }
 
 /**
@@ -150,7 +174,7 @@ function rmrf(dir) { try { fs.rmSync(dir, { recursive: true, force: true }); } c
  */
 async function downloadModel(manifestUrl, o) {
   const budget = { left: MAX_TOTAL_BYTES };
-  const mres = await guardedGet(manifestUrl, { fetchImpl: o.fetchImpl, timeoutMs: o.manifestTimeoutMs });
+  const { res: mres, hops: manifestHops } = await guardedGet(manifestUrl, { fetchImpl: o.fetchImpl, timeoutMs: o.manifestTimeoutMs });
   /** @type {Uint8Array[]} */
   const parts = [];
   const mbudget = { left: MAX_MANIFEST_BYTES };
@@ -162,13 +186,13 @@ async function downloadModel(manifestUrl, o) {
   // Already there and good: nothing to download.
   try { verifyModelDir(finalDir); return { model: manifest.model, dir: finalDir }; } catch { /* download it */ }
 
-  const base = manifestUrl.slice(0, manifestUrl.lastIndexOf('/') + 1);
+  const base = pinnedBase(manifestHops) ?? manifestUrl.slice(0, manifestUrl.lastIndexOf('/') + 1);
   const tmpRoot = path.join(root, `.tmp-${process.pid}-${randomBytes(4).toString('hex')}`);
   const stage = path.join(tmpRoot, manifest.model);
   try {
     fs.mkdirSync(stage, { recursive: true });
     for (const name of manifest.files) {
-      const res = await guardedGet(base + encodeURIComponent(name), { fetchImpl: o.fetchImpl, timeoutMs: o.fileTimeoutMs });
+      const { res } = await guardedGet(base + encodeURIComponent(name), { fetchImpl: o.fetchImpl, timeoutMs: o.fileTimeoutMs });
       const len = Number(res.headers.get('content-length'));
       o.log(`rwxmap: downloading ${name} (${MB(Number.isFinite(len) && len > 0 ? len : null)})`);
       const fd = fs.openSync(path.join(stage, name), 'w');
@@ -197,13 +221,14 @@ async function downloadModel(manifestUrl, o) {
  */
 export async function ensureModel(opts = {}) {
   const environ = opts.environ ?? process.env;
+  const variant = opts.variant === 'small' ? 'small' : 'exact';
   const log = opts.log ?? (() => {});
   /** @type {string[]} */
   const notes = [];
   /** @type {string} */
   let why;
   try {
-    const got = await downloadModel(MANIFEST_URLS[opts.variant === 'small' ? 'small' : 'exact'], {
+    const got = await downloadModel(MANIFEST_URLS[variant], {
       environ,
       fetchImpl: opts.fetchImpl ?? globalThis.fetch,
       log,
@@ -215,10 +240,11 @@ export async function ensureModel(opts = {}) {
     why = msg(err);
   }
   // Could not get the latest: the highest verified cached model, if any.
-  const found = findModel(environ);
+  const found = findModel(environ, VARIANT_MODEL_FILE[variant]);
   if (found.status === 'ok') {
     for (const r of found.rejected) notes.push(`rwxmap: WARNING: rwxlite model rejected (${r.reason}); ${r.dir} was NOT used`);
-    notes.push(`rwxmap: using cached ${found.model}, could not check for a newer one (${why})`);
+    const other = found.otherVariant ? ` (no cached ${variant === 'small' ? 'small' : 'exact'} model, so the ${variant === 'small' ? 'exact' : 'small'} one)` : '';
+    notes.push(`rwxmap: using cached ${found.model}${other}, could not check for a newer one (${why})`);
     return { status: 'ready', model: found.model, dir: path.dirname(found.file), notes };
   }
   if (found.status === 'bad') {

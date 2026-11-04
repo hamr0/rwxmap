@@ -903,11 +903,11 @@ Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
 Status: spec in progress on branch `feat/d133-rwxlite-engines`. Pass 1
 (second pass against a stub engine, wider `loose`, `--engine`, evidence
-`rwxlite`, the `rwxlite` JSON block, the cache check) and pass 2a (model
+`rwxlite`, the `rwxlite` JSON block, the cache check), pass 2a (model
 download from rwxlite's GitHub releases, `--model small`, the rwxlite
-adapter) are built on the branch, unreleased. rwxlite is not published, so
-the default run is mechanical ("rwxlite: off") until it is; mode b is not
-built. User rulings 2026-11-03 and 2026-11-04 are below as
+adapter) and pass 2b (mode b, mode c's undecided rule, the 2a fixes) are
+built on the branch, unreleased. rwxlite is not published, so the default
+run is mechanical ("rwxlite: off") until it is. User rulings 2026-11-03 and 2026-11-04 are below as
 decided; everything marked "proposal" or "open" is not decided.
 
 ### Decided (user rulings, 2026-11-03 and 2026-11-04)
@@ -925,17 +925,46 @@ decided; everything marked "proposal" or "open" is not decided.
     0.97 (rwxlite's measured cut-off). If rwxlite cannot decide, the row
     is x and marked for review. Raised, lowered and undecided rows all
     get the review mark.
-  - **b: rwxlite alone.** rwxlite judges every row; rwxmap is still the
-    adapter. The user sets a confidence from 0% to 99%. More confidence
-    means more asks (rows left x and marked for review). 70% is the
-    default, the sweet spot: some too-loose risk, fewer asks. Each
-    setting reports its measured too-loose rate and ask rate from
-    rwxlite's figures. Too loose is never folded into one accuracy
-    number.
+  - **b: rwxlite alone (built, pass 2b).** rwxlite judges every row,
+    `settled` ones too; rwxmap is still the adapter. Per row: x = pIsX,
+    w = pChanges - pIsX, r = 1 - pChanges; the letter is the largest
+    share (a tie goes to the tighter class) and p is that share. The
+    user sets a confidence from 0 to 99 (`--confidence`). If p >=
+    confidence/100 the row gets the letter (a raise, a keep or a
+    lowering, all at the same cut); otherwise the row is undecided: x,
+    review `tight`. An errored or malformed answer is undecided too.
+    More confidence means more asks. **Default 95** (user ruling,
+    2026-11-04; replaces the earlier 70): it is the lowest setting whose
+    too-loose count (6 of 949) is no higher than mechanical alone's (6
+    of 949) on the tuning set below. Measured on rwxlite's fresh 949
+    rows (coolify, workos, lago, resend; tuning data for rwxmap, int8
+    p values, from `poc/d133-mode-b/readout.txt`; the code reproduces
+    these counts in `src/secondpass.test.js`). Denominator 949 rows;
+    asked rows are scored as x:
+
+    | confidence | exact | too loose | too tight | asked |
+    |---|---|---|---|---|
+    | 70 | 870 (91.7%) | 18 (1.9%) | 61 (6.4%) | 52 (5.5%) |
+    | 95 (default) | 837 (88.2%) | 6 (0.6%) | 106 (11.2%) | 134 (14.1%) |
+    | 97 | 811 (85.5%) | 3 (0.3%) | 135 (14.2%) | 173 (18.2%) |
+
+    Mechanical alone on the same rows: 736 exact (77.6%), 6 too loose
+    (0.6%), 207 too tight (21.8%). Too loose and too tight are never
+    folded into one number. The default fp32 model will shift these
+    slightly (rwxlite: 7 rows differ); re-measure on the next exam.
   - **c: mechanical -> Jev (paid, BYOK).** Same flow and scope as mode
     a, with Jev deciding instead of rwxlite. Undecided means x plus
-    review. Jev's cut-offs stay as measured. Planned, not built: today a
-    Jev row that fails or does not fire keeps its mechanical letter.
+    review. Jev's cut-offs stay as measured (tiers, separate questions,
+    D129). Built in pass 2b: a Jev row whose call fails, errors or comes
+    back malformed (first or second question) is undecided, x with
+    review `tight`, instead of keeping the mechanical letter (or w). A
+    row Jev answers but does not move keeps its mechanical letter, as
+    before. Rows Jev moves get their marker through `reviewHint`'s
+    second-pass argument (raised: `tight` if x else `loose`; lowered:
+    `loose`). Scope is still the Jev tiers' own piles (`needsJev`), not
+    mode a's loose and tight rows. Not covered: a D129 second answer
+    that carries a different model string than the first is a
+    successful call the rule cannot use; the row stays at w.
   This reverses today's order (mechanical default, Jev opt-in).
 - **Runtime and files.** At runtime bareguard sees x, and its own
   gate and ruling decide (for example a human in the loop). rwxmap
@@ -973,14 +1002,23 @@ decided; everything marked "proposal" or "open" is not decided.
   rwxlite and Jev engines.
 - **No model, no stop.** If the model is missing for the whole run
   (cannot be downloaded), or mechanical is chosen, mechanical runs
-  alone and rows are marked as today. The run prints "rwxlite: off
+  alone and rows are marked as today. Mode a with no loose or tight
+  row fetches nothing and prints "rwxlite: nothing to check"; mode b
+  always needs the model when the spec has rows. Offline, the cached
+  model of the chosen variant (matched on the manifest's `modelFile`)
+  is preferred; the other variant is used only when none of the chosen
+  kind is cached, and the line says so. The asset files are fetched from
+  the release tag the manifest request was redirected to, so a release
+  published mid-download cannot mix files; with no tag in the redirect
+  the files come from `latest` as before and the sha256 check still
+  guards. The run prints "rwxlite: off
   (mechanical)". It never stops.
 - **rwxmap is the adapter for all modes**, including rwxlite on its own.
   It consumes the OpenAPI catalogue and specs, discovers APIs on the
   fly, and emits WebMCP, MCP hints and the other carriers. rwxlite is
   only a classifier; it never reads a spec or an API and only returns p.
 - **CLI names.** `rwxmap spec.json` is mode a. `--engine rwxlite
-  --confidence <0-99>` is mode b (default 70). `--engine jev` is mode c
+  --confidence <0-99>` is mode b (default 95). `--engine jev` is mode c
   and needs the key. `--engine mechanical` is no model.
   `--confidence` is valid only with `--engine rwxlite`; elsewhere it
   fails loudly.
@@ -1212,7 +1250,7 @@ Parked items and known limits below.
   `RWXMAP_JEV_KEY` (environment, else `.env`) turns on all three tiers
   (D119). No key: mechanical, and the run says so. Bring your own key;
   spec text (method, path, operationId, summary, description) goes to
-  `api.typesafe.ai` (D120). A failed row keeps its mechanical letter.
+  `api.typesafe.ai` (D120). A failed row is undecided: x, review `tight` (D133).
   A `.env` that cannot be read or parsed means no key: the run stays
   mechanical.
 - **Carriers** (D124; `rwxmap@0.6.0`). The third file,

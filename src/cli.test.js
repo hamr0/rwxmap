@@ -743,7 +743,7 @@ test('run: jev-raise-get moves r -> w at p >= threshold, not below it (bar 2)', 
 });
 
 // bar 3: a bad answer never moves a letter — one case each.
-test('run: a bad answer (NaN, out-of-range, missing model, HTTP error, timeout-like failure, malformed JSON) never moves a letter (bar 3)', async () => {
+test('run: a bad answer (NaN, out-of-range, missing model, HTTP error, timeout-like failure, malformed JSON) is undecided: x, review tight (bar 3, D133)', async () => {
   const dir = mkScratch();
 
   /** @type {Array<[string, any]>} */
@@ -770,16 +770,21 @@ test('run: a bad answer (NaN, out-of-range, missing model, HTTP error, timeout-l
     assert.equal(code, 0, `[${label}] expected exit 0`);
 
     const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
-    // Every pile row keeps its MECHANICAL letter: r/w/x floors, untouched.
-    assert.equal(combined.mcp['GET /things']._meta['io.github.hamr0.rwxmap/class'], 'r', label);
-    assert.equal(combined.mcp['PUT /things/{id}']._meta['io.github.hamr0.rwxmap/class'], 'w', label);
+    // Every pile row is undecided (D133): x, whatever its mechanical letter was.
+    assert.equal(combined.mcp['GET /things']._meta['io.github.hamr0.rwxmap/class'], 'x', label);
+    assert.equal(combined.mcp['PUT /things/{id}']._meta['io.github.hamr0.rwxmap/class'], 'x', label);
     assert.equal(combined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/class'], 'x', label);
-    assert.equal(combined.jev.changed, 0, label);
+    const sc = readJson(path.join(outDir, 'example.rwxmap.review.json'));
+    for (const k of ['GET /things', 'PUT /things/{id}', 'POST /mystery']) {
+      const r = sc.rows.find((row) => `${row.method} ${row.path}` === k);
+      assert.equal(r.marker, 'tight', `${label} ${k}`);
+    }
+    assert.equal(combined.jev.changed, 2, label);
     assert.equal(combined.jev.failed, 3, label);
   }
 });
 
-// bar 6: never stops — every call fails, exit 0, all letters mechanical.
+// bar 6: never stops — every call fails, exit 0, every asked row is undecided (x).
 test('run: never stops when every Jev call fails (bar 6)', async () => {
   const dir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
@@ -796,9 +801,9 @@ test('run: never stops when every Jev call fails (bar 6)', async () => {
   assert.equal(combined.jev.sent, 3);
   assert.equal(combined.jev.answered, 0);
   assert.equal(combined.jev.failed, 3);
-  assert.equal(combined.jev.changed, 0);
-  assert.equal(combined.mcp['GET /things']._meta['io.github.hamr0.rwxmap/class'], 'r');
-  assert.equal(combined.mcp['PUT /things/{id}']._meta['io.github.hamr0.rwxmap/class'], 'w');
+  assert.equal(combined.jev.changed, 2);
+  assert.equal(combined.mcp['GET /things']._meta['io.github.hamr0.rwxmap/class'], 'x');
+  assert.equal(combined.mcp['PUT /things/{id}']._meta['io.github.hamr0.rwxmap/class'], 'x');
   assert.equal(combined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/class'], 'x');
   assert.match(stdout.text(), /3 failed/);
 });
@@ -906,7 +911,7 @@ test('run: with a key, stdout prints the disclosure banner and the on-mode summa
   assert.match(text, /Jev: on — sends method, path, operationId, summary, description of 3 operation/);
   assert.match(text, /api\.typesafe\.ai/);
   assert.match(text, /Your key, your cost\./);
-  assert.match(text, /Jev: on — 3 sent · 3 answered · 0 failed \(letter kept\) · 0 letters changed/);
+  assert.match(text, /Jev: on — 3 sent · 3 answered · 0 failed \(x, review tight\) · 0 letters changed/);
 });
 
 // Bar 8 cost figure: the `jev` summary sums answered rows' token usage;
@@ -931,7 +936,7 @@ test('run: jev.tokens sums answered rows usage, skips failed rows, and stays out
   assert.equal(combined.jev.answered, 2);
   assert.equal(combined.jev.failed, 1);
   assert.deepEqual(combined.jev.tokens, { input: 1200, output: 50 });
-  assert.match(stdout.text(), /Jev: on — 3 sent · 2 answered · 1 failed \(letter kept\) · 1 letters changed · 1200 in \/ 50 out tokens\n/);
+  assert.match(stdout.text(), /Jev: on — 3 sent · 2 answered · 1 failed \(x, review tight\) · 1 letters changed · 1200 in \/ 50 out tokens\n/);
 
   // The moved row carries exactly {p, model}; no row carries usage.
   const sidecarText = fs.readFileSync(path.join(outDir, 'example.rwxmap.review.json'), 'utf8');
@@ -1023,11 +1028,11 @@ test('run (D129): a fired jev-lower row gets one second call, the changes questi
   assert.equal(combined.jev.changed, 1);
   assert.deepEqual(combined.jev.tokens, { input: 140, output: 3 });
   assert.equal(mystery.letter, 'r');
-  assert.equal(mystery.marker, 'settled');
+  assert.equal(mystery.marker, 'loose');
   assert.equal(mystery.evidence, 'jev');
   assert.deepEqual(mystery.jev, { p: JEV_LOWER_THRESHOLD, model: 'jev-1.0.0', pChanges: JEV_LOWER_R_THRESHOLD });
   assert.equal(combined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/class'], 'r');
-  assert.match(stdout, /Jev: on — 4 sent · 4 answered · 0 failed \(letter kept\) · 1 letters changed · 140 in \/ 3 out tokens\n/);
+  assert.match(stdout, /Jev: on — 4 sent · 4 answered · 0 failed \(x, review tight\) · 1 letters changed · 140 in \/ 3 out tokens\n/);
 });
 
 test('run (D129): changes above 0.50 leaves a fired jev-lower row at w', async () => {
@@ -1040,7 +1045,7 @@ test('run (D129): changes above 0.50 leaves a fired jev-lower row at w', async (
   assert.deepEqual(mystery.jev, { p: 0.01, model: 'jev-1.0.0' });
 });
 
-test('run (D129): a failed, malformed or other-model second answer leaves the row at w and is reported', async () => {
+test('run (D129): a failed or malformed second answer makes the row undecided (x, review tight); an other-model one leaves it at w (D129, D133)', async () => {
   /** @type {Array<[string, (body: any) => any, number]>} label, response, failed count */
   const cases = [
     ['HTTP error', () => ({ ok: false, status: 400, json: async () => ({}) }), 1],
@@ -1055,12 +1060,19 @@ test('run (D129): a failed, malformed or other-model second answer leaves the ro
     });
     const { combined, mystery } = await runJevSpec(fetchImpl);
     assert.equal(calls.length, 4, label);
-    assert.equal(mystery.letter, 'w', label);
-    assert.deepEqual(mystery.jev, { p: 0.01, model: 'jev-1.0.0' }, label);
+    if (failedCount === 1) {
+      assert.equal(mystery.letter, 'x', label);
+      assert.equal(mystery.marker, 'tight', label);
+      assert.equal(mystery.evidence, 'floor', label);
+      assert.equal(mystery.jev, undefined, label);
+    } else {
+      assert.equal(mystery.letter, 'w', label);
+      assert.deepEqual(mystery.jev, { p: 0.01, model: 'jev-1.0.0' }, label);
+    }
     assert.equal(combined.jev.sent, 4, label);
     assert.equal(combined.jev.failed, failedCount, label);
     assert.equal(combined.jev.answered, 4 - failedCount, label);
-    assert.equal(combined.jev.changed, 1, label);
+    assert.equal(combined.jev.changed, failedCount === 1 ? 0 : 1, label);
   }
 });
 
@@ -1997,7 +2009,7 @@ test('run (D133): default mode a with an engine sends only loose and tight rows 
   assert.match(stdout, new RegExp(`^rwxmap: rwxlite: on \\(${D133_MODEL.replace(/[+.]/g, '\\$&')}\\) — 3 sent · 1 raised · 1 lowered · 0 kept · 1 undecided`, 'm'));
   assert.doesNotMatch(stdout, /rwxlite: off/);
   const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
-  assert.deepEqual(combined.rwxlite, { mode: 'on', model: D133_MODEL, sent: 3, raised: 1, lowered: 1, kept: 0, undecided: 1 });
+  assert.deepEqual(combined.rwxlite, { mode: 'on', model: D133_MODEL, pass: 'a', confidence: null, sent: 3, raised: 1, lowered: 1, kept: 0, undecided: 1 });
   assert.equal(combined.jev.mode, 'off');
   // Every moved row publishes evidence rwxlite, in the sidecar, the MCP _meta and the OpenAPI copy.
   const rows = readJson(path.join(outDir, 'example.rwxmap.review.json')).rows;
@@ -2006,15 +2018,89 @@ test('run (D133): default mode a with an engine sends only loose and tight rows 
   assert.equal(combined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/evidence'], 'rwxlite');
 });
 
-test('run (D133): --engine rwxlite on its own (mode b) is not built: with an engine it fails loudly, with no model it behaves like no model', async () => {
-  const withEngine = await runD133(['--engine', 'rwxlite'], { rwxliteEngine: { model: D133_MODEL, run: async () => [] } });
-  assert.equal(withEngine.code, 1);
-  assert.match(withEngine.stderr, /mode b\) is not built yet/);
-  assert.deepEqual(fs.readdirSync(withEngine.outDir), []);
+/** An answer whose letter is `letter` with share `p` (the same shares secondpass.test.js uses). */
+function d133Ans(letter, p, model = D133_MODEL) {
+  if (letter === 'x') return { pIsX: p, pChanges: p + (1 - p) / 2, model };
+  if (letter === 'w') return { pIsX: (1 - p) / 2, pChanges: (1 - p) / 2 + p, model };
+  return { pIsX: (1 - p) / 2, pChanges: 1 - p, model };
+}
 
+/** Mode b engine: answers by operationId, records what was sent. */
+function modeBEngine(byOp, sent = []) {
+  return async (items) => {
+    sent.push(items.map((i) => i.operationId).sort());
+    return items.map((i) => byOp[i.operationId]);
+  };
+}
+
+test('run (D133): --engine rwxlite (mode b) judges every row at the default confidence 95', async () => {
+  const sent = [];
+  const engine = modeBEngine({
+    deleteThingPermission: d133Ans('w', 0.96), // x -> w at 0.96 >= 0.95: lowered
+    listThings: d133Ans('r', 0.98), // kept
+    updateThingArchive: d133Ans('x', 0.99), // w -> x: raised
+    updateThing: d133Ans('w', 0.90), // under 0.95: undecided
+    // doMystery: no answer: undecided
+  }, sent);
+  const { code, stdout, stderr, outDir } = await runD133(['--engine', 'rwxlite'], { rwxliteEngine: { model: D133_MODEL, run: engine } });
+  assert.equal(code, 0, stderr);
+  assert.equal(sent.length, 1);
+  assert.equal(sent[0].length, 5, 'settled rows are sent too');
+  assert.deepEqual(d133Rows(outDir), {
+    'DELETE /things/{id}/permission': 'w/loose',
+    'GET /things': 'r/settled',
+    'POST /things/{id}/archive': 'x/tight',
+    'PUT /things/{id}': 'x/tight',
+    'POST /mystery': 'x/tight',
+  });
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.deepEqual(combined.rwxlite, { mode: 'on', model: D133_MODEL, pass: 'b', confidence: 95, sent: 5, raised: 1, lowered: 1, kept: 1, undecided: 2 });
+  assert.match(stdout, /^rwxmap: rwxlite: on \(.*\) — mode b, confidence 95 — 5 sent · 1 raised · 1 lowered · 1 kept · 2 undecided/m);
+  const byKey = Object.fromEntries(readJson(path.join(outDir, 'example.rwxmap.review.json')).rows.map((r) => [`${r.method} ${r.path}`, r.evidence]));
+  assert.equal(byKey['DELETE /things/{id}/permission'], 'rwxlite');
+  assert.equal(byKey['GET /things'], 'floor');
+  assert.equal(byKey['POST /mystery'], 'floor', 'an x row left undecided at x keeps its evidence');
+  assert.equal(byKey['PUT /things/{id}'], 'rwxlite');
+});
+
+test('run (D133): --confidence changes what mode b accepts (50 accepts a 0.90 answer, 99 asks about it)', async () => {
+  const answers = { deleteThingPermission: d133Ans('x', 0.995), listThings: d133Ans('r', 0.9), updateThingArchive: d133Ans('w', 0.9), updateThing: d133Ans('w', 0.9), doMystery: d133Ans('w', 0.9) };
+  for (const [c, expected] of [
+    ['50', { 'DELETE /things/{id}/permission': 'x/settled', 'GET /things': 'r/settled', 'POST /things/{id}/archive': 'w/loose', 'PUT /things/{id}': 'w/loose', 'POST /mystery': 'w/loose' }],
+    ['99', { 'DELETE /things/{id}/permission': 'x/settled', 'GET /things': 'x/tight', 'POST /things/{id}/archive': 'x/tight', 'PUT /things/{id}': 'x/tight', 'POST /mystery': 'x/tight' }],
+  ]) {
+    const r = await runD133(['--engine', 'rwxlite', '--confidence', c], { rwxliteEngine: { model: D133_MODEL, run: modeBEngine(answers) } });
+    assert.equal(r.code, 0, r.stderr);
+    assert.deepEqual(d133Rows(r.outDir), expected, `confidence ${c}`);
+    assert.equal(readJson(path.join(r.outDir, 'example.rwxmap.json')).rwxlite.confidence, Number(c));
+  }
+});
+
+test('run (D133): mode b with no model is mechanical and says so; with --model small it is accepted', async () => {
   const noModel = await runD133(['--engine', 'rwxlite', '--confidence', '70']);
   assert.equal(noModel.code, 0, noModel.stderr);
   assert.match(noModel.stdout, /rwxlite: off \(mechanical\) — could not get the model/);
+  assert.equal(d133Rows(noModel.outDir)['POST /mystery'], 'x/tight');
+  const small = await runD133(['--engine', 'rwxlite', '--confidence', '50', '--model', 'small']);
+  assert.equal(small.code, 0, small.stderr);
+  assert.match(small.stdout, /rwxlite: off \(mechanical\)/);
+});
+
+test('run (D133): mode a with no loose or tight row fetches no model and says "nothing to check"', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', { openapi: '3.0.0', paths: { '/things': { get: { operationId: 'listThings' } }, '/things/{id}': { delete: { operationId: 'deleteThing' } } } });
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  let calls = 0;
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+    cwd: dir, stdout, stderr: captureStream(), jevKey: '', xdgCacheHome: mkScratch(), modelFetch: async () => { calls += 1; throw new Error('must not be called'); },
+  });
+  assert.equal(code, 0);
+  assert.equal(calls, 0);
+  assert.match(stdout.text(), /^rwxmap: rwxlite: nothing to check \(no row is marked loose or tight\); no model was fetched$/m);
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.equal(combined.rwxlite.mode, 'off');
+  assert.equal(combined.rwxlite.reason, 'nothing to check');
 });
 
 test('run (D133): --confidence is valid only with --engine rwxlite, and only as a whole number 0-99', async () => {
@@ -2124,7 +2210,7 @@ test('run (D133): offline with a verified cached model -> "using cached ...", th
   const seen = [];
   const r = await runD133([], { xdgCacheHome: xdg, rwxliteImporter: fakeRwxlite(model, { isX: 0.99, changes: 0.99 }, seen) });
   assert.equal(r.code, 0, r.stderr);
-  assert.match(r.stderr, new RegExp(`^rwxmap: using cached ${model.replace(/[+.]/g, '\\$&')}, could not check for a newer one`, 'm'));
+  assert.match(r.stderr, new RegExp(`^rwxmap: using cached ${model.replace(/[+.]/g, '\\$&')}( \\(no cached exact model, so the small one\\))?, could not check for a newer one`, 'm'));
   assert.equal(seen.length, 1);
   assert.equal(seen[0].dir, dir);
   assert.match(r.stdout, /rwxlite: on \(/);

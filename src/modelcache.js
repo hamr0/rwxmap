@@ -46,9 +46,10 @@ function msg(e) { return e instanceof Error ? e.message : String(e); }
 
 /**
  * Check one model directory; throws an Error whose message is the reason on
- * ANY problem (fail closed). Returns the model string and the model file path.
+ * ANY problem (fail closed). Returns the model string, the model file path and
+ * the manifest's modelFile name.
  * @param {string} dir
- * @returns {{model: string, file: string}}
+ * @returns {{model: string, file: string, modelFile: string}}
  */
 export function verifyModelDir(dir) {
   const name = path.basename(dir);
@@ -71,7 +72,7 @@ export function verifyModelDir(dir) {
     if (hex !== want) throw new Error(`hash mismatch: sha256 of ${file} is not the one in manifest.json`);
     if (file === manifest.modelFile && hex.slice(0, 8) !== sha8) throw new Error(`hash mismatch: sha256 of ${file} does not start with the sha8 in ${name}`);
   }
-  return { model: name, file: path.join(dir, manifest.modelFile) };
+  return { model: name, file: path.join(dir, manifest.modelFile), modelFile: manifest.modelFile };
 }
 
 /**
@@ -80,13 +81,19 @@ export function verifyModelDir(dir) {
  * lower one (it is listed in `rejected` so the caller can warn). Never throws:
  * every outcome is a status the caller prints.
  *   none     no cache dir or no rwxlite-* directory in it
- *   ok       a verified model; `file` is its model file
+ *   ok       a verified model; `file` is its model file. With `preferModelFile`
+ *            (the manifest's modelFile of the variant the run chose, for
+ *            example model-fp32.onnx), the highest valid model with THAT
+ *            modelFile wins even over a higher one of the other variant; only
+ *            when none exists is the highest valid one of any kind returned,
+ *            with `otherVariant: true`
  *   bad      directories exist but none verifies; `dir` is the highest one,
  *            NOT used
  * @param {{XDG_CACHE_HOME?: string}} [environ]
- * @returns {{status: 'none'} | {status: 'ok', model: string, file: string, rejected: Array<{dir: string, reason: string}>} | {status: 'bad', dir: string, reason: string}}
+ * @param {string} [preferModelFile]
+ * @returns {{status: 'none'} | {status: 'ok', model: string, file: string, otherVariant?: true, rejected: Array<{dir: string, reason: string}>} | {status: 'bad', dir: string, reason: string}}
  */
-export function findModel(environ = process.env) {
+export function findModel(environ = process.env, preferModelFile) {
   const root = cacheDir(environ);
   let names;
   try { names = fs.readdirSync(root, { withFileTypes: true }).filter((e) => e.isDirectory() && e.name.startsWith('rwxlite-')).map((e) => e.name); } catch { return { status: 'none' }; }
@@ -100,13 +107,22 @@ export function findModel(environ = process.env) {
   all.sort((a, b) => b.version[0] - a.version[0] || b.version[1] - a.version[1] || b.version[2] - a.version[2] || (a.dir < b.dir ? -1 : 1));
   /** @type {Array<{dir: string, reason: string}>} */
   const rejected = [];
+  /** @type {{ok: {model: string, file: string, modelFile: string}, rejectedBefore: number}|null} */
+  let firstValid = null;
   for (const c of all) {
     try {
       const ok = verifyModelDir(c.dir);
-      return { status: 'ok', model: ok.model, file: ok.file, rejected };
+      if (preferModelFile === undefined || ok.modelFile === preferModelFile) {
+        return { status: 'ok', model: ok.model, file: ok.file, rejected };
+      }
+      if (!firstValid) firstValid = { ok, rejectedBefore: rejected.length };
     } catch (err) {
       rejected.push({ dir: c.dir, reason: msg(err) });
     }
+  }
+  if (firstValid) {
+    const { ok, rejectedBefore } = firstValid;
+    return { status: 'ok', model: ok.model, file: ok.file, otherVariant: true, rejected: rejected.slice(0, rejectedBefore) };
   }
   return { status: 'bad', dir: rejected[0].dir, reason: rejected[0].reason };
 }

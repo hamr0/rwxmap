@@ -542,15 +542,9 @@ export function assertJevMove(tier, from, to) {
  *   the pre-D129 call, unchanged. On any tier without a second question it
  *   is ignored.
  * A moved verdict's `review` hint is RECOMPUTED here, through flow.js's
- * reviewHint — the same one writer classifyRow uses — because a row whose
- * class moved must never carry the hint its old class earned. `options.method`
- * supplies the row's method for that recomputation; it is optional because a
- * moved verdict's source is always 'jev', which rules out 'loose' outright,
- * and the one hint the method could still decide ('tight' = x on a POST) is
- * unreachable from every tier: jev-lower ends at w or r and jev-raise-get at
- * w, and jev-raise-wx reads only the 'method-floor' pile, which step 3 fills
- * with PUT and PATCH alone. Passing the method costs nothing and keeps that
- * argument from having to hold.
+ * reviewHint — the same one writer classifyRow uses — telling it what the
+ * tier did (D133): a raise is 'tight' if it ends at x, else 'loose'; a
+ * lowering is 'loose'. `options.method` is passed through for the same call.
  *
  * @param {{thresholds?: Record<string, unknown>, method?: string}} [options]
  *   `thresholds` overrides a tier's default by tier name, e.g.
@@ -607,9 +601,28 @@ export function applyJev(verdict, answer, options) {
     rule: tier,
     source: 'jev',
     matched: [],
-    review: reviewHint(options && options.method, to, 'jev'),
+    review: reviewHint(options && options.method, to, 'jev', spec.direction === 'raise' ? 'raised' : 'lowered'),
     jev: pChanges === undefined ? { p, model } : { p, model, pChanges },
   };
+}
+
+/**
+ * A row Jev could not answer for (D133: an errored, timed-out or malformed
+ * call, on the first question or the second): undecided, so x with review
+ * 'tight'. THE ONE WRITER of that verdict. A row a tier does not own is
+ * returned unchanged. A row already at x keeps everything else mechanical gave
+ * it; a row at w or r moves to x with source 'jev' and no word, matched
+ * list or `jev` block (there is no answer to record).
+ * @param {Verdict} verdict the MECHANICAL verdict of the row.
+ * @param {{method?: string}} [options]
+ * @returns {Verdict}
+ */
+export function jevUndecided(verdict, options) {
+  const tier = needsJev(verdict);
+  if (!tier) return verdict;
+  const review = reviewHint(options && options.method, 'x', 'jev', 'undecided');
+  if (verdict.class === 'x') return { ...verdict, review };
+  return { class: 'x', step: verdict.step, rule: tier, source: 'jev', matched: [], review };
 }
 
 /**

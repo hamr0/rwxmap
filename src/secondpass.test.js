@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 
 import { secondPass, LOWER_MIN_P } from './secondpass.js';
 import { classifyRow } from './flow.js';
+import { readFileSync } from 'node:fs';
+import { gunzipSync } from 'node:zlib';
 
 const MODEL = 'rwxlite-1.0.0+0123abcd';
 
@@ -219,4 +221,72 @@ test('lean: every item sent to the engine carries the mechanical class and rule,
   }
   // all kept: the verdicts (the published side) carry no lean
   for (const v of verdicts) assert.equal('lean' in v, false);
+});
+
+// ---- MODE B (options.confidence): rwxlite alone judges every row ----
+
+test('mode b: every row is sent, settled ones too, and the summary records pass b and the confidence', async () => {
+  const { engine, sent } = engineOf({});
+  const { summary } = await secondPass(OPS, mech(), engine, { model: MODEL, confidence: 95 });
+  assert.deepEqual(sent, [[0, 1, 2, 3, 4, 5]]);
+  assert.deepEqual(summary, { model: MODEL, pass: 'b', confidence: 95, sent: 6, raised: 0, lowered: 0, kept: 0, undecided: 6 });
+  const a = await secondPass(OPS, mech(), engineOf({}).engine, { model: MODEL });
+  assert.deepEqual([a.summary.pass, a.summary.confidence], ['a', null]);
+});
+
+test('mode b: accepted only at p >= confidence/100, raise, keep and lower alike; a lowering needs no more than the confidence', async () => {
+  const byIndex = {
+    0: ans('w', 0.96), // DELETE x -> w at 0.96 >= 0.95: lowered (mode a would need 0.97)
+    1: ans('r', 0.95), // GET r kept, exactly at the confidence
+    2: ans('x', 0.99), // POST w -> x raised
+    3: ans('w', 0.94), // just under: undecided -> x tight
+    4: undefined, // error -> undecided (already x: stays x, tight, evidence kept)
+    5: ans('r', 0.5), // POST r (list) under: undecided -> x tight
+  };
+  const before = mech();
+  const { verdicts, summary } = await secondPass(OPS, before, engineOf(byIndex).engine, { model: MODEL, confidence: 95 });
+  assert.deepEqual(verdicts.map((v) => [v.class, v.review, v.source]), [
+    ['w', 'loose', 'rwxlite'],
+    ['r', 'settled', 'floor'],
+    ['x', 'tight', 'rwxlite'],
+    ['x', 'tight', 'rwxlite'],
+    ['x', 'tight', 'floor'],
+    ['x', 'tight', 'rwxlite'],
+  ]);
+  assert.deepEqual([summary.raised, summary.lowered, summary.kept, summary.undecided], [1, 1, 1, 3]);
+  const lowAt70 = await secondPass(OPS, mech(), engineOf(byIndex).engine, { model: MODEL, confidence: 70 });
+  assert.equal(lowAt70.verdicts[3].class, 'w', '0.94 is accepted at confidence 70');
+  assert.equal(lowAt70.verdicts[3].review, 'loose');
+});
+
+test('mode b: a bad confidence fails loudly', async () => {
+  for (const confidence of [100, -1, 7.5, NaN, '95']) {
+    await assert.rejects(secondPass(OPS, mech(), engineOf({}).engine, { model: MODEL, confidence: /** @type {any} */ (confidence) }), /confidence must be a whole number from 0 to 99/);
+  }
+});
+
+// ---- PARITY with poc/d133-mode-b/readout.txt, through the REAL code ----
+
+test('mode b parity: rwxlite fresh 949 rows through secondPass reproduce the readout main table at c = 70, 95, 97', async () => {
+  const dir = new URL('../data/rwxlite-fresh-2026-11-03/', import.meta.url);
+  const lines = (s) => s.split(/\r?\n/).filter(Boolean);
+  const rows = lines(gunzipSync(readFileSync(new URL('decision.jsonl.gz', dir))).toString('utf8')).map((l) => JSON.parse(l));
+  const truth = new Map(lines(readFileSync(new URL('truth.csv', dir), 'utf8')).slice(1).map((l) => l.split(',')));
+  const readout = lines(readFileSync(new URL('../poc/d133-mode-b/readout.txt', import.meta.url), 'utf8'));
+  assert.equal(rows.length, 949);
+  const ops = rows.map((r) => ({ method: r.method, path: r.state.path, operationId: r.state.operationId, summary: r.state.summary, description: r.state.description }));
+  const rank = { r: 0, w: 1, x: 2 };
+  const engine = async (items) => items.map((it) => ({ pIsX: rows[it.index].isX, pChanges: rows[it.index].changes, model: MODEL }));
+
+  for (const c of [70, 95, 97]) {
+    const { verdicts, summary } = await secondPass(ops, ops.map((o) => classifyRow(o)), engine, { model: MODEL, confidence: c });
+    let exact = 0; let loose = 0; let tight = 0;
+    verdicts.forEach((v, i) => {
+      const t = truth.get(rows[i].id);
+      if (v.class === t) exact += 1; else if (rank[v.class] < rank[t]) loose += 1; else tight += 1;
+    });
+    const pc = (k) => `${k} (${(100 * k / 949).toFixed(1)}%)`;
+    const line = `c=${String(c).padStart(2)}: exact ${pc(exact)}, too loose ${pc(loose)}, too tight ${pc(tight)}, asked ${pc(summary.undecided)}`;
+    assert.ok(readout.includes(line), `readout.txt has no line: ${line}`);
+  }
 });

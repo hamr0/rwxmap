@@ -1,7 +1,9 @@
-// The D133 second pass (mode a: mechanical -> rwxlite). Mechanical has
-// already classified every row; this file asks an ENGINE about exactly the
-// rows mechanical marks for a human (review 'loose' or 'tight') and applies
-// what comes back under fixed rules. It holds no word list and runs no model:
+// The D133 second pass. Mechanical has already classified every row. Mode a
+// (mechanical -> rwxlite) asks an ENGINE about exactly the rows mechanical
+// marks for a human (review 'loose' or 'tight') and applies what comes back
+// under fixed rules. Mode b (rwxlite alone) is the same file with
+// `options.confidence` set: every row is sent and the answer is accepted only
+// at p >= confidence/100 (see MODE B below). It holds no word list and runs no model:
 // the engine is a function handed in (rwxlite itself, or a stub in a test).
 //
 // Each item sent to the engine carries `lean: {class, rule}`, rwxmap's own
@@ -24,7 +26,13 @@
 //   L == M (keep)   -> keep the verdict untouched (its review stays as derived).
 //   L < M (lower)   -> accept L only if p >= LOWER_MIN_P, review loose;
 //                      otherwise class x, undecided (review tight).
-// 'settled' rows are never sent and never change.
+// Mode a: 'settled' rows are never sent and never change.
+//
+// MODE B (options.confidence, an integer 0-99). Every row is sent, settled
+// ones too. A usable answer is accepted (raise, keep or lower alike) only at
+// p >= confidence/100; a lowering needs no more than that (LOWER_MIN_P is
+// mode a's). Below it, or on any unusable answer, the row is x, undecided
+// (review tight). The answer reading above is shared, not copied.
 //
 // WRITERS. The `review` marker is written only by flow.js's reviewHint; this
 // file passes it what the second pass did. `evidence` (the verdict's `source`)
@@ -55,7 +63,7 @@ const RANK = { r: 0, w: 1, x: 2 };
  * @param {string} model the run's model string
  * @returns {{letter: 'r'|'w'|'x', p: number}|null}
  */
-function readAnswer(answer, model) {
+export function readAnswer(answer, model) {
   if (!answer || typeof answer !== 'object' || answer.error) return null;
   const { pIsX, pChanges } = answer;
   if (typeof pIsX !== 'number' || !Number.isFinite(pIsX) || pIsX < 0 || pIsX > 1) return null;
@@ -79,12 +87,19 @@ function readAnswer(answer, model) {
  * @param {Operation[]} ops
  * @param {Verdict[]} verdicts mechanical verdicts, same order as ops; not mutated.
  * @param {Engine} engine
- * @param {{model: string}} options the run's model string, rwxlite-<semver>+<sha8>.
- * @returns {Promise<{verdicts: Verdict[], summary: {model: string, sent: number, raised: number, lowered: number, kept: number, undecided: number}}>}
+ * @param {{model: string, confidence?: number}} options the run's model string,
+ *   rwxlite-<semver>+<sha8>; `confidence` (integer 0-99) switches on mode b.
+ * @returns {Promise<{verdicts: Verdict[], summary: {model: string, pass: 'a'|'b', confidence: number|null, sent: number, raised: number, lowered: number, kept: number, undecided: number}}>}
  */
 export async function secondPass(ops, verdicts, engine, options) {
   const model = options && options.model;
   parseModelString(model);
+  const confidence = options.confidence;
+  const modeB = confidence !== undefined;
+  if (modeB && (!Number.isInteger(confidence) || /** @type {number} */ (confidence) < 0 || /** @type {number} */ (confidence) > 99)) {
+    throw new Error(`secondPass: confidence must be a whole number from 0 to 99, got ${confidence}`);
+  }
+  const minP = modeB ? /** @type {number} */ (confidence) / 100 : 0;
   if (typeof engine !== 'function') throw new Error('secondPass: engine must be a function');
   if (!Array.isArray(ops) || !Array.isArray(verdicts) || ops.length !== verdicts.length) {
     throw new Error('secondPass: ops and verdicts must be arrays of the same length');
@@ -93,7 +108,7 @@ export async function secondPass(ops, verdicts, engine, options) {
   /** @type {EngineItem[]} */
   const items = [];
   verdicts.forEach((v, index) => {
-    if (v.review !== 'loose' && v.review !== 'tight') return;
+    if (!modeB && v.review !== 'loose' && v.review !== 'tight') return;
     const { method, path, operationId, summary, description } = ops[index];
     items.push({ index, method, path, operationId, summary, description, lean: { class: v.class, rule: v.rule } });
   });
@@ -110,12 +125,13 @@ export async function secondPass(ops, verdicts, engine, options) {
   }
 
   const out = verdicts.slice();
-  const summary = { model, sent: items.length, raised: 0, lowered: 0, kept: 0, undecided: 0 };
+  const summary = { model, pass: /** @type {'a'|'b'} */ (modeB ? 'b' : 'a'), confidence: modeB ? confidence : null, sent: items.length, raised: 0, lowered: 0, kept: 0, undecided: 0 };
 
   items.forEach((item, i) => {
     const v = verdicts[item.index];
     const method = ops[item.index].method;
-    const read = readAnswer(answers[i], model);
+    let read = readAnswer(answers[i], model);
+    if (read && read.p < minP) read = null; // mode b: short of the confidence is undecided
 
     if (read && read.letter === v.class) {
       summary.kept += 1;
@@ -126,7 +142,7 @@ export async function secondPass(ops, verdicts, engine, options) {
       out[item.index] = moved(v, read.letter, 'rwxlite-raise', reviewHint(method, read.letter, v.source, 'raised'));
       return;
     }
-    if (read && read.p >= LOWER_MIN_P) {
+    if (read && read.p >= (modeB ? minP : LOWER_MIN_P)) {
       summary.lowered += 1;
       out[item.index] = moved(v, read.letter, 'rwxlite-lower', reviewHint(method, read.letter, v.source, 'lowered'));
       return;

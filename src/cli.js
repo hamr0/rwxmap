@@ -42,7 +42,7 @@
 // JEV (PRD item c, D118-120; D133): runs ONLY with --engine jev (a key alone
 // leaves it off and says so); --engine jev without a key exits 1; every run
 // says loudly which mode ran. Without Jev the default is the D133 rwxlite
-// second pass (secondpass.js), which finds no model yet and stays mechanical. The key is
+// second pass (secondpass.js); --engine rwxlite alone is mode b. The key is
 // RWXMAP_JEV_KEY from the environment, else the RWXMAP_JEV_KEY line of a
 // `.env` file in `cwd`, parsed with Node's own util.parseEnv (no dotenv
 // dependency) -- an already-set variable wins, only that one variable is
@@ -54,8 +54,9 @@
 // fails closed on anything unusable), and hand the FINAL verdicts to
 // buildOutput's `verdicts` option so exportGate/exportSidecar classify
 // nothing a second time. A row Jev cannot answer for -- a request
-// failure, a bad answer -- keeps its mechanical verdict; the run never
-// stops on a Jev error.
+// failure, a bad answer, on either question -- is undecided (D133): x with
+// review tight, through jev.js's jevUndecided; the run never stops on a Jev
+// error.
 //
 // LOCAL-FILE VENDOR DEFAULT (user ruling, orchestrator escalation 1
 // resolved): "a local file -> the spec's first server host." Reuses
@@ -94,7 +95,7 @@ import { loadSpec } from './load.js';
 import { findSpec, firstServerHost } from './discover.js';
 import { operationsFrom, operationEntries, exportGate, exportSidecar, classifyOperations } from './exporter.js';
 import { resolvedServers, tenantServerTemplates } from './servers.js';
-import { needsJev, applyJev, jevTier } from './jev.js';
+import { needsJev, applyJev, jevTier, jevUndecided } from './jev.js';
 import { runJevBatch } from './jev-client.js';
 import { secondPass } from './secondpass.js';
 import { ensureModel } from './modeldownload.js';
@@ -629,14 +630,16 @@ function jevOffSummary() {
  * The `rwxlite` top-level field (D133), shaped like `jev`: mode, model and
  * the second pass's counts. The one writer of this field: "off" carries the
  * reason no model ran; "on" carries secondPass's own summary.
- * @param {{reason?: string, summary?: {model: string, sent: number, raised: number, lowered: number, kept: number, undecided: number}}} [from]
- * @returns {{mode: 'off'|'on', model: string|null, reason?: string, sent: number, raised: number, lowered: number, kept: number, undecided: number}}
+ * "on" also records `pass` ('a' or 'b') and `confidence` (the mode b setting,
+ * else null).
+ * @param {{reason?: string, summary?: {model: string, pass: 'a'|'b', confidence: number|null, sent: number, raised: number, lowered: number, kept: number, undecided: number}}} [from]
+ * @returns {{mode: 'off'|'on', model: string|null, pass?: 'a'|'b', confidence?: number|null, reason?: string, sent: number, raised: number, lowered: number, kept: number, undecided: number}}
  */
 function rwxliteSummary(from = {}) {
   const { reason = 'not run', summary } = from;
   if (summary) {
-    const { model, sent, raised, lowered, kept, undecided } = summary;
-    return { mode: 'on', model, sent, raised, lowered, kept, undecided };
+    const { model, pass, confidence, sent, raised, lowered, kept, undecided } = summary;
+    return { mode: 'on', model, pass, confidence, sent, raised, lowered, kept, undecided };
   }
   return { mode: 'off', model: null, reason, sent: 0, raised: 0, lowered: 0, kept: 0, undecided: 0 };
 }
@@ -734,10 +737,10 @@ function loadJevKey(cwd) {
 /**
  * Run the optional Jev tiers (D118-120) over one mechanically-classified
  * batch. NEVER THROWS and NEVER STOPS THE RUN: any row Jev cannot usefully
- * answer for (a request failure, a bad/missing answer) keeps exactly the
- * mechanical verdict `verdicts` already gave it — jev.js's applyJev is the
- * one place that decides that, and it already fails closed, so this
- * function only has to feed it real answers or nothing at all.
+ * answer for (a request failure, a bad/missing answer, on the first or the
+ * second question) is undecided (D133) — jev.js's jevUndecided makes it x
+ * with review tight. Successful answers go through applyJev, which decides
+ * the letter and fails closed.
  *
  * Sends ONLY the rows jev.js's needsJev names — one askJev call per such
  * row, never the whole operation list — plus, for a tier with a second
@@ -745,7 +748,7 @@ function loadJevKey(cwd) {
  * here), one more askJev call per row the first answer moved, and none
  * for any other row. "sent" is exactly the request count this run makes;
  * "answered" and "failed" count requests too, so a failed second call
- * shows as one failure while its row keeps the first answer's move.
+ * shows as one failure and its row is undecided (x, review tight).
  *
  * @param {import('./types.js').Operation[]} ops
  * @param {import('./types.js').Verdict[]} verdicts  mechanical, same
@@ -796,6 +799,7 @@ async function runJev(ops, verdicts, jevOpts) {
     const answer = answers[j];
     if (!answer) {
       failed += 1;
+      finalVerdicts[index] = jevUndecided(verdicts[index], { method: ops[index].method });
       continue;
     }
     count(answer);
@@ -813,7 +817,8 @@ async function runJev(ops, verdicts, jevOpts) {
     const { j, index } = seconds[k];
     const second = secondAnswers[k];
     if (!second) {
-      failed += 1; // the row keeps the first answer's move (w)
+      failed += 1;
+      finalVerdicts[index] = jevUndecided(verdicts[index], { method: ops[index].method });
       continue;
     }
     count(second);
@@ -852,6 +857,9 @@ function argError(err) {
 
 const ENGINES = ['rwxlite', 'jev', 'mechanical'];
 
+/** Mode b's confidence when --confidence is not given (user ruling, 2026-11-04). */
+const DEFAULT_CONFIDENCE = 95;
+
 const USAGE = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--engine rwxlite|jev|mechanical] [--confidence <0-99>] [--model small] [--force]';
 
 const HELP = `${USAGE}
@@ -865,7 +873,7 @@ Options:
   -o <dir>       write the output files here (default: the current folder)
   --vendor <n>   name for the output files and tool keys (default: the host)
   --engine <e>   rwxlite | jev | mechanical (default: mechanical, then rwxlite on the rows marked loose or tight)
-  --confidence <0-99>  only with --engine rwxlite
+  --confidence <0-99>  only with --engine rwxlite: rwxlite alone judges every row; a row under this share is x, review tight (default 95)
   --model small  the smaller rwxlite model (23 MB instead of 91 MB); only where rwxlite runs
   --force        overwrite existing output files
   -h, --help     this help
@@ -1073,9 +1081,19 @@ export async function run(argv, env) {
   let engineLine = 'rwxmap: rwxlite: off (mechanical)\n';
   let rwxliteField = rwxliteSummary({ reason: engineName === 'jev' ? 'engine jev' : 'engine mechanical' });
   if (engineName !== 'jev' && engineName !== 'mechanical') {
-    // Mode a (default): mechanical -> rwxlite. No model, no stop.
+    // Mode a (default): mechanical -> rwxlite on the loose and tight rows.
+    // Mode b (--engine rwxlite): rwxlite alone on every row, accepted at
+    // --confidence (default 95). No model, no stop.
+    const modeB = engineName === 'rwxlite';
+    const confidence = modeB ? (values.confidence !== undefined ? Number(values.confidence) : DEFAULT_CONFIDENCE) : undefined;
+    const toSend = modeB ? verdicts.length : verdicts.reduce((n, v) => (v.review === 'loose' || v.review === 'tight' ? n + 1 : n), 0);
     let engine = env.rwxliteEngine;
-    if (!engine) {
+    if (toSend === 0) {
+      const why = modeB ? 'the spec has no operations' : 'no row is marked loose or tight';
+      engineLine = `rwxmap: rwxlite: nothing to check (${why}); no model was fetched\n`;
+      rwxliteField = rwxliteSummary({ reason: 'nothing to check' });
+      engine = undefined;
+    } else if (!engine) {
       const got = await ensureModel({
         variant: values.model === 'small' ? 'small' : 'exact',
         environ: { XDG_CACHE_HOME: env.xdgCacheHome ?? process.env.XDG_CACHE_HOME },
@@ -1097,16 +1115,12 @@ export async function run(argv, env) {
         rwxliteField = rwxliteSummary({ reason });
       }
     }
-    if (engine) {
-      if (engineName === 'rwxlite') {
-        stderr.write('rwxmap: --engine rwxlite on its own (mode b) is not built yet\n');
-        return 1;
-      }
-      const result = await secondPass(ops, verdicts, engine.run, { model: engine.model });
+    if (engine && toSend > 0) {
+      const result = await secondPass(ops, verdicts, engine.run, { model: engine.model, confidence });
       verdicts.splice(0, verdicts.length, ...result.verdicts);
       const s = result.summary;
       rwxliteField = rwxliteSummary({ summary: s });
-      engineLine = `rwxmap: rwxlite: on (${s.model}) — ${s.sent} sent · ${s.raised} raised · ${s.lowered} lowered · ${s.kept} kept · ${s.undecided} undecided (x, review tight)\n`;
+      engineLine = `rwxmap: rwxlite: on (${s.model})${modeB ? ` — mode b, confidence ${s.confidence}` : ''} — ${s.sent} sent · ${s.raised} raised · ${s.lowered} lowered · ${s.kept} kept · ${s.undecided} undecided (x, review tight)\n`;
     }
   }
   if (key) {
@@ -1154,7 +1168,7 @@ export async function run(argv, env) {
   );
   stdout.write(
     jevSummary.mode === 'on'
-      ? `rwxmap: Jev: on — ${jevSummary.sent} sent · ${jevSummary.answered} answered · ${jevSummary.failed} failed (letter kept) · ${jevSummary.changed} letters changed · ${jevSummary.tokens.input} in / ${jevSummary.tokens.output} out tokens\n`
+      ? `rwxmap: Jev: on — ${jevSummary.sent} sent · ${jevSummary.answered} answered · ${jevSummary.failed} failed (x, review tight) · ${jevSummary.changed} letters changed · ${jevSummary.tokens.input} in / ${jevSummary.tokens.output} out tokens\n`
       : engineLine,
   );
   stdout.write(`rwxmap: wrote ${path.basename(mapPath)} + ${path.basename(reviewPath)} + ${path.basename(openapiPath)}\n`);

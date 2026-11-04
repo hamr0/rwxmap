@@ -154,3 +154,35 @@ test('findModel: an invalid higher version does not hide a valid lower one, and 
   assert.equal(r.rejected[0].dir, high.dir);
   assert.match(r.rejected[0].reason, /hash mismatch/);
 });
+
+/** putModel, but with a chosen model file name (a different variant). */
+function putVariant(xdg, version, modelFile) {
+  const m = putModel(xdg, version);
+  const bytes = fs.readFileSync(path.join(m.dir, 'model.bin'));
+  fs.renameSync(path.join(m.dir, 'model.bin'), path.join(m.dir, modelFile));
+  const manifest = JSON.parse(fs.readFileSync(path.join(m.dir, 'manifest.json'), 'utf8'));
+  manifest.modelFile = modelFile;
+  manifest.files = { [modelFile]: sha256(bytes), 'vocab.txt': manifest.files['vocab.txt'] };
+  fs.writeFileSync(path.join(m.dir, 'manifest.json'), JSON.stringify(manifest));
+  return m;
+}
+
+test('findModel: preferModelFile picks the highest valid model of that variant even under a higher one of the other', () => {
+  const xdg = scratch();
+  const exact = putVariant(xdg, '0.1.0', 'model-fp32.onnx');
+  const small = putVariant(xdg, '0.2.0', 'model-int8-pc.onnx');
+  const env = { XDG_CACHE_HOME: xdg };
+  const a = /** @type {any} */ (findModel(env, 'model-fp32.onnx'));
+  assert.deepEqual([a.status, a.model, a.otherVariant], ['ok', exact.model, undefined]);
+  const b = /** @type {any} */ (findModel(env, 'model-int8-pc.onnx'));
+  assert.deepEqual([b.status, b.model, b.otherVariant], ['ok', small.model, undefined]);
+  assert.equal(/** @type {any} */ (findModel(env)).model, small.model, 'no preference: the highest semver');
+});
+
+test('findModel: with none of the preferred variant, the highest valid of the other is returned and flagged otherVariant', () => {
+  const xdg = scratch();
+  putVariant(xdg, '0.1.0', 'model-int8-pc.onnx');
+  const hi = putVariant(xdg, '0.2.0', 'model-int8-pc.onnx');
+  const r = /** @type {any} */ (findModel({ XDG_CACHE_HOME: xdg }, 'model-fp32.onnx'));
+  assert.deepEqual([r.status, r.model, r.otherVariant], ['ok', hi.model, true]);
+});
