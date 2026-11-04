@@ -1,0 +1,238 @@
+row_id,provider,method,path,operationId,summary,description
+ex3-0880,novu.co,GET,/v1/agents,AgentsController_listAgents,List all agents,"Retrieve a cursor-paginated list of agents for the current environment. Use **after**, **before**, **limit**, **orderBy**, and **orderDirection** query parameters."
+ex3-0881,novu.co,POST,/v1/agents,AgentsController_createAgent,Create an agent,Create an agent scoped to the current environment. The identifier must be unique per environment. Set `runtime` to `managed` and supply `managedRuntime` to provision a provider-hosted agent brain.
+ex3-0882,novu.co,POST,/v1/agents/{agentId}/reply,AgentReplyController_handleAgentReplyHandler,Send an agent reply,"**Deprecated** — use `POST /v1/agents/events/ingest` (AgentEvent protocol).
+This route stays live for old `@novu/framework` and existing OpenAPI `sendReply` clients.
+Do not use it for new integrations.
+
+**Message actions**
+- `reply` — markdown, interactive card, or tool-approval card (optional `files`)
+- `edit` — update a previously delivered message in place
+- `deleteMessages` — remove rendered platform messages (history is kept)
+- `addReactions` — add emoji reactions to existing messages
+
+**Turn control**
+- `typing` — `{ status?: string }` to set status, or `""stop""` to clear
+- `resolve` — mark the conversation resolved (optionally with a final reply)
+- `error: true` — report a customer-runtime failure (cannot combine with other actions)
+
+**Signals & tools**
+- `signals` — metadata set/delete/clear, or trigger a Novu workflow
+- `toolResults` — persist tool outputs into conversation history
+- `toolApprovalRequest` — ledger a gated tool call (pair with an approval card reply)
+
+Returns `{ data: { messageId, platformThreadId } }` when a reply or edit is delivered;
+otherwise `{ data: null }`."
+ex3-0883,novu.co,DELETE,/v1/agents/{identifier},AgentsController_deleteAgent,Delete an agent,"Delete an agent by identifier, remove all agent-integration links, and clear the agent assignment from any workflows that reference it. For managed-runtime agents, pass `deleteFromProvider=true` to also archive the agent on the provider side (e.g. Anthropic). By default only the Novu record is deleted and the provider agent is left intact."
+ex3-0884,novu.co,GET,/v1/agents/{identifier},AgentsController_getAgent,Retrieve an agent,Retrieve an agent by its external identifier (not the internal MongoDB id).
+ex3-0885,novu.co,PATCH,/v1/agents/{identifier},AgentsController_updateAgent,Update an agent,Update an agent by its external identifier.
+ex3-0886,novu.co,PUT,/v1/agents/{identifier}/bridge,AgentsController_updateAgentBridge,Update an agent bridge,Update the bridge URL configuration for an agent. Used by the CLI to register dev tunnel URLs. Refuses to activate dev bridges on production environments.
+ex3-0887,novu.co,GET,/v1/agents/{identifier}/integrations,AgentIntegrationsController_listAgentIntegrations,List agent integrations,"Retrieve integration links for an agent identified by its external identifier. Supports cursor pagination via **after**, **before**, **limit**, **orderBy**, and **orderDirection**."
+ex3-0888,novu.co,POST,/v1/agents/{identifier}/integrations,AgentIntegrationsController_addAgentIntegration,Create an agent integration,"Create a link between an agent (by identifier) and an integration (by integration **identifier**, not the internal _id)."
+ex3-0889,novu.co,DELETE,/v1/agents/{identifier}/integrations/{agentIntegrationId},AgentIntegrationsController_removeAgentIntegration,Delete an agent integration,Delete a specific agent-integration link by its document id.
+ex3-0890,novu.co,PATCH,/v1/agents/{identifier}/integrations/{agentIntegrationId},AgentIntegrationsController_updateAgentIntegration,Update an agent integration,"Update which integration a link points to (by integration **identifier**, not the internal _id)."
+ex3-0891,novu.co,GET,/v1/channel-connections,ChannelConnectionsController_listChannelConnections,List all channel connections,List all channel connections for a resource.
+ex3-0892,novu.co,POST,/v1/channel-connections,ChannelConnectionsController_createChannelConnection,Create a channel connection,Create a new channel connection for a resource for given integration. Only one channel connection is allowed per resource and integration.
+ex3-0893,novu.co,DELETE,/v1/channel-connections/{identifier},ChannelConnectionsController_deleteChannelConnection,Delete a channel connection,Delete a specific channel connection by its unique identifier.
+ex3-0894,novu.co,GET,/v1/channel-connections/{identifier},ChannelConnectionsController_getChannelConnectionByIdentifier,Retrieve a channel connection,Retrieve a specific channel connection by its unique identifier.
+ex3-0895,novu.co,PATCH,/v1/channel-connections/{identifier},ChannelConnectionsController_updateChannelConnection,Update a channel connection,Update an existing channel connection by its unique identifier.
+ex3-0896,novu.co,GET,/v1/channel-endpoints,ChannelEndpointsController_listChannelEndpoints,List all channel endpoints,List all channel endpoints for a resource based on query filters.
+ex3-0897,novu.co,POST,/v1/channel-endpoints,ChannelEndpointsController_createChannelEndpoint,Create a channel endpoint,Create a new channel endpoint for a resource.
+ex3-0898,novu.co,DELETE,/v1/channel-endpoints/{identifier},ChannelEndpointsController_deleteChannelEndpoint,Delete a channel endpoint,Delete a specific channel endpoint by its unique identifier.
+ex3-0899,novu.co,GET,/v1/channel-endpoints/{identifier},ChannelEndpointsController_getChannelEndpoint,Retrieve a channel endpoint,Retrieve a specific channel endpoint by its unique identifier.
+ex3-0900,novu.co,PATCH,/v1/channel-endpoints/{identifier},ChannelEndpointsController_updateChannelEndpoint,Update a channel endpoint,Update an existing channel endpoint by its unique identifier.
+ex3-0901,novu.co,GET,/v1/domains,DomainsController_listDomains,List domains for an environment,Returns a paginated list of inbound-email domains in the current environment. Supports cursor pagination and a name contains filter.
+ex3-0902,novu.co,POST,/v1/domains,DomainsController_createDomain,Create a domain,Registers a new inbound-email domain. The response includes the DNS records customers must add at their DNS provider before the domain can receive mail.
+ex3-0903,novu.co,DELETE,/v1/domains/{domain},DomainsController_deleteDomain,Delete a domain,Removes the domain and cascades the deletion to all of its routes. Inbound mail for that domain stops being processed immediately.
+ex3-0904,novu.co,GET,/v1/domains/{domain},DomainsController_getDomain,Retrieve a domain by name,Returns the domain configuration and the DNS records that must be in place. This is a pure read; call `domains.verify` to refresh verification status from DNS.
+ex3-0905,novu.co,PATCH,/v1/domains/{domain},DomainsController_updateDomain,Update a domain,"Updates optional domain fields. When `data` is provided, it replaces the entire metadata object; omit `data` to leave it unchanged."
+ex3-0906,novu.co,GET,/v1/domains/{domain}/auto-configure,DomainsController_getDomainAutoConfigure,Retrieve auto-configuration availability,"Returns whether DNS auto-configuration (Domain Connect) is available for this domain. When `available` is `false`, `manualRecords` lists the DNS records the customer must add manually."
+ex3-0907,novu.co,POST,/v1/domains/{domain}/auto-configure/start,DomainsController_startDomainAutoConfigure,Start DNS auto-configuration,"Generates a signed redirect URL the customer can follow to apply Novu DNS records at their DNS provider. After the provider completes the flow, it redirects back to `redirectUri`."
+ex3-0908,novu.co,POST,/v1/domains/{domain}/diagnose,DomainsController_diagnoseDomain,Diagnose inbound DNS for a domain,"Runs live DNS checks for inbound email readiness (MX correctness, apex CNAME collision, and common DNS blocklists for the Novu mail host). Returns structured issues with plain-language fixes."
+ex3-0909,novu.co,GET,/v1/domains/{domain}/routes,DomainsController_listDomainRoutes,List routes for a domain,Returns a paginated list of routes attached to the domain. Optionally filter by an agent identifier to find routes pointing to a specific agent.
+ex3-0910,novu.co,POST,/v1/domains/{domain}/routes,DomainsController_createDomainRoute,Create a route,Creates a route on the domain that forwards inbound mail addressed to `<address>@<domain>` to either a webhook or an agent. Each address on a domain may only have a single route.
+ex3-0911,novu.co,DELETE,/v1/domains/{domain}/routes/{address},DomainsController_deleteDomainRoute,Delete a route,Removes the route bound to `<address>@<domain>`. Inbound mail for that address will no longer be processed.
+ex3-0912,novu.co,GET,/v1/domains/{domain}/routes/{address},DomainsController_getDomainRoute,Retrieve a route by address,Returns the route bound to `<address>@<domain>`. Use `*` as the address to retrieve the wildcard route for the domain.
+ex3-0913,novu.co,PATCH,/v1/domains/{domain}/routes/{address},DomainsController_updateDomainRoute,Update a route,Updates the destination of the route bound to `<address>@<domain>`. The address itself is the resource identity and cannot be changed; delete and recreate the route to rename it.
+ex3-0914,novu.co,POST,/v1/domains/{domain}/routes/{address}/test,DomainsController_testDomainRoute,Test an inbound route,"Sends a synthetic inbound email through the same delivery path as production (outbound webhooks for webhook routes, signed HTTP to the agent for agent routes). Use `dryRun: true` to preview the payload without delivering."
+ex3-0915,novu.co,POST,/v1/domains/{domain}/verify,DomainsController_verifyDomain,Verify a domain,Performs a live DNS lookup to refresh the MX record status of the domain and updates the verification status accordingly. Returns the latest domain configuration.
+ex3-0916,novu.co,GET,/v1/environment-variables,EnvironmentVariablesController_listEnvironmentVariables,List all variables,Returns all environment variables for the current organization. Secret values are masked.
+ex3-0917,novu.co,POST,/v1/environment-variables,EnvironmentVariablesController_createEnvironmentVariable,Create a variable,Creates a new environment variable. Keys must be uppercase with underscores only (e.g. BASE_URL). Secret variables are encrypted at rest and masked in API responses.
+ex3-0918,novu.co,DELETE,/v1/environment-variables/{variableKey},EnvironmentVariablesController_deleteEnvironmentVariable,Delete environment variable,Deletes an environment variable by key.
+ex3-0919,novu.co,GET,/v1/environment-variables/{variableKey},EnvironmentVariablesController_getEnvironmentVariable,Get environment variable,Returns a single environment variable by key. Secret values are masked.
+ex3-0920,novu.co,PATCH,/v1/environment-variables/{variableKey},EnvironmentVariablesController_updateEnvironmentVariable,Update a variable,Updates an existing environment variable. Providing `values` merges them into the existing per-environment values by `_environmentId`; envs not present in the request keep their stored value. Submitting the masked secret placeholder (the value returned by read endpoints for secret variables) as a real value is rejected.
+ex3-0921,novu.co,GET,/v1/environment-variables/{variableKey}/usage,EnvironmentVariablesController_getEnvironmentVariableUsage,Retrieve a variable usage,Returns the workflows that reference this environment variable via `{{env.KEY}}` in their step controls. **variableId** is required.
+ex3-0922,novu.co,GET,/v1/environments,EnvironmentsControllerV1_listMyEnvironments,List all environments,"This API returns a list of environments for the current organization. 
+    Each environment contains its configuration, API keys (if user has access), and metadata."
+ex3-0923,novu.co,POST,/v1/environments,EnvironmentsControllerV1_createEnvironment,Create an environment,"Creates a new environment within the current organization. 
+    Environments allow you to manage different stages of your application development lifecycle.
+    Each environment has its own set of API keys and configurations."
+ex3-0924,novu.co,DELETE,/v1/environments/{environmentId},EnvironmentsControllerV1_deleteEnvironment,Delete an environment,"Delete an environment by its unique identifier **environmentId**. 
+    This action is irreversible and will remove the environment and all its associated data."
+ex3-0925,novu.co,PUT,/v1/environments/{environmentId},EnvironmentsControllerV1_updateMyEnvironment,Update an environment,"Update an environment by its unique identifier **environmentId**. 
+    You can modify the environment name, identifier, color, and other configuration settings."
+ex3-0926,novu.co,POST,/v1/events/trigger,EventsController_trigger,Trigger event,"
+    Trigger event is the main (and only) way to send notifications to subscribers. The trigger identifier is used to match the particular workflow associated with it. Maximum number of recipients can be 100. Additional information can be passed according the body interface below.
+    To prevent duplicate triggers, you can optionally pass a **transactionId** in the request body. If the same **transactionId** is used again, the trigger will be ignored. The retention period depends on your billing tier."
+ex3-0927,novu.co,POST,/v1/events/trigger/broadcast,EventsController_broadcastEventToAll,Broadcast event to all,"Trigger a broadcast event to all existing subscribers, could be used to send announcements, etc.
+      In the future could be used to trigger events to a subset of subscribers based on defined filters."
+ex3-0928,novu.co,POST,/v1/events/trigger/bulk,EventsController_triggerBulk,Bulk trigger event,"
+      Using this endpoint you can trigger multiple events at once, to avoid multiple calls to the API.
+      The bulk API is limited to 100 events per request.
+    "
+ex3-0929,novu.co,DELETE,/v1/events/trigger/{transactionId},EventsController_cancel,Cancel triggered event,"
+    Using a previously generated transactionId during the event trigger,
+     will cancel any active or pending workflows. This is useful to cancel active digests, delays etc...
+    "
+ex3-0930,novu.co,GET,/v1/integrations,IntegrationsController_listIntegrations,List all integrations,"List all the channels integrations created in the organization. Only integration metadata is returned, credentials field is returned as an empty object."
+ex3-0931,novu.co,POST,/v1/integrations,IntegrationsController_createIntegration,Create an integration,"Create an integration for the current environment the user is based on the API key provided. 
+    Each provider supports different credentials, check the provider documentation for more details. Only integration metadata is returned, credentials field is returned as an empty object."
+ex3-0932,novu.co,GET,/v1/integrations/active,IntegrationsController_getActiveIntegrations,List active integrations,"List all the active integrations created in the organization. Only integration metadata is returned, credentials field is returned as an empty object."
+ex3-0933,novu.co,POST,/v1/integrations/channel-connections/oauth,IntegrationsController_generateConnectOAuthUrl,Generate OAuth URL for a workspace/tenant connection,"Generate an OAuth URL that creates a workspace or tenant-level channel connection (Slack workspace install, MS Teams admin consent, or Webex integration authorization).
+    The generated URL expires after 5 minutes."
+ex3-0934,novu.co,POST,/v1/integrations/channel-endpoints/link,IntegrationsController_linkChannelEndpoint,Issue a URL to link a subscriber chat identity,Returns a provider-specific URL the subscriber opens to link their chat identity. The integration provider is resolved from integrationIdentifier; Telegram returns a deep link.
+ex3-0935,novu.co,POST,/v1/integrations/channel-endpoints/oauth,IntegrationsController_generateLinkUserOAuthUrl,Generate OAuth URL to link a subscriber user identity,"Generate an OAuth URL that links a specific subscriber to their chat identity (Slack user ID, MS Teams user OID, or Webex person).
+    The generated URL expires after 5 minutes."
+ex3-0936,novu.co,POST,/v1/integrations/chat/oauth,IntegrationsController_getChatOAuthUrl,Generate chat OAuth URL,"**Deprecated** — use `POST /integrations/channel-connections/oauth` (connect) or `POST /integrations/channel-endpoints/oauth` (link_user) instead.
+    Generate an OAuth URL for chat integrations like Slack, MS Teams, and Webex.
+    This URL allows subscribers to authorize the integration, enabling the system to send messages 
+    through their chat workspace. The generated URL expires after 5 minutes."
+ex3-0937,novu.co,POST,/v1/integrations/{integrationIdentifier}/mobile-link,IntegrationsController_createIntegrationMobileLink,Issue a short-lived mobile setup link for an existing integration,"Returns an opaque, single-use setup token plus a mobile URL for configuring an existing chat integration. Telegram is the only supported provider initially."
+ex3-0938,novu.co,POST,/v1/integrations/{integrationIdentifier}/webhook/configure,IntegrationsController_configureIntegrationWebhook,Configure a chat integration webhook,Registers the Novu webhook URL with the chat provider for the specified integration. Telegram is the only supported provider initially.
+ex3-0939,novu.co,DELETE,/v1/integrations/{integrationId},IntegrationsController_removeIntegration,Delete an integration,"Delete an integration by its unique key identifier **integrationId**. 
+    This action is irreversible. Only integration metadata is returned, credentials field is returned as empty object."
+ex3-0940,novu.co,PUT,/v1/integrations/{integrationId},IntegrationsController_updateIntegrationById,Update an integration,"Update an integration by its unique key identifier **integrationId**. 
+    Each provider supports different credentials, check the provider documentation for more details. Only integration metadata is returned, credentials field is returned as an empty object."
+ex3-0941,novu.co,POST,/v1/integrations/{integrationId}/auto-configure,IntegrationsController_autoConfigureIntegration,Auto-configure an integration for inbound webhooks,"Auto-configure an integration by its unique key identifier **integrationId** for inbound webhook support. 
+    This will automatically generate required webhook signing keys and configure webhook endpoints. Only integration metadata is returned, credentials field is returned as an empty object."
+ex3-0942,novu.co,POST,/v1/integrations/{integrationId}/set-primary,IntegrationsController_setIntegrationAsPrimary,Update integration as primary,"Update an integration as **primary** by its unique key identifier **integrationId**. 
+    This API will set the integration as primary for that channel in the current environment. 
+    Primary integration is used to deliver notification for sms and email channels in the workflow. 
+    Only integration metadata is returned, credentials field is returned as an empty object."
+ex3-0943,novu.co,GET,/v1/messages,MessagesController_getMessages,List all messages,"List all messages for the current environment. 
+    This API supports filtering by **channel**, **subscriberId**, and **transactionId**. 
+    This API returns a paginated list of messages."
+ex3-0944,novu.co,DELETE,/v1/messages/transaction/{transactionId},MessagesController_deleteMessagesByTransactionId,Delete messages by transactionId,"Delete multiple messages from the Novu platform using **transactionId** of triggered event. 
+    This API supports filtering by **channel** and delete all messages associated with the **transactionId**."
+ex3-0945,novu.co,DELETE,/v1/messages/{messageId},MessagesController_deleteMessage,Delete a message,"Delete a message entity from the Novu platform by **messageId**. 
+    This action is irreversible. **messageId** is required and of mongodbId type."
+ex3-0946,novu.co,GET,/v1/notifications,NotificationsController_listNotifications,List all events,"List all notification events (triggered events) for the current environment. 
+    This API supports filtering by **channels**, **templates**, **emails**, **subscriberIds**, **transactionId**, **topicKey**, **severity**, **contextKeys**. 
+    Checkout all available filters in the query section.
+    This API returns event triggers, to list each channel notifications, check messages APIs."
+ex3-0947,novu.co,GET,/v1/notifications/{notificationId},NotificationsController_getNotification,Retrieve an event,"Retrieve an event by its unique key identifier **notificationId**. 
+    Here **notificationId** is of mongodbId type. 
+    This API returns the event details - execution logs, status, actual notification (message) generated by each workflow step."
+ex3-0948,novu.co,POST,/v1/subscribers/bulk,SubscribersV1Controller_bulkCreateSubscribers,Bulk create subscribers,"
+      Using this endpoint multiple subscribers can be created at once. The bulk API is limited to 500 subscribers per request.
+    "
+ex3-0949,novu.co,PATCH,/v1/subscribers/{subscriberId}/credentials,SubscribersV1Controller_modifySubscriberChannel,Upsert provider credentials,"Upsert credentials for a provider such as **slack** and **FCM**. 
+      **providerId** is required field. This API creates **deviceTokens** or appends to the existing ones."
+ex3-0950,novu.co,PUT,/v1/subscribers/{subscriberId}/credentials,SubscribersV1Controller_updateSubscriberChannel,Update provider credentials,"Update credentials for a provider such as **slack** and **FCM**. 
+      **providerId** is required field. This API creates the **deviceTokens** or replaces the existing ones."
+ex3-0951,novu.co,DELETE,/v1/subscribers/{subscriberId}/credentials/{providerId},SubscribersV1Controller_deleteSubscriberCredentials,Delete provider credentials,"Delete subscriber credentials for a provider such as **slack** and **FCM** by **providerId**. 
+    This action is irreversible and will remove the credentials for the provider for particular **subscriberId**."
+ex3-0952,novu.co,POST,/v1/subscribers/{subscriberId}/messages/mark-all,SubscribersV1Controller_markAllUnreadAsRead,Update all notifications state,"This API is deprecated, use v2 API instead. Update all subscriber in-app notifications state such as read, unread, seen or unseen by **subscriberId**."
+ex3-0953,novu.co,POST,/v1/subscribers/{subscriberId}/messages/mark-as,SubscribersV1Controller_markMessagesAs,Update notifications state,"This API is deprecated, use v2 API instead. Update subscriber's multiple in-app notifications state such as seen, read, unseen or unread by **subscriberId**. 
+      **messageId** is of type mongodbId of notifications."
+ex3-0954,novu.co,POST,/v1/subscribers/{subscriberId}/messages/{messageId}/actions/{type},SubscribersV1Controller_markActionAsSeen,Update notification action status,"This API is deprecated, use v2 API instead. Update in-app notification's action status by its unique key identifier **messageId** and type field **type**. 
+      **type** field can be **primary** or **secondary**"
+ex3-0955,novu.co,GET,/v1/subscribers/{subscriberId}/notifications/feed,SubscribersV1Controller_getNotificationsFeed,Retrieve subscriber notifications,"This API is deprecated, use v2 API instead. Retrieve subscriber in-app notifications by its unique key identifier **subscriberId**."
+ex3-0956,novu.co,GET,/v1/subscribers/{subscriberId}/notifications/unseen,SubscribersV1Controller_getUnseenCount,Retrieve unseen notifications count,"This API is deprecated, use v2 API instead. Retrieve unseen in-app notifications count for a subscriber by its unique key identifier **subscriberId**."
+ex3-0957,novu.co,PATCH,/v1/subscribers/{subscriberId}/online-status,SubscribersV1Controller_updateSubscriberOnlineFlag,Update subscriber online status,Update the subscriber online status by its unique key identifier **subscriberId**
+ex3-0958,novu.co,GET,/v1/topics/{topicKey}/subscribers/{externalSubscriberId},TopicsV1Controller_getTopicSubscriber,Check topic subscriber,Check if a subscriber belongs to a certain topic
+ex3-0959,novu.co,GET,/v2/contexts,ContextsController_listContexts,List all contexts,"Retrieve a paginated list of all contexts, optionally filtered by type and key pattern.
+      **type** and **id** are optional fields, if provided, only contexts with the matching type and id will be returned.
+      **search** is an optional field, if provided, only contexts with the matching key pattern will be returned.
+      Checkout all possible parameters in the query section below for more details"
+ex3-0960,novu.co,POST,/v2/contexts,ContextsController_createContext,Create a context,"Create a new context with the specified type, id, and data. Returns 409 if context already exists.
+      **type** and **id** are required fields, **data** is optional, if the context already exists, it returns the 409 response"
+ex3-0961,novu.co,DELETE,/v2/contexts/{type}/{id},ContextsController_deleteContext,Delete a context,"Delete a context by its type and id.
+      **type** and **id** are required fields, if the context does not exist, it returns the 404 response"
+ex3-0962,novu.co,GET,/v2/contexts/{type}/{id},ContextsController_getContext,Retrieve a context,"Retrieve a specific context by its type and id.
+      **type** and **id** are required fields, if the context does not exist, it returns the 404 response"
+ex3-0963,novu.co,PATCH,/v2/contexts/{type}/{id},ContextsController_updateContext,Update a context,"Update the data of an existing context.
+      **type** and **id** are required fields, **data** is required. Only the data field is updated, the rest of the context is not affected.
+      If the context does not exist, it returns the 404 response"
+ex3-0964,novu.co,GET,/v2/environments/{environmentId}/tags,EnvironmentsController_getEnvironmentTags,List environment tags,Retrieve all unique tags used in workflows within the specified environment. These tags can be used for filtering workflows.
+ex3-0965,novu.co,POST,/v2/environments/{targetEnvironmentId}/diff,EnvironmentsController_diffEnvironment,Compare resources between environments,"Compares workflows and other resources between the development and target environments, returning detailed diff information including additions, modifications, and deletions."
+ex3-0966,novu.co,POST,/v2/environments/{targetEnvironmentId}/publish,EnvironmentsController_publishEnvironment,Publish resources to target environment,Publishes all workflows and resources from the development environment to the target environment. Optionally specify specific resources to publish or use dryRun mode to preview changes.
+ex3-0967,novu.co,POST,/v2/inbound-webhooks/delivery-providers/{environmentId}/{integrationId},InboundWebhooksController_handleWebhook,Track provider activity and engagement events,Track activity and engagement events for a specific delivery provider
+ex3-0968,novu.co,GET,/v2/layouts,LayoutsController_list,List all layouts,Retrieves a list of layouts with optional filtering and pagination
+ex3-0969,novu.co,POST,/v2/layouts,LayoutsController_create,Create a layout,Creates a new layout in the Novu Cloud environment
+ex3-0970,novu.co,DELETE,/v2/layouts/{layoutId},LayoutsController__delete,Delete a layout,Removes a specific layout by its unique identifier **layoutId**
+ex3-0971,novu.co,GET,/v2/layouts/{layoutId},LayoutsController_get,Retrieve a layout,Fetches details of a specific layout by its unique identifier **layoutId**
+ex3-0972,novu.co,PUT,/v2/layouts/{layoutId},LayoutsController_update,Update a layout,"Updates the details of an existing layout, here **layoutId** is the identifier of the layout"
+ex3-0973,novu.co,POST,/v2/layouts/{layoutId}/duplicate,LayoutsController_duplicate,Duplicate a layout,Duplicates a layout by its unique identifier **layoutId**. This will create a new layout with the content of the original layout.
+ex3-0974,novu.co,POST,/v2/layouts/{layoutId}/preview,LayoutsController_generatePreview,Generate layout preview,Generates a preview for a layout by its unique identifier **layoutId**
+ex3-0975,novu.co,GET,/v2/layouts/{layoutId}/usage,LayoutsController_getUsage,Get layout usage,Retrieves information about workflows that use the specified layout by its unique identifier **layoutId**
+ex3-0976,novu.co,GET,/v2/subscribers,SubscribersController_searchSubscribers,Search subscribers,"Search subscribers by their **email**, **phone**, **subscriberId** and **name**. 
+    The search is case sensitive and supports pagination.Checkout all available filters in the query section."
+ex3-0977,novu.co,POST,/v2/subscribers,SubscribersController_createSubscriber,Create a subscriber,"Create a subscriber with the subscriber attributes. 
+      **subscriberId** is a required field, rest other fields are optional, if the subscriber already exists, it will be updated"
+ex3-0978,novu.co,DELETE,/v2/subscribers/{subscriberId},SubscribersController_removeSubscriber,Delete a subscriber,"Deletes a subscriber entity from the Novu platform along with associated messages, preferences, and topic subscriptions. 
+      **subscriberId** is a required field."
+ex3-0979,novu.co,GET,/v2/subscribers/{subscriberId},SubscribersController_getSubscriber,Retrieve a subscriber,"Retrieve a subscriber by its unique key identifier **subscriberId**. 
+    **subscriberId** field is required."
+ex3-0980,novu.co,PATCH,/v2/subscribers/{subscriberId},SubscribersController_patchSubscriber,Update a subscriber,"Update a subscriber by its unique key identifier **subscriberId**. 
+    **subscriberId** is a required field, rest other fields are optional"
+ex3-0981,novu.co,GET,/v2/subscribers/{subscriberId}/notifications,SubscribersController_getSubscriberNotifications,Retrieve subscriber notifications,"Retrieve in-app (inbox) notifications for a subscriber by its unique key identifier **subscriberId**. 
+    Supports filtering by tags, read/archived/snoozed/seen state, data attributes, severity, date range, and context keys."
+ex3-0982,novu.co,POST,/v2/subscribers/{subscriberId}/notifications/archive,SubscribersController_archiveAllNotifications,Archive all notifications,Archive all in-app (inbox) notifications matching the specified filters. Supports context-based filtering.
+ex3-0983,novu.co,GET,/v2/subscribers/{subscriberId}/notifications/count,SubscribersController_getSubscriberNotificationsCount,Retrieve subscriber notifications count,"Retrieve count of in-app (inbox) notifications for a subscriber by its unique key identifier **subscriberId**. 
+    Supports multiple filters to count in-app (inbox) notifications by different criteria, including context keys."
+ex3-0984,novu.co,POST,/v2/subscribers/{subscriberId}/notifications/delete,SubscribersController_deleteAllNotifications,Delete all notifications,Permanently delete all in-app (inbox) notifications matching the specified filters. Supports context-based filtering.
+ex3-0985,novu.co,POST,/v2/subscribers/{subscriberId}/notifications/read,SubscribersController_markAllNotificationsAsRead,Mark all notifications as read,Mark all in-app (inbox) notifications matching the specified filters as read. Supports context-based filtering.
+ex3-0986,novu.co,POST,/v2/subscribers/{subscriberId}/notifications/read-archive,SubscribersController_archiveAllReadNotifications,Archive all read notifications,Archive all read in-app (inbox) notifications matching the specified filters. Supports context-based filtering.
+ex3-0987,novu.co,POST,/v2/subscribers/{subscriberId}/notifications/seen,SubscribersController_markNotificationsAsSeen,Mark notifications as seen,Mark specific and multiple in-app (inbox) notifications as seen. Supports context-based filtering.
+ex3-0988,novu.co,DELETE,/v2/subscribers/{subscriberId}/notifications/{notificationId},SubscribersController_deleteNotification,Delete a notification,Delete a specific in-app (inbox) notification permanently by its unique identifier **notificationId**.
+ex3-0989,novu.co,PATCH,/v2/subscribers/{subscriberId}/notifications/{notificationId}/actions/{actionType}/complete,SubscribersController_completeNotificationAction,Complete a notification action,Mark a single in-app (inbox) notification's action (primary or secondary) as completed by its unique identifier **notificationId** and action type **actionType**.
+ex3-0990,novu.co,PATCH,/v2/subscribers/{subscriberId}/notifications/{notificationId}/actions/{actionType}/revert,SubscribersController_revertNotificationAction,Revert a notification action,Revert a single in-app (inbox) notification's action (primary or secondary) to pending state by its unique identifier **notificationId** and action type **actionType**.
+ex3-0991,novu.co,PATCH,/v2/subscribers/{subscriberId}/notifications/{notificationId}/archive,SubscribersController_archiveNotification,Archive a notification,Archive a specific in-app (inbox) notification by its unique identifier **notificationId**.
+ex3-0992,novu.co,PATCH,/v2/subscribers/{subscriberId}/notifications/{notificationId}/read,SubscribersController_markNotificationAsRead,Mark a notification as read,Mark a specific in-app (inbox) notification as read by its unique identifier **notificationId**.
+ex3-0993,novu.co,PATCH,/v2/subscribers/{subscriberId}/notifications/{notificationId}/snooze,SubscribersController_snoozeNotification,Snooze a notification,Snooze a specific in-app (inbox) notification by its unique identifier **notificationId** until a specified time.
+ex3-0994,novu.co,PATCH,/v2/subscribers/{subscriberId}/notifications/{notificationId}/unarchive,SubscribersController_unarchiveNotification,Unarchive a notification,Unarchive a specific in-app (inbox) notification by its unique identifier **notificationId**.
+ex3-0995,novu.co,PATCH,/v2/subscribers/{subscriberId}/notifications/{notificationId}/unread,SubscribersController_markNotificationAsUnread,Mark a notification as unread,Mark a specific in-app (inbox) notification as unread by its unique identifier **notificationId**.
+ex3-0996,novu.co,PATCH,/v2/subscribers/{subscriberId}/notifications/{notificationId}/unsnooze,SubscribersController_unsnoozeNotification,Unsnooze a notification,Unsnooze a specific in-app (inbox) notification by its unique identifier **notificationId**.
+ex3-0997,novu.co,GET,/v2/subscribers/{subscriberId}/preferences,SubscribersController_getSubscriberPreferences,Retrieve subscriber preferences,"Retrieve subscriber channel preferences by its unique key identifier **subscriberId**. 
+    This API returns all five channels preferences for all workflows and global preferences."
+ex3-0998,novu.co,PATCH,/v2/subscribers/{subscriberId}/preferences,SubscribersController_updateSubscriberPreferences,Update subscriber preferences,"Update subscriber preferences by its unique key identifier **subscriberId**. 
+    **workflowId** is optional field, if provided, this API will update that workflow preference, 
+    otherwise it will update global preferences"
+ex3-0999,novu.co,PATCH,/v2/subscribers/{subscriberId}/preferences/bulk,SubscribersController_bulkUpdateSubscriberPreferences,Bulk update subscriber preferences,"Bulk update subscriber preferences by its unique key identifier **subscriberId**. 
+    This API allows updating multiple workflow preferences in a single request."
+ex3-1000,novu.co,GET,/v2/subscribers/{subscriberId}/subscriptions,SubscribersController_listSubscriberTopics,Retrieve subscriber subscriptions,"Retrieve subscriber's topic subscriptions by its unique key identifier **subscriberId**. 
+    Checkout all available filters in the query section."
+ex3-1001,novu.co,GET,/v2/topics,TopicsController_listTopics,List all topics,"This api returns a paginated list of topics.
+    Topics can be filtered by **key**, **name**, or **includeCursor** to paginate through the list. 
+    Checkout all available filters in the query section."
+ex3-1002,novu.co,POST,/v2/topics,TopicsController_upsertTopic,Create a topic,"Creates a new topic if it does not exist, or updates an existing topic if it already exists. Use ?failIfExists=true to prevent updates."
+ex3-1003,novu.co,DELETE,/v2/topics/{topicKey},TopicsController_deleteTopic,Delete a topic,"Delete a topic by its unique key identifier **topicKey**. 
+    This action is irreversible and will remove all subscriptions to the topic."
+ex3-1004,novu.co,GET,/v2/topics/{topicKey},TopicsController_getTopic,Retrieve a topic,Retrieve a topic by its unique key identifier **topicKey**
+ex3-1005,novu.co,PATCH,/v2/topics/{topicKey},TopicsController_updateTopic,Update a topic,Update a topic name or data by its unique key identifier **topicKey**
+ex3-1006,novu.co,DELETE,/v2/topics/{topicKey}/subscriptions,TopicsController_deleteTopicSubscriptions,Delete topic subscriptions,Delete subscriptions for subscriberIds for a topic.
+ex3-1007,novu.co,GET,/v2/topics/{topicKey}/subscriptions,TopicsController_listTopicSubscriptions,List topic subscriptions,"List all subscriptions of subscribers for a topic.
+    Checkout all available filters in the query section."
+ex3-1008,novu.co,POST,/v2/topics/{topicKey}/subscriptions,TopicsController_createTopicSubscriptions,Create topic subscriptions,"This api will create subscription for subscriberIds for a topic. 
+      Its like subscribing to a common interest group. if topic does not exist, it will be created."
+ex3-1009,novu.co,GET,/v2/topics/{topicKey}/subscriptions/{identifier},TopicsController_getTopicSubscription,Retrieve a topic subscription,Retrieve a subscription by its unique identifier for a topic.
+ex3-1010,novu.co,PATCH,/v2/topics/{topicKey}/subscriptions/{identifier},TopicsController_updateTopicSubscription,Update a topic subscription,Update a subscription by its unique identifier for a topic. You can update the preferences and name associated with the subscription.
+ex3-1011,novu.co,POST,/v2/translations,TranslationController_createTranslationEndpoint,Create a translation,"Create a translation for a specific workflow and locale, if the translation already exists, it will be updated"
+ex3-1012,novu.co,GET,/v2/translations/group/{resourceType}/{resourceId},TranslationController_getTranslationGroupEndpoint,Retrieve a translation group,"Retrieves a single translation group by resource type (workflow, layout) and resource ID (workflowId, layoutId)"
+ex3-1013,novu.co,GET,/v2/translations/master-json,TranslationController_getMasterJsonEndpoint,Retrieve master translations JSON,Retrieve all translations for a locale in master JSON format organized by resourceId (workflowId)
+ex3-1014,novu.co,POST,/v2/translations/master-json,TranslationController_importMasterJsonEndpoint,Import master translations JSON,Import translations for multiple workflows from master JSON format for a specific locale
+ex3-1015,novu.co,POST,/v2/translations/master-json/upload,TranslationController_uploadMasterJsonEndpoint,Upload master translations JSON file,"Upload a master JSON file containing translations for multiple workflows. Locale is automatically detected from filename (e.g., en_US.json)"
+ex3-1016,novu.co,POST,/v2/translations/upload,TranslationController_uploadTranslationFiles,Upload translation files,"Upload one or more JSON translation files for a specific workflow. Files name must match the locale, e.g. en_US.json. Supports both ""files"" and ""files[]"" field names for backwards compatibility."
+ex3-1017,novu.co,DELETE,/v2/translations/{resourceType}/{resourceId},TranslationController_deleteTranslationGroupEndpoint,Delete a translation group,Delete an entire translation group and all its translations
+ex3-1018,novu.co,DELETE,/v2/translations/{resourceType}/{resourceId}/{locale},TranslationController_deleteTranslationEndpoint,Delete a translation,"Delete a specific translation by resource type, resource ID and locale"
+ex3-1019,novu.co,GET,/v2/translations/{resourceType}/{resourceId}/{locale},TranslationController_getSingleTranslation,Retrieve a translation,"Retrieve a specific translation by resource type, resource ID and locale"
+ex3-1020,novu.co,GET,/v2/workflows,WorkflowController_searchWorkflows,List all workflows,Retrieves a list of workflows with optional filtering and pagination
+ex3-1021,novu.co,POST,/v2/workflows,WorkflowController_create,Create a workflow,Creates a new workflow in the Novu Cloud environment
+ex3-1022,novu.co,DELETE,/v2/workflows/{workflowId},WorkflowController_removeWorkflow,Delete a workflow,Removes a specific workflow by its unique identifier **workflowId**
+ex3-1023,novu.co,GET,/v2/workflows/{workflowId},WorkflowController_getWorkflow,Retrieve a workflow,Fetches details of a specific workflow by its unique identifier **workflowId**
+ex3-1024,novu.co,PATCH,/v2/workflows/{workflowId},WorkflowController_patchWorkflow,Update a workflow,Partially updates a workflow by its unique identifier **workflowId**
+ex3-1025,novu.co,PUT,/v2/workflows/{workflowId},WorkflowController_update,Update a workflow,"Updates the details of an existing workflow, here **workflowId** is the identifier of the workflow"
+ex3-1026,novu.co,POST,/v2/workflows/{workflowId}/step/{stepId}/preview,WorkflowController_generatePreview,Generate a step preview,Generates a preview for a specific workflow step by its unique identifier **stepId**
+ex3-1027,novu.co,GET,/v2/workflows/{workflowId}/steps/{stepId},WorkflowController_getWorkflowStepData,Retrieve workflow step,Retrieves data for a specific step in a workflow
+ex3-1028,novu.co,PUT,/v2/workflows/{workflowId}/sync,WorkflowController_sync,Sync a workflow,Synchronizes a workflow to the target environment

@@ -1,0 +1,1 @@
+A-mux.scripted.csv: labeller A for mux used a script that labelled from method, path and summary and ignored descriptions (its own report, 2026-11-04; 12 distinct reasons over 192 rows). Rejected; mux relabelled by a new labeller A.

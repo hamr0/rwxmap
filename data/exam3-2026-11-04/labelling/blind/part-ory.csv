@@ -1,0 +1,1340 @@
+row_id,provider,method,path,operationId,summary,description
+ex3-1029,ory.sh,GET,/.well-known/change-password,getWellKnownChangePassword,Change Password URL,"This endpoint implements the W3C ""change password URL"" well-known location by
+redirecting the browser to the configured settings UI. Password managers follow
+this redirect to take users straight to the page where they can change their
+password."
+ex3-1030,ory.sh,GET,/.well-known/jwks.json,discoverJsonWebKeys,Discover Well-Known JSON Web Keys,"This endpoint returns JSON Web Keys required to verifying OpenID Connect ID Tokens and,
+if enabled, OAuth 2.0 JWT Access Tokens. This endpoint can be used with client libraries like
+[node-jwks-rsa](https://github.com/auth0/node-jwks-rsa) among others.
+
+Adding custom keys requires first creating a keyset via the createJsonWebKeySet operation,
+and then configuring the webfinger.jwks.broadcast_keys configuration value to include the keyset name."
+ex3-1031,ory.sh,GET,/.well-known/openid-configuration,discoverOidcConfiguration,OpenID Connect Discovery,"A mechanism for an OpenID Connect Relying Party to discover the End-User's OpenID Provider and obtain information needed to interact with it, including its OAuth 2.0 endpoint locations.
+
+Popular libraries for OpenID Connect clients include oidc-client-js (JavaScript), go-oidc (Golang), and others.
+For a full list of clients go here: https://openid.net/developers/certified/"
+ex3-1032,ory.sh,GET,/.well-known/ory/webauthn.js,getWebAuthnJavaScript,Get WebAuthn JavaScript,"This endpoint provides JavaScript which is needed in order to perform WebAuthn login and registration.
+
+If you are building a JavaScript Browser App (e.g. in ReactJS or AngularJS) you will need to load this file:
+
+```html
+<script src=""https://public-kratos.example.org/.well-known/ory/webauthn.js"" type=""script"" async />
+```
+
+More information can be found at [Ory Kratos User Login](https://www.ory.com/docs/kratos/self-service/flows/user-login) and [User Registration Documentation](https://www.ory.com/docs/kratos/self-service/flows/user-registration)."
+ex3-1033,ory.sh,GET,/.well-known/webauthn,getWebAuthnRelatedOrigins,Get WebAuthn Related Origins,"This endpoint serves the WebAuthn Related Origin Requests document specified in
+https://www.w3.org/TR/webauthn-3/#sctn-related-origins. It lists the web origins
+allowed to use this domain as their WebAuthn relying party ID. Browsers fetch it
+when a page requests a relying party ID that does not match the page's own origin.
+
+The document contains the relying party origins configured for the enabled
+WebAuthn and passkey methods."
+ex3-1034,ory.sh,GET,/admin/clients,listOAuth2Clients,List OAuth 2.0 Clients,"This endpoint lists all clients in the database, and never returns client secrets.
+As a default it lists the first 100 clients."
+ex3-1035,ory.sh,POST,/admin/clients,createOAuth2Client,Create OAuth 2.0 Client,"Create a new OAuth 2.0 client. If you pass `client_secret` the secret is used, otherwise a random secret
+is generated. The secret is echoed in the response. It is not possible to retrieve it later on."
+ex3-1036,ory.sh,DELETE,/admin/clients/{id},deleteOAuth2Client,Delete OAuth 2.0 Client,"Delete an existing OAuth 2.0 Client by its ID.
+
+OAuth 2.0 clients are used to perform OAuth 2.0 and OpenID Connect flows. Usually, OAuth 2.0 clients are
+generated for applications which want to consume your OAuth 2.0 or OpenID Connect capabilities.
+
+Make sure that this endpoint is well protected and only callable by first-party components."
+ex3-1037,ory.sh,GET,/admin/clients/{id},getOAuth2Client,Get an OAuth 2.0 Client,"Get an OAuth 2.0 client by its ID. This endpoint never returns the client secret.
+
+OAuth 2.0 clients are used to perform OAuth 2.0 and OpenID Connect flows. Usually, OAuth 2.0 clients are
+generated for applications which want to consume your OAuth 2.0 or OpenID Connect capabilities."
+ex3-1038,ory.sh,PATCH,/admin/clients/{id},patchOAuth2Client,Patch OAuth 2.0 Client,"Patch an existing OAuth 2.0 Client using JSON Patch. If you update
+`client_secret`, the secret will be updated and returned via the API. This is
+the only time you will be able to retrieve the client secret. Passing a new
+`client_secret` will clear all rotated secrets.
+
+To perform a seamless client secret rotation, use the `rotateOAuth2ClientSecret` endpoint instead.
+
+OAuth 2.0 clients are used to perform OAuth 2.0 and OpenID Connect flows. Usually, OAuth 2.0 clients are
+generated for applications which want to consume your OAuth 2.0 or OpenID Connect capabilities."
+ex3-1039,ory.sh,PUT,/admin/clients/{id},setOAuth2Client,Set OAuth 2.0 Client,"Replaces an existing OAuth 2.0 Client with the payload you send. If you pass `client_secret` the secret is used,
+otherwise the existing secret is used. Rotated secrets will be cleared if you pass a new `client_secret`.
+
+If set, the secret is echoed in the response. It is not possible to retrieve it later on.
+
+To perform a seamless client secret rotation, use the `rotateOAuth2ClientSecret` endpoint instead.
+
+OAuth 2.0 Clients are used to perform OAuth 2.0 and OpenID Connect flows. Usually, OAuth 2.0 clients are
+generated for applications which want to consume your OAuth 2.0 or OpenID Connect capabilities."
+ex3-1040,ory.sh,PUT,/admin/clients/{id}/lifespans,setOAuth2ClientLifespans,Set OAuth2 Client Token Lifespans,Set lifespans of different token types issued for this OAuth 2.0 client. Does not modify other fields.
+ex3-1041,ory.sh,DELETE,/admin/clients/{id}/secrets/rotate,deleteRotatedOAuth2ClientSecrets,Delete Rotated OAuth 2.0 Client Secrets,"Removes all rotated secrets from an OAuth 2.0 client. This should be called after all services
+have been updated to use the new secret and the old secrets are no longer needed."
+ex3-1042,ory.sh,POST,/admin/clients/{id}/secrets/rotate,rotateOAuth2ClientSecret,Rotate OAuth 2.0 Client Secret,"Rotates an OAuth 2.0 client's secrets. The old secret will remain valid for
+authentication, allowing for zero-downtime secret rotations. A new secret
+will be generated and returned in the response.
+
+Up to five rotated secrets are retained. Use the
+`deleteRotatedOAuth2ClientSecrets` endpoint to remove old rotated secrets
+when they are no longer needed.
+
+Supply `client_secret` in the request body to rotate to a specific value
+instead of a generated one. The request body is optional."
+ex3-1043,ory.sh,GET,/admin/courier/messages,listCourierMessages,List Messages,Lists all messages by given status and recipient.
+ex3-1044,ory.sh,GET,/admin/courier/messages/{id},getCourierMessage,Get a Message,Gets a specific messages by the given ID.
+ex3-1045,ory.sh,GET,/admin/identities,listIdentities,List Identities,Lists all [identities](https://www.ory.com/docs/kratos/concepts/identity-user-model) in the system. Note: filters cannot be combined.
+ex3-1046,ory.sh,PATCH,/admin/identities,batchPatchIdentities,Create multiple identities,"Creates multiple [identities](https://www.ory.com/docs/kratos/concepts/identity-user-model).
+
+You can also use this endpoint to [import credentials](https://www.ory.com/docs/kratos/manage-identities/import-user-accounts-identities),
+including passwords, social sign-in settings, and multi-factor authentication methods.
+
+If the patch includes hashed passwords you can import up to 1,000 identities per request.
+
+If the patch includes at least one plaintext password you can import up to 200 identities per request.
+
+Avoid importing large batches with plaintext passwords. They can cause timeouts as the passwords need to be hashed before they are stored.
+
+If at least one identity is imported successfully, the response status is 200 OK.
+If all imports fail, the response is one of the following 4xx errors:
+- 400 Bad Request: The request payload is invalid or improperly formatted.
+- 409 Conflict: Duplicate identities or conflicting data were detected.
+
+This applies while `with_partial_inserts` is true, which is the default. Set it to false to import the batch as a single
+unit instead: one conflict then fails the whole request with 409 Conflict and no identity is created, in exchange for a
+considerably faster import.
+
+If you get a 504 Gateway Timeout:
+- Reduce the batch size
+- Avoid duplicate identities
+- Pre-hash passwords with BCrypt
+
+If the issue persists, contact support."
+ex3-1047,ory.sh,POST,/admin/identities,createIdentity,Create an Identity,"Create an [identity](https://www.ory.com/docs/kratos/concepts/identity-user-model).  This endpoint can also be used to
+[import credentials](https://www.ory.com/docs/kratos/manage-identities/import-user-accounts-identities)
+for instance passwords, social sign in configurations, or multifactor methods."
+ex3-1048,ory.sh,GET,/admin/identities/by/external/{externalID},getIdentityByExternalID,Get an Identity by its External ID,"Return an [identity](https://www.ory.com/docs/kratos/concepts/identity-user-model) by its external ID. You can optionally
+include credentials (e.g. social sign in connections) in the response by using the `include_credential` query parameter."
+ex3-1049,ory.sh,DELETE,/admin/identities/{id},deleteIdentity,Delete an Identity,"Calling this endpoint irrecoverably and permanently deletes the [identity](https://www.ory.com/docs/kratos/concepts/identity-user-model) given its ID. This action can not be undone.
+This endpoint returns 204 when the identity was deleted or 404 if the identity was not found."
+ex3-1050,ory.sh,GET,/admin/identities/{id},getIdentity,Get an Identity,"Return an [identity](https://www.ory.com/docs/kratos/concepts/identity-user-model) by its ID. You can optionally
+include credentials (e.g. social sign in connections) in the response by using the `include_credential` query parameter."
+ex3-1051,ory.sh,PATCH,/admin/identities/{id},patchIdentity,Patch an Identity,"Partially updates an [identity's](https://www.ory.com/docs/kratos/concepts/identity-user-model) field using [JSON Patch](https://jsonpatch.com/).
+The fields `id`, `stateChangedAt` and `credentials` can not be updated using this method."
+ex3-1052,ory.sh,PUT,/admin/identities/{id},updateIdentity,Update an Identity,"This endpoint updates an [identity](https://www.ory.com/docs/kratos/concepts/identity-user-model). The full identity
+payload (except credentials) is expected.
+
+It is possible to update the identity's credentials as well. Using this operation, credentials will not be overwritten
+but instead added to the list. For example, if a user has a social sign in connection set up, updating the credentials
+will keep the social sign in connection and add the new credentials to the list. This prevents accidentally overwriting
+credentials and locking out users. A complete view of all credential types is here:
+
+- `password`: The existing password credential will be completely replaced with the new configuration. You can provide either a hashed password, a plaintext password (which will be hashed), or enable the password migration hook.
+- `oidc`, `saml`: The existing OIDC and SAML credentials will be kept and the new credentials will be added to the list.
+- `totp`: The existing TOTP credentials will be replaced with the new configuration.
+- `lookup_secret`: The existing Lookup Secret codes will be kept and the new codes will be added to the list.
+- `webauthn`, `passkey`: The existing credentials are preserved, new credentials are added, and credentials with matching IDs are updated with new values. If a new `user_handle` is provided, it's added to the identity's identifiers list while preserving previous user handles.
+- `code`: To import code credentials, configure your identity schema to use one of the identity traits as an identifier source (`{""ory.sh/kratos"":{""code"":{""identifier"":true"", ""via"":""email""}}}`)."
+ex3-1053,ory.sh,DELETE,/admin/identities/{id}/credentials/{type},deleteIdentityCredentials,Delete a credential for a specific identity,"Delete an [identity](https://www.ory.com/docs/kratos/concepts/identity-user-model) credential by its type.
+You cannot delete passkeys or code auth credentials through this API."
+ex3-1054,ory.sh,DELETE,/admin/identities/{id}/sessions,deleteIdentitySessions,Delete & Invalidate an Identity's Sessions,Calling this endpoint irrecoverably and permanently deletes and invalidates all sessions that belong to the given Identity.
+ex3-1055,ory.sh,GET,/admin/identities/{id}/sessions,listIdentitySessions,List an Identity's Sessions,This endpoint returns all sessions that belong to the given Identity.
+ex3-1056,ory.sh,DELETE,/admin/keys/{set},deleteJsonWebKeySet,Delete JSON Web Key Set,"Use this endpoint to delete a complete JSON Web Key Set and all the keys in that set.
+
+A JSON Web Key (JWK) is a JavaScript Object Notation (JSON) data structure that represents a cryptographic key. A JWK Set is a JSON data structure that represents a set of JWKs. A JSON Web Key is identified by its set and key id. ORY Hydra uses this functionality to store cryptographic keys used for TLS and JSON Web Tokens (such as OpenID Connect ID tokens), and allows storing user-defined keys as well."
+ex3-1057,ory.sh,GET,/admin/keys/{set},getJsonWebKeySet,Retrieve a JSON Web Key Set,"This endpoint can be used to retrieve JWK Sets stored in ORY Hydra.
+
+A JSON Web Key (JWK) is a JavaScript Object Notation (JSON) data structure that represents a cryptographic key. A JWK Set is a JSON data structure that represents a set of JWKs. A JSON Web Key is identified by its set and key id. ORY Hydra uses this functionality to store cryptographic keys used for TLS and JSON Web Tokens (such as OpenID Connect ID tokens), and allows storing user-defined keys as well.
+
+While `jwks.admin_api.expose_private_keys` is disabled, responses contain public key material only, and a key with no public representation is omitted."
+ex3-1058,ory.sh,POST,/admin/keys/{set},createJsonWebKeySet,Create JSON Web Key,"This endpoint is capable of generating JSON Web Key Sets for you. There are different strategies available, such as symmetric cryptographic keys (HS256, HS512) and asymmetric cryptographic keys (RS256, ECDSA). If the specified JSON Web Key Set does not exist, it will be created.
+
+If the set already exists, the newly generated key is added to it and all existing keys are kept. This allows you to rotate keys: tokens signed with an older key in the set remain verifiable. Exception: when Ory Hydra is configured to use a Hardware Security Module (HSM), generating a key replaces the set, which then contains only the new key. To replace a set and all of its keys instead, use the `setJsonWebKeySet` operation (`PUT /admin/keys/{set}`).
+
+A JSON Web Key (JWK) is a JavaScript Object Notation (JSON) data structure that represents a cryptographic key. A JWK Set is a JSON data structure that represents a set of JWKs. A JSON Web Key is identified by its set and key id. ORY Hydra uses this functionality to store cryptographic keys used for TLS and JSON Web Tokens (such as OpenID Connect ID tokens), and allows storing user-defined keys as well.
+
+While `jwks.admin_api.expose_private_keys` is disabled, responses contain public key material only, and a key with no public representation is omitted. The generated key is stored in full either way."
+ex3-1059,ory.sh,PUT,/admin/keys/{set},setJsonWebKeySet,Update a JSON Web Key Set,"Use this method if you do not want to let Hydra generate the JWKs for you, but instead save your own.
+
+This operation replaces the entire JSON Web Key Set: keys that exist in the set but are not part of the request body are deleted. To add a newly generated key to the set while keeping the existing keys, use the `createJsonWebKeySet` operation (`POST /admin/keys/{set}`).
+
+A JSON Web Key (JWK) is a JavaScript Object Notation (JSON) data structure that represents a cryptographic key. A JWK Set is a JSON data structure that represents a set of JWKs. A JSON Web Key is identified by its set and key id. ORY Hydra uses this functionality to store cryptographic keys used for TLS and JSON Web Tokens (such as OpenID Connect ID tokens), and allows storing user-defined keys as well.
+
+The response echoes the key set as it was stored, including any private key material the request carried. `jwks.admin_api.expose_private_keys` governs what a read discloses and does not apply here, because this response returns only what the request already contained.
+
+While that setting is disabled, a request that would leave the key set without a private key is rejected with `400`. Reading a key set returns public keys only, so writing that response back would discard the private keys the set signs with. Retiring one key to its public half stays possible as long as the set keeps another private key, and a key set is removed with the `deleteJsonWebKeySet` operation."
+ex3-1060,ory.sh,DELETE,/admin/keys/{set}/{kid},deleteJsonWebKey,Delete JSON Web Key,"Use this endpoint to delete a single JSON Web Key.
+
+A JSON Web Key (JWK) is a JavaScript Object Notation (JSON) data structure that represents a cryptographic key. A
+JWK Set is a JSON data structure that represents a set of JWKs. A JSON Web Key is identified by its set and key id. ORY Hydra uses
+this functionality to store cryptographic keys used for TLS and JSON Web Tokens (such as OpenID Connect ID tokens),
+and allows storing user-defined keys as well."
+ex3-1061,ory.sh,GET,/admin/keys/{set}/{kid},getJsonWebKey,Get JSON Web Key,"This endpoint returns a singular JSON Web Key contained in a set. It is identified by the set and the specific key ID (kid).
+
+While `jwks.admin_api.expose_private_keys` is disabled, responses contain public key material only, and a key with no public
+representation is omitted."
+ex3-1062,ory.sh,PUT,/admin/keys/{set}/{kid},setJsonWebKey,Set JSON Web Key,"Use this method if you do not want to let Hydra generate the JWKs for you, but instead save your own.
+
+The key is created or updated under the `{kid}` path parameter. If the request body carries a `kid`, it must equal the path parameter, or the request is rejected with `400`. A body without a `kid` takes the path parameter as its `kid`.
+
+A JSON Web Key (JWK) is a JavaScript Object Notation (JSON) data structure that represents a cryptographic key. A JWK Set is a JSON data structure that represents a set of JWKs. A JSON Web Key is identified by its set and key id. ORY Hydra uses this functionality to store cryptographic keys used for TLS and JSON Web Tokens (such as OpenID Connect ID tokens), and allows storing user-defined keys as well.
+
+The response echoes the key as it was stored, including any private key material the request carried. `jwks.admin_api.expose_private_keys` governs what a read discloses and does not apply here, because this response returns only what the request already contained.
+
+While that setting is disabled, writing a public key over the last private key of a set is rejected with `400`, because reading the set returns public keys only and writing that response back would discard the key it signs with."
+ex3-1063,ory.sh,GET,/admin/oauth2/auth/requests/consent,getOAuth2ConsentRequest,Get OAuth 2.0 Consent Request,"When an authorization code, hybrid, or implicit OAuth 2.0 Flow is initiated, Ory asks the login provider
+to authenticate the subject and then tell Ory now about it. If the subject authenticated, he/she must now be asked if
+the OAuth 2.0 Client which initiated the flow should be allowed to access the resources on the subject's behalf.
+
+The consent challenge is appended to the consent provider's URL to which the subject's user-agent (browser) is redirected to. The consent
+provider uses that challenge to fetch information on the OAuth2 request and then tells Ory if the subject accepted
+or rejected the request.
+
+The default consent provider is available via the Ory Managed Account Experience. To customize the consent provider, please
+head over to the OAuth 2.0 documentation."
+ex3-1064,ory.sh,PUT,/admin/oauth2/auth/requests/consent/accept,acceptOAuth2ConsentRequest,Accept OAuth 2.0 Consent Request,"When an authorization code, hybrid, or implicit OAuth 2.0 Flow is initiated, Ory asks the login provider
+to authenticate the subject and then tell Ory now about it. If the subject authenticated, he/she must now be asked if
+the OAuth 2.0 Client which initiated the flow should be allowed to access the resources on the subject's behalf.
+
+The consent challenge is appended to the consent provider's URL to which the subject's user-agent (browser) is redirected to. The consent
+provider uses that challenge to fetch information on the OAuth2 request and then tells Ory if the subject accepted
+or rejected the request.
+
+This endpoint tells Ory that the subject has authorized the OAuth 2.0 client to access resources on his/her behalf.
+The consent provider includes additional information, such as session data for access and ID tokens, and if the
+consent request should be used as basis for future requests.
+
+The response contains a redirect URL which the consent provider should redirect the user-agent to.
+
+The default consent provider is available via the Ory Managed Account Experience. To customize the consent provider, please
+head over to the OAuth 2.0 documentation."
+ex3-1065,ory.sh,PUT,/admin/oauth2/auth/requests/consent/reject,rejectOAuth2ConsentRequest,Reject OAuth 2.0 Consent Request,"When an authorization code, hybrid, or implicit OAuth 2.0 Flow is initiated, Ory asks the login provider
+to authenticate the subject and then tell Ory now about it. If the subject authenticated, he/she must now be asked if
+the OAuth 2.0 Client which initiated the flow should be allowed to access the resources on the subject's behalf.
+
+The consent challenge is appended to the consent provider's URL to which the subject's user-agent (browser) is redirected to. The consent
+provider uses that challenge to fetch information on the OAuth2 request and then tells Ory if the subject accepted
+or rejected the request.
+
+This endpoint tells Ory that the subject has not authorized the OAuth 2.0 client to access resources on his/her behalf.
+The consent provider must include a reason why the consent was not granted.
+
+The response contains a redirect URL which the consent provider should redirect the user-agent to.
+
+The default consent provider is available via the Ory Managed Account Experience. To customize the consent provider, please
+head over to the OAuth 2.0 documentation."
+ex3-1066,ory.sh,PUT,/admin/oauth2/auth/requests/device/accept,acceptUserCodeRequest,Accepts a device grant user_code request,Accepts a device grant user_code request
+ex3-1067,ory.sh,GET,/admin/oauth2/auth/requests/login,getOAuth2LoginRequest,Get OAuth 2.0 Login Request,"When an authorization code, hybrid, or implicit OAuth 2.0 Flow is initiated, Ory asks the login provider
+to authenticate the subject and then tell the Ory OAuth2 Service about it.
+
+Per default, the login provider is Ory itself. You may use a different login provider which needs to be a web-app
+you write and host, and it must be able to authenticate (""show the subject a login screen"")
+a subject (in OAuth2 the proper name for subject is ""resource owner"").
+
+The authentication challenge is appended to the login provider URL to which the subject's user-agent (browser) is redirected to. The login
+provider uses that challenge to fetch information on the OAuth2 request and then accept or reject the requested authentication process."
+ex3-1068,ory.sh,PUT,/admin/oauth2/auth/requests/login/accept,acceptOAuth2LoginRequest,Accept OAuth 2.0 Login Request,"When an authorization code, hybrid, or implicit OAuth 2.0 Flow is initiated, Ory asks the login provider
+to authenticate the subject and then tell the Ory OAuth2 Service about it.
+
+The authentication challenge is appended to the login provider URL to which the subject's user-agent (browser) is redirected to. The login
+provider uses that challenge to fetch information on the OAuth2 request and then accept or reject the requested authentication process.
+
+This endpoint tells Ory that the subject has successfully authenticated and includes additional information such as
+the subject's ID and if Ory should remember the subject's subject agent for future authentication attempts by setting
+a cookie.
+
+The response contains a redirect URL which the login provider should redirect the user-agent to."
+ex3-1069,ory.sh,PUT,/admin/oauth2/auth/requests/login/reject,rejectOAuth2LoginRequest,Reject OAuth 2.0 Login Request,"When an authorization code, hybrid, or implicit OAuth 2.0 Flow is initiated, Ory asks the login provider
+to authenticate the subject and then tell the Ory OAuth2 Service about it.
+
+The authentication challenge is appended to the login provider URL to which the subject's user-agent (browser) is redirected to. The login
+provider uses that challenge to fetch information on the OAuth2 request and then accept or reject the requested authentication process.
+
+This endpoint tells Ory that the subject has not authenticated and includes a reason why the authentication
+was denied.
+
+The response contains a redirect URL which the login provider should redirect the user-agent to."
+ex3-1070,ory.sh,GET,/admin/oauth2/auth/requests/logout,getOAuth2LogoutRequest,Get OAuth 2.0 Session Logout Request,Use this endpoint to fetch an Ory OAuth 2.0 logout request.
+ex3-1071,ory.sh,PUT,/admin/oauth2/auth/requests/logout/accept,acceptOAuth2LogoutRequest,Accept OAuth 2.0 Session Logout Request,"When a user or an application requests Ory OAuth 2.0 to remove the session state of a subject, this endpoint is used to confirm that logout request.
+
+The response contains a redirect URL which the consent provider should redirect the user-agent to."
+ex3-1072,ory.sh,PUT,/admin/oauth2/auth/requests/logout/reject,rejectOAuth2LogoutRequest,Reject OAuth 2.0 Session Logout Request,"When a user or an application requests Ory OAuth 2.0 to remove the session state of a subject, this endpoint is used to deny that logout request.
+No HTTP request body is required.
+
+The response is empty as the logout provider has to chose what action to perform next."
+ex3-1073,ory.sh,DELETE,/admin/oauth2/auth/sessions/consent,revokeOAuth2ConsentSessions,Revoke OAuth 2.0 Consent Sessions of a Subject,"This endpoint revokes a subject's granted consent sessions and invalidates all
+associated OAuth 2.0 Access Tokens. You may also only revoke sessions for a specific OAuth 2.0 Client ID."
+ex3-1074,ory.sh,GET,/admin/oauth2/auth/sessions/consent,listOAuth2ConsentSessions,List OAuth 2.0 Consent Sessions of a Subject,"This endpoint lists all subject's granted consent sessions, including client and granted scope.
+If the subject is unknown or has not granted any consent sessions yet, the endpoint returns an
+empty JSON array with status code 200 OK."
+ex3-1075,ory.sh,DELETE,/admin/oauth2/auth/sessions/login,revokeOAuth2LoginSessions,Revokes OAuth 2.0 Login Sessions by either a Subject or a SessionID,"This endpoint invalidates authentication sessions. After revoking the authentication session(s), the subject
+has to re-authenticate at the Ory OAuth2 Provider. This endpoint does not invalidate any tokens.
+
+If you send the subject in a query param, all authentication sessions that belong to that subject are revoked.
+No OpenID Connect Front- or Back-channel logout is performed in this case.
+
+Alternatively, you can send a SessionID via `sid` query param, in which case, only the session that is connected
+to that SessionID is revoked. OpenID Connect Back-channel logout is performed in this case.
+
+When using Ory for the identity provider, the login provider will also invalidate the session cookie."
+ex3-1076,ory.sh,POST,/admin/oauth2/introspect,introspectOAuth2Token,Introspect OAuth2 Access and Refresh Tokens,"The introspection endpoint allows to check if a token (both refresh and access) is active or not. An active token
+is neither expired nor revoked. If a token is active, additional information on the token will be included. You can
+set additional data for a token by setting `session.access_token` during the consent flow."
+ex3-1077,ory.sh,DELETE,/admin/oauth2/tokens,deleteOAuth2Token,Delete OAuth 2.0 Access Tokens from specific OAuth 2.0 Client,This endpoint deletes OAuth2 access tokens issued to an OAuth 2.0 Client from the database.
+ex3-1078,ory.sh,POST,/admin/recovery/code,createRecoveryCodeForIdentity,Create a Recovery Code,"This endpoint creates a recovery code which should be given to the user in order for them to recover
+(or activate) their account."
+ex3-1079,ory.sh,POST,/admin/recovery/link,createRecoveryLinkForIdentity,Create a Recovery Link,"This endpoint creates a recovery link which should be given to the user in order for them to recover
+(or activate) their account."
+ex3-1080,ory.sh,DELETE,/admin/relation-tuples,deleteRelationships,Delete Relationships,Use this endpoint to delete relationships
+ex3-1081,ory.sh,PATCH,/admin/relation-tuples,patchRelationships,Patch Multiple Relationships,Use this endpoint to patch one or more relationships.
+ex3-1082,ory.sh,PUT,/admin/relation-tuples,createRelationship,Create a Relationship,Use this endpoint to create a relationship.
+ex3-1083,ory.sh,GET,/admin/sessions,listSessions,List All Sessions,Listing all sessions that exist.
+ex3-1084,ory.sh,POST,/admin/sessions,manageSessions,Manage sessions in bulk,"Disable or delete sessions for a list of identities or a list of sessions in
+a single call. The `action` field selects the operation:
+
+- `disable` — deactivate matching sessions (sets `active = false`, preserves
+audit data).
+- `delete` — permanently delete matching sessions.
+
+Exactly one of `identities` or `sessions` must be provided. To scope the
+operation to every session in the network, pass `identities: [""*""]`; the
+wildcard is not accepted in the `sessions` field. Up to 500 explicit IDs
+are accepted per call.
+
+All requests return `200 OK` with `{processed, more}`. `processed` reports
+how many rows the call affected; for `disable` it counts only sessions
+that were active before the call. `more` is `true` only when a wildcard
+request reached the per-call batch limit and additional rows may remain;
+callers drain the network by re-issuing the same request while `more` is
+`true`. Explicit-IDs requests always return `more: false`."
+ex3-1085,ory.sh,DELETE,/admin/sessions/{id},disableSession,Deactivate a Session,Calling this endpoint deactivates the specified session. Session data is not deleted.
+ex3-1086,ory.sh,GET,/admin/sessions/{id},getSession,Get Session,"This endpoint is useful for:
+
+- Getting a session object with all specified expandables that exist in an administrative context."
+ex3-1087,ory.sh,PATCH,/admin/sessions/{id}/extend,extendSession,Extend a Session,"Calling this endpoint extends the given session ID. If `session.earliest_possible_extend` is set it
+will only extend the session after the specified time has passed.
+
+This endpoint returns per default a 204 No Content response on success. Older Ory Network projects may
+return a 200 OK response with the session in the body. Returning the session as part of the response
+will be deprecated in the future and should not be relied upon.
+
+This endpoint returns a success response without extending the session if the session is not yet due for an
+extension, including when a consecutive or concurrent request already extended it. This endpoint returns a 404
+error if the session does not exist.
+
+Retrieve the session ID from the `/sessions/whoami` endpoint / `toSession` SDK method."
+ex3-1088,ory.sh,POST,/admin/test-login-flows,createTestLoginFlow,Create a test OIDC login flow,"Creates a dry-run OIDC test login flow pre-scoped to one provider. The
+returned flow carries a single-submit UI and a CSRF bearer token. No
+identity is persisted and no session is issued when the flow completes;
+the captured debug data is returned in the flow's test_context."
+ex3-1089,ory.sh,GET,/admin/trust/grants/jwt-bearer/issuers,listTrustedOAuth2JwtGrantIssuers,List Trusted OAuth2 JWT Bearer Grant Type Issuers,Use this endpoint to list all trusted JWT Bearer Grant Type Issuers.
+ex3-1090,ory.sh,POST,/admin/trust/grants/jwt-bearer/issuers,trustOAuth2JwtGrantIssuer,Trust OAuth2 JWT Bearer Grant Type Issuer,"Use this endpoint to establish a trust relationship for a JWT issuer
+to perform JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication
+and Authorization Grants [RFC7523](https://datatracker.ietf.org/doc/html/rfc7523)."
+ex3-1091,ory.sh,DELETE,/admin/trust/grants/jwt-bearer/issuers/{id},deleteTrustedOAuth2JwtGrantIssuer,Delete Trusted OAuth2 JWT Bearer Grant Type Issuer,"Use this endpoint to delete trusted JWT Bearer Grant Type Issuer. The ID is the one returned when you
+created the trust relationship.
+
+Once deleted, the associated issuer will no longer be able to perform the JSON Web Token (JWT) Profile
+for OAuth 2.0 Client Authentication and Authorization Grant."
+ex3-1092,ory.sh,GET,/admin/trust/grants/jwt-bearer/issuers/{id},getTrustedOAuth2JwtGrantIssuer,Get Trusted OAuth2 JWT Bearer Grant Type Issuer,"Use this endpoint to get a trusted JWT Bearer Grant Type Issuer. The ID is the one returned when you
+created the trust relationship."
+ex3-1093,ory.sh,POST,/credentials,createVerifiableCredential,Issues a Verifiable Credential,"This endpoint creates a verifiable credential that attests that the user
+authenticated with the provided access token owns a certain public/private key
+pair.
+
+More information can be found at
+https://openid.net/specs/openid-connect-userinfo-vc-1_0.html."
+ex3-1094,ory.sh,GET,/elements/configuration,getConfiguration,Get Ory Elements configuration,"Returns a subset of the project's configuration for the given host.
+The response only contains non-sensitive data that is used to customize the behavior of Ory Elements."
+ex3-1095,ory.sh,GET,/namespaces,listRelationshipNamespaces,Query namespaces,Get all namespaces
+ex3-1096,ory.sh,GET,/oauth2/auth,oAuth2Authorize,OAuth 2.0 Authorize Endpoint,"Use open source libraries to perform OAuth 2.0 and OpenID Connect
+available for any programming language. You can find a list of libraries at https://oauth.net/code/
+
+This endpoint should not be used via the Ory SDK and is only included for technical reasons.
+Instead, use one of the libraries linked above."
+ex3-1097,ory.sh,POST,/oauth2/device/auth,oAuth2DeviceFlow,The OAuth 2.0 Device Authorize Endpoint,"This endpoint is not documented here because you should never use your own implementation to perform OAuth2 flows.
+OAuth2 is a very popular protocol and a library for your programming language will exist.
+
+To learn more about this flow please refer to the specification: https://tools.ietf.org/html/rfc8628"
+ex3-1098,ory.sh,GET,/oauth2/device/verify,performOAuth2DeviceVerificationFlow,OAuth 2.0 Device Verification Endpoint,This is the device user verification endpoint. The user is redirected here when trying to log in using the device flow.
+ex3-1099,ory.sh,POST,/oauth2/register,createOidcDynamicClient,Register OAuth2 Client using OpenID Dynamic Client Registration,"This endpoint behaves like the administrative counterpart (`createOAuth2Client`) but is capable of facing the
+public internet directly and can be used in self-service. It implements the OpenID Connect
+Dynamic Client Registration Protocol. This feature needs to be enabled in the configuration. This endpoint
+is disabled by default. It can be enabled by an administrator.
+
+Please note that using this endpoint you are not able to choose the `client_secret` nor the `client_id` as those
+values will be server generated when specifying `token_endpoint_auth_method` as `client_secret_basic` or
+`client_secret_post`.
+
+The `client_secret` will be returned in the response and you will not be able to retrieve it later on.
+Write the secret down and keep it somewhere safe."
+ex3-1100,ory.sh,DELETE,/oauth2/register/{id},deleteOidcDynamicClient,Delete OAuth 2.0 Client using the OpenID Dynamic Client Registration Management Protocol,"This endpoint behaves like the administrative counterpart (`deleteOAuth2Client`) but is capable of facing the
+public internet directly and can be used in self-service. It implements the OpenID Connect
+Dynamic Client Registration Protocol. This feature needs to be enabled in the configuration. This endpoint
+is disabled by default. It can be enabled by an administrator.
+
+To use this endpoint, you will need to present the client's authentication credentials. If the OAuth2 Client
+uses the Token Endpoint Authentication Method `client_secret_post`, you need to present the client secret in the URL query.
+If it uses `client_secret_basic`, present the Client ID and the Client Secret in the Authorization header.
+
+OAuth 2.0 clients are used to perform OAuth 2.0 and OpenID Connect flows. Usually, OAuth 2.0 clients are
+generated for applications which want to consume your OAuth 2.0 or OpenID Connect capabilities."
+ex3-1101,ory.sh,GET,/oauth2/register/{id},getOidcDynamicClient,Get OAuth2 Client using OpenID Dynamic Client Registration,"This endpoint behaves like the administrative counterpart (`getOAuth2Client`) but is capable of facing the
+public internet directly and can be used in self-service. It implements the OpenID Connect
+Dynamic Client Registration Protocol.
+
+To use this endpoint, you will need to present the client's authentication credentials. If the OAuth2 Client
+uses the Token Endpoint Authentication Method `client_secret_post`, you need to present the client secret in the URL query.
+If it uses `client_secret_basic`, present the Client ID and the Client Secret in the Authorization header."
+ex3-1102,ory.sh,PUT,/oauth2/register/{id},setOidcDynamicClient,Set OAuth2 Client using OpenID Dynamic Client Registration,"This endpoint behaves like the administrative counterpart (`setOAuth2Client`) but is capable of facing the
+public internet directly to be used by third parties. It implements the OpenID Connect
+Dynamic Client Registration Protocol.
+
+This feature is disabled per default. It can be enabled by a system administrator.
+
+If you pass `client_secret` the secret is used, otherwise the existing secret is used. If set, the secret is echoed in the response.
+It is not possible to retrieve it later on.
+
+To use this endpoint, you will need to present the client's authentication credentials. If the OAuth2 Client
+uses the Token Endpoint Authentication Method `client_secret_post`, you need to present the client secret in the URL query.
+If it uses `client_secret_basic`, present the Client ID and the Client Secret in the Authorization header.
+
+OAuth 2.0 clients are used to perform OAuth 2.0 and OpenID Connect flows. Usually, OAuth 2.0 clients are
+generated for applications which want to consume your OAuth 2.0 or OpenID Connect capabilities."
+ex3-1103,ory.sh,POST,/oauth2/revoke,revokeOAuth2Token,Revoke OAuth 2.0 Access or Refresh Token,"Revoking a token (both access and refresh) means that the tokens will be invalid. A revoked access token can no
+longer be used to make access requests, and a revoked refresh token can no longer be used to refresh an access token.
+Revoking a refresh token also invalidates the access token that was created with it. A token may only be revoked by
+the client the token was generated for."
+ex3-1104,ory.sh,GET,/oauth2/sessions/logout,revokeOidcSession,OpenID Connect Front- and Back-channel Enabled Logout,"This endpoint initiates and completes user logout at the Ory OAuth2 & OpenID provider and initiates OpenID Connect Front- / Back-channel logout:
+
+- https://openid.net/specs/openid-connect-frontchannel-1_0.html
+- https://openid.net/specs/openid-connect-backchannel-1_0.html
+
+Back-channel logout is performed asynchronously and does not affect logout flow."
+ex3-1105,ory.sh,POST,/oauth2/token,oauth2TokenExchange,The OAuth 2.0 Token Endpoint,"Use open source libraries to perform OAuth 2.0 and OpenID Connect
+available for any programming language. You can find a list of libraries here https://oauth.net/code/
+
+This endpoint should not be used via the Ory SDK and is only included for technical reasons.
+Instead, use one of the libraries linked above."
+ex3-1106,ory.sh,POST,/opl/syntax/check,checkOplSyntax,Check the syntax of an OPL file,The OPL file is expected in the body of the request.
+ex3-1107,ory.sh,GET,/projects,listProjects,List All Projects,Lists all projects you have access to.
+ex3-1108,ory.sh,POST,/projects,createProject,Create a Project,Creates a new project.
+ex3-1109,ory.sh,DELETE,/projects/{project_id},purgeProject,Irrecoverably purge a project,"!! Use with extreme caution !!
+
+Using this API endpoint you can purge (completely delete) a project and its data.
+This action can not be undone and will delete ALL your data.
+
+Calling this endpoint will additionally delete custom domains and other related data.
+
+If the project is linked to a subscription, the subscription needs to be unlinked first."
+ex3-1110,ory.sh,GET,/projects/{project_id},getProject,Get an Ory Network Project Configuration,"Returns the project rendered into the configuration format the open source
+projects use (e.g. Ory Kratos for Identity, Ory Keto for Permissions), including
+the values Ory fills in for the project, such as the resolved base URLs.
+
+The rendered configuration does not carry the operational configuration items
+(e.g. port, tracing, logging) available in the open source."
+ex3-1111,ory.sh,PATCH,/projects/{project_id},patchProject,Patch an Ory Network Project Configuration,"Deprecated: Use the `patchProjectWithRevision` endpoint instead to specify the exact revision the patch was generated for.
+
+This endpoints allows you to patch individual Ory Network project configuration keys for
+Ory's services (identity, permission, ...). The configuration format is fully compatible
+with the open source projects for the respective services (e.g. Ory Kratos for Identity, Ory Keto for Permissions).
+
+This endpoint expects the `version` key to be set in the payload. If it is unset, it
+will try to import the config as if it is from the most recent version.
+
+If you have an older version of a configuration, you should set the version key in the payload!
+
+While this endpoint is able to process all configuration items related to features (e.g. password reset),
+it does not support operational configuration items (e.g. port, tracing, logging) otherwise available in the
+open source.
+
+For configuration items that can not be translated to the Ory Network, this endpoint will return a list of warnings
+to help you understand which parts of your config could not be processed."
+ex3-1112,ory.sh,PUT,/projects/{project_id},setProject,Update an Ory Network Project Configuration,"This endpoints allows you to update the Ory Network project configuration for
+individual services (identity, permission, ...). The configuration is fully compatible
+with the open source projects for the respective services (e.g. Ory Kratos for Identity, Ory Keto for Permissions).
+
+This endpoint expects the `version` key to be set in the payload. If it is unset, it
+will try to import the config as if it is from the most recent version.
+
+If you have an older version of a configuration, you should set the version key in the payload!
+
+While this endpoint is able to process all configuration items related to features (e.g. password reset),
+it does not support operational configuration items (e.g. port, tracing, logging) otherwise available in the
+open source.
+
+For configuration items that can not be translated to the Ory Network, this endpoint will return a list of warnings
+to help you understand which parts of your config could not be processed.
+
+Be aware that updating any service's configuration will completely override your current configuration for that
+service!"
+ex3-1113,ory.sh,GET,/projects/{project_id}/eventstreams,listEventStreams,List all event streams for the project. This endpoint is not paginated.,
+ex3-1114,ory.sh,POST,/projects/{project_id}/eventstreams,createEventStream,Create an event stream for your project.,
+ex3-1115,ory.sh,DELETE,/projects/{project_id}/eventstreams/{event_stream_id},deleteEventStream,Remove an event stream from a project,Remove an event stream from a project.
+ex3-1116,ory.sh,PUT,/projects/{project_id}/eventstreams/{event_stream_id},setEventStream,Update an event stream for a project.,
+ex3-1117,ory.sh,POST,/projects/{project_id}/opl/validate,validateOpl,Validate an Ory Permission Language document,"Parses an OPL document using the same product limits and subscription
+entitlements applied when the project's configuration is saved."
+ex3-1118,ory.sh,GET,/projects/{project_id}/organizations,listOrganizations,List all Enterprise SSO organizations,"Deprecated: use getProject instead
+
+Lists all Enterprise SSO organizations in a project."
+ex3-1119,ory.sh,POST,/projects/{project_id}/organizations,createOrganization,Create an Enterprise SSO Organization,"Deprecated: use setProject or patchProjectWithRevision instead
+
+Creates an Enterprise SSO Organization in a project."
+ex3-1120,ory.sh,DELETE,/projects/{project_id}/organizations/{organization_id},deleteOrganization,Delete Enterprise SSO Organization,"Deprecated: use setProject or patchProjectWithRevision instead
+
+Irrecoverably deletes an Enterprise SSO Organization in a project by its ID."
+ex3-1121,ory.sh,GET,/projects/{project_id}/organizations/{organization_id},getOrganization,Get Enterprise SSO Organization by ID,"Deprecated: use getProject instead
+
+Retrieves an Enterprise SSO Organization for a project by its ID"
+ex3-1122,ory.sh,PUT,/projects/{project_id}/organizations/{organization_id},updateOrganization,Update an Enterprise SSO Organization,"Deprecated: use setProject or patchProjectWithRevision instead
+
+Updates an Enterprise SSO Organization in a project by its ID."
+ex3-1123,ory.sh,GET,/projects/{project_id}/organizations/{organization_id}/onboarding-portal-links,getOrganizationOnboardingPortalLinks,Get the organization onboarding portal links,Retrieves the organization onboarding portal links.
+ex3-1124,ory.sh,POST,/projects/{project_id}/organizations/{organization_id}/onboarding-portal-links,createOrganizationOnboardingPortalLink,Create organization onboarding portal link,Create a onboarding portal link for an organization.
+ex3-1125,ory.sh,DELETE,/projects/{project_id}/organizations/{organization_id}/onboarding-portal-links/{onboarding_portal_link_id},deleteOrganizationOnboardingPortalLink,Delete an organization onboarding portal link,Deletes a onboarding portal link for an organization.
+ex3-1126,ory.sh,POST,/projects/{project_id}/organizations/{organization_id}/onboarding-portal-links/{onboarding_portal_link_id},updateOrganizationOnboardingPortalLink,Update organization onboarding portal link,Update a onboarding portal link for an organization.
+ex3-1127,ory.sh,PATCH,/projects/{project_id}/revision/{revision_id},patchProjectWithRevision,Patch an Ory Network Project Configuration based on a revision ID,"This endpoints allows you to patch individual Ory Network Project configuration keys for
+Ory's services (identity, permission, ...). The configuration format is fully compatible
+with the open source projects for the respective services (e.g. Ory Kratos for Identity, Ory Keto for Permissions).
+
+This endpoint expects the `version` key to be set in the payload. If it is unset, it
+will try to import the config as if it is from the most recent version.
+
+If you have an older version of a configuration, you should set the version key in the payload!
+
+While this endpoint is able to process all configuration items related to features (e.g. password reset),
+it does not support operational configuration items (e.g. port, tracing, logging) otherwise available in the
+open source.
+
+For configuration items that can not be translated to the Ory Network, this endpoint will return a list of warnings
+to help you understand which parts of your config could not be processed."
+ex3-1128,ory.sh,GET,/projects/{project}/members,getProjectMembers,Get all members associated with this project,This endpoint requires the user to be a member of the project with the role `OWNER` or `DEVELOPER`.
+ex3-1129,ory.sh,DELETE,/projects/{project}/members/{member},removeProjectMember,Remove a member associated with this project,"This also sets their invite status to `REMOVED`.
+This endpoint requires the user to be a member of the project with the role `OWNER`."
+ex3-1130,ory.sh,GET,/projects/{project}/tokens,listProjectApiKeys,List a project's API keys,A list of all the project's API keys.
+ex3-1131,ory.sh,POST,/projects/{project}/tokens,createProjectApiKey,Create project API key,Create an API key for a project.
+ex3-1132,ory.sh,DELETE,/projects/{project}/tokens/{token_id},deleteProjectApiKey,Delete project API key,Deletes an API key and immediately removes it.
+ex3-1133,ory.sh,GET,/relation-tuples,getRelationships,Query relationships,Get all relationships that match the query. Only the namespace field is required.
+ex3-1134,ory.sh,POST,/relation-tuples/batch/check,batchCheckPermission,Batch check permissions,"To learn how relationship tuples and the check works, head over to [the documentation](https://www.ory.com/docs/keto/concepts/api-overview)."
+ex3-1135,ory.sh,GET,/relation-tuples/check,checkPermissionOrError,Check a permission,"To learn how relationship tuples and the check works, head over to [the documentation](https://www.ory.com/docs/keto/concepts/api-overview)."
+ex3-1136,ory.sh,POST,/relation-tuples/check,postCheckPermissionOrError,Check a permission,"To learn how relationship tuples and the check works, head over to [the documentation](https://www.ory.com/docs/keto/concepts/api-overview)."
+ex3-1137,ory.sh,GET,/relation-tuples/check/openapi,checkPermission,Check a permission,"To learn how relationship tuples and the check works, head over to [the documentation](https://www.ory.com/docs/keto/concepts/api-overview)."
+ex3-1138,ory.sh,POST,/relation-tuples/check/openapi,postCheckPermission,Check a permission,"To learn how relationship tuples and the check works, head over to [the documentation](https://www.ory.com/docs/keto/concepts/api-overview)."
+ex3-1139,ory.sh,GET,/relation-tuples/expand,expandPermissions,Expand a Relationship into permissions.,Use this endpoint to expand a relationship tuple into permissions.
+ex3-1140,ory.sh,GET,/schemas,listIdentitySchemas,Get all Identity Schemas,Returns a list of all identity schemas currently in use.
+ex3-1141,ory.sh,GET,/schemas/{id},getIdentitySchema,Get Identity JSON Schema,Return a specific identity schema.
+ex3-1142,ory.sh,GET,/self-service/errors,getFlowError,Get User-Flow Errors,"This endpoint returns the error associated with a user-facing self service errors.
+
+This endpoint supports stub values to help you implement the error UI:
+
+- `?id=stub:500` - returns a stub 500 (Internal Server Error) error.
+
+More information can be found at [Ory Kratos User User Facing Error Documentation](https://www.ory.com/docs/kratos/self-service/flows/user-facing-errors)."
+ex3-1143,ory.sh,GET,/self-service/fed-cm/parameters,createFedcmFlow,Get FedCM Parameters,This endpoint returns a list of all available FedCM providers. It is only supported on the Ory Network.
+ex3-1144,ory.sh,POST,/self-service/fed-cm/token,updateFedcmFlow,Submit a FedCM token,"Use this endpoint to submit a token from a FedCM provider through
+`navigator.credentials.get` and log the user in. The parameters from
+`navigator.credentials.get` must have come from `GET
+self-service/fed-cm/parameters`."
+ex3-1145,ory.sh,POST,/self-service/login,updateLoginFlow,Submit a Login Flow,"Use this endpoint to complete a login flow. This endpoint
+behaves differently for API and browser flows.
+
+API flows expect `application/json` to be sent in the body and responds with
+- HTTP 200 and a application/json body with the session token on success;
+- HTTP 410 if the original flow expired with the appropriate error messages set and optionally a `use_flow_id` parameter in the body;
+- HTTP 400 on form validation errors.
+
+Browser flows expect a Content-Type of `application/x-www-form-urlencoded` or `application/json` to be sent in the body and respond with
+- a HTTP 303 redirect to the post/after login URL or the `return_to` value if it was set and if the login succeeded;
+- a HTTP 303 redirect to the login UI URL with the flow ID containing the validation errors otherwise.
+
+Browser flows with an accept header of `application/json` will not redirect but instead respond with
+- HTTP 200 and a application/json body with the signed in identity and a `Set-Cookie` header on success;
+- HTTP 303 redirect to a fresh login flow if the original flow expired with the appropriate error messages set;
+- HTTP 400 on form validation errors.
+
+If this endpoint is called with `Accept: application/json` in the header, the response contains the flow without a redirect. In the
+case of an error, the `error.id` of the JSON response body can be one of:
+
+- `session_already_available`: The user is already signed in.
+- `security_csrf_violation`: Unable to fetch the flow because a CSRF violation occurred.
+- `security_identity_mismatch`: The requested `?return_to` address is not allowed to be used. Adjust this in the configuration!
+- `browser_location_change_required`: Usually sent when an AJAX request indicates that the browser needs to open a specific URL.
+Most likely used in Social Sign In flows.
+
+More information can be found at [Ory Kratos User Login](https://www.ory.com/docs/kratos/self-service/flows/user-login) and [User Registration Documentation](https://www.ory.com/docs/kratos/self-service/flows/user-registration)."
+ex3-1146,ory.sh,GET,/self-service/login/api,createNativeLoginFlow,Create Login Flow for Native Apps,"This endpoint initiates a login flow for native apps that do not use a browser, such as mobile devices, smart TVs, and so on.
+
+If a valid provided session cookie or session token is provided, a 400 Bad Request error
+will be returned unless the URL query parameter `?refresh=true` is set.
+
+To fetch an existing login flow call `/self-service/login/flows?flow=<flow_id>`.
+
+You MUST NOT use this endpoint in client-side (Single Page Apps, ReactJS, AngularJS) nor server-side (Java Server
+Pages, NodeJS, PHP, Golang, ...) browser applications. Using this endpoint in these applications will make
+you vulnerable to a variety of CSRF attacks, including CSRF login attacks.
+
+In the case of an error, the `error.id` of the JSON response body can be one of:
+
+- `session_already_available`: The user is already signed in.
+- `session_aal1_required`: Multi-factor auth (e.g. 2fa) was requested but the user has no session yet.
+- `session_aal2_enrollment_required`: Second-factor auth is required but the identity has no second factor enrolled. Follow `redirect_browser_to` to the settings flow to enroll one.
+- `security_csrf_violation`: Unable to fetch the flow because a CSRF violation occurred.
+
+This endpoint MUST ONLY be used in scenarios such as native mobile apps (React Native, Objective C, Swift, Java, ...).
+
+More information can be found at [Ory Kratos User Login](https://www.ory.com/docs/kratos/self-service/flows/user-login) and [User Registration Documentation](https://www.ory.com/docs/kratos/self-service/flows/user-registration)."
+ex3-1147,ory.sh,GET,/self-service/login/browser,createBrowserLoginFlow,Create Login Flow for Browsers,"This endpoint initializes a browser-based user login flow. This endpoint will set the appropriate
+cookies and anti-CSRF measures required for browser-based flows.
+
+If this endpoint is opened as a link in the browser, it will be redirected to
+`selfservice.flows.login.ui_url` with the flow ID set as the query parameter `?flow=`. If a valid user session
+exists already, the browser will be redirected to `urls.default_redirect_url` unless the query parameter
+`?refresh=true` was set.
+
+If this endpoint is called via an AJAX request, the response contains the flow without a redirect. In the
+case of an error, the `error.id` of the JSON response body can be one of:
+
+- `session_already_available`: The user is already signed in.
+- `session_aal1_required`: Multi-factor auth (e.g. 2fa) was requested but the user has no session yet.
+- `session_aal2_enrollment_required`: Second-factor auth is required but the identity has no second factor enrolled. Follow `redirect_browser_to` to the settings flow to enroll one.
+- `security_csrf_violation`: Unable to fetch the flow because a CSRF violation occurred.
+- `security_identity_mismatch`: The requested `?return_to` address is not allowed to be used. Adjust this in the configuration!
+
+The optional query parameter login_challenge is set when using Kratos with
+Hydra in an OAuth2 flow. See the oauth2_provider.url configuration
+option.
+
+This endpoint is NOT INTENDED for clients that do not have a browser (Chrome, Firefox, ...) as cookies are needed.
+
+More information can be found at [Ory Kratos User Login](https://www.ory.com/docs/kratos/self-service/flows/user-login) and [User Registration Documentation](https://www.ory.com/docs/kratos/self-service/flows/user-registration)."
+ex3-1148,ory.sh,GET,/self-service/login/flows,getLoginFlow,Get Login Flow,"This endpoint returns a login flow's context with, for example, error details and other information.
+
+Browser flows expect the anti-CSRF cookie to be included in the request's HTTP Cookie Header.
+For AJAX requests you must ensure that cookies are included in the request or requests will fail.
+
+If you use the browser-flow for server-side apps, the services need to run on a common top-level-domain
+and you need to forward the incoming HTTP Cookie header to this endpoint:
+
+```js
+pseudo-code example
+router.get('/login', async function (req, res) {
+const flow = await client.getLoginFlow(req.header('cookie'), req.query['flow'])
+
+res.render('login', flow)
+})
+```
+
+This request may fail due to several reasons. The `error.id` can be one of:
+
+- `session_already_available`: The user is already signed in.
+- `self_service_flow_expired`: The flow is expired and you should request a new one.
+
+More information can be found at [Ory Kratos User Login](https://www.ory.com/docs/kratos/self-service/flows/user-login) and [User Registration Documentation](https://www.ory.com/docs/kratos/self-service/flows/user-registration)."
+ex3-1149,ory.sh,DELETE,/self-service/login/test,deleteTestLoginFlow,Delete a test OIDC login flow,"Deletes a dry-run OIDC test login flow. A flow whose debug payload has
+been captured requires the HMAC cookie set by the OIDC callback; a flow
+still in the initial choose-method state is deletable with just the flow
+ID (it carries no PII, and the admin may want to abandon it)."
+ex3-1150,ory.sh,GET,/self-service/logout,updateLogoutFlow,Update Logout Flow,"This endpoint logs out an identity in a self-service manner.
+
+If the `Accept` HTTP header is not set to `application/json`, the browser will be redirected (HTTP 303 See Other)
+to the `return_to` parameter of the initial request or fall back to `urls.default_return_to`.
+
+If the `Accept` HTTP header is set to `application/json`, a 204 No Content response
+will be sent on successful logout instead.
+
+This endpoint is NOT INTENDED for API clients and only works
+with browsers (Chrome, Firefox, ...). For API clients you can
+call the `/self-service/logout/api` URL directly with the Ory Session Token.
+
+More information can be found at [Ory Kratos User Logout Documentation](https://www.ory.com/docs/next/kratos/self-service/flows/user-logout)."
+ex3-1151,ory.sh,DELETE,/self-service/logout/api,performNativeLogout,Perform Logout for Native Apps,"Use this endpoint to log out an identity using an Ory Session Token. If the Ory Session Token was successfully
+revoked, the server returns a 204 No Content response. A 204 No Content response is also sent when
+the Ory Session Token has been revoked already before.
+
+If the Ory Session Token is malformed or does not exist a 403 Forbidden response will be returned.
+
+This endpoint does not remove any HTTP
+Cookies - use the Browser-Based Self-Service Logout Flow instead."
+ex3-1152,ory.sh,GET,/self-service/logout/browser,createBrowserLogoutFlow,Create a Logout URL for Browsers,"This endpoint initializes a browser-based user logout flow and a URL which can be used to log out the user.
+
+This endpoint is NOT INTENDED for API clients and only works
+with browsers (Chrome, Firefox, ...). For API clients you can
+call the `/self-service/logout/api` URL directly with the Ory Session Token.
+
+The URL is only valid for the currently signed in user. If no user is signed in, this endpoint returns
+a 401 error.
+
+When calling this endpoint from a backend, please ensure to properly forward the HTTP cookies."
+ex3-1153,ory.sh,POST,/self-service/methods/saml/acs/{provider},submitSamlAssertion,Native SAML Assertion Consumer Service (ACS),"This is the Assertion Consumer Service (ACS) for the native SAML engine.
+The identity provider delivers its SAML Response here via the HTTP-POST
+binding, carrying the RelayState token that correlates it with the
+AuthnRequest issued by the init endpoint. On success the browser is
+redirected to complete the login, registration, or settings-link flow that
+started the sign-in.
+
+This endpoint is posted to directly by the identity provider's browser and
+is NOT INTENDED to be called by API clients.
+
+Every failure -- a replayed or unknown token, a malformed request, a
+provider mismatch, a response delivered to a browser other than the one
+that started the flow, or a signature/assertion validation failure -- is
+reported with the identical generic error, so the response body cannot be
+used to probe which check failed."
+ex3-1154,ory.sh,GET,/self-service/methods/saml/idp-initiated/{provider},createIdPInitiatedSamlBrowserLoginFlow,Complete IdP-Initiated SAML Login for Browsers,"This endpoint is the entry point for IdP-initiated login through Ory Polis.
+Ory Polis redirects the browser here with a single-use authorization code
+after validating an unsolicited SAML response; Kratos then starts a regular
+browser login flow and forwards the code as a `code_hint` so Polis can
+complete the flow without a second round-trip to the identity provider.
+
+The provider must be a `jackson` provider with
+`idp_initiated_login_enabled` set to `true` in its configuration.
+
+This endpoint is NOT INTENDED for API clients and only works with browsers."
+ex3-1155,ory.sh,GET,/self-service/methods/saml/init/{provider},initSamlLogin,Initiate Native SAML Sign-In,"This endpoint starts a native SP-initiated SAML sign-in for the given
+connection. It checks that the flow named by the `flow` query parameter
+exists as the kind named by `purpose`, builds a SAML AuthnRequest, and
+forwards the browser to the identity provider's Single Sign-On endpoint -- either with
+an HTTP 302 redirect (HTTP-Redirect binding) or by returning a
+self-submitting HTML form (HTTP-POST binding).
+
+A login, registration, or settings flow redirects here as a browser
+navigation once a SAML connection has been selected. This endpoint is NOT
+INTENDED to be called directly by API clients: it is a browser navigation
+target, not a JSON API."
+ex3-1156,ory.sh,POST,/self-service/methods/saml/init/{provider},initSamlLoginRequest,Initiate Native SAML Sign-In (Direct POST),"Identical to `GET /self-service/methods/saml/init/{provider}`, except the
+caller POSTs directly to this endpoint -- validated by the anti-CSRF
+middleware -- instead of being redirected here as a GET."
+ex3-1157,ory.sh,GET,/self-service/methods/saml/metadata,getSamlMetadata,Get SAML SP Metadata,"This endpoint serves the per-project SAML Service Provider metadata
+document: the SP entity ID and certificates this Ory Network project
+presents to every SAML identity provider by default. It is a public,
+unauthenticated, cacheable endpoint and never contains a private key.
+
+By SAML SP convention, the returned entity ID is this endpoint's own URL.
+The native engine derives and uses it automatically as the default SP entity
+ID for every connection, so there is nothing to copy; share it with an
+identity provider administrator setting up SSO. A connection can present a
+different SP entity ID via `sp_entity_id_override`.
+
+This endpoint 404s if no native SAML connection has been configured for
+this project yet (no SP signing key exists to publish)."
+ex3-1158,ory.sh,GET,/self-service/methods/saml/metadata/{provider},getSamlProviderMetadata,Get Per-Connection SAML SP Metadata,"This endpoint serves per-connection SAML Service Provider metadata: the
+identity and certificate a single native connection presents to its identity
+provider, including the connection's own Assertion Consumer Service (ACS)
+URL. It serves a document for any native connection; when the connection sets
+`sp_entity_id_override` the SP entity ID is that value, otherwise it is the
+project default.
+
+It 404s -- with the identical generic response -- for an unknown connection
+ID, a connection disabled by invalid configuration, and a non-native
+connection, which manages its SP identity out of band."
+ex3-1159,ory.sh,POST,/self-service/recovery,updateRecoveryFlow,Update Recovery Flow,"Use this endpoint to update a recovery flow. This endpoint
+behaves differently for API and browser flows and has several states:
+
+- `choose_method` expects `flow` (in the URL query) and `email` (in the body) to be sent
+and works with API- and Browser-initiated flows.
+- For API clients and Browser clients with HTTP Header `Accept: application/json` it either returns a HTTP 200 OK when the form is valid and HTTP 400 OK when the form is invalid.
+and a HTTP 303 See Other redirect with a fresh recovery flow if the flow was otherwise invalid (e.g. expired).
+- For Browser clients without HTTP Header `Accept` or with `Accept: text/*` it returns a HTTP 303 See Other redirect to the Recovery UI URL with the Recovery Flow ID appended.
+- `sent_email` is the success state after `choose_method` for the `link` method and allows the user to request another recovery email. It
+works for both API and Browser-initiated flows and returns the same responses as the flow in `choose_method` state.
+- `passed_challenge` expects a `token` to be sent in the URL query and given the nature of the flow (""sending a recovery link"")
+does not have any API capabilities. The server responds with a HTTP 303 See Other redirect either to the Settings UI URL
+(if the link was valid) and instructs the user to update their password, or a redirect to the Recover UI URL with
+a new Recovery Flow ID which contains an error message that the recovery link was invalid.
+
+More information can be found at [Ory Kratos Account Recovery Documentation](../self-service/flows/account-recovery)."
+ex3-1160,ory.sh,GET,/self-service/recovery/api,createNativeRecoveryFlow,Create Recovery Flow for Native Apps,"This endpoint initiates a recovery flow for API clients such as mobile devices, smart TVs, and so on.
+
+If a valid provided session cookie or session token is provided, a 400 Bad Request error.
+
+On an existing recovery flow, use the `getRecoveryFlow` API endpoint.
+
+You MUST NOT use this endpoint in client-side (Single Page Apps, ReactJS, AngularJS) nor server-side (Java Server
+Pages, NodeJS, PHP, Golang, ...) browser applications. Using this endpoint in these applications will make
+you vulnerable to a variety of CSRF attacks.
+
+This endpoint MUST ONLY be used in scenarios such as native mobile apps (React Native, Objective C, Swift, Java, ...).
+
+More information can be found at [Ory Kratos Account Recovery Documentation](../self-service/flows/account-recovery)."
+ex3-1161,ory.sh,GET,/self-service/recovery/browser,createBrowserRecoveryFlow,Create Recovery Flow for Browsers,"This endpoint initializes a browser-based account recovery flow. Once initialized, the browser will be redirected to
+`selfservice.flows.recovery.ui_url` with the flow ID set as the query parameter `?flow=`. If a valid user session
+exists, the browser is returned to the configured return URL.
+
+If this endpoint is called via an AJAX request, the response contains the recovery flow without any redirects
+or a 400 bad request error if the user is already authenticated.
+
+This endpoint is NOT INTENDED for clients that do not have a browser (Chrome, Firefox, ...) as cookies are needed.
+
+More information can be found at [Ory Kratos Account Recovery Documentation](../self-service/flows/account-recovery)."
+ex3-1162,ory.sh,GET,/self-service/recovery/flows,getRecoveryFlow,Get Recovery Flow,"This endpoint returns a recovery flow's context with, for example, error details and other information.
+
+Browser flows expect the anti-CSRF cookie to be included in the request's HTTP Cookie Header.
+For AJAX requests you must ensure that cookies are included in the request or requests will fail.
+
+If you use the browser-flow for server-side apps, the services need to run on a common top-level-domain
+and you need to forward the incoming HTTP Cookie header to this endpoint:
+
+```js
+pseudo-code example
+router.get('/recovery', async function (req, res) {
+const flow = await client.getRecoveryFlow(req.header('Cookie'), req.query['flow'])
+
+res.render('recovery', flow)
+})
+```
+
+More information can be found at [Ory Kratos Account Recovery Documentation](../self-service/flows/account-recovery)."
+ex3-1163,ory.sh,POST,/self-service/registration,updateRegistrationFlow,Update Registration Flow,"Use this endpoint to complete a registration flow by sending an identity's traits and password. This endpoint
+behaves differently for API and browser flows.
+
+API flows expect `application/json` to be sent in the body and respond with
+- HTTP 200 and a application/json body with the created identity success - if the session hook is configured the
+`session` and `session_token` will also be included;
+- HTTP 410 if the original flow expired with the appropriate error messages set and optionally a `use_flow_id` parameter in the body;
+- HTTP 400 on form validation errors.
+
+Browser flows expect a Content-Type of `application/x-www-form-urlencoded` or `application/json` to be sent in the body and respond with
+- a HTTP 303 redirect to the post/after registration URL or the `return_to` value if it was set and if the registration succeeded;
+- a HTTP 303 redirect to the registration UI URL with the flow ID containing the validation errors otherwise.
+
+Browser flows with an accept header of `application/json` will not redirect but instead respond with
+- HTTP 200 and a application/json body with the signed in identity and a `Set-Cookie` header on success;
+- HTTP 303 redirect to a fresh login flow if the original flow expired with the appropriate error messages set;
+- HTTP 400 on form validation errors.
+
+If this endpoint is called with `Accept: application/json` in the header, the response contains the flow without a redirect. In the
+case of an error, the `error.id` of the JSON response body can be one of:
+
+- `session_already_available`: The user is already signed in.
+- `security_csrf_violation`: Unable to fetch the flow because a CSRF violation occurred.
+- `security_identity_mismatch`: The requested `?return_to` address is not allowed to be used. Adjust this in the configuration!
+- `browser_location_change_required`: Usually sent when an AJAX request indicates that the browser needs to open a specific URL.
+Most likely used in Social Sign In flows.
+
+More information can be found at [Ory Kratos User Login](https://www.ory.com/docs/kratos/self-service/flows/user-login) and [User Registration Documentation](https://www.ory.com/docs/kratos/self-service/flows/user-registration)."
+ex3-1164,ory.sh,GET,/self-service/registration/api,createNativeRegistrationFlow,Create Registration Flow for Native Apps,"This endpoint initiates a registration flow for API clients such as mobile devices, smart TVs, and so on.
+
+If a valid provided session cookie or session token is provided, a 400 Bad Request error
+will be returned unless the URL query parameter `?refresh=true` is set.
+
+To fetch an existing registration flow call `/self-service/registration/flows?flow=<flow_id>`.
+
+You MUST NOT use this endpoint in client-side (Single Page Apps, ReactJS, AngularJS) nor server-side (Java Server
+Pages, NodeJS, PHP, Golang, ...) browser applications. Using this endpoint in these applications will make
+you vulnerable to a variety of CSRF attacks.
+
+In the case of an error, the `error.id` of the JSON response body can be one of:
+
+- `session_already_available`: The user is already signed in.
+- `security_csrf_violation`: Unable to fetch the flow because a CSRF violation occurred.
+
+This endpoint MUST ONLY be used in scenarios such as native mobile apps (React Native, Objective C, Swift, Java, ...).
+
+More information can be found at [Ory Kratos User Login](https://www.ory.com/docs/kratos/self-service/flows/user-login) and [User Registration Documentation](https://www.ory.com/docs/kratos/self-service/flows/user-registration)."
+ex3-1165,ory.sh,GET,/self-service/registration/browser,createBrowserRegistrationFlow,Create Registration Flow for Browsers,"This endpoint initializes a browser-based user registration flow. This endpoint will set the appropriate
+cookies and anti-CSRF measures required for browser-based flows.
+
+If this endpoint is opened as a link in the browser, it will be redirected to
+`selfservice.flows.registration.ui_url` with the flow ID set as the query parameter `?flow=`. If a valid user session
+exists already, the browser will be redirected to `urls.default_redirect_url`.
+
+If this endpoint is called via an AJAX request, the response contains the flow without a redirect. In the
+case of an error, the `error.id` of the JSON response body can be one of:
+
+- `session_already_available`: The user is already signed in.
+- `security_csrf_violation`: Unable to fetch the flow because a CSRF violation occurred.
+- `security_identity_mismatch`: The requested `?return_to` address is not allowed to be used. Adjust this in the configuration!
+
+If this endpoint is called via an AJAX request, the response contains the registration flow without a redirect.
+
+This endpoint is NOT INTENDED for clients that do not have a browser (Chrome, Firefox, ...) as cookies are needed.
+
+More information can be found at [Ory Kratos User Login](https://www.ory.com/docs/kratos/self-service/flows/user-login) and [User Registration Documentation](https://www.ory.com/docs/kratos/self-service/flows/user-registration)."
+ex3-1166,ory.sh,GET,/self-service/registration/flows,getRegistrationFlow,Get Registration Flow,"This endpoint returns a registration flow's context with, for example, error details and other information.
+
+Browser flows expect the anti-CSRF cookie to be included in the request's HTTP Cookie Header.
+For AJAX requests you must ensure that cookies are included in the request or requests will fail.
+
+If you use the browser-flow for server-side apps, the services need to run on a common top-level-domain
+and you need to forward the incoming HTTP Cookie header to this endpoint:
+
+```js
+pseudo-code example
+router.get('/registration', async function (req, res) {
+const flow = await client.getRegistrationFlow(req.header('cookie'), req.query['flow'])
+
+res.render('registration', flow)
+})
+```
+
+This request may fail due to several reasons. The `error.id` can be one of:
+
+- `session_already_available`: The user is already signed in.
+- `self_service_flow_expired`: The flow is expired and you should request a new one.
+
+More information can be found at [Ory Kratos User Login](https://www.ory.com/docs/kratos/self-service/flows/user-login) and [User Registration Documentation](https://www.ory.com/docs/kratos/self-service/flows/user-registration)."
+ex3-1167,ory.sh,POST,/self-service/settings,updateSettingsFlow,Complete Settings Flow,"Use this endpoint to complete a settings flow by sending an identity's updated password. This endpoint
+behaves differently for API and browser flows.
+
+API-initiated flows expect `application/json` to be sent in the body and respond with
+- HTTP 200 and an application/json body with the session token on success;
+- HTTP 303 redirect to a fresh settings flow if the original flow expired with the appropriate error messages set;
+- HTTP 400 on form validation errors.
+- HTTP 401 when the endpoint is called without a valid session token.
+- HTTP 403 when `selfservice.flows.settings.privileged_session_max_age` was reached or the session's AAL is too low.
+Implies that the user needs to re-authenticate.
+
+Browser flows without HTTP Header `Accept` or with `Accept: text/*` respond with
+- a HTTP 303 redirect to the post/after settings URL or the `return_to` value if it was set and if the flow succeeded;
+- a HTTP 303 redirect to the Settings UI URL with the flow ID containing the validation errors otherwise.
+- a HTTP 303 redirect to the login endpoint when `selfservice.flows.settings.privileged_session_max_age` was reached or the session's AAL is too low.
+
+Browser flows with HTTP Header `Accept: application/json` respond with
+- HTTP 200 and a application/json body with the signed in identity and a `Set-Cookie` header on success;
+- HTTP 303 redirect to a fresh login flow if the original flow expired with the appropriate error messages set;
+- HTTP 401 when the endpoint is called without a valid session cookie.
+- HTTP 403 when the page is accessed without a session cookie or the session's AAL is too low.
+- HTTP 400 on form validation errors.
+
+Depending on your configuration this endpoint might return a 403 error if the session has a lower Authenticator
+Assurance Level (AAL) than is possible for the identity. This can happen if the identity has password + webauthn
+credentials (which would result in AAL2) but the session has only AAL1. If this error occurs, ask the user
+to sign in with the second factor (happens automatically for server-side browser flows) or change the configuration.
+
+If this endpoint is called with a `Accept: application/json` HTTP header, the response contains the flow without a redirect. In the
+case of an error, the `error.id` of the JSON response body can be one of:
+
+- `session_refresh_required`: The identity requested to change something that needs a privileged session. Redirect
+the identity to the login init endpoint with query parameters `?refresh=true&return_to=<the-current-browser-url>`,
+or initiate a refresh login flow otherwise.
+- `security_csrf_violation`: Unable to fetch the flow because a CSRF violation occurred.
+- `session_inactive`: No Ory Session was found - sign in a user first.
+- `session_credential_required`: The session must be authenticated with a specific credential first. Follow `redirect_browser_to` to the login flow to sign in with it.
+- `security_identity_mismatch`: The flow was interrupted with `session_refresh_required` but apparently some other
+identity logged in instead.
+- `security_identity_mismatch`: The requested `?return_to` address is not allowed to be used. Adjust this in the configuration!
+- `browser_location_change_required`: Usually sent when an AJAX request indicates that the browser needs to open a specific URL.
+Most likely used in Social Sign In flows.
+
+More information can be found at [Ory Kratos User Settings & Profile Management Documentation](../self-service/flows/user-settings)."
+ex3-1168,ory.sh,GET,/self-service/settings/api,createNativeSettingsFlow,Create Settings Flow for Native Apps,"This endpoint initiates a settings flow for API clients such as mobile devices, smart TVs, and so on.
+You must provide a valid Ory Kratos Session Token for this endpoint to respond with HTTP 200 OK.
+
+To fetch an existing settings flow call `/self-service/settings/flows?flow=<flow_id>`.
+
+You MUST NOT use this endpoint in client-side (Single Page Apps, ReactJS, AngularJS) nor server-side (Java Server
+Pages, NodeJS, PHP, Golang, ...) browser applications. Using this endpoint in these applications will make
+you vulnerable to a variety of CSRF attacks.
+
+Depending on your configuration this endpoint might return a 403 error if the session has a lower Authenticator
+Assurance Level (AAL) than is possible for the identity. This can happen if the identity has password + webauthn
+credentials (which would result in AAL2) but the session has only AAL1. If this error occurs, ask the user
+to sign in with the second factor or change the configuration.
+
+In the case of an error, the `error.id` of the JSON response body can be one of:
+
+- `security_csrf_violation`: Unable to fetch the flow because a CSRF violation occurred.
+- `session_inactive`: No Ory Session was found - sign in a user first.
+- `session_credential_required`: The session must be authenticated with a specific credential first. Follow `redirect_browser_to` to the login flow to sign in with it.
+
+This endpoint MUST ONLY be used in scenarios such as native mobile apps (React Native, Objective C, Swift, Java, ...).
+
+More information can be found at [Ory Kratos User Settings & Profile Management Documentation](../self-service/flows/user-settings)."
+ex3-1169,ory.sh,GET,/self-service/settings/browser,createBrowserSettingsFlow,Create Settings Flow for Browsers,"This endpoint initializes a browser-based user settings flow. Once initialized, the browser will be redirected to
+`selfservice.flows.settings.ui_url` with the flow ID set as the query parameter `?flow=`. If no valid
+Ory Kratos Session Cookie is included in the request, a login flow will be initialized.
+
+If this endpoint is opened as a link in the browser, it will be redirected to
+`selfservice.flows.settings.ui_url` with the flow ID set as the query parameter `?flow=`. If no valid user session
+was set, the browser will be redirected to the login endpoint.
+
+If this endpoint is called via an AJAX request, the response contains the settings flow without any redirects
+or a 401 forbidden error if no valid session was set.
+
+Depending on your configuration this endpoint might return a 403 error if the session has a lower Authenticator
+Assurance Level (AAL) than is possible for the identity. This can happen if the identity has password + webauthn
+credentials (which would result in AAL2) but the session has only AAL1. If this error occurs, ask the user
+to sign in with the second factor (happens automatically for server-side browser flows) or change the configuration.
+
+If this endpoint is called via an AJAX request, the response contains the flow without a redirect. In the
+case of an error, the `error.id` of the JSON response body can be one of:
+
+- `security_csrf_violation`: Unable to fetch the flow because a CSRF violation occurred.
+- `session_inactive`: No Ory Session was found - sign in a user first.
+- `session_credential_required`: The session must be authenticated with a specific credential first. Follow `redirect_browser_to` to the login flow to sign in with it.
+- `security_identity_mismatch`: The requested `?return_to` address is not allowed to be used. Adjust this in the configuration!
+
+This endpoint is NOT INTENDED for clients that do not have a browser (Chrome, Firefox, ...) as cookies are needed.
+
+More information can be found at [Ory Kratos User Settings & Profile Management Documentation](../self-service/flows/user-settings)."
+ex3-1170,ory.sh,GET,/self-service/settings/flows,getSettingsFlow,Get Settings Flow,"When accessing this endpoint through Ory Kratos' Public API you must ensure that either the Ory Kratos Session Cookie
+or the Ory Kratos Session Token are set.
+
+Depending on your configuration this endpoint might return a 403 error if the session has a lower Authenticator
+Assurance Level (AAL) than is possible for the identity. This can happen if the identity has password + webauthn
+credentials (which would result in AAL2) but the session has only AAL1. If this error occurs, ask the user
+to sign in with the second factor or change the configuration.
+
+You can access this endpoint without credentials when using Ory Kratos' Admin API.
+
+If this endpoint is called via an AJAX request, the response contains the flow without a redirect. In the
+case of an error, the `error.id` of the JSON response body can be one of:
+
+- `security_csrf_violation`: Unable to fetch the flow because a CSRF violation occurred.
+- `session_inactive`: No Ory Session was found - sign in a user first.
+- `session_credential_required`: The session must be authenticated with a specific credential first. Follow `redirect_browser_to` to the login flow to sign in with it.
+- `security_identity_mismatch`: The flow was interrupted with `session_refresh_required` but apparently some other
+identity logged in instead.
+
+More information can be found at [Ory Kratos User Settings & Profile Management Documentation](../self-service/flows/user-settings)."
+ex3-1171,ory.sh,POST,/self-service/verification,updateVerificationFlow,Complete Verification Flow,"Use this endpoint to complete a verification flow. This endpoint
+behaves differently for API and browser flows and has several states:
+
+- `choose_method` expects `flow` (in the URL query) and `email` (in the body) to be sent
+and works with API- and Browser-initiated flows.
+- For API clients and Browser clients with HTTP Header `Accept: application/json` it either returns a HTTP 200 OK when the form is valid and HTTP 400 OK when the form is invalid
+and a HTTP 303 See Other redirect with a fresh verification flow if the flow was otherwise invalid (e.g. expired).
+- For Browser clients without HTTP Header `Accept` or with `Accept: text/*` it returns a HTTP 303 See Other redirect to the Verification UI URL with the Verification Flow ID appended.
+- `sent_email` is the success state after `choose_method` when using the `link` method and allows the user to request another verification email. It
+works for both API and Browser-initiated flows and returns the same responses as the flow in `choose_method` state.
+- `passed_challenge` expects a `token` to be sent in the URL query and given the nature of the flow (""sending a verification link"")
+does not have any API capabilities. The server responds with a HTTP 303 See Other redirect either to the Settings UI URL
+(if the link was valid) and instructs the user to update their password, or a redirect to the Verification UI URL with
+a new Verification Flow ID which contains an error message that the verification link was invalid.
+
+More information can be found at [Ory Kratos Email and Phone Verification Documentation](https://www.ory.com/docs/kratos/self-service/flows/verify-email-account-activation)."
+ex3-1172,ory.sh,GET,/self-service/verification/api,createNativeVerificationFlow,Create Verification Flow for Native Apps,"This endpoint initiates a verification flow for API clients such as mobile devices, smart TVs, and so on.
+
+To fetch an existing verification flow call `/self-service/verification/flows?flow=<flow_id>`.
+
+You MUST NOT use this endpoint in client-side (Single Page Apps, ReactJS, AngularJS) nor server-side (Java Server
+Pages, NodeJS, PHP, Golang, ...) browser applications. Using this endpoint in these applications will make
+you vulnerable to a variety of CSRF attacks.
+
+This endpoint MUST ONLY be used in scenarios such as native mobile apps (React Native, Objective C, Swift, Java, ...).
+
+More information can be found at [Ory Email and Phone Verification Documentation](https://www.ory.com/docs/kratos/self-service/flows/verify-email-account-activation)."
+ex3-1173,ory.sh,GET,/self-service/verification/browser,createBrowserVerificationFlow,Create Verification Flow for Browser Clients,"This endpoint initializes a browser-based account verification flow. Once initialized, the browser will be redirected to
+`selfservice.flows.verification.ui_url` with the flow ID set as the query parameter `?flow=`.
+
+If this endpoint is called via an AJAX request, the response contains the recovery flow without any redirects.
+
+This endpoint is NOT INTENDED for API clients and only works with browsers (Chrome, Firefox, ...).
+
+More information can be found at [Ory Kratos Email and Phone Verification Documentation](https://www.ory.com/docs/kratos/self-service/flows/verify-email-account-activation)."
+ex3-1174,ory.sh,GET,/self-service/verification/flows,getVerificationFlow,Get Verification Flow,"This endpoint returns a verification flow's context with, for example, error details and other information.
+
+Browser flows expect the anti-CSRF cookie to be included in the request's HTTP Cookie Header.
+For AJAX requests you must ensure that cookies are included in the request or requests will fail.
+
+If you use the browser-flow for server-side apps, the services need to run on a common top-level-domain
+and you need to forward the incoming HTTP Cookie header to this endpoint:
+
+```js
+pseudo-code example
+router.get('/recovery', async function (req, res) {
+const flow = await client.getVerificationFlow(req.header('cookie'), req.query['flow'])
+
+res.render('verification', flow)
+})
+```
+
+More information can be found at [Ory Kratos Email and Phone Verification Documentation](https://www.ory.com/docs/kratos/self-service/flows/verify-email-account-activation)."
+ex3-1175,ory.sh,DELETE,/sessions,disableMyOtherSessions,Disable my other sessions,"Calling this endpoint invalidates all except the current session that belong to the logged-in user.
+Session data are not deleted."
+ex3-1176,ory.sh,GET,/sessions,listMySessions,Get My Active Sessions,"This endpoints returns all other active sessions that belong to the logged-in user.
+The current session can be retrieved by calling the `/sessions/whoami` endpoint."
+ex3-1177,ory.sh,GET,/sessions/token-exchange,exchangeSessionToken,Exchange Session Token,
+ex3-1178,ory.sh,GET,/sessions/whoami,toSession,Check Who the Current HTTP Session Belongs To,"Uses the HTTP Headers in the GET request to determine (e.g. by using checking the cookies) who is authenticated.
+Returns a session object in the body or 401 if the credentials are invalid or no credentials were sent.
+When the request it successful it adds the user ID to the 'X-Kratos-Authenticated-Identity-Id' header
+in the response.
+For requests from an origin in `security.restricted_origins`, the response contains only the
+session ID and `active`, and `tokenize_as` is rejected with a 400.
+
+If you call this endpoint from a server-side application, you must forward the HTTP Cookie Header to this endpoint:
+
+```js
+pseudo-code example
+router.get('/protected-endpoint', async function (req, res) {
+const session = await client.toSession(undefined, req.header('cookie'))
+
+console.log(session)
+})
+```
+
+When calling this endpoint from a non-browser application (e.g. mobile app) you must include the session token:
+
+```js
+pseudo-code example
+...
+const session = await client.toSession(""the-session-token"")
+
+console.log(session)
+```
+
+When using a token template, the token is included in the `tokenized` field of the session.
+
+```js
+pseudo-code example
+...
+const session = await client.toSession(""the-session-token"", { tokenize_as: ""example-jwt-template"" })
+
+console.log(session.tokenized) // The JWT
+```
+
+Depending on your configuration this endpoint might return a 403 status code if the session has a lower Authenticator
+Assurance Level (AAL) than is possible for the identity. This can happen if the identity has password + webauthn
+credentials (which would result in AAL2) but the session has only AAL1. If this error occurs, ask the user
+to sign in with the second factor or change the configuration.
+
+This endpoint is useful for:
+
+- AJAX calls. Remember to send credentials and set up CORS correctly!
+- Reverse proxies and API Gateways
+- Server-side calls - use the `X-Session-Token` header!
+
+This endpoint authenticates users by checking:
+
+- if the `Cookie` HTTP header was set containing an Ory Kratos Session Cookie;
+- if the `Authorization: bearer <ory-session-token>` HTTP header was set with a valid Ory Kratos Session Token;
+- if the `X-Session-Token` HTTP header was set with a valid Ory Kratos Session Token.
+
+If none of these headers are set or the cookie or token are invalid, the endpoint returns a HTTP 401 status code.
+
+As explained above, this request may fail due to several reasons. The `error.id` can be one of:
+
+- `session_inactive`: No active session was found in the request (e.g. no Ory Session Cookie / Ory Session Token).
+- `session_aal2_required`: An active session was found but it does not fulfil the Authenticator Assurance Level, implying that the session must (e.g.) authenticate the second factor.
+- `session_aal2_enrollment_required`: An active session was found but the required Authenticator Assurance Level can not be reached because the identity has no second factor enrolled. Follow `redirect_browser_to` to the settings flow to enroll one.
+- `session_credential_required`: An active session was found but it must be authenticated with a specific credential first. Follow `redirect_browser_to` to the login flow to sign in with it."
+ex3-1179,ory.sh,DELETE,/sessions/{id},disableMySession,Disable one of my sessions,"Calling this endpoint invalidates the specified session. The current session cannot be revoked.
+Session data are not deleted."
+ex3-1180,ory.sh,GET,/userinfo,getOidcUserInfo,OpenID Connect Userinfo,"This endpoint returns the payload of the ID Token, including `session.id_token` values, of
+the provided OAuth 2.0 Access Token's consent request.
+
+In the case of authentication error, a WWW-Authenticate header might be set in the response
+with more information about the error. See [the spec](https://datatracker.ietf.org/doc/html/rfc6750#section-3)
+for more details about header format."
+ex3-1181,ory.sh,POST,/v2alpha1/admin/apiKeys:batchVerify,adminBatchVerifyApiKeys,Batch Verify API Keys,"Verifies multiple credentials in a single request. Efficiently verifies up
+to 100 credentials in parallel. Each credential is verified independently;
+partial failures are returned. Admin access only.
+
+Cache Control (HTTP Headers):
+  - Cache-Control: no-cache  - Bypasses cache read, forces fresh DB lookup
+  - Cache-Control: no-store  - Bypasses cache read AND write (never cached)
+  - Pragma: no-cache         - Same as Cache-Control: no-cache (HTTP/1.0)
+
+The cache directive applies to every credential in the batch.
+
+```http
+POST /v2alpha1/admin/apiKeys:batchVerify
+{
+  ""requests"": [
+    {""credential"": ""sk_live_abc123...""},
+    {""credential"": ""eyJhbGciOiJFZERTQSI...""}
+  ]
+}
+```"
+ex3-1182,ory.sh,POST,/v2alpha1/admin/apiKeys:derive,adminDeriveToken,Derive Token,"Mints a short-lived JWT or Macaroon token from an issued or imported root
+API key. Derived JWTs and Macaroons cannot mint successor tokens. The
+derived token inherits the permissions of the parent API key.
+
+```http
+POST /v2alpha1/admin/apiKeys:derive
+{
+  ""credential"": ""ory_ak_v1_..."",
+  ""ttl"": ""1h""
+}
+```"
+ex3-1183,ory.sh,POST,/v2alpha1/admin/apiKeys:verify,adminVerifyApiKey,Verify API Key,"Verifies a single API key or derived token. Validates the credential's
+signature, expiration, and revocation status. Works with any credential
+type (issued keys, imported keys, JWT, macaroon). The verification result
+includes decoded claims and metadata — admin access only.
+
+Cache Control (HTTP Headers):
+  - Cache-Control: no-cache  - Bypasses cache read, forces fresh DB lookup
+  - Cache-Control: no-store  - Bypasses cache read AND write (never cached)
+  - Pragma: no-cache         - Same as Cache-Control: no-cache (HTTP/1.0)
+
+```http
+POST /v2alpha1/admin/apiKeys:verify
+{
+  ""credential"": ""sk_live_abc123...""
+}
+```"
+ex3-1184,ory.sh,GET,/v2alpha1/admin/importedApiKeys,adminListImportedApiKeys,List Imported API Keys,"Lists all imported keys with filtering. Returns imported keys only (not
+issued keys). Supports pagination and AIP-160 filter expressions.
+
+```http
+GET /v2alpha1/admin/importedApiKeys?page_size=50&filter=status%3DKEY_STATUS_ACTIVE
+```"
+ex3-1185,ory.sh,POST,/v2alpha1/admin/importedApiKeys,adminImportApiKey,Import API Key,"Imports an external API key into the system. Allows importing keys from
+legacy systems or external providers. The raw key is hashed and stored
+securely (HMAC). Imported keys support token derivation (JWT/Macaroon)
+like issued keys.
+
+```http
+POST /v2alpha1/admin/importedApiKeys
+{
+  ""raw_key"": ""imported-key-EXAMPLE-not-a-real-secret"",
+  ""name"": ""Example imported key"",
+  ""actor_id"": ""user_123""
+}
+```"
+ex3-1186,ory.sh,DELETE,/v2alpha1/admin/importedApiKeys/{key_id},adminDeleteImportedApiKey,Delete Imported API Key,"Permanently deletes an imported key (hard delete). The key is removed from
+the database. Use AdminRevokeImportedApiKey for soft deletion (recommended).
+
+```http
+DELETE /v2alpha1/admin/importedApiKeys/{key_id}
+```"
+ex3-1187,ory.sh,GET,/v2alpha1/admin/importedApiKeys/{key_id},adminGetImportedApiKey,Get Imported API Key,"Retrieves details about a specific imported key. Returns metadata about
+the imported key. The original raw key is never returned.
+
+```http
+GET /v2alpha1/admin/importedApiKeys/{key_id}
+```"
+ex3-1188,ory.sh,PATCH,/v2alpha1/admin/importedApiKeys/{key_id},adminUpdateImportedApiKey,Update Imported API Key,"Updates metadata, scopes, or rate limits of an imported key. Supports
+partial updates via the update_mask query parameter (AIP-134). Omitting
+update_mask is equivalent to a mask of every populated field in the body.
+To clear a field to its zero value, list it explicitly in update_mask and
+leave it unset (or empty) in the body.
+
+```http
+PATCH /v2alpha1/admin/importedApiKeys/{key_id}?update_mask=name
+{
+  ""imported_api_key"": {
+    ""key_id"": ""{key_id}"",
+    ""name"": ""New name""
+  }
+}
+```"
+ex3-1189,ory.sh,POST,/v2alpha1/admin/importedApiKeys/{key_id}:revoke,adminRevokeImportedApiKey,Revoke Imported API Key,"Immediately revokes an imported API key. Once revoked, the key can no longer
+be used for authentication. This operation is irreversible. Revoked keys
+are retained for audit purposes.
+
+```http
+POST /v2alpha1/admin/importedApiKeys/9a3f051b2c7e8d4f1a6b9c0e5f2d8a3b:revoke
+{
+  ""reason"": ""REVOCATION_REASON_KEY_COMPROMISE""
+}
+```"
+ex3-1190,ory.sh,POST,/v2alpha1/admin/importedApiKeys:batchCreate,adminBatchCreateImportedApiKeys,Batch Import API Keys,"Imports up to 1000 external API keys in one request. Returns per-item
+results. If at least one item succeeds, response is 200 OK. If all items
+fail, the endpoint returns a non-200 error.
+
+```http
+POST /v2alpha1/admin/importedApiKeys:batchCreate
+{
+  ""requests"": [
+    {""raw_key"": ""sk_live_abc"", ""name"": ""Stripe key"", ""actor_id"": ""user_1""},
+    {""raw_key"": ""ghp_xyz"", ""name"": ""GitHub PAT"", ""actor_id"": ""user_2""}
+  ]
+}
+```"
+ex3-1191,ory.sh,GET,/v2alpha1/admin/issuedApiKeys,adminListIssuedApiKeys,List Issued API Keys,"Lists issued API keys with optional filtering. Supports cursor-based
+pagination and AIP-160 filter expressions. Returns only issued
+(generated) API keys; use ListImportedApiKeys for imported keys.
+
+```http
+GET /v2alpha1/admin/issuedApiKeys?page_size=50&filter=actor_id%3D%22user_123%22
+```"
+ex3-1192,ory.sh,POST,/v2alpha1/admin/issuedApiKeys,adminIssueApiKey,Issue API Key,"Creates a new API key for a given actor. The secret is returned only once
+in the response and cannot be retrieved later. Keys can be scoped with
+specific permissions and have optional expiration.
+
+```http
+POST /v2alpha1/admin/issuedApiKeys
+{
+  ""name"": ""production-service"",
+  ""actor_id"": ""user_123"",
+  ""scopes"": [""read"", ""write""],
+  ""ttl"": ""8760h""
+}
+```"
+ex3-1193,ory.sh,GET,/v2alpha1/admin/issuedApiKeys/{key_id},adminGetIssuedApiKey,Get Issued API Key,"Retrieves details about a specific issued API key including its status,
+scopes, expiration, and usage statistics. The secret is never returned.
+
+```http
+GET /v2alpha1/admin/issuedApiKeys/01HQZX9VYQKJB8XQZQXQZQXQXQ
+```"
+ex3-1194,ory.sh,PATCH,/v2alpha1/admin/issuedApiKeys/{key_id},adminUpdateIssuedApiKey,Update Issued API Key,"Updates metadata, scopes, or rate limits of an issued key without rotating
+the secret. Use RotateIssuedApiKey to change the secret.
+
+Follows AIP-134: the request body is the IssuedApiKey resource itself,
+and the update_mask query parameter names the subset of fields to apply.
+Omitting update_mask is equivalent to a mask of every populated field
+in the body. To clear a field to its zero value, list it explicitly in
+update_mask and leave it unset (or empty) in the body.
+
+```http
+PATCH /v2alpha1/admin/issuedApiKeys/01HQZX9VYQKJB8XQZQXQZQXQXQ?update_mask=scopes
+{
+  ""issued_api_key"": {
+    ""key_id"": ""01HQZX9VYQKJB8XQZQXQZQXQXQ"",
+    ""scopes"": [""read""]
+  }
+}
+```"
+ex3-1195,ory.sh,POST,/v2alpha1/admin/issuedApiKeys/{key_id}:revoke,adminRevokeIssuedApiKey,Revoke Issued API Key,"Immediately revokes an issued API key. Once revoked, the key can no longer
+be used for authentication. This operation is irreversible. Revoked keys
+are retained for audit purposes.
+
+```http
+POST /v2alpha1/admin/issuedApiKeys/01HQZX9VYQKJB8XQZQXQZQXQXQ:revoke
+{
+  ""reason"": ""REVOCATION_REASON_KEY_COMPROMISE""
+}
+```"
+ex3-1196,ory.sh,POST,/v2alpha1/admin/issuedApiKeys/{key_id}:rotate,adminRotateIssuedApiKey,Rotate Issued API Key,"Generates a new secret for an issued API key. Creates a new API key with a
+new key_id and secret, and immediately revokes the old key. This is the
+recommended way to update scopes, metadata, or rotate credentials.
+
+For zero-downtime rotation, use this workflow instead:
+  1. IssueApiKey with new credentials
+  2. Deploy new secret to all services
+  3. Verify new secret works everywhere
+  4. AdminRevokeIssuedApiKey to remove the old key
+
+```http
+POST /v2alpha1/admin/issuedApiKeys/01HQZX9VYQKJB8XQZQXQZQXQXQ:rotate
+{
+  ""scopes"": [""read""]
+}
+```"
+ex3-1197,ory.sh,POST,/v2alpha1/apiKeys:selfRevoke,revokeApiKey,Revoke API Key (self-service),"Proof-of-possession variant of revocation. The `Self*` prefix on the
+request/response messages disambiguates from the admin variants
+(`AdminRevokeIssuedApiKey` / `AdminRevokeImportedApiKey`).
+
+Allows an API key holder to revoke their own non-public issued or imported
+key by providing the full secret as proof of possession. Active public
+keys require an admin revocation endpoint and return PermissionDenied
+(HTTP 403 Forbidden) here. Already-revoked keys return success. JWT and
+macaroon tokens cannot be self-revoked (they are stateless).
+
+The PRIVILEGE_WITHDRAWN reason is not allowed for self-revocation
+(admin-only).
+
+```http
+POST /v2alpha1/apiKeys:selfRevoke
+{
+  ""credential"": ""sk_live_abc123..."",
+  ""reason"": ""REVOCATION_REASON_KEY_COMPROMISE""
+}
+```"
+ex3-1198,ory.sh,GET,/v2alpha1/derivedKeys/jwks.json,getJwks,Get JWKS,"Returns the JSON Web Key Set for token verification. Provides the public
+keys needed to verify JWT tokens issued by this service. Keys are loaded
+from configuration (file://, https://, or base64:// URIs). Follows the
+JWKS standard (RFC 7517).
+
+```http
+GET /v2alpha1/derivedKeys/jwks.json
+```"
+ex3-1199,ory.sh,GET,/version,getVersion,Return Running Software Version.,"This endpoint returns the version of Ory Kratos.
+
+If the service supports TLS Edge Termination, this endpoint does not require the
+`X-Forwarded-Proto` header to be set.
+
+Be aware that if you are running multiple nodes of this service, the version will never
+refer to the cluster state, only to a single instance."
+ex3-1200,ory.sh,GET,/workspaces,listWorkspaces,List workspaces the user is a member of,
+ex3-1201,ory.sh,POST,/workspaces,createWorkspace,Create a new workspace,
+ex3-1202,ory.sh,GET,/workspaces/{workspace},getWorkspace,Get a workspace,Any workspace member can access this endpoint.
+ex3-1203,ory.sh,PUT,/workspaces/{workspace},updateWorkspace,Update an workspace,Workspace members with the role `OWNER` can access this endpoint.
+ex3-1204,ory.sh,GET,/workspaces/{workspace}/projects,listWorkspaceProjects,List all projects of a workspace,Any workspace member can access this endpoint.
+ex3-1205,ory.sh,GET,/workspaces/{workspace}/tokens,listWorkspaceApiKeys,List a workspace's API keys,A list of all the workspace's API keys.
+ex3-1206,ory.sh,POST,/workspaces/{workspace}/tokens,createWorkspaceApiKey,Create workspace API key,Create an API key for a workspace.
+ex3-1207,ory.sh,DELETE,/workspaces/{workspace}/tokens/{token_id},deleteWorkspaceApiKey,Delete workspace API key,Deletes an API key and immediately removes it.

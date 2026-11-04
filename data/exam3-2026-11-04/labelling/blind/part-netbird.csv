@@ -1,0 +1,269 @@
+row_id,provider,method,path,operationId,summary,description
+ex3-0649,netbird.io,GET,/api/accounts,,List all Accounts,Returns a list of accounts of a user. Always returns a list of one account.
+ex3-0650,netbird.io,DELETE,/api/accounts/{accountId},,Delete an Account,Deletes an account and all its resources. Only account owners can delete accounts.
+ex3-0651,netbird.io,PUT,/api/accounts/{accountId},,Update an Account,Update information about an account
+ex3-0652,netbird.io,GET,/api/agent-network/access-log-sessions,,List Agent Network access logs grouped by session,"Returns a paginated, server-side-filtered list of agent-network (LLM) access logs grouped by session. The page unit is a session (total_records counts sessions); each session carries an aggregate summary and its ordered entries. Requests the client sent no session id for each form their own singleton group. Accepts the same filters as the flat access-logs endpoint. Available only when the account has log collection enabled. Callers without the account-wide grant are not denied - the response is scoped to their own requests (any user_id or group_id filter is overridden)."
+ex3-0653,netbird.io,GET,/api/agent-network/access-logs,,List Agent Network access logs,"Returns a paginated, server-side-filtered list of agent-network (LLM) access log entries. Available only when the account has log collection enabled; otherwise entries are not retained. Callers without the account-wide grant are not denied - the response is scoped to their own requests (any user_id or group_id filter is overridden)."
+ex3-0654,netbird.io,GET,/api/agent-network/agent-config,,Retrieve the caller's Agent Network agent config,"Returns everything the caller needs to configure a local AI tool and nothing more - the account's Agent Network endpoint plus the providers and models the caller's own policies allow. Available to every authenticated user regardless of role; the response never contains provider credentials, policy or guardrail configuration, or providers the caller cannot reach."
+ex3-0655,netbird.io,GET,/api/agent-network/budget-rules,,List all Agent Network budget rules,Returns all account-level budget rules.
+ex3-0656,netbird.io,POST,/api/agent-network/budget-rules,,Create an Agent Network budget rule,Creates a new account-level budget rule.
+ex3-0657,netbird.io,DELETE,/api/agent-network/budget-rules/{ruleId},,Delete an Agent Network budget rule,Deletes an account-level budget rule.
+ex3-0658,netbird.io,GET,/api/agent-network/budget-rules/{ruleId},,Retrieve an Agent Network budget rule,Get a specific account-level budget rule.
+ex3-0659,netbird.io,PUT,/api/agent-network/budget-rules/{ruleId},,Update an Agent Network budget rule,Updates an existing account-level budget rule.
+ex3-0660,netbird.io,GET,/api/agent-network/catalog/providers,,List Agent Network catalog providers,"Returns the static catalog of supported Agent Network providers (OpenAI, Anthropic, …) along with their default upstream host, auth header template, brand color, and known models."
+ex3-0661,netbird.io,POST,/api/agent-network/catalog/providers/models,,Discover the models a provider credential can reach,"Asks the vendor which models the supplied credential can actually use, so the provider form can offer a live list instead of only the static catalog. The endpoint, auth header and response shape are taken from the catalog entry, never from the request.
+
+Supply either an api_key together with the upstream_url being configured (before the provider is saved), or a provider_id of an existing record to reuse its stored credential.
+
+Returns 422 for a catalog provider that has no listing endpoint (most gateways); the caller should fall back to the catalog's own model list. A model whose price the shipped table does not know is returned with pricing_known false, and the operator must set rates for it.
+"
+ex3-0662,netbird.io,GET,/api/agent-network/consumption,,List Agent Network consumption counters,"Returns every per-(dimension, window) consumption counter recorded for the account, ordered window-newest-first. Empty list when nothing has been consumed yet."
+ex3-0663,netbird.io,GET,/api/agent-network/guardrails,,List all Agent Network Guardrails,Returns a list of all Agent Network guardrails for the account.
+ex3-0664,netbird.io,POST,/api/agent-network/guardrails,,Create an Agent Network Guardrail,Creates a new Agent Network guardrail that can be attached to one or more policies.
+ex3-0665,netbird.io,DELETE,/api/agent-network/guardrails/{guardrailId},,Delete an Agent Network Guardrail,Delete an existing Agent Network guardrail.
+ex3-0666,netbird.io,GET,/api/agent-network/guardrails/{guardrailId},,Retrieve an Agent Network Guardrail,Get information about a specific Agent Network guardrail.
+ex3-0667,netbird.io,PUT,/api/agent-network/guardrails/{guardrailId},,Update an Agent Network Guardrail,Update an existing Agent Network guardrail.
+ex3-0668,netbird.io,GET,/api/agent-network/policies,,List all Agent Network Policies,Returns a list of all Agent Network policies for the account.
+ex3-0669,netbird.io,POST,/api/agent-network/policies,,Create an Agent Network Policy,"Creates a new Agent Network policy binding source groups to destination providers, optionally enforced by guardrails."
+ex3-0670,netbird.io,DELETE,/api/agent-network/policies/{policyId},,Delete an Agent Network Policy,Delete an existing Agent Network policy.
+ex3-0671,netbird.io,GET,/api/agent-network/policies/{policyId},,Retrieve an Agent Network Policy,Get information about a specific Agent Network policy.
+ex3-0672,netbird.io,PUT,/api/agent-network/policies/{policyId},,Update an Agent Network Policy,Update an existing Agent Network policy.
+ex3-0673,netbird.io,GET,/api/agent-network/providers,,List all Agent Network Providers,Returns a list of all Agent Network AI providers configured for the account.
+ex3-0674,netbird.io,POST,/api/agent-network/providers,,Create an Agent Network Provider,"Connects a new Agent Network AI provider for the account.
+
+The credential is checked against the vendor's model listing before the provider is stored, so a record the vendor will not accept is refused rather than saved. A rejected credential, a listing endpoint that does not resolve or answer, a vendor outage, and a timeout all block the write and return 422.
+
+What that proves about the upstream URL is narrower than the URL itself. Only its host is used: the listing is requested over HTTPS at the path the catalog entry declares, so a configured scheme or path is neither used nor validated here. Where the catalog entry has a listing host of its own — Bedrock, whose listing comes from the control plane — even the host is only resolved, never contacted, so a public host that does not answer is still stored.
+
+Only what cannot be checked at all is exempt and stored unverified: a catalog provider with no listing endpoint, one with no host to derive a listing from, an upstream resolving to a private address the management service will not dial, and a provider configured to skip TLS verification.
+"
+ex3-0675,netbird.io,DELETE,/api/agent-network/providers/{providerId},,Delete an Agent Network Provider,Delete an existing Agent Network AI provider.
+ex3-0676,netbird.io,GET,/api/agent-network/providers/{providerId},,Retrieve an Agent Network Provider,Get information about a specific Agent Network AI provider.
+ex3-0677,netbird.io,PUT,/api/agent-network/providers/{providerId},,Update an Agent Network Provider,"Update an existing Agent Network AI provider.
+
+When the upstream URL, the API key or the catalog provider changes, the record is checked against the vendor before the change is stored, and a refusal returns 422 without replacing what was there. Switching TLS verification back on is the fourth trigger: a provider exempt from the check was stored unverified, so the edit that ends the exemption is the first opportunity to check it. Where one of the four does fire, an update that omits the API key is checked against the stored one. Edits touching none of them — a rename, model rows, price edits — are stored without a check, as are the cases the create description lists as unverifiable.
+"
+ex3-0678,netbird.io,DELETE,/api/agent-network/settings,,Delete Agent Network settings,"Deletes the account's Agent Network settings row, releasing the endpoint. Guarded — the delete is refused with 412 while any Agent Network provider exists for the account or while a proxy is actively serving the endpoint. Bootstrapping again after a delete allocates a new endpoint; the released hostname is not reserved."
+ex3-0679,netbird.io,GET,/api/agent-network/settings,,Retrieve Agent Network settings,"Returns the per-account Agent Network gateway settings (endpoint, proxy address, collection toggles). Before the account is bootstrapped via POST, the response carries the default values with an empty endpoint and proxy address."
+ex3-0680,netbird.io,POST,/api/agent-network/settings,,Bootstrap Agent Network settings,"Creates the per-account Agent Network settings row and allocates the account's endpoint. Exactly one of `proxy_address` (labeled endpoint under that cluster; the server allocates the label) and `endpoint` (self-addressed dedicated endpoint, claimed verbatim) must be provided. The endpoint and proxy address are immutable once assigned. Returns 409 when the account already has a settings row."
+ex3-0681,netbird.io,PUT,/api/agent-network/settings,,Update Agent Network settings,"Updates the account-level Agent Network settings; the request carries every field, replacing the mutable ones (collection toggles and retention). Returns 404 when the account has no settings row yet — bootstrap it with POST first. The endpoint and proxy address are assigned at bootstrap and immutable; the request must carry them unchanged, and a request carrying different values is rejected."
+ex3-0682,netbird.io,GET,/api/agent-network/usage/overview,,Agent Network usage overview,"Returns agent-network token and cost usage aggregated into time buckets, server-side filtered. Usage is always collected (independent of log collection). Callers without the account-wide grant are not denied - the response is scoped to their own usage (any user_id or group_id filter is overridden)."
+ex3-0683,netbird.io,GET,/api/dns/nameservers,,List all Nameserver Groups,Returns a list of all Nameserver Groups
+ex3-0684,netbird.io,POST,/api/dns/nameservers,,Create a Nameserver Group,Creates a Nameserver Group
+ex3-0685,netbird.io,DELETE,/api/dns/nameservers/{nsgroupId},,Delete a Nameserver Group,Delete a Nameserver Group
+ex3-0686,netbird.io,GET,/api/dns/nameservers/{nsgroupId},,Retrieve a Nameserver Group,Get information about a Nameserver Groups
+ex3-0687,netbird.io,PUT,/api/dns/nameservers/{nsgroupId},,Update a Nameserver Group,Update/Replace a Nameserver Group
+ex3-0688,netbird.io,GET,/api/dns/settings,,Retrieve DNS settings,Returns a DNS settings object
+ex3-0689,netbird.io,PUT,/api/dns/settings,,Update DNS Settings,Updates a DNS settings object
+ex3-0690,netbird.io,GET,/api/dns/zones,,List all DNS Zones,Returns a list of all custom DNS zones
+ex3-0691,netbird.io,POST,/api/dns/zones,,Create a DNS Zone,Creates a new custom DNS zone
+ex3-0692,netbird.io,DELETE,/api/dns/zones/{zoneId},,Delete a DNS Zone,Deletes a custom DNS zone
+ex3-0693,netbird.io,GET,/api/dns/zones/{zoneId},,Retrieve a DNS Zone,Returns information about a specific DNS zone
+ex3-0694,netbird.io,PUT,/api/dns/zones/{zoneId},,Update a DNS Zone,Updates a custom DNS zone
+ex3-0695,netbird.io,GET,/api/dns/zones/{zoneId}/records,,List all DNS Records,Returns a list of all DNS records in a zone
+ex3-0696,netbird.io,POST,/api/dns/zones/{zoneId}/records,,Create a DNS Record,Creates a new DNS record in a zone
+ex3-0697,netbird.io,DELETE,/api/dns/zones/{zoneId}/records/{recordId},,Delete a DNS Record,Deletes a DNS record from a zone
+ex3-0698,netbird.io,GET,/api/dns/zones/{zoneId}/records/{recordId},,Retrieve a DNS Record,Returns information about a specific DNS record
+ex3-0699,netbird.io,PUT,/api/dns/zones/{zoneId}/records/{recordId},,Update a DNS Record,Updates a DNS record in a zone
+ex3-0700,netbird.io,GET,/api/event-streaming,getAllIntegrations,List Event Streaming Integrations,Retrieves all event streaming integrations for the authenticated account.
+ex3-0701,netbird.io,POST,/api/event-streaming,createIntegration,Create Event Streaming Integration,"Creates a new event streaming integration for the authenticated account.
+The request body should conform to `CreateIntegrationRequest`.
+Note: Based on the provided Go code, the `enabled` field from the request is part of the `CreateIntegrationRequest` struct,
+but the backend `manager.CreateIntegration` function signature shown does not directly use this `enabled` field.
+The actual behavior for `enabled` during creation should be confirmed (e.g., it might have a server-side default or be handled by other logic).
+"
+ex3-0702,netbird.io,DELETE,/api/event-streaming/{id},deleteEventStreamingIntegration,Delete Event Streaming Integration,Deletes an event streaming integration by its ID.
+ex3-0703,netbird.io,GET,/api/event-streaming/{id},getIntegration,Get Event Streaming Integration,Retrieves a specific event streaming integration by its ID.
+ex3-0704,netbird.io,PUT,/api/event-streaming/{id},updateIntegration,Update Event Streaming Integration,"Updates an existing event streaming integration. The request body structure is `CreateIntegrationRequest`.
+However, for updates:
+- The `platform` field, if provided in the body, is ignored by the backend manager function, as the platform of an existing integration is typically immutable.
+- The `enabled` and `config` fields from the request body are used to update the integration.
+"
+ex3-0705,netbird.io,GET,/api/events/audit,,List all Audit Events,Returns a list of all audit events
+ex3-0706,netbird.io,GET,/api/events/network-traffic,,List all Traffic Events,Returns a list of all network traffic events
+ex3-0707,netbird.io,GET,/api/events/proxy,,List all Reverse Proxy Access Logs,Returns a paginated list of all reverse proxy access log entries
+ex3-0708,netbird.io,GET,/api/groups,,List all Groups,Returns a list of all groups
+ex3-0709,netbird.io,POST,/api/groups,,Create a Group,Creates a group
+ex3-0710,netbird.io,DELETE,/api/groups/{groupId},,Delete a Group,Delete a group
+ex3-0711,netbird.io,GET,/api/groups/{groupId},,Retrieve a Group,Get information about a group
+ex3-0712,netbird.io,PUT,/api/groups/{groupId},,Update a Group,Update/Replace a group
+ex3-0713,netbird.io,GET,/api/identity-providers,,List all Identity Providers,Returns a list of all identity providers configured for the account
+ex3-0714,netbird.io,POST,/api/identity-providers,,Create an Identity Provider,Creates a new identity provider configuration
+ex3-0715,netbird.io,DELETE,/api/identity-providers/{idpId},,Delete an Identity Provider,Delete an identity provider configuration
+ex3-0716,netbird.io,GET,/api/identity-providers/{idpId},,Retrieve an Identity Provider,Get information about a specific identity provider
+ex3-0717,netbird.io,PUT,/api/identity-providers/{idpId},,Update an Identity Provider,Update an existing identity provider configuration
+ex3-0718,netbird.io,GET,/api/instance,,Get Instance Status,Returns the instance status including whether initial setup is required. This endpoint does not require authentication.
+ex3-0719,netbird.io,GET,/api/instance/version,,Get Version Info,Returns version information for NetBird components including the current management server version and latest available versions from GitHub.
+ex3-0720,netbird.io,GET,/api/integrations/agent-network/managed-proxy,,Retrieve managed Agent Network gateway status,"Reports the account's managed gateway deployment and its derived state, including `disabled` for a deployment that is turned off. Returns 404 when the account has no managed deployment."
+ex3-0721,netbird.io,POST,/api/integrations/agent-network/managed-proxy,,Provision a managed Agent Network gateway,"Starts provisioning of a NetBird-managed Agent Network gateway for the account, allocating its endpoint under the managed zone on the first call. Idempotent — answers 202 when this call started (or, after a failure, restarted) provisioning and 200 when a deployment already exists, reporting current state either way. A disabled deployment answers 200 with state `disabled` and stays disabled. Returns 409 when the account already has an Agent Network endpoint that managed provisioning does not own, and 503 when endpoint allocation is temporarily exhausted."
+ex3-0722,netbird.io,GET,/api/integrations/azure-idp,getAllAzureIntegrations,Get All Azure IDP Integrations,Retrieves all Azure AD IDP integrations for the authenticated account
+ex3-0723,netbird.io,POST,/api/integrations/azure-idp,createAzureIntegration,Create Azure IDP Integration,Creates a new Azure AD IDP integration
+ex3-0724,netbird.io,DELETE,/api/integrations/azure-idp/{id},deleteAzureIntegration,Delete Azure IDP Integration,Deletes an Azure IDP integration by ID.
+ex3-0725,netbird.io,GET,/api/integrations/azure-idp/{id},getAzureIntegration,Get Azure IDP Integration,Retrieves an Azure IDP integration by ID.
+ex3-0726,netbird.io,PUT,/api/integrations/azure-idp/{id},updateAzureIntegration,Update Azure IDP Integration,Updates an existing Azure AD IDP integration.
+ex3-0727,netbird.io,GET,/api/integrations/azure-idp/{id}/logs,getAzureIntegrationLogs,Get Azure Integration Sync Logs,Retrieves synchronization logs for an Azure IDP integration.
+ex3-0728,netbird.io,POST,/api/integrations/azure-idp/{id}/sync,syncAzureIntegration,Sync Azure IDP Integration,Triggers a manual synchronization for an Azure IDP integration.
+ex3-0729,netbird.io,POST,/api/integrations/billing/aws/marketplace/activate,,Activate AWS Marketplace subscription.,
+ex3-0730,netbird.io,POST,/api/integrations/billing/aws/marketplace/enrich,,Enrich AWS Marketplace subscription with Account ID.,
+ex3-0731,netbird.io,POST,/api/integrations/billing/checkout,,Create checkout session,
+ex3-0732,netbird.io,GET,/api/integrations/billing/invoices,,Get account's paid invoices,
+ex3-0733,netbird.io,GET,/api/integrations/billing/invoices/{id}/csv,,Get account invoice CSV.,
+ex3-0734,netbird.io,GET,/api/integrations/billing/invoices/{id}/pdf,,Get account invoice URL to Stripe.,
+ex3-0735,netbird.io,GET,/api/integrations/billing/plans,,Get available plans,
+ex3-0736,netbird.io,GET,/api/integrations/billing/portal,,Get customer portal URL,
+ex3-0737,netbird.io,GET,/api/integrations/billing/subscription,,Get current subscription,
+ex3-0738,netbird.io,PUT,/api/integrations/billing/subscription,,Change subscription,
+ex3-0739,netbird.io,GET,/api/integrations/billing/usage,,Get current usage,
+ex3-0740,netbird.io,DELETE,/api/integrations/edr/falcon,,Delete EDR Falcon Integration,Deletes an existing EDR Falcon Integration by its ID.
+ex3-0741,netbird.io,GET,/api/integrations/edr/falcon,,Get EDR Falcon Integration,Retrieves a specific EDR Falcon integration by its ID.
+ex3-0742,netbird.io,POST,/api/integrations/edr/falcon,createFalconEDRIntegration,Create EDR Falcon Integration,Creates a new EDR Falcon integration
+ex3-0743,netbird.io,PUT,/api/integrations/edr/falcon,updateFalconEDRIntegration,Update EDR Falcon Integration,Updates an existing EDR Falcon Integration.
+ex3-0744,netbird.io,DELETE,/api/integrations/edr/fleetdm,,Delete EDR FleetDM Integration,Deletes an EDR FleetDM Integration by its ID.
+ex3-0745,netbird.io,GET,/api/integrations/edr/fleetdm,,Get EDR FleetDM Integration,Retrieves a specific EDR FleetDM integration by its ID.
+ex3-0746,netbird.io,POST,/api/integrations/edr/fleetdm,createFleetDMEDRIntegration,Create EDR FleetDM Integration,Creates a new EDR FleetDM integration
+ex3-0747,netbird.io,PUT,/api/integrations/edr/fleetdm,updateFleetDMEDRIntegration,Update EDR FleetDM Integration,Updates an existing EDR FleetDM Integration.
+ex3-0748,netbird.io,DELETE,/api/integrations/edr/huntress,,Delete EDR Huntress Integration,Deletes an EDR Huntress Integration by its ID.
+ex3-0749,netbird.io,GET,/api/integrations/edr/huntress,,Get EDR Huntress Integration,Retrieves a specific EDR Huntress integration by its ID.
+ex3-0750,netbird.io,POST,/api/integrations/edr/huntress,createHuntressEDRIntegration,Create EDR Huntress Integration,Creates a new EDR Huntress integration
+ex3-0751,netbird.io,PUT,/api/integrations/edr/huntress,updateHuntressEDRIntegration,Update EDR Huntress Integration,Updates an existing EDR Huntress Integration.
+ex3-0752,netbird.io,DELETE,/api/integrations/edr/intune,deleteEDRIntuneIntegration,Delete EDR Intune Integration,Deletes an EDR Intune Integration by its ID.
+ex3-0753,netbird.io,GET,/api/integrations/edr/intune,getEDRIntegration,Get EDR Intune Integration,Retrieves a specific EDR Intune integration by its ID.
+ex3-0754,netbird.io,POST,/api/integrations/edr/intune,createEDRIntegration,Create EDR Intune Integration,"Creates a new EDR Intune integration for the authenticated account.
+"
+ex3-0755,netbird.io,PUT,/api/integrations/edr/intune,updateEDRIntegration,Update EDR Intune Integration,"Updates an existing EDR Intune Integration. The request body structure is `EDRIntuneRequest`.
+"
+ex3-0756,netbird.io,DELETE,/api/integrations/edr/sentinelone,,Delete EDR SentinelOne Integration,Deletes an EDR SentinelOne Integration by its ID.
+ex3-0757,netbird.io,GET,/api/integrations/edr/sentinelone,,Get EDR SentinelOne Integration,Retrieves a specific EDR SentinelOne integration by its ID.
+ex3-0758,netbird.io,POST,/api/integrations/edr/sentinelone,createSentinelOneEDRIntegration,Create EDR SentinelOne Integration,Creates a new EDR SentinelOne integration
+ex3-0759,netbird.io,PUT,/api/integrations/edr/sentinelone,updateSentinelOneEDRIntegration,Update EDR SentinelOne Integration,Updates an existing EDR SentinelOne Integration.
+ex3-0760,netbird.io,GET,/api/integrations/google-idp,getAllGoogleIntegrations,Get All Google IDP Integrations,Retrieves all Google Workspace IDP integrations for the authenticated account
+ex3-0761,netbird.io,POST,/api/integrations/google-idp,createGoogleIntegration,Create Google IDP Integration,Creates a new Google Workspace IDP integration
+ex3-0762,netbird.io,DELETE,/api/integrations/google-idp/{id},deleteGoogleIntegration,Delete Google IDP Integration,Deletes a Google IDP integration by ID.
+ex3-0763,netbird.io,GET,/api/integrations/google-idp/{id},getGoogleIntegration,Get Google IDP Integration,Retrieves a Google IDP integration by ID.
+ex3-0764,netbird.io,PUT,/api/integrations/google-idp/{id},updateGoogleIntegration,Update Google IDP Integration,Updates an existing Google Workspace IDP integration.
+ex3-0765,netbird.io,GET,/api/integrations/google-idp/{id}/logs,getGoogleIntegrationLogs,Get Google Integration Sync Logs,Retrieves synchronization logs for a Google IDP integration.
+ex3-0766,netbird.io,POST,/api/integrations/google-idp/{id}/sync,syncGoogleIntegration,Sync Google IDP Integration,Triggers a manual synchronization for a Google IDP integration.
+ex3-0767,netbird.io,GET,/api/integrations/msp/tenants,,Get MSP tenants,
+ex3-0768,netbird.io,POST,/api/integrations/msp/tenants,,Create MSP tenant,
+ex3-0769,netbird.io,DELETE,/api/integrations/msp/tenants/{id},,Delete MSP tenant,
+ex3-0770,netbird.io,PUT,/api/integrations/msp/tenants/{id},,Update MSP tenant,
+ex3-0771,netbird.io,POST,/api/integrations/msp/tenants/{id}/dns,,Verify a tenant domain DNS challenge,
+ex3-0772,netbird.io,POST,/api/integrations/msp/tenants/{id}/invite,,Invite existing account as a Tenant to the MSP account,
+ex3-0773,netbird.io,PUT,/api/integrations/msp/tenants/{id}/invite,,Response by the invited Tenant account owner,
+ex3-0774,netbird.io,POST,/api/integrations/msp/tenants/{id}/subscription,,Create subscription for Tenant,
+ex3-0775,netbird.io,POST,/api/integrations/msp/tenants/{id}/unlink,,Unlink a tenant,
+ex3-0776,netbird.io,GET,/api/integrations/notifications/channels,listNotificationChannels,List Notification Channels,Retrieves all notification channels configured for the authenticated account.
+ex3-0777,netbird.io,POST,/api/integrations/notifications/channels,createNotificationChannel,Create Notification Channel,"Creates a new notification channel for the authenticated account.
+Supported channel types are `email` and `webhook`.
+"
+ex3-0778,netbird.io,DELETE,/api/integrations/notifications/channels/{channelId},deleteNotificationChannel,Delete Notification Channel,Deletes a notification channel by its ID.
+ex3-0779,netbird.io,GET,/api/integrations/notifications/channels/{channelId},getNotificationChannel,Get Notification Channel,Retrieves a specific notification channel by its ID.
+ex3-0780,netbird.io,PUT,/api/integrations/notifications/channels/{channelId},updateNotificationChannel,Update Notification Channel,Updates an existing notification channel.
+ex3-0781,netbird.io,GET,/api/integrations/notifications/types,listNotificationEventTypes,List Notification Event Types,"Returns a map of all supported activity event type codes to their
+human-readable descriptions. Use these codes when configuring
+`event_types` on notification channels.
+"
+ex3-0782,netbird.io,GET,/api/integrations/okta-scim-idp,getAllOktaScimIntegrations,Get All Okta SCIM IDP Integrations,Retrieves all Okta SCIM IDP integrations for the authenticated account
+ex3-0783,netbird.io,POST,/api/integrations/okta-scim-idp,createOktaScimIntegration,Create Okta SCIM IDP Integration,Creates a new Okta SCIM IDP integration
+ex3-0784,netbird.io,DELETE,/api/integrations/okta-scim-idp/{id},deleteOktaScimIntegration,Delete Okta SCIM IDP Integration,Deletes an Okta SCIM IDP integration by ID.
+ex3-0785,netbird.io,GET,/api/integrations/okta-scim-idp/{id},getOktaScimIntegration,Get Okta SCIM IDP Integration,Retrieves an Okta SCIM IDP integration by ID.
+ex3-0786,netbird.io,PUT,/api/integrations/okta-scim-idp/{id},updateOktaScimIntegration,Update Okta SCIM IDP Integration,Updates an existing Okta SCIM IDP integration.
+ex3-0787,netbird.io,GET,/api/integrations/okta-scim-idp/{id}/logs,getOktaScimIntegrationLogs,Get Okta SCIM Integration Sync Logs,Retrieves synchronization logs for an Okta SCIM IDP integration.
+ex3-0788,netbird.io,POST,/api/integrations/okta-scim-idp/{id}/token,regenerateOktaScimToken,Regenerate Okta SCIM Token,Regenerates the SCIM API token for an Okta SCIM IDP integration.
+ex3-0789,netbird.io,GET,/api/integrations/scim-idp,getAllSCIMIntegrations,Get All SCIM IDP Integrations,Retrieves all SCIM IDP integrations for the authenticated account
+ex3-0790,netbird.io,POST,/api/integrations/scim-idp,createSCIMIntegration,Create SCIM IDP Integration,Creates a new SCIM integration
+ex3-0791,netbird.io,DELETE,/api/integrations/scim-idp/{id},deleteSCIMIntegration,Delete SCIM IDP Integration,Deletes an SCIM IDP integration by ID.
+ex3-0792,netbird.io,GET,/api/integrations/scim-idp/{id},getSCIMIntegration,Get SCIM IDP Integration,Retrieves an SCIM IDP integration by ID.
+ex3-0793,netbird.io,PUT,/api/integrations/scim-idp/{id},updateSCIMIntegration,Update SCIM IDP Integration,Updates an existing SCIM IDP Integration.
+ex3-0794,netbird.io,GET,/api/integrations/scim-idp/{id}/logs,getSCIMIntegrationLogs,Get SCIM Integration Sync Logs,Retrieves synchronization logs for a SCIM IDP integration.
+ex3-0795,netbird.io,POST,/api/integrations/scim-idp/{id}/token,regenerateSCIMToken,Regenerate SCIM Token,Regenerates the SCIM API token for an SCIM IDP integration.
+ex3-0796,netbird.io,GET,/api/locations/countries,,List all country codes,Get list of all country in 2-letter ISO 3166-1 alpha-2 codes
+ex3-0797,netbird.io,GET,/api/locations/countries/{country}/cities,,List all city names by country,Get a list of all English city names for a given country code
+ex3-0798,netbird.io,GET,/api/networks,,List all Networks,Returns a list of all networks
+ex3-0799,netbird.io,POST,/api/networks,,Create a Network,Creates a Network
+ex3-0800,netbird.io,GET,/api/networks/routers,,List all Network Routers,Returns a list of all routers in a network
+ex3-0801,netbird.io,DELETE,/api/networks/{networkId},,Delete a Network,Delete a network
+ex3-0802,netbird.io,GET,/api/networks/{networkId},,Retrieve a Network,Get information about a Network
+ex3-0803,netbird.io,PUT,/api/networks/{networkId},,Update a Network,Update/Replace a Network
+ex3-0804,netbird.io,GET,/api/networks/{networkId}/resources,,List all Network Resources,Returns a list of all resources in a network
+ex3-0805,netbird.io,POST,/api/networks/{networkId}/resources,,Create a Network Resource,Creates a Network Resource
+ex3-0806,netbird.io,DELETE,/api/networks/{networkId}/resources/{resourceId},,Delete a Network Resource,Delete a network resource
+ex3-0807,netbird.io,GET,/api/networks/{networkId}/resources/{resourceId},,Retrieve a Network Resource,Get information about a Network Resource
+ex3-0808,netbird.io,PUT,/api/networks/{networkId}/resources/{resourceId},,Update a Network Resource,Update a Network Resource
+ex3-0809,netbird.io,GET,/api/networks/{networkId}/routers,,List all Network Routers,Returns a list of all routers in a network
+ex3-0810,netbird.io,POST,/api/networks/{networkId}/routers,,Create a Network Router,Creates a Network Router
+ex3-0811,netbird.io,DELETE,/api/networks/{networkId}/routers/{routerId},,Delete a Network Router,Delete a network router
+ex3-0812,netbird.io,GET,/api/networks/{networkId}/routers/{routerId},,Retrieve a Network Router,Get information about a Network Router
+ex3-0813,netbird.io,PUT,/api/networks/{networkId}/routers/{routerId},,Update a Network Router,Update a Network Router
+ex3-0814,netbird.io,GET,/api/peers,,List all Peers,Returns a list of all peers
+ex3-0815,netbird.io,GET,/api/peers/edr/bypassed,listBypassedPeers,List all bypassed peers,Returns all peers that have compliance bypassed by an admin.
+ex3-0816,netbird.io,DELETE,/api/peers/{peer-id}/edr/bypass,revokeBypass,Revoke compliance bypass for a peer,"Removes the compliance bypass, subjecting the peer to normal EDR validation."
+ex3-0817,netbird.io,POST,/api/peers/{peer-id}/edr/bypass,bypassCompliance,Bypass compliance for a non-compliant peer,"Allows an admin to bypass EDR compliance checks for a specific peer.
+The peer will remain bypassed until the admin revokes it OR the device becomes
+naturally compliant in the EDR system.
+"
+ex3-0818,netbird.io,DELETE,/api/peers/{peerId},,Delete a Peer,Delete a peer
+ex3-0819,netbird.io,GET,/api/peers/{peerId},,Retrieve a Peer,Get information about a peer
+ex3-0820,netbird.io,PUT,/api/peers/{peerId},,Update a Peer,Update information about a peer
+ex3-0821,netbird.io,GET,/api/peers/{peerId}/accessible-peers,,List accessible Peers,Returns a list of peers that the specified peer can connect to within the network.
+ex3-0822,netbird.io,GET,/api/peers/{peerId}/jobs,,List Jobs,Retrieve all jobs for a given peer
+ex3-0823,netbird.io,POST,/api/peers/{peerId}/jobs,,Create Job,Create a new job for a given peer
+ex3-0824,netbird.io,GET,/api/peers/{peerId}/jobs/{jobId},,Get Job,Retrieve details of a specific job
+ex3-0825,netbird.io,POST,/api/peers/{peerId}/temporary-access,,Create a Temporary Access Peer,Creates a temporary access peer that can be used to access this peer and this peer only. The temporary access peer and its access policies will be automatically deleted after it disconnects.
+ex3-0826,netbird.io,GET,/api/policies,,List all Policies,Returns a list of all policies
+ex3-0827,netbird.io,POST,/api/policies,,Create a Policy,Creates a policy
+ex3-0828,netbird.io,DELETE,/api/policies/{policyId},,Delete a Policy,Delete a policy
+ex3-0829,netbird.io,GET,/api/policies/{policyId},,Retrieve a Policy,Get information about a Policies
+ex3-0830,netbird.io,PUT,/api/policies/{policyId},,Update a Policy,Update/Replace a Policy
+ex3-0831,netbird.io,GET,/api/posture-checks,,List all Posture Checks,Returns a list of all posture checks
+ex3-0832,netbird.io,POST,/api/posture-checks,,Create a Posture Check,Creates a posture check
+ex3-0833,netbird.io,DELETE,/api/posture-checks/{postureCheckId},,Delete a Posture Check,Delete a posture check
+ex3-0834,netbird.io,GET,/api/posture-checks/{postureCheckId},,Retrieve a Posture Check,Get information about a posture check
+ex3-0835,netbird.io,PUT,/api/posture-checks/{postureCheckId},,Update a Posture Check,Update/Replace a posture check
+ex3-0836,netbird.io,GET,/api/reverse-proxies/clusters,,List available proxy clusters,Returns a list of available proxy clusters with their connection status
+ex3-0837,netbird.io,DELETE,/api/reverse-proxies/clusters/{clusterAddress},,Delete a self-hosted proxy cluster,Removes all self-hosted (BYOP) proxy registrations for the given cluster address owned by the account.
+ex3-0838,netbird.io,GET,/api/reverse-proxies/domains,,Retrieve Service Domains,Get information about domains that can be used for service endpoints.
+ex3-0839,netbird.io,POST,/api/reverse-proxies/domains,,Create a Custom domain,"Create a new Custom domain for use with service endpoints, this will trigger an initial validation check"
+ex3-0840,netbird.io,DELETE,/api/reverse-proxies/domains/{domainId},,Delete a Custom domain,"Delete an existing service custom domain after removing or moving all services that use it or its subdomains, including disabled services."
+ex3-0841,netbird.io,GET,/api/reverse-proxies/domains/{domainId}/validate,,Validate a custom domain,Validate domain ownership for a custom domain
+ex3-0842,netbird.io,GET,/api/reverse-proxies/proxy-tokens,,List Proxy Tokens,Returns all proxy access tokens for the account
+ex3-0843,netbird.io,POST,/api/reverse-proxies/proxy-tokens,,Create a Proxy Token,Generate an account-scoped proxy access token for self-hosted proxy registration
+ex3-0844,netbird.io,DELETE,/api/reverse-proxies/proxy-tokens/{tokenId},,Revoke a Proxy Token,Revoke an account-scoped proxy access token
+ex3-0845,netbird.io,GET,/api/reverse-proxies/services,,List all Services,Returns a list of all reverse proxy services
+ex3-0846,netbird.io,POST,/api/reverse-proxies/services,,Create a Service,Creates a new reverse proxy service
+ex3-0847,netbird.io,DELETE,/api/reverse-proxies/services/{serviceId},,Delete a Service,Delete an existing service
+ex3-0848,netbird.io,GET,/api/reverse-proxies/services/{serviceId},,Retrieve a Service,Get information about a specific reverse proxy service
+ex3-0849,netbird.io,PUT,/api/reverse-proxies/services/{serviceId},,Update a Service,Update an existing service
+ex3-0850,netbird.io,GET,/api/routes,,List all Routes,Returns a list of all routes
+ex3-0851,netbird.io,POST,/api/routes,,Create a Route,Creates a Route
+ex3-0852,netbird.io,DELETE,/api/routes/{routeId},,Delete a Route,Delete a route
+ex3-0853,netbird.io,GET,/api/routes/{routeId},,Retrieve a Route,Get information about a Routes
+ex3-0854,netbird.io,PUT,/api/routes/{routeId},,Update a Route,Update/Replace a Route
+ex3-0855,netbird.io,POST,/api/setup,,Setup Instance,"Creates the initial admin user for the instance. This endpoint does not require authentication but only works when setup is required (no accounts exist and embedded IDP is enabled).
+
+When the management server is started with `NB_SETUP_PAT_ENABLED=true` and the request includes `create_pat: true`, the endpoint also provisions the NetBird account for the new owner user and returns the plain text Personal Access Token in `personal_access_token`. The optional `pat_expire_in` value applies only when `create_pat` is true and defaults to 1 day when omitted. If a post-user step fails, setup-created resources are rolled back when safe; if account cleanup fails, the owner user is left in place to avoid leaving an account without its admin user.
+"
+ex3-0856,netbird.io,GET,/api/setup-keys,,List all Setup Keys,Returns a list of all Setup Keys
+ex3-0857,netbird.io,POST,/api/setup-keys,,Create a Setup Key,Creates a setup key
+ex3-0858,netbird.io,DELETE,/api/setup-keys/{keyId},,Delete a Setup Key,Delete a Setup Key
+ex3-0859,netbird.io,GET,/api/setup-keys/{keyId},,Retrieve a Setup Key,Get information about a setup key
+ex3-0860,netbird.io,PUT,/api/setup-keys/{keyId},,Update a Setup Key,Update information about a setup key
+ex3-0861,netbird.io,GET,/api/users,,List all Users,Returns a list of all users
+ex3-0862,netbird.io,POST,/api/users,,Create a User,Creates a new service user or sends an invite to a regular user
+ex3-0863,netbird.io,GET,/api/users/current,,Retrieve current user,Get information about the current user
+ex3-0864,netbird.io,GET,/api/users/invites,,List user invites,Lists all pending invites for the account. Only available when embedded IdP is enabled.
+ex3-0865,netbird.io,POST,/api/users/invites,,Create a user invite,Creates an invite link for a new user. Only available when embedded IdP is enabled. The user is not created until they accept the invite.
+ex3-0866,netbird.io,DELETE,/api/users/invites/{inviteId},,Delete a user invite,Deletes a pending invite. Only available when embedded IdP is enabled.
+ex3-0867,netbird.io,POST,/api/users/invites/{inviteId}/regenerate,,Regenerate a user invite,Regenerates an invite link for an existing invite. Invalidates the previous token and creates a new one.
+ex3-0868,netbird.io,GET,/api/users/invites/{token},,Get invite information,Retrieves public information about an invite. This endpoint is unauthenticated and protected by the token itself.
+ex3-0869,netbird.io,POST,/api/users/invites/{token}/accept,,Accept an invite,Accepts an invite and creates the user with the provided password. This endpoint is unauthenticated and protected by the token itself.
+ex3-0870,netbird.io,DELETE,/api/users/{userId},,Delete a User,This method removes a user from accessing the system. For this leaves the IDP user intact unless the `--user-delete-from-idp` is passed to management startup.
+ex3-0871,netbird.io,PUT,/api/users/{userId},,Update a User,Update information about a User
+ex3-0872,netbird.io,POST,/api/users/{userId}/approve,,Approve user,Approve a user that is pending approval
+ex3-0873,netbird.io,POST,/api/users/{userId}/invite,,Resend user invitation,Resend user invitation
+ex3-0874,netbird.io,PUT,/api/users/{userId}/password,,Change user password,Change the password for a user. Only available when embedded IdP is enabled. Users can only change their own password.
+ex3-0875,netbird.io,DELETE,/api/users/{userId}/reject,,Reject user,Reject a user that is pending approval by removing them from the account
+ex3-0876,netbird.io,GET,/api/users/{userId}/tokens,,List all Tokens,Returns a list of all tokens for a user
+ex3-0877,netbird.io,POST,/api/users/{userId}/tokens,,Create a Token,Create a new token for a user
+ex3-0878,netbird.io,DELETE,/api/users/{userId}/tokens/{tokenId},,Delete a Token,Delete a token for a user
+ex3-0879,netbird.io,GET,/api/users/{userId}/tokens/{tokenId},,Retrieve a Token,Returns a specific token for a user
