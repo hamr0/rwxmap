@@ -87,7 +87,7 @@ still works, less exactly.
 
 ```
 npx rwxmap <spec URL | file | API address> [-o dir] [--vendor name]
-  [--engine rwxlite|jev|mechanical] [--confidence 0-99] [--force]
+  [--engine rwxlite|jev|mechanical] [--confidence 0-99] [--model small] [--force]
 ```
 
 ```
@@ -134,7 +134,7 @@ Trimmed example of the combined JSON, one entry each:
     }
   },
   "jev": { "mode": "off", "model": null, "sent": 0, "answered": 0, "failed": 0, "changed": 0, "tokens": { "input": 0, "output": 0 } },
-  "rwxlite": { "mode": "off", "model": null, "reason": "no model in the cache", "sent": 0, "raised": 0, "lowered": 0, "kept": 0, "undecided": 0 }
+  "rwxlite": { "mode": "off", "model": null, "reason": "could not get the model (fetch failed); none in the cache", "sent": 0, "raised": 0, "lowered": 0, "kept": 0, "undecided": 0 }
 }
 ```
 
@@ -144,28 +144,51 @@ overwritten without `--force`.
 **Engines.** `--engine` picks who looks at the rows mechanical marks
 `loose` or `tight`:
 
-- No flag: mechanical first, then the rwxlite model on those rows. The
-  model is not shipped yet, so today a run with no model in the cache
-  (`$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`) prints
-  `rwxlite: off (mechanical)` and runs mechanically. A cached model
-  whose hash does not match its name is not used, and the run says so.
-  When the model ships, install with `ONNXRUNTIME_NODE_INSTALL=skip`: on
-  Linux x64, `onnxruntime-node` otherwise downloads about 285 MB of GPU
-  (CUDA/TensorRT) libraries. It is not shipped yet, so there is nothing to
-  install today.
-- `--engine mechanical`: mechanical only, never looks for a model.
+- No flag: mechanical first, then the rwxlite model on those rows.
+  rwxlite is not published yet, so until it is this prints
+  `rwxlite: off (mechanical)` and the run is mechanical. See "rwxlite
+  model" below.
+- `--engine mechanical`: mechanical only, never touches the network for a model.
 - `--engine jev`: the paid Jev pass, below.
 - `--engine rwxlite` is accepted, with `--confidence <0-99>` (only valid
   with it; anything else fails). Running rwxlite on its own is not built
   yet, so today it behaves like the default.
 
-An unknown `--engine` value, or a bad `--confidence`, exits 1 with
+An unknown `--engine` value, a bad `--confidence`, or a `--model` other
+than `small` (or used with `--engine jev` or `mechanical`) exits 1 with
 nothing written.
 
 `evidence` is `floor` (the method alone decided), `list` (a word list
 fired), `jev` (Jev moved the row) or `rwxlite` (the rwxlite second pass
 moved the row). The `rwxlite` block in the combined JSON records the
 model string and the pass's counts.
+
+**rwxlite model.** A run that uses rwxlite fetches the latest manifest
+from rwxlite's GitHub releases (a small request), downloads the model if
+it is not already cached, checks every sha256, and only then puts it in
+place. The default is the exact fp32 model, about 91 MB, downloaded once;
+`--model small` uses the int8 model, about 23 MB. The cache is
+`$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`, one folder per
+model. Downloads are https only, from github.com and its
+githubusercontent.com hosts, capped at 200 MB, and a failed or tampered
+download installs nothing.
+
+If the manifest cannot be fetched (offline, rwxlite not published yet), the
+run uses the highest verified model already cached and says "using cached
+<model>, could not check for a newer one". With none cached it prints
+`rwxlite: off (mechanical) — <reason>` and runs mechanically. It never
+stops the run. The model is not pinned to the rwxmap version, so the same
+spec can get different letters after a model update; the combined JSON
+records the model string.
+
+The model runs through the `rwxlite` npm package, which will be an
+optional dependency of rwxmap. It is not on npm yet, so today it is not
+declared and not installed; without it the run prints
+`rwxlite: off (mechanical) — the rwxlite package is not installed (npm
+install rwxlite)`. When it is published, install with
+`ONNXRUNTIME_NODE_INSTALL=skip`: on Linux x64, `onnxruntime-node`
+otherwise downloads about 285 MB of GPU (CUDA/TensorRT) libraries. Nothing
+here is live until rwxlite publishes.
 
 Only bareguard reads `bareguard.tools` directly. The MCP, WebMCP and
 OpenAPI parts are hints you copy into place; a client may ignore them.

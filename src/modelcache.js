@@ -50,7 +50,7 @@ function msg(e) { return e instanceof Error ? e.message : String(e); }
  * @param {string} dir
  * @returns {{model: string, file: string}}
  */
-function verifyModelDir(dir) {
+export function verifyModelDir(dir) {
   const name = path.basename(dir);
   const { sha8 } = parseModelString(name);
   /** @type {any} */

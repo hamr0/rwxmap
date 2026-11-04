@@ -9,13 +9,21 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 
-import { run } from './cli.js';
+import { run as runCli } from './cli.js';
 import { matcherFrom } from './matcher.js';
 import { JEV_LOWER_THRESHOLD, JEV_LOWER_R_THRESHOLD, JEV_RAISE_WX_THRESHOLD, JEV_RAISE_GET_THRESHOLD, jevQuestions } from './jev.js';
 
 // ---------------------------------------------------------------------
 // Fixtures / helpers
 // ---------------------------------------------------------------------
+
+// Every test goes through this `run`: the model download sees an offline
+// network and an empty scratch cache unless a test passes its own, so no test
+// reaches the real network or the real ~/.cache.
+const offlineFetch = async () => { throw new Error('offline (test)'); };
+function run(argv, env) {
+  return runCli(argv, { modelFetch: offlineFetch, xdgCacheHome: mkScratch(), ...env });
+}
 
 // One operation of each class, by method-floor evidence alone (no word
 // list needs to fire): GET -> r, PUT -> w (floor, review "loose"), DELETE
@@ -406,7 +414,7 @@ test('run: a directory is not a file', async () => {
 });
 
 test('run: an option with no value, and an unknown option, are named as the user typed them', async () => {
-  const usage = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--engine rwxlite|jev|mechanical] [--confidence <0-99>] [--force]';
+  const usage = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--engine rwxlite|jev|mechanical] [--confidence <0-99>] [--model small] [--force]';
   const cases = [
     [['spec.json', '-o'], 'rwxmap: -o needs a value'],
     [['spec.json', '--vendor'], 'rwxmap: --vendor needs a value'],
@@ -599,7 +607,7 @@ test('run: a write failure (target path is not a directory) exits 1 and writes n
 // Stdout summary always names the mode.
 // ---------------------------------------------------------------------
 
-test('run: stdout always says rwxlite is off (mechanical) when no model is cached', async () => {
+test('run: stdout always says rwxlite is off (mechanical) when no model can be got', async () => {
   const dir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
   const outDir = mkScratch();
@@ -609,7 +617,7 @@ test('run: stdout always says rwxlite is off (mechanical) when no model is cache
   const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr, xdgCacheHome: mkScratch() });
 
   assert.equal(code, 0, stderr.text());
-  assert.match(stdout.text(), /^rwxmap: rwxlite: off \(mechanical\) — no model in the cache$/m);
+  assert.match(stdout.text(), /^rwxmap: rwxlite: off \(mechanical\) — could not get the model \(offline \(test\)\); none in the cache$/m);
   assert.doesNotMatch(stdout.text(), /Jev: on/);
   const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
   assert.deepEqual(combined.jev, {
@@ -1796,7 +1804,7 @@ test('run: no leftover files means no leftover line', async () => {
 // module through it but leaves argv[1] unresolved, so a plain path compare
 // made the installed `rwxmap` exit 0 doing nothing. Each spawn: a temp cwd
 // with no .env, RWXMAP_JEV_KEY removed, XDG_CACHE_HOME in a temp dir, and a
-// local spec file (no network).
+// local spec file with --engine mechanical (no network).
 // ---------------------------------------------------------------------
 
 const CLI_PATH = path.join(import.meta.dirname, 'cli.js');
@@ -1813,7 +1821,7 @@ function spawnCli(command, args) {
   assert.equal(fs.existsSync(path.join(cwd, '.env')), false);
   const outDir = mkScratch();
   const specPath = writeSpecFile(mkScratch(), 'spec.json', SPEC_DOC);
-  const res = spawnSync(command, [...args, specPath, '-o', outDir, '--vendor', 'example'], {
+  const res = spawnSync(command, [...args, '--engine', 'mechanical', specPath, '-o', outDir, '--vendor', 'example'], {
     cwd, env: childEnv(mkScratch()), encoding: 'utf8', timeout: 30_000,
   });
   return { res, outDir };
@@ -1935,10 +1943,10 @@ function d133Rows(outDir) {
   return Object.fromEntries(rows.map((r) => [`${r.method} ${r.path}`, `${r.letter}/${r.marker}`]));
 }
 
-test('run (D133): no model in the cache -> "rwxlite: off (mechanical)", exit 0, mechanical letters, widened markers', async () => {
+test('run (D133): no model can be got -> "rwxlite: off (mechanical)", exit 0, mechanical letters, widened markers', async () => {
   const { code, stdout, stderr, outDir } = await runD133([]);
   assert.equal(code, 0, stderr);
-  assert.match(stdout, /^rwxmap: rwxlite: off \(mechanical\) — no model in the cache$/m);
+  assert.match(stdout, /^rwxmap: rwxlite: off \(mechanical\) — could not get the model \(offline \(test\)\); none in the cache$/m);
   assert.deepEqual(d133Rows(outDir), {
     'DELETE /things/{id}/permission': 'x/settled',
     'GET /things': 'r/settled',
@@ -1948,7 +1956,7 @@ test('run (D133): no model in the cache -> "rwxlite: off (mechanical)", exit 0, 
   });
   const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
   assert.deepEqual(combined.rwxlite, {
-    mode: 'off', model: null, reason: 'no model in the cache', sent: 0, raised: 0, lowered: 0, kept: 0, undecided: 0,
+    mode: 'off', model: null, reason: 'could not get the model (offline (test)); none in the cache', sent: 0, raised: 0, lowered: 0, kept: 0, undecided: 0,
   });
 });
 
@@ -2006,7 +2014,7 @@ test('run (D133): --engine rwxlite on its own (mode b) is not built: with an eng
 
   const noModel = await runD133(['--engine', 'rwxlite', '--confidence', '70']);
   assert.equal(noModel.code, 0, noModel.stderr);
-  assert.match(noModel.stdout, /rwxlite: off \(mechanical\) — no model in the cache/);
+  assert.match(noModel.stdout, /rwxlite: off \(mechanical\) — could not get the model/);
 });
 
 test('run (D133): --confidence is valid only with --engine rwxlite, and only as a whole number 0-99', async () => {
@@ -2090,19 +2098,90 @@ test('run (D133): a cached model whose hash does not match its name is NOT used:
   const r = await runD133([], { xdgCacheHome: xdg });
   assert.equal(r.code, 0, r.stderr);
   assert.match(r.stderr, /WARNING: rwxlite model rejected \(hash mismatch.*rwxlite-1\.0\.0\+deadbeef was NOT used/);
-  assert.match(r.stdout, /rwxlite: off \(mechanical\) — cached model rejected/);
+  assert.match(r.stdout, /rwxlite: off \(mechanical\) — could not get the model \(offline \(test\)\); the cached model was rejected/);
   assert.equal(d133Rows(r.outDir)['POST /mystery'], 'x/tight');
 });
 
-test('run (D133): a cached model that verifies is found, and the run says this build cannot run it yet', async () => {
+/** A fake `rwxlite` package: its answerer reports `model`, and answers every request with the given p. */
+function fakeRwxlite(model, p, seen = []) {
+  return async (name) => {
+    assert.equal(name, 'rwxlite');
+    return {
+      loadAnswerer: async (opts) => {
+        seen.push(opts);
+        return { model, answerMany: async (reqs) => reqs.map(() => ({ model, answers: { isX: { noul: p.isX }, changes: { noul: p.changes } } })) };
+      },
+    };
+  };
+}
+
+test('run (D133): offline with a verified cached model -> "using cached ...", the second pass runs on it', async () => {
   const xdg = mkScratch();
   const bytes = Buffer.from('weights');
   const sha8 = createHash('sha256').update(bytes).digest('hex').slice(0, 8);
-  writeModelDir(xdg, bytes);
-  const r = await runD133([], { xdgCacheHome: xdg });
+  const dir = writeModelDir(xdg, bytes);
+  const model = `rwxlite-1.0.0+${sha8}`;
+  const seen = [];
+  const r = await runD133([], { xdgCacheHome: xdg, rwxliteImporter: fakeRwxlite(model, { isX: 0.99, changes: 0.99 }, seen) });
   assert.equal(r.code, 0, r.stderr);
-  assert.equal(r.stderr, '');
-  assert.match(r.stdout, new RegExp(`rwxlite: off \\(mechanical\\) — model rwxlite-1\\.0\\.0\\+${sha8} is cached, but this build has no way to run it yet`));
+  assert.match(r.stderr, new RegExp(`^rwxmap: using cached ${model.replace(/[+.]/g, '\\$&')}, could not check for a newer one`, 'm'));
+  assert.equal(seen.length, 1);
+  assert.equal(seen[0].dir, dir);
+  assert.match(r.stdout, /rwxlite: on \(/);
+  assert.equal(readJson(path.join(r.outDir, 'example.rwxmap.json')).rwxlite.model, model);
+});
+
+test('run (D133): a verified model but no rwxlite package -> mechanical alone, says how to install it', async () => {
+  const xdg = mkScratch();
+  writeModelDir(xdg, Buffer.from('weights'));
+  const importer = async () => { throw Object.assign(new Error("Cannot find package 'rwxlite' imported from /x/src/rwxliteengine.js"), { code: 'ERR_MODULE_NOT_FOUND' }); };
+  const r = await runD133([], { xdgCacheHome: xdg, rwxliteImporter: importer });
+  assert.equal(r.code, 0, r.stderr);
+  assert.match(r.stdout, /^rwxmap: rwxlite: off \(mechanical\) — the rwxlite package is not installed \(npm install rwxlite\)$/m);
+  assert.equal(readJson(path.join(r.outDir, 'example.rwxmap.json')).rwxlite.mode, 'off');
+});
+
+test('run (D133): --model small is accepted in the default run and --engine rwxlite, and fetches the small manifest', async () => {
+  for (const args of [['--model', 'small'], ['--engine', 'rwxlite', '--model', 'small']]) {
+    const urls = [];
+    const r = await runD133(args, { modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
+    assert.equal(r.code, 0, r.stderr);
+    assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/latest/download/manifest.json'], args.join(' '));
+  }
+  const urls = [];
+  const r = await runD133([], { modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
+  assert.equal(r.code, 0, r.stderr);
+  assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/latest/download/manifest-exact.json']);
+});
+
+test('run (D133): --model fails loudly with any other value, and with --engine jev or mechanical; nothing is fetched or written', async () => {
+  /** @type {Array<[string[], RegExp]>} */
+  const cases = [
+    [['--model', 'exact'], /--model takes only "small"/],
+    [['--model', ''], /--model takes only "small"/],
+    [['--engine', 'rwxlite', '--model', 'big'], /--model takes only "small"/],
+    [['--engine', 'mechanical', '--model', 'small'], /--model is valid only in the default run and with --engine rwxlite/],
+    [['--engine', 'jev', '--model', 'small'], /--model is valid only in the default run and with --engine rwxlite/],
+  ];
+  for (const [args, re] of cases) {
+    let calls = 0;
+    const r = await runD133(args, { modelFetch: async () => { calls += 1; throw new Error('must not be called'); } });
+    assert.equal(r.code, 1, args.join(' '));
+    assert.match(r.stderr, re, args.join(' '));
+    assert.equal(calls, 0);
+    assert.deepEqual(fs.readdirSync(r.outDir), []);
+  }
+});
+
+test('run (D133): --engine mechanical and --engine jev never touch the network for the model', async () => {
+  let calls = 0;
+  const modelFetch = async () => { calls += 1; throw new Error('must not be called'); };
+  const m = await runD133(['--engine', 'mechanical'], { modelFetch });
+  assert.equal(m.code, 0, m.stderr);
+  const { fetchImpl } = routedJevFetch({ listThings: { p: 0.1 }, updateThing: { p: 0.1 }, doMystery: { p: 0.1 } });
+  const j = await runD133(['--engine', 'jev'], { jevKey: 'sk-fake', fetchImpl, modelFetch });
+  assert.equal(j.code, 0, j.stderr);
+  assert.equal(calls, 0);
 });
 
 test('run (D133): --help names the engines, --confidence, and that a key alone does not turn Jev on', async () => {

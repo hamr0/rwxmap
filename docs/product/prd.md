@@ -903,9 +903,11 @@ Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
 Status: spec in progress on branch `feat/d133-rwxlite-engines`. Pass 1
 (second pass against a stub engine, wider `loose`, `--engine`, evidence
-`rwxlite`, the `rwxlite` JSON block, the cache check) is built on the
-branch, unreleased. The model is not shipped, so the default run is
-mechanical. User rulings 2026-11-03 and 2026-11-04 are below as
+`rwxlite`, the `rwxlite` JSON block, the cache check) and pass 2a (model
+download from rwxlite's GitHub releases, `--model small`, the rwxlite
+adapter) are built on the branch, unreleased. rwxlite is not published, so
+the default run is mechanical ("rwxlite: off") until it is; mode b is not
+built. User rulings 2026-11-03 and 2026-11-04 are below as
 decided; everything marked "proposal" or "open" is not decided.
 
 ### Decided (user rulings, 2026-11-03 and 2026-11-04)

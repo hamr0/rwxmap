@@ -97,7 +97,8 @@ import { resolvedServers, tenantServerTemplates } from './servers.js';
 import { needsJev, applyJev, jevTier } from './jev.js';
 import { runJevBatch } from './jev-client.js';
 import { secondPass } from './secondpass.js';
-import { findModel } from './modelcache.js';
+import { ensureModel } from './modeldownload.js';
+import { loadRwxliteEngine } from './rwxliteengine.js';
 
 // ---------------------------------------------------------------------
 // Small local helpers — each one trivial enough (a regex, a URL-API call,
@@ -851,7 +852,7 @@ function argError(err) {
 
 const ENGINES = ['rwxlite', 'jev', 'mechanical'];
 
-const USAGE = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--engine rwxlite|jev|mechanical] [--confidence <0-99>] [--force]';
+const USAGE = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--engine rwxlite|jev|mechanical] [--confidence <0-99>] [--model small] [--force]';
 
 const HELP = `${USAGE}
 
@@ -865,6 +866,7 @@ Options:
   --vendor <n>   name for the output files and tool keys (default: the host)
   --engine <e>   rwxlite | jev | mechanical (default: mechanical, then rwxlite on the rows marked loose or tight)
   --confidence <0-99>  only with --engine rwxlite
+  --model small  the smaller rwxlite model (23 MB instead of 91 MB); only where rwxlite runs
   --force        overwrite existing output files
   -h, --help     this help
   -v, --version  the version
@@ -872,7 +874,8 @@ Options:
 Writes <vendor>.rwxmap.json, <vendor>.rwxmap.review.json, <vendor>.openapi.rwx.json.
 
 rwxlite: the default run asks the rwxlite model about the rows marked loose or tight.
-No model in the cache means "rwxlite: off (mechanical)" and the run is mechanical; the model is not shipped yet.
+The model is downloaded on first use from rwxlite's GitHub releases and cached in ~/.cache/rwxmap.
+No model (offline, not published yet, package not installed) means "rwxlite: off (mechanical)" and the run is mechanical.
 --engine mechanical never looks for a model.
 
 Jev (paid, optional): --engine jev, with RWXMAP_JEV_KEY set or in a .env in the run folder.
@@ -888,7 +891,7 @@ Exit 0 on success; 1 on failure, with nothing written.
  * tests never have to spawn a process.
  *
  * @param {string[]} argv  Arguments only (no "node"/script path).
- * @param {{cwd: string, stdout: {write: (s: string) => void}, stderr: {write: (s: string) => void}, cacheDir?: string, jevKey?: string, fetchImpl?: typeof fetch, jevConcurrency?: number, beforeReplace?: (targetPath: string) => void, rwxliteEngine?: {model: string, run: import('./secondpass.js').Engine}, xdgCacheHome?: string}} env
+ * @param {{cwd: string, stdout: {write: (s: string) => void}, stderr: {write: (s: string) => void}, cacheDir?: string, jevKey?: string, fetchImpl?: typeof fetch, jevConcurrency?: number, beforeReplace?: (targetPath: string) => void, rwxliteEngine?: {model: string, run: import('./secondpass.js').Engine}, xdgCacheHome?: string, modelFetch?: typeof fetch, rwxliteImporter?: (name: string) => Promise<any>}} env
  *   `jevKey`, `fetchImpl` and `jevConcurrency` are test-only overrides for
  *   the Jev wiring (D118), the same pattern `cacheDir` already uses for
  *   discovery: `jevKey` bypasses loadJevKey's environment/.env read
@@ -902,7 +905,7 @@ Exit 0 on success; 1 on failure, with nothing written.
  *   `rwxliteEngine` (an engine function plus its model string) and
  *   `xdgCacheHome` (where to look for a cached model) are test-only seams of
  *   the same kind: a real run finds its model in the cache and never passes
- *   either.
+ *   either. `modelFetch` and `rwxliteImporter` are the same kind: the fetch used to download the model and the `import('rwxlite')` call.
  * @returns {Promise<number>}  Process exit code.
  */
 export async function run(argv, env) {
@@ -921,6 +924,7 @@ export async function run(argv, env) {
         force: { type: 'boolean', default: false },
         engine: { type: 'string' },
         confidence: { type: 'string' },
+        model: { type: 'string' },
         help: { type: 'boolean', short: 'h', default: false },
         version: { type: 'boolean', short: 'v', default: false },
       },
@@ -958,6 +962,16 @@ export async function run(argv, env) {
     }
     if (!/^\d{1,2}$/.test(values.confidence)) {
       stderr.write(`rwxmap: --confidence must be a whole number from 0 to 99: ${values.confidence}\n`);
+      return 1;
+    }
+  }
+  if (values.model !== undefined) {
+    if (engineName !== undefined && engineName !== 'rwxlite') {
+      stderr.write('rwxmap: --model is valid only in the default run and with --engine rwxlite\n');
+      return 1;
+    }
+    if (values.model !== 'small') {
+      stderr.write(`rwxmap: --model takes only "small" (or leave it out for the default model): ${values.model}\n`);
       return 1;
     }
   }
@@ -1058,28 +1072,36 @@ export async function run(argv, env) {
   // The rwxlite line of the run summary (every non-Jev run prints one).
   let engineLine = 'rwxmap: rwxlite: off (mechanical)\n';
   let rwxliteField = rwxliteSummary({ reason: engineName === 'jev' ? 'engine jev' : 'engine mechanical' });
-  if (engineName === 'rwxlite' && env.rwxliteEngine) {
-    stderr.write('rwxmap: --engine rwxlite on its own (mode b) is not built yet\n');
-    return 1;
-  }
   if (engineName !== 'jev' && engineName !== 'mechanical') {
     // Mode a (default): mechanical -> rwxlite. No model, no stop.
     let engine = env.rwxliteEngine;
     if (!engine) {
-      const found = findModel({ XDG_CACHE_HOME: env.xdgCacheHome ?? process.env.XDG_CACHE_HOME });
-      if (found.status === 'none') {
-        engineLine = 'rwxmap: rwxlite: off (mechanical) — no model in the cache\n';
-        rwxliteField = rwxliteSummary({ reason: 'no model in the cache' });
-      } else if (found.status === 'bad') {
-        stderr.write(`rwxmap: WARNING: rwxlite model rejected (${found.reason}); ${found.dir} was NOT used\n`);
-        engineLine = 'rwxmap: rwxlite: off (mechanical) — cached model rejected, see the warning above\n';
-        rwxliteField = rwxliteSummary({ reason: `cached model rejected (${found.reason})` });
+      const got = await ensureModel({
+        variant: values.model === 'small' ? 'small' : 'exact',
+        environ: { XDG_CACHE_HOME: env.xdgCacheHome ?? process.env.XDG_CACHE_HOME },
+        fetchImpl: env.modelFetch,
+        log: (line) => stderr.write(`${line}\n`),
+      });
+      for (const n of got.notes) stderr.write(`${n}\n`);
+      /** @type {string|null} */
+      let reason = null;
+      if (got.status === 'off') {
+        reason = got.reason;
       } else {
-        for (const r of found.rejected) stderr.write(`rwxmap: WARNING: rwxlite model rejected (${r.reason}); ${r.dir} was NOT used\n`);
-        engineLine = `rwxmap: rwxlite: off (mechanical) — model ${found.model} is cached, but this build has no way to run it yet\n`;
-        rwxliteField = rwxliteSummary({ reason: `model ${found.model} is cached, but this build has no way to run it yet` });
+        const loaded = await loadRwxliteEngine({ dir: got.dir, model: got.model, importer: env.rwxliteImporter });
+        if (loaded.status === 'on') engine = loaded.engine;
+        else reason = loaded.reason;
       }
-    } else {
+      if (reason !== null) {
+        engineLine = `rwxmap: rwxlite: off (mechanical) — ${reason}\n`;
+        rwxliteField = rwxliteSummary({ reason });
+      }
+    }
+    if (engine) {
+      if (engineName === 'rwxlite') {
+        stderr.write('rwxmap: --engine rwxlite on its own (mode b) is not built yet\n');
+        return 1;
+      }
       const result = await secondPass(ops, verdicts, engine.run, { model: engine.model });
       verdicts.splice(0, verdicts.length, ...result.verdicts);
       const s = result.summary;
