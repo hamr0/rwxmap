@@ -1025,6 +1025,16 @@ decided; everything marked "proposal" or "open" is not decided.
   with 4 threads. rwxlite's `loadAnswerer` default threads is
   `min(4, cores)`. Earlier laptop (i7-8665U, 1 thread, int8-pc): mean
   20.2 ms, p95 38.1 ms.
+- **Decision rule (user ruling, 2026-11-04).** rwxmap keeps its built
+  rule (`src/secondpass.js`): send `loose` and `tight` rows; the
+  engine's letter is the largest of x = isX, w = changes - isX, r = 1 -
+  changes; a raise is accepted; a lowering is accepted only at p >=
+  0.97; otherwise the row is x plus review `tight`; `settled` rows are
+  never sent. rwxlite's tier rule is NOT adopted (it moves only Jev's
+  three tiers, with per-tier cuts and then asks a lowering under 0.97).
+  Evidence: "Rule comparison" under Evidence so far. Caveat:
+  secondPass has only that one tuning measurement; the D133 exam is its
+  test.
 - **R1 and R2 are tuning candidates only.** R1: credential replace on
   PUT/PATCH (last path segment is a credential being replaced: api-key,
   client-credentials, token, secret), kept narrower than the broad noun
@@ -1103,6 +1113,19 @@ client-credentials, workos api-key, coolify integration-tokens;
 mechanical w, truth x by clause b) and 2 logout GETs (workos
 /sso/logout, /user_management/sessions/logout; truth x). Practice rows
 (rwxlite v3 tuning, LOVO): 93.2% right, 21 too loose (0.41%), 9.6% asked.
+
+Rule comparison (2026-11-04; `poc/d133-rule-compare/readout.txt`,
+fixture and truth in `data/rwxlite-fresh-2026-11-03/`). The 949 rows
+are TUNING data for rwxmap (rwxlite burned them), same int8-pc p's
+(rwxmap's default is fp32). Exact / too loose / too tight: mechanical
+736 / 6 / 207; rwxlite tier rule (asked rows scored at the stricter
+letter) 821 / 5 / 123, 775 rows sent, 74 asked; rwxmap secondPass 826 /
+6 / 117, 425 rows sent, 99 undecided. Both pass the mode-a bar on this
+set. They differ on 9 rows (5 GET rows only the tier rule sends, 4
+PUT/PATCH rows it raises at isX >= 0.15); the tier rule has one fewer
+leak (lago PUT /invoices/{id}/finalize), which is noise. Neither fixes
+the 5 remaining leaks (3 credential PUT/PATCH, 2 workos logout GETs):
+the model agrees with mechanical there, so R1 and R2 are the route.
 
 ### Open
 

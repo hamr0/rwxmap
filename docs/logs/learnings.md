@@ -8323,3 +8323,49 @@ Node.
 - Lesson: a pooled share over a corpus with capped write-heavy samples
   overstates per-API cost. Measure on complete APIs. PRD D133 evidence
   updated.
+
+## 2026-11-04 — D133 decision-rule comparison
+
+- Question: which decision rule does rwxmap's second pass use, its own
+  (`src/secondpass.js`) or rwxlite's tier rule?
+- Method: `poc/d133-rule-compare/` (readout.txt, commit 466cda1) scored
+  both rules over the same p's on rwxlite's burned fresh exam, 949 rows
+  (coolify, workos, lago, resend). Fixture and truth are in
+  `data/rwxlite-fresh-2026-11-03/`. TUNING data for rwxmap, not an exam.
+  p's are the int8 per-channel model; rwxmap's default is fp32.
+- Rules. secondPass: send loose and tight rows; letter = largest of
+  x = isX, w = changes - isX, r = 1 - changes; raise accepted; lowering
+  accepted only at p >= 0.97; else x plus review tight; settled never
+  sent. Tier rule: only Jev's three tiers (jev-lower, jev-raise-wx,
+  jev-raise-get) move; cuts isX < 0.30 lower, POST changes < 0.40 to r,
+  isX >= 0.15 raise w to x, changes >= 0.05 raise r to w; then ask a
+  lowering under 0.97.
+
+| rule | exact | too loose | too tight | sent | undecided/asked |
+|---|---|---|---|---|---|
+| mechanical | 736 | 6 | 207 | 0 | 0 |
+| tier rule (asked at stricter letter) | 821 | 5 | 123 | 775 | 74 asked |
+| secondPass (undecided = x) | 826 | 6 | 117 | 425 | 99 undecided |
+
+Both pass the D133 mode-a bar on this set (too loose <= mechanical,
+exact >= +5 points): +9.0 and +9.5 points.
+
+- The 9 differing rows (mech / tier / secondPass / truth):
+  - fx-0036 GET /sso/profile: r / w / r / r (tier rule sends it)
+  - fx-0249 GET /sso/logout: r / w / r / x (too loose under both)
+  - fx-0549 GET /user_management/authorize: r / w / r / r
+  - fx-0594 GET /sso/authorize: r / w / r / r
+  - fx-0837 GET /user_management/sessions/logout: r / w / r / x (too loose under both)
+  - fx-0039 PUT /invoices/{lago_id}/finalize: w / x / w / x (tier rule fixes a leak)
+  - fx-0086 PUT /authorization/groups/{group_id}/role_assignments: w / x / w / w
+  - fx-0231 PATCH /organizations/{organizationId}/groups/{groupId}/organization-memberships: w / x / w / w
+  - fx-0643 PUT /user_management/organization_memberships/{id}/reactivate: w / x / w / w
+- Ruling (user, 2026-11-04): keep secondPass; do not adopt the tier
+  rule. A one-row leak difference is noise. Neither rule fixes the 5
+  remaining leaks (3 credential PUT/PATCH: workos client-credentials,
+  api-key, coolify integration-tokens; 2 workos logout GETs): the model
+  agrees with mechanical there, so R1 and R2 are the route. Caveat:
+  secondPass has only this one measurement; the D133 exam is its test.
+- Lesson: a model's measured scores belong to the decision rule they
+  were measured with; a different rule over the same p's needs its own
+  measurement. PRD D133 and decisions-log updated.
