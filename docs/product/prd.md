@@ -905,10 +905,10 @@ Status: spec in progress on branch `feat/d133-rwxlite-engines`. Pass 1
 (second pass against a stub engine, wider `loose`, `--engine`, evidence
 `rwxlite`, the `rwxlite` JSON block, the cache check) is built on the
 branch, unreleased. The model is not shipped, so the default run is
-mechanical. User rulings 2026-11-03 are below as
+mechanical. User rulings 2026-11-03 and 2026-11-04 are below as
 decided; everything marked "proposal" or "open" is not decided.
 
-### Decided (user rulings, 2026-11-03)
+### Decided (user rulings, 2026-11-03 and 2026-11-04)
 
 - **Purpose.** rwxlite is a free, fast classifier for a second pass.
   The rows mechanical marks for a human today go to the second pass
@@ -997,10 +997,34 @@ decided; everything marked "proposal" or "open" is not decided.
   and matches its sha256. Any failure means the model is not used:
   mechanical runs alone and the run says so loudly. The highest valid
   semver wins; an invalid higher one does not hide a valid lower one.
-- **Publish location (not decided).** rwxlite proposes GitHub release
-  assets on `hamr0/rwxlite` with a `releases/latest/download/manifest.json`
-  pointer, plus an npm package `rwxlite` with `onnxruntime-node`
-  optional. Pending rwxlite's user.
+- **Default model and `--model` (user ruling, 2026-11-04).** rwxmap's
+  default model is rwxlite's fp32 "exact" model (91 MB, the un-quantised
+  original, no quantisation drift; manifest `manifest-exact.json`). A
+  user who wants a smaller download chooses rwxlite's int8 per-channel
+  model (23.1 MB; manifest `manifest.json`; model string at its current
+  version `rwxlite-0.1.0+8ad0a182`) with `--model small`. `--model` is
+  valid only where rwxlite runs (default mode a and `--engine rwxlite`);
+  elsewhere it fails loudly, like `--confidence`. Evidence: on rwxlite's
+  fresh exam (coolify, workos, lago, resend) int8 per-channel gave the
+  same 5 too-loose rows as fp32; default int8 (not offered) drifts about
+  3x more.
+- **Publish location (rwxlite's user ruling, relayed by the rwxlite
+  session, 2026-11-04).** GitHub releases on `hamr0/rwxlite`. Assets per
+  release: `manifest.json` (int8 per-channel), `manifest-exact.json`
+  (fp32), `model-int8-pc.onnx`, `model-fp32.onnx`, `vocab.txt`. Latest
+  pointers: `https://github.com/hamr0/rwxlite/releases/latest/download/manifest-exact.json`
+  (rwxmap default) and `.../manifest.json` (`--model small`). Not live
+  yet. On download rwxmap stores the chosen manifest as `manifest.json`
+  inside the model's own folder `rwxlite-<semver>+<sha8>/` (the cache
+  layout above). The runtime is an npm package `rwxlite`
+  (`loadAnswerer`) with `onnxruntime-node` optional; it is a draft, not
+  published.
+- **Speed (rwxlite's measurement).** Quiet i3-8100T, 4 cores, batch 1.
+  int8-pc: 15.5 ms mean / 31.0 p95 at 1 thread, 9.2 / 17.8 at 2, 6.9 /
+  13.1 at 4. fp32 at 4 threads: 7.9 / 14.0. The 20 ms bar holds at p95
+  with 4 threads. rwxlite's `loadAnswerer` default threads is
+  `min(4, cores)`. Earlier laptop (i7-8665U, 1 thread, int8-pc): mean
+  20.2 ms, p95 38.1 ms.
 - **R1 and R2 are tuning candidates only.** R1: credential replace on
   PUT/PATCH (last path segment is a credential being replaced: api-key,
   client-credentials, token, secret), kept narrower than the broad noun
@@ -1056,10 +1080,11 @@ decided; everything marked "proposal" or "open" is not decided.
   w = p(changes) - p(isX), r = 1 - p(changes). The Jev engine keeps its
   separate requests, because its cut-offs were measured that way (D127).
 - **Interface to pin with rwxlite** (rwxlite's proposed defaults):
-  - Model string: `rwxlite-<semver>+<sha8 of int8 weights>`, recorded on
-    every run (D88-style).
-  - Latency: at most 20 ms per operation on a laptop CPU, int8, no GPU.
-    Their bar, to be measured.
+  - Model string: `rwxlite-<semver>+<sha8 of the model file's sha256>`
+    (fp32 by default, int8 with `--model small`), recorded on every run
+    (D88-style).
+  - Latency: their bar is at most 20 ms per operation, no GPU; measured
+    values are under "Speed" above.
   - Shipping: npm, with `onnxruntime-node` as an optional dependency
     loaded only when a local engine is on (dependency rule). The user
     ruled download-on-first-use for the model itself.
