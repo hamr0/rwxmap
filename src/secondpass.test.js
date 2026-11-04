@@ -18,6 +18,8 @@ const OPS = [
 ];
 const mech = () => OPS.map((o) => classifyRow(o));
 
+const lastItems = new Map();
+
 /** An answer whose letter is `letter` with share `p`. */
 function ans(letter, p, model = MODEL) {
   if (letter === 'x') return { pIsX: p, pChanges: p + (1 - p) / 2, model };
@@ -29,6 +31,7 @@ function ans(letter, p, model = MODEL) {
 function engineOf(byIndex) {
   const sent = [];
   const engine = async (items) => {
+    for (const i of items) lastItems.set(i.index, i);
     sent.push(items.map((i) => i.index));
     return items.map((i) => byIndex[i.index]);
   };
@@ -201,4 +204,19 @@ test('evidence: a moved row publishes rwxlite (raise, lower, undecided-moved); k
   assert.equal(verdicts[5].source, 'list'); // kept
   assert.equal(verdicts[0].source, before[0].source); // settled, never sent
   assert.equal(before[2].source, 'list'); // input not mutated
+});
+
+test('lean: every item sent to the engine carries the mechanical class and rule, and no published field changes', async () => {
+  lastItems.clear();
+  const before = mech();
+  const { engine } = engineOf({ 2: ans('w', 0.9), 3: ans('w', 0.9), 4: ans('x', 0.9), 5: ans('r', 0.9) });
+  const { verdicts } = await secondPass(OPS, before, engine, { model: MODEL });
+  assert.deepEqual([...lastItems.keys()], [2, 3, 4, 5]);
+  for (const [index, item] of lastItems) {
+    assert.deepEqual(item.lean, { class: before[index].class, rule: before[index].rule }, String(index));
+    assert.match(item.lean.class, /^[rwx]$/);
+    assert.ok(item.lean.rule);
+  }
+  // all kept: the verdicts (the published side) carry no lean
+  for (const v of verdicts) assert.equal('lean' in v, false);
 });

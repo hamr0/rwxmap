@@ -2071,13 +2071,25 @@ test('run (D133): --engine jev with a key behaves as before and prints no rwxlit
   assert.doesNotMatch(r.stdout, /rwxlite/);
 });
 
+/** A cached model directory in rwxlite's layout; `dirSha8` overrides the sha8 in the directory name. */
+function writeModelDir(xdg, bytes, dirSha8) {
+  const sha = (b) => createHash('sha256').update(b).digest('hex');
+  const model = `rwxlite-1.0.0+${dirSha8 ?? sha(bytes).slice(0, 8)}`;
+  const dir = path.join(xdg, 'rwxmap', model);
+  fs.mkdirSync(dir, { recursive: true });
+  const vocab = Buffer.from('vocab');
+  fs.writeFileSync(path.join(dir, 'model.bin'), bytes);
+  fs.writeFileSync(path.join(dir, 'vocab.txt'), vocab);
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ version: '1.0.0', modelFile: 'model.bin', model, files: { 'model.bin': sha(bytes), 'vocab.txt': sha(vocab) } }));
+  return dir;
+}
+
 test('run (D133): a cached model whose hash does not match its name is NOT used: loud warning, mechanical, exit 0', async () => {
   const xdg = mkScratch();
-  fs.mkdirSync(path.join(xdg, 'rwxmap'));
-  fs.writeFileSync(path.join(xdg, 'rwxmap', 'rwxlite-1.0.0+deadbeef.int8'), 'not the real weights');
+  writeModelDir(xdg, Buffer.from('weights'), 'deadbeef');
   const r = await runD133([], { xdgCacheHome: xdg });
   assert.equal(r.code, 0, r.stderr);
-  assert.match(r.stderr, /WARNING: rwxlite model rejected \(hash mismatch/);
+  assert.match(r.stderr, /WARNING: rwxlite model rejected \(hash mismatch.*rwxlite-1\.0\.0\+deadbeef was NOT used/);
   assert.match(r.stdout, /rwxlite: off \(mechanical\) — cached model rejected/);
   assert.equal(d133Rows(r.outDir)['POST /mystery'], 'x/tight');
 });
@@ -2086,8 +2098,7 @@ test('run (D133): a cached model that verifies is found, and the run says this b
   const xdg = mkScratch();
   const bytes = Buffer.from('weights');
   const sha8 = createHash('sha256').update(bytes).digest('hex').slice(0, 8);
-  fs.mkdirSync(path.join(xdg, 'rwxmap'));
-  fs.writeFileSync(path.join(xdg, 'rwxmap', `rwxlite-1.0.0+${sha8}.int8`), bytes);
+  writeModelDir(xdg, bytes);
   const r = await runD133([], { xdgCacheHome: xdg });
   assert.equal(r.code, 0, r.stderr);
   assert.equal(r.stderr, '');

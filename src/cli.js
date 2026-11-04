@@ -1071,10 +1071,11 @@ export async function run(argv, env) {
         engineLine = 'rwxmap: rwxlite: off (mechanical) — no model in the cache\n';
         rwxliteField = rwxliteSummary({ reason: 'no model in the cache' });
       } else if (found.status === 'bad') {
-        stderr.write(`rwxmap: WARNING: rwxlite model rejected (${found.reason}); ${found.file} was NOT used\n`);
+        stderr.write(`rwxmap: WARNING: rwxlite model rejected (${found.reason}); ${found.dir} was NOT used\n`);
         engineLine = 'rwxmap: rwxlite: off (mechanical) — cached model rejected, see the warning above\n';
         rwxliteField = rwxliteSummary({ reason: `cached model rejected (${found.reason})` });
       } else {
+        for (const r of found.rejected) stderr.write(`rwxmap: WARNING: rwxlite model rejected (${r.reason}); ${r.dir} was NOT used\n`);
         engineLine = `rwxmap: rwxlite: off (mechanical) — model ${found.model} is cached, but this build has no way to run it yet\n`;
         rwxliteField = rwxliteSummary({ reason: `model ${found.model} is cached, but this build has no way to run it yet` });
       }

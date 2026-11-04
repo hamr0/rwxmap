@@ -4,6 +4,10 @@
 // what comes back under fixed rules. It holds no word list and runs no model:
 // the engine is a function handed in (rwxlite itself, or a stub in a test).
 //
+// Each item sent to the engine carries `lean: {class, rule}`, rwxmap's own
+// mechanical verdict for that row (class r|w|x, rule = the verdict's internal
+// rule name). It goes only to the engine; it is never published.
+//
 // ENGINE CONTRACT. `engine(items)` is async and returns an array aligned with
 // `items`. Each element is either `{pIsX, pChanges, model}` or an error /
 // missing value (undefined, null, `{error}`, anything else). Both questions
@@ -40,7 +44,7 @@ export const LOWER_MIN_P = 0.97;
 const RANK = { r: 0, w: 1, x: 2 };
 
 /**
- * @typedef {{index: number, method?: string, path?: string, operationId?: string, summary?: string, description?: string}} EngineItem
+ * @typedef {{index: number, method?: string, path?: string, operationId?: string, summary?: string, description?: string, lean: {class: 'r'|'w'|'x', rule: string}}} EngineItem
  * @typedef {(items: EngineItem[]) => Promise<Array<{pIsX?: unknown, pChanges?: unknown, model?: unknown, error?: unknown}|null|undefined>>} Engine
  */
 
@@ -91,7 +95,7 @@ export async function secondPass(ops, verdicts, engine, options) {
   verdicts.forEach((v, index) => {
     if (v.review !== 'loose' && v.review !== 'tight') return;
     const { method, path, operationId, summary, description } = ops[index];
-    items.push({ index, method, path, operationId, summary, description });
+    items.push({ index, method, path, operationId, summary, description, lean: { class: v.class, rule: v.rule } });
   });
 
   /** @type {any[]} */

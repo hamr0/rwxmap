@@ -149,6 +149,10 @@ overwritten without `--force`.
   (`$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`) prints
   `rwxlite: off (mechanical)` and runs mechanically. A cached model
   whose hash does not match its name is not used, and the run says so.
+  When the model ships, install with `ONNXRUNTIME_NODE_INSTALL=skip`: on
+  Linux x64, `onnxruntime-node` otherwise downloads about 285 MB of GPU
+  (CUDA/TensorRT) libraries. It is not shipped yet, so there is nothing to
+  install today.
 - `--engine mechanical`: mechanical only, never looks for a model.
 - `--engine jev`: the paid Jev pass, below.
 - `--engine rwxlite` is accepted, with `--confidence <0-99>` (only valid

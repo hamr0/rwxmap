@@ -901,9 +901,11 @@ Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
 ## Module D133: rwxmap with rwxlite (three engines)
 
-Status: spec in progress on branch `feat/d133-rwxlite-engines`. Nothing
-is built. Current behaviour is unchanged (mechanical default, Jev
-opt-in) until the module ships. User rulings 2026-11-03 are below as
+Status: spec in progress on branch `feat/d133-rwxlite-engines`. Pass 1
+(second pass against a stub engine, wider `loose`, `--engine`, evidence
+`rwxlite`, the `rwxlite` JSON block, the cache check) is built on the
+branch, unreleased. The model is not shipped, so the default run is
+mechanical. User rulings 2026-11-03 are below as
 decided; everything marked "proposal" or "open" is not decided.
 
 ### Decided (user rulings, 2026-11-03)
@@ -985,10 +987,20 @@ decided; everything marked "proposal" or "open" is not decided.
   Consequence: the same spec can get different letters after a model
   update, so every run records the model string.
 - **Model cache and integrity.** The downloaded model is cached in a
-  per-user folder, `~/.cache/rwxmap/`. Every download is checked
-  against the hash in rwxlite's model string
-  (`rwxlite-<semver>+<sha8 of int8 weights>`). A mismatch means the
-  model is not used: mechanical runs alone and the run says so loudly.
+  per-user folder, `~/.cache/rwxmap/` (or `$XDG_CACHE_HOME/rwxmap`),
+  one directory per model: `rwxlite-<semver>+<sha8>/` holding
+  `manifest.json` (`{version, modelFile, model, files: {<name>: <sha256>}}`),
+  the model file (named by `modelFile`) and `vocab.txt`. sha8 is the first
+  8 hex of the model file's sha256. Before use: the manifest parses,
+  `model` equals the directory name, `modelFile` is in `files`, every
+  listed file exists inside the directory (no `/`, `\` or `..` in names)
+  and matches its sha256. Any failure means the model is not used:
+  mechanical runs alone and the run says so loudly. The highest valid
+  semver wins; an invalid higher one does not hide a valid lower one.
+- **Publish location (not decided).** rwxlite proposes GitHub release
+  assets on `hamr0/rwxlite` with a `releases/latest/download/manifest.json`
+  pointer, plus an npm package `rwxlite` with `onnxruntime-node`
+  optional. Pending rwxlite's user.
 - **R1 and R2 are tuning candidates only.** R1: credential replace on
   PUT/PATCH (last path segment is a credential being replaced: api-key,
   client-credentials, token, secret), kept narrower than the broad noun
@@ -1036,6 +1048,10 @@ decided; everything marked "proposal" or "open" is not decided.
 
 ### Proposals (not decided)
 
+- **`lean` to the engine.** Every item sent to the engine also carries
+  `lean: {class, rule}`, rwxmap's mechanical verdict for that row (class
+  r|w|x, rule = the internal rule name). It goes only to the engine and is
+  never published.
 - **One request, both questions** (isX and changes): x = p(isX),
   w = p(changes) - p(isX), r = 1 - p(changes). The Jev engine keeps its
   separate requests, because its cut-offs were measured that way (D127).
