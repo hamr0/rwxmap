@@ -38,7 +38,94 @@ also carries `destructive`: true when an x removes something (a delete,
 purge, revoke, expire, void or redact), never on an r or w. bareguard,
 the author's agent gate, uses the same meaning of the three letters.
 
+## How rwxmap decides
+
+Four steps:
+
+1. **Mechanical letter.** The HTTP method and the first verb of the
+   operation name give a letter. Offline, free, the same answer every run.
+2. **Mechanical marks what it is unsure of.** `loose` means it lowered
+   the letter. `tight` means an x that may be stricter than needed.
+3. **A second pass looks again at only those rows.** rwxlite is a small
+   model that runs on your machine. It is free and needs no key.
+4. **Still unsure? It becomes x, marked for review.** The tool never
+   guesses a looser letter.
+
+```
+spec -> mechanical letter -> unsure rows (loose / tight)
+                                   |
+                       second pass (rwxlite, local)
+                                   |
+                   sure: its letter    unsure: x + review
+```
+
+HTTP methods: GET, HEAD, OPTIONS and QUERY (RFC 10008) start at r.
+PUT and PATCH start at w. DELETE starts at x. POST has no default; its
+first verb decides. A word can raise a PUT or PATCH to x.
+
+**Modes.** Pick one with `--engine`.
+
+| mode | command | what runs | cost | network | when to use |
+|---|---|---|---|---|---|
+| **a** (default) | `rwxmap spec.json` | mechanical, then rwxlite on the loose and tight rows | free | model download once | the normal run |
+| **b** | `rwxmap spec.json --engine rwxlite [--confidence 0-99]` (default 95) | rwxlite judges every row; under the confidence it is x + review | free | model download once | more asks, fewer too-loose rows; raise `--confidence` to be stricter |
+| **c** | `rwxmap spec.json --engine jev` | mechanical, then Jev | your key, your cost | each checked row goes to Jev | you already pay for Jev; needs `RWXMAP_JEV_KEY` |
+| mechanical only | `rwxmap spec.json --engine mechanical` | method and verbs only | free | none | offline, or you want no model at all |
+
+`--model small` (a and b only) uses the 23 MB int8 model instead of the
+91 MB exact default.
+
+**Not live yet.** The rwxlite model is not published. Today every mode
+except c runs mechanically and prints `rwxlite: off (mechanical)`; the
+numbers below are from the model run as a test. Once it is published, the
+first run downloads it (from rwxlite's GitHub releases, sha256-checked)
+into `$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`, and later runs
+reuse it. With no network and no cached model the run is mechanical and
+never stops. Details are under "rwxlite model" below.
+
+**Markers.** Each row carries a `review` marker.
+
+- `settled`: nothing lowered it and nothing is doubtful. Not signed, not
+  verified. Look at it last.
+- `loose`: mechanical lowered the letter (a PUT or PATCH left at w, or a
+  POST a word list lowered). A reviewer checks whether it should be x.
+  This is where most too-loose rows live.
+- `tight`: x that may be stricter than needed, including any row the
+  second pass could not decide. A reviewer checks whether it can be w or
+  r. Too tight costs usability, not safety.
+
+**Quick reference, measured.** The same 949 operations for every row
+(coolify, workos, lago, resend). rwxlite built this set as its own exam
+and used it up; here it is tuning data, not an exam for rwxmap. Too
+loose (looser than the truth label) and too tight (stricter) are kept
+apart. Asked is the rows made x and marked for review.
+
+| mode | exact | too loose | too tight | asked (x + review) |
+|---|---|---|---|---|
+| mechanical only | 736 (77.6%) | 6 (0.6%) | 207 (21.8%) | none |
+| a | 826 (87.0%) | 6 (0.6%) | 117 (12.3%) | 99 (10.4%) |
+| b at 95 (default) | 837 (88.2%) | 6 (0.6%) | 106 (11.2%) | 134 (14.1%) |
+| b at 70 | 870 (91.7%) | 18 (1.9%) | 61 (6.4%) | 52 (5.5%) |
+| b at 97 | 811 (85.5%) | 3 (0.3%) | 135 (14.2%) | 173 (18.2%) |
+| c (Jev, one run, jev-1.14.0) | 870 (91.7%) | 8 (0.8%) | 71 (7.5%) | none |
+
+- Percentages are of 949. The model answers come from the small int8
+  model; the default exact model differs on a handful of rows.
+- These are tuning numbers. A shared fresh exam will replace them.
+- 5 risky rows no mode fixes yet: 3 credential replaces on PUT or PATCH
+  and 2 logout GETs. Two mechanical rules are being tested for them.
+- Mode c is one run of a model that can answer differently next time.
+
+**What leaves your machine.** Mechanical: nothing. Modes a and b: only
+the model download from GitHub; your spec stays local. Mode c: for each
+row Jev checks, the method, path, operationId, summary and description go
+to Jev.
+
 ## How good it is
+
+The one clean exam so far. It is scored and used up; the rules were not
+changed to fit it. Today's numbers on newer data are in "Quick
+reference, measured" above.
 
 | | exact | too loose | too tight |
 |---|---|---|---|
@@ -76,7 +163,7 @@ WebMCP flags are always written.
   not safety. That is for library use, a harness classifying call by call;
   the CLI needs a spec and exits 1 when it finds none.
 
-Each works without a Jev key.
+Each works without a key.
 
 **The shape it reads.** rwxmap reads OpenAPI 3.x or Swagger 2.0, JSON or
 YAML. If your API is described some other way, convert it to OpenAPI
@@ -141,18 +228,10 @@ Trimmed example of the combined JSON, one entry each:
 Exit 0 on success, 1 on any failure. An existing output file is not
 overwritten without `--force`.
 
-**Engines.** `--engine` picks who looks at the rows mechanical marks
-`loose` or `tight`:
-
-- No flag: mechanical first, then the rwxlite model on those rows.
-  rwxlite is not published yet, so until it is this prints
-  `rwxlite: off (mechanical)` and the run is mechanical. See "rwxlite
-  model" below.
-- `--engine mechanical`: mechanical only, never touches the network for a model.
-- `--engine jev`: the paid Jev pass, below.
-- `--engine rwxlite`: rwxlite alone judges every row. `--confidence
-  <0-99>` (only valid with it; default 95) is how sure it must be: a row
-  under that share is x, marked for review.
+**Engines.** `--engine` picks who looks at the rows. The table in "How
+rwxmap decides" lists every mode. `--confidence <0-99>` is valid only
+with `--engine rwxlite` (default 95): a row the model is less sure of
+than that is x, marked for review.
 
 An unknown `--engine` value, a bad `--confidence`, or a `--model` other
 than `small` (or used with `--engine jev` or `mechanical`) exits 1 with
@@ -197,31 +276,9 @@ here is live until rwxlite publishes.
 Only bareguard reads `bareguard.tools` directly. The MCP, WebMCP and
 OpenAPI parts are hints you copy into place; a client may ignore them.
 
-## Review markers
-
-Each verdict carries `review`, which rows to look at first. The table is
-measured on the 4279-operation exam with Jev running, before `loose` was
-widened (see below), so its row counts describe the older, narrower `loose`:
-
-| | what it is | rows | how many are wrong |
-|---|---|---|---|
-| **`tight`** | `x` on a POST | 7% of the API | 61% |
-| **`loose`** | `w` on a PUT/PATCH with no word evidence | 17% | 3% |
-| **`settled`** | everything else | 76% | 3% |
-
-- `tight` is where the fishing is: six in ten are tighter than needed.
-- `loose` is mostly false alarms, but its 3% are three quarters of every
-  too-loose row. It turns a 4279-row search into a 713-row one.
-- `loose` now also covers a POST that a word list lowered below the
-  POST floor of x (class w or r). `tight` also covers any row a second
-  pass could not decide. This applies in every mode, including
-  `--engine mechanical`. Letters are not changed by this.
-- `settled` only means neither of the other two fired. It is not signed
-  and not verified.
-
 ## Jev (optional)
 
-Jev is an optional model pass that can lower an x to w, or on a
+Jev is an optional paid model pass that can lower an x to w, or on a
 second question to r. Bring
 your own key; your key, your cost. Jev runs only with `--engine jev`.
 A key alone does not turn it on: the run says so and sends nothing.

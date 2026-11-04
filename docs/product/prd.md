@@ -263,17 +263,15 @@ for debugging and are never published (D28/D76/D77).
   from method + class + evidence and nothing else; its one writer is
   `reviewHint` in `src/flow.js`, and `applyJev` recomputes it through
   the same function when a tier moves a row.
-  - `tight` — class x on a POST. Likely tighter than needed; safe to
-    review, since no too-loose row has been observed in this bucket.
-    Planned, not built (D133): it widens to "x, possibly tighter than
-    needed", also covering rows the second pass could not decide.
-  - `loose` — class w on a PUT or PATCH decided by the method floor.
-    Where most of the too-loose rows live.
-    Planned, not built (D133): it widens to "mechanical lowered it". It
-    also covers any POST row a word list lowered below the POST floor
-    of x (class w or r, evidence `list`). Needs a change to
-    `reviewHint` in `src/flow.js`. `settled` then means nothing
-    lowered the row, mostly GET r and DELETE x floor rows.
+  - `tight` — x, possibly tighter than needed (D133, built in commit
+    aea12f1). It covers class x on a POST and any row the second pass
+    could not decide and pushed to x, a PUT/PATCH included.
+  - `loose` — mechanical lowered it (D133, built in commit aea12f1):
+    class w on a PUT or PATCH decided by the method floor, plus any POST
+    row a word list lowered below the POST floor of x (class w or r,
+    evidence `list`). Where most of the too-loose rows live.
+    `settled` means nothing lowered the row, mostly GET r and DELETE x
+    floor rows.
   - `settled` — neither of the other two. It is NOT signed or
     confirmed by anyone. A signed state would be a fourth value only a
     human writes after the export; rwxmap never emits it.
@@ -981,19 +979,18 @@ decided; everything marked "proposal" or "open" is not decided.
   review marker. No new per-row field; the two additions below (a
   fourth `evidence` value and a top-level `rwxlite` block) are the only
   output changes.
-- **The `tight` marker widens (planned, not built).** It will mean "x,
-  possibly tighter than needed, review". It covers today's x-on-POST
-  rows and rows the second pass could not decide, including an
-  undecided PUT/PATCH pushed to x, which today's `reviewHint` marks
-  `settled`. This needs a change to `reviewHint` in `src/flow.js`
-  (core-adjacent, its one writer). Output format is unchanged.
-- **The `loose` marker widens (planned, not built).** It will mean
+- **The `tight` marker is wider (built, commit aea12f1).** It means "x,
+  possibly tighter than needed, review". It covers x-on-POST rows and
+  rows the second pass could not decide, including an undecided
+  PUT/PATCH pushed to x. The change is in `reviewHint` in
+  `src/flow.js` (core-adjacent, its one writer). Output format is
+  unchanged.
+- **The `loose` marker is wider (built, commit aea12f1).** It means
   "mechanical lowered it". It covers PUT/PATCH rows left at w by the
-  method floor (today's `loose`) plus any POST row a word list lowered
-  below the POST floor of x (class w or r, evidence `list`). `tight`
-  stays "x, possibly tighter than needed, review". `settled` is rows
-  nothing lowered. Output format is unchanged. Same `reviewHint`
-  change as above.
+  method floor plus any POST row a word list lowered below the POST
+  floor of x (class w or r, evidence `list`). `settled` is rows
+  nothing lowered. Output format is unchanged. It applies in every mode,
+  `--engine mechanical` included.
 - **A moved row's evidence is `rwxlite` (user ruling, 2026-11-04).** A
   row the second pass moved (raised, lowered, or undecided and moved to
   x) publishes `evidence: "rwxlite"`, a fourth value beside `floor`,
@@ -1255,13 +1252,15 @@ Parked items and known limits below.
   never labelled. `-h`/`--help` and `-v`/`--version` exit 0; error text
   is plain (`no such file`, `not a file`, `unknown option`, `-o needs a
   value`).
-- **Jev in the CLI** (D118-D120, D125; `rwxmap@0.6.0`). A key in
-  `RWXMAP_JEV_KEY` (environment, else `.env`) turns on all three tiers
-  (D119). No key: mechanical, and the run says so. Bring your own key;
+- **Jev in the CLI** (D118-D120, D125; `rwxmap@0.6.0`; since D133 only
+  with `--engine jev`). `--engine jev` turns on all three tiers (D119)
+  and needs `RWXMAP_JEV_KEY` (environment, else `.env`); without a key
+  it exits 1. A key alone turns nothing on: the run says so and sends
+  nothing. Bring your own key;
   spec text (method, path, operationId, summary, description) goes to
   `api.typesafe.ai` (D120). A failed row is undecided: x, review `tight` (D133).
-  A `.env` that cannot be read or parsed means no key: the run stays
-  mechanical.
+  A `.env` that cannot be read or parsed means no key, so
+  `--engine jev` exits 1.
 - **Carriers** (D124; `rwxmap@0.6.0`). The third file,
   `<vendor>.openapi.rwx.json`, is a copy of the spec with
   `x-rwx: { class, destructive, evidence, review }` on every operation;
