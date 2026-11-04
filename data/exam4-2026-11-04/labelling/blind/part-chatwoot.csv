@@ -1,0 +1,281 @@
+row_id,provider,method,path,operationId,summary,description
+ex4-0001,chatwoot.com,GET,/accounts/{account_id}/conversations/{conversation_id}/messages,getConversationMessages,Get messages from a conversation,Returns all messages from a specific conversation
+ex4-0002,chatwoot.com,GET,/api/v1/accounts/{account_id},get-account-details,Get account details,Get the details of the current account
+ex4-0003,chatwoot.com,PATCH,/api/v1/accounts/{account_id},update-account,Update account,"Update account details, settings, and custom attributes"
+ex4-0004,chatwoot.com,POST,/api/v1/accounts/{account_id}/actions/contact_merge,contactMerge,Merge Contacts,"Merge two contacts into a single contact. The base contact remains and receives all
+data from the mergee contact. After the merge, the mergee contact is permanently deleted.
+
+This action is irreversible. All conversations, labels, and custom attributes from the
+mergee contact will be moved to the base contact.
+"
+ex4-0005,chatwoot.com,GET,/api/v1/accounts/{account_id}/agent_bots,list-all-account-agent-bots,List all AgentBots,List all agent bots available for the current account
+ex4-0006,chatwoot.com,POST,/api/v1/accounts/{account_id}/agent_bots,create-an-account-agent-bot,Create an Agent Bot,Create an agent bot in the account
+ex4-0007,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/agent_bots/{id},delete-an-account-agent-bot,Delete an AgentBot,Delete an AgentBot from the account
+ex4-0008,chatwoot.com,GET,/api/v1/accounts/{account_id}/agent_bots/{id},get-details-of-a-single-account-agent-bot,Get an agent bot details,Get the details of an agent bot in the account
+ex4-0009,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/agent_bots/{id},update-an-account-agent-bot,Update an agent bot,Update an agent bot's attributes
+ex4-0010,chatwoot.com,GET,/api/v1/accounts/{account_id}/agents,get-account-agents,List Agents in Account,Get Details of Agents in an Account
+ex4-0011,chatwoot.com,POST,/api/v1/accounts/{account_id}/agents,add-new-agent-to-account,Add a New Agent,Add a new Agent to Account
+ex4-0012,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/agents/{id},delete-agent-from-account,Remove an Agent from Account,Remove an Agent from Account
+ex4-0013,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/agents/{id},update-agent-in-account,Update Agent in Account,Update an Agent in Account
+ex4-0014,chatwoot.com,GET,/api/v1/accounts/{account_id}/audit_logs,get-account-audit-logs,List Audit Logs in Account,Get Details of Audit Log entries for an Account. This endpoint is only available in Enterprise editions and requires the audit_logs feature to be enabled.
+ex4-0015,chatwoot.com,GET,/api/v1/accounts/{account_id}/automation_rules,get-account-automation-rule,List all automation rules in an account,Get details of automation rules in an Account
+ex4-0016,chatwoot.com,POST,/api/v1/accounts/{account_id}/automation_rules,add-new-automation-rule-to-account,Add a new automation rule,Add a new automation rule to account
+ex4-0017,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/automation_rules/{id},delete-automation-rule-from-account,Remove a automation rule from account,Remove a automation rule from account
+ex4-0018,chatwoot.com,GET,/api/v1/accounts/{account_id}/automation_rules/{id},get-details-of-a-single-automation-rule,Get a automation rule details,Get the details of a automation rule in the account
+ex4-0019,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/automation_rules/{id},update-automation-rule-in-account,Update automation rule in Account,Update a automation rule in account
+ex4-0020,chatwoot.com,GET,/api/v1/accounts/{account_id}/branded_email_layout,getAccountBrandedEmailLayout,Get account branded email layout,Get the account-scoped Liquid HTML layout used as the fallback for branded email replies.
+ex4-0021,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/branded_email_layout,updateAccountBrandedEmailLayout,Update account branded email layout,Update or clear the account-scoped Liquid HTML layout used as the fallback for branded email replies.
+ex4-0022,chatwoot.com,GET,/api/v1/accounts/{account_id}/campaigns,list-campaigns,List campaigns,List all campaigns in the account. The response is an unpaginated array. Requires an account administrator and API access enabled for the account.
+ex4-0023,chatwoot.com,POST,/api/v1/accounts/{account_id}/campaigns,create-campaign,Create a campaign,"Create a campaign. For a supported messaging inbox, provide scheduled_at to schedule a one-off campaign; omitting it makes the campaign eligible for the next scheduler run. Website campaigns use trigger_rules instead. Channel-specific campaign availability and requirements still apply. One-off campaigns require at least one audience label for delivery. WhatsApp campaigns also require template_params with the selected template name, language, and any variable values. A successful creation response does not confirm delivery. Requires an account administrator and API access enabled for the account."
+ex4-0024,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/campaigns/{id},delete-campaign,Delete a campaign,Delete a campaign from the account. Requires an account administrator and API access enabled for the account.
+ex4-0025,chatwoot.com,GET,/api/v1/accounts/{account_id}/campaigns/{id},get-campaign,Get a campaign,Retrieve a campaign using its account-scoped ID. Requires an account administrator and API access enabled for the account.
+ex4-0026,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/campaigns/{id},update-campaign,Update a campaign,"Update campaign fields, including scheduled_at to reschedule an active one-off campaign. Completed campaigns cannot be updated. Requires an account administrator and API access enabled for the account."
+ex4-0027,chatwoot.com,GET,/api/v1/accounts/{account_id}/canned_responses,get-account-canned-response,List all Canned Responses in an Account,Get Details of Canned Responses in an Account
+ex4-0028,chatwoot.com,POST,/api/v1/accounts/{account_id}/canned_responses,add-new-canned-response-to-account,Add a New Canned Response,Add a new Canned Response to Account
+ex4-0029,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/canned_responses/{id},delete-canned-response-from-account,Remove a Canned Response from Account,Remove a Canned Response from Account
+ex4-0030,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/canned_responses/{id},update-canned-response-in-account,Update Canned Response in Account,Update a Canned Response in Account
+ex4-0031,chatwoot.com,GET,/api/v1/accounts/{account_id}/contacts,contactList,List Contacts,"Listing all the resolved contacts with pagination (Page size = 15). Resolved contacts are the ones with a value for identifier, email or phone number"
+ex4-0032,chatwoot.com,POST,/api/v1/accounts/{account_id}/contacts,contactCreate,Create Contact,Create a new Contact
+ex4-0033,chatwoot.com,POST,/api/v1/accounts/{account_id}/contacts/filter,contactFilter,Contact Filter,Filter contacts with custom filter options and pagination
+ex4-0034,chatwoot.com,GET,/api/v1/accounts/{account_id}/contacts/search,contactSearch,Search Contacts,"Search the resolved contacts using a search key, currently supports email search (Page size = 15). Resolved contacts are the ones with a value for identifier, email or phone number"
+ex4-0035,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/contacts/{id},contactDelete,Delete Contact,Delete a contact belonging to the account using ID
+ex4-0036,chatwoot.com,GET,/api/v1/accounts/{account_id}/contacts/{id},contactDetails,Show Contact,Get a contact belonging to the account using ID
+ex4-0037,chatwoot.com,PUT,/api/v1/accounts/{account_id}/contacts/{id},contactUpdate,Update Contact,Update a contact belonging to the account using ID
+ex4-0038,chatwoot.com,POST,/api/v1/accounts/{account_id}/contacts/{id}/contact_inboxes,contactInboxCreation,Create contact inbox,Create a contact inbox record for an inbox
+ex4-0039,chatwoot.com,GET,/api/v1/accounts/{account_id}/contacts/{id}/contactable_inboxes,contactableInboxesGet,Get Contactable Inboxes,Get List of contactable Inboxes
+ex4-0040,chatwoot.com,GET,/api/v1/accounts/{account_id}/contacts/{id}/conversations,contactConversations,Contact Conversations,Get conversations associated with that contact
+ex4-0041,chatwoot.com,GET,/api/v1/accounts/{account_id}/contacts/{id}/labels,list-all-labels-of-a-contact,List Labels,Lists all the labels of a contact
+ex4-0042,chatwoot.com,POST,/api/v1/accounts/{account_id}/contacts/{id}/labels,contact-add-labels,Add Labels,Add labels to a contact. Note that this API would overwrite the existing list of labels associated to the conversation.
+ex4-0043,chatwoot.com,GET,/api/v1/accounts/{account_id}/conversations,conversationList,Conversations List,List all the conversations with pagination
+ex4-0044,chatwoot.com,POST,/api/v1/accounts/{account_id}/conversations,newConversation,Create New Conversation,"Creating a conversation in chatwoot requires a source id. 
+
+ Learn more about source_id: https://www.chatwoot.com/hc/user-guide/articles/1677839703-how-to-create-an-api-channel-inbox#send-messages-to-the-api-channel"
+ex4-0045,chatwoot.com,POST,/api/v1/accounts/{account_id}/conversations/filter,conversationFilter,Conversations Filter,Filter conversations with custom filter options and pagination
+ex4-0046,chatwoot.com,GET,/api/v1/accounts/{account_id}/conversations/meta,conversationListMeta,Get Conversation Counts,"Get open, unassigned and all Conversation counts"
+ex4-0047,chatwoot.com,GET,/api/v1/accounts/{account_id}/conversations/{conversation_id},get-details-of-a-conversation,Conversation Details,Get all details regarding a conversation with all messages in the conversation
+ex4-0048,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/conversations/{conversation_id},update-conversation,Update Conversation,Update Conversation Attributes
+ex4-0049,chatwoot.com,POST,/api/v1/accounts/{account_id}/conversations/{conversation_id}/assignments,assign-a-conversation,Assign Conversation,Assign a conversation to an agent or a team
+ex4-0050,chatwoot.com,POST,/api/v1/accounts/{account_id}/conversations/{conversation_id}/custom_attributes,update-custom-attributes-of-a-conversation,Update Custom Attributes,Updates the custom attributes of a conversation
+ex4-0051,chatwoot.com,POST,/api/v1/accounts/{account_id}/conversations/{conversation_id}/destroy_custom_attributes,destroy-custom-attributes-of-a-conversation,Destroy Custom Attributes,Removes the given custom attribute keys from a conversation
+ex4-0052,chatwoot.com,GET,/api/v1/accounts/{account_id}/conversations/{conversation_id}/labels,list-all-labels-of-a-conversation,List Labels,Lists all the labels of a conversation
+ex4-0053,chatwoot.com,POST,/api/v1/accounts/{account_id}/conversations/{conversation_id}/labels,conversation-add-labels,Add Labels,Add labels to a conversation. Note that this API would overwrite the existing list of labels associated to the conversation.
+ex4-0054,chatwoot.com,GET,/api/v1/accounts/{account_id}/conversations/{conversation_id}/messages,list-all-messages,Get messages,List all messages of a conversation
+ex4-0055,chatwoot.com,POST,/api/v1/accounts/{account_id}/conversations/{conversation_id}/messages,create-a-new-message-in-a-conversation,Create New Message,"Create a new message in the conversation.
+
+Use `application/json` for text messages and `multipart/form-data` when the
+message includes file attachments.
+
+### Multipart attachment request
+
+Send files with the `attachments[]` form field. `curl -F` sets the
+`multipart/form-data` content type and boundary automatically.
+
+```bash
+curl -X POST ""https://app.chatwoot.com/api/v1/accounts/{account_id}/conversations/{conversation_id}/messages"" \
+  -H ""Authorization: Bearer <your-api-token>"" \
+  -F ""content=Here is the screenshot"" \
+  -F ""message_type=outgoing"" \
+  -F ""private=false"" \
+  -F ""attachments[]=@/path/to/screenshot.png""
+```
+
+## WhatsApp Template Messages
+
+For WhatsApp channels, you can send structured template messages using the `template_params` field. 
+Templates must be pre-approved in WhatsApp Business Manager.
+
+By default, `content` is treated as the already-rendered transcript text for
+compatibility with existing API and mobile clients. To submit the original
+template body instead, set `template_params.content_mode` to `raw_template`;
+Chatwoot will substitute `processed_params.body` before saving the transcript.
+
+### Example Templates
+
+**Text with Image Header:**
+```json
+{
+  ""content"": ""Hi your order 121212 is confirmed. Please wait for further updates"",
+  ""template_params"": {
+    ""name"": ""order_confirmation"",
+    ""category"": ""MARKETING"",
+    ""language"": ""en"",
+    ""processed_params"": {
+      ""body"": {
+        ""1"": ""121212""
+      },
+      ""header"": {
+        ""media_url"": ""https://picsum.photos/200/300"",
+        ""media_type"": ""image""
+      }
+    }
+  }
+}
+```
+
+**Text with Copy Code Button:**
+```json
+{
+  ""content"": ""Special offer! Get 30% off your next purchase. Use the code below"",
+  ""template_params"": {
+    ""name"": ""discount_coupon"",
+    ""category"": ""MARKETING"",
+    ""language"": ""en"",
+    ""processed_params"": {
+      ""body"": {
+        ""discount_percentage"": ""30""
+      },
+      ""buttons"": [{
+        ""type"": ""copy_code"",
+        ""parameter"": ""SAVE20""
+      }]
+    }
+  }
+}
+```
+"
+ex4-0056,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/conversations/{conversation_id}/messages/{message_id},delete-a-message,Delete a message,Delete a message and it's attachments from the conversation.
+ex4-0057,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/conversations/{conversation_id}/messages/{message_id},update-message-status,Update message status,"Updates the delivery status of a single message. Available only for messages in
+API channel inboxes, where your own system is responsible for delivering messages
+and reporting what happened. Use this to push `sent`, `delivered`, and `read`
+receipts into Chatwoot, for example, to mark an agent's message as read when the
+end user views it in your client, so the agent sees the read indicator on the
+message.
+
+A message already marked `read` cannot be moved back to `delivered`. When
+reporting a failure, include `external_error` with the reason, which is shown to
+the agent along with the failed indicator.
+"
+ex4-0058,chatwoot.com,GET,/api/v1/accounts/{account_id}/conversations/{conversation_id}/reporting_events,get-conversation-reporting-events,Conversation Reporting Events,"Get reporting events for a specific conversation. This endpoint returns events such as first response time, resolution time, and other metrics for the conversation, sorted by creation time in ascending order."
+ex4-0059,chatwoot.com,POST,/api/v1/accounts/{account_id}/conversations/{conversation_id}/toggle_priority,toggle-priority-of-a-conversation,Toggle Priority,Toggles the priority of conversation
+ex4-0060,chatwoot.com,POST,/api/v1/accounts/{account_id}/conversations/{conversation_id}/toggle_status,toggle-status-of-a-conversation,Toggle Status,"Toggle the status of a conversation. Pass `status` to explicitly set the
+conversation state. Use `snoozed` along with `snoozed_until` to snooze a
+conversation until a specific time. If `snoozed_until` is omitted, the
+conversation is snoozed until the next reply from the contact. Regardless
+of the value provided, snoozed conversations always reopen on the next
+reply from the contact."
+ex4-0061,chatwoot.com,POST,/api/v1/accounts/{account_id}/conversations/{conversation_id}/toggle_typing_status,toggle-typing-status-of-a-conversation,Toggle Typing Status,Toggles the typing status for a conversation.
+ex4-0062,chatwoot.com,POST,/api/v1/accounts/{account_id}/conversations/{conversation_id}/update_last_seen,conversationUpdateLastSeen,Update Last Seen,Updates the last seen of the conversation so that conversations will have the bubbles in the agents screen
+ex4-0063,chatwoot.com,GET,/api/v1/accounts/{account_id}/custom_attribute_definitions,get-account-custom-attribute,List all custom attributes in an account,Get details of custom attributes in an Account
+ex4-0064,chatwoot.com,POST,/api/v1/accounts/{account_id}/custom_attribute_definitions,add-new-custom-attribute-to-account,Add a new custom attribute,Add a new custom attribute to account
+ex4-0065,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/custom_attribute_definitions/{id},delete-custom-attribute-from-account,Remove a custom attribute from account,Remove a custom attribute from account
+ex4-0066,chatwoot.com,GET,/api/v1/accounts/{account_id}/custom_attribute_definitions/{id},get-details-of-a-single-custom-attribute,Get a custom attribute details,Get the details of a custom attribute in the account
+ex4-0067,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/custom_attribute_definitions/{id},update-custom-attribute-in-account,Update custom attribute in Account,Update a custom attribute in account
+ex4-0068,chatwoot.com,GET,/api/v1/accounts/{account_id}/custom_filters,list-all-filters,List all custom filters,List all custom filters in a category of a user
+ex4-0069,chatwoot.com,POST,/api/v1/accounts/{account_id}/custom_filters,create-a-custom-filter,Create a custom filter,Create a custom filter in the account
+ex4-0070,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/custom_filters/{custom_filter_id},delete-a-custom-filter,Delete a custom filter,Delete a custom filter from the account
+ex4-0071,chatwoot.com,GET,/api/v1/accounts/{account_id}/custom_filters/{custom_filter_id},get-details-of-a-single-custom-filter,Get a custom filter details,Get the details of a custom filter in the account
+ex4-0072,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/custom_filters/{custom_filter_id},update-a-custom-filter,Update a custom filter,Update a custom filter's attributes
+ex4-0073,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/inbox_members,delete-agent-in-inbox,Remove an Agent from Inbox,Remove an Agent from Inbox
+ex4-0074,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/inbox_members,update-agents-in-inbox,Update Agents in Inbox,All agents except the one passed in params will be removed
+ex4-0075,chatwoot.com,POST,/api/v1/accounts/{account_id}/inbox_members,add-new-agent-to-inbox,Add a New Agent,Add a new Agent to Inbox
+ex4-0076,chatwoot.com,GET,/api/v1/accounts/{account_id}/inbox_members/{inbox_id},get-inbox-members,List Agents in Inbox,Get Details of Agents in an Inbox
+ex4-0077,chatwoot.com,GET,/api/v1/accounts/{account_id}/inboxes,listAllInboxes,List all inboxes,List all inboxes available in the current account
+ex4-0078,chatwoot.com,POST,/api/v1/accounts/{account_id}/inboxes,inboxCreation,Create an inbox,You can create more than one website inbox in each account
+ex4-0079,chatwoot.com,GET,/api/v1/accounts/{account_id}/inboxes/{id},GetInbox,Get an inbox,Get an inbox available in the current account
+ex4-0080,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/inboxes/{id},updateInbox,Update Inbox,Update an existing inbox
+ex4-0081,chatwoot.com,GET,/api/v1/accounts/{account_id}/inboxes/{id}/agent_bot,getInboxAgentBot,Show Inbox Agent Bot,See if an agent bot is associated to the Inbox
+ex4-0082,chatwoot.com,GET,/api/v1/accounts/{account_id}/inboxes/{id}/message_templates,listWhatsappMessageTemplates,List WhatsApp message templates,List the cached message templates available for a native or Twilio WhatsApp inbox
+ex4-0083,chatwoot.com,POST,/api/v1/accounts/{account_id}/inboxes/{id}/set_agent_bot,updateAgentBot,Add or remove agent bot,"To add an agent bot pass agent_bot id, to remove agent bot from an inbox pass null"
+ex4-0084,chatwoot.com,GET,/api/v1/accounts/{account_id}/integrations/apps,get-details-of-all-integrations,List all the Integrations,Get the details of all Integrations available for the account
+ex4-0085,chatwoot.com,POST,/api/v1/accounts/{account_id}/integrations/hooks,create-an-integration-hook,Create an integration hook,Create an integration hook
+ex4-0086,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/integrations/hooks/{hook_id},delete-an-integration-hook,Delete an Integration Hook,Delete an Integration Hook
+ex4-0087,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/integrations/hooks/{hook_id},update-an-integrations-hook,Update an Integration Hook,Update an Integration Hook
+ex4-0088,chatwoot.com,GET,/api/v1/accounts/{account_id}/labels,list-all-labels,List all labels,List all labels available in the current account
+ex4-0089,chatwoot.com,POST,/api/v1/accounts/{account_id}/labels,create-a-label,Create a label,Create a label in the account
+ex4-0090,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/labels/{id},delete-a-label,Delete a label,Delete a label from the account
+ex4-0091,chatwoot.com,GET,/api/v1/accounts/{account_id}/labels/{id},get-details-of-a-single-label,Get a label,Get the details of a label in the account
+ex4-0092,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/labels/{id},update-a-label,Update a label,Update a label's attributes
+ex4-0093,chatwoot.com,GET,/api/v1/accounts/{account_id}/portals,get-portal,List all portals in an account,Get details of portals in an Account
+ex4-0094,chatwoot.com,POST,/api/v1/accounts/{account_id}/portals,add-new-portal-to-account,Add a new portal,Add a new portal to account
+ex4-0095,chatwoot.com,GET,/api/v1/accounts/{account_id}/portals/{portal_slug},get-details-of-a-single-portal,Get a portal details,Get the details of a portal in the account
+ex4-0096,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/portals/{portal_slug},update-portal-to-account,Update a portal,Update a portal to account
+ex4-0097,chatwoot.com,POST,/api/v1/accounts/{account_id}/portals/{portal_slug}/articles,add-new-article-to-account,Add a new article,Add a new article to portal
+ex4-0098,chatwoot.com,POST,/api/v1/accounts/{account_id}/portals/{portal_slug}/categories,add-new-category-to-account,Add a new category,Add a new category to portal
+ex4-0099,chatwoot.com,GET,/api/v1/accounts/{account_id}/reporting_events,get-account-reporting-events,Account Reporting Events,"Get paginated reporting events for the account. This endpoint returns reporting events such as first response time, resolution time, and other metrics. Only administrators can access this endpoint. Results are paginated with 25 items per page."
+ex4-0100,chatwoot.com,GET,/api/v1/accounts/{account_id}/teams,list-all-teams,List all teams,List all teams available in the current account
+ex4-0101,chatwoot.com,POST,/api/v1/accounts/{account_id}/teams,create-a-team,Create a team,Create a team in the account
+ex4-0102,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/teams/{team_id},delete-a-team,Delete a team,Delete a team from the account
+ex4-0103,chatwoot.com,GET,/api/v1/accounts/{account_id}/teams/{team_id},get-details-of-a-single-team,Get a team details,Get the details of a team in the account
+ex4-0104,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/teams/{team_id},update-a-team,Update a team,Update a team's attributes
+ex4-0105,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/teams/{team_id}/team_members,delete-agent-in-team,Remove an Agent from Team,Remove an Agent from Team
+ex4-0106,chatwoot.com,GET,/api/v1/accounts/{account_id}/teams/{team_id}/team_members,get-team-members,List Agents in Team,Get Details of Agents in an Team
+ex4-0107,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/teams/{team_id}/team_members,update-agents-in-team,Update Agents in Team,All agents except the one passed in params will be removed
+ex4-0108,chatwoot.com,POST,/api/v1/accounts/{account_id}/teams/{team_id}/team_members,add-new-agent-to-team,Add a New Agent,Add a new Agent to Team
+ex4-0109,chatwoot.com,GET,/api/v1/accounts/{account_id}/webhooks,list-all-webhooks,List all webhooks,List all webhooks in the account
+ex4-0110,chatwoot.com,POST,/api/v1/accounts/{account_id}/webhooks,create-a-webhook,Add a webhook,Add a webhook subscription to the account
+ex4-0111,chatwoot.com,DELETE,/api/v1/accounts/{account_id}/webhooks/{webhook_id},delete-a-webhook,Delete a webhook,Delete a webhook from the account
+ex4-0112,chatwoot.com,PATCH,/api/v1/accounts/{account_id}/webhooks/{webhook_id},update-a-webhook,Update a webhook object,Update a webhook object in the account
+ex4-0113,chatwoot.com,GET,/api/v1/profile,fetchProfile,Fetch user profile,Get the user profile details
+ex4-0114,chatwoot.com,PUT,/api/v1/profile,updateProfile,Update user profile,Update the user profile details
+ex4-0115,chatwoot.com,GET,/api/v2/accounts/{account_id}/reports,list-all-conversation-statistics,Get Account reports,"Get Account reports for a specific type, metric and date range"
+ex4-0116,chatwoot.com,GET,/api/v2/accounts/{account_id}/reports/conversations,get-account-conversation-metrics,Account Conversation Metrics,Get conversation metrics for Account
+ex4-0117,chatwoot.com,GET,/api/v2/accounts/{account_id}/reports/conversations/,get-agent-conversation-metrics,Agent Conversation Metrics,Get conversation metrics for Agent
+ex4-0118,chatwoot.com,GET,/api/v2/accounts/{account_id}/reports/first_response_time_distribution,get-first-response-time-distribution,Get first response time distribution by channel,"Get the distribution of first response times grouped by channel type.
+Returns conversation counts in different time buckets (0-1h, 1-4h, 4-8h, 8-24h, 24h+) for each channel type.
+
+**Note:** This API endpoint is available only in Chatwoot version 4.11.0 and above.
+"
+ex4-0119,chatwoot.com,GET,/api/v2/accounts/{account_id}/reports/inbox_label_matrix,get-inbox-label-matrix,Get inbox-label matrix report,"Get a matrix showing the count of conversations for each inbox-label combination.
+Returns a list of inboxes, labels, and a 2D matrix where each cell contains the count of conversations
+in a specific inbox that have a specific label applied.
+
+**Note:** This API endpoint is available only in Chatwoot version 4.11.0 and above.
+"
+ex4-0120,chatwoot.com,GET,/api/v2/accounts/{account_id}/reports/outgoing_messages_count,get-outgoing-messages-count,Get outgoing messages count grouped by entity,"Get the count of outgoing messages grouped by a specified entity (agent, team, inbox, or label).
+When grouped by agent, messages sent by bots (AgentBot, Captain::Assistant) are excluded.
+
+**Note:** This API endpoint is available only in Chatwoot version 4.11.0 and above.
+"
+ex4-0121,chatwoot.com,GET,/api/v2/accounts/{account_id}/reports/summary,list-all-conversation-statistics-summary,Get Account reports summary,Get Account reports summary for a specific type and date range
+ex4-0122,chatwoot.com,GET,/api/v2/accounts/{account_id}/summary_reports/agent,get-agent-summary-report,Get conversation statistics grouped by agent,"Get conversation statistics grouped by agent for a given date range.
+Returns metrics for each agent including conversation counts, resolution counts,
+average first response time, average resolution time, and average reply time.
+"
+ex4-0123,chatwoot.com,GET,/api/v2/accounts/{account_id}/summary_reports/channel,get-channel-summary-report,Get conversation statistics grouped by channel type,"Get conversation counts grouped by channel type and status for a given date range.
+Returns statistics for each channel type including open, resolved, pending, snoozed, and total conversation counts.
+
+**Note:** This API endpoint is available only in Chatwoot version 4.10.0 and above. The date range is limited to a maximum of 6 months.
+"
+ex4-0124,chatwoot.com,GET,/api/v2/accounts/{account_id}/summary_reports/inbox,get-inbox-summary-report,Get conversation statistics grouped by inbox,"Get conversation statistics grouped by inbox for a given date range.
+Returns metrics for each inbox including conversation counts, resolution counts,
+average first response time, average resolution time, and average reply time.
+"
+ex4-0125,chatwoot.com,GET,/api/v2/accounts/{account_id}/summary_reports/team,get-team-summary-report,Get conversation statistics grouped by team,"Get conversation statistics grouped by team for a given date range.
+Returns metrics for each team including conversation counts, resolution counts,
+average first response time, average resolution time, and average reply time.
+"
+ex4-0126,chatwoot.com,POST,/platform/api/v1/accounts,create-an-account,Create an Account,Create an Account
+ex4-0127,chatwoot.com,DELETE,/platform/api/v1/accounts/{account_id},delete-an-account,Delete an Account,Delete an Account
+ex4-0128,chatwoot.com,GET,/platform/api/v1/accounts/{account_id},get-details-of-an-account,Get an account details,Get the details of an account
+ex4-0129,chatwoot.com,PATCH,/platform/api/v1/accounts/{account_id},update-an-account,Update an account,Update an account's attributes
+ex4-0130,chatwoot.com,DELETE,/platform/api/v1/accounts/{account_id}/account_users,delete-an-account-user,Delete an Account User,Delete an Account User
+ex4-0131,chatwoot.com,GET,/platform/api/v1/accounts/{account_id}/account_users,list-all-account-users,List all Account Users,List all account users
+ex4-0132,chatwoot.com,POST,/platform/api/v1/accounts/{account_id}/account_users,create-an-account-user,Create an Account User,Create an Account User
+ex4-0133,chatwoot.com,GET,/platform/api/v1/agent_bots,list-all-agent-bots,List all AgentBots,List all agent bots available
+ex4-0134,chatwoot.com,POST,/platform/api/v1/agent_bots,create-an-agent-bot,Create an Agent Bot,Create an agent bot
+ex4-0135,chatwoot.com,DELETE,/platform/api/v1/agent_bots/{id},delete-an-agent-bot,Delete an AgentBot,Delete an AgentBot
+ex4-0136,chatwoot.com,GET,/platform/api/v1/agent_bots/{id},get-details-of-a-single-agent-bot,Get an agent bot details,Get the details of an agent bot
+ex4-0137,chatwoot.com,PATCH,/platform/api/v1/agent_bots/{id},update-an-agent-bot,Update an agent bot,Update an agent bot's attributes
+ex4-0138,chatwoot.com,POST,/platform/api/v1/users,create-a-user,Create a User,Create a User
+ex4-0139,chatwoot.com,DELETE,/platform/api/v1/users/{id},delete-a-user,Delete a User,Delete a User
+ex4-0140,chatwoot.com,GET,/platform/api/v1/users/{id},get-details-of-a-user,Get an user details,Get the details of an user
+ex4-0141,chatwoot.com,PATCH,/platform/api/v1/users/{id},update-a-user,Update a user,Update a user's attributes
+ex4-0142,chatwoot.com,GET,/platform/api/v1/users/{id}/login,get-sso-url-of-a-user,Get User SSO Link,Get the sso link of a user
+ex4-0143,chatwoot.com,POST,/platform/api/v1/users/{id}/token,post-user-token,Get User Access Token,Get the access token of a user
+ex4-0144,chatwoot.com,GET,/public/api/v1/inboxes/{inbox_identifier},get-details-of-a-inbox,Inbox details,Get the details of an inbox
+ex4-0145,chatwoot.com,POST,/public/api/v1/inboxes/{inbox_identifier}/contacts,create-a-contact,Create a contact,Create a contact
+ex4-0146,chatwoot.com,GET,/public/api/v1/inboxes/{inbox_identifier}/contacts/{contact_identifier},get-details-of-a-contact,Get a contact,Get the details of a contact
+ex4-0147,chatwoot.com,PATCH,/public/api/v1/inboxes/{inbox_identifier}/contacts/{contact_identifier},update-a-contact,Update a contact,Update a contact's attributes
+ex4-0148,chatwoot.com,GET,/public/api/v1/inboxes/{inbox_identifier}/contacts/{contact_identifier}/conversations,list-all-contact-conversations,List all conversations,List all conversations for the contact
+ex4-0149,chatwoot.com,POST,/public/api/v1/inboxes/{inbox_identifier}/contacts/{contact_identifier}/conversations,create-a-conversation,Create a conversation,Create a conversation
+ex4-0150,chatwoot.com,GET,/public/api/v1/inboxes/{inbox_identifier}/contacts/{contact_identifier}/conversations/{conversation_id},get-single-conversation,Get a single conversation,Retrieves the details of a specific conversation
+ex4-0151,chatwoot.com,GET,/public/api/v1/inboxes/{inbox_identifier}/contacts/{contact_identifier}/conversations/{conversation_id}/messages,list-all-conversation-messages,List all messages,List all messages in the conversation
+ex4-0152,chatwoot.com,POST,/public/api/v1/inboxes/{inbox_identifier}/contacts/{contact_identifier}/conversations/{conversation_id}/messages,create-a-message,Create a message,Create a message
+ex4-0153,chatwoot.com,PATCH,/public/api/v1/inboxes/{inbox_identifier}/contacts/{contact_identifier}/conversations/{conversation_id}/messages/{message_id},update-a-message,Update a message,Update a message
+ex4-0154,chatwoot.com,POST,/public/api/v1/inboxes/{inbox_identifier}/contacts/{contact_identifier}/conversations/{conversation_id}/toggle_status,resolve-conversation,Resolve a conversation,Marks a conversation as resolved
+ex4-0155,chatwoot.com,POST,/public/api/v1/inboxes/{inbox_identifier}/contacts/{contact_identifier}/conversations/{conversation_id}/toggle_typing,toggle-typing-status,Toggle typing status,Toggles the typing status in a conversation
+ex4-0156,chatwoot.com,POST,/public/api/v1/inboxes/{inbox_identifier}/contacts/{contact_identifier}/conversations/{conversation_id}/update_last_seen,update-last-seen,Update last seen and mark messages read,"Updates the contact's last seen time for the conversation and marks agent messages
+sent before that time as read. Use this to send read receipts from a custom client
+built on the API channel, so agents can see when the contact has read their messages.
+"
+ex4-0157,chatwoot.com,GET,/survey/responses/{conversation_uuid},get-csat-survey-page,Get CSAT survey page,"You can redirect the client to this URL, instead of implementing the CSAT survey component yourself."
