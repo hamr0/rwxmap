@@ -909,7 +909,7 @@ Exit 0 on success; 1 on failure, with nothing written.
  * tests never have to spawn a process.
  *
  * @param {string[]} argv  Arguments only (no "node"/script path).
- * @param {{cwd: string, stdout: {write: (s: string) => void}, stderr: {write: (s: string) => void}, cacheDir?: string, jevKey?: string, fetchImpl?: typeof fetch, jevConcurrency?: number, beforeReplace?: (targetPath: string) => void, rwxliteEngine?: {model: string, run: import('./secondpass.js').Engine}, xdgCacheHome?: string, modelFetch?: typeof fetch, rwxliteImporter?: (name: string) => Promise<any>}} env
+ * @param {{cwd: string, stdout: {write: (s: string) => void}, stderr: {write: (s: string) => void}, cacheDir?: string, jevKey?: string, fetchImpl?: typeof fetch, jevConcurrency?: number, beforeReplace?: (targetPath: string) => void, rwxliteEngine?: {model: string, run: import('./secondpass.js').Engine}, xdgCacheHome?: string, modelFetch?: typeof fetch, rwxliteImporter?: (name: string) => Promise<any>, rwxliteVersionReader?: () => string}} env
  *   `jevKey`, `fetchImpl` and `jevConcurrency` are test-only overrides for
  *   the Jev wiring (D118), the same pattern `cacheDir` already uses for
  *   discovery: `jevKey` bypasses loadJevKey's environment/.env read
@@ -923,7 +923,7 @@ Exit 0 on success; 1 on failure, with nothing written.
  *   `rwxliteEngine` (an engine function plus its model string) and
  *   `xdgCacheHome` (where to look for a cached model) are test-only seams of
  *   the same kind: a real run finds its model in the cache and never passes
- *   either. `modelFetch` and `rwxliteImporter` are the same kind: the fetch used to download the model and the `import('rwxlite')` call.
+ *   either. `modelFetch`, `rwxliteImporter` and `rwxliteVersionReader` are the same kind: the fetch used to download the model, the `import('rwxlite')` call and the installed-version read.
  * @returns {Promise<number>}  Process exit code.
  */
 export async function run(argv, env) {
@@ -1116,7 +1116,7 @@ export async function run(argv, env) {
       if (got.status === 'off') {
         reason = got.reason;
       } else {
-        const loaded = await loadRwxliteEngine({ dir: got.dir, model: got.model, importer: env.rwxliteImporter });
+        const loaded = await loadRwxliteEngine({ dir: got.dir, model: got.model, importer: env.rwxliteImporter, versionReader: env.rwxliteVersionReader });
         if (loaded.status === 'on') engine = loaded.engine;
         else reason = loaded.reason;
       }

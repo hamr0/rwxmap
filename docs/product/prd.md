@@ -1032,7 +1032,11 @@ decided; everything marked "proposal" or "open" is not decided.
   fails loudly.
 - **Distribution.** Ships on npm. The model is downloaded on first use
   and is pinned to one rwxlite release tag in each rwxmap release (D135;
-  `RWXLITE_TAG` in `src/modeldownload.js`). A newer model replaces it only
+  `RWXLITE_TAG` in `src/modeldownload.js`). The rwxlite npm package that
+  runs it must be in the same minor line (>=0.2.0 <0.3.0, derived from the
+  tag, read from the package's own package.json); any other version, a
+  pre-release or an unreadable version turns rwxlite off, mechanical
+  alone, with the reason printed (D135). A newer model replaces it only
   after a no-regression result on a fresh clean exam. Every run records
   the model string.
 - **Model cache and integrity.** The downloaded model is cached in a

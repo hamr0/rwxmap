@@ -8545,3 +8545,9 @@ exact >= +5 points): +9.0 and +9.5 points.
   - int8 under 0.2.0: batched (answerMany) vs one-row answers differ on 592 of 592 rows in mode a (max |dp| 0.169) and 1376 of 1377 in b95 (max |dp| 0.144). Under 0.2.1, dp is 0 exactly, in both modes.
   - int8 letters, 0.2.1 vs 0.2.0: 9 rows differ in mode a, 13 in b95. Info only (burned exam): mode a 1192 / 15 / 170 -> 1189 / 16 / 172; b95 1181 / 13 / 183 -> 1180 / 14 / 183. Each mode gains one too-loose row: ex3-0422 mux PUT /video/v1/live-streams/{LIVE_STREAM_ID}/complete (mode a, truth x) and ex3-0257 clerk POST /waitlist_entries/bulk (b95, truth x). Both new leaks carry review marker loose.
 - Lesson: 0.2.1 makes int8 consistent, not more accurate. The rows 0.2.0's batching got right were luck from batch neighbours. fp32, the default, is untouched, so taking 0.2.1 does not change what D135 pins.
+
+## 2026-11-04 — D135: rwxlite npm package range-checked
+
+- Goal: the model files are pinned to v0.2.0, but the rwxlite package that runs them is installed by the user at any version, so a code change there could change answers unseen.
+- Outcome: `loadRwxliteEngine` reads the installed package's version (resolve the entry, walk up to the package.json named rwxlite; the package exports no version) and accepts only >=0.2.0 <0.3.0, derived from `RWXLITE_TAG`. Anything else, a pre-release (0.2.1-beta) or an unreadable version is off, mechanical alone, with the reason. Seam: `versionReader` beside `importer` (cli: `rwxliteVersionReader`). Tests cover 0.2.0, 0.2.1, 0.3.0, 0.1.9, garbage, missing and the reason text; range check broken by hand once (10 -> 9 pass, 1 fail), restored.
+- Lesson: pinning the data is not pinning the code that reads it; every piece the user installs separately needs its own gate.

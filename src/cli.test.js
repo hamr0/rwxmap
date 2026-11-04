@@ -2212,7 +2212,7 @@ test('run (D133): offline with a verified cached model -> "using cached ...", th
   const dir = writeModelDir(xdg, bytes);
   const model = `rwxlite-0.2.0+${sha8}`;
   const seen = [];
-  const r = await runD133([], { xdgCacheHome: xdg, rwxliteImporter: fakeRwxlite(model, { isX: 0.99, changes: 0.99 }, seen) });
+  const r = await runD133([], { xdgCacheHome: xdg, rwxliteImporter: fakeRwxlite(model, { isX: 0.99, changes: 0.99 }, seen), rwxliteVersionReader: () => '0.2.0' });
   assert.equal(r.code, 0, r.stderr);
   assert.match(r.stderr, new RegExp(`^rwxmap: using cached ${model.replace(/[+.]/g, '\\$&')}( \\(no cached exact model, so the small one\\))?, could not reach the release`, 'm'));
   assert.equal(seen.length, 1);
@@ -2227,7 +2227,7 @@ test('run (D133): a verified model but no rwxlite package -> mechanical alone, s
   const importer = async () => { throw Object.assign(new Error("Cannot find package 'rwxlite' imported from /x/src/rwxliteengine.js"), { code: 'ERR_MODULE_NOT_FOUND' }); };
   const r = await runD133([], { xdgCacheHome: xdg, rwxliteImporter: importer });
   assert.equal(r.code, 0, r.stderr);
-  assert.match(r.stdout, /^rwxmap: rwxlite: off \(mechanical\) — the rwxlite package is not installed \(npm install rwxlite\)$/m);
+  assert.match(r.stdout, /^rwxmap: rwxlite: off \(mechanical\) — the rwxlite package is not installed \(npm install rwxlite@0\.2\)$/m);
   assert.equal(readJson(path.join(r.outDir, 'example.rwxmap.json')).rwxlite.mode, 'off');
 });
 

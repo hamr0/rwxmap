@@ -263,14 +263,15 @@ cached <model>, could not reach the release". With none cached it prints
 stops the run. The model is pinned in each rwxmap release; a new model ships only
 after it passes a fresh exam. The combined JSON records the model string.
 
-The model runs through the `rwxlite` npm package, which will be an
-optional dependency of rwxmap. It is not on npm yet, so today it is not
-declared and not installed; without it the run prints
+The model runs through the `rwxlite` npm package, an optional package you
+install yourself. Install it with
+`ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.2`: on Linux x64,
+`onnxruntime-node` otherwise downloads about 285 MB of GPU (CUDA/TensorRT)
+libraries. This rwxmap accepts only rwxlite package versions 0.2.x (D135);
+any other version turns the second pass off (mechanical alone, with the
+reason printed). Without the package the run prints
 `rwxlite: off (mechanical) — the rwxlite package is not installed (npm
-install rwxlite)`. When it is published, install with
-`ONNXRUNTIME_NODE_INSTALL=skip`: on Linux x64, `onnxruntime-node`
-otherwise downloads about 285 MB of GPU (CUDA/TensorRT) libraries. Nothing
-here is live until rwxlite publishes.
+install rwxlite@0.2)`.
 
 Only bareguard reads `bareguard.tools` directly. The MCP, WebMCP and
 OpenAPI parts are hints you copy into place; a client may ignore them.

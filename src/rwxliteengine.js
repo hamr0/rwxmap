@@ -11,6 +11,47 @@
 // secondPass wants {pIsX, pChanges, model} or an error; anything that is not a
 // well-formed success becomes {error}, which secondPass counts as undecided.
 import * as os from 'node:os';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { RWXLITE_VERSION } from './modeldownload.js';
+
+/**
+ * The rwxlite npm package versions this rwxmap accepts (D135): the pinned
+ * model's minor line, >=M.m.0 <M.(m+1).0, derived from RWXLITE_TAG so moving
+ * to a new model stays a one-line change. Pre-release tags are out.
+ */
+const [PIN_MAJOR, PIN_MINOR] = RWXLITE_VERSION.split('.').map(Number);
+export const RWXLITE_PACKAGE_RANGE = `${PIN_MAJOR}.${PIN_MINOR}.x`;
+
+/** @param {string} v @returns {boolean} plain M.m.p inside the accepted range */
+export function versionInRange(v) {
+  const m = /^(\d+)\.(\d+)\.(\d+)$/.exec(v);
+  return m !== null && Number(m[1]) === PIN_MAJOR && Number(m[2]) === PIN_MINOR;
+}
+
+/**
+ * The installed rwxlite package's version. The package exports no version
+ * and its `exports` hides package.json, so: resolve the entry, walk up to
+ * the nearest package.json named "rwxlite", read `version`. Throws if it
+ * cannot be found.
+ * @param {(specifier: string) => string} [resolve] returns a file: URL
+ * @returns {string}
+ */
+export function readRwxliteVersion(resolve = (s) => import.meta.resolve(s)) {
+  let dir = path.dirname(fileURLToPath(resolve('rwxlite')));
+  for (;;) {
+    const file = path.join(dir, 'package.json');
+    if (fs.existsSync(file)) {
+      const pkg = JSON.parse(fs.readFileSync(file, 'utf8'));
+      if (pkg && pkg.name === 'rwxlite') return pkg.version;
+    }
+    const up = path.dirname(dir);
+    if (up === dir) throw new Error('no package.json named rwxlite above its entry');
+    dir = up;
+  }
+}
 
 /** Rows per answerMany call: bounds the model's memory on a big spec. */
 const CHUNK = 64;
@@ -36,19 +77,30 @@ function mapSlot(slot) {
  * Load rwxlite on a verified model folder.
  *   {status: 'on', engine: {model, run}}   engine.model is the folder's model string
  *   {status: 'off', reason}                mechanical alone, reason is printed
- * @param {{dir: string, model: string, importer?: (name: string) => Promise<any>, threads?: number}} opts
+ * The installed package version must be in RWXLITE_PACKAGE_RANGE (D135), else off.
+ * `versionReader` is the seam for tests: it returns the version string.
+ * @param {{dir: string, model: string, importer?: (name: string) => Promise<any>, versionReader?: () => string, threads?: number}} opts
  * @returns {Promise<{status: 'on', engine: {model: string, run: import('./secondpass.js').Engine}} | {status: 'off', reason: string}>}
  */
-export async function loadRwxliteEngine({ dir, model, importer = (name) => import(name), threads = Math.min(4, os.availableParallelism()) }) {
+export async function loadRwxliteEngine({ dir, model, importer = (name) => import(name), versionReader = readRwxliteVersion, threads = Math.min(4, os.availableParallelism()) }) {
   let lib;
   try {
     lib = await importer('rwxlite');
   } catch (err) {
     const e = /** @type {any} */ (err);
     if (e && e.code === 'ERR_MODULE_NOT_FOUND' && /['"]rwxlite['"]/.test(String(e.message))) {
-      return { status: 'off', reason: 'the rwxlite package is not installed (npm install rwxlite)' };
+      return { status: 'off', reason: `the rwxlite package is not installed (npm install rwxlite@${PIN_MAJOR}.${PIN_MINOR})` };
     }
     return { status: 'off', reason: `the rwxlite package could not be loaded (${msg(err)})` };
+  }
+  let version;
+  try {
+    version = versionReader();
+  } catch (err) {
+    return { status: 'off', reason: `the rwxlite package version could not be read (${msg(err)}); this rwxmap accepts ${RWXLITE_PACKAGE_RANGE} (D135); npm install rwxlite@${PIN_MAJOR}.${PIN_MINOR}` };
+  }
+  if (typeof version !== 'string' || !versionInRange(version)) {
+    return { status: 'off', reason: `the rwxlite package is ${typeof version === 'string' ? version : 'of unknown version'}; this rwxmap accepts ${RWXLITE_PACKAGE_RANGE} (D135); npm install rwxlite@${PIN_MAJOR}.${PIN_MINOR}` };
   }
   let answerer;
   try {
