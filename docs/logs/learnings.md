@@ -8458,3 +8458,16 @@ exact >= +5 points): +9.0 and +9.5 points.
   pinned item. whapi PUT /account/plusCard/pin is already its one wrong
   gate-3 fire; circuitsandbox PUT /spaces/{topicId}/pin was reported by
   rwxlite on 2026-11-04. Over-tight, not a leak.
+
+## 2026-11-04 — credential-set floor cross-checked with rwxlite on 32 rows: PASS
+
+- Goal: user ruling that rwxmap and rwxlite check the credential-set guard on the same rows and agree. rwxmap's floor: the second pass never lowers a credential-set verdict (NEVER_LOWER_RULES, src/secondpass.js, commit 25125a8). rwxlite's guard: it reads the rule name as cant-undo-verb (rwxlite a939e62).
+- Data: rwxlite's 32-row file (commit 2a5989f, m1), copied to data/credential-set-2026-11-04/. Model rwxlite-0.1.0+8ad0a182 int8-pc. "before" = raw rule name, "after" = rwxlite's guard. No truth labels. The first two lines are the same operation (appwrite PATCH /account/password): 32 lines, 31 distinct operations.
+- Run: poc/credential-set-check/check.mjs, output out.txt, real classifyRow and secondPass with a stub engine. Orchestrator re-ran it from a cwd with no .env: exit 0, output identical, fixture byte-identical to rwxlite's.
+- Outcome:
+  - Our classifier calls all 32 rows credential-set, x, settled. No disagreement on the rule name.
+  - Mode a as run sends 0 of 32 (settled rows are not sent).
+  - Every mode and answer set ends 32 of 32 at x, 0 lowered (a forced, b at 95, b at 0; before and after).
+  - Without the guard, the "before" answers would lower 3 of 32 at b 95 and a forced (britbox PUT /account/pin w 0.984, whapi PUT /account/plusCard/pin w 0.990, circuitsandbox PUT /spaces/{topicId}/pin w 0.973) and 12 of 32 at b 0. The "after" answers lower 0 (x at 1.000 on all 32).
+  - "before" at b 95: 29 undecided (x, review tight), 3 kept.
+- Lesson: a model trained before a rule existed can confidently lower that rule's rows. A floor on the rule name in the adapter makes the safety independent of the model version installed.
