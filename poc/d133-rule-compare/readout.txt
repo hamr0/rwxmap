@@ -1,0 +1,67 @@
+D133 rule comparison on rwxlite fresh-exam 949 rows. TUNING data, NOT an exam for rwxmap (rwxlite burned it).
+Note: fixture p are from the int8 per-channel model; rwxmap default model is fp32 (rwxlite: 7 rows differ under its rule).
+rows 949; truth rows 949; vendor rows 949
+rulings.csv: 15 rulings; truth.csv label differs from ruling on 0 (none) -> truth already includes the rulings: true
+lean vs our mechanical verdict: class mismatches 0, class-or-rule mismatches 0
+rule 1 parity vs fixture.expected: using fixture lean 0 mismatches; using our mechanical 0 mismatches
+fixture expected counts: asked 74
+
+HEADLINE (949 rows; too loose = predicted looser than truth; too tight = stricter)
+0 mechanical: exact 736 (77.6%), too loose 6 (0.6%), too tight 207 (21.8%)
+1 rwxlite tier rule (asked scored stricter): exact 821 (86.5%), too loose 5 (0.5%), too tight 123 (13.0%)
+2 rwxmap secondPass (undecided = x): exact 826 (87.0%), too loose 6 (0.6%), too tight 117 (12.3%)
+context only, rule 1 with asked rows taking the lowered letter: exact 870 (91.7%), too loose 17 (1.8%), too tight 62 (6.5%)
+rwxlite's own scoring (asked rows set aside, not scored): right 809, too loose 5, too tight 61, asked 74 (their reference: 810 / 5 / 60 / 74)
+
+rule 1 moves: tier rows (sent) 775, raised 10, lowered(incl. asked) 165, kept 600, asked 74; lowered and accepted 91
+rule 2 moves: sent 425, raised 1, lowered 91, kept 234, undecided 99
+rule 2 review markers (tight/loose/settled): 185/240/524
+
+D133 mode-a bar (too loose <= mechanical alone; exact >= mechanical + 5 points). TUNING, not an exam.
+1 rwxlite tier rule (asked scored stricter): too loose 5 vs 6 -> ok; exact +9.0 pts -> ok
+2 rwxmap secondPass (undecided = x): too loose 6 vs 6 -> ok; exact +9.5 pts -> ok
+
+ROWS WHERE RULE 1 AND RULE 2 DIFFER: 9 (different scope 5, different letter pick 4)
+  fx-0036 GET /sso/profile | mech r/settled | r1 w | r2 r | truth r | scope (tier jev-raise-get, cred false, sent false)
+  fx-0039 PUT /invoices/{lago_id}/finalize | mech w/loose | r1 x | r2 w | truth x | pick (tier jev-raise-wx, cred false, sent true)
+  fx-0086 PUT /authorization/groups/{group_id}/role_assignments | mech w/loose | r1 x | r2 w | truth w | pick (tier jev-raise-wx, cred false, sent true)
+  fx-0231 PATCH /organizations/{organizationId}/groups/{groupId}/organization-memberships | mech w/loose | r1 x | r2 w | truth w | pick (tier jev-raise-wx, cred false, sent true)
+  fx-0249 GET /sso/logout | mech r/settled | r1 w | r2 r | truth x | scope (tier jev-raise-get, cred false, sent false)
+  fx-0549 GET /user_management/authorize | mech r/settled | r1 w | r2 r | truth r | scope (tier jev-raise-get, cred false, sent false)
+  fx-0594 GET /sso/authorize | mech r/settled | r1 w | r2 r | truth r | scope (tier jev-raise-get, cred false, sent false)
+  fx-0643 PUT /user_management/organization_memberships/{id}/reactivate | mech w/loose | r1 x | r2 w | truth w | pick (tier jev-raise-wx, cred false, sent true)
+  fx-0837 GET /user_management/sessions/logout | mech r/settled | r1 w | r2 r | truth x | scope (tier jev-raise-get, cred false, sent false)
+
+TOO-LOOSE ROWS, 0 mechanical: 6
+  fx-0039 PUT /invoices/{lago_id}/finalize | mech w/loose | r1 x | r2 w | truth x
+  fx-0249 GET /sso/logout | mech r/settled | r1 w | r2 r | truth x
+  fx-0354 PUT /data-integrations/{slug}/client-credentials | mech w/loose | r1 w | r2 w | truth x
+  fx-0503 PUT /data-integrations/{slug}/api-key | mech w/loose | r1 w | r2 w | truth x
+  fx-0543 PATCH /security/integration-tokens/{uuid} | mech w/loose | r1 w | r2 w | truth x
+  fx-0837 GET /user_management/sessions/logout | mech r/settled | r1 w | r2 r | truth x
+
+TOO-LOOSE ROWS, 1 rwxlite tier rule (asked scored stricter): 5
+  fx-0249 GET /sso/logout | mech r/settled | r1 w | r2 r | truth x
+  fx-0354 PUT /data-integrations/{slug}/client-credentials | mech w/loose | r1 w | r2 w | truth x
+  fx-0503 PUT /data-integrations/{slug}/api-key | mech w/loose | r1 w | r2 w | truth x
+  fx-0543 PATCH /security/integration-tokens/{uuid} | mech w/loose | r1 w | r2 w | truth x
+  fx-0837 GET /user_management/sessions/logout | mech r/settled | r1 w | r2 r | truth x
+
+TOO-LOOSE ROWS, 2 rwxmap secondPass (undecided = x): 6
+  fx-0039 PUT /invoices/{lago_id}/finalize | mech w/loose | r1 x | r2 w | truth x
+  fx-0249 GET /sso/logout | mech r/settled | r1 w | r2 r | truth x
+  fx-0354 PUT /data-integrations/{slug}/client-credentials | mech w/loose | r1 w | r2 w | truth x
+  fx-0503 PUT /data-integrations/{slug}/api-key | mech w/loose | r1 w | r2 w | truth x
+  fx-0543 PATCH /security/integration-tokens/{uuid} | mech w/loose | r1 w | r2 w | truth x
+  fx-0837 GET /user_management/sessions/logout | mech r/settled | r1 w | r2 r | truth x
+
+1 rwxlite tier rule (asked scored stricter): fixes 1 of mechanical's 6 too-loose rows, introduces 0
+  fixed fx-0039 PUT /invoices/{lago_id}/finalize | mech w/loose | r1 x | r2 w | truth x
+
+2 rwxmap secondPass (undecided = x): fixes 0 of mechanical's 6 too-loose rows, introduces 0
+
+PER VENDOR (provider from ops.csv; each rule: exact/too loose/too tight of n)
+  workos.com n=269: 0: 197/4/68  1: 219/4/46  2: 225/4/40
+  coolify.io n=321: 0: 248/1/72  1: 284/1/36  2: 284/1/36
+  resend.com n=142: 0: 115/0/27  1: 131/0/11  2: 131/0/11
+  getlago.com n=217: 0: 176/1/40  1: 187/0/30  2: 186/1/30
