@@ -192,8 +192,9 @@ r and is handled exactly like GET everywhere a method decides something
 (D134, user ruling 2026-11-04): step 1's floor, the review marker, the
 MCP and WebMCP hints, the exporter letter, the key and the matcher. It is
 read from OpenAPI 3.2's `query` field and from an `additionalOperations`
-entry keyed QUERY (any case). Open question: rwxlite's model has not seen
-QUERY, so in mode b a QUERY row is sent with method `QUERY` as-is.
+entry keyed QUERY (any case). In modes a and b a QUERY row is sent with
+method `QUERY` as-is; rwxlite shows it to its model as GET (from rwxlite's
+next release; on its 383 GET exam rows relabelled QUERY, 1 top letter changed).
 
 | method | floor | what can move it |
 |---|---|---|
