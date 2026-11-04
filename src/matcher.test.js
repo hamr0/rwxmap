@@ -19,6 +19,7 @@ const SPEC = {
   },
 };
 
+/** @param {any} [spec] */
 function sidecarFor(vendor, servers, spec = SPEC) {
   return exportSidecar(operationsFrom(spec), { vendor, servers });
 }
@@ -246,4 +247,36 @@ test('a default port is the same host as none', () => {
   assert.equal(m.match('GET', 'https://h/orders').source, 'spec');
   const explicit = matcherFrom([sidecarFor('h', ['https://h:443'])]);
   assert.equal(explicit.match('GET', 'https://h/orders').source, 'spec');
+});
+
+const SPEC_32 = {
+  openapi: '3.2.0',
+  paths: {
+    '/orders': {
+      get: { operationId: 'listOrders' },
+      post: { operationId: 'createOrder' },
+      query: { operationId: 'purgeOrdersQuery' },
+    },
+    '/reports': {
+      additionalOperations: { QUERY: { operationId: 'runReport' }, copy: { operationId: 'copyReport' } },
+    },
+  },
+};
+
+test('D134: a 3.2 query op and an additionalOperations QUERY op are r, keyed, and matched by a live QUERY request', () => {
+  const rows = operationsFrom(SPEC_32);
+  assert.deepEqual(rows.map((r) => `${r.method} ${r.path}`), ['GET /orders', 'POST /orders', 'QUERY /orders', 'QUERY /reports']);
+  const sidecar = sidecarFor('h', ['https://h'], SPEC_32);
+  assert.equal(sidecar.rows.length, 4);
+  const m = matcherFrom([sidecar]);
+  const q = m.match('QUERY', 'https://h/orders');
+  assert.deepEqual([q.key, q.letter, q.marker, q.source], ['h.purgeOrdersQuery', 'r', 'settled', 'spec']);
+  assert.equal(m.match('query', 'https://h/reports').letter, 'r');
+  // the GET and POST rows on the same path are unaffected
+  assert.equal(m.match('GET', 'https://h/orders').key, 'h.listOrders');
+  assert.equal(m.match('POST', 'https://h/orders').key, 'h.createOrder');
+  // an unlisted QUERY falls back to a per-request key, still r
+  const loose = m.match('QUERY', 'https://h/nowhere');
+  assert.equal(loose.source, 'request');
+  assert.equal(loose.letter, 'r');
 });

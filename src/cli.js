@@ -75,8 +75,9 @@
 // keys or on which operation won a collision. A third file,
 // `<vendor>.openapi.rwx.json`, is a JSON copy of the parsed input with
 // `x-rwx` set on every operation object under a standard HTTP method
-// field (buildOpenApiCopy). OpenAPI 3.2 `query`/`additionalOperations`
-// operations are not labelled yet; the run counts them and says so
+// field (buildOpenApiCopy), including OpenAPI 3.2's `query` field and
+// `additionalOperations.QUERY` (D134). Any other `additionalOperations`
+// operation is not labelled yet; the run counts it and says so
 // (countUnlabelledOperations). The input
 // file itself is only ever read. For a discovered spec the parsed
 // document is not in findSpec's result (nor its cache), so resolveInput
@@ -418,9 +419,10 @@ function countJsonNumberIssues(doc) {
 
 /**
  * Count the OpenAPI 3.2 operations operationEntries does not walk (item g
- * will label them): each `paths[p].query` that is an object, plus each
- * object entry of `paths[p].additionalOperations`. Reporting only — this
- * never changes which operations are classified.
+ * will label them): each object entry of `paths[p].additionalOperations`
+ * whose key is not QUERY. `query` and `additionalOperations.QUERY` are
+ * walked by operationEntries (D134). Reporting only — this never changes
+ * which operations are classified.
  *
  * @param {any} doc
  * @returns {number}
@@ -431,10 +433,11 @@ function countUnlabelledOperations(doc) {
   let n = 0;
   for (const item of Object.values(paths)) {
     if (!item || typeof item !== 'object') continue;
-    if (item.query && typeof item.query === 'object') n += 1;
     const extra = item.additionalOperations;
     if (extra && typeof extra === 'object') {
-      for (const op of Object.values(extra)) if (op && typeof op === 'object') n += 1;
+      for (const [key, op] of Object.entries(extra)) {
+        if (key.toLowerCase() !== 'query' && op && typeof op === 'object') n += 1;
+      }
     }
   }
   return n;
@@ -828,6 +831,13 @@ async function runJev(ops, verdicts, jevOpts) {
       { p: first.p, model: first.model, changes: { p: second.p, model: second.model } },
       { method: ops[index].method },
     );
+    // D133: applyJev makes a second answer from another model version
+    // undecided (a verdict with no `jev` block); count it as the failed
+    // call it is.
+    if (finalVerdicts[index].jev === undefined) {
+      answered -= 1;
+      failed += 1;
+    }
   }
 
   for (let i = 0; i < verdicts.length; i += 1) {
@@ -1020,13 +1030,13 @@ export async function run(argv, env) {
   }
 
   // One rule for every input kind: nothing to classify -> exit 1, no file.
-  // A spec whose only operations sit under OpenAPI 3.2 query/
-  // additionalOperations (not read yet, item g) says so instead.
+  // A spec whose only operations sit under OpenAPI 3.2
+  // additionalOperations other than QUERY (not read yet, item g) says so instead.
   if (ops.length === 0) {
     const unread = countUnlabelledOperations(doc);
     stderr.write(
       unread > 0
-        ? `rwxmap: no labelled operations in ${source} — ${unread} operation(s) under OpenAPI 3.2 query/additionalOperations are not read yet (item g)\n`
+        ? `rwxmap: no labelled operations in ${source} — ${unread} operation(s) under OpenAPI 3.2 additionalOperations (other than QUERY) are not read yet (item g)\n`
         : `rwxmap: no operations found in ${source}\n`,
     );
     return 1;
@@ -1188,7 +1198,7 @@ export async function run(argv, env) {
   const unlabelled = countUnlabelledOperations(doc);
   if (unlabelled > 0) {
     stdout.write(
-      `rwxmap: ${unlabelled} operation(s) under OpenAPI 3.2 query/additionalOperations are not labelled yet (no letter, no key, no x-rwx)\n`,
+      `rwxmap: ${unlabelled} operation(s) under OpenAPI 3.2 additionalOperations (other than QUERY) are not labelled yet (no letter, no key, no x-rwx)\n`,
     );
   }
   const webhooks = countWebhookOperations(doc);

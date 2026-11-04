@@ -163,6 +163,10 @@ fired), `jev` (Jev moved the row) or `rwxlite` (the rwxlite second pass
 moved the row). The `rwxlite` block in the combined JSON records the
 model string and the pass's counts.
 
+HTTP QUERY (RFC 10008, safe like GET) is r, handled exactly like GET;
+OpenAPI 3.2's `query` operations and `additionalOperations` entries keyed
+QUERY are read. Other `additionalOperations` keys are counted, not read.
+
 **rwxlite model.** A run that uses rwxlite fetches the latest manifest
 from rwxlite's GitHub releases (a small request), downloads the model if
 it is not already cached, checks every sha256, and only then puts it in

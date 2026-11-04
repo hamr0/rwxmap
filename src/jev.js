@@ -574,8 +574,9 @@ export function applyJev(verdict, answer, options) {
 
   // D129: the second question is read ONLY here, after the first fired. It
   // must be usable on the same terms as the first answer AND carry the same
-  // model string (both answers must come from one model version); anything
-  // else leaves the row at spec.to, exactly as before D129.
+  // model string (both answers must come from one model version). A usable
+  // answer with another model string is undecided (D133); any other unusable
+  // second answer leaves the row at spec.to, exactly as before D129.
   let to = spec.to;
   /** @type {number|undefined} */
   let pChanges;
@@ -583,7 +584,11 @@ export function applyJev(verdict, answer, options) {
   const next = answer.changes;
   if (second && next && typeof next === 'object') {
     const p2 = next.p;
-    if (typeof p2 === 'number' && Number.isFinite(p2) && p2 >= 0 && p2 <= 1 && next.model === model) {
+    const usable = typeof p2 === 'number' && Number.isFinite(p2) && p2 >= 0 && p2 <= 1;
+    // D133: a usable second answer from another model version is a failed
+    // call, not a keep-at-w: the two answers cannot be combined.
+    if (usable && next.model !== model) return jevUndecided(verdict, options);
+    if (usable) {
       const t2 = thresholdFor(second.thresholdKey, second.threshold, options);
       const fires2 = spec.direction === 'lower' ? p2 <= t2 : p2 >= t2;
       if (fires2) {

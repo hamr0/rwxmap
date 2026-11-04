@@ -151,7 +151,7 @@ decides it.
 
 | order | step | claims | rule | evidence |
 |---|---|---|---|---|
-| 1 | step 1, r | GET, HEAD, OPTIONS | `method` | floor |
+| 1 | step 1, r | GET, HEAD, OPTIONS, QUERY | `method` | floor |
 | 1 | step 1, r | POST whose lead verb is in `READ_VERBS` | `read-verb` | list |
 | 1 | step 1, r | POST with a `SAFE_VERBS` word at any position | `read-verb-anywhere` | list |
 | 2 | step 2, x | DELETE, always, `destructive: true` | `method-delete` | floor |
@@ -186,11 +186,18 @@ truly w, but a POST with no verb word cannot be told from a create
 of 1994 on tuning) carry most of the too-tight cost and are the pile
 `jev-lower` lowers.
 
-**The method floor, as the code has it.**
+**The method floor, as the code has it.** QUERY (RFC 10008, June 2026,
+Proposed Standard: safe and idempotent like GET, with a request body) is
+r and is handled exactly like GET everywhere a method decides something
+(D134, user ruling 2026-11-04): step 1's floor, the review marker, the
+MCP and WebMCP hints, the exporter letter, the key and the matcher. It is
+read from OpenAPI 3.2's `query` field and from an `additionalOperations`
+entry keyed QUERY (any case). Open question: rwxlite's model has not seen
+QUERY, so in mode b a QUERY row is sent with method `QUERY` as-is.
 
 | method | floor | what can move it |
 |---|---|---|
-| GET, HEAD, OPTIONS | r | nothing in the mechanical core |
+| GET, HEAD, OPTIONS, QUERY | r | nothing in the mechanical core |
 | DELETE | x, `destructive: true` | nothing — DELETE beats every word |
 | PUT, PATCH | w | a `CANT_UNDO` verb or `credential-set` raises it to x |
 | POST | none — decided by its verb | `READ_VERBS`/`SAFE_VERBS` → r; `CANT_UNDO` → x; `KEEP_W` → w; no word → x |
@@ -963,8 +970,9 @@ decided; everything marked "proposal" or "open" is not decided.
     second-pass argument (raised: `tight` if x else `loose`; lowered:
     `loose`). Scope is still the Jev tiers' own piles (`needsJev`), not
     mode a's loose and tight rows. Not covered: a D129 second answer
-    that carries a different model string than the first is a
-    successful call the rule cannot use; the row stays at w.
+    that carries a different model string than the first cannot be
+    combined with it (D133, user-agreed): it counts as a failed call and
+    the row is undecided, x with review `tight`, not left at w.
   This reverses today's order (mechanical default, Jev opt-in).
 - **Runtime and files.** At runtime bareguard sees x, and its own
   gate and ruling decide (for example a human in the loop). rwxmap
@@ -1196,10 +1204,11 @@ Parked items and known limits below.
 
 ### Known limits (not planned)
 
-- **OpenAPI 3.2 `query` and `additionalOperations`.** `operationsFrom`
-  (`src/exporter.js`) reads neither, so those operations get no letter
-  and no key. Few specs use 3.2 today, and stdout already counts the
-  operations it skips.
+- **OpenAPI 3.2 `additionalOperations` other than QUERY.**
+  `operationsFrom` (`src/exporter.js`) reads only the `query` field and
+  an `additionalOperations` entry keyed QUERY (D134); every other key
+  there (COPY, PURGE, ...) gets no letter and no key. Few specs use 3.2
+  today, and stdout already counts the operations it skips.
 - **Two plain error messages depend on wording.** The CLI recognises
   `load.js`'s "no usable paths" error and Node's `parseArgs` errors by
   their text. If either is reworded the user sees the raw message

@@ -474,7 +474,7 @@ test('D129: isX does not fire -> x unchanged, whatever the changes answer says',
   assert.deepEqual(applyJev(FLOOR_VERDICT, { model: MODEL, changes: { p: 0, model: MODEL } }), FLOOR_VERDICT);
 });
 
-test('D129: a missing, malformed or other-model changes answer leaves the row at w', () => {
+test('D129: a missing or malformed changes answer leaves the row at w', () => {
   /** @type {[string, any][]} */
   const bad = [
     ['missing', undefined],
@@ -488,14 +488,25 @@ test('D129: a missing, malformed or other-model changes answer leaves the row at
     ['p -Infinity', { p: -Infinity, model: MODEL }],
     ['p negative', { p: -0.01, model: MODEL }],
     ['p above 1', { p: 1.5, model: MODEL }],
-    ['no model', { p: 0.1 }],
-    ['empty model', { p: 0.1, model: '' }],
-    ['non-string model', { p: 0.1, model: 1 }],
-    ['different model', { p: 0.1, model: 'jev-1.14.0' }],
   ];
   for (const [name, changes] of bad) {
     assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes }), LOWER_TO_W, name);
   }
+});
+
+test('D133: a usable changes answer from another model version is undecided (x, review tight), not w', () => {
+  /** @type {[string, any][]} */
+  const other = [
+    ['different model', { p: 0.1, model: 'jev-1.14.0' }],
+    ['no model', { p: 0.1 }],
+    ['empty model', { p: 0.1, model: '' }],
+    ['non-string model', { p: 0.1, model: 1 }],
+  ];
+  for (const [name, changes] of other) {
+    assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes }), jevUndecided(FLOOR_VERDICT), name);
+  }
+  // the first answer not firing never reads the second one
+  assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.9, model: MODEL, changes: { p: 0.1, model: 'other' } }), FLOOR_VERDICT);
 });
 
 test('D129: a changes answer never moves a row on a tier without a second question', () => {
@@ -558,7 +569,6 @@ test('D133: successful answers give the same letters as before, for every tier a
     [FLOOR_VERDICT, { p: 0.11, ...m }, 'x'],
     [FLOOR_VERDICT, { p: 0.05, ...m, changes: { p: 0.50, model: MODEL } }, 'r'],
     [FLOOR_VERDICT, { p: 0.05, ...m, changes: { p: 0.51, model: MODEL } }, 'w'],
-    [FLOOR_VERDICT, { p: 0.05, ...m, changes: { p: 0.10, model: 'other' } }, 'w'],
     [FLOOR_VERDICT, { p: 0.50, ...m, changes: { p: 0.01, model: MODEL } }, 'x'],
     [METHOD_FLOOR_W, { p: 0.80, ...m }, 'x'],
     [METHOD_FLOOR_W, { p: 0.79, ...m }, 'w'],

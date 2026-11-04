@@ -1045,14 +1045,14 @@ test('run (D129): changes above 0.50 leaves a fired jev-lower row at w', async (
   assert.deepEqual(mystery.jev, { p: 0.01, model: 'jev-1.0.0' });
 });
 
-test('run (D129): a failed or malformed second answer makes the row undecided (x, review tight); an other-model one leaves it at w (D129, D133)', async () => {
+test('run (D129): a failed or malformed second answer makes the row undecided (x, review tight), and so does an other-model one (D129, D133)', async () => {
   /** @type {Array<[string, (body: any) => any, number]>} label, response, failed count */
   const cases = [
     ['HTTP error', () => ({ ok: false, status: 400, json: async () => ({}) }), 1],
     ['network failure', () => { throw new Error('offline'); }, 1],
     ['NaN p', () => ({ ok: true, status: 200, json: async () => ({ model: 'jev-1.0.0', answers: { changes: { noul: NaN } } }) }), 1],
     ['missing model', () => ({ ok: true, status: 200, json: async () => ({ answers: { changes: { noul: 0 } } }) }), 1],
-    ['other model', ok(0, 'jev-9.9.9'), 0],
+    ['other model', ok(0, 'jev-9.9.9'), 1],
   ];
   for (const [label, changes, failedCount] of cases) {
     const { fetchImpl, calls } = questionJevFetch({
@@ -1515,7 +1515,7 @@ test('run: a successful --force leaves no backup file behind', async () => {
   readJson(path.join(outDir, 'example.openapi.rwx.json'));
 });
 
-test('run: OpenAPI 3.2 query/additionalOperations operations are counted as not labelled, and stay unlabelled', async () => {
+test('run: OpenAPI 3.2 query is labelled (D134); other additionalOperations are counted as not labelled and stay unlabelled', async () => {
   const doc = {
     openapi: '3.2.0',
     paths: {
@@ -1535,11 +1535,11 @@ test('run: OpenAPI 3.2 query/additionalOperations operations are counted as not 
 
   const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
   assert.equal(code, 0, stderr.text());
-  assert.match(stdout.text(), /\nrwxmap: 3 operation\(s\) under OpenAPI 3\.2 query\/additionalOperations are not labelled yet \(no letter, no key, no x-rwx\)\n/);
+  assert.match(stdout.text(), /\nrwxmap: 2 operation\(s\) under OpenAPI 3\.2 additionalOperations \(other than QUERY\) are not labelled yet \(no letter, no key, no x-rwx\)\n/);
   const review = readJson(path.join(outDir, 'example.rwxmap.review.json'));
-  assert.equal(review.counts.rows, 2);
+  assert.equal(review.counts.rows, 3);
   const copy = readJson(path.join(outDir, 'example.openapi.rwx.json'));
-  assert.equal('x-rwx' in copy.paths['/things'].query, false);
+  assert.equal(copy.paths['/things'].query['x-rwx'].class, 'r');
   assert.equal('x-rwx' in copy.paths['/things'].additionalOperations.COPY, false);
 });
 
@@ -1645,13 +1645,12 @@ test('run: --force never leaves a target absent — between backup and rename th
   for (const name of names) readJson(path.join(outDir, name));
 });
 
-test('run: a spec whose only operations are OpenAPI 3.2 query/additionalOperations exits 1, says so, and writes no file', async () => {
+test('run: a spec whose only operations are OpenAPI 3.2 additionalOperations other than QUERY exits 1, says so, and writes no file', async () => {
   const dir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', {
     openapi: '3.2.0',
     paths: {
       '/things': {
-        query: { operationId: 'queryThings' },
         additionalOperations: { COPY: { operationId: 'copyThings' } },
       },
     },
@@ -1663,7 +1662,7 @@ test('run: a spec whose only operations are OpenAPI 3.2 query/additionalOperatio
   assert.equal(code, 1);
   assert.equal(
     stderr.text(),
-    `rwxmap: no labelled operations in ${specPath} — 2 operation(s) under OpenAPI 3.2 query/additionalOperations are not read yet (item g)\n`,
+    `rwxmap: no labelled operations in ${specPath} — 1 operation(s) under OpenAPI 3.2 additionalOperations (other than QUERY) are not read yet (item g)\n`,
   );
   assert.deepEqual(fs.readdirSync(outDir), []);
 });
@@ -2277,4 +2276,37 @@ test('run (D133): --help names the engines, --confidence, and that a key alone d
   assert.match(stdout.text(), /--engine <e>/);
   assert.match(stdout.text(), /--confidence <0-99>/);
   assert.match(stdout.text(), /A key alone does not turn Jev on/);
+});
+
+test('D134: a 3.2 query op and an additionalOperations QUERY op get r, a key, x-rwx and readOnlyHint; COPY stays unread', async () => {
+  const doc = {
+    openapi: '3.2.0',
+    servers: [{ url: 'https://api.example.com' }],
+    paths: {
+      '/things': {
+        get: { operationId: 'listThings' },
+        post: { operationId: 'createThing' },
+        query: { operationId: 'purgeThingsQuery' },
+      },
+      '/reports': { additionalOperations: { QUERY: { operationId: 'runReport' }, COPY: { operationId: 'copyReport' } } },
+    },
+  };
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', doc);
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
+  assert.equal(code, 0, stderr.text());
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.deepEqual(combined.mcp['QUERY /things'].annotations, { readOnlyHint: true });
+  assert.deepEqual(combined.mcp['QUERY /reports'].annotations, { readOnlyHint: true });
+  assert.equal(combined.mcp['QUERY /things']._meta['io.github.hamr0.rwxmap/class'], 'r');
+  assert.ok(combined.webmcp['QUERY /things']);
+  const copy = readJson(path.join(outDir, 'example.openapi.rwx.json'));
+  assert.equal(copy.paths['/things'].query['x-rwx'].class, 'r');
+  assert.equal(copy.paths['/reports'].additionalOperations.QUERY['x-rwx'].class, 'r');
+  assert.equal('x-rwx' in copy.paths['/reports'].additionalOperations.COPY, false);
+  assert.equal(copy.paths['/things'].post['x-rwx'].class, 'x');
+  assert.match(stdout.text(), /\nrwxmap: 1 operation\(s\) under OpenAPI 3\.2 additionalOperations \(other than QUERY\) are not labelled yet/);
 });

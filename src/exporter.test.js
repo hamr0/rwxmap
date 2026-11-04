@@ -388,3 +388,14 @@ test('exportSidecar: `servers` is always present — [] when not given, the give
   assert.deepEqual(exportSidecar(ops, { vendor: 'acme' }).servers, []);
   assert.deepEqual(exportSidecar(ops, { vendor: 'acme', servers: ['https://api.acme.test/v1'] }).servers, ['https://api.acme.test/v1']);
 });
+
+test('D134: operationsFrom reads the 3.2 query field and additionalOperations QUERY (any case); other additionalOperations keys stay unread', () => {
+  const rows = operationsFrom({
+    paths: {
+      '/a': { query: { operationId: 'q1' }, additionalOperations: { Query: { operationId: 'q2' }, COPY: { operationId: 'c' }, PURGE: { operationId: 'p' } } },
+      '/b': { additionalOperations: { QUERY: 'not an object' } },
+    },
+  });
+  assert.deepEqual(rows.map((r) => `${r.method} ${r.path} ${r.operationId}`), ['QUERY /a q1', 'QUERY /a q2']);
+  assert.deepEqual(classifyOperations(rows).map((v) => [v.class, v.review]), [['r', 'settled'], ['r', 'settled']]);
+});
