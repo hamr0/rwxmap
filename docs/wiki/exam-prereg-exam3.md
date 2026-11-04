@@ -168,3 +168,47 @@ change after this needs a new exam.
 - Mode b and mode a share the same model; their rows are not independent.
 - rwxmap's default (published) model will be whatever rwxlite releases; these
   figures are for r10 only.
+
+## Results and findings (after scoring, 2026-11-04)
+
+Scored once. Exam #3 is BURNED. Source: `data/exam3-2026-11-04/score/score.txt`.
+
+### rwxmap's committed scores (of 1377)
+
+| config | exact | too loose | too tight |
+|---|---|---|---|
+| mech | 1094 (79.4%) | 17 (1.2%) | 266 (19.3%) |
+| a-fp32 | 1178 (85.5%) | 15 (1.1%) | 184 (13.4%) |
+| a-int8 | 1180 (85.7%) | 15 (1.1%) | 182 (13.2%) |
+| b95-fp32 | 1179 (85.6%) | 12 (0.9%) | 186 (13.5%) |
+| b95-int8 | 1182 (85.8%) | 12 (0.9%) | 183 (13.3%) |
+| c-jev | 1250 (90.8%) | 16 (1.2%) | 111 (8.1%) |
+
+### D133 verdicts
+
+- Mode a gate (a-fp32): PASS. Too loose 15 vs mech 17. Exact +6.10 points vs the 5.0 bar (69 more rows needed; 84 gained).
+- Mode a a-int8: PASS (+6.25 points).
+- Mode b: no bar. b95-fp32 12 too loose, 244 asked (17.7%).
+- Mode c (M3 gate): PASS. Too loose 1.2% vs 2%, too tight 8.1% vs 20%.
+- rwxlite's own gate (relayed by rwxlite): r10 int8-pc NO-GO, 15 too loose = 1.22% of answered vs 0.5%.
+
+### rwxlite 0.2.0 fp32 replay (analysis, not a new exam)
+
+Replay of rwxlite's frozen p files through rwxmap's real `secondPass`. Parity gates: mechanical 1377 of 1377 equal; r10 fp32 replay equal to the committed CLI rows 1377 of 1377 in both modes. int8 failed parity (5 rows in mode a, 7 in b95), so 0.2.0 is reported for fp32 only. Detail in `docs/logs/learnings.md`, entry "rwxlite 0.2.0 vs r10 inside rwxmap".
+
+| config (of 1377) | exact | too loose | too tight |
+|---|---|---|---|
+| r10 a-fp32 | 1178 | 15 | 184 |
+| 0.2.0 a-fp32 | 1192 | 15 | 170 |
+| r10 b95-fp32 | 1179 | 12 | 186 |
+| 0.2.0 b95-fp32 | 1181 | 14 | 182 |
+
+Mode a: 22 rows differ, none a leak; 0.2.0 right on 18, r10 right on 4. Mode b95: 39 rows differ; 0.2.0 newly too loose on 4, fixes 2 of r10's leaks.
+
+### Findings
+
+- (a) All 15 mode-a too-loose rows are mechanical's own leaks that the model kept. Shapes: credential or identity replace (7 rows), billing commits (3), mux analyze-structure jobs read as r (2), mux mp4-support (1), ory logout GETs (2). The same shapes R1 and R2 failed to fix on tuning.
+- (b) 2 of the 15 were user-ruled x on dispute: ex3-1256 supabase PATCH billing/addons and ex3-0400 mux PUT mp4-support.
+- (c) Jev opens 2 leaks by lowering: ex3-0774 netbird POST msp tenants/{id}/subscription and ex3-0823 netbird POST peers/{peerId}/jobs (both evidence jev).
+- (d) int8 p drift: rwxlite's predict file and the CLI's int8 run disagree by about 0.005 to 0.01 on rows near a cut. rwxlite's own parity test (2.2e-16) did not see it. Cause under investigation by rwxlite.
+- (e) Labeller A's first mux pass was written by script and rejected. The labellers are one model family, so agreement may be inflated.

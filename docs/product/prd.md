@@ -1185,7 +1185,9 @@ loose, 244 asked (no bar). Jev: 1250 / 16 / 111, PASS on the M3 gate (1.2%
 too loose vs 2%, 8.1% too tight vs 20%). All 15 mode-a leaks are
 mechanical's own leaks the model kept. rwxlite's own gate for r10 is
 NO-GO (15 too loose = 1.22% of answered vs 0.5%). The exam is burned for
-both sides.
+both sides. A parity-checked replay of rwxlite 0.2.0 fp32 (analysis, not a
+new exam) gives 1192 / 15 / 170 in mode a, also a PASS, and 14 too loose in
+b95 vs r10's 12.
 
 ### Open
 
@@ -1194,7 +1196,7 @@ One item, listed under Open questions below.
 ## What is next
 
 0.9.0 is released (PR #18, merge e9b697c, npm 0.9.0, 2026-11-03). Next:
-the D133 release, pending which rwxlite model ships (r10 passed rwxmap's mode-a bar but failed rwxlite's own gate). That is a user decision.
+the D133 release, pending which rwxlite model ships (0.2.0 or r10/0.3.0; see Open questions). That is a user decision.
 Parked items and known limits below.
 
 ### Parked
@@ -1221,6 +1223,14 @@ Parked items and known limits below.
   an `additionalOperations` entry keyed QUERY (D134); every other key
   there (COPY, PURGE, ...) gets no letter and no key. Few specs use 3.2
   today, and stdout already counts the operations it skips.
+- **credential-set (D131) fires on "pin" meaning a pinned item.** whapi
+  PUT /account/plusCard/pin and circuitsandbox PUT /spaces/{topicId}/pin.
+  Over-tight only, not a leak.
+- **Jev sees a QUERY row's method raw on the jev-raise-get pile.** The tier
+  is raise-only, so the cost is over-tight only. QUERY = r is settled (D134).
+- **int8 p drift between rwxlite's predict file and the CLI run.** 5 rows
+  in mode a and 7 in b95 differ on exam #3, each within about 0.01 of a
+  cut. rwxlite is investigating.
 - **Two plain error messages depend on wording.** The CLI recognises
   `load.js`'s "no usable paths" error and Node's `parseArgs` errors by
   their text. If either is reworded the user sees the raw message
@@ -1299,4 +1309,4 @@ network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
 
 ## Open questions
 
-- D133: which rwxlite model ships. r10 passed rwxmap's mode-a bar (15 too loose vs 17 mechanical, exam #3) but failed rwxlite's own gate; user decision.
+- D133: which rwxlite model ships — 0.2.0 (published; replay: same 15 leaks as r10 in mode a, +14 exact) or r10/0.3.0 (pre-registered pass, but failed rwxlite's own gate). Orchestrator recommends 0.2.0; user decision pending.

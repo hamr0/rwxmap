@@ -8502,3 +8502,28 @@ exact >= +5 points): +9.0 and +9.5 points.
   - Process: one labeller (A, mux, first pass) labelled by script and was rejected. The labellers are one model family, so agreement may be inflated.
 - Lesson: the second pass helps exactness (+84 exact rows) without adding leaks, but leaves mechanical's leaks in place when the model agrees with them. The remaining leaks are credential/identity replace, billing commits and logout GETs: the same shapes R1 and R2 failed to fix on tuning.
 - State: exam #3 is BURNED for both sides. Usable for training or tuning, never an exam again.
+
+## 2026-11-04 — rwxlite 0.2.0 vs r10 inside rwxmap, exam #3 replay (analysis, exam burned)
+
+- Goal: rwxlite asked rwxmap to help decide which model ships, 0.2.0 or r10 (0.3.0). Exam #3 is already burned; this is analysis, not a new exam.
+- Tried: replayed rwxlite's frozen per-row p files (rwxlite commit 7cb5dc0) through rwxmap's real `secondPass`, with mechanical verdicts built the way the CLI builds them. Script `poc/exam3-v020/replay.mjs`, output `poc/exam3-v020/out.txt`. Two gates before any number counts:
+  - Gate 1, mechanical vs `rows-mech.csv`: 1377 of 1377 equal.
+  - Gate 2, r10 replay vs the committed CLI rows (letter and review): fp32 equal on 1377 of 1377 in mode a and in b95. int8 FAILED: 5 rows differ in mode a (ex3-0601, ex3-0661, ex3-0846, ex3-0910, ex3-1344) and 7 in b95 (ex3-0348, ex3-0948, ex3-0993, ex3-1046, ex3-1058, ex3-1148, ex3-1333). Every one sits within about 0.01 of a cut (0.97 or 0.95). rwxlite's int8 p file and the CLI's int8 run disagree by about 0.005 to 0.01. rwxlite is investigating; the suspects are thread count (the CLI uses min(4, cores), 4 on the i7-8665U) and batching per vendor.
+  - So 0.2.0 is reported for fp32 only. int8 0.2.0 was not computed.
+- Outcome (exact / too loose / too tight, of 1377):
+
+  | config | exact | too loose | too tight | secondPass |
+  |---|---|---|---|---|
+  | mech | 1094 | 17 | 266 | - |
+  | r10 a-fp32 | 1178 | 15 | 184 | sent 592, raised 3, lowered 83, kept 331, undecided 175 |
+  | 0.2.0 a-fp32 | 1192 | 15 | 170 | sent 592, raised 3, lowered 97, kept 329, undecided 163 |
+  | r10 b95-fp32 | 1179 | 12 | 186 | sent 1377, raised 4, lowered 125, kept 1004, undecided 244 |
+  | 0.2.0 b95-fp32 | 1181 | 14 | 182 | sent 1377, raised 3, lowered 134, kept 1007, undecided 233 |
+
+  - Mode a: 22 rows differ in letter, none a leak. 0.2.0 is right on 18 (POST creates that r10 raised to x: clerk, mux, neon, netbird, novu, ory, supabase). r10 is right on 4: ex3-0576 neon, ex3-1302 supabase, ex3-1331 supabase, ex3-1345 supabase. Same 15 too-loose rows. 0.2.0 passes the D133 mode-a bar: 15 too loose vs 17, exact +98 rows = +7.12 points vs 5.0 (r10: +6.10).
+  - Mode b95: 39 rows differ in letter. 0.2.0 is newly too loose on 4 truth-x rows that r10 got exact: ex3-0018 clerk PUT /beta_features/domain, ex3-0031 clerk POST price_transition, ex3-0257 clerk POST /waitlist_entries/bulk, ex3-0774 netbird POST msp tenants/{id}/subscription. It fixes 2 r10 leaks: ex3-1059 ory PUT /admin/keys/{set}, ex3-1104 ory GET /oauth2/sessions/logout. Net 14 too loose vs r10's 12 (12 + 4 - 2). Mode b has no bar.
+- Caveats:
+  - The 0.2.0 fp32 file carries the stale string `rwxlite-0.1.0+8503b655`. The published model is `rwxlite-0.2.0+8503b655`, same weights. Each file's own string was passed to `secondPass`; the file was not rewritten.
+  - The replay is post-hoc, not pre-registered.
+  - Choosing between two pre-fixed models on a burned exam is a mild form of fitting.
+- Lesson: a replay is trusted only after it reproduces the committed rows exactly. The int8 check caught a p drift that rwxlite's own parity test (2.2e-16) missed.
