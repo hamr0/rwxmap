@@ -1,0 +1,28 @@
+requests a-fp32: 15 chunks, 592 rows; byte-identical in the 0.2.0 and 0.2.1 CLI runs
+requests a-int8: 15 chunks, 592 rows; byte-identical in the 0.2.0 and 0.2.1 CLI runs
+requests b95-fp32: 25 chunks, 1377 rows; byte-identical in the 0.2.0 and 0.2.1 CLI runs
+requests b95-int8: 25 chunks, 1377 rows; byte-identical in the 0.2.0 and 0.2.1 CLI runs
+(iii) rwxlite 0.2.0 fp32: answerer.model = rwxlite-0.2.0+8503b655 (= cache folder)
+(iii) rwxlite 0.2.1 fp32: answerer.model = rwxlite-0.2.0+8503b655 (= cache folder)
+(iii) rwxlite 0.2.0 int8: answerer.model = rwxlite-0.2.0+8ad0a182 (= cache folder)
+(iii) rwxlite 0.2.1 int8: answerer.model = rwxlite-0.2.0+8ad0a182 (= cache folder)
+
+(i) answerMany in production chunks vs answer() one row at a time
+  0.2.0 fp32 mode a: n 592  isX max|dp| 0.000e+0 rows dp>0 0  changes max|dp| 0.000e+0 rows dp>0 0  (errors: both 0, one side 0)
+  0.2.0 fp32 mode b95: n 1377  isX max|dp| 0.000e+0 rows dp>0 0  changes max|dp| 0.000e+0 rows dp>0 0  (errors: both 0, one side 0)
+  0.2.1 fp32 mode a: n 592  isX max|dp| 0.000e+0 rows dp>0 0  changes max|dp| 0.000e+0 rows dp>0 0  (errors: both 0, one side 0)
+  0.2.1 fp32 mode b95: n 1377  isX max|dp| 0.000e+0 rows dp>0 0  changes max|dp| 0.000e+0 rows dp>0 0  (errors: both 0, one side 0)
+  0.2.0 int8 mode a: n 592  isX max|dp| 1.694e-1 rows dp>0 592  changes max|dp| 1.347e-1 rows dp>0 592  (errors: both 0, one side 0)
+  0.2.0 int8 mode b95: n 1377  isX max|dp| 1.442e-1 rows dp>0 1376  changes max|dp| 1.117e-1 rows dp>0 1376  (errors: both 0, one side 0)
+  0.2.1 int8 mode a: n 592  isX max|dp| 0.000e+0 rows dp>0 0  changes max|dp| 0.000e+0 rows dp>0 0  (errors: both 0, one side 0)
+  0.2.1 int8 mode b95: n 1377  isX max|dp| 0.000e+0 rows dp>0 0  changes max|dp| 0.000e+0 rows dp>0 0  (errors: both 0, one side 0)
+
+(ii) 0.2.1 vs 0.2.0 on the same chunks
+  fp32 mode a answerMany : n 592  isX max|dp| 0.000e+0 rows dp>0 0  changes max|dp| 0.000e+0 rows dp>0 0  (errors: both 0, one side 0)
+  fp32 mode a one-by-one : n 592  isX max|dp| 0.000e+0 rows dp>0 0  changes max|dp| 0.000e+0 rows dp>0 0  (errors: both 0, one side 0)
+  fp32 mode b95 answerMany : n 1377  isX max|dp| 0.000e+0 rows dp>0 0  changes max|dp| 0.000e+0 rows dp>0 0  (errors: both 0, one side 0)
+  fp32 mode b95 one-by-one : n 1377  isX max|dp| 0.000e+0 rows dp>0 0  changes max|dp| 0.000e+0 rows dp>0 0  (errors: both 0, one side 0)
+  int8 mode a answerMany : n 592  isX max|dp| 1.694e-1 rows dp>0 592  changes max|dp| 1.347e-1 rows dp>0 592  (errors: both 0, one side 0)
+  int8 mode a one-by-one : n 592  isX max|dp| 0.000e+0 rows dp>0 0  changes max|dp| 0.000e+0 rows dp>0 0  (errors: both 0, one side 0)
+  int8 mode b95 answerMany : n 1377  isX max|dp| 1.442e-1 rows dp>0 1376  changes max|dp| 1.117e-1 rows dp>0 1376  (errors: both 0, one side 0)
+  int8 mode b95 one-by-one : n 1377  isX max|dp| 0.000e+0 rows dp>0 0  changes max|dp| 0.000e+0 rows dp>0 0  (errors: both 0, one side 0)
