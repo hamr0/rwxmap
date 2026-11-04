@@ -1084,15 +1084,11 @@ decided; everything marked "proposal" or "open" is not decided.
   Evidence: "Rule comparison" under Evidence so far. Caveat:
   secondPass has only that one tuning measurement; the D133 exam is its
   test.
-- **R1 and R2 are tuning candidates only.** R1: credential replace on
-  PUT/PATCH (last path segment is a credential being replaced: api-key,
-  client-credentials, token, secret), kept narrower than the broad noun
-  rule that failed (6 right, 17 wrong, learnings F2 POC). R2: logout,
-  signout, end-session is x on any method; it touches step 1, so it is
-  a core change. Each gets its own D-number only if it passes tuning
-  (D100 bar, LOVO), after a prevalence check across all vendors first (4
-  of the 5 source rows are workos). rwxlite's burned 949-op exam
-  (coolify, workos, lago, resend) may be used as extra tuning rows.
+- **R1 and R2 failed tuning.** Measured 2026-11-04, both failed the
+  D100 tighten bar. Every right fire was workos, the vendor they were
+  drawn from; excluding it, neither closes a leak. Each adds wrong
+  fires (R1 files.com PATCH /api_key; R2 okta sign-out page settings).
+  Neither is built; no D-number. Details in learnings.
 - **Go/no-go bar (set before building).** A starting bar ("we can start
   there"), one per mode. It replaces the old fixed 0.5% too-loose limit
   for the default mode. Too loose and too tight are counted and
@@ -1174,7 +1170,8 @@ set. They differ on 9 rows (5 GET rows only the tier rule sends, 4
 PUT/PATCH rows it raises at isX >= 0.15); the tier rule has one fewer
 leak (lago PUT /invoices/{id}/finalize), which is noise. Neither fixes
 the 5 remaining leaks (3 credential PUT/PATCH, 2 workos logout GETs):
-the model agrees with mechanical there, so R1 and R2 are the route.
+the model agrees with mechanical there, and the R1 and R2 tuning POCs
+(2026-11-04) closed none of them.
 
 ### Open
 
@@ -1183,7 +1180,7 @@ One item, listed under Open questions below.
 ## What is next
 
 0.9.0 is released (PR #18, merge e9b697c, npm 0.9.0, 2026-11-03). Next:
-the D133 spec (above), the R1 and R2 tuning POCs, and shared exam #3.
+the D133 release and shared exam #3.
 Parked items and known limits below.
 
 ### Parked

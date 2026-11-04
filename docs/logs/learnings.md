@@ -8369,3 +8369,92 @@ exact >= +5 points): +9.0 and +9.5 points.
 - Lesson: a model's measured scores belong to the decision rule they
   were measured with; a different rule over the same p's needs its own
   measurement. PRD D133 and decisions-log updated.
+
+## 2026-11-04 — R1/R2 pre-registered (tuning POC, bar set before measuring)
+
+- Goal: tuning POC for the two D133 candidates R1 and R2 (PRD D133,
+  "R1 and R2 are tuning candidates only"). Definitions and bar are set
+  here, before any scorer code is written or run.
+- Both rules only raise to x. They apply on top of the current
+  mechanical verdict (src classifyRow). A row already x is "already x",
+  not a move.
+- R1 (step 2, credential replace). Method PUT or PATCH. The row is not
+  already claimed by step 2's CANT_UNDO lead-verb check, nor by the
+  existing credential-set rule (D131). The LAST path segment is
+  literal (not a {param}) and, lowercased with "-" and "_" removed,
+  equals one of: apikey, clientcredentials, token, secret. Singular
+  only. Nothing else is read (no summary, no operationId).
+- R2 (step 1, end session). Any method. Fires when either (a) the
+  operationId, split with the project tokenizer ("_", "-", ".",
+  camelCase), has lead tokens forming logout, signout or endsession
+  (the single token, or the two-token sequences log+out, sign+out,
+  end+session at lead position), or (b) any literal path segment,
+  lowercased with "-" and "_" removed, equals logout, signout or
+  endsession.
+- Bar (D100 tighten-only, as for F2), per rule, judged separately:
+  1. Among moved rows, right (truth x, leak closed) > wrong (truth w
+     or r, new over-tight), on each tuning line.
+  2. Too loose never rises on any line.
+  3. Holds under leave-one-vendor-out. The rules are fixed lists, so
+     LOVO here is the per-vendor breakdown plus the result with each
+     vendor's rows removed in turn; right and wrong are stated with the
+     top vendor removed.
+  4. Prevalence: APIs.guru fires (no truth) across providers, as F2
+     did. FLAG if one vendor holds more than 50% of the fires on any
+     line or in prevalence. 4 of the 5 R2 source rows are workos, so
+     every line is also reported with workos excluded.
+- Also reported: R1 and R2 jointly (both on); counts with denominators;
+  exact / too loose / too tight before and after per line.
+- Tuning lines, scored and printed separately, never blended: combined
+  (6557), buildset (1819), rwxlite fresh 949 (mechanical baseline is
+  classifyRow, not the file's lean), and rwxlite gate-3 (800; credential
+  and general strata separately). Gate-3 was the D131 exam and is burned
+  for that rule; here it is a tuning line for new rules only.
+  Not used: gate4-2026-11-04, rwxlite's gate-2026-11-07, and the
+  vendors clerk, neon, supabase, mux, netbird, ory, novu.
+- Run file: poc/r1r2/score.mjs, output score.txt. No Jev calls.
+
+## 2026-11-04 — R1/R2 tuning POC: both FAIL
+
+- Goal: tuning POC for the two rules the D133 rule comparison left as the
+  route to the 5 remaining leaks on the 949 set. R1: PUT/PATCH replacing
+  a credential (api-key, client-credentials, token, secret) is x. R2:
+  logout, signout, end-session is x on any method. Bar set before
+  measuring (pre-registration entry above): D100 tighten-only, per rule.
+- Tried: poc/r1r2/score.mjs, output poc/r1r2/score.txt, 7 tests pass. The
+  orchestrator re-ran it; the output was identical. Lines: combined
+  (6557), buildset (1819), rwxlite fresh 949, rwxlite gate3 (800), plus
+  APIs.guru prevalence (123339 ops, no truth). Every line also reported
+  with workos excluded.
+- Outcome: both FAIL.
+  - R1. Combined 0 fires of 6557. Buildset 0 of 1819. Fresh949: 2 fires,
+    2 moved, 2 right (workos upsertClientCredentials, upsertApiKey); too
+    loose 6 -> 4. Gate3: 1 fire, 1 moved, wrong (files.com PATCH
+    /api_key, truth w). Workos excluded: 0 right on every line.
+    APIs.guru: 20 fires across 3 providers, github.com 18 (90%), FLAG.
+  - R2. Combined 3 fires of 6557: 1 already x (zendesk DELETE
+    /users/me/logout), 2 moved, both wrong (okta GET and PUT
+    /api/v1/brands/{brandId}/pages/sign-out/customized: page settings,
+    not a session; truth r and w). Buildset 4 fires, all already x
+    (clearblade x2, keycloak, dracoon). Fresh949: 4 fires, 2 moved right
+    (workos GET /sso/logout, GET /user_management/sessions/logout), 2
+    already x. Gate3 0 fires of 800. Workos excluded: 0 right.
+    APIs.guru: 35 fires across 31 providers, top amazonaws.com 8.6%, only
+    3 would move.
+  - Joint R1+R2 adds nothing. Combined: 3 fires, 2 moved, 0 right, 2
+    wrong (the okta rows). Fresh949: 6 fires, 4 moved, 4 right, all
+    workos; with workos excluded 1 fire, already x, 0 moved. Gate3: 1
+    moved, wrong (files.com).
+  - Process slip: gate3 (rwxlite gate-2026-11-06) was included as a tuning
+    line, but its README says it was used once and is never for tuning. It
+    contributed only the one R1 wrong row (files.com). The verdict is the
+    same without it.
+- Lesson: the 5 leaks left on the 949 set are workos-shaped, so the rules
+  were fitted by construction. With the source vendor removed neither
+  rule closes a leak. A path-segment match on "sign-out" catches page
+  settings, not sessions. Logout rows elsewhere are already x through the
+  POST floor or DELETE. Neither rule is built; no D-number.
+- Ledger item, not fixed: credential-set (D131) fires on "pin" meaning a
+  pinned item. whapi PUT /account/plusCard/pin is already its one wrong
+  gate-3 fire; circuitsandbox PUT /spaces/{topicId}/pin was reported by
+  rwxlite on 2026-11-04. Over-tight, not a leak.

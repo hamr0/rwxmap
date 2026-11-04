@@ -1,0 +1,300 @@
+
+================ combined (read 6557; skipped 0 (truth not r/w/x); banned-vendor 0)
+
+-- combined | R1 | 6557 rows
+   fires 0 of 6557; already x 0; moved 0 -> right (truth x) 0, wrong truth w 0, wrong truth r 0; right <= wrong (no moves: bar 1 vacuous); R1-shaped rows claimed by step 2 (already x): 0
+   before: 5420 exact (82.7%) / 62 too loose (0.9%) / 1075 too tight (16.4%) of 6557
+   after : 5420 exact (82.7%) / 62 too loose (0.9%) / 1075 too tight (16.4%) of 6557  | too loose 62 -> 62 ok; too tight 1075 -> 1075 (+0, wrong moves 0)
+   per vendor (fires / moved / right / wrong): (none)
+   top vendor - holds 0 of 0 fires (0.0%)
+   leave-one-vendor-out (rows of vendor removed): (none)
+   workos excluded (0 rows removed): fires 0; already x 0; moved 0, right 0, wrong 0; no moves
+      before: 5420 exact (82.7%) / 62 too loose (0.9%) / 1075 too tight (16.4%) of 6557
+      after : 5420 exact (82.7%) / 62 too loose (0.9%) / 1075 too tight (16.4%) of 6557 | too loose 62 -> 62 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+
+-- combined | R2 | 6557 rows
+   fires 3 of 6557; already x 1; moved 2 -> right (truth x) 0, wrong truth w 1, wrong truth r 1; right <= wrong
+   before: 5420 exact (82.7%) / 62 too loose (0.9%) / 1075 too tight (16.4%) of 6557
+   after : 5418 exact (82.6%) / 62 too loose (0.9%) / 1077 too tight (16.4%) of 6557  | too loose 62 -> 62 ok; too tight 1075 -> 1077 (+2, wrong moves 2)
+   per vendor (fires / moved / right / wrong): okta 2/2/0/2, zendesk 1/0/0/0
+   top vendor okta holds 2 of 3 fires (66.7%) FLAG: >50% one vendor
+   leave-one-vendor-out (rows of vendor removed): -okta: moved 0 right 0 wrong 0; -zendesk: moved 2 right 0 wrong 2 (right<=wrong)
+   top-moved vendor removed (okta): moved 0, right 0, wrong 0; right <= wrong
+   workos excluded (0 rows removed): fires 3; already x 1; moved 2, right 0, wrong 2; right <= wrong
+      before: 5420 exact (82.7%) / 62 too loose (0.9%) / 1075 too tight (16.4%) of 6557
+      after : 5418 exact (82.6%) / 62 too loose (0.9%) / 1077 too tight (16.4%) of 6557 | too loose 62 -> 62 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+     okta | GET | /api/v1/brands/{brandId}/pages/sign-out/customized | getSignOutPageSettings | r | r->x (method) | WRONG | R2:b:signout
+     okta | PUT | /api/v1/brands/{brandId}/pages/sign-out/customized | replaceSignOutPageSettings | w | w->x (method-floor) | WRONG | R2:b:signout
+     zendesk | DELETE | /api/v2/users/me/logout | DeleteAuthenticatedSession | x | x->x (method-delete) | already x | R2:b:logout
+
+-- combined | R1+R2 | 6557 rows
+   fires 3 of 6557; already x 1; moved 2 -> right (truth x) 0, wrong truth w 1, wrong truth r 1; right <= wrong; R1-shaped rows claimed by step 2 (already x): 0
+   before: 5420 exact (82.7%) / 62 too loose (0.9%) / 1075 too tight (16.4%) of 6557
+   after : 5418 exact (82.6%) / 62 too loose (0.9%) / 1077 too tight (16.4%) of 6557  | too loose 62 -> 62 ok; too tight 1075 -> 1077 (+2, wrong moves 2)
+   per vendor (fires / moved / right / wrong): okta 2/2/0/2, zendesk 1/0/0/0
+   top vendor okta holds 2 of 3 fires (66.7%) FLAG: >50% one vendor
+   leave-one-vendor-out (rows of vendor removed): -okta: moved 0 right 0 wrong 0; -zendesk: moved 2 right 0 wrong 2 (right<=wrong)
+   top-moved vendor removed (okta): moved 0, right 0, wrong 0; right <= wrong
+   workos excluded (0 rows removed): fires 3; already x 1; moved 2, right 0, wrong 2; right <= wrong
+      before: 5420 exact (82.7%) / 62 too loose (0.9%) / 1075 too tight (16.4%) of 6557
+      after : 5418 exact (82.6%) / 62 too loose (0.9%) / 1077 too tight (16.4%) of 6557 | too loose 62 -> 62 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+     okta | GET | /api/v1/brands/{brandId}/pages/sign-out/customized | getSignOutPageSettings | r | r->x (method) | WRONG | R2:b:signout
+     okta | PUT | /api/v1/brands/{brandId}/pages/sign-out/customized | replaceSignOutPageSettings | w | w->x (method-floor) | WRONG | R2:b:signout
+     zendesk | DELETE | /api/v2/users/me/logout | DeleteAuthenticatedSession | x | x->x (method-delete) | already x | R2:b:logout
+
+================ buildset (read 1819; skipped 0 (truth not r/w/x); banned-vendor 0)
+
+-- buildset | R1 | 1819 rows
+   fires 0 of 1819; already x 0; moved 0 -> right (truth x) 0, wrong truth w 0, wrong truth r 0; right <= wrong (no moves: bar 1 vacuous); R1-shaped rows claimed by step 2 (already x): 0
+   before: 1311 exact (72.1%) / 16 too loose (0.9%) / 492 too tight (27.0%) of 1819
+   after : 1311 exact (72.1%) / 16 too loose (0.9%) / 492 too tight (27.0%) of 1819  | too loose 16 -> 16 ok; too tight 492 -> 492 (+0, wrong moves 0)
+   per vendor (fires / moved / right / wrong): (none)
+   top vendor - holds 0 of 0 fires (0.0%)
+   leave-one-vendor-out (rows of vendor removed): (none)
+   workos excluded (0 rows removed): fires 0; already x 0; moved 0, right 0, wrong 0; no moves
+      before: 1311 exact (72.1%) / 16 too loose (0.9%) / 492 too tight (27.0%) of 1819
+      after : 1311 exact (72.1%) / 16 too loose (0.9%) / 492 too tight (27.0%) of 1819 | too loose 16 -> 16 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+
+-- buildset | R2 | 1819 rows
+   fires 4 of 1819; already x 4; moved 0 -> right (truth x) 0, wrong truth w 0, wrong truth r 0; right <= wrong (no moves: bar 1 vacuous)
+   before: 1311 exact (72.1%) / 16 too loose (0.9%) / 492 too tight (27.0%) of 1819
+   after : 1311 exact (72.1%) / 16 too loose (0.9%) / 492 too tight (27.0%) of 1819  | too loose 16 -> 16 ok; too tight 492 -> 492 (+0, wrong moves 0)
+   per vendor (fires / moved / right / wrong): clearblade 2/0/0/0, keycloak 1/0/0/0, dracoon 1/0/0/0
+   top vendor clearblade holds 2 of 4 fires (50.0%)
+   leave-one-vendor-out (rows of vendor removed): -clearblade: moved 0 right 0 wrong 0; -keycloak: moved 0 right 0 wrong 0; -dracoon: moved 0 right 0 wrong 0
+   top-moved vendor removed (clearblade): moved 0, right 0, wrong 0; right <= wrong
+   workos excluded (0 rows removed): fires 4; already x 4; moved 0, right 0, wrong 0; no moves
+      before: 1311 exact (72.1%) / 16 too loose (0.9%) / 492 too tight (27.0%) of 1819
+      after : 1311 exact (72.1%) / 16 too loose (0.9%) / 492 too tight (27.0%) of 1819 | too loose 16 -> 16 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+     clearblade | POST | /admin/logout | DevLogout | x | x->x (floor-post) | already x | R2:b:logout
+     clearblade | POST | /api/v/1/user/logout | UserLogout | x | x->x (floor-post) | already x | R2:b:logout
+     keycloak | POST | /{realm}/users/{id}/logout |  | x | x->x (floor-post) | already x | R2:b:logout
+     dracoon | POST | /v4/user/logout | logout | x | x->x (floor-post) | already x | R2:a:logout
+
+-- buildset | R1+R2 | 1819 rows
+   fires 4 of 1819; already x 4; moved 0 -> right (truth x) 0, wrong truth w 0, wrong truth r 0; right <= wrong (no moves: bar 1 vacuous); R1-shaped rows claimed by step 2 (already x): 0
+   before: 1311 exact (72.1%) / 16 too loose (0.9%) / 492 too tight (27.0%) of 1819
+   after : 1311 exact (72.1%) / 16 too loose (0.9%) / 492 too tight (27.0%) of 1819  | too loose 16 -> 16 ok; too tight 492 -> 492 (+0, wrong moves 0)
+   per vendor (fires / moved / right / wrong): clearblade 2/0/0/0, keycloak 1/0/0/0, dracoon 1/0/0/0
+   top vendor clearblade holds 2 of 4 fires (50.0%)
+   leave-one-vendor-out (rows of vendor removed): -clearblade: moved 0 right 0 wrong 0; -keycloak: moved 0 right 0 wrong 0; -dracoon: moved 0 right 0 wrong 0
+   top-moved vendor removed (clearblade): moved 0, right 0, wrong 0; right <= wrong
+   workos excluded (0 rows removed): fires 4; already x 4; moved 0, right 0, wrong 0; no moves
+      before: 1311 exact (72.1%) / 16 too loose (0.9%) / 492 too tight (27.0%) of 1819
+      after : 1311 exact (72.1%) / 16 too loose (0.9%) / 492 too tight (27.0%) of 1819 | too loose 16 -> 16 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+     clearblade | POST | /admin/logout | DevLogout | x | x->x (floor-post) | already x | R2:b:logout
+     clearblade | POST | /api/v/1/user/logout | UserLogout | x | x->x (floor-post) | already x | R2:b:logout
+     keycloak | POST | /{realm}/users/{id}/logout |  | x | x->x (floor-post) | already x | R2:b:logout
+     dracoon | POST | /v4/user/logout | logout | x | x->x (floor-post) | already x | R2:a:logout
+
+================ fresh949 (ops 949; truth 949; decision 949; skipped 0; banned-vendor 0; method differs ops vs decision 0)
+
+-- fresh949 | R1 | 949 rows
+   fires 2 of 949; already x 0; moved 2 -> right (truth x) 2, wrong truth w 0, wrong truth r 0; right > wrong; R1-shaped rows claimed by step 2 (already x): 0
+   before: 736 exact (77.6%) / 6 too loose (0.6%) / 207 too tight (21.8%) of 949
+   after : 738 exact (77.8%) / 4 too loose (0.4%) / 207 too tight (21.8%) of 949  | too loose 6 -> 4 ok; too tight 207 -> 207 (+0, wrong moves 0)
+   per vendor (fires / moved / right / wrong): workos.com 2/2/2/0
+   top vendor workos.com holds 2 of 2 fires (100.0%) FLAG: >50% one vendor
+   leave-one-vendor-out (rows of vendor removed): -workos.com: moved 0 right 0 wrong 0
+   top-moved vendor removed (workos.com): moved 0, right 0, wrong 0; right <= wrong
+   workos excluded (269 rows removed): fires 0; already x 0; moved 0, right 0, wrong 0; no moves
+      before: 539 exact (79.3%) / 2 too loose (0.3%) / 139 too tight (20.4%) of 680
+      after : 539 exact (79.3%) / 2 too loose (0.3%) / 139 too tight (20.4%) of 680 | too loose 2 -> 2 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+     workos.com | PUT | /data-integrations/{slug}/client-credentials | DataIntegrationsController_upsertClientCredentials | x | w->x (method-floor) | RIGHT | R1:clientcredentials
+     workos.com | PUT | /data-integrations/{slug}/api-key | DataIntegrationsController_upsertApiKey | x | w->x (method-floor) | RIGHT | R1:apikey
+
+-- fresh949 | R2 | 949 rows
+   fires 4 of 949; already x 2; moved 2 -> right (truth x) 2, wrong truth w 0, wrong truth r 0; right > wrong
+   before: 736 exact (77.6%) / 6 too loose (0.6%) / 207 too tight (21.8%) of 949
+   after : 738 exact (77.8%) / 4 too loose (0.4%) / 207 too tight (21.8%) of 949  | too loose 6 -> 4 ok; too tight 207 -> 207 (+0, wrong moves 0)
+   per vendor (fires / moved / right / wrong): workos.com 3/2/2/0, coolify.io 1/0/0/0
+   top vendor workos.com holds 3 of 4 fires (75.0%) FLAG: >50% one vendor
+   leave-one-vendor-out (rows of vendor removed): -workos.com: moved 0 right 0 wrong 0; -coolify.io: moved 2 right 2 wrong 0
+   top-moved vendor removed (workos.com): moved 0, right 0, wrong 0; right <= wrong
+   workos excluded (269 rows removed): fires 1; already x 1; moved 0, right 0, wrong 0; no moves
+      before: 539 exact (79.3%) / 2 too loose (0.3%) / 139 too tight (20.4%) of 680
+      after : 539 exact (79.3%) / 2 too loose (0.3%) / 139 too tight (20.4%) of 680 | too loose 2 -> 2 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+     workos.com | GET | /sso/logout | SsoController_logout | x | r->x (method) | RIGHT | R2:b:logout
+     coolify.io | DELETE | /servers/{uuid}/registries/{registry} | logout-server-registry | x | x->x (method-delete) | already x | R2:a:logout
+     workos.com | POST | /sso/logout/authorize | SsoController_logoutAuthorize | w | x->x (floor-post) | already x | R2:b:logout
+     workos.com | GET | /user_management/sessions/logout | UserlandSessionsController_logout | x | r->x (method) | RIGHT | R2:b:logout
+
+-- fresh949 | R1+R2 | 949 rows
+   fires 6 of 949; already x 2; moved 4 -> right (truth x) 4, wrong truth w 0, wrong truth r 0; right > wrong; R1-shaped rows claimed by step 2 (already x): 0
+   before: 736 exact (77.6%) / 6 too loose (0.6%) / 207 too tight (21.8%) of 949
+   after : 740 exact (78.0%) / 2 too loose (0.2%) / 207 too tight (21.8%) of 949  | too loose 6 -> 2 ok; too tight 207 -> 207 (+0, wrong moves 0)
+   per vendor (fires / moved / right / wrong): workos.com 5/4/4/0, coolify.io 1/0/0/0
+   top vendor workos.com holds 5 of 6 fires (83.3%) FLAG: >50% one vendor
+   leave-one-vendor-out (rows of vendor removed): -workos.com: moved 0 right 0 wrong 0; -coolify.io: moved 4 right 4 wrong 0
+   top-moved vendor removed (workos.com): moved 0, right 0, wrong 0; right <= wrong
+   workos excluded (269 rows removed): fires 1; already x 1; moved 0, right 0, wrong 0; no moves
+      before: 539 exact (79.3%) / 2 too loose (0.3%) / 139 too tight (20.4%) of 680
+      after : 539 exact (79.3%) / 2 too loose (0.3%) / 139 too tight (20.4%) of 680 | too loose 2 -> 2 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+     workos.com | GET | /sso/logout | SsoController_logout | x | r->x (method) | RIGHT | R2:b:logout
+     coolify.io | DELETE | /servers/{uuid}/registries/{registry} | logout-server-registry | x | x->x (method-delete) | already x | R2:a:logout
+     workos.com | PUT | /data-integrations/{slug}/client-credentials | DataIntegrationsController_upsertClientCredentials | x | w->x (method-floor) | RIGHT | R1:clientcredentials
+     workos.com | PUT | /data-integrations/{slug}/api-key | DataIntegrationsController_upsertApiKey | x | w->x (method-floor) | RIGHT | R1:apikey
+     workos.com | POST | /sso/logout/authorize | SsoController_logoutAuthorize | w | x->x (floor-post) | already x | R2:b:logout
+     workos.com | GET | /user_management/sessions/logout | UserlandSessionsController_logout | x | r->x (method) | RIGHT | R2:b:logout
+
+[gate3 note] blind 800; truth 800; skipped 0; banned-vendor 0. NOTE: gate-3 was the D131 exam (burned for that rule); used here as a tuning line for new rules only.
+
+================ gate3 (all 800)
+
+-- gate3 | R1 | 800 rows
+   fires 1 of 800; already x 0; moved 1 -> right (truth x) 0, wrong truth w 1, wrong truth r 0; right <= wrong; R1-shaped rows claimed by step 2 (already x): 0
+   before: 580 exact (72.5%) / 23 too loose (2.9%) / 197 too tight (24.6%) of 800
+   after : 579 exact (72.4%) / 23 too loose (2.9%) / 198 too tight (24.8%) of 800  | too loose 23 -> 23 ok; too tight 197 -> 198 (+1, wrong moves 1)
+   per vendor (fires / moved / right / wrong): files.com 1/1/0/1
+   top vendor files.com holds 1 of 1 fires (100.0%) FLAG: >50% one vendor
+   leave-one-vendor-out (rows of vendor removed): -files.com: moved 0 right 0 wrong 0
+   top-moved vendor removed (files.com): moved 0, right 0, wrong 0; right <= wrong
+   workos excluded (0 rows removed): fires 1; already x 0; moved 1, right 0, wrong 1; right <= wrong
+      before: 580 exact (72.5%) / 23 too loose (2.9%) / 197 too tight (24.6%) of 800
+      after : 579 exact (72.4%) / 23 too loose (2.9%) / 198 too tight (24.8%) of 800 | too loose 23 -> 23 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+     files.com | PATCH | /api_key | ApiKeyUpdateCurrent | w | w->x (method-floor) | WRONG | R1:apikey
+
+-- gate3 | R2 | 800 rows
+   fires 0 of 800; already x 0; moved 0 -> right (truth x) 0, wrong truth w 0, wrong truth r 0; right <= wrong (no moves: bar 1 vacuous)
+   before: 580 exact (72.5%) / 23 too loose (2.9%) / 197 too tight (24.6%) of 800
+   after : 580 exact (72.5%) / 23 too loose (2.9%) / 197 too tight (24.6%) of 800  | too loose 23 -> 23 ok; too tight 197 -> 197 (+0, wrong moves 0)
+   per vendor (fires / moved / right / wrong): (none)
+   top vendor - holds 0 of 0 fires (0.0%)
+   leave-one-vendor-out (rows of vendor removed): (none)
+   workos excluded (0 rows removed): fires 0; already x 0; moved 0, right 0, wrong 0; no moves
+      before: 580 exact (72.5%) / 23 too loose (2.9%) / 197 too tight (24.6%) of 800
+      after : 580 exact (72.5%) / 23 too loose (2.9%) / 197 too tight (24.6%) of 800 | too loose 23 -> 23 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+
+-- gate3 | R1+R2 | 800 rows
+   fires 1 of 800; already x 0; moved 1 -> right (truth x) 0, wrong truth w 1, wrong truth r 0; right <= wrong; R1-shaped rows claimed by step 2 (already x): 0
+   before: 580 exact (72.5%) / 23 too loose (2.9%) / 197 too tight (24.6%) of 800
+   after : 579 exact (72.4%) / 23 too loose (2.9%) / 198 too tight (24.8%) of 800  | too loose 23 -> 23 ok; too tight 197 -> 198 (+1, wrong moves 1)
+   per vendor (fires / moved / right / wrong): files.com 1/1/0/1
+   top vendor files.com holds 1 of 1 fires (100.0%) FLAG: >50% one vendor
+   leave-one-vendor-out (rows of vendor removed): -files.com: moved 0 right 0 wrong 0
+   top-moved vendor removed (files.com): moved 0, right 0, wrong 0; right <= wrong
+   workos excluded (0 rows removed): fires 1; already x 0; moved 1, right 0, wrong 1; right <= wrong
+      before: 580 exact (72.5%) / 23 too loose (2.9%) / 197 too tight (24.6%) of 800
+      after : 579 exact (72.4%) / 23 too loose (2.9%) / 198 too tight (24.8%) of 800 | too loose 23 -> 23 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+     files.com | PATCH | /api_key | ApiKeyUpdateCurrent | w | w->x (method-floor) | WRONG | R1:apikey
+
+================ gate3/cred (stratum)
+
+-- gate3/cred | R1 | 200 rows
+   fires 1 of 200; already x 0; moved 1 -> right (truth x) 0, wrong truth w 1, wrong truth r 0; right <= wrong; R1-shaped rows claimed by step 2 (already x): 0
+   before: 115 exact (57.5%) / 13 too loose (6.5%) / 72 too tight (36.0%) of 200
+   after : 114 exact (57.0%) / 13 too loose (6.5%) / 73 too tight (36.5%) of 200  | too loose 13 -> 13 ok; too tight 72 -> 73 (+1, wrong moves 1)
+   per vendor (fires / moved / right / wrong): files.com 1/1/0/1
+   top vendor files.com holds 1 of 1 fires (100.0%) FLAG: >50% one vendor
+   leave-one-vendor-out (rows of vendor removed): -files.com: moved 0 right 0 wrong 0
+   top-moved vendor removed (files.com): moved 0, right 0, wrong 0; right <= wrong
+   workos excluded (0 rows removed): fires 1; already x 0; moved 1, right 0, wrong 1; right <= wrong
+      before: 115 exact (57.5%) / 13 too loose (6.5%) / 72 too tight (36.0%) of 200
+      after : 114 exact (57.0%) / 13 too loose (6.5%) / 73 too tight (36.5%) of 200 | too loose 13 -> 13 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+     files.com | PATCH | /api_key | ApiKeyUpdateCurrent | w | w->x (method-floor) | WRONG | R1:apikey
+
+-- gate3/cred | R2 | 200 rows
+   fires 0 of 200; already x 0; moved 0 -> right (truth x) 0, wrong truth w 0, wrong truth r 0; right <= wrong (no moves: bar 1 vacuous)
+   before: 115 exact (57.5%) / 13 too loose (6.5%) / 72 too tight (36.0%) of 200
+   after : 115 exact (57.5%) / 13 too loose (6.5%) / 72 too tight (36.0%) of 200  | too loose 13 -> 13 ok; too tight 72 -> 72 (+0, wrong moves 0)
+   per vendor (fires / moved / right / wrong): (none)
+   top vendor - holds 0 of 0 fires (0.0%)
+   leave-one-vendor-out (rows of vendor removed): (none)
+   workos excluded (0 rows removed): fires 0; already x 0; moved 0, right 0, wrong 0; no moves
+      before: 115 exact (57.5%) / 13 too loose (6.5%) / 72 too tight (36.0%) of 200
+      after : 115 exact (57.5%) / 13 too loose (6.5%) / 72 too tight (36.0%) of 200 | too loose 13 -> 13 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+
+-- gate3/cred | R1+R2 | 200 rows
+   fires 1 of 200; already x 0; moved 1 -> right (truth x) 0, wrong truth w 1, wrong truth r 0; right <= wrong; R1-shaped rows claimed by step 2 (already x): 0
+   before: 115 exact (57.5%) / 13 too loose (6.5%) / 72 too tight (36.0%) of 200
+   after : 114 exact (57.0%) / 13 too loose (6.5%) / 73 too tight (36.5%) of 200  | too loose 13 -> 13 ok; too tight 72 -> 73 (+1, wrong moves 1)
+   per vendor (fires / moved / right / wrong): files.com 1/1/0/1
+   top vendor files.com holds 1 of 1 fires (100.0%) FLAG: >50% one vendor
+   leave-one-vendor-out (rows of vendor removed): -files.com: moved 0 right 0 wrong 0
+   top-moved vendor removed (files.com): moved 0, right 0, wrong 0; right <= wrong
+   workos excluded (0 rows removed): fires 1; already x 0; moved 1, right 0, wrong 1; right <= wrong
+      before: 115 exact (57.5%) / 13 too loose (6.5%) / 72 too tight (36.0%) of 200
+      after : 114 exact (57.0%) / 13 too loose (6.5%) / 73 too tight (36.5%) of 200 | too loose 13 -> 13 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+     files.com | PATCH | /api_key | ApiKeyUpdateCurrent | w | w->x (method-floor) | WRONG | R1:apikey
+
+================ gate3/general (stratum)
+
+-- gate3/general | R1 | 600 rows
+   fires 0 of 600; already x 0; moved 0 -> right (truth x) 0, wrong truth w 0, wrong truth r 0; right <= wrong (no moves: bar 1 vacuous); R1-shaped rows claimed by step 2 (already x): 0
+   before: 465 exact (77.5%) / 10 too loose (1.7%) / 125 too tight (20.8%) of 600
+   after : 465 exact (77.5%) / 10 too loose (1.7%) / 125 too tight (20.8%) of 600  | too loose 10 -> 10 ok; too tight 125 -> 125 (+0, wrong moves 0)
+   per vendor (fires / moved / right / wrong): (none)
+   top vendor - holds 0 of 0 fires (0.0%)
+   leave-one-vendor-out (rows of vendor removed): (none)
+   workos excluded (0 rows removed): fires 0; already x 0; moved 0, right 0, wrong 0; no moves
+      before: 465 exact (77.5%) / 10 too loose (1.7%) / 125 too tight (20.8%) of 600
+      after : 465 exact (77.5%) / 10 too loose (1.7%) / 125 too tight (20.8%) of 600 | too loose 10 -> 10 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+
+-- gate3/general | R2 | 600 rows
+   fires 0 of 600; already x 0; moved 0 -> right (truth x) 0, wrong truth w 0, wrong truth r 0; right <= wrong (no moves: bar 1 vacuous)
+   before: 465 exact (77.5%) / 10 too loose (1.7%) / 125 too tight (20.8%) of 600
+   after : 465 exact (77.5%) / 10 too loose (1.7%) / 125 too tight (20.8%) of 600  | too loose 10 -> 10 ok; too tight 125 -> 125 (+0, wrong moves 0)
+   per vendor (fires / moved / right / wrong): (none)
+   top vendor - holds 0 of 0 fires (0.0%)
+   leave-one-vendor-out (rows of vendor removed): (none)
+   workos excluded (0 rows removed): fires 0; already x 0; moved 0, right 0, wrong 0; no moves
+      before: 465 exact (77.5%) / 10 too loose (1.7%) / 125 too tight (20.8%) of 600
+      after : 465 exact (77.5%) / 10 too loose (1.7%) / 125 too tight (20.8%) of 600 | too loose 10 -> 10 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+
+-- gate3/general | R1+R2 | 600 rows
+   fires 0 of 600; already x 0; moved 0 -> right (truth x) 0, wrong truth w 0, wrong truth r 0; right <= wrong (no moves: bar 1 vacuous); R1-shaped rows claimed by step 2 (already x): 0
+   before: 465 exact (77.5%) / 10 too loose (1.7%) / 125 too tight (20.8%) of 600
+   after : 465 exact (77.5%) / 10 too loose (1.7%) / 125 too tight (20.8%) of 600  | too loose 10 -> 10 ok; too tight 125 -> 125 (+0, wrong moves 0)
+   per vendor (fires / moved / right / wrong): (none)
+   top vendor - holds 0 of 0 fires (0.0%)
+   leave-one-vendor-out (rows of vendor removed): (none)
+   workos excluded (0 rows removed): fires 0; already x 0; moved 0, right 0, wrong 0; no moves
+      before: 465 exact (77.5%) / 10 too loose (1.7%) / 125 too tight (20.8%) of 600
+      after : 465 exact (77.5%) / 10 too loose (1.7%) / 125 too tight (20.8%) of 600 | too loose 10 -> 10 ok
+   fired rows: vendor | method | path | operationId | truth | before->after | verdict
+
+================ APIs.guru prevalence: 123339 ops read (no truth)
+[prev] R1: 20 fires (would move 20 not already x) across 3 providers; top github.com 90.0% FLAG: >50% one provider; with workos excluded 20 fires
+       top 10: github.com 18, files.com 1, rudder.example.local 1
+[prev] R2: 35 fires (would move 3 not already x) across 31 providers; top amazonaws.com 8.6%; with workos excluded 35 fires
+       top 10: amazonaws.com 3, clearblade.com 2, yodlee.com 2, beezup.com 1, brainbi.net 1, britbox.co.uk 1, c19qrserver.local 1, discourse.local 1, dracoon.team 1, googleapis.com 1
+[prev] R1+R2: 55 fires (would move 23 not already x) across 34 providers; top github.com 32.7%; with workos excluded 55 fires
+       top 10: github.com 18, amazonaws.com 3, clearblade.com 2, yodlee.com 2, beezup.com 1, brainbi.net 1, britbox.co.uk 1, c19qrserver.local 1, discourse.local 1, dracoon.team 1
+
+================ BAR SUMMARY (D100 tighten-only; per rule; moved rows on mechanical)
+combined R1: ok   ok: right 0 > wrong 0 (vacuous, no moves); ok: too loose 62 -> 62; ok: top share 0.0% <= 50%
+combined R2: CHECK NO: right 0 > wrong 2; ok: too loose 62 -> 62; NO: top share 66.7% <= 50%
+combined R1+R2: CHECK NO: right 0 > wrong 2; ok: too loose 62 -> 62; NO: top share 66.7% <= 50%
+buildset R1: ok   ok: right 0 > wrong 0 (vacuous, no moves); ok: too loose 16 -> 16; ok: top share 0.0% <= 50%
+buildset R2: ok   ok: right 0 > wrong 0 (vacuous, no moves); ok: too loose 16 -> 16; ok: top share 50.0% <= 50%
+buildset R1+R2: ok   ok: right 0 > wrong 0 (vacuous, no moves); ok: too loose 16 -> 16; ok: top share 50.0% <= 50%
+fresh949 R1: CHECK ok: right 2 > wrong 0; ok: too loose 6 -> 4; NO: top share 100.0% <= 50%
+fresh949 R2: CHECK ok: right 2 > wrong 0; ok: too loose 6 -> 4; NO: top share 75.0% <= 50%
+fresh949 R1+R2: CHECK ok: right 4 > wrong 0; ok: too loose 6 -> 2; NO: top share 83.3% <= 50%
+gate3 R1: CHECK NO: right 0 > wrong 1; ok: too loose 23 -> 23; NO: top share 100.0% <= 50%
+gate3 R2: ok   ok: right 0 > wrong 0 (vacuous, no moves); ok: too loose 23 -> 23; ok: top share 0.0% <= 50%
+gate3 R1+R2: CHECK NO: right 0 > wrong 1; ok: too loose 23 -> 23; NO: top share 100.0% <= 50%
+gate3/cred R1: CHECK NO: right 0 > wrong 1; ok: too loose 13 -> 13; NO: top share 100.0% <= 50%
+gate3/cred R2: ok   ok: right 0 > wrong 0 (vacuous, no moves); ok: too loose 13 -> 13; ok: top share 0.0% <= 50%
+gate3/cred R1+R2: CHECK NO: right 0 > wrong 1; ok: too loose 13 -> 13; NO: top share 100.0% <= 50%
+gate3/general R1: ok   ok: right 0 > wrong 0 (vacuous, no moves); ok: too loose 10 -> 10; ok: top share 0.0% <= 50%
+gate3/general R2: ok   ok: right 0 > wrong 0 (vacuous, no moves); ok: too loose 10 -> 10; ok: top share 0.0% <= 50%
+gate3/general R1+R2: ok   ok: right 0 > wrong 0 (vacuous, no moves); ok: too loose 10 -> 10; ok: top share 0.0% <= 50%
+(LOVO, workos-excluded and prevalence readings are in the blocks above; bar 3 and 4 are judged there.)
