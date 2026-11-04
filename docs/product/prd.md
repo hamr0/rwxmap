@@ -1014,13 +1014,12 @@ decided; everything marked "proposal" or "open" is not decided.
   alone and rows are marked as today. Mode a with no loose or tight
   row fetches nothing and prints "rwxlite: nothing to check"; mode b
   always needs the model when the spec has rows. Offline, the cached
-  model of the chosen variant (matched on the manifest's `modelFile`)
-  is preferred; the other variant is used only when none of the chosen
-  kind is cached, and the line says so. The asset files are fetched from
-  the release tag the manifest request was redirected to, so a release
-  published mid-download cannot mix files; with no tag in the redirect
-  the files come from `latest` as before and the sha256 check still
-  guards. The run prints "rwxlite: off
+  model of the pinned version and the chosen variant (matched on the
+  manifest's `modelFile`) is preferred; the other variant is used only
+  when none of the chosen kind is cached, and the line says so ("could
+  not reach the release"). Cached models of any other version are
+  ignored (D135). The manifest and asset files are fetched from the
+  pinned release tag (D135), never `latest`. The run prints "rwxlite: off
   (mechanical)". It never stops.
 - **rwxmap is the adapter for all modes**, including rwxlite on its own.
   It consumes the OpenAPI catalogue and specs, discovers APIs on the
@@ -1032,9 +1031,10 @@ decided; everything marked "proposal" or "open" is not decided.
   `--confidence` is valid only with `--engine rwxlite`; elsewhere it
   fails loudly.
 - **Distribution.** Ships on npm. The model is downloaded on first use
-  and is always the latest model, not pinned to the rwxmap version.
-  Consequence: the same spec can get different letters after a model
-  update, so every run records the model string.
+  and is pinned to one rwxlite release tag in each rwxmap release (D135;
+  `RWXLITE_TAG` in `src/modeldownload.js`). A newer model replaces it only
+  after a no-regression result on a fresh clean exam. Every run records
+  the model string.
 - **Model cache and integrity.** The downloaded model is cached in a
   per-user folder, `~/.cache/rwxmap/` (or `$XDG_CACHE_HOME/rwxmap`),
   one directory per model: `rwxlite-<semver>+<sha8>/` holding
@@ -1044,8 +1044,8 @@ decided; everything marked "proposal" or "open" is not decided.
   `model` equals the directory name, `modelFile` is in `files`, every
   listed file exists inside the directory (no `/`, `\` or `..` in names)
   and matches its sha256. Any failure means the model is not used:
-  mechanical runs alone and the run says so loudly. The highest valid
-  semver wins; an invalid higher one does not hide a valid lower one.
+  mechanical runs alone and the run says so loudly. Among cached models
+  of the pinned version, an invalid one does not hide a valid one.
 - **Default model and `--model` (user ruling, 2026-11-04).** rwxmap's
   default model is rwxlite's fp32 "exact" model (91 MB, the un-quantised
   original, no quantisation drift; manifest `manifest-exact.json`). A
@@ -1060,8 +1060,8 @@ decided; everything marked "proposal" or "open" is not decided.
 - **Publish location (rwxlite's user ruling, relayed by the rwxlite
   session, 2026-11-04).** GitHub releases on `hamr0/rwxlite`. Assets per
   release: `manifest.json` (int8 per-channel), `manifest-exact.json`
-  (fp32), `model-int8-pc.onnx`, `model-fp32.onnx`, `vocab.txt`. Latest
-  pointers: `https://github.com/hamr0/rwxlite/releases/latest/download/manifest-exact.json`
+  (fp32), `model-int8-pc.onnx`, `model-fp32.onnx`, `vocab.txt`. Pinned
+  tag (D135): `https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest-exact.json`
   (rwxmap default) and `.../manifest.json` (`--model small`). Not live
   yet. On download rwxmap stores the chosen manifest as `manifest.json`
   inside the model's own folder `rwxlite-<semver>+<sha8>/` (the cache
@@ -1191,12 +1191,12 @@ b95 vs r10's 12.
 
 ### Open
 
-One item, listed under Open questions below.
+None.
 
 ## What is next
 
 0.9.0 is released (PR #18, merge e9b697c, npm 0.9.0, 2026-11-03). Next:
-the D133 release, pending which rwxlite model ships (0.2.0 or r10/0.3.0; see Open questions). That is a user decision.
+the D133 release, which ships rwxlite 0.2.0, pinned to tag v0.2.0 (D135).
 Parked items and known limits below.
 
 ### Parked
@@ -1230,7 +1230,12 @@ Parked items and known limits below.
   is raise-only, so the cost is over-tight only. QUERY = r is settled (D134).
 - **int8 p drift between rwxlite's predict file and the CLI run.** 5 rows
   in mode a and 7 in b95 differ on exam #3, each within about 0.01 of a
-  cut. rwxlite is investigating.
+  cut. rwxlite traced it to batch composition, not threads: answerMany pads
+  each batch to its longest row, and int8-pc uses dynamic activation
+  quantisation with one scale over the whole padded batch, so p depends on
+  which rows share a batch (max |dp| 0.11 on exam #3, 5 rows cross 0.97).
+  fp32, the default, is unaffected. The fix is rwxlite's (one row per
+  session.run); we re-check int8 parity when it ships.
 - **Two plain error messages depend on wording.** The CLI recognises
   `load.js`'s "no usable paths" error and Node's `parseArgs` errors by
   their text. If either is reworded the user sees the raw message
@@ -1309,4 +1314,4 @@ network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
 
 ## Open questions
 
-- D133: which rwxlite model ships — 0.2.0 (published; replay: same 15 leaks as r10 in mode a, +14 exact) or r10/0.3.0 (pre-registered pass, but failed rwxlite's own gate). Orchestrator recommends 0.2.0; user decision pending.
+None.

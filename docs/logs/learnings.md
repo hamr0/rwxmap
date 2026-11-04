@@ -8527,3 +8527,11 @@ exact >= +5 points): +9.0 and +9.5 points.
   - The replay is post-hoc, not pre-registered.
   - Choosing between two pre-fixed models on a burned exam is a mild form of fitting.
 - Lesson: a replay is trusted only after it reproduces the committed rows exactly. The int8 check caught a p drift that rwxlite's own parity test (2.2e-16) missed.
+
+## 2026-11-04 — D135: rwxlite 0.2.0 ships, download pinned to the tag
+
+- Goal: record the user's ruling (rwxmap ships rwxlite 0.2.0; a newer model needs a no-regression result on a fresh clean exam) and make the code match it.
+- Tried: read `src/modeldownload.js`. The manifest URLs used `releases/latest/download/`, so a new upstream rwxlite release would have reached users before any check. Second gap: the offline fallback took the highest verified cached model, so a cached 0.3.0 would beat 0.2.0 when the network failed.
+- Outcome: one constant `RWXLITE_TAG = 'v0.2.0'` builds the URLs; `RWXLITE_VERSION` is derived from it. Checked read-only that both v0.2.0 manifests say version 0.2.0. `findModel` takes an optional `onlyVersion` (callers that omit it behave as before; the only caller is `ensureModel`, which passes the pinned version). Cached 0.3.0 and 0.1.0 are now ignored; with none of the pinned version cached the run is off (mechanical, stated). The now-dead redirect-tag logic was removed. Offline note now says "could not reach the release". Tests: guard test fails if a manifest URL has `/latest/` or lacks the tag (broken by hand once: 13 modeldownload tests failed, it was one; restored). `npm test` 588 pass 0 fail, `npm run typecheck` 0, `npm run check:lockfile` 0, conformance 6/6 exit 0.
+- Also recorded: the int8 p drift traced by rwxlite to batch composition (answerMany pads to the longest row; int8-pc uses one dynamic scale over the batch), not threads. fp32 is unaffected. The fix is rwxlite's; re-check int8 parity when it ships.
+- Lesson: a pin on the download is not a pin on the run; every fallback path that reads the cache must name the same version.

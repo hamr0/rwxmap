@@ -5,12 +5,12 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { createHash } from 'node:crypto';
 
-import { ensureModel, MANIFEST_URLS, MAX_TOTAL_BYTES } from './modeldownload.js';
+import { ensureModel, MANIFEST_URLS, MAX_TOTAL_BYTES, RWXLITE_TAG } from './modeldownload.js';
 import { findModel } from './modelcache.js';
 
 const sha256 = (b) => createHash('sha256').update(b).digest('hex');
 const scratch = () => fs.mkdtempSync(path.join(os.tmpdir(), 'rwxmap-modeldl-'));
-const BASE = 'https://github.com/hamr0/rwxlite/releases/latest/download/';
+const BASE = 'https://github.com/hamr0/rwxlite/releases/download/v0.2.0/';
 
 /**
  * A fake release: the small and exact manifests plus their files, served by an
@@ -19,7 +19,7 @@ const BASE = 'https://github.com/hamr0/rwxlite/releases/latest/download/';
  * opts.redirect ({name: url}: that file answers 302 to url), opts.hostile.
  */
 function release(opts = {}) {
-  const version = opts.version ?? '0.1.0';
+  const version = opts.version ?? '0.2.0';
   const weights = opts.weights ?? Buffer.from('fp32-weights-' + version);
   const vocab = Buffer.from('vocab-' + version);
   const model = `rwxlite-${version}+${sha256(weights).slice(0, 8)}`;
@@ -82,10 +82,10 @@ test('ensureModel: a second run re-reads only the manifest, never the model file
   assert.deepEqual(lines, []);
 });
 
-test('ensureModel: a newer release downloads beside the old model and wins', async () => {
+test('ensureModel: a different build at the pinned version downloads beside the old model and wins', async () => {
   const xdg = scratch();
   await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: release().fetchImpl });
-  const rel2 = release({ version: '0.2.0' });
+  const rel2 = release({ weights: Buffer.from('rebuilt-weights') });
   const got = await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: rel2.fetchImpl });
   assert.ok(got.status === 'ready');
   assert.equal(got.model, rel2.model);
@@ -196,18 +196,36 @@ test('ensureModel: HTTP 404 (not published) or offline with no cache -> off with
   assert.deepEqual(cacheFolders(xdg), []);
 });
 
-test('ensureModel: offline or failing with a verified cached model -> uses the highest one and says so', async () => {
+test('ensureModel: offline or failing with a verified cached pinned model -> uses it and says so; other versions are ignored (D135)', async () => {
   const xdg = scratch();
-  await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: release({ version: '0.1.0' }).fetchImpl });
-  const newer = release({ version: '0.3.0' });
-  await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: newer.fetchImpl });
+  const pinned = release({ version: '0.2.0' });
+  await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: pinned.fetchImpl });
+  putCached(xdg, '0.3.0', 'model-fp32.onnx');
+  putCached(xdg, '0.1.0', 'model-fp32.onnx');
   for (const fetchImpl of [release({ offline: true }).fetchImpl, release({ tamper: { 'vocab.txt': Buffer.from('evil') }, version: '0.9.0' }).fetchImpl]) {
     const got = await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl });
     assert.equal(got.status, 'ready');
-    assert.equal(got.model, newer.model);
-    assert.match(got.notes.join('\n'), new RegExp(`using cached ${newer.model.replace(/[+.]/g, '\\$&')}, could not check for a newer one`));
+    assert.equal(got.model, pinned.model);
+    assert.match(got.notes.join('\n'), new RegExp(`using cached ${pinned.model.replace(/[+.]/g, '\\$&')}, could not reach the release`));
   }
-  assert.equal(cacheFolders(xdg).length, 2); // the failed 0.9.0 left nothing
+  assert.equal(cacheFolders(xdg).length, 3); // the failed 0.9.0 left nothing
+});
+
+test('ensureModel: offline with only cached models of other versions (0.3.0, 0.1.0) -> off, none in the cache (D135)', async () => {
+  const xdg = scratch();
+  putCached(xdg, '0.3.0', 'model-fp32.onnx');
+  putCached(xdg, '0.1.0', 'model-fp32.onnx');
+  const got = /** @type {any} */ (await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: release({ offline: true }).fetchImpl }));
+  assert.equal(got.status, 'off');
+  assert.match(got.reason, /none in the cache/);
+});
+
+test('download is pinned to a tag, never latest (D135)', () => {
+  assert.match(RWXLITE_TAG, /^v\d+\.\d+\.\d+$/);
+  for (const u of Object.values(MANIFEST_URLS)) {
+    assert.ok(!u.includes('/latest/'), u);
+    assert.ok(u.includes(`/releases/download/${RWXLITE_TAG}/`), u);
+  }
 });
 
 test('ensureModel: offline with only a corrupt cached model -> off, loud warning', async () => {
@@ -229,7 +247,7 @@ test('ensureModel: a cached model that is corrupt is re-downloaded when the netw
   fs.rmSync(path.join(xdg, 'rwxmap', rel.model), { recursive: true });
   const got = await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: release().fetchImpl });
   assert.equal(got.status, 'ready');
-  assert.equal(fs.readFileSync(path.join(got.dir, 'vocab.txt'), 'utf8'), 'vocab-0.1.0');
+  assert.equal(fs.readFileSync(path.join(got.dir, 'vocab.txt'), 'utf8'), 'vocab-0.2.0');
 });
 
 /** Put an already-valid model of a variant straight into the cache. */
@@ -247,7 +265,7 @@ function putCached(xdg, version, modelFile) {
 
 test('ensureModel: offline, the cached model of the CHOSEN variant wins over a higher one of the other', async () => {
   const xdg = scratch();
-  const exact = putCached(xdg, '0.1.0', 'model-fp32.onnx');
+  const exact = putCached(xdg, '0.2.0', 'model-fp32.onnx');
   const small = putCached(xdg, '0.2.0', 'model-int8-pc.onnx');
   const offline = release({ offline: true }).fetchImpl;
   const a = /** @type {any} */ (await ensureModel({ variant: 'exact', environ: { XDG_CACHE_HOME: xdg }, fetchImpl: offline }));
@@ -262,63 +280,10 @@ test('ensureModel: offline with no cached model of the chosen variant, the other
   const small = putCached(xdg, '0.2.0', 'model-int8-pc.onnx');
   const got = /** @type {any} */ (await ensureModel({ variant: 'exact', environ: { XDG_CACHE_HOME: xdg }, fetchImpl: release({ offline: true }).fetchImpl }));
   assert.deepEqual([got.status, got.model], ['ready', small]);
-  assert.match(got.notes.join('\n'), /using cached rwxlite-0\.2\.0\+[0-9a-f]{8} \(no cached exact model, so the small one\), could not check/);
+  assert.match(got.notes.join('\n'), /using cached rwxlite-0\.2\.0\+[0-9a-f]{8} \(no cached exact model, so the small one\), could not reach the release/);
   const xdg2 = scratch();
-  const exact = putCached(xdg2, '0.1.0', 'model-fp32.onnx');
+  const exact = putCached(xdg2, '0.2.0', 'model-fp32.onnx');
   const got2 = /** @type {any} */ (await ensureModel({ variant: 'small', environ: { XDG_CACHE_HOME: xdg2 }, fetchImpl: release({ offline: true }).fetchImpl }));
   assert.equal(got2.model, exact);
   assert.match(got2.notes.join('\n'), /\(no cached small model, so the exact one\)/);
-});
-
-/**
- * A release host that redirects `latest` to a tag like GitHub does, and serves
- * assets only from /releases/download/<tag>/. `moveAfterManifest` makes `latest`
- * point at a different tag (with different files) once the manifest was served.
- */
-function taggedRelease(tag, newerTag) {
-  const mk = (version) => {
-    const weights = Buffer.from('fp32-weights-' + version);
-    const vocab = Buffer.from('vocab-' + version);
-    const model = `rwxlite-${version}+${sha256(weights).slice(0, 8)}`;
-    return { weights, vocab, model, manifest: Buffer.from(JSON.stringify({ version, modelFile: 'model-fp32.onnx', model, files: { 'model-fp32.onnx': sha256(weights), 'vocab.txt': sha256(vocab) } })) };
-  };
-  const rels = { [tag]: mk('0.1.0'), ...(newerTag ? { [newerTag]: mk('0.2.0') } : {}) };
-  const seen = [];
-  let manifestServed = false;
-  const fetchImpl = async (url) => {
-    const u = String(url);
-    seen.push(u);
-    const latest = /^https:\/\/github\.com\/hamr0\/rwxlite\/releases\/latest\/download\/(.+)$/.exec(u);
-    if (latest) {
-      const t = manifestServed && newerTag ? newerTag : tag;
-      return new Response(null, { status: 302, headers: { location: `https://github.com/hamr0/rwxlite/releases/download/${t}/${latest[1]}` } });
-    }
-    const m = /^https:\/\/github\.com\/hamr0\/rwxlite\/releases\/download\/([^/]+)\/(.+)$/.exec(u);
-    if (!m || !rels[m[1]]) return new Response('nope', { status: 404 });
-    const r = rels[m[1]];
-    const bytes = m[2] === 'manifest-exact.json' ? r.manifest : m[2] === 'model-fp32.onnx' ? r.weights : m[2] === 'vocab.txt' ? r.vocab : null;
-    if (!bytes) return new Response('nope', { status: 404 });
-    if (m[2] === 'manifest-exact.json') manifestServed = true;
-    return new Response(bytes, { status: 200 });
-  };
-  return { fetchImpl, seen, model: rels[tag].model };
-}
-
-test('ensureModel: asset files come from the tag the manifest was redirected to, even if latest moves mid-download', async () => {
-  const xdg = scratch();
-  const rel = taggedRelease('v0.1.0', 'v0.2.0');
-  const got = await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: rel.fetchImpl });
-  assert.equal(got.status, 'ready');
-  assert.equal(got.model, rel.model);
-  const base = 'https://github.com/hamr0/rwxlite/releases/download/v0.1.0/';
-  assert.deepEqual(rel.seen, [
-    MANIFEST_URLS.exact, base + 'manifest-exact.json', base + 'model-fp32.onnx', base + 'vocab.txt',
-  ]);
-});
-
-test('ensureModel: with no tag in the redirect the files come from the latest URL as before (and the sha256 check still guards)', async () => {
-  const rel = release();
-  const got = await ensureModel({ environ: { XDG_CACHE_HOME: scratch() }, fetchImpl: rel.fetchImpl });
-  assert.equal(got.status, 'ready');
-  assert.deepEqual(rel.seen, [MANIFEST_URLS.exact, BASE + 'model-fp32.onnx', BASE + 'vocab.txt']);
 });

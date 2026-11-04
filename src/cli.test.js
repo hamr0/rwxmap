@@ -1938,7 +1938,7 @@ test('run: tenant-templated servers land in serverTemplates (and only those); ot
 // rwxlite second pass (injected engine) and the model cache check.
 // ---------------------------------------------------------------------
 
-const D133_MODEL = 'rwxlite-1.0.0+0123abcd';
+const D133_MODEL = 'rwxlite-0.2.0+0123abcd';
 
 /** Run the CLI on SPEC_JEV_DOC; returns {code, stdout, stderr, outDir}. */
 async function runD133(extraArgs, extraEnv = {}) {
@@ -2172,13 +2172,13 @@ test('run (D133): --engine jev with a key behaves as before and prints no rwxlit
 /** A cached model directory in rwxlite's layout; `dirSha8` overrides the sha8 in the directory name. */
 function writeModelDir(xdg, bytes, dirSha8) {
   const sha = (b) => createHash('sha256').update(b).digest('hex');
-  const model = `rwxlite-1.0.0+${dirSha8 ?? sha(bytes).slice(0, 8)}`;
+  const model = `rwxlite-0.2.0+${dirSha8 ?? sha(bytes).slice(0, 8)}`;
   const dir = path.join(xdg, 'rwxmap', model);
   fs.mkdirSync(dir, { recursive: true });
   const vocab = Buffer.from('vocab');
   fs.writeFileSync(path.join(dir, 'model.bin'), bytes);
   fs.writeFileSync(path.join(dir, 'vocab.txt'), vocab);
-  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ version: '1.0.0', modelFile: 'model.bin', model, files: { 'model.bin': sha(bytes), 'vocab.txt': sha(vocab) } }));
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ version: '0.2.0', modelFile: 'model.bin', model, files: { 'model.bin': sha(bytes), 'vocab.txt': sha(vocab) } }));
   return dir;
 }
 
@@ -2187,7 +2187,7 @@ test('run (D133): a cached model whose hash does not match its name is NOT used:
   writeModelDir(xdg, Buffer.from('weights'), 'deadbeef');
   const r = await runD133([], { xdgCacheHome: xdg });
   assert.equal(r.code, 0, r.stderr);
-  assert.match(r.stderr, /WARNING: rwxlite model rejected \(hash mismatch.*rwxlite-1\.0\.0\+deadbeef was NOT used/);
+  assert.match(r.stderr, /WARNING: rwxlite model rejected \(hash mismatch.*rwxlite-0\.2\.0\+deadbeef was NOT used/);
   assert.match(r.stdout, /rwxlite: off \(mechanical\) — could not get the model \(offline \(test\)\); the cached model was rejected/);
   assert.equal(d133Rows(r.outDir)['POST /mystery'], 'x/tight');
 });
@@ -2210,11 +2210,11 @@ test('run (D133): offline with a verified cached model -> "using cached ...", th
   const bytes = Buffer.from('weights');
   const sha8 = createHash('sha256').update(bytes).digest('hex').slice(0, 8);
   const dir = writeModelDir(xdg, bytes);
-  const model = `rwxlite-1.0.0+${sha8}`;
+  const model = `rwxlite-0.2.0+${sha8}`;
   const seen = [];
   const r = await runD133([], { xdgCacheHome: xdg, rwxliteImporter: fakeRwxlite(model, { isX: 0.99, changes: 0.99 }, seen) });
   assert.equal(r.code, 0, r.stderr);
-  assert.match(r.stderr, new RegExp(`^rwxmap: using cached ${model.replace(/[+.]/g, '\\$&')}( \\(no cached exact model, so the small one\\))?, could not check for a newer one`, 'm'));
+  assert.match(r.stderr, new RegExp(`^rwxmap: using cached ${model.replace(/[+.]/g, '\\$&')}( \\(no cached exact model, so the small one\\))?, could not reach the release`, 'm'));
   assert.equal(seen.length, 1);
   assert.equal(seen[0].dir, dir);
   assert.match(r.stdout, /rwxlite: on \(/);
@@ -2236,12 +2236,12 @@ test('run (D133): --model small is accepted in the default run and --engine rwxl
     const urls = [];
     const r = await runD133(args, { modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
     assert.equal(r.code, 0, r.stderr);
-    assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/latest/download/manifest.json'], args.join(' '));
+    assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest.json'], args.join(' '));
   }
   const urls = [];
   const r = await runD133([], { modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
   assert.equal(r.code, 0, r.stderr);
-  assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/latest/download/manifest-exact.json']);
+  assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest-exact.json']);
 });
 
 test('run (D133): --model fails loudly with any other value, and with --engine jev or mechanical; nothing is fetched or written', async () => {

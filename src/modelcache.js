@@ -91,12 +91,14 @@ export function verifyModelDir(dir) {
  *            NOT used
  * @param {{XDG_CACHE_HOME?: string}} [environ]
  * @param {string} [preferModelFile]
+ * @param {string} [onlyVersion] e.g. "0.2.0": folders of any other version are ignored (D135)
  * @returns {{status: 'none'} | {status: 'ok', model: string, file: string, otherVariant?: true, rejected: Array<{dir: string, reason: string}>} | {status: 'bad', dir: string, reason: string}}
  */
-export function findModel(environ = process.env, preferModelFile) {
+export function findModel(environ = process.env, preferModelFile, onlyVersion) {
   const root = cacheDir(environ);
   let names;
   try { names = fs.readdirSync(root, { withFileTypes: true }).filter((e) => e.isDirectory() && e.name.startsWith('rwxlite-')).map((e) => e.name); } catch { return { status: 'none' }; }
+  if (onlyVersion !== undefined) names = names.filter((n) => { const m = MODEL_RE.exec(n); return m !== null && `${m[1]}.${m[2]}.${m[3]}` === onlyVersion; });
   if (names.length === 0) return { status: 'none' };
   /** @type {Array<{dir: string, version: number[]}>} */
   const all = names.map((name) => {

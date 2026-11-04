@@ -246,8 +246,8 @@ HTTP QUERY (RFC 10008, safe like GET) is r, handled exactly like GET;
 OpenAPI 3.2's `query` operations and `additionalOperations` entries keyed
 QUERY are read. Other `additionalOperations` keys are counted, not read.
 
-**rwxlite model.** A run that uses rwxlite fetches the latest manifest
-from rwxlite's GitHub releases (a small request), downloads the model if
+**rwxlite model.** A run that uses rwxlite fetches the manifest
+of the pinned rwxlite release, v0.2.0 (a small request), downloads the model if
 it is not already cached, checks every sha256, and only then puts it in
 place. The default is the exact fp32 model, about 91 MB, downloaded once;
 `--model small` uses the int8 model, about 23 MB. The cache is
@@ -257,12 +257,11 @@ githubusercontent.com hosts, capped at 200 MB, and a failed or tampered
 download installs nothing.
 
 If the manifest cannot be fetched (offline, rwxlite not published yet), the
-run uses the highest verified model already cached and says "using cached
-<model>, could not check for a newer one". With none cached it prints
+run uses the verified cached model of the pinned version and says "using
+cached <model>, could not reach the release". With none cached it prints
 `rwxlite: off (mechanical) — <reason>` and runs mechanically. It never
-stops the run. The model is not pinned to the rwxmap version, so the same
-spec can get different letters after a model update; the combined JSON
-records the model string.
+stops the run. The model is pinned in each rwxmap release; a new model ships only
+after it passes a fresh exam. The combined JSON records the model string.
 
 The model runs through the `rwxlite` npm package, which will be an
 optional dependency of rwxmap. It is not on npm yet, so today it is not
