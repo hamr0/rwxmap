@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { secondPass, LOWER_MIN_P } from './secondpass.js';
+import { secondPass, LOWER_MIN_P, NEVER_LOWER_RULES } from './secondpass.js';
 import { classifyRow } from './flow.js';
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
@@ -288,5 +288,32 @@ test('mode b parity: rwxlite fresh 949 rows through secondPass reproduce the rea
     const pc = (k) => `${k} (${(100 * k / 949).toFixed(1)}%)`;
     const line = `c=${String(c).padStart(2)}: exact ${pc(exact)}, too loose ${pc(loose)}, too tight ${pc(tight)}, asked ${pc(summary.undecided)}`;
     assert.ok(readout.includes(line), `readout.txt has no line: ${line}`);
+  }
+});
+
+// ---- credential-set is never lowered (user ruling 2026-11-04) --------------
+const CRED_OP = { method: 'PUT', path: '/users/{id}/password', operationId: 'putPassword' };
+const CTRL_OP = { method: 'DELETE', path: '/things/{id}', operationId: 'deleteThing' };
+
+test('credential-set: a lowering to w at 0.99 leaves it x, tight, undecided, in mode a and mode b (95 and 0); a non-credential x control IS lowered in mode b', async () => {
+  const cred = classifyRow(CRED_OP);
+  assert.equal(cred.rule, 'credential-set');
+  assert.equal(cred.class, 'x');
+  assert.ok(NEVER_LOWER_RULES.has('credential-set'));
+  const ctrl = classifyRow(CTRL_OP);
+  assert.notEqual(ctrl.rule, 'credential-set');
+  assert.equal(ctrl.class, 'x');
+  const engine = async (items) => items.map(() => ans('w', 0.99));
+  // Mode a only sends loose/tight rows; the real verdict is settled, so mark it tight for the send.
+  const a = await secondPass([CRED_OP], [{ ...cred, review: 'tight' }], engine, { model: MODEL });
+  assert.deepEqual([a.verdicts[0].class, a.verdicts[0].review, a.verdicts[0].source], ['x', 'tight', 'list']);
+  assert.deepEqual([a.summary.sent, a.summary.lowered, a.summary.undecided], [1, 0, 1]);
+  for (const confidence of [95, 0]) {
+    const b = await secondPass([CRED_OP], [cred], engine, { model: MODEL, confidence });
+    assert.deepEqual([b.verdicts[0].class, b.verdicts[0].review, b.verdicts[0].source], ['x', 'tight', 'list'], `mode b ${confidence}`);
+    assert.deepEqual([b.summary.sent, b.summary.lowered, b.summary.undecided], [1, 0, 1], `mode b ${confidence}`);
+    const c = await secondPass([CTRL_OP], [ctrl], engine, { model: MODEL, confidence });
+    assert.equal(c.verdicts[0].class, 'w', `control lowered at ${confidence}`);
+    assert.equal(c.summary.lowered, 1);
   }
 });

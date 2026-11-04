@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **The second pass never lowers a `credential-set` verdict, in any mode (D133, user ruling 2026-11-04).** A lowering answer leaves the row x, review `tight`, counted undecided.
 - **HTTP QUERY (RFC 10008) is r, handled exactly like GET (D134).** Step 1's method floor, the review marker, the MCP and WebMCP hints, the exporter letter, the key and the matcher all treat it as GET. OpenAPI 3.2's `query` field and `additionalOperations` entries keyed QUERY (any case) are now read, labelled, and get `x-rwx` in the copy. Other `additionalOperations` keys stay unread and are still counted in the stdout notice. No existing row's letter moves.
 - **`--engine rwxlite|jev|mechanical` and `--confidence <0-99>`.** `--confidence` is valid only with `--engine rwxlite`; elsewhere, out of range or non-integer, it exits 1. An unknown `--engine` exits 1.
 - **A second pass for the rows marked `loose` or `tight` (D133, mode a).** `src/secondpass.js` asks an engine about those rows only. A raise is accepted, a lowering only at p >= 0.97, and an error, timeout or malformed answer leaves the row x with review `tight`. Until the model is published, a normal run prints `rwxlite: off (mechanical)` and runs mechanically.

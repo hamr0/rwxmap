@@ -27,6 +27,9 @@
 //   L < M (lower)   -> accept L only if p >= LOWER_MIN_P, review loose;
 //                      otherwise class x, undecided (review tight).
 // Mode a: 'settled' rows are never sent and never change.
+// NEVER_LOWER_RULES (user ruling 2026-11-04): a verdict whose rule is
+// credential-set (D131) is never lowered, in either mode; a lowering answer
+// leaves it x, undecided (review tight).
 //
 // MODE B (options.confidence, an integer 0-99). Every row is sent, settled
 // ones too. A usable answer is accepted (raise, keep or lower alike) only at
@@ -48,6 +51,9 @@ import { parseModelString } from './modelcache.js';
 
 /** A lowering is accepted only at or above this share (rwxlite's measured cut-off). */
 export const LOWER_MIN_P = 0.97;
+
+/** Rules whose verdict the second pass never lowers, in any mode. */
+export const NEVER_LOWER_RULES = new Set(['credential-set']);
 
 const RANK = { r: 0, w: 1, x: 2 };
 
@@ -142,7 +148,7 @@ export async function secondPass(ops, verdicts, engine, options) {
       out[item.index] = moved(v, read.letter, 'rwxlite-raise', reviewHint(method, read.letter, v.source, 'raised'));
       return;
     }
-    if (read && read.p >= (modeB ? minP : LOWER_MIN_P)) {
+    if (read && !NEVER_LOWER_RULES.has(v.rule) && read.p >= (modeB ? minP : LOWER_MIN_P)) {
       summary.lowered += 1;
       out[item.index] = moved(v, read.letter, 'rwxlite-lower', reviewHint(method, read.letter, v.source, 'lowered'));
       return;

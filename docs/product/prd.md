@@ -1081,6 +1081,8 @@ decided; everything marked "proposal" or "open" is not decided.
   0.97; otherwise the row is x plus review `tight`; `settled` rows are
   never sent. rwxlite's tier rule is NOT adopted (it moves only Jev's
   three tiers, with per-tier cuts and then asks a lowering under 0.97).
+  A `credential-set` verdict (D131) is never lowered by the second pass,
+  in any mode (user ruling 2026-11-04).
   Evidence: "Rule comparison" under Evidence so far. Caveat:
   secondPass has only that one tuning measurement; the D133 exam is its
   test.
