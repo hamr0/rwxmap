@@ -8471,3 +8471,34 @@ exact >= +5 points): +9.0 and +9.5 points.
   - Without the guard, the "before" answers would lower 3 of 32 at b 95 and a forced (britbox PUT /account/pin w 0.984, whapi PUT /account/plusCard/pin w 0.990, circuitsandbox PUT /spaces/{topicId}/pin w 0.973) and 12 of 32 at b 0. The "after" answers lower 0 (x at 1.000 on all 32).
   - "before" at b 95: 29 undecided (x, review tight), 3 kept.
 - Lesson: a model trained before a rule existed can confidently lower that rule's rows. A floor on the rule name in the adapter makes the safety independent of the model version installed.
+
+## 2026-11-04 — Shared exam #3 scored once (rwxmap side): mode a PASS
+
+- Goal: score the shared fresh exam #3 once, as pre-registered (rwxmap prereg 46235ea, rwxlite 1cef41c), on rwxlite r10 = 0.3.0 at fe374c0.
+- Tried: 7 vendors' official specs (clerk, neon, supabase, mux, netbird, ory, novu), 1377 operations. Truth from two blind Sonnet labellers on BRIEF-v3 (1370 of 1377 agreed) plus 7 user rulings. Six configs scored; output in data/exam3-2026-11-04/score/score.txt.
+- Outcome (exact / too loose / too tight, of 1377):
+
+  | config | exact | too loose | too tight |
+  |---|---|---|---|
+  | mech | 1094 (79.4%) | 17 (1.2%) | 266 (19.3%) |
+  | a-fp32 | 1178 (85.5%) | 15 (1.1%) | 184 (13.4%) |
+  | a-int8 | 1180 (85.7%) | 15 (1.1%) | 182 (13.2%) |
+  | b95-fp32 | 1179 (85.6%) | 12 (0.9%) | 186 (13.5%) |
+  | b95-int8 | 1182 (85.8%) | 12 (0.9%) | 183 (13.3%) |
+  | c-jev | 1250 (90.8%) | 16 (1.2%) | 111 (8.1%) |
+
+  - rwxlite: a-fp32 sent 592, raised 3, lowered 83, kept 331, undecided 175. a-int8 sent 592, raised 3, lowered 85, kept 326, undecided 178. b95-fp32 sent 1377, raised 4, lowered 125, kept 1004, undecided 244. b95-int8 sent 1377, raised 4, lowered 128, kept 1004, undecided 241.
+  - Jev: sent 1276, answered 1276, failed 0, changed 194.
+  - Bars. Mode a gate (a-fp32): PASS; too loose 15 vs mech 17; exact +6.10 points vs bar 5.0 (69 more rows). a-int8: PASS (+6.25 points). Mode b: no bar. Mode c (M3 gate, user-confirmed): PASS; too loose 1.2% <= 2%, too tight 8.1% <= 20%.
+  - The 15 a-fp32 too-loose rows are all mechanical's own leaks the model kept. Mode a closed 2 of mech's 17: ex3-0422 mux PUT live-streams/{LIVE_STREAM_ID}/complete, ex3-1028 novu PUT /v2/workflows/{workflowId}/sync. The 15, grouped:
+    - Credential or identity replace: ex3-0018 clerk PUT /beta_features/domain; ex3-0230 clerk PUT /users/{user_id}/email_address; ex3-0243 clerk PUT /users/{user_id}/phone_number; ex3-0246 clerk POST /users/{user_id}/remove_password; ex3-1059 ory PUT /admin/keys/{set}; ex3-1159 ory POST /self-service/recovery; ex3-1171 ory POST /self-service/verification.
+    - Billing: ex3-0729 netbird POST /api/integrations/billing/aws/marketplace/activate; ex3-0738 netbird PUT /api/integrations/billing/subscription; ex3-1256 supabase PATCH /v1/projects/{ref}/billing/addons.
+    - Mux analyze-structure jobs: ex3-0318 POST /robots/v0/jobs/analyze-structure; ex3-0355 POST /robots/v1/jobs/analyze-structure.
+    - Mux mp4-support: ex3-0400 PUT /video/v1/assets/{ASSET_ID}/mp4-support.
+    - Ory logout GETs: ex3-1104 GET /oauth2/sessions/logout; ex3-1150 GET /self-service/logout.
+    - Two of the 15 (ex3-1256 supabase billing/addons, ex3-0400 mux mp4-support) were ruled x by the user on dispute.
+  - Jev's 16: closes ex3-0230, ex3-0243 (clerk email_address, phone_number) and ex3-1028 vs mech, but opens ex3-0774 netbird POST msp tenants/{id}/subscription and ex3-0823 netbird POST peers/{peerId}/jobs (both evidence jev), and raises the two ory logout GETs only to w.
+  - rwxlite side (relayed by rwxlite; their log /home/hamr/PycharmProjects/rwxlite/data/exam3/score.log): their own gate GONOGO_lba097 is NO-GO for r10 int8-pc (15 too loose = 1.22% of answered vs 0.5%) and for 0.2.0. Mechanical 17 matches ours.
+  - Process: one labeller (A, mux, first pass) labelled by script and was rejected. The labellers are one model family, so agreement may be inflated.
+- Lesson: the second pass helps exactness (+84 exact rows) without adding leaks, but leaves mechanical's leaks in place when the model agrees with them. The remaining leaks are credential/identity replace, billing commits and logout GETs: the same shapes R1 and R2 failed to fix on tuning.
+- State: exam #3 is BURNED for both sides. Usable for training or tuning, never an exam again.

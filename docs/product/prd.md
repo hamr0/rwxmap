@@ -1175,6 +1175,18 @@ the 5 remaining leaks (3 credential PUT/PATCH, 2 workos logout GETs):
 the model agrees with mechanical there, and the R1 and R2 tuning POCs
 (2026-11-04) closed none of them.
 
+Shared exam #3 (scored once 2026-11-04; data in `data/exam3-2026-11-04/`,
+prereg 46235ea, figures are for rwxlite r10 = 0.3.0 only). 7 vendors
+(clerk, neon, supabase, mux, netbird, ory, novu), 1377 operations. Exact /
+too loose / too tight: mechanical 1094 / 17 / 266; mode a r10 fp32 (the
+gate) 1178 / 15 / 184, a PASS on its bar (too loose 15 vs 17, exact +6.10
+points vs 5.0); int8 1180 / 15 / 182, also PASS. Mode b at 95: 12 too
+loose, 244 asked (no bar). Jev: 1250 / 16 / 111, PASS on the M3 gate (1.2%
+too loose vs 2%, 8.1% too tight vs 20%). All 15 mode-a leaks are
+mechanical's own leaks the model kept. rwxlite's own gate for r10 is
+NO-GO (15 too loose = 1.22% of answered vs 0.5%). The exam is burned for
+both sides.
+
 ### Open
 
 One item, listed under Open questions below.
@@ -1182,7 +1194,7 @@ One item, listed under Open questions below.
 ## What is next
 
 0.9.0 is released (PR #18, merge e9b697c, npm 0.9.0, 2026-11-03). Next:
-the D133 release and shared exam #3.
+the D133 release, pending which rwxlite model ships (r10 passed rwxmap's mode-a bar but failed rwxlite's own gate). That is a user decision.
 Parked items and known limits below.
 
 ### Parked
@@ -1287,4 +1299,4 @@ network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
 
 ## Open questions
 
-- D133: the shared fresh exam #3 vendor list, from rwxmap's spares clerk, neon, supabase, mux, netbird, ory, novu; both projects commit candidates before truth is read; each scores once.
+- D133: which rwxlite model ships. r10 passed rwxmap's mode-a bar (15 too loose vs 17 mechanical, exam #3) but failed rwxlite's own gate; user decision.
