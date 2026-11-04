@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **A D129 second Jev answer from a different model than the first is now a failed call (D133).** The row is undecided (x, review `tight`) and counted in `failed`, instead of staying at w.
+- **A D129 second Jev answer that is malformed, or from a different model than the first, is now a failed call (D133).** Malformed means p missing, not a number, NaN, non-finite or outside [0,1]. The row is undecided (x, review `tight`) and counted in `failed`, instead of staying at w.
 - **BREAKING (Jev): a failed, errored or malformed Jev call is now undecided.** On the first or the second (D129) question the row becomes x with review `tight`, instead of keeping the mechanical letter (or w). Jev's tiers, cut-offs and the letters of successful answers are unchanged. Rows Jev moves now get their review marker from the second-pass rule (raised: `tight` if x else `loose`; lowered: `loose`). The summary line reads "failed (x, review tight)".
 - **Offline fallback prefers the chosen model variant.** A cached model of the variant you chose (exact or `--model small`) wins over a higher-version one of the other; the other variant is used only when none of the chosen kind is cached, and the line says so.
 - **Model files are fetched from one release.** After the manifest request is redirected to a release tag, the asset files come from that tag, so a release published mid-download cannot mix files. With no tag in the redirect the files come from `latest` as before.

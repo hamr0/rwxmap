@@ -474,10 +474,14 @@ test('D129: isX does not fire -> x unchanged, whatever the changes answer says',
   assert.deepEqual(applyJev(FLOOR_VERDICT, { model: MODEL, changes: { p: 0, model: MODEL } }), FLOOR_VERDICT);
 });
 
-test('D129: a missing or malformed changes answer leaves the row at w', () => {
+test('D129: no changes answer at all (a pre-D129 call) leaves the row at w', () => {
+  assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL }), LOWER_TO_W);
+  assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes: undefined }), LOWER_TO_W);
+});
+
+test('D133: a malformed changes answer is undecided (x, review tight), not w', () => {
   /** @type {[string, any][]} */
   const bad = [
-    ['missing', undefined],
     ['null', null],
     ['empty', {}],
     ['not an object', 0.1],
@@ -490,7 +494,10 @@ test('D129: a missing or malformed changes answer leaves the row at w', () => {
     ['p above 1', { p: 1.5, model: MODEL }],
   ];
   for (const [name, changes] of bad) {
-    assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes }), LOWER_TO_W, name);
+    const out = applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes });
+    assert.deepEqual(out, jevUndecided(FLOOR_VERDICT), name);
+    assert.equal(out.class, 'x', name);
+    assert.equal(out.review, 'tight', name);
   }
 });
 

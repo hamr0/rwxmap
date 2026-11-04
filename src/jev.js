@@ -32,8 +32,9 @@
 // changes question (jevQuestions('jev-raise-get'), sent as a separate
 // request) asked of the same row. If that second answer is usable, carries
 // the SAME model string as the isX answer, and p(changes) <= 0.50, the row
-// goes on to r instead of stopping at w. Any other second answer leaves the
-// row at w; a changes answer without a firing isX answer moves nothing. No
+// goes on to r instead of stopping at w. A malformed second answer, or one
+// from another model version, is a failed call (D133: undecided, x + review);
+// a changes answer without a firing isX answer moves nothing. No
 // verdict another tier produced is ever read: both answers are about the
 // one floor-post verdict this tier owns.
 //
@@ -575,26 +576,24 @@ export function applyJev(verdict, answer, options) {
   // D129: the second question is read ONLY here, after the first fired. It
   // must be usable on the same terms as the first answer AND carry the same
   // model string (both answers must come from one model version). A usable
-  // answer with another model string is undecided (D133); any other unusable
-  // second answer leaves the row at spec.to, exactly as before D129.
+  // answer with another model string, or a malformed one, is undecided (D133).
   let to = spec.to;
   /** @type {number|undefined} */
   let pChanges;
   const second = spec.second;
   const next = answer.changes;
-  if (second && next && typeof next === 'object') {
+  if (second && next !== undefined) {
+    if (next === null || typeof next !== 'object') return jevUndecided(verdict, options);
     const p2 = next.p;
     const usable = typeof p2 === 'number' && Number.isFinite(p2) && p2 >= 0 && p2 <= 1;
-    // D133: a usable second answer from another model version is a failed
-    // call, not a keep-at-w: the two answers cannot be combined.
-    if (usable && next.model !== model) return jevUndecided(verdict, options);
-    if (usable) {
-      const t2 = thresholdFor(second.thresholdKey, second.threshold, options);
-      const fires2 = spec.direction === 'lower' ? p2 <= t2 : p2 >= t2;
-      if (fires2) {
-        to = second.then;
-        pChanges = p2;
-      }
+    // D133: a malformed second answer, or one from another model version, is
+    // a failed call, not a keep-at-w.
+    if (!usable || next.model !== model) return jevUndecided(verdict, options);
+    const t2 = thresholdFor(second.thresholdKey, second.threshold, options);
+    const fires2 = spec.direction === 'lower' ? p2 <= t2 : p2 >= t2;
+    if (fires2) {
+      to = second.then;
+      pChanges = p2;
     }
   }
 

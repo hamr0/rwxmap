@@ -286,8 +286,10 @@ undo another. The two raise tiers make one one-way move. `jev-lower`
 ends at w or at r (D129): when p(x) ≤ 0.10 fires, a second, separate
 request asks the changes question (`jev-raise-get`'s, byte-equal). A
 usable answer from the same model string with p(changes) ≤ 0.50
-(`JEV_LOWER_R_THRESHOLD`) moves the row x → r; anything else stops it
-at w. Rows isX does not lower get no second call.
+(`JEV_LOWER_R_THRESHOLD`) moves the row x → r; a usable answer above
+0.50 stops it at w; a malformed answer (p missing, non-number, NaN,
+non-finite, outside [0,1]) or another model string is a failed call
+(D133): undecided, x with review `tight`. Rows isX does not lower get no second call.
 
 | tier | pile (mechanical rule) | move | question | fires at |
 |---|---|---|---|---|
@@ -967,10 +969,11 @@ decided; everything marked "proposal" or "open" is not decided.
     before. Rows Jev moves get their marker through `reviewHint`'s
     second-pass argument (raised: `tight` if x else `loose`; lowered:
     `loose`). Scope is still the Jev tiers' own piles (`needsJev`), not
-    mode a's loose and tight rows. Not covered: a D129 second answer
-    that carries a different model string than the first cannot be
-    combined with it (D133, user-agreed): it counts as a failed call and
-    the row is undecided, x with review `tight`, not left at w.
+    mode a's loose and tight rows. Also a failed call (D133, user-ruled
+    2026-11-04): a D129 second answer that is malformed (p missing,
+    non-number, NaN, non-finite, outside [0,1]) or carries a different
+    model string than the first. The row is undecided, x with review
+    `tight`, counted in `failed`, never left at w.
   This reverses today's order (mechanical default, Jev opt-in).
 - **Runtime and files.** At runtime bareguard sees x, and its own
   gate and ruling decide (for example a human in the loop). rwxmap

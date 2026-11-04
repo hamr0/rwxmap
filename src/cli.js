@@ -831,9 +831,9 @@ async function runJev(ops, verdicts, jevOpts) {
       { p: first.p, model: first.model, changes: { p: second.p, model: second.model } },
       { method: ops[index].method },
     );
-    // D133: applyJev makes a second answer from another model version
-    // undecided (a verdict with no `jev` block); count it as the failed
-    // call it is.
+    // D133: applyJev makes a malformed second answer, or one from another
+    // model version, undecided (a verdict with no `jev` block); count it as
+    // the failed call it is.
     if (finalVerdicts[index].jev === undefined) {
       answered -= 1;
       failed += 1;

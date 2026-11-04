@@ -1053,6 +1053,11 @@ test('run (D129): a failed or malformed second answer makes the row undecided (x
     ['NaN p', () => ({ ok: true, status: 200, json: async () => ({ model: 'jev-1.0.0', answers: { changes: { noul: NaN } } }) }), 1],
     ['missing model', () => ({ ok: true, status: 200, json: async () => ({ answers: { changes: { noul: 0 } } }) }), 1],
     ['other model', ok(0, 'jev-9.9.9'), 1],
+    ['p above 1', ok(1.5), 1],
+    ['p negative', ok(-0.1), 1],
+    ['p Infinity', () => ({ ok: true, status: 200, json: async () => ({ model: 'jev-1.0.0', answers: { changes: { noul: Infinity } } }) }), 1],
+    ['p string', () => ({ ok: true, status: 200, json: async () => ({ model: 'jev-1.0.0', answers: { changes: { noul: '0.1' } } }) }), 1],
+    ['p missing', () => ({ ok: true, status: 200, json: async () => ({ model: 'jev-1.0.0', answers: { changes: {} } }) }), 1],
   ];
   for (const [label, changes, failedCount] of cases) {
     const { fetchImpl, calls } = questionJevFetch({

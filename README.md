@@ -294,7 +294,8 @@ A key alone does not turn it on: the run says so and sends nothing.
   name. They go to `https://api.typesafe.ai/v1/systemone`. Nothing else
   is sent, and the key never appears in any output.
 - **A failed call** never stops the run. If either call for a row fails,
-  the row is x, marked for review.
+  or the second answer is malformed (p missing, not a number, or outside
+  0 to 1), the row is x, marked for review.
 
 ## Library use
 
