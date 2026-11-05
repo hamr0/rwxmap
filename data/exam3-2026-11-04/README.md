@@ -65,3 +65,5 @@ path item key that is an HTTP method. Dedupe key = (METHOD, path with every
 - sha256 of ops.csv: `fff7afa983c7fc85e2073e5662c4c317c69e37a1dd92a04c7e5dc04ecf43d790`
 - Vendor list frozen 2026-11-04 (user approved, main API per vendor); already-seen scan clear by domain and bare name across rwxmap data/.
 - Brand aliases (for excluding these vendors from future draws): neon.com = neon.tech (API host console.neon.tech); ory.sh = ory.com and oryapis.com (API host {project}.projects.oryapis.com); novu.co also eu.api.novu.co.
+
+- `truth-d136.csv`: a derived copy for D136 (restart is w). Two rows changed, ex3-0621 and ex3-1358, x to w; nothing else differs. `truth.csv` remains the scored record and every committed score uses `truth.csv`. The copy is for rwxlite round 12 training/testing and is never used to re-score this exam.

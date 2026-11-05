@@ -75,3 +75,5 @@ item key that is an HTTP method. As in exam #3, uniqueness is asserted on
 - sha256 of ops.csv: `e9836ff2f9e8288e3721f97506ed666b871a3486f7b781c544b5234a0b5da0b4`
 - Brand aliases (for excluding these vendors from future draws): permit.io = permit, permitio, api.permit.io; immich.app = immich, immich-app; polar.sh = polar, polarsource, polar-sh, app.polar.sh, api.polar.sh, sandbox-api.polar.sh; goharbor.io = harbor, goharbor; zulip.com = zulip, zulipchat.com, chat.zulip.org; chatwoot.com = chatwoot, app.chatwoot.com; render.com = render, onrender.com, api.render.com, api-docs.render.com.
 - Leakage checks must match on the provider/vendor fields (and registrable domain labels), never on free text: render, polar, harbor and paddle are ordinary words and appear in descriptions of other vendors' specs (rwxlite's suggestion).
+
+- `truth-d136.csv`: a derived copy for D136 (restart is w). Two rows changed, ex4-1237 and ex4-1308, x to w; nothing else differs. `truth.csv` remains the scored record and every committed score uses `truth.csv`. The copy is for rwxlite round 12 training/testing and is never used to re-score this exam.

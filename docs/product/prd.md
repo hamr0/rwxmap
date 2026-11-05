@@ -126,7 +126,7 @@ vendor (D81). Only "what does the call do" is asked.
 
 The labelling brief every truth label is made under is
 `data/relabel-2026-09-22/BRIEF-v3.md` (amended by D98).
-Restart and stop are w (D136); to be written into BRIEF-v4 before exam #5.
+Restart and stopping a server or service are w; stopping a running job whose work is lost stays x by clause (f) (D136); to be written into BRIEF-v4 before exam #5.
 
 ## The core (frozen)
 

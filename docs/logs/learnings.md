@@ -8604,3 +8604,4 @@ exact >= +5 points): +9.0 and +9.5 points.
   - (c) Of 11 human truths rwxlite's generator flagged, 7 are right on the full description, 3 borderline (victorops resolve-all x, nexmo network-unblock w, azure listkeys r), 1 reads wrong under BRIEF-v3 (r9-0263 codat POST push/billCreditNotes, w; pushes to an outside accounting package, (e)/(d) x; rwxlite's truth, their call).
 - Decision: D136 (both rulings).
 - Lesson: a lower cut-off buys tight rows at ~28 per leak but every added leak is a confident x->w; the bar (no looser than mechanical) catches it per set, so the gain has to come from the model, not the rule.
+- Follow-up ruling (2026-11-05): clause (f) stands for job stops; truth-d136.csv copies added beside exam #3 and #4 truth (4 restart rows to w), originals untouched.
