@@ -8631,3 +8631,16 @@ exact >= +5 points): +9.0 and +9.5 points.
 - Findings: (1) rwxlite's frozen pick rule (too loose <= v020's, exact >= v020 + 3) passed S0, S2, S1, but its v020 used T refit to 0.9211; against shipped 0.2.0 (T 0.844) no round 12 run beats it at 0.97 (best S0 424/9/22, inside noise). rwxlite recorded this as a prereg design error. (2) Temperature alone moved v020 by 7 exact at 0.97 (425 -> 418), more than any training change. (3) Leaks at 0.97: v020 ex4-0170 0175 0241 0279 0295 0327 0335 0358 1132; S0/S1/S2 ex4-0175 0241 0279 0295 0327 0358 1115 1132 1318 — round 12 closes harbor 0170 (job stop) and 0335 (purgeaudit), opens render 1115/1318 (PUT secret-files) as r11 did; 5 harbor job stops stay missed by every model. (4) Variants x5 (S2) did not beat no variants (S0).
 - Decision: none for rwxmap; 0.10.0 stays on 0.2.0 (D135). No exam #5 requested.
 - Lesson: compare a candidate against the shipped configuration, temperature included; a baseline rescored with a different T is a different model, and here it alone hid a 7-row gap.
+
+## 2026-11-05 — rwxlite calibration of 0.2.0 under the real second pass: one dial, 0.97 stays
+
+- Goal: see whether temperature (T) or our lower cut-off (0.97) could gain exact rows on the shipped 0.2.0 without new leaks. This is rwxlite's analysis (rwxlite docs/wiki/findings.md, commit 9f2827d, reported 2026-11-05), recorded by us. Row-level flips are in rwxlite's scratchpad calib/ folder.
+- Setup: rwxlite's copy of src/secondpass.js matched our real secondPass row for row on 9 sets (0 differing rows). Checks (exact / too loose / too tight): 455 harbor+render 425/9/21; exam #4 1391/16/98; exam #3 1192/15/170.
+- Outcome: no setting gains right rows without adding too-loose rows, except a boundary-noise gain of +9 rows.
+- Findings:
+  - (1) T and the 0.97 line move essentially the same rows (95% or more overlap), and the model's top letter never changes. They are one dial, not two.
+  - (2) Every setting that gains right rows also adds too-loose rows. T 0.80 gives +140 right and +6 loose. A 0.96 line gives +200 right and +7 loose. Raising the line to 0.975 fixes 3 loose but loses 187 right.
+  - (3) The best setting with no new loose rows is T 0.84. It gains +9 right on 5,031 clean rows (+2 of 455). These are rows at p 0.9700-0.9705, which is boundary noise.
+  - (4) The remaining leaks are confident wrong lowerings at p about 0.96-0.975, and no cut-off separates them: chatwoot ex4-0152 (inbox contacts), clerk ex3-0031 (billing price), workos fx-0936 (waitlist), permit.io ex4-0813 (env copy), googleapis gate4 (messages), elmah.io r9-1129.
+- Decision: none for rwxmap. 0.97 stays (D136). rwxlite keeps 0.2.0 at T 0.844 / 0.97 and will not spend a fresh exam on calibration. Their next model work waits for more real human-labelled dangerous POST/PUT examples.
+- Lesson: when a model's letter never changes across T, temperature and the cut-off are one lever. Its remaining leaks are confident errors, so only new training data can fix them, not calibration. This refines the round 12 lesson: T moved 7 rows there because it moves the same rows the line does.
