@@ -57,8 +57,19 @@ never in rwxlite's training data under another name.
   with its A and B labels and a reason). rwxmap builds truth; Jev is never used.
   Labeller outputs go in `data/exam4-2026-11-04/labelling/`; the ruled result is
   `truth.csv` (`id,label`, label r|w|x, 1505 rows) in `data/exam4-2026-11-04/`.
-- `truth.csv` sha256: **pending** (filled in when truth is built and ruled; built
-  by `labelling/build-truth.mjs`, two runs must give the same sha).
+- `truth.csv` sha256: **b76c55fb30235726489574c90425c2c53b8343467e2fd918603952d135313c45**
+  (`truth.csv.sha256`). Built by `labelling/build-truth.mjs` from the 14
+  labeller files and `labelling/rulings.csv`; two runs gave the same sha.
+- Measured facts: 14 labeller files (A and B for each of 7 vendors), all
+  validated directly. A and B agree on 1485 of 1505 rows (98.7%). Per vendor
+  (agreed/rows): permit 257/263, immich 275/279, polar 188/190, harbor 202/203,
+  zulip 154/161 (5 class disagreements plus 2 rows both marked ?), chatwoot
+  157/157, render 252/252. The 20 disputed rows were ruled by the user on
+  2026-11-05 (`labelling/rulings.csv`, each with its A and B labels and a
+  reason; one row, ex4-0355 harbor DELETE /users/{user_id}, was ruled x against
+  the orchestrator's suggestion of w). Truth classes: r 715, w 467, x 323.
+  Distinct-reason counts per file ranged 72-210; no file was rejected as
+  scripted.
 - Custody: rwxmap holds `truth.csv`. `truth.csv` and `labelling/out/` stay out
   of git until both sides have scored; only their sha256 are committed
   (`truth.csv.sha256`, and `labelling/out.sha256`, which lists the sha256 of
