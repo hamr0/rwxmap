@@ -118,15 +118,31 @@ reading:
   expiring, rotating or resetting a credential, key, token, secret,
   certificate, session or password, and changing or setting a password,
   is x (D130; BRIEF-v3 clause b).
+  **The test (D137):** after this call, a later call cannot put things
+  back the way they were, including everything anyone could have done
+  in between. That happens two ways: *gone* (delete, purge, a job
+  stopped with its work lost) or *out of your hands* (sent, published,
+  charged, run, or a secret or a right handed to someone).
+  **Access example (D137):** an operation that grants or widens who can
+  do what to which resource is x: IAM, resource, bucket and key
+  policies; role or permission assignments and bindings; ACLs; share and
+  invite grants; deploy keys; setIamPolicy-style calls. Narrowing access
+  (admin to viewer) stays w: nobody gains anything in between. A set or
+  replace whose text does not say whether it widens or narrows is x by
+  the doubt rule. A "policy" that does not control access (autoscaling,
+  lifecycle, retention, routing) stays w unless x for another reason.
+  D130, BRIEF-v3 clauses (c) and (f) are examples of this one test;
+  D136 (restart and stop are w) is consistent with it.
 - Unsure → **x**.
 
 "Whose thing is it" is not a class test: it cannot be read reliably
 from a spec, because the words for "whose" mean different things per
 vendor (D81). Only "what does the call do" is asked.
 
-The labelling brief every truth label is made under is
-`data/relabel-2026-09-22/BRIEF-v3.md` (amended by D98).
-Restart and stopping a server or service are w; stopping a running job whose work is lost stays x by clause (f) (D136); to be written into BRIEF-v4 before exam #5.
+Truth today is BRIEF-v3 (`data/relabel-2026-09-22/BRIEF-v3.md`,
+amended by D98, D130, D136). BRIEF-v4 (D137) replaces it once
+calibrated, and every set is relabelled under it (plan:
+`docs/wiki/truth-v4-plan.md`).
 
 ## The core (frozen)
 
@@ -1215,8 +1231,20 @@ None.
 
 ## What is next
 
-0.9.0 is released (PR #18, merge e9b697c, npm 0.9.0, 2026-11-03). Next:
-the D133 release, which ships rwxlite 0.2.0, pinned to tag v0.2.0 (D135).
+0.10.0 is released (D133/D135, PR #19, npm 0.10.0, rwxlite 0.2.1 on
+npm). Next: the truth-v4 plan (D137), steps listed in
+`docs/wiki/truth-v4-plan.md`:
+
+0. Ruling D137 (done 2026-11-05).
+1. Send rwxlite the shared wording.
+2. BRIEF-v4, calibrated blind on a practice set and a burned holdback.
+3. Inventory of every labelled set in both repos.
+4. Relabel every row under BRIEF-v4; truth-v4.csv beside each original.
+5. Merged v4 export for rwxlite; rwxlite retrains (round 13).
+6. rwxmap code: second pass never lowers an access-widening x (new D-number).
+7. Fresh exam #5, pre-registered, scored once for both projects.
+8. README "what x covers" section, exam #5 numbers, release.
+
 Parked items and known limits below.
 
 ### Parked

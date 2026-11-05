@@ -8644,3 +8644,10 @@ exact >= +5 points): +9.0 and +9.5 points.
   - (4) The remaining leaks are confident wrong lowerings at p about 0.96-0.975, and no cut-off separates them: chatwoot ex4-0152 (inbox contacts), clerk ex3-0031 (billing price), workos fx-0936 (waitlist), permit.io ex4-0813 (env copy), googleapis gate4 (messages), elmah.io r9-1129.
 - Decision: none for rwxmap. 0.97 stays (D136). rwxlite keeps 0.2.0 at T 0.844 / 0.97 and will not spend a fresh exam on calibration. Their next model work waits for more real human-labelled dangerous POST/PUT examples.
 - Lesson: when a model's letter never changes across T, temperature and the cut-off are one lever. Its remaining leaks are confident errors, so only new training data can fix them, not calibration. This refines the round 12 lesson: T moved 7 rows there because it moves the same rows the line does.
+
+## 2026-11-05 — D137: x widened to 'including everything anyone could do in between'; truth v4 for every set
+
+- Ruling (user, D137): x = after this call, a later call cannot put things back the way they were, including everything anyone could have done in between. Gone (delete, purge, job stopped with work lost) or out of your hands (sent, published, charged, run, a secret or a right handed over). Granting or widening access (IAM/resource/bucket/key policies, role bindings, ACLs, share grants, deploy keys, setIamPolicy-style) is x; narrowing stays w; unclear set/replace is x by the doubt rule. D130, BRIEF-v3 (c) and (f) become examples of this one test.
+- Why: rwxlite's vendor-label check found Jev said w on 165 of 221 AWS "Permissions management" endpoints and 0.2.0 learned it. Our second pass lowered 38 of them from x to w at p 0.97-0.99 (PutRolePolicy, PutKeyPolicy, PutResourcePolicy, create-deploy-key, and more). Same family as the credential-set leaks.
+- Plan: `docs/wiki/truth-v4-plan.md`. Every set either project labelled is relabelled under BRIEF-v4; originals stay; rwxmap code waits for its own D-number and exam #5.
+- Lesson: adding one clause per finding makes pockets; one test with examples keeps the definition whole.
