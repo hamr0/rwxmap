@@ -8579,3 +8579,28 @@ exact >= +5 points): +9.0 and +9.5 points.
   4. Unreachable by any model (never sent): GET floor r with truth w or x, 19 rows; settled list PUT/PATCH (mechanical x, truth w), 10 rows. Dropped from rwxlite's targets.
 - Open (not a ruling): how bad is x->w compared with x->r? The user's view (2026-11-05): x->w is not great, still loose, but not the worst kind. The orchestrator's view: agreed it is milder, because a w row is still flagged as a change and a gate that asks on every write still asks; an x->r row may be let through as a read. But how bad it is depends on the gate: if a policy lets w through as "undoable", RegisterDomain or a twilio challenge goes through unasked. Of the 6, 3 are clear x (RegisterDomain, twilio Challenge, shipengine manifest) and 3 sit on the label boundary (create audit, update system services, update cluster master), where a labeller could argue w. Proposal, not adopted: keep counting x->w as too loose (the invariant and every gate stay unchanged), but report a severity split beside the total (x->r, x->w, w->r), and suggest rwxlite weight its training loss x->r > x->w > w->r. Changing any gate's weighting would need a D-number and the user's ruling.
 - Lesson: under the shipped rule the cheap win is calibration, because the model already knows most of the tight rows; the risk to watch is the handful of confident wrong lowers, which sharpening could grow.
+
+## 2026-11-05 — Lowering cut-off what-if (0.99-0.90) and the rulings it led to (D136)
+
+- Goal: the user asked what a 95% lowering cut-off would do instead of 97%.
+- Setup: `replay.mjs --lower-min-p` through a temp copy of the second pass. Parity P1: temp copy at 0.97 = real module, exam #4 r11, 0 differ. P2: G1/G2 still pass. Exam #4 0.2.0 base reproduced 1391/16/98 row for row; exam #3 totals 1192/15/170 reproduced (no per-row 0.2.0 file exists). Sets: the six rwxlite r12 sets plus exam #3 and exam #4 (both burned; measurement only). Output in `poc/replay-r12/out/cutoff/` (c03b9eb).
+- Outcome, pooled over 8 sets (exact / too loose / too tight; leaks added vs 0.97):
+  - 7831 rows, 0.99: 5635/86/2110 (0 added); 0.97: 6578/93/1160; 0.95: 6903/105/823 (+12); 0.93: 7044/118/669 (+25); 0.90: 7163/130/538 (+37).
+  - Without the three training sets (5282 rows): 0.99 3717/53/1512; 0.97 4413/59/810; 0.95 4663/67/552 (+8); 0.93 4764/77/441 (+18); 0.90 4854/82/346 (+23).
+- Per set (exact / too loose / too tight at 0.99, 0.97, 0.95, 0.93, 0.90):
+  - fresh, 949: 735/6/208; 827/6/116; 845/8/96; 855/8/86; 856/15/78
+  - gate-2026-11-03, 600: 464/8/128; 511/8/81; 538/8/54; 547/10/43; 553/10/37
+  - gate-2026-11-04, 600: 477/7/116; 523/7/70; 536/8/56; 549/8/43; 557/8/35
+  - gate-2026-11-06, 800: 584/19/197; 648/20/132; 678/20/102; 694/21/85; 712/21/67
+  - gate-2026-11-07, 800: 599/8/193; 690/8/102; 717/10/73; 731/12/57; 741/12/47
+  - r9-hand, 1200: 413/8/779; 796/13/391; 959/15/226; 1014/20/166; 1066/23/111
+  - exam #4, 1505: 1268/15/222; 1391/16/98; 1407/18/80; 1411/21/73; 1419/22/64
+  - exam #3, 1377: 1095/15/267; 1192/15/170; 1223/18/136; 1243/18/116; 1259/19/99
+- The 12 leaks added at 0.95 (all x->w POST; id, provider, path, p): fx-0718 getlago /credit_notes 0.9578; fx-0936 workos /user_management/waitlists/{id}/entries 0.9637; gate2-0219 linode /linode/instances 0.9516; gate4-0667 googleapis /v1/{parent}/messages 0.9655; gate4-0672 windows.net /jobs/{jobId}/addtaskcollection 0.9683; r9-0713 microsoft /me/events/{event-id}/exceptionOccurrences/{event-id1}/microsoft.graph.tentativelyAccept 0.9516; r9-1129 elmah.io /v3/messages/{logId} 0.9670; ex4-0152 chatwoot .../conversations/{conversation_id}/messages 0.9692; ex4-0813 permit.io /v2/projects/{proj_id}/envs/{env_id}/copy 0.9638; ex3-0031 clerk /billing/subscription_items/{subscription_item_id}/price_transition 0.9643; ex3-0257 clerk /waitlist_entries/bulk 0.9526; ex3-0774 netbird /api/integrations/msp/tenants/{id}/subscription 0.9541. No x->r leak at any cut-off; one w->r at 0.93 (r9-0689 trakt POST /users/{id}/lists/{list_id}/like, p 0.9386).
+- Bar check: 0.95 breaks the D133 mode-a bar (too loose no worse than mechanical) on exam #3 (18 vs 17), gate-2026-11-04 (8 vs 7) and the fresh set (8 vs 6); 0.97 passes (mechanical too loose: exam #3 17, gate-2026-11-04 7, fresh 6; verify against poc/replay-r12/out/cutoff/log-*-0.97.txt mechanical lines).
+- Also, rwxlite review findings this session:
+  - (a) rwxlite's Jev cross-check for generated variants would drop about half of true-x variants (Jev x-recall 47.8%, x-precision 93%); rwxlite made it one-sided and will report the x share before/after.
+  - (b) Variants that drop the description can remove the only x evidence (influx gate-0579 "This will cancel all queued runs", vimeo gate-0597 "publish the page", vtex r9-0089 "Create a debit value"); such variants must keep that sentence or be relabelled by the brief.
+  - (c) Of 11 human truths rwxlite's generator flagged, 7 are right on the full description, 3 borderline (victorops resolve-all x, nexmo network-unblock w, azure listkeys r), 1 reads wrong under BRIEF-v3 (r9-0263 codat POST push/billCreditNotes, w; pushes to an outside accounting package, (e)/(d) x; rwxlite's truth, their call).
+- Decision: D136 (both rulings).
+- Lesson: a lower cut-off buys tight rows at ~28 per leak but every added leak is a confident x->w; the bar (no looser than mechanical) catches it per set, so the gain has to come from the model, not the rule.

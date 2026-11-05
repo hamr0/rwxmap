@@ -126,6 +126,7 @@ vendor (D81). Only "what does the call do" is asked.
 
 The labelling brief every truth label is made under is
 `data/relabel-2026-09-22/BRIEF-v3.md` (amended by D98).
+Restart and stop are w (D136); to be written into BRIEF-v4 before exam #5.
 
 ## The core (frozen)
 
@@ -1088,6 +1089,7 @@ decided; everything marked "proposal" or "open" is not decided.
   three tiers, with per-tier cuts and then asks a lowering under 0.97).
   A `credential-set` verdict (D131) is never lowered by the second pass,
   in any mode (user ruling 2026-11-04).
+  Kept at 0.97 after a measured 0.95/0.93/0.90 what-if (D136).
   Evidence: "Rule comparison" under Evidence so far. Caveat:
   secondPass has only that one tuning measurement; the D133 exam is its
   test.
