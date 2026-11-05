@@ -1200,7 +1200,8 @@ gate scored rwxlite r11 (v0.3.0) NO-GO: mode a fp32 too loose 18 vs 16 for
 0.2.0 (exact 1393 vs 1391), so 0.2.0 stays and the next model needs a new
 exam. Mode a with 0.2.0 passed the D133 bar on this exam: 1391 / 16 / 98
 (exact / too loose / too tight) vs mechanical 1262 / 21 / 222, +8.57
-points. Jev (mode c) was not scored. rwxlite's own scorer also says NO-GO
+points. Jev (mode c) scored 1428 / 17 / 60 (94.9% exact, 17 = 1.1% too
+loose, 60 = 4.0% too tight): M3 gate PASS, 15 of its 17 leaks are mechanical's kept and 2 (ex4-0023, ex4-0573) its own. rwxlite's own scorer also says NO-GO
 but with different numbers (it applies no ask rule); rwxlite confirmed the
 gate is the CLI number.
 

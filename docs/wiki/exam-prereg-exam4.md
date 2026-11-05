@@ -294,7 +294,7 @@ change after this needs a new exam.
 
 ## Results and findings (after scoring, 2026-11-05)
 
-Scored once, at rwxmap 9f58894, exit 0, no Jev. Exam #4 is BURNED for both sides. Source: `data/exam4-2026-11-04/score/score.txt`.
+Scored once, at rwxmap 9f58894, exit 0 for the rwxlite configs; c-jev was scored in a second run (2026-11-05, same ref 9f58894, exit 0, `data/exam4-2026-11-04/score/score-jev.txt`, rows in `rows-c-jev.csv`, model jev-1.14.0). Exam #4 is BURNED for both sides. Source: `data/exam4-2026-11-04/score/score.txt`.
 
 ### rwxmap's scores (of 1505)
 
@@ -321,7 +321,7 @@ Verdict: NO-GO. rwxlite r11 (v0.3.0) does not ship; rwxmap stays on 0.2.0. A lat
 - a-int8-base: PASS. 16 vs 21; +8.31 points.
 - a-int8-cand: PASS. 18 vs 21; +8.50 points.
 - Mode b (no bar): b95-fp32-base 9 too loose (0.6%), 99 too tight (6.6%), asked 152 (10.1%); b95-fp32-cand 7 too loose (0.5%), 94 too tight (6.2%), asked 147 (9.8%).
-- Mode c (Jev): not scored, pending the user's decision.
+- Mode c (Jev), c-jev: exact 1428 (94.9%), too loose 17 (1.1%), too tight 60 (4.0%) of 1505. Jev sent 1354, answered 1354, failed 0, changed 174. M3 gate (too loose <= 2%, D94): 17 (1.1%) -> PASS; too tight 60 (4.0%) <= 20% -> within. Jev is non-deterministic, but this result is not near the bar (1.1% against 2%), so no second run is needed on that account. Against mech (1262 / 21 / 222) Jev closes 6 of mech's 21 leaks and opens 2 itself, so 21 - 6 + 2 = 17.
 
 ### Too-loose rows
 
@@ -330,6 +330,8 @@ Mechanical (21): ex4-0170, 0175, 0241, 0279, 0295, 0302, 0327, 0335, 0358 (gohar
 a-fp32-base (16): ex4-0170, 0175, 0241, 0279, 0295, 0327, 0335, 0358 (goharbor); ex4-0464, 0573 (immich); ex4-0667, 0683, 0692 (permit); ex4-1132 (render); ex4-1352, 1435 (zulip). Evidence: floor on 13, list on ex4-1132 and ex4-1435, rwxlite on ex4-0573 (POST /shared-links, truth x, scored w).
 
 a-fp32-cand (18): the base 16 minus ex4-0335, plus ex4-0813 (permit POST /v2/projects/{proj_id}/envs/{env_id}/copy, evidence rwxlite), ex4-1115 (render PUT /build-sources/{buildSourceId}/secret-files, floor) and ex4-1318 (render PUT /services/{serviceId}/secret-files, floor). That is 16 - 1 + 3 = 18.
+
+Jev, c-jev (17): ex4-0023 (chatwoot POST /api/v1/accounts/{account_id}/campaigns, evidence jev, OPENED BY JEV: mech had x); ex4-0170, 0175, 0241, 0279, 0295, 0327, 0335 (goharbor, floor); ex4-0464 (immich, floor); ex4-0573 (immich POST /shared-links, evidence jev, OPENED BY JEV: mech had x); ex4-0667, 0683, 0692 (permit, floor); ex4-1132 (render, list); ex4-1299, 1313 (render, floor); ex4-1435 (zulip, list). 15 are mechanical's own leaks that Jev kept (13 floor, 2 list); the 2 marked are the only ones Jev opened. Jev closes mech's ex4-0302, 0358, 1091, 1115, 1318, 1352. By vendor: goharbor 7, immich 2, permit 3, render 3, chatwoot 1, zulip 1, polar 0.
 
 ### Rows where base and cand differ (12), truth, base -> cand
 
@@ -354,4 +356,4 @@ a-fp32-cand (18): the base 16 minus ex4-0335, plus ex4-0813 (permit POST /v2/pro
 - (b) Every base leak but one carries floor or list evidence (13 floor, 2 list: ex4-1132, ex4-1435). ex4-0573 (immich POST /shared-links) is the only one where rwxlite lowered the row itself.
 - (c) Harbor PUT/PATCH job and execution stop rows (ex4-0170, 0175, 0241, 0279, 0295, 0327) are mechanical floor leaks that both models keep.
 - (d) rwxlite's own scorer (rwxlite 594227f / 3ce3332, `train/exam4_score.py`, "a_none") reports: mech 1262/21/222 (the same as ours); base fp32 1448/24/33; cand 1447/22/36. Their NO-GO is on exact (1447 < 1448). The verdicts agree; the numbers differ. Confirmed by rwxlite (2026-11-05): "a_none" is offline mode a at exam #3's cuts (lower when pIsX < 0.30, the r cut 0.40 on POST, raise-wx 0.15, raise-get 0.05, credential rule forces x last). Every row is sent and it never asks or reviews. It is not rwxmap's `secondPass`: it has no lower-only-at-p >= 0.97-else-x-plus-review, does not skip settled rows, and has no credential-set never-lower. rwxlite agrees the D135 gate is the CLI number (base 1391/16/98, cand 1393/18/94, NO-GO on too loose), and records "a_none named as gate config" as a prereg error on their side. For the next exam their gate is rwxmap's CLI `secondPass`, or a replay of their p-jsonl through our CLI. A model's score belongs to the rule it was measured with.
-- (e) Jev (mode c) was not scored, pending the user's decision.
+- (e) Jev (mode c) scored once: 1428 / 17 / 60, M3 gate PASS (17 = 1.1% <= 2%). Of its 17 leaks, 15 are mechanical floor or list leaks it kept and 2 (ex4-0023, ex4-0573) it opened itself. Best exact (94.9%) of any config here, but the fewest too-loose rows belong to b95 (9 base, 7 cand).
