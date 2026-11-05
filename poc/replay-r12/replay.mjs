@@ -7,14 +7,36 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
+import * as os from 'node:os';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const { classifyOperations } = await import(`${REPO}/src/exporter.js`);
-const { secondPass } = await import(`${REPO}/src/secondpass.js`);
+const { readAnswer } = await import(`${REPO}/src/secondpass.js`);
 
-const { values: a } = parseArgs({ options: { ops: { type: 'string' }, truth: { type: 'string' }, p: { type: 'string' }, out: { type: 'string' }, 'expect-mech': { type: 'string' }, 'expect-rows': { type: 'string' } } });
+const { values: a } = parseArgs({ options: { 'lower-min-p': { type: 'string' }, ops: { type: 'string' }, truth: { type: 'string' }, p: { type: 'string' }, out: { type: 'string' }, 'expect-mech': { type: 'string' }, 'expect-rows': { type: 'string' } } });
 const die = (m) => { console.error(`replay: ${m}`); process.exit(2); };
 for (const k of ['ops', 'truth', 'p', 'out']) if (!a[k]) die(`--${k} is required`);
+
+// ---- second pass: the real module, or (with --lower-min-p) a temp copy with only LOWER_MIN_P changed
+let spFile = `${REPO}/src/secondpass.js`, cutoff = 0.97;
+if (a['lower-min-p'] !== undefined) {
+  cutoff = Number(a['lower-min-p']);
+  if (!Number.isFinite(cutoff) || cutoff < 0 || cutoff > 1) die(`--lower-min-p must be a number in 0..1, got ${a['lower-min-p']}`);
+  const src = fs.readFileSync(`${REPO}/src/secondpass.js`, 'utf8');
+  const line = 'export const LOWER_MIN_P = 0.97;';
+  if (src.split(line).length !== 2) die(`expected line not found exactly once in src/secondpass.js: ${line}`);
+  let copy = src.replace(line, () => `export const LOWER_MIN_P = ${cutoff};`);
+  for (const imp of ['./flow.js', './modelcache.js']) {
+    const from = `from '${imp}'`;
+    if (copy.split(from).length !== 2) die(`import ${from} not found exactly once in src/secondpass.js`);
+    copy = copy.replace(from, () => `from '${REPO}/src/${imp.slice(2)}'`);
+  }
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'secondpass-cut-'));
+  spFile = path.join(dir, 'secondpass.js');
+  fs.writeFileSync(spFile, copy);
+}
+const { secondPass } = await import(spFile);
+console.log(`second pass file: ${spFile}${a['lower-min-p'] !== undefined ? ' (temp copy)' : ' (real module)'}; lower cut-off ${cutoff}`);
 
 function parseCsv(text) {
   const rows = []; let row = [], f = '', i = 0, q = false;
@@ -80,8 +102,8 @@ const fin = sp.verdicts, s = sp.summary;
 
 // ---- rows
 const outcome = (letter, id) => { const d = RANK[letter] - RANK[truth.get(id)]; return d === 0 ? 'exact' : d < 0 ? 'loose' : 'tight'; };
-const rows = opsRows.map((o, i) => ({ id: o.id, provider: o.provider, method: o.method, path: o.path, truth: truth.get(o.id), mech_letter: mech[i].class, mech_review: mech[i].review, letter: fin[i].class, review: fin[i].review, evidence: fin[i].source, outcome: outcome(fin[i].class, o.id), mech_outcome: outcome(mech[i].class, o.id) }));
-const cols = ['id', 'provider', 'method', 'path', 'truth', 'mech_letter', 'mech_review', 'letter', 'review', 'evidence', 'outcome'];
+const rows = opsRows.map((o, i) => ({ id: o.id, provider: o.provider, method: o.method, path: o.path, truth: truth.get(o.id), mech_letter: mech[i].class, mech_review: mech[i].review, letter: fin[i].class, review: fin[i].review, evidence: fin[i].source, rule: fin[i].rule, rw_letter: (readAnswer(pById.get(o.id), model) || {}).letter || '', rw_p: (readAnswer(pById.get(o.id), model) || { p: '' }).p, outcome: outcome(fin[i].class, o.id), mech_outcome: outcome(mech[i].class, o.id) }));
+const cols = ['id', 'provider', 'method', 'path', 'truth', 'mech_letter', 'mech_review', 'letter', 'review', 'evidence', 'outcome', 'rule', 'rw_letter', 'rw_p'];
 fs.writeFileSync(a.out, [cols.join(','), ...rows.map((r) => cols.map((c) => q(r[c])).join(','))].join('\n') + '\n');
 
 // ---- report
