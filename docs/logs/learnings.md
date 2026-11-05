@@ -8659,3 +8659,12 @@ exact >= +5 points): +9.0 and +9.5 points.
 - Lesson: a model that never applies "unsure -> x" can't label a widening whose cases are mostly "direction not stated". Both labellers being Sonnet measures consistency, not independent opinion.
 - Decision: the pass is labelled locally by two Sonnet labellers (user ruling). Flips are reported as D137 vs other (p116, p188 flip for other reasons).
 - Where: data/pilot-v4-2026-11-05/ (README Result section, truth-v4.csv, rulings.csv), poc/v4-pilot/.
+
+## 2026-11-06 — v4 pilot 2: ask Jev facts, apply the rule in code; 96.4% x recall
+
+- Goal: rerun the v4 pilot on 200 fresh w rows (100 access-pattern, 100 random); Jev gets five factual questions per row and our code applies the rule. Bar set before running: catch at least 95% of agreed-x rows.
+- Numbers: labellers agree on 197 of 200; user ruled the 3 disputes x (q045, q075, q129) and corrected 5 both-r rows to r (fixes). Truth x 31, w 164, r 5. Jev rule label catches 27 of 28 agreed x (96.4%), PASS; false x 23 of 169; the miss is q026 adyen (otherX p 0.22). About 621k input and 21.8k output tokens, 0 errors.
+- Cost: 5 requests per row came to slightly more tokens than pilot 1's single long question (about 621k vs 559k input).
+- Lesson: Ask a model facts and apply the decision rule (including "unsure means x") in code; a doubt rule inside a probability question reads as "probably not".
+- Decision (user): full pass labelled by Jev; Sonnet re-labels suspect rows only (all Jev-x, Jev-w with any p in [0.2, 0.5), seeded 5% of the rest); disagreements go to the user by pattern.
+- Where: data/pilot2-v4-2026-11-06/ (README Result, truth-v4.csv, rulings.csv), poc/v4-pilot2/.
