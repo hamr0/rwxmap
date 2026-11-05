@@ -25,6 +25,11 @@ function run(argv, env) {
   return runCli(argv, { modelFetch: offlineFetch, xdgCacheHome: mkScratch(), ...env });
 }
 
+// A package check that passes (the rwxlite package is not installed in this repo):
+// the default run checks the package before it looks for a model, so a test about
+// the model needs this to get that far. The fake package is never asked to load.
+const PKG_OK = { rwxliteImporter: async () => ({}), rwxliteVersionReader: () => '0.2.0' };
+
 // One operation of each class, by method-floor evidence alone (no word
 // list needs to fire): GET -> r, PUT -> w (floor, review "loose"), DELETE
 // -> x (floor, review "settled"). Matches the D104 hint table's three
@@ -614,7 +619,7 @@ test('run: stdout always says rwxlite is off (mechanical) when no model can be g
   const stdout = captureStream();
   const stderr = captureStream();
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr, xdgCacheHome: mkScratch() });
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr, xdgCacheHome: mkScratch(), ...PKG_OK });
 
   assert.equal(code, 0, stderr.text());
   assert.match(stdout.text(), /^rwxmap: rwxlite: off \(mechanical\) — could not get the model \(offline \(test\)\); none in the cache$/m);
@@ -1960,7 +1965,7 @@ function d133Rows(outDir) {
 }
 
 test('run (D133): no model can be got -> "rwxlite: off (mechanical)", exit 0, mechanical letters, widened markers', async () => {
-  const { code, stdout, stderr, outDir } = await runD133([]);
+  const { code, stdout, stderr, outDir } = await runD133([], PKG_OK);
   assert.equal(code, 0, stderr);
   assert.match(stdout, /^rwxmap: rwxlite: off \(mechanical\) — could not get the model \(offline \(test\)\); none in the cache$/m);
   assert.deepEqual(d133Rows(outDir), {
@@ -2081,11 +2086,11 @@ test('run (D133): --confidence changes what mode b accepts (50 accepts a 0.90 an
 });
 
 test('run (D133): mode b with no model is mechanical and says so; with --model small it is accepted', async () => {
-  const noModel = await runD133(['--engine', 'rwxlite', '--confidence', '70']);
+  const noModel = await runD133(['--engine', 'rwxlite', '--confidence', '70'], PKG_OK);
   assert.equal(noModel.code, 0, noModel.stderr);
   assert.match(noModel.stdout, /rwxlite: off \(mechanical\) — could not get the model/);
   assert.equal(d133Rows(noModel.outDir)['POST /mystery'], 'x/tight');
-  const small = await runD133(['--engine', 'rwxlite', '--confidence', '50', '--model', 'small']);
+  const small = await runD133(['--engine', 'rwxlite', '--confidence', '50', '--model', 'small'], PKG_OK);
   assert.equal(small.code, 0, small.stderr);
   assert.match(small.stdout, /rwxlite: off \(mechanical\)/);
 });
@@ -2185,7 +2190,7 @@ function writeModelDir(xdg, bytes, dirSha8) {
 test('run (D133): a cached model whose hash does not match its name is NOT used: loud warning, mechanical, exit 0', async () => {
   const xdg = mkScratch();
   writeModelDir(xdg, Buffer.from('weights'), 'deadbeef');
-  const r = await runD133([], { xdgCacheHome: xdg });
+  const r = await runD133([], { xdgCacheHome: xdg, ...PKG_OK });
   assert.equal(r.code, 0, r.stderr);
   assert.match(r.stderr, /WARNING: rwxlite model rejected \(hash mismatch.*rwxlite-0\.2\.0\+deadbeef was NOT used/);
   assert.match(r.stdout, /rwxlite: off \(mechanical\) — could not get the model \(offline \(test\)\); the cached model was rejected/);
@@ -2231,15 +2236,45 @@ test('run (D133): a verified model but no rwxlite package -> mechanical alone, s
   assert.equal(readJson(path.join(r.outDir, 'example.rwxmap.json')).rwxlite.mode, 'off');
 });
 
+test('run (D133): no rwxlite package -> nothing is fetched, mechanical alone, same reason (modes a and b)', async () => {
+  const importer = async () => { throw Object.assign(new Error("Cannot find package 'rwxlite' imported from /x/src/rwxliteengine.js"), { code: 'ERR_MODULE_NOT_FOUND' }); };
+  for (const args of [[], ['--engine', 'rwxlite']]) {
+    let calls = 0;
+    const r = await runD133(args, { rwxliteImporter: importer, modelFetch: async () => { calls += 1; throw new Error('must not be called'); } });
+    assert.equal(r.code, 0, r.stderr);
+    assert.equal(calls, 0, args.join(' '));
+    assert.match(r.stdout, /^rwxmap: rwxlite: off \(mechanical\) — the rwxlite package is not installed \(npm install rwxlite@0\.2\)$/m);
+    assert.equal(d133Rows(r.outDir)['POST /mystery'], 'x/tight');
+    assert.equal(readJson(path.join(r.outDir, 'example.rwxmap.json')).rwxlite.mode, 'off');
+  }
+});
+
+test('run (D133): rwxlite package out of range -> nothing is fetched, mechanical alone with the version reason', async () => {
+  let calls = 0;
+  const r = await runD133([], { rwxliteImporter: async () => ({}), rwxliteVersionReader: () => '0.3.0', modelFetch: async () => { calls += 1; throw new Error('must not be called'); } });
+  assert.equal(r.code, 0, r.stderr);
+  assert.equal(calls, 0);
+  assert.match(r.stdout, /^rwxmap: rwxlite: off \(mechanical\) — the rwxlite package is 0\.3\.0; this rwxmap accepts 0\.2\.x \(D135\); npm install rwxlite@0\.2$/m);
+  assert.equal(d133Rows(r.outDir)['POST /mystery'], 'x/tight');
+});
+
+test('run (D133): rwxlite package fine -> the model is fetched as before', async () => {
+  const urls = [];
+  const r = await runD133([], { ...PKG_OK, modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
+  assert.equal(r.code, 0, r.stderr);
+  assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest-exact.json']);
+  assert.match(r.stdout, /rwxlite: off \(mechanical\) — could not get the model/);
+});
+
 test('run (D133): --model small is accepted in the default run and --engine rwxlite, and fetches the small manifest', async () => {
   for (const args of [['--model', 'small'], ['--engine', 'rwxlite', '--model', 'small']]) {
     const urls = [];
-    const r = await runD133(args, { modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
+    const r = await runD133(args, { ...PKG_OK, modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
     assert.equal(r.code, 0, r.stderr);
     assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest.json'], args.join(' '));
   }
   const urls = [];
-  const r = await runD133([], { modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
+  const r = await runD133([], { ...PKG_OK, modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
   assert.equal(r.code, 0, r.stderr);
   assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest-exact.json']);
 });

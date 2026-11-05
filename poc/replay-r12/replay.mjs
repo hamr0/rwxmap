@@ -18,7 +18,7 @@ const die = (m) => { console.error(`replay: ${m}`); process.exit(2); };
 for (const k of ['ops', 'truth', 'p', 'out']) if (!a[k]) die(`--${k} is required`);
 
 // ---- second pass: the real module, or (with --lower-min-p) a temp copy with only LOWER_MIN_P changed
-let spFile = `${REPO}/src/secondpass.js`, cutoff = 0.97;
+let spFile = `${REPO}/src/secondpass.js`, cutoff = 0.97, tmpDir = null;
 if (a['lower-min-p'] !== undefined) {
   cutoff = Number(a['lower-min-p']);
   if (!Number.isFinite(cutoff) || cutoff < 0 || cutoff > 1) die(`--lower-min-p must be a number in 0..1, got ${a['lower-min-p']}`);
@@ -31,11 +31,12 @@ if (a['lower-min-p'] !== undefined) {
     if (copy.split(from).length !== 2) die(`import ${from} not found exactly once in src/secondpass.js`);
     copy = copy.replace(from, () => `from '${REPO}/src/${imp.slice(2)}'`);
   }
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'secondpass-cut-'));
-  spFile = path.join(dir, 'secondpass.js');
+  tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'secondpass-cut-'));
+  spFile = path.join(tmpDir, 'secondpass.js');
   fs.writeFileSync(spFile, copy);
 }
 const { secondPass } = await import(spFile);
+if (tmpDir) fs.rmSync(tmpDir, { recursive: true, force: true }); // the import is done; the copy is not needed again
 console.log(`second pass file: ${spFile}${a['lower-min-p'] !== undefined ? ' (temp copy)' : ' (real module)'}; lower cut-off ${cutoff}`);
 
 function parseCsv(text) {

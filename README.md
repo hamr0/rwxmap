@@ -75,11 +75,12 @@ first verb decides. A word can raise a PUT or PATCH to x.
 `--model small` (a and b only) uses the 23 MB int8 model instead of the
 91 MB exact default.
 
-**Not live yet.** The rwxlite model is not published. Today every mode
-except c runs mechanically and prints `rwxlite: off (mechanical)`; the
-numbers below are from the model run as a test. Once it is published, the
-first run downloads it (from rwxlite's GitHub releases, sha256-checked)
-into `$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`, and later runs
+**Needs the package.** rwxlite 0.2.0 is published. Modes a and b use it
+when the `rwxlite@0.2` npm package is installed (`npm install rwxlite@0.2`);
+without the package they run mechanically and print
+`rwxlite: off (mechanical)`. The numbers below are from the model run as
+a test. With the package, the first run downloads the model (from
+rwxlite's GitHub releases, sha256-checked) into `$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`, and later runs
 reuse it. With no network and no cached model the run is mechanical and
 never stops. Details are under "rwxlite model" below.
 
@@ -256,7 +257,7 @@ model. Downloads are https only, from github.com and its
 githubusercontent.com hosts, capped at 200 MB, and a failed or tampered
 download installs nothing.
 
-If the manifest cannot be fetched (offline, rwxlite not published yet), the
+If the manifest cannot be fetched (offline), the
 run uses the verified cached model of the pinned version and says "using
 cached <model>, could not reach the release". With none cached it prints
 `rwxlite: off (mechanical) — <reason>` and runs mechanically. It never

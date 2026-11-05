@@ -915,8 +915,8 @@ Status: spec in progress on branch `feat/d133-rwxlite-engines`. Pass 1
 `rwxlite`, the `rwxlite` JSON block, the cache check), pass 2a (model
 download from rwxlite's GitHub releases, `--model small`, the rwxlite
 adapter) and pass 2b (mode b, mode c's undecided rule, the 2a fixes) are
-built on the branch, unreleased. rwxlite is not published, so the default
-run is mechanical ("rwxlite: off") until it is. User rulings 2026-11-03 and 2026-11-04 are below as
+built on the branch, unreleased. rwxlite 0.2.0 is published, so the default
+run uses it when the `rwxlite@0.2` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
 decided; everything marked "proposal" or "open" is not decided.
 
 ### Decided (user rulings, 2026-11-03 and 2026-11-04)

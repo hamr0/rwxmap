@@ -111,7 +111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`-h`/`--help` and `-v`/`--version`** on the CLI: `--help` prints a short guide (inputs, options, the three output files, Jev, exit codes); `--version` prints the package version. Both exit 0.
 - **OpenAPI 3.1 webhooks notice**: webhook operations are counted in a stdout notice and never labelled, the same way 3.2 `query`/`additionalOperations` operations are.
 - **CI installs the packed tarball**: CI now packs the package, installs the tarball and runs the installed `rwxmap` bin on a tracked spec.
-- **`docs/release-checklist.md`**: a repo process document, not shipped in the package.
+- **`docs/product/release-checklist.md`**: a repo process document, not shipped in the package.
 
 ### Changed
 

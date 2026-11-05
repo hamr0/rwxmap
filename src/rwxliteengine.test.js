@@ -6,9 +6,16 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { loadRwxliteEngine, readRwxliteVersion, versionInRange } from './rwxliteengine.js';
+import { checkRwxlitePackage, loadRwxliteEngine, readRwxliteVersion, versionInRange } from './rwxliteengine.js';
 
-const load = (o) => loadRwxliteEngine({ versionReader: () => '0.2.0', ...o });
+/**
+ * The two steps the CLI runs: the package check, then the model load on the lib it returned.
+ * @param {{dir: string, model: string, importer?: (name: string) => Promise<any>, versionReader?: () => string, threads?: number}} o
+ */
+const load = async ({ importer, versionReader = () => '0.2.0', ...o }) => {
+  const pkg = await checkRwxlitePackage({ importer, versionReader });
+  return pkg.status === 'off' ? pkg : loadRwxliteEngine({ ...o, lib: pkg.lib });
+};
 const MODEL = 'rwxlite-0.1.0+0123abcd';
 /** @returns {import('./secondpass.js').EngineItem} */
 const item = (i) => ({ index: i, method: 'POST', path: `/p${i}`, operationId: `op${i}`, summary: `s${i}`, description: `d${i}`, lean: { class: /** @type {'x'} */ ('x'), rule: 'floor' } });
@@ -110,11 +117,11 @@ test('loadRwxliteEngine: an answerer whose model string differs from the verifie
 test('loadRwxliteEngine (D135): package 0.2.0 and 0.2.1 are on; 0.3.0, 0.1.9, 1.2.0 are off with the reason', async () => {
   const answerer = { model: MODEL, answerMany: async (reqs) => reqs.map(() => ok(0.1, 0.2)) };
   for (const v of ['0.2.0', '0.2.1', '0.2.17']) {
-    const r = await loadRwxliteEngine({ dir: '/d', model: MODEL, importer: fake(answerer), versionReader: () => v });
+    const r = await load({ dir: '/d', model: MODEL, importer: fake(answerer), versionReader: () => v });
     assert.equal(r.status, 'on', v);
   }
   for (const v of ['0.3.0', '0.1.9', '1.2.0']) {
-    const r = await loadRwxliteEngine({ dir: '/d', model: MODEL, importer: fake(answerer), versionReader: () => v });
+    const r = await load({ dir: '/d', model: MODEL, importer: fake(answerer), versionReader: () => v });
     assert.deepEqual(r, { status: 'off', reason: `the rwxlite package is ${v}; this rwxmap accepts 0.2.x (D135); npm install rwxlite@0.2` }, v);
   }
 });
@@ -122,11 +129,11 @@ test('loadRwxliteEngine (D135): package 0.2.0 and 0.2.1 are on; 0.3.0, 0.1.9, 1.
 test('loadRwxliteEngine (D135): pre-release, garbage, non-string and unreadable versions are off (fail closed)', async () => {
   const answerer = { model: MODEL, answerMany: async () => [] };
   for (const v of ['0.2.1-beta', '0.2', 'x.y.z', '', undefined, 2, null]) {
-    const r = await loadRwxliteEngine({ dir: '/d', model: MODEL, importer: fake(answerer), versionReader: () => /** @type {any} */ (v) });
+    const r = await load({ dir: '/d', model: MODEL, importer: fake(answerer), versionReader: () => /** @type {any} */ (v) });
     assert.equal(r.status, 'off', String(v));
     assert.match(/** @type {any} */ (r).reason, /^the rwxlite package is .*this rwxmap accepts 0\.2\.x \(D135\); npm install rwxlite@0\.2$/, String(v));
   }
-  const r = await loadRwxliteEngine({ dir: '/d', model: MODEL, importer: fake(answerer), versionReader: () => { throw new Error('boom'); } });
+  const r = await load({ dir: '/d', model: MODEL, importer: fake(answerer), versionReader: () => { throw new Error('boom'); } });
   assert.deepEqual(r, { status: 'off', reason: 'the rwxlite package version could not be read (boom); this rwxmap accepts 0.2.x (D135); npm install rwxlite@0.2' });
   assert.equal(versionInRange('0.2.0+build'), false);
 });

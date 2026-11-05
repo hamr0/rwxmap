@@ -74,15 +74,16 @@ function mapSlot(slot) {
 }
 
 /**
- * Load rwxlite on a verified model folder.
- *   {status: 'on', engine: {model, run}}   engine.model is the folder's model string
- *   {status: 'off', reason}                mechanical alone, reason is printed
- * The installed package version must be in RWXLITE_PACKAGE_RANGE (D135), else off.
- * `versionReader` is the seam for tests: it returns the version string.
- * @param {{dir: string, model: string, importer?: (name: string) => Promise<any>, versionReader?: () => string, threads?: number}} opts
- * @returns {Promise<{status: 'on', engine: {model: string, run: import('./secondpass.js').Engine}} | {status: 'off', reason: string}>}
+ * Check the rwxlite npm package: it imports, and its version is in
+ * RWXLITE_PACKAGE_RANGE (D135). Cheap, so it runs before any model fetch.
+ *   {status: 'on', lib}      the imported package
+ *   {status: 'off', reason}  mechanical alone, reason is printed
+ * `importer` and `versionReader` are the seams for tests: the importer
+ * returns the package, the reader returns the version string.
+ * @param {{importer?: (name: string) => Promise<any>, versionReader?: () => string}} [opts]
+ * @returns {Promise<{status: 'on', lib: any} | {status: 'off', reason: string}>}
  */
-export async function loadRwxliteEngine({ dir, model, importer = (name) => import(name), versionReader = readRwxliteVersion, threads = Math.min(4, os.availableParallelism()) }) {
+export async function checkRwxlitePackage({ importer = (name) => import(name), versionReader = readRwxliteVersion } = {}) {
   let lib;
   try {
     lib = await importer('rwxlite');
@@ -102,6 +103,18 @@ export async function loadRwxliteEngine({ dir, model, importer = (name) => impor
   if (typeof version !== 'string' || !versionInRange(version)) {
     return { status: 'off', reason: `the rwxlite package is ${typeof version === 'string' ? version : 'of unknown version'}; this rwxmap accepts ${RWXLITE_PACKAGE_RANGE} (D135); npm install rwxlite@${PIN_MAJOR}.${PIN_MINOR}` };
   }
+  return { status: 'on', lib };
+}
+
+/**
+ * Load rwxlite's answerer on a verified model folder. `lib` is the package
+ * checkRwxlitePackage returned.
+ *   {status: 'on', engine: {model, run}}   engine.model is the folder's model string
+ *   {status: 'off', reason}                mechanical alone, reason is printed
+ * @param {{dir: string, model: string, lib: any, threads?: number}} opts
+ * @returns {Promise<{status: 'on', engine: {model: string, run: import('./secondpass.js').Engine}} | {status: 'off', reason: string}>}
+ */
+export async function loadRwxliteEngine({ dir, model, lib, threads = Math.min(4, os.availableParallelism()) }) {
   let answerer;
   try {
     answerer = await lib.loadAnswerer({ dir, threads });

@@ -100,7 +100,7 @@ import { needsJev, applyJev, jevTier, jevUndecided } from './jev.js';
 import { runJevBatch } from './jev-client.js';
 import { secondPass } from './secondpass.js';
 import { ensureModel } from './modeldownload.js';
-import { loadRwxliteEngine } from './rwxliteengine.js';
+import { checkRwxlitePackage, loadRwxliteEngine } from './rwxliteengine.js';
 
 // ---------------------------------------------------------------------
 // Small local helpers — each one trivial enough (a regex, a URL-API call,
@@ -893,7 +893,7 @@ Writes <vendor>.rwxmap.json, <vendor>.rwxmap.review.json, <vendor>.openapi.rwx.j
 
 rwxlite: the default run asks the rwxlite model about the rows marked loose or tight.
 The model is downloaded on first use from rwxlite's GitHub releases and cached in ~/.cache/rwxmap.
-No model (offline, not published yet, package not installed) means "rwxlite: off (mechanical)" and the run is mechanical.
+No model (offline with none cached, package not installed) means "rwxlite: off (mechanical)" and the run is mechanical.
 --engine mechanical never looks for a model.
 
 Jev (paid, optional): --engine jev, with RWXMAP_JEV_KEY set or in a .env in the run folder.
@@ -1104,21 +1104,27 @@ export async function run(argv, env) {
       rwxliteField = rwxliteSummary({ reason: 'nothing to check' });
       engine = undefined;
     } else if (!engine) {
-      const got = await ensureModel({
-        variant: values.model === 'small' ? 'small' : 'exact',
-        environ: { XDG_CACHE_HOME: env.xdgCacheHome ?? process.env.XDG_CACHE_HOME },
-        fetchImpl: env.modelFetch,
-        log: (line) => stderr.write(`${line}\n`),
-      });
-      for (const n of got.notes) stderr.write(`${n}\n`);
+      // The cheap package check runs first: no package, no 87 MB download.
       /** @type {string|null} */
       let reason = null;
-      if (got.status === 'off') {
-        reason = got.reason;
+      const pkg = await checkRwxlitePackage({ importer: env.rwxliteImporter, versionReader: env.rwxliteVersionReader });
+      if (pkg.status === 'off') {
+        reason = pkg.reason;
       } else {
-        const loaded = await loadRwxliteEngine({ dir: got.dir, model: got.model, importer: env.rwxliteImporter, versionReader: env.rwxliteVersionReader });
-        if (loaded.status === 'on') engine = loaded.engine;
-        else reason = loaded.reason;
+        const got = await ensureModel({
+          variant: values.model === 'small' ? 'small' : 'exact',
+          environ: { XDG_CACHE_HOME: env.xdgCacheHome ?? process.env.XDG_CACHE_HOME },
+          fetchImpl: env.modelFetch,
+          log: (line) => stderr.write(`${line}\n`),
+        });
+        for (const n of got.notes) stderr.write(`${n}\n`);
+        if (got.status === 'off') {
+          reason = got.reason;
+        } else {
+          const loaded = await loadRwxliteEngine({ dir: got.dir, model: got.model, lib: pkg.lib });
+          if (loaded.status === 'on') engine = loaded.engine;
+          else reason = loaded.reason;
+        }
       }
       if (reason !== null) {
         engineLine = `rwxmap: rwxlite: off (mechanical) — ${reason}\n`;
