@@ -1,0 +1,280 @@
+row_id,provider,method,path,operationId,summary,description
+ex4-0361,immich.app,GET,/activities,getActivities,List all activities,"Returns a list of activities for the selected asset or album. The activities are returned in sorted order, with the oldest activities appearing first."
+ex4-0362,immich.app,POST,/activities,createActivity,Create an activity,"Create a like or a comment for an album, or an asset in an album."
+ex4-0363,immich.app,GET,/activities/statistics,getActivityStatistics,Retrieve activity statistics,Returns the number of likes and comments for a given album or asset in an album.
+ex4-0364,immich.app,DELETE,/activities/{id},deleteActivity,Delete an activity,Removes a like or comment from a given album or asset in an album.
+ex4-0365,immich.app,POST,/admin/auth/unlink-all,unlinkAllOAuthAccountsAdmin,Unlink all OAuth accounts,Unlinks all OAuth accounts associated with user accounts in the system.
+ex4-0366,immich.app,GET,/admin/config,getAdminConfig,Get the admin configuration,Retrieve admin configuration.
+ex4-0367,immich.app,PUT,/admin/config,updateAdminConfig,Update the system configuration,Update the system configuration with a new system configuration.
+ex4-0368,immich.app,GET,/admin/config/defaults,getAdminConfigDefaults,Get the system configuration defaults,Retrieve the default value of every system configuration property.
+ex4-0369,immich.app,DELETE,/admin/database-backups,deleteDatabaseBackup,Delete database backup,Delete a backup by its filename
+ex4-0370,immich.app,GET,/admin/database-backups,listDatabaseBackups,List database backups,Get the list of the successful and failed backups
+ex4-0371,immich.app,POST,/admin/database-backups/start-restore,startDatabaseRestoreFlow,Start database backup restore flow,Put Immich into maintenance mode to restore a backup (Immich must not be configured)
+ex4-0372,immich.app,POST,/admin/database-backups/upload,uploadDatabaseBackup,Upload database backup,Uploads .sql/.sql.gz file to restore backup from
+ex4-0373,immich.app,GET,/admin/database-backups/{filename},downloadDatabaseBackup,Download database backup,Downloads the database backup file
+ex4-0374,immich.app,GET,/admin/integrity/report,getIntegrityReport,Get integrity report by type,Get all flagged items by integrity report type
+ex4-0375,immich.app,DELETE,/admin/integrity/report/{id},deleteIntegrityReport,Delete integrity report item,"Delete a given report item and perform corresponding deletion (e.g. trash asset, delete file)"
+ex4-0376,immich.app,GET,/admin/integrity/report/{id}/file,getIntegrityReportFile,Download flagged file,Download the untracked/broken file if one exists
+ex4-0377,immich.app,GET,/admin/integrity/report/{type}/csv,getIntegrityReportCsv,Export integrity report by type as CSV,Get all integrity report entries for a given type as a CSV
+ex4-0378,immich.app,GET,/admin/integrity/summary,getIntegrityReportSummary,Get integrity report summary,Get a count of the items flagged in each integrity report
+ex4-0379,immich.app,POST,/admin/maintenance,setMaintenanceMode,Set maintenance mode,Put Immich into or take it out of maintenance mode
+ex4-0380,immich.app,GET,/admin/maintenance/detect-install,detectPriorInstall,Detect existing install,Collect integrity checks and other heuristics about local data.
+ex4-0381,immich.app,POST,/admin/maintenance/login,maintenanceLogin,Log into maintenance mode,Login with maintenance token or cookie to receive current information and perform further actions.
+ex4-0382,immich.app,GET,/admin/maintenance/status,getMaintenanceStatus,Get maintenance mode status,Fetch information about the currently running maintenance action.
+ex4-0383,immich.app,POST,/admin/notifications,createNotification,Create a notification,Create a new notification for a specific user.
+ex4-0384,immich.app,POST,/admin/notifications/templates/{name},getNotificationTemplateAdmin,Render email template,Retrieve a preview of the provided email template.
+ex4-0385,immich.app,POST,/admin/notifications/test-email,sendTestEmailAdmin,Send test email,Send a test email using the provided SMTP configuration.
+ex4-0386,immich.app,GET,/admin/users,searchUsersAdmin,Search users,Search for users.
+ex4-0387,immich.app,POST,/admin/users,createUserAdmin,Create a user,Create a new user.
+ex4-0388,immich.app,DELETE,/admin/users/{id},deleteUserAdmin,Delete a user,Delete a user.
+ex4-0389,immich.app,GET,/admin/users/{id},getUserAdmin,Retrieve a user,Retrieve  a specific user by their ID.
+ex4-0390,immich.app,PUT,/admin/users/{id},updateUserAdmin,Update a user,Update an existing user.
+ex4-0391,immich.app,GET,/admin/users/{id}/calendar-heatmap,getUserCalendarHeatmapAdmin,Retrieve calendar heatmap activity,"Retrieve activity counts for a specified period, in a calendar heatmap format."
+ex4-0392,immich.app,GET,/admin/users/{id}/preferences,getUserPreferencesAdmin,Retrieve user preferences,Retrieve the preferences of a specific user.
+ex4-0393,immich.app,PUT,/admin/users/{id}/preferences,updateUserPreferencesAdmin,Update user preferences,Update the preferences of a specific user.
+ex4-0394,immich.app,POST,/admin/users/{id}/restore,restoreUserAdmin,Restore a deleted user,Restore a previously deleted user.
+ex4-0395,immich.app,GET,/admin/users/{id}/sessions,getUserSessionsAdmin,Retrieve user sessions,Retrieve all sessions for a specific user.
+ex4-0396,immich.app,GET,/admin/users/{id}/statistics,getUserStatisticsAdmin,Retrieve user statistics,Retrieve asset statistics for a specific user.
+ex4-0397,immich.app,GET,/albums,getAllAlbums,List all albums,Retrieve a list of albums available to the authenticated user.
+ex4-0398,immich.app,POST,/albums,createAlbum,Create an album,Create a new album. The album can also be created with initial users and assets.
+ex4-0399,immich.app,PUT,/albums/assets,addAssetsToAlbums,Add assets to albums,Send a list of asset IDs and album IDs to add each asset to each album.
+ex4-0400,immich.app,GET,/albums/statistics,getAlbumStatistics,Retrieve album statistics,Returns statistics about the albums available to the authenticated user.
+ex4-0401,immich.app,DELETE,/albums/{id},deleteAlbum,Delete an album,"Delete a specific album by its ID. Note the album is initially trashed and then immediately scheduled for deletion, but relies on a background job to complete the process."
+ex4-0402,immich.app,GET,/albums/{id},getAlbumInfo,Retrieve an album,Retrieve information about a specific album by its ID.
+ex4-0403,immich.app,PATCH,/albums/{id},updateAlbumInfo,Update an album,"Update the information of a specific album by its ID. This endpoint can be used to update the album name, description, sort order, etc. However, it is not used to add or remove assets or users from the album."
+ex4-0404,immich.app,DELETE,/albums/{id}/assets,removeAssetFromAlbum,Remove assets from an album,Remove multiple assets from a specific album by its ID.
+ex4-0405,immich.app,PUT,/albums/{id}/assets,addAssetsToAlbum,Add assets to an album,Add multiple assets to a specific album by its ID.
+ex4-0406,immich.app,GET,/albums/{id}/map-markers,getAlbumMapMarkers,Retrieve album map markers,Retrieve map marker information for a specific album by its ID.
+ex4-0407,immich.app,DELETE,/albums/{id}/user/{userId},removeUserFromAlbum,Remove user from album,"Remove a user from an album. Use an ID of ""me"" to leave a shared album."
+ex4-0408,immich.app,PUT,/albums/{id}/user/{userId},updateAlbumUser,Update user role,Change the role for a specific user in a specific album.
+ex4-0409,immich.app,PUT,/albums/{id}/users,addUsersToAlbum,Share album with users,Share an album with multiple users. Each user can be given a specific role in the album.
+ex4-0410,immich.app,GET,/api-keys,getApiKeys,List all API keys,Retrieve all API keys of the current user.
+ex4-0411,immich.app,POST,/api-keys,createApiKey,Create an API key,Creates a new API key. It will be limited to the permissions specified.
+ex4-0412,immich.app,GET,/api-keys/me,getMyApiKey,Retrieve the current API key,Retrieve the API key that is used to access this endpoint.
+ex4-0413,immich.app,DELETE,/api-keys/{id},deleteApiKey,Delete an API key,Deletes an API key identified by its ID. The current user must own this API key.
+ex4-0414,immich.app,GET,/api-keys/{id},getApiKey,Retrieve an API key,Retrieve an API key by its ID. The current user must own this API key.
+ex4-0415,immich.app,PUT,/api-keys/{id},updateApiKey,Update an API key,Updates the name and permissions of an API key by its ID. The current user must own this API key.
+ex4-0416,immich.app,POST,/api-keys/{id}/rotate,rotateApiKey,Rotate an API key,"Generates a new secret for an API key, immediately invalidating the previous one. The current user must own this API key."
+ex4-0417,immich.app,GET,/asset-files,searchAssetFiles,Search asset files,Returns all matching asset files.
+ex4-0418,immich.app,DELETE,/asset-files/{id},deleteAssetFile,Delete an asset file,Delete a file and remove it from the database.
+ex4-0419,immich.app,GET,/asset-files/{id},getAssetFile,Retrieve an asset file,Returns metadata about a specific asset file.
+ex4-0420,immich.app,GET,/asset-files/{id}/download,downloadAssetFile,Download an asset file,Serve the contents of a specific asset file.
+ex4-0421,immich.app,DELETE,/assets,deleteAssets,Delete assets,Deletes multiple assets at the same time.
+ex4-0422,immich.app,POST,/assets,uploadAsset,Upload asset,Uploads a new asset to the server.
+ex4-0423,immich.app,PUT,/assets,updateAssets,Update assets,Updates multiple assets at the same time.
+ex4-0424,immich.app,POST,/assets/bulk-upload-check,checkBulkUpload,Check bulk upload,Determine which assets have already been uploaded to the server based on their SHA1 checksums.
+ex4-0425,immich.app,PUT,/assets/copy,copyAsset,Copy asset,"Copy asset information like albums, tags, etc. from one asset to another."
+ex4-0426,immich.app,POST,/assets/jobs,runAssetJobs,Run an asset job,Run a specific job on a set of assets.
+ex4-0427,immich.app,DELETE,/assets/metadata,deleteBulkAssetMetadata,Delete asset metadata,Delete metadata key-value pairs for multiple assets.
+ex4-0428,immich.app,PUT,/assets/metadata,updateBulkAssetMetadata,Upsert asset metadata,Upsert metadata key-value pairs for multiple assets.
+ex4-0429,immich.app,GET,/assets/statistics,getAssetStatistics,Get asset statistics,Retrieve various statistics about the assets owned by the authenticated user.
+ex4-0430,immich.app,GET,/assets/{id},getAssetInfo,Retrieve an asset,Retrieve detailed information about a specific asset.
+ex4-0431,immich.app,PUT,/assets/{id},updateAsset,Update an asset,Update information of a specific asset.
+ex4-0432,immich.app,DELETE,/assets/{id}/edits,removeAssetEdits,Remove edits from an existing asset,"Removes all edit actions (crop, rotate, mirror) associated with the specified asset."
+ex4-0433,immich.app,GET,/assets/{id}/edits,getAssetEdits,Retrieve edits for an existing asset,"Retrieve a series of edit actions (crop, rotate, mirror) associated with the specified asset."
+ex4-0434,immich.app,PUT,/assets/{id}/edits,editAsset,Apply edits to an existing asset,"Apply a series of edit actions (crop, rotate, mirror) to the specified asset."
+ex4-0435,immich.app,GET,/assets/{id}/metadata,getAssetMetadata,Get asset metadata,Retrieve all metadata key-value pairs associated with the specified asset.
+ex4-0436,immich.app,PUT,/assets/{id}/metadata,updateAssetMetadata,Update asset metadata,Update or add metadata key-value pairs for the specified asset.
+ex4-0437,immich.app,DELETE,/assets/{id}/metadata/{key},deleteAssetMetadata,Delete asset metadata by key,Delete a specific metadata key-value pair associated with the specified asset.
+ex4-0438,immich.app,GET,/assets/{id}/metadata/{key},getAssetMetadataByKey,Retrieve asset metadata by key,Retrieve the value of a specific metadata key associated with the specified asset.
+ex4-0439,immich.app,GET,/assets/{id}/ocr,getAssetOcr,Retrieve asset OCR data,Retrieve all OCR (Optical Character Recognition) data associated with the specified asset.
+ex4-0440,immich.app,GET,/assets/{id}/original,downloadAsset,Download original asset,Downloads the original file of the specified asset.
+ex4-0441,immich.app,GET,/assets/{id}/thumbnail,viewAsset,View asset thumbnail,"Retrieve the thumbnail image for the specified asset. Viewing the fullsize thumbnail might redirect to downloadAsset, which requires a different permission."
+ex4-0442,immich.app,GET,/assets/{id}/video/playback,playAssetVideo,Play asset video,Streams the video file for the specified asset. This endpoint also supports byte range requests.
+ex4-0443,immich.app,GET,/assets/{id}/video/stream/main.m3u8,getMainPlaylist,Get HLS main playlist,Returns an HLS main playlist with all available variants for the asset.
+ex4-0444,immich.app,DELETE,/assets/{id}/video/stream/{sessionId},endSession,End HLS streaming session,Releases server resources for the streaming session.
+ex4-0445,immich.app,GET,/assets/{id}/video/stream/{sessionId}/{variantIndex}/playlist.m3u8,getMediaPlaylist,Get HLS media playlist,Returns an HLS media playlist for one variant of the streaming session.
+ex4-0446,immich.app,GET,/assets/{id}/video/stream/{sessionId}/{variantIndex}/{filename},getSegment,Get HLS segment or init file,Streams an HLS init segment (init.mp4) or media segment (seg_N.m4s).
+ex4-0447,immich.app,POST,/auth/admin-sign-up,signUpAdmin,Register admin,Create the first admin user in the system.
+ex4-0448,immich.app,POST,/auth/change-password,changePassword,Change password,Change the password of the current user.
+ex4-0449,immich.app,POST,/auth/login,login,Login,Login with username and password and receive a session token.
+ex4-0450,immich.app,POST,/auth/logout,logout,Logout,Logout the current user and invalidate the session token.
+ex4-0451,immich.app,DELETE,/auth/pin-code,resetPinCode,Reset pin code,Reset the pin code for the current user by providing the account password
+ex4-0452,immich.app,POST,/auth/pin-code,setupPinCode,Setup pin code,Setup a new pin code for the current user.
+ex4-0453,immich.app,PUT,/auth/pin-code,changePinCode,Change pin code,Change the pin code for the current user.
+ex4-0454,immich.app,POST,/auth/session/lock,lockAuthSession,Lock auth session,Remove elevated access to locked assets from the current session.
+ex4-0455,immich.app,POST,/auth/session/unlock,unlockAuthSession,Unlock auth session,Temporarily grant the session elevated access to locked assets by providing the correct PIN code.
+ex4-0456,immich.app,GET,/auth/status,getAuthStatus,Retrieve auth status,"Get information about the current session, including whether the user has a password, and if the session can access locked assets."
+ex4-0457,immich.app,POST,/auth/validateToken,validateAccessToken,Validate access token,Validate the current authorization method is still valid.
+ex4-0458,immich.app,GET,/cluster-groups/requests,getClusterGroupRequests,Retrieve cluster group requests,Retrieve the pending requests for the current user to join a cluster group.
+ex4-0459,immich.app,DELETE,/cluster-groups/requests/{id},deleteClusterGroupRequest,Decline a cluster group request,Delete a pending request to join a cluster group.
+ex4-0460,immich.app,POST,/cluster-groups/requests/{id}/accept,acceptClusterGroupRequest,Accept a cluster group request,Join the cluster group the request was created for.
+ex4-0461,immich.app,POST,/cluster-groups/{id}/leave,leaveClusterGroup,Leave a cluster group,Move the current user into a new cluster group of their own.
+ex4-0462,immich.app,POST,/cluster-groups/{id}/regenerate-people,clusterGroupRegeneratePeople,Regenerate people of users in cluster group,Forcefully re-run facial recognition for all faces of users in this group.
+ex4-0463,immich.app,GET,/cluster-groups/{id}/requests,getClusterGroupRequestsForGroup,Retrieve the requests sent by a cluster group,Retrieve the pending requests for other users to join the cluster group.
+ex4-0464,immich.app,PUT,/cluster-groups/{id}/requests,createClusterGroupRequest,Create a cluster group request,Ask another user to join the cluster group of the current user.
+ex4-0465,immich.app,GET,/cluster-groups/{id}/users,getClusterGroupUsers,Retrieve the users of a cluster group,Retrieve the users that are a member of the cluster group.
+ex4-0466,immich.app,GET,/config,getUserConfig,Get the configuration with user visibility,Retrieve the system configuration properties that are visible to logged in users.
+ex4-0467,immich.app,GET,/config/defaults,getUserConfigDefaults,Get the default configuration with user visibility,Retrieve the default value of the configuration properties that are visible to logged in users.
+ex4-0468,immich.app,POST,/download/archive,downloadArchive,Download asset archive,"Download a ZIP archive containing the specified assets. The assets must have been previously requested via the ""getDownloadInfo"" endpoint."
+ex4-0469,immich.app,POST,/download/info,getDownloadInfo,Retrieve download information,Retrieve information about how to request a download for the specified assets or album. The response includes groups of assets that can be downloaded together.
+ex4-0470,immich.app,DELETE,/duplicates,deleteDuplicates,Delete duplicates,Delete multiple duplicate assets specified by their IDs.
+ex4-0471,immich.app,GET,/duplicates,getAssetDuplicates,Retrieve duplicates,Retrieve a list of duplicate assets available to the authenticated user.
+ex4-0472,immich.app,POST,/duplicates/resolve,resolveDuplicates,Resolve duplicate groups,Resolve duplicate groups by synchronizing metadata across assets and deleting/trashing duplicates.
+ex4-0473,immich.app,DELETE,/duplicates/{id},deleteDuplicate,Dismiss a duplicate group,"Dismiss a duplicate group by its ID, unlinking all assets in the group without deleting them."
+ex4-0474,immich.app,GET,/faces,getFaces,Retrieve faces for asset,Retrieve all faces belonging to an asset.
+ex4-0475,immich.app,POST,/faces,createFace,Create a face,Create a new face that has not been discovered by facial recognition. The content of the bounding box is considered a face.
+ex4-0476,immich.app,DELETE,/faces/{id},deleteFace,Delete a face,Delete a face identified by the id. Optionally can be force deleted.
+ex4-0477,immich.app,PUT,/faces/{id},reassignFacesById,Re-assign a face to another person,Re-assign the face provided in the body to the person identified by the id in the path parameter.
+ex4-0478,immich.app,GET,/jobs,getQueuesLegacy,Retrieve queue counts and status,"Retrieve the counts of the current queue, as well as the current status."
+ex4-0479,immich.app,POST,/jobs,createJob,Create a manual job,"Run a specific job. Most jobs are queued automatically, but this endpoint allows for manual creation of a handful of jobs, including various cleanup tasks, as well as creating a new database backup."
+ex4-0480,immich.app,PUT,/jobs/{name},runQueueCommandLegacy,Run jobs,"Queue all assets for a specific job type. Defaults to only queueing assets that have not yet been processed, but the force command can be used to re-process all assets."
+ex4-0481,immich.app,GET,/libraries,getAllLibraries,Retrieve libraries,Retrieve a list of external libraries.
+ex4-0482,immich.app,POST,/libraries,createLibrary,Create a library,Create a new external library.
+ex4-0483,immich.app,DELETE,/libraries/{id},deleteLibrary,Delete a library,Delete an external library by its ID.
+ex4-0484,immich.app,GET,/libraries/{id},getLibrary,Retrieve a library,Retrieve an external library by its ID.
+ex4-0485,immich.app,PUT,/libraries/{id},updateLibrary,Update a library,Update an existing external library.
+ex4-0486,immich.app,POST,/libraries/{id}/scan,scanLibrary,Scan a library,Queue a scan for the external library to find and import new assets.
+ex4-0487,immich.app,GET,/libraries/{id}/statistics,getLibraryStatistics,Retrieve library statistics,"Retrieve statistics for a specific external library, including number of videos, images, and storage usage."
+ex4-0488,immich.app,POST,/libraries/{id}/validate,validate,Validate library settings,Validate the settings of an external library.
+ex4-0489,immich.app,GET,/map/markers,getMapMarkers,Retrieve map markers,Retrieve a list of latitude and longitude coordinates for every asset with location data.
+ex4-0490,immich.app,GET,/map/reverse-geocode,reverseGeocode,Reverse geocode coordinates,"Retrieve location information (e.g., city, country) for given latitude and longitude coordinates."
+ex4-0491,immich.app,GET,/memories,searchMemories,Retrieve memories,"Retrieve a list of memories. Memories are sorted descending by creation date by default, although they can also be sorted in ascending order, or randomly."
+ex4-0492,immich.app,POST,/memories,createMemory,Create a memory,"Create a new memory by providing a name, description, and a list of asset IDs to include in the memory."
+ex4-0493,immich.app,GET,/memories/statistics,memoriesStatistics,Retrieve memories statistics,"Retrieve statistics about memories, such as total count and other relevant metrics."
+ex4-0494,immich.app,DELETE,/memories/{id},deleteMemory,Delete a memory,Delete a specific memory by its ID.
+ex4-0495,immich.app,GET,/memories/{id},getMemory,Retrieve a memory,Retrieve a specific memory by its ID.
+ex4-0496,immich.app,PUT,/memories/{id},updateMemory,Update a memory,Update an existing memory by its ID.
+ex4-0497,immich.app,DELETE,/memories/{id}/assets,removeMemoryAssets,Remove assets from a memory,Remove a list of asset IDs from a specific memory.
+ex4-0498,immich.app,PUT,/memories/{id}/assets,addMemoryAssets,Add assets to a memory,Add a list of asset IDs to a specific memory.
+ex4-0499,immich.app,DELETE,/notifications,deleteNotifications,Delete notifications,Delete a list of notifications at once.
+ex4-0500,immich.app,GET,/notifications,getNotifications,Retrieve notifications,Retrieve a list of notifications.
+ex4-0501,immich.app,PUT,/notifications,updateNotifications,Update notifications,Update a list of notifications. Allows to bulk-set the read status of notifications.
+ex4-0502,immich.app,DELETE,/notifications/{id},deleteNotification,Delete a notification,Delete a specific notification.
+ex4-0503,immich.app,GET,/notifications/{id},getNotification,Get a notification,Retrieve a specific notification identified by id.
+ex4-0504,immich.app,PUT,/notifications/{id},updateNotification,Update a notification,Update a specific notification to set its read status.
+ex4-0505,immich.app,POST,/oauth/authorize,startOAuth,Start OAuth,Initiate the OAuth authorization process.
+ex4-0506,immich.app,POST,/oauth/backchannel-logout,logoutOAuth,Backchannel OAuth logout,Logout the OAuth account and invalidate the session specified by the sid claim or all sessions if the sid claim is not present.
+ex4-0507,immich.app,POST,/oauth/callback,finishOAuth,Finish OAuth,Complete the OAuth authorization process by exchanging the authorization code for a session token.
+ex4-0508,immich.app,POST,/oauth/link,linkOAuthAccount,Link OAuth account,Link an OAuth account to the authenticated user.
+ex4-0509,immich.app,GET,/oauth/mobile-redirect,redirectOAuthToMobile,Redirect OAuth to mobile,"Requests to this URL are automatically forwarded to the mobile app, and is used in some cases for OAuth redirecting."
+ex4-0510,immich.app,POST,/oauth/unlink,unlinkOAuthAccount,Unlink OAuth account,Unlink the OAuth account from the authenticated user.
+ex4-0511,immich.app,GET,/partners,getPartners,Retrieve partners,Retrieve a list of partners with whom assets are shared.
+ex4-0512,immich.app,POST,/partners,createPartner,Create a partner,Create a new partner to share assets with.
+ex4-0513,immich.app,DELETE,/partners/{id},removePartner,Remove a partner,Stop sharing assets with a partner.
+ex4-0514,immich.app,POST,/partners/{id},createPartnerDeprecated,Create a partner,Create a new partner to share assets with.
+ex4-0515,immich.app,PUT,/partners/{id},updatePartner,Update a partner,Specify whether a partner's assets should appear in the user's timeline.
+ex4-0516,immich.app,DELETE,/people,deletePeople,Delete people,Bulk delete a list of people at once.
+ex4-0517,immich.app,GET,/people,getAllPeople,Get all people,Retrieve a list of all people.
+ex4-0518,immich.app,POST,/people,createPerson,Create a person,Create a new person that can have multiple faces assigned to them.
+ex4-0519,immich.app,PUT,/people,updatePeople,Update people,Bulk update multiple people at once.
+ex4-0520,immich.app,POST,/people/merge,mergePeople,Merge people,"Merge an ordered list of people together into a single person. The final name and birth date are always the first defined value, following the order. Also automatically merges people for other users in the cluster group, skipping people that would result in overriding a previously set name or birth date."
+ex4-0521,immich.app,DELETE,/people/users,removeUsersFromPeople,Remove users from people,Remove user access to people
+ex4-0522,immich.app,GET,/people/users,getUsersForPeople,Get people access,Retrieve a list of users and the people to which they have been given access
+ex4-0523,immich.app,PUT,/people/users,upsertPeopleUsers,Upsert user access,Give users access to people
+ex4-0524,immich.app,DELETE,/people/{id},deletePerson,Delete person,Delete an individual person.
+ex4-0525,immich.app,GET,/people/{id},getPerson,Get a person,Retrieve a person by id.
+ex4-0526,immich.app,PUT,/people/{id},updatePerson,Update person,Update an individual person.
+ex4-0527,immich.app,POST,/people/{id}/merge,mergePersonLegacy,Merge people,Merge a list of people into the person specified in the path parameter.
+ex4-0528,immich.app,PUT,/people/{id}/reassign,reassignFaces,Reassign faces,Bulk reassign a list of faces to a different person.
+ex4-0529,immich.app,GET,/people/{id}/statistics,getPersonStatistics,Get person statistics,Retrieve statistics about a specific person.
+ex4-0530,immich.app,GET,/people/{id}/thumbnail,getPersonThumbnail,Get person thumbnail,Retrieve the thumbnail file for a person.
+ex4-0531,immich.app,GET,/plugins,searchPlugins,List all plugins,Retrieve a list of plugins available to the authenticated user.
+ex4-0532,immich.app,GET,/plugins/methods,searchPluginMethods,Retrieve plugin methods,Retrieve a list of plugin methods
+ex4-0533,immich.app,GET,/plugins/templates,searchPluginTemplates,Retrieve workflow templates,Retrieve workflow templates provided by installed plugins
+ex4-0534,immich.app,GET,/plugins/{id},getPlugin,Retrieve a plugin,Retrieve information about a specific plugin by its ID.
+ex4-0535,immich.app,GET,/public/config,getPublicConfig,Get the public configuration,Retrieve the system configuration properties that are visible to everyone.
+ex4-0536,immich.app,GET,/public/config/defaults,getPublicConfigDefaults,Get the public configuration defaults,Retrieve the default value of the configuration properties that are visible to everyone.
+ex4-0537,immich.app,GET,/queues,getQueues,List all queues,Retrieves a list of queues.
+ex4-0538,immich.app,GET,/queues/{name},getQueue,Retrieve a queue,Retrieves a specific queue by its name.
+ex4-0539,immich.app,PUT,/queues/{name},updateQueue,Update a queue,Change the paused status of a specific queue.
+ex4-0540,immich.app,DELETE,/queues/{name}/jobs,emptyQueue,Empty a queue,Removes all jobs from the specified queue.
+ex4-0541,immich.app,GET,/queues/{name}/jobs,getQueueJobs,Retrieve queue jobs,Retrieves a list of queue jobs from the specified queue.
+ex4-0542,immich.app,GET,/search/cities,getAssetsByCity,Retrieve assets by city,Retrieve a list of assets with each asset belonging to a different city. This endpoint is used on the places pages to show a single thumbnail for each city the user has assets in.
+ex4-0543,immich.app,GET,/search/explore,getExploreData,Retrieve explore data,"Retrieve data for the explore section, such as popular people and places."
+ex4-0544,immich.app,POST,/search/large-assets,searchLargeAssets,Search large assets,Search for assets that are considered large based on specified criteria.
+ex4-0545,immich.app,POST,/search/metadata,searchAssets,Search assets by metadata,Search for assets based on various metadata criteria.
+ex4-0546,immich.app,GET,/search/person,searchPerson,Search people,Search for people by name.
+ex4-0547,immich.app,GET,/search/places,searchPlaces,Search places,Search for places by name.
+ex4-0548,immich.app,POST,/search/random,searchRandom,Search random assets,Retrieve a random selection of assets based on the provided criteria.
+ex4-0549,immich.app,POST,/search/smart,searchSmart,Smart asset search,Perform a smart search for assets by using machine learning vectors to determine relevance.
+ex4-0550,immich.app,POST,/search/statistics,searchAssetStatistics,Search asset statistics,"Retrieve statistical data about assets based on search criteria, such as the total matching count."
+ex4-0551,immich.app,GET,/search/suggestions,getSearchSuggestions,Retrieve search suggestions,Retrieve search suggestions based on partial input. This endpoint is used for typeahead search features.
+ex4-0552,immich.app,GET,/server/about,getAboutInfo,Get server information,Retrieve a list of information about the server.
+ex4-0553,immich.app,GET,/server/apk-links,getApkLinks,Get APK links,Retrieve links to the APKs for the current server version.
+ex4-0554,immich.app,GET,/server/config,getServerConfig,Get config,Retrieve the current server configuration.
+ex4-0555,immich.app,GET,/server/features,getServerFeatures,Get features,Retrieve available features supported by this server.
+ex4-0556,immich.app,DELETE,/server/license,deleteServerLicense,Delete server product key,Delete the currently set server product key.
+ex4-0557,immich.app,GET,/server/license,getServerLicense,Get product key,Retrieve information about whether the server currently has a product key registered.
+ex4-0558,immich.app,PUT,/server/license,setServerLicense,Set server product key,Validate and set the server product key if successful.
+ex4-0559,immich.app,GET,/server/media-types,getSupportedMediaTypes,Get supported media types,Retrieve all media types supported by the server.
+ex4-0560,immich.app,GET,/server/ping,pingServer,Ping,Pong
+ex4-0561,immich.app,GET,/server/statistics,getServerStatistics,Get statistics,Retrieve statistics about the entire Immich instance such as asset counts.
+ex4-0562,immich.app,GET,/server/storage,getStorage,Get storage,Retrieve the current storage utilization information of the server.
+ex4-0563,immich.app,GET,/server/version,getServerVersion,Get server version,Retrieve the current server version in semantic versioning (semver) format.
+ex4-0564,immich.app,GET,/server/version-check,getVersionCheck,Get version check status,Retrieve information about the last time the version check ran.
+ex4-0565,immich.app,GET,/server/version-history,getVersionHistory,Get version history,Retrieve a list of past versions the server has been on.
+ex4-0566,immich.app,DELETE,/sessions,deleteAllSessions,Delete all sessions,Delete all sessions for the user. This will not delete the current session.
+ex4-0567,immich.app,GET,/sessions,getSessions,Retrieve sessions,Retrieve a list of sessions for the user.
+ex4-0568,immich.app,POST,/sessions,createSession,Create a session,Create a session as a child to the current session. This endpoint is used for casting.
+ex4-0569,immich.app,DELETE,/sessions/{id},deleteSession,Delete a session,Delete a specific session by id.
+ex4-0570,immich.app,PUT,/sessions/{id},updateSession,Update a session,Update a specific session identified by id.
+ex4-0571,immich.app,POST,/sessions/{id}/lock,lockSession,Lock a session,Lock a specific session by id.
+ex4-0572,immich.app,GET,/shared-links,getAllSharedLinks,Retrieve all shared links,Retrieve a list of all shared links.
+ex4-0573,immich.app,POST,/shared-links,createSharedLink,Create a shared link,Create a new shared link.
+ex4-0574,immich.app,POST,/shared-links/login,sharedLinkLogin,Shared link login,Login to a password protected shared link
+ex4-0575,immich.app,GET,/shared-links/me,getMySharedLink,Retrieve current shared link,Retrieve the current shared link associated with authentication method.
+ex4-0576,immich.app,DELETE,/shared-links/{id},removeSharedLink,Delete a shared link,Delete a specific shared link by its ID.
+ex4-0577,immich.app,GET,/shared-links/{id},getSharedLinkById,Retrieve a shared link,Retrieve a specific shared link by its ID.
+ex4-0578,immich.app,PATCH,/shared-links/{id},updateSharedLink,Update a shared link,Update an existing shared link by its ID.
+ex4-0579,immich.app,DELETE,/shared-links/{id}/assets,removeSharedLinkAssets,Remove assets from a shared link,Remove assets from a specific shared link by its ID. This endpoint is only relevant for shared link of type individual.
+ex4-0580,immich.app,PUT,/shared-links/{id}/assets,addSharedLinkAssets,Add assets to a shared link,Add assets to a specific shared link by its ID. This endpoint is only relevant for shared link of type individual.
+ex4-0581,immich.app,DELETE,/stacks,deleteStacks,Delete stacks,Delete multiple stacks by providing a list of stack IDs.
+ex4-0582,immich.app,GET,/stacks,searchStacks,Retrieve stacks,Retrieve a list of stacks.
+ex4-0583,immich.app,POST,/stacks,createStack,Create a stack,"Create a new stack by providing a name and a list of asset IDs to include in the stack. If any of the provided asset IDs are primary assets of an existing stack, the existing stack will be merged into the newly created stack."
+ex4-0584,immich.app,DELETE,/stacks/{id},deleteStack,Delete a stack,Delete a specific stack by its ID.
+ex4-0585,immich.app,GET,/stacks/{id},getStack,Retrieve a stack,Retrieve a specific stack by its ID.
+ex4-0586,immich.app,PUT,/stacks/{id},updateStack,Update a stack,Update an existing stack by its ID.
+ex4-0587,immich.app,DELETE,/stacks/{id}/assets/{assetId},removeAssetFromStack,Remove an asset from a stack,Remove a specific asset from a stack by providing the stack ID and asset ID.
+ex4-0588,immich.app,DELETE,/sync/ack,deleteSyncAck,Delete acknowledgements,Delete specific synchronization acknowledgments.
+ex4-0589,immich.app,GET,/sync/ack,getSyncAck,Retrieve acknowledgements,Retrieve the synchronization acknowledgments for the current session.
+ex4-0590,immich.app,POST,/sync/ack,sendSyncAck,Acknowledge changes,Send a list of synchronization acknowledgements to confirm that the latest changes have been received.
+ex4-0591,immich.app,POST,/sync/stream,getSyncStream,Stream sync changes,Retrieve a JSON lines streamed response of changes for synchronization. This endpoint is used by the mobile app to efficiently stay up to date with changes.
+ex4-0592,immich.app,GET,/system-config,getConfig,Get system configuration,Retrieve the current system configuration.
+ex4-0593,immich.app,PUT,/system-config,updateConfig,Update system configuration,Update the system configuration with a new system configuration.
+ex4-0594,immich.app,GET,/system-config/defaults,getConfigDefaults,Get system configuration defaults,Retrieve the default values for the system configuration.
+ex4-0595,immich.app,GET,/system-config/storage-template-options,getStorageTemplateOptions,Get storage template options,Retrieve exemplary storage template options.
+ex4-0596,immich.app,GET,/system-metadata/admin-onboarding,getAdminOnboarding,Retrieve admin onboarding,Retrieve the current admin onboarding status.
+ex4-0597,immich.app,POST,/system-metadata/admin-onboarding,updateAdminOnboarding,Update admin onboarding,Update the admin onboarding status.
+ex4-0598,immich.app,GET,/system-metadata/reverse-geocoding-state,getReverseGeocodingState,Retrieve reverse geocoding state,Retrieve the current state of the reverse geocoding import.
+ex4-0599,immich.app,GET,/system-metadata/version-check-state,getVersionCheckState,Retrieve version check state,Retrieve the current state of the version check process.
+ex4-0600,immich.app,GET,/tags,getAllTags,Retrieve tags,Retrieve a list of all tags.
+ex4-0601,immich.app,POST,/tags,createTag,Create a tag,Create a new tag by providing a name and optional color.
+ex4-0602,immich.app,PUT,/tags,upsertTags,Upsert tags,Create or update multiple tags in a single request.
+ex4-0603,immich.app,PUT,/tags/assets,bulkTagAssets,Tag assets,Add multiple tags to multiple assets in a single request.
+ex4-0604,immich.app,DELETE,/tags/{id},deleteTag,Delete a tag,Delete a specific tag by its ID.
+ex4-0605,immich.app,GET,/tags/{id},getTagById,Retrieve a tag,Retrieve a specific tag by its ID.
+ex4-0606,immich.app,PUT,/tags/{id},updateTag,Update a tag,Update an existing tag identified by its ID.
+ex4-0607,immich.app,DELETE,/tags/{id}/assets,untagAssets,Untag assets,Remove a tag from all the specified assets.
+ex4-0608,immich.app,PUT,/tags/{id}/assets,tagAssets,Tag assets,Add a tag to all the specified assets.
+ex4-0609,immich.app,GET,/timeline/bucket,getTimeBucket,Get time bucket,Retrieve a string of all asset ids in a given time bucket.
+ex4-0610,immich.app,GET,/timeline/buckets,getTimeBuckets,Get time buckets,Retrieve a list of all minimal time buckets.
+ex4-0611,immich.app,POST,/trash/empty,emptyTrash,Empty trash,Permanently delete all items in the trash.
+ex4-0612,immich.app,POST,/trash/restore,restoreTrash,Restore trash,Restore all items in the trash.
+ex4-0613,immich.app,POST,/trash/restore/assets,restoreAssets,Restore assets,Restore specific assets from the trash.
+ex4-0614,immich.app,GET,/users,searchUsers,Get all users,Retrieve a list of all users on the server.
+ex4-0615,immich.app,GET,/users/me,getMyUser,Get current user,Retrieve information about the user making the API request.
+ex4-0616,immich.app,PUT,/users/me,updateMyUser,Update current user,Update the current user making the API request.
+ex4-0617,immich.app,GET,/users/me/calendar-heatmap,getMyCalendarHeatmap,Retrieve calendar heatmap activity,"Retrieve activity counts for a specified period, in a calendar heatmap format."
+ex4-0618,immich.app,DELETE,/users/me/license,deleteUserLicense,Delete user product key,Delete the registered product key for the current user.
+ex4-0619,immich.app,GET,/users/me/license,getUserLicense,Retrieve user product key,Retrieve information about whether the current user has a registered product key.
+ex4-0620,immich.app,PUT,/users/me/license,setUserLicense,Set user product key,Register a product key for the current user.
+ex4-0621,immich.app,DELETE,/users/me/onboarding,deleteUserOnboarding,Delete user onboarding,Delete the onboarding status of the current user.
+ex4-0622,immich.app,GET,/users/me/onboarding,getUserOnboarding,Retrieve user onboarding,Retrieve the onboarding status of the current user.
+ex4-0623,immich.app,PUT,/users/me/onboarding,setUserOnboarding,Update user onboarding,Update the onboarding status of the current user.
+ex4-0624,immich.app,GET,/users/me/preferences,getMyPreferences,Get my preferences,Retrieve the preferences for the current user.
+ex4-0625,immich.app,PUT,/users/me/preferences,updateMyPreferences,Update my preferences,Update the preferences of the current user.
+ex4-0626,immich.app,DELETE,/users/profile-image,deleteProfileImage,Delete user profile image,Delete the profile image of the current user.
+ex4-0627,immich.app,POST,/users/profile-image,createProfileImage,Create user profile image,Upload and set a new profile image for the current user.
+ex4-0628,immich.app,GET,/users/{id},getUser,Retrieve a user,Retrieve a specific user by their ID.
+ex4-0629,immich.app,GET,/users/{id}/profile-image,getProfileImage,Retrieve user profile image,Retrieve the profile image file for a user.
+ex4-0630,immich.app,GET,/view/folder,getAssetsByOriginalPath,Retrieve assets by original path,Retrieve assets that are children of a specific folder.
+ex4-0631,immich.app,GET,/view/folder/unique-paths,getUniqueOriginalPaths,Retrieve unique paths,Retrieve a list of unique folder paths from asset original paths.
+ex4-0632,immich.app,GET,/workflows,searchWorkflows,List all workflows,Retrieve a list of workflows available to the authenticated user.
+ex4-0633,immich.app,POST,/workflows,createWorkflow,Create a workflow,"Create a new workflow, the workflow can also be created with empty filters and actions."
+ex4-0634,immich.app,GET,/workflows/triggers,getWorkflowTriggers,List all workflow triggers,Retrieve a list of all available workflow triggers.
+ex4-0635,immich.app,DELETE,/workflows/{id},deleteWorkflow,Delete a workflow,Delete a workflow by its ID.
+ex4-0636,immich.app,GET,/workflows/{id},getWorkflow,Retrieve a workflow,Retrieve information about a specific workflow by its ID.
+ex4-0637,immich.app,PUT,/workflows/{id},updateWorkflow,Update a workflow,"Update the information of a specific workflow by its ID. This endpoint can be used to update the workflow name, description, trigger type, filters and actions order, etc."
+ex4-0638,immich.app,GET,/workflows/{id}/logs,getWorkflowLogs,Retrieve workflow logs,Retrieve logs of a workflows runs by ID
+ex4-0639,immich.app,GET,/workflows/{id}/share,getWorkflowForShare,Retrieve a workflow,"Retrieve a workflow details without ids, default values, etc."

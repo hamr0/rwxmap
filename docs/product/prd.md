@@ -126,6 +126,7 @@ vendor (D81). Only "what does the call do" is asked.
 
 The labelling brief every truth label is made under is
 `data/relabel-2026-09-22/BRIEF-v3.md` (amended by D98).
+Restart and stopping a server or service are w; stopping a running job whose work is lost stays x by clause (f) (D136); to be written into BRIEF-v4 before exam #5.
 
 ## The core (frozen)
 
@@ -151,7 +152,7 @@ decides it.
 
 | order | step | claims | rule | evidence |
 |---|---|---|---|---|
-| 1 | step 1, r | GET, HEAD, OPTIONS | `method` | floor |
+| 1 | step 1, r | GET, HEAD, OPTIONS, QUERY | `method` | floor |
 | 1 | step 1, r | POST whose lead verb is in `READ_VERBS` | `read-verb` | list |
 | 1 | step 1, r | POST with a `SAFE_VERBS` word at any position | `read-verb-anywhere` | list |
 | 2 | step 2, x | DELETE, always, `destructive: true` | `method-delete` | floor |
@@ -186,11 +187,19 @@ truly w, but a POST with no verb word cannot be told from a create
 of 1994 on tuning) carry most of the too-tight cost and are the pile
 `jev-lower` lowers.
 
-**The method floor, as the code has it.**
+**The method floor, as the code has it.** QUERY (RFC 10008, June 2026,
+Proposed Standard: safe and idempotent like GET, with a request body) is
+r and is handled exactly like GET everywhere a method decides something
+(D134, user ruling 2026-11-04): step 1's floor, the review marker, the
+MCP and WebMCP hints, the exporter letter, the key and the matcher. It is
+read from OpenAPI 3.2's `query` field and from an `additionalOperations`
+entry keyed QUERY (any case). In modes a and b a QUERY row is sent with
+method `QUERY` as-is; rwxlite shows it to its model as GET (from rwxlite's
+next release; on its 383 GET exam rows relabelled QUERY, 1 top letter changed).
 
 | method | floor | what can move it |
 |---|---|---|
-| GET, HEAD, OPTIONS | r | nothing in the mechanical core |
+| GET, HEAD, OPTIONS, QUERY | r | nothing in the mechanical core |
 | DELETE | x, `destructive: true` | nothing — DELETE beats every word |
 | PUT, PATCH | w | a `CANT_UNDO` verb or `credential-set` raises it to x |
 | POST | none — decided by its verb | `READ_VERBS`/`SAFE_VERBS` → r; `CANT_UNDO` → x; `KEEP_W` → w; no word → x |
@@ -242,9 +251,12 @@ for debugging and are never published (D28/D76/D77).
   and every DELETE. On the verdict it is absent rather than `false`;
   the map and the sidecar spell it out as a boolean. It is a refinement
   flag inside x, not a fourth class (D86's ruling on D28).
-- **`evidence`** — exactly three values: `floor` (the method alone
+- **`evidence`** — exactly four values: `floor` (the method alone
   decided, no word matched), `list` (a word list fired), `jev` (an
-  optional Jev tier moved the row; appears only when a tier ran). It
+  optional Jev tier moved the row; appears only when a tier ran),
+  `rwxlite` (the D133 second pass moved the row: raised, lowered, or
+  undecided and pushed to x; a row it kept, or left undecided at x,
+  keeps mechanical's value). It
   answers "did a word fire", which is a fact about the implementation,
   not a reliability signal: on the M3 exam `floor` was the cleanest
   bucket (5.6% error) and `list` the dirtiest (23.3%), because `floor`
@@ -253,10 +265,15 @@ for debugging and are never published (D28/D76/D77).
   from method + class + evidence and nothing else; its one writer is
   `reviewHint` in `src/flow.js`, and `applyJev` recomputes it through
   the same function when a tier moves a row.
-  - `tight` — class x on a POST. Likely tighter than needed; safe to
-    review, since no too-loose row has been observed in this bucket.
-  - `loose` — class w on a PUT or PATCH decided by the method floor.
-    Where most of the too-loose rows live.
+  - `tight` — x, possibly tighter than needed (D133, built in commit
+    aea12f1). It covers class x on a POST and any row the second pass
+    could not decide and pushed to x, a PUT/PATCH included.
+  - `loose` — mechanical lowered it (D133, built in commit aea12f1):
+    class w on a PUT or PATCH decided by the method floor, plus any POST
+    row a word list lowered below the POST floor of x (class w or r,
+    evidence `list`). Where most of the too-loose rows live.
+    `settled` means nothing lowered the row, mostly GET r and DELETE x
+    floor rows.
   - `settled` — neither of the other two. It is NOT signed or
     confirmed by anyone. A signed state would be a fourth value only a
     human writes after the export; rwxmap never emits it.
@@ -271,8 +288,10 @@ undo another. The two raise tiers make one one-way move. `jev-lower`
 ends at w or at r (D129): when p(x) ≤ 0.10 fires, a second, separate
 request asks the changes question (`jev-raise-get`'s, byte-equal). A
 usable answer from the same model string with p(changes) ≤ 0.50
-(`JEV_LOWER_R_THRESHOLD`) moves the row x → r; anything else stops it
-at w. Rows isX does not lower get no second call.
+(`JEV_LOWER_R_THRESHOLD`) moves the row x → r; a usable answer above
+0.50 stops it at w; a malformed answer (p missing, non-number, NaN,
+non-finite, outside [0,1]) or another model string is a failed call
+(D133): undecided, x with review `tight`. Rows isX does not lower get no second call.
 
 | tier | pile (mechanical rule) | move | question | fires at |
 |---|---|---|---|---|
@@ -883,77 +902,322 @@ above.
   e) — released as `rwxmap@0.6.0` on 2026-09-29.
 - **CLI polish and the release checklist** — `--help`, `--version`,
   plain error messages, the `openapi`/`swagger` key check and
-  `docs/release-checklist.md` — released as `rwxmap@0.7.0` on 2026-09-30.
+  `docs/product/release-checklist.md` — released as `rwxmap@0.7.0` on 2026-09-30.
 - **The proxy matcher** — `rwxmap/match` (D126) released as
   `rwxmap@0.8.0` on 2026-10-29.
 
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
-## Planned: rwxmap with rwxlite (after rwxlite's last test)
+## Module D133: rwxmap with rwxlite (three engines)
 
-PLANNED, not adopted and not current behaviour. User statement
-2026-11-03: "we will probably go for it". It becomes the next module
-only after rwxlite's last test, with its own D-number and ruling.
+Status: spec in progress on branch `feat/d133-rwxlite-engines`. Pass 1
+(second pass against a stub engine, wider `loose`, `--engine`, evidence
+`rwxlite`, the `rwxlite` JSON block, the cache check), pass 2a (model
+download from rwxlite's GitHub releases, `--model small`, the rwxlite
+adapter) and pass 2b (mode b, mode c's undecided rule, the 2a fixes) are
+built on the branch, unreleased. rwxlite 0.2.0 is published, so the default
+run uses it when the `rwxlite@0.2` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
+decided; everything marked "proposal" or "open" is not decided.
 
-- **Split.** rwxmap stays the adapter: spec import, shaping, flags, all
-  output. rwxlite is a pure classifier: Jev-shaped questions in, p out.
-  It never decides to ask.
-- **Three engines under rwxmap.** (1) mechanical -> rwxlite, the planned
-  default, local and free. (2) rwxlite alone (rwxlite's "mode b").
-  (3) mechanical -> Jev, kept as the paid option. This would reverse
-  today's order (mechanical default, Jev opt-in).
+### Decided (user rulings, 2026-11-03 and 2026-11-04)
+
+- **Purpose.** rwxlite is a free, fast classifier for a second pass.
+  The rows mechanical marks for a human today go to the second pass
+  first.
+- **Three modes.**
+  - **a (default): mechanical -> rwxlite.** Every row marked `loose`
+    or `tight` gets the second pass, with `loose` widened (see "The
+    `loose` marker widens" below). `settled` rows are not sent and
+    stay exactly as today. Mode c uses the same scope. On a `loose`
+    row rwxlite is asked whether it is really x (raise or keep). On a `tight` row rwxlite is asked
+    whether it can be lowered; a lowering is accepted only at max p >=
+    0.97 (rwxlite's measured cut-off). If rwxlite cannot decide, the row
+    is x and marked for review. Raised, lowered and undecided rows all
+    get the review mark.
+  - **b: rwxlite alone (built, pass 2b).** rwxlite judges every row,
+    `settled` ones too; rwxmap is still the adapter. Per row: x = pIsX,
+    w = pChanges - pIsX, r = 1 - pChanges; the letter is the largest
+    share (a tie goes to the tighter class) and p is that share. The
+    user sets a confidence from 0 to 99 (`--confidence`). If p >=
+    confidence/100 the row gets the letter (a raise, a keep or a
+    lowering, all at the same cut); otherwise the row is undecided: x,
+    review `tight`. An errored or malformed answer is undecided too.
+    More confidence means more asks. **Default 95** (user ruling,
+    2026-11-04; replaces the earlier 70): it is the lowest setting whose
+    too-loose count (6 of 949) is no higher than mechanical alone's (6
+    of 949) on the tuning set below. Measured on rwxlite's fresh 949
+    rows (coolify, workos, lago, resend; tuning data for rwxmap, int8
+    p values, from `poc/d133-mode-b/readout.txt`; the code reproduces
+    these counts in `src/secondpass.test.js`). Denominator 949 rows;
+    asked rows are scored as x:
+
+    | confidence | exact | too loose | too tight | asked |
+    |---|---|---|---|---|
+    | 70 | 870 (91.7%) | 18 (1.9%) | 61 (6.4%) | 52 (5.5%) |
+    | 95 (default) | 837 (88.2%) | 6 (0.6%) | 106 (11.2%) | 134 (14.1%) |
+    | 97 | 811 (85.5%) | 3 (0.3%) | 135 (14.2%) | 173 (18.2%) |
+
+    Mechanical alone on the same rows: 736 exact (77.6%), 6 too loose
+    (0.6%), 207 too tight (21.8%). Too loose and too tight are never
+    folded into one number. The default fp32 model will shift these
+    slightly (rwxlite: 7 rows differ); re-measure on the next exam.
+  - **c: mechanical -> Jev (paid, BYOK).** Same flow and scope as mode
+    a, with Jev deciding instead of rwxlite. Undecided means x plus
+    review. Jev's cut-offs stay as measured (tiers, separate questions,
+    D129). Built in pass 2b: a Jev row whose call fails, errors or comes
+    back malformed (first or second question) is undecided, x with
+    review `tight`, instead of keeping the mechanical letter (or w). A
+    row Jev answers but does not move keeps its mechanical letter, as
+    before. Rows Jev moves get their marker through `reviewHint`'s
+    second-pass argument (raised: `tight` if x else `loose`; lowered:
+    `loose`). Scope is still the Jev tiers' own piles (`needsJev`), not
+    mode a's loose and tight rows. Also a failed call (D133, user-ruled
+    2026-11-04): a D129 second answer that is malformed (p missing,
+    non-number, NaN, non-finite, outside [0,1]) or carries a different
+    model string than the first. The row is undecided, x with review
+    `tight`, counted in `failed`, never left at w.
+  This reverses today's order (mechanical default, Jev opt-in).
+- **Runtime and files.** At runtime bareguard sees x, and its own
+  gate and ruling decide (for example a human in the loop). rwxmap
+  never emits "ask" or "deny" (D103 exporter contract). In files
+  (WebMCP, MCP hints, OpenAPI x-rwx, exporter) the row is x with the
+  review marker. No new per-row field; the two additions below (a
+  fourth `evidence` value and a top-level `rwxlite` block) are the only
+  output changes.
+- **The `tight` marker is wider (built, commit aea12f1).** It means "x,
+  possibly tighter than needed, review". It covers x-on-POST rows and
+  rows the second pass could not decide, including an undecided
+  PUT/PATCH pushed to x. The change is in `reviewHint` in
+  `src/flow.js` (core-adjacent, its one writer). Output format is
+  unchanged.
+- **The `loose` marker is wider (built, commit aea12f1).** It means
+  "mechanical lowered it". It covers PUT/PATCH rows left at w by the
+  method floor plus any POST row a word list lowered below the POST
+  floor of x (class w or r, evidence `list`). `settled` is rows
+  nothing lowered. Output format is unchanged. It applies in every mode,
+  `--engine mechanical` included.
+- **A moved row's evidence is `rwxlite` (user ruling, 2026-11-04).** A
+  row the second pass moved (raised, lowered, or undecided and moved to
+  x) publishes `evidence: "rwxlite"`, a fourth value beside `floor`,
+  `list` and `jev`, added the way `jev` was. A row it kept, or an x row
+  left undecided at x, keeps mechanical's evidence.
+- **The model string is recorded in the combined JSON (user ruling,
+  2026-11-04).** A top-level `rwxlite` block, shaped like `jev`: `mode`
+  (`on`/`off`), `model`, and the counts `sent`, `raised`, `lowered`,
+  `kept`, `undecided`. A run with no model records `mode: "off"`,
+  `model: null` and a `reason`. The bareguard exporter is unaffected (it
+  emits the bare letter or letter+marker only, never evidence).
+- **Errors count as undecided.** An errored or timed-out call on a row
+  counts as undecided: the row is x plus review. This holds for the
+  rwxlite and Jev engines.
+- **No model, no stop.** If the model is missing for the whole run
+  (cannot be downloaded), or mechanical is chosen, mechanical runs
+  alone and rows are marked as today. Mode a with no loose or tight
+  row fetches nothing and prints "rwxlite: nothing to check"; mode b
+  always needs the model when the spec has rows. Offline, the cached
+  model of the pinned version and the chosen variant (matched on the
+  manifest's `modelFile`) is preferred; the other variant is used only
+  when none of the chosen kind is cached, and the line says so ("could
+  not reach the release"). Cached models of any other version are
+  ignored (D135). The manifest and asset files are fetched from the
+  pinned release tag (D135), never `latest`. The run prints "rwxlite: off
+  (mechanical)". It never stops.
+- **rwxmap is the adapter for all modes**, including rwxlite on its own.
+  It consumes the OpenAPI catalogue and specs, discovers APIs on the
+  fly, and emits WebMCP, MCP hints and the other carriers. rwxlite is
+  only a classifier; it never reads a spec or an API and only returns p.
+- **CLI names.** `rwxmap spec.json` is mode a. `--engine rwxlite
+  --confidence <0-99>` is mode b (default 95). `--engine jev` is mode c
+  and needs the key. `--engine mechanical` is no model.
+  `--confidence` is valid only with `--engine rwxlite`; elsewhere it
+  fails loudly.
+- **Distribution.** Ships on npm. The model is downloaded on first use
+  and is pinned to one rwxlite release tag in each rwxmap release (D135;
+  `RWXLITE_TAG` in `src/modeldownload.js`). The rwxlite npm package that
+  runs it must be in the same minor line (>=0.2.0 <0.3.0, derived from the
+  tag, read from the package's own package.json); any other version, a
+  pre-release or an unreadable version turns rwxlite off, mechanical
+  alone, with the reason printed (D135). The package is checked before
+  the model is fetched, so a missing or wrong-version package costs no
+  download. A newer model replaces it only
+  after a no-regression result on a fresh clean exam (exam #4,
+  2026-11-05: rwxlite r11 failed it, 0.2.0 stays). Every run records
+  the model string.
+- **Model cache and integrity.** The downloaded model is cached in a
+  per-user folder, `~/.cache/rwxmap/` (or `$XDG_CACHE_HOME/rwxmap`),
+  one directory per model: `rwxlite-<semver>+<sha8>/` holding
+  `manifest.json` (`{version, modelFile, model, files: {<name>: <sha256>}}`),
+  the model file (named by `modelFile`) and `vocab.txt`. sha8 is the first
+  8 hex of the model file's sha256. Before use: the manifest parses,
+  `model` equals the directory name, `modelFile` is in `files`, every
+  listed file exists inside the directory (no `/`, `\` or `..` in names)
+  and matches its sha256. Any failure means the model is not used:
+  mechanical runs alone and the run says so loudly. Among cached models
+  of the pinned version, an invalid one does not hide a valid one.
+- **Default model and `--model` (user ruling, 2026-11-04).** rwxmap's
+  default model is rwxlite's fp32 "exact" model (91 MB, the un-quantised
+  original, no quantisation drift; manifest `manifest-exact.json`). A
+  user who wants a smaller download chooses rwxlite's int8 per-channel
+  model (23.1 MB; manifest `manifest.json`; model string at its current
+  version `rwxlite-0.1.0+8ad0a182`) with `--model small`. `--model` is
+  valid only where rwxlite runs (default mode a and `--engine rwxlite`);
+  elsewhere it fails loudly, like `--confidence`. Evidence: on rwxlite's
+  fresh exam (coolify, workos, lago, resend) int8 per-channel gave the
+  same 5 too-loose rows as fp32; default int8 (not offered) drifts about
+  3x more.
+- **Publish location (rwxlite's user ruling, relayed by the rwxlite
+  session, 2026-11-04).** GitHub releases on `hamr0/rwxlite`. Assets per
+  release: `manifest.json` (int8 per-channel), `manifest-exact.json`
+  (fp32), `model-int8-pc.onnx`, `model-fp32.onnx`, `vocab.txt`. Pinned
+  tag (D135): `https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest-exact.json`
+  (rwxmap default) and `.../manifest.json` (`--model small`). Not live
+  yet. On download rwxmap stores the chosen manifest as `manifest.json`
+  inside the model's own folder `rwxlite-<semver>+<sha8>/` (the cache
+  layout above). The runtime is an npm package `rwxlite`
+  (`loadAnswerer`) with `onnxruntime-node` optional; it is a draft, not
+  published.
+- **Speed (rwxlite's measurement).** Quiet i3-8100T, 4 cores, batch 1.
+  int8-pc: 15.5 ms mean / 31.0 p95 at 1 thread, 9.2 / 17.8 at 2, 6.9 /
+  13.1 at 4. fp32 at 4 threads: 7.9 / 14.0. The 20 ms bar holds at p95
+  with 4 threads. rwxlite's `loadAnswerer` default threads is
+  `min(4, cores)`. Earlier laptop (i7-8665U, 1 thread, int8-pc): mean
+  20.2 ms, p95 38.1 ms.
+- **Decision rule (user ruling, 2026-11-04).** rwxmap keeps its built
+  rule (`src/secondpass.js`): send `loose` and `tight` rows; the
+  engine's letter is the largest of x = isX, w = changes - isX, r = 1 -
+  changes; a raise is accepted; a lowering is accepted only at p >=
+  0.97; otherwise the row is x plus review `tight`; `settled` rows are
+  never sent. rwxlite's tier rule is NOT adopted (it moves only Jev's
+  three tiers, with per-tier cuts and then asks a lowering under 0.97).
+  A `credential-set` verdict (D131) is never lowered by the second pass,
+  in any mode (user ruling 2026-11-04).
+  Kept at 0.97 after a measured 0.95/0.93/0.90 what-if (D136).
+  Evidence: "Rule comparison" under Evidence so far. Caveat:
+  secondPass has only that one tuning measurement; the D133 exam is its
+  test.
+- **R1 and R2 failed tuning.** Measured 2026-11-04, both failed the
+  D100 tighten bar. Every right fire was workos, the vendor they were
+  drawn from; excluding it, neither closes a leak. Each adds wrong
+  fires (R1 files.com PATCH /api_key; R2 okta sign-out page settings).
+  Neither is built; no D-number. Details in learnings.
+- **Go/no-go bar (set before building).** A starting bar ("we can start
+  there"), one per mode. It replaces the old fixed 0.5% too-loose limit
+  for the default mode. Too loose and too tight are counted and
+  reported separately.
+  - Mechanical -> rwxlite (default): too loose must be no more than
+    mechanical alone on the same exam (it must never leak more than
+    mechanical does), AND exact must be at least 5 percentage points
+    above mechanical alone on that exam.
+  - rwxlite alone: no pass/fail bar of its own. The user sets a
+    confidence from 0% to 99%, and each setting prints its measured
+    too-loose rate and ask rate beside it (the user accepts the
+    trade-off).
+  - Mechanical -> Jev: unchanged (the existing Jev bars).
+
+> Evidence for the widened `loose` (measured 2026-11-03, tuning pool
+> 8376 = combined-2026-09-21 6557 + relabel-buildset-2026-09-23 1819,
+> classified with src v0.9.0 `classifyRow`). Current buckets, rows /
+> too loose / too tight: `settled` 4608 / 27 / 42; `loose` 1652 / 51 /
+> 1; `tight` 2116 / 0 / 1524. Of the 27 `settled` leaks, 25 are POST
+> rows a word list lowered (24 to w by step-3 modify-verb or
+> modify-verb-summary, 1 to r by step-1 read-verb-anywhere). Those
+> POST-lowered rows are 577 of 4608 `settled` rows (12.5%), with 4.3%
+> leak density against 0.59% for all `settled`. 15 vendors hold the
+> leaks; one-vendor-held-out coverage is 0.90-0.96. The other 2 are GET
+> method-floor rows (datadog GET /api/v1/graph/snapshot, intercom GET
+> /contacts/{id}/banners), left as accepted risk: catching them means
+> sending all 2543 GET floor rows. With the widened `loose`, the
+> second pass covers 1734 of 4171 rows (41.6%) on the 15 complete
+> official APIs (median 39.8%, intercom; range 14.8% figma to 60.0%
+> paypal), and 4345 of 8376 (51.9%) pooled over the tuning sets, which
+> hold capped write-heavy samples. At 20 ms per op the largest complete
+> API stripe (297 rows) takes about 5.9 s. Caveat: tuning-set
+> figures. The rule follows the principle "every lowered row gets a
+> second pass" but is proven only on tuning data; the D133 exam is its
+> test.
+
+### Proposals (not decided)
+
+- **`lean` to the engine.** Every item sent to the engine also carries
+  `lean: {class, rule}`, rwxmap's mechanical verdict for that row (class
+  r|w|x, rule = the internal rule name). It goes only to the engine and is
+  never published.
 - **One request, both questions** (isX and changes): x = p(isX),
   w = p(changes) - p(isX), r = 1 - p(changes). The Jev engine keeps its
   separate requests, because its cut-offs were measured that way (D127).
-- **Lowerings are flagged, not trusted.** A lowering is accepted only
-  when max p >= 0.97; otherwise the row is marked to ask, beside
-  rwxmap's tight marks. Raises and keeps are trusted. Proposed form: an
-  asked row keeps the stricter letter and carries the existing `tight`
-  review marker, no new output field. To be decided.
-- **Evidence so far** (rwxlite's numbers; its fresh exam on coolify,
-  workos, lago, resend, 949 operations; rwxlite commits 0caa381
-  prereg, 402fea0 score; labels 934 of 949 agreed). Answered 875 rows:
-  92.57% right; 5 too loose (0.57% of 875) against a 0.5% bar (4
-  rows), so NO-GO by one row; 60 too tight (6.9%); asked 74 (7.8% of
-  949). All 13 wrong lowerings of 166 were under 0.97 and asked; all 92
-  accepted lowerings were right. Mechanical alone on the same exam:
-  77.6% right, 6 too loose (0.63%), 21.8% too tight. The 5 misses come
-  from the mechanical letter: 3 PUT/PATCH credential upserts (workos
-  client-credentials, workos api-key, coolify integration-tokens;
-  mechanical w, truth x by clause b) and 2 logout GETs (workos
-  /sso/logout, /user_management/sessions/logout; truth x). Practice rows
-  (rwxlite v3 tuning, LOVO): 93.2% right, 21 too loose (0.41%), 9.6%
-  asked.
-- **Mechanical candidates this points to** (each needs a tuning POC and
-  a fresh exam). R1: credential replace on PUT/PATCH (last path segment
-  is a credential being replaced: api-key, client-credentials, token,
-  secret), kept narrower than the broad noun rule that failed (6 right,
-  17 wrong, learnings F2 POC). R2: logout, signout, end-session is x on
-  any method; it touches step 1, so it is a core change.
-- **The bar** (user note 2026-11-03, open, not decided). The target
-  could be lowered, because the local model is about 92% right and asks
-  on the doubtful rows. The bar for this module is set before it is
-  built.
-- **Interface to pin with rwxlite.** Model string and version format;
-  error behaviour (fail closed: keep the mechanical letter); latency
-  budget; distribution (npm package or model file); `onnxruntime-node`
-  as an optional dependency loaded only for the local engines
-  (dependency rule).
-- **Next steps.** Shared fresh exam #3, agreed by both users: vendors
-  from rwxmap's spares clerk, neon, supabase, mux, netbird, ory, novu;
-  both projects commit candidates before truth is read; each scores
-  once. rwxlite's M1 is an int8 ONNX Node answerer in Jev's
-  request/answer shape.
+- **Interface to pin with rwxlite** (rwxlite's proposed defaults):
+  - Model string: `rwxlite-<semver>+<sha8 of the model file's sha256>`
+    (fp32 by default, int8 with `--model small`), recorded on every run
+    (D88-style).
+  - Latency: their bar is at most 20 ms per operation, no GPU; measured
+    values are under "Speed" above.
+  - Shipping: npm, with `onnxruntime-node` as an optional dependency
+    loaded only when a local engine is on (dependency rule). The user
+    ruled download-on-first-use for the model itself.
+
+### Evidence so far
+
+rwxlite's numbers; its fresh exam on coolify, workos, lago, resend, 949
+operations; rwxlite commits 0caa381 prereg, 402fea0 score; labels 934 of
+949 agreed. Answered 875 rows: 92.57% right; 5 too loose (0.57% of 875)
+against a 0.5% bar (4 rows), so NO-GO by one row; 60 too tight (6.9%);
+asked 74 (7.8% of 949). All 13 wrong lowerings of 166 were under 0.97 and
+asked; all 92 accepted lowerings were right. Mechanical alone on the same
+exam: 77.6% right, 6 too loose (0.63%), 21.8% too tight. The 5 misses
+come from the mechanical letter: 3 PUT/PATCH credential upserts (workos
+client-credentials, workos api-key, coolify integration-tokens;
+mechanical w, truth x by clause b) and 2 logout GETs (workos
+/sso/logout, /user_management/sessions/logout; truth x). Practice rows
+(rwxlite v3 tuning, LOVO): 93.2% right, 21 too loose (0.41%), 9.6% asked.
+
+Rule comparison (2026-11-04; `poc/d133-rule-compare/readout.txt`,
+fixture and truth in `data/rwxlite-fresh-2026-11-03/`). The 949 rows
+are TUNING data for rwxmap (rwxlite burned them), same int8-pc p's
+(rwxmap's default is fp32). Exact / too loose / too tight: mechanical
+736 / 6 / 207; rwxlite tier rule (asked rows scored at the stricter
+letter) 821 / 5 / 123, 775 rows sent, 74 asked; rwxmap secondPass 826 /
+6 / 117, 425 rows sent, 99 undecided. Both pass the mode-a bar on this
+set. They differ on 9 rows (5 GET rows only the tier rule sends, 4
+PUT/PATCH rows it raises at isX >= 0.15); the tier rule has one fewer
+leak (lago PUT /invoices/{id}/finalize), which is noise. Neither fixes
+the 5 remaining leaks (3 credential PUT/PATCH, 2 workos logout GETs):
+the model agrees with mechanical there, and the R1 and R2 tuning POCs
+(2026-11-04) closed none of them.
+
+Shared exam #3 (scored once 2026-11-04; data in `data/exam3-2026-11-04/`,
+prereg 46235ea, figures are for rwxlite r10 = 0.3.0 only). 7 vendors
+(clerk, neon, supabase, mux, netbird, ory, novu), 1377 operations. Exact /
+too loose / too tight: mechanical 1094 / 17 / 266; mode a r10 fp32 (the
+gate) 1178 / 15 / 184, a PASS on its bar (too loose 15 vs 17, exact +6.10
+points vs 5.0); int8 1180 / 15 / 182, also PASS. Mode b at 95: 12 too
+loose, 244 asked (no bar). Jev: 1250 / 16 / 111, PASS on the M3 gate (1.2%
+too loose vs 2%, 8.1% too tight vs 20%). All 15 mode-a leaks are
+mechanical's own leaks the model kept. rwxlite's own gate for r10 is
+NO-GO (15 too loose = 1.22% of answered vs 0.5%). The exam is burned for
+both sides. A parity-checked replay of rwxlite 0.2.0 fp32 (analysis, not a
+new exam) gives 1192 / 15 / 170 in mode a, also a PASS, and 14 too loose in
+b95 vs r10's 12.
+
+Shared exam #4 (scored once 2026-11-05; data in `data/exam4-2026-11-04/`;
+7 vendors, 1505 operations; BURNED for both sides). The D135 next-model
+gate scored rwxlite r11 (v0.3.0) NO-GO: mode a fp32 too loose 18 vs 16 for
+0.2.0 (exact 1393 vs 1391), so 0.2.0 stays and the next model needs a new
+exam. Mode a with 0.2.0 passed the D133 bar on this exam: 1391 / 16 / 98
+(exact / too loose / too tight) vs mechanical 1262 / 21 / 222, +8.57
+points. Jev (mode c) scored 1428 / 17 / 60 (94.9% exact, 17 = 1.1% too
+loose, 60 = 4.0% too tight): M3 gate PASS, 15 of its 17 leaks are mechanical's kept and 2 (ex4-0023, ex4-0573) its own. rwxlite's own scorer also says NO-GO
+but with different numbers (it applies no ask rule); rwxlite confirmed the
+gate is the CLI number.
+
+### Open
+
+None.
 
 ## What is next
 
-The 0.9.0 candidate carries F1 (D129) and F2 (D131). The gate-4 fresh
-check passed (91.8% vs 85.9% exact, too loose 9 vs 10 of 800). The
-other take-backs were measured and rejected (learnings, 2026-11-03).
-rwxlite's model failed its D128 exam: 36 of 4279 rows too loose (0.84%,
-bar 0.5%), so Jev stays the model tier. Open: invert the D128 order (model
-first, mechanical when unsure), pending rwxlite's brief. Parked items and
-known limits below.
+0.9.0 is released (PR #18, merge e9b697c, npm 0.9.0, 2026-11-03). Next:
+the D133 release, which ships rwxlite 0.2.0, pinned to tag v0.2.0 (D135).
+Parked items and known limits below.
 
 ### Parked
 
@@ -974,10 +1238,25 @@ known limits below.
 
 ### Known limits (not planned)
 
-- **OpenAPI 3.2 `query` and `additionalOperations`.** `operationsFrom`
-  (`src/exporter.js`) reads neither, so those operations get no letter
-  and no key. Few specs use 3.2 today, and stdout already counts the
-  operations it skips.
+- **OpenAPI 3.2 `additionalOperations` other than QUERY.**
+  `operationsFrom` (`src/exporter.js`) reads only the `query` field and
+  an `additionalOperations` entry keyed QUERY (D134); every other key
+  there (COPY, PURGE, ...) gets no letter and no key. Few specs use 3.2
+  today, and stdout already counts the operations it skips.
+- **credential-set (D131) fires on "pin" meaning a pinned item.** whapi
+  PUT /account/plusCard/pin and circuitsandbox PUT /spaces/{topicId}/pin.
+  Over-tight only, not a leak.
+- **Jev sees a QUERY row's method raw on the jev-raise-get pile.** The tier
+  is raise-only, so the cost is over-tight only. QUERY = r is settled (D134).
+- **int8 p drift between rwxlite's predict file and the CLI run.** 5 rows
+  in mode a and 7 in b95 differ on exam #3, each within about 0.01 of a
+  cut. rwxlite traced it to batch composition, not threads: answerMany pads
+  each batch to its longest row, and int8-pc uses dynamic activation
+  quantisation with one scale over the whole padded batch, so p depends on
+  which rows share a batch (max |dp| 0.11 on exam #3, 5 rows cross 0.97).
+  fp32, the default, is unaffected. The fix is rwxlite's (one row per
+  session.run). It was measured as 0.2.1 on exam #3 before release: fp32 is
+  identical on every row, and int8 answers no longer depend on the batch.
 - **Two plain error messages depend on wording.** The CLI recognises
   `load.js`'s "no usable paths" error and Node's `parseArgs` errors by
   their text. If either is reworded the user sees the raw message
@@ -1024,13 +1303,15 @@ known limits below.
   never labelled. `-h`/`--help` and `-v`/`--version` exit 0; error text
   is plain (`no such file`, `not a file`, `unknown option`, `-o needs a
   value`).
-- **Jev in the CLI** (D118-D120, D125; `rwxmap@0.6.0`). A key in
-  `RWXMAP_JEV_KEY` (environment, else `.env`) turns on all three tiers
-  (D119). No key: mechanical, and the run says so. Bring your own key;
+- **Jev in the CLI** (D118-D120, D125; `rwxmap@0.6.0`; since D133 only
+  with `--engine jev`). `--engine jev` turns on all three tiers (D119)
+  and needs `RWXMAP_JEV_KEY` (environment, else `.env`); without a key
+  it exits 1. A key alone turns nothing on: the run says so and sends
+  nothing. Bring your own key;
   spec text (method, path, operationId, summary, description) goes to
-  `api.typesafe.ai` (D120). A failed row keeps its mechanical letter.
-  A `.env` that cannot be read or parsed means no key: the run stays
-  mechanical.
+  `api.typesafe.ai` (D120). A failed row is undecided: x, review `tight` (D133).
+  A `.env` that cannot be read or parsed means no key, so
+  `--engine jev` exits 1.
 - **Carriers** (D124; `rwxmap@0.6.0`). The third file,
   `<vendor>.openapi.rwx.json`, is a copy of the spec with
   `x-rwx: { class, destructive, evidence, review }` on every operation;
@@ -1054,6 +1335,4 @@ network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
 
 ## Open questions
 
-- Default engine order: mechanical first, or rwxlite first.
-- The bar for the rwxlite module (see the planned section).
-- How an asked row is published: the `tight` marker, or a new field.
+None.

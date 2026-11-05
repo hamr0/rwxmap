@@ -1,0 +1,31 @@
+Mode c (mechanical -> Jev, today's Jev path), rwxlite fresh 949 rows. TUNING data, not an exam.
+One run of a non-deterministic model. Mode c's planned D133 change (failed call -> x plus review) is not built yet, so this is today's Jev behaviour.
+rows joined 949 of 949; unjoined 0; model jev-1.14.0
+Jev sent 916, answered 916, failed 0, letters changed 146; tokens 1939546 in / 18712 out
+
+Jev summary line per CLI run:
+  workos.com: rwxmap: Jev: on — 265 sent · 265 answered · 0 failed (letter kept) · 43 letters changed · 575385 in / 5420 out tokens
+  coolify.io: rwxmap: Jev: on — 315 sent · 315 answered · 0 failed (letter kept) · 59 letters changed · 655104 in / 6437 out tokens
+  resend.com: rwxmap: Jev: on — 143 sent · 143 answered · 0 failed (letter kept) · 21 letters changed · 304605 in / 2920 out tokens
+  getlago.com: rwxmap: Jev: on — 193 sent · 193 answered · 0 failed (letter kept) · 23 letters changed · 404452 in / 3935 out tokens
+
+HEADLINE (too loose = looser than truth; too tight = stricter)
+mechanical (this run): exact 736 (77.6%), too loose 6 (0.6%), too tight 207 (21.8%)
+mode c  mech -> Jev:   exact 870 (91.7%), too loose 8 (0.8%), too tight 71 (7.5%)
+reference (poc/d133-rule-compare/readout.txt): mechanical 736 / 6 / 207; mode a (rwxmap secondPass) 826 / 6 / 117 (exact / too loose / too tight)
+
+TOO-LOOSE ROWS, mode c: 8
+  fx-0039 PUT /invoices/{lago_id}/finalize | mech w | jev w | truth x
+  fx-0120 POST /servers/digitalocean | mech x | jev w | truth x
+  fx-0249 GET /sso/logout | mech r | jev w | truth x
+  fx-0355 POST /servers/vultr | mech x | jev w | truth x
+  fx-0543 PATCH /security/integration-tokens/{uuid} | mech w | jev w | truth x
+  fx-0568 POST /servers/hetzner | mech x | jev w | truth x
+  fx-0837 GET /user_management/sessions/logout | mech r | jev w | truth x
+  fx-0850 POST /payment_requests | mech x | jev w | truth x
+
+PER VENDOR (exact/too loose/too tight of n)
+  workos.com n=269: mech 197/4/68  mode c 236/2/31
+  coolify.io n=321: mech 248/1/72  mode c 301/4/16
+  resend.com n=142: mech 115/0/27  mode c 136/0/6
+  getlago.com n=217: mech 176/1/40  mode c 197/2/18

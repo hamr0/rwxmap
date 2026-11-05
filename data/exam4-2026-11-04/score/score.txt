@@ -1,0 +1,245 @@
+ops.csv sha256 e9836ff2f9e8288e3721f97506ed666b871a3486f7b781c544b5234a0b5da0b4; truth.csv sha256 verified; 1505 ops
+candidate addendum: every field matches docs/wiki/exam-prereg-exam4.md at 9f58894aed736639bba49d12db8f16a55e02a5d0
+c-jev: skipped (no --jev)
+rwxmap 9f58894aed736639bba49d12db8f16a55e02a5d0 = 9f58894aed736639bba49d12db8f16a55e02a5d0; scratch copy /tmp/claude-1000/-home-hamr-PycharmProjects-rwxmap/ce972391-4bc3-4d00-985a-718bf1fd1fb1/scratchpad/ex4score/work/rwxmap-base; src unchanged (tag v0.2.0)
+base: model set verified (5 files); rwxlite ref 6c47fec6734e666462164025674b55e8323d5b86 = 6c47fec6734e666462164025674b55e8323d5b86; models rwxlite-0.2.0+8503b655, rwxlite-0.2.0+8ad0a182
+candidate rwxmap copy /tmp/claude-1000/-home-hamr-PycharmProjects-rwxmap/ce972391-4bc3-4d00-985a-718bf1fd1fb1/scratchpad/ex4score/work/rwxmap-cand; the whole change vs the archive:
+--- a/src/modeldownload.js
++++ b/src/modeldownload.js
+@@ -32,7 +32,7 @@
+ export const VARIANT_MODEL_FILE = { exact: 'model-fp32.onnx', small: 'model-int8-pc.onnx' };
+ 
+ /** The one rwxlite release rwxmap ships with (D135). */
+-export const RWXLITE_TAG = 'v0.2.0';
++export const RWXLITE_TAG = 'v0.3.0';
+ /** The model version that tag carries, derived so there is one literal. */
+ export const RWXLITE_VERSION = RWXLITE_TAG.slice(1);
+ const RELEASE_BASE = `https://github.com/hamr0/rwxlite/releases/download/${RWXLITE_TAG}/`;
+
+cand: model set verified (5 files); rwxlite ref 77e6bb485fcb3e119f3c3f02ceb649f1de0c9bbf = 77e6bb485fcb3e119f3c3f02ceb649f1de0c9bbf; models rwxlite-0.3.0+252f3181, rwxlite-0.3.0+adc6e6c1
+
+== mech ==  model(s): (none)  rows 1505
+overall        exact 1262 (83.9%)  too loose   21 ( 1.4%)  too tight  222 (14.8%)  of 1505
+by vendor:
+  chatwoot.com   exact  129 (82.2%)  too loose    0 ( 0.0%)  too tight   28 (17.8%)  of 157
+  goharbor.io    exact  171 (84.2%)  too loose    9 ( 4.4%)  too tight   23 (11.3%)  of 203
+  immich.app     exact  243 (87.1%)  too loose    1 ( 0.4%)  too tight   35 (12.5%)  of 279
+  permit.io      exact  219 (83.3%)  too loose    3 ( 1.1%)  too tight   41 (15.6%)  of 263
+  polar.sh       exact  153 (80.5%)  too loose    1 ( 0.5%)  too tight   36 (18.9%)  of 190
+  render.com     exact  218 (86.5%)  too loose    5 ( 2.0%)  too tight   29 (11.5%)  of 252
+  zulip.com      exact  129 (80.1%)  too loose    2 ( 1.2%)  too tight   30 (18.6%)  of 161
+by method:
+  DELETE         exact  208 (99.5%)  too loose    0 ( 0.0%)  too tight    1 ( 0.5%)  of 209
+  GET            exact  683 (99.9%)  too loose    1 ( 0.1%)  too tight    0 ( 0.0%)  of 684
+  HEAD           exact    1 (100.0%)  too loose    0 ( 0.0%)  too tight    0 ( 0.0%)  of 1
+  PATCH          exact  114 (96.6%)  too loose    4 ( 3.4%)  too tight    0 ( 0.0%)  of 118
+  POST           exact  157 (41.6%)  too loose    2 ( 0.5%)  too tight  218 (57.8%)  of 377
+  PUT            exact   99 (85.3%)  too loose   14 (12.1%)  too tight    3 ( 2.6%)  of 116
+
+== a-fp32-base ==  model(s): rwxlite-0.2.0+8503b655  rows 1505
+overall        exact 1391 (92.4%)  too loose   16 ( 1.1%)  too tight   98 ( 6.5%)  of 1505
+rwxlite: sent 602 · raised 6 · lowered 125 · kept 369 · undecided (asked, scored x) 102
+by vendor:
+  chatwoot.com   exact  147 (93.6%)  too loose    0 ( 0.0%)  too tight   10 ( 6.4%)  of 157
+  goharbor.io    exact  188 (92.6%)  too loose    8 ( 3.9%)  too tight    7 ( 3.4%)  of 203
+  immich.app     exact  258 (92.5%)  too loose    2 ( 0.7%)  too tight   19 ( 6.8%)  of 279
+  permit.io      exact  250 (95.1%)  too loose    3 ( 1.1%)  too tight   10 ( 3.8%)  of 263
+  polar.sh       exact  174 (91.6%)  too loose    0 ( 0.0%)  too tight   16 ( 8.4%)  of 190
+  render.com     exact  239 (94.8%)  too loose    1 ( 0.4%)  too tight   12 ( 4.8%)  of 252
+  zulip.com      exact  135 (83.9%)  too loose    2 ( 1.2%)  too tight   24 (14.9%)  of 161
+by method:
+  DELETE         exact  208 (99.5%)  too loose    0 ( 0.0%)  too tight    1 ( 0.5%)  of 209
+  GET            exact  683 (99.9%)  too loose    1 ( 0.1%)  too tight    0 ( 0.0%)  of 684
+  HEAD           exact    1 (100.0%)  too loose    0 ( 0.0%)  too tight    0 ( 0.0%)  of 1
+  PATCH          exact  116 (98.3%)  too loose    2 ( 1.7%)  too tight    0 ( 0.0%)  of 118
+  POST           exact  280 (74.3%)  too loose    3 ( 0.8%)  too tight   94 (24.9%)  of 377
+  PUT            exact  103 (88.8%)  too loose   10 ( 8.6%)  too tight    3 ( 2.6%)  of 116
+
+== a-fp32-cand ==  model(s): rwxlite-0.3.0+252f3181  rows 1505
+overall        exact 1393 (92.6%)  too loose   18 ( 1.2%)  too tight   94 ( 6.2%)  of 1505
+rwxlite: sent 602 · raised 5 · lowered 130 · kept 376 · undecided (asked, scored x) 91
+by vendor:
+  chatwoot.com   exact  147 (93.6%)  too loose    0 ( 0.0%)  too tight   10 ( 6.4%)  of 157
+  goharbor.io    exact  190 (93.6%)  too loose    7 ( 3.4%)  too tight    6 ( 3.0%)  of 203
+  immich.app     exact  257 (92.1%)  too loose    2 ( 0.7%)  too tight   20 ( 7.2%)  of 279
+  permit.io      exact  250 (95.1%)  too loose    4 ( 1.5%)  too tight    9 ( 3.4%)  of 263
+  polar.sh       exact  175 (92.1%)  too loose    0 ( 0.0%)  too tight   15 ( 7.9%)  of 190
+  render.com     exact  238 (94.4%)  too loose    3 ( 1.2%)  too tight   11 ( 4.4%)  of 252
+  zulip.com      exact  136 (84.5%)  too loose    2 ( 1.2%)  too tight   23 (14.3%)  of 161
+by method:
+  DELETE         exact  208 (99.5%)  too loose    0 ( 0.0%)  too tight    1 ( 0.5%)  of 209
+  GET            exact  683 (99.9%)  too loose    1 ( 0.1%)  too tight    0 ( 0.0%)  of 684
+  HEAD           exact    1 (100.0%)  too loose    0 ( 0.0%)  too tight    0 ( 0.0%)  of 1
+  PATCH          exact  116 (98.3%)  too loose    2 ( 1.7%)  too tight    0 ( 0.0%)  of 118
+  POST           exact  283 (75.1%)  too loose    4 ( 1.1%)  too tight   90 (23.9%)  of 377
+  PUT            exact  102 (87.9%)  too loose   11 ( 9.5%)  too tight    3 ( 2.6%)  of 116
+
+== a-int8-base ==  model(s): rwxlite-0.2.0+8ad0a182  rows 1505
+overall        exact 1387 (92.2%)  too loose   16 ( 1.1%)  too tight  102 ( 6.8%)  of 1505
+rwxlite: sent 602 · raised 6 · lowered 121 · kept 369 · undecided (asked, scored x) 106
+by vendor:
+  chatwoot.com   exact  145 (92.4%)  too loose    0 ( 0.0%)  too tight   12 ( 7.6%)  of 157
+  goharbor.io    exact  189 (93.1%)  too loose    8 ( 3.9%)  too tight    6 ( 3.0%)  of 203
+  immich.app     exact  258 (92.5%)  too loose    2 ( 0.7%)  too tight   19 ( 6.8%)  of 279
+  permit.io      exact  249 (94.7%)  too loose    3 ( 1.1%)  too tight   11 ( 4.2%)  of 263
+  polar.sh       exact  172 (90.5%)  too loose    0 ( 0.0%)  too tight   18 ( 9.5%)  of 190
+  render.com     exact  239 (94.8%)  too loose    1 ( 0.4%)  too tight   12 ( 4.8%)  of 252
+  zulip.com      exact  135 (83.9%)  too loose    2 ( 1.2%)  too tight   24 (14.9%)  of 161
+by method:
+  DELETE         exact  208 (99.5%)  too loose    0 ( 0.0%)  too tight    1 ( 0.5%)  of 209
+  GET            exact  683 (99.9%)  too loose    1 ( 0.1%)  too tight    0 ( 0.0%)  of 684
+  HEAD           exact    1 (100.0%)  too loose    0 ( 0.0%)  too tight    0 ( 0.0%)  of 1
+  PATCH          exact  116 (98.3%)  too loose    2 ( 1.7%)  too tight    0 ( 0.0%)  of 118
+  POST           exact  276 (73.2%)  too loose    3 ( 0.8%)  too tight   98 (26.0%)  of 377
+  PUT            exact  103 (88.8%)  too loose   10 ( 8.6%)  too tight    3 ( 2.6%)  of 116
+
+== a-int8-cand ==  model(s): rwxlite-0.3.0+adc6e6c1  rows 1505
+overall        exact 1390 (92.4%)  too loose   18 ( 1.2%)  too tight   97 ( 6.4%)  of 1505
+rwxlite: sent 602 · raised 5 · lowered 127 · kept 374 · undecided (asked, scored x) 96
+by vendor:
+  chatwoot.com   exact  145 (92.4%)  too loose    0 ( 0.0%)  too tight   12 ( 7.6%)  of 157
+  goharbor.io    exact  189 (93.1%)  too loose    7 ( 3.4%)  too tight    7 ( 3.4%)  of 203
+  immich.app     exact  257 (92.1%)  too loose    2 ( 0.7%)  too tight   20 ( 7.2%)  of 279
+  permit.io      exact  250 (95.1%)  too loose    4 ( 1.5%)  too tight    9 ( 3.4%)  of 263
+  polar.sh       exact  175 (92.1%)  too loose    0 ( 0.0%)  too tight   15 ( 7.9%)  of 190
+  render.com     exact  238 (94.4%)  too loose    3 ( 1.2%)  too tight   11 ( 4.4%)  of 252
+  zulip.com      exact  136 (84.5%)  too loose    2 ( 1.2%)  too tight   23 (14.3%)  of 161
+by method:
+  DELETE         exact  208 (99.5%)  too loose    0 ( 0.0%)  too tight    1 ( 0.5%)  of 209
+  GET            exact  683 (99.9%)  too loose    1 ( 0.1%)  too tight    0 ( 0.0%)  of 684
+  HEAD           exact    1 (100.0%)  too loose    0 ( 0.0%)  too tight    0 ( 0.0%)  of 1
+  PATCH          exact  116 (98.3%)  too loose    2 ( 1.7%)  too tight    0 ( 0.0%)  of 118
+  POST           exact  280 (74.3%)  too loose    4 ( 1.1%)  too tight   93 (24.7%)  of 377
+  PUT            exact  102 (87.9%)  too loose   11 ( 9.5%)  too tight    3 ( 2.6%)  of 116
+
+== b95-fp32-base ==  model(s): rwxlite-0.2.0+8503b655  rows 1505
+overall        exact 1397 (92.8%)  too loose    9 ( 0.6%)  too tight   99 ( 6.6%)  of 1505
+rwxlite: sent 1505 · raised 0 · lowered 145 · kept 1208 · undecided (asked, scored x) 152
+by vendor:
+  chatwoot.com   exact  148 (94.3%)  too loose    1 ( 0.6%)  too tight    8 ( 5.1%)  of 157
+  goharbor.io    exact  194 (95.6%)  too loose    2 ( 1.0%)  too tight    7 ( 3.4%)  of 203
+  immich.app     exact  258 (92.5%)  too loose    2 ( 0.7%)  too tight   19 ( 6.8%)  of 279
+  permit.io      exact  248 (94.3%)  too loose    2 ( 0.8%)  too tight   13 ( 4.9%)  of 263
+  polar.sh       exact  174 (91.6%)  too loose    0 ( 0.0%)  too tight   16 ( 8.4%)  of 190
+  render.com     exact  240 (95.2%)  too loose    1 ( 0.4%)  too tight   11 ( 4.4%)  of 252
+  zulip.com      exact  135 (83.9%)  too loose    1 ( 0.6%)  too tight   25 (15.5%)  of 161
+by method:
+  DELETE         exact  208 (99.5%)  too loose    0 ( 0.0%)  too tight    1 ( 0.5%)  of 209
+  GET            exact  679 (99.3%)  too loose    0 ( 0.0%)  too tight    5 ( 0.7%)  of 684
+  HEAD           exact    1 (100.0%)  too loose    0 ( 0.0%)  too tight    0 ( 0.0%)  of 1
+  PATCH          exact  112 (94.9%)  too loose    0 ( 0.0%)  too tight    6 ( 5.1%)  of 118
+  POST           exact  296 (78.5%)  too loose    5 ( 1.3%)  too tight   76 (20.2%)  of 377
+  PUT            exact  101 (87.1%)  too loose    4 ( 3.4%)  too tight   11 ( 9.5%)  of 116
+
+== b95-fp32-cand ==  model(s): rwxlite-0.3.0+252f3181  rows 1505
+overall        exact 1404 (93.3%)  too loose    7 ( 0.5%)  too tight   94 ( 6.2%)  of 1505
+rwxlite: sent 1505 · raised 1 · lowered 149 · kept 1208 · undecided (asked, scored x) 147
+by vendor:
+  chatwoot.com   exact  149 (94.9%)  too loose    1 ( 0.6%)  too tight    7 ( 4.5%)  of 157
+  goharbor.io    exact  195 (96.1%)  too loose    1 ( 0.5%)  too tight    7 ( 3.4%)  of 203
+  immich.app     exact  259 (92.8%)  too loose    1 ( 0.4%)  too tight   19 ( 6.8%)  of 279
+  permit.io      exact  248 (94.3%)  too loose    2 ( 0.8%)  too tight   13 ( 4.9%)  of 263
+  polar.sh       exact  175 (92.1%)  too loose    0 ( 0.0%)  too tight   15 ( 7.9%)  of 190
+  render.com     exact  240 (95.2%)  too loose    1 ( 0.4%)  too tight   11 ( 4.4%)  of 252
+  zulip.com      exact  138 (85.7%)  too loose    1 ( 0.6%)  too tight   22 (13.7%)  of 161
+by method:
+  DELETE         exact  208 (99.5%)  too loose    0 ( 0.0%)  too tight    1 ( 0.5%)  of 209
+  GET            exact  679 (99.3%)  too loose    0 ( 0.0%)  too tight    5 ( 0.7%)  of 684
+  HEAD           exact    1 (100.0%)  too loose    0 ( 0.0%)  too tight    0 ( 0.0%)  of 1
+  PATCH          exact  113 (95.8%)  too loose    0 ( 0.0%)  too tight    5 ( 4.2%)  of 118
+  POST           exact  298 (79.0%)  too loose    6 ( 1.6%)  too tight   73 (19.4%)  of 377
+  PUT            exact  105 (90.5%)  too loose    1 ( 0.9%)  too tight   10 ( 8.6%)  of 116
+
+== D135 gate (next-model gate; user ruling 2026-11-04: better or same, no regression) ==
+a-fp32-cand (GATE) vs a-fp32-base: too loose 18 vs 16 (+2) -> FAIL (need <=); exact 1393 vs 1391 (+2) -> OK (need >=)  => FAIL: 0.2.0 stays
+  beside the gate, not part of it: too tight 94 vs 98 (-4), of 1505
+
+== D133 mode a bar vs mech (reported for both models; it is not the D135 gate) ==
+mode a a-fp32-base: too loose 16 vs mech 21 -> OK; exact 1391 (92.4%) vs mech 1262 (83.9%) = 8.57 points, need >= 5.0 (76 more rows) -> OK  => PASS
+mode a a-fp32-cand: too loose 18 vs mech 21 -> OK; exact 1393 (92.6%) vs mech 1262 (83.9%) = 8.70 points, need >= 5.0 (76 more rows) -> OK  => PASS
+mode a a-int8-base: too loose 16 vs mech 21 -> OK; exact 1387 (92.2%) vs mech 1262 (83.9%) = 8.31 points, need >= 5.0 (76 more rows) -> OK  => PASS
+mode a a-int8-cand: too loose 18 vs mech 21 -> OK; exact 1390 (92.4%) vs mech 1262 (83.9%) = 8.50 points, need >= 5.0 (76 more rows) -> OK  => PASS
+
+== mode b (D133: no bar) ==
+mode b b95-fp32-base: too loose 9 (0.6%), too tight 99 (6.6%), asked 152 (10.1%)
+mode b b95-fp32-cand: too loose 7 (0.5%), too tight 94 (6.2%), asked 147 (9.8%)
+
+== mode c ==
+c-jev: skipped (no --jev)
+
+too-loose rows, mech (21): id provider method path truth->letter evidence
+  ex4-0170 goharbor.io PUT /jobservice/jobs/{job_id} x->w floor
+  ex4-0175 goharbor.io PUT /jobservice/queues/{job_type} x->w floor
+  ex4-0241 goharbor.io PATCH /projects/{project_name}/preheat/policies/{preheat_policy_name}/executions/{execution_id} x->w floor
+  ex4-0279 goharbor.io PUT /replication/executions/{id} x->w floor
+  ex4-0295 goharbor.io PATCH /retentions/{id}/executions/{eid} x->w floor
+  ex4-0302 goharbor.io PATCH /robots/{robot_id} x->w floor
+  ex4-0327 goharbor.io PUT /system/gc/{gc_id} x->w floor
+  ex4-0335 goharbor.io PUT /system/purgeaudit/{purge_id} x->w floor
+  ex4-0358 goharbor.io PUT /users/{user_id}/cli_secret x->w floor
+  ex4-0464 immich.app PUT /cluster-groups/{id}/requests x->w floor
+  ex4-0667 permit.io PUT /v2/elements/{proj_id}/{env_id}/config/{elements_config_id}/access_requests/{access_request_id}/deny x->w floor
+  ex4-0683 permit.io PUT /v2/elements/{proj_id}/{env_id}/config/{elements_config_id}/operation_approval/{operation_approval_id}/deny x->w floor
+  ex4-0692 permit.io PUT /v2/facts/{proj_id}/{env_id}/access_requests/{elements_config_id}/user/{user_id}/tenant/{tenant_id}/{access_request_id}/deny x->w floor
+  ex4-1091 polar.sh PATCH /v1/webhooks/endpoints/{id}/secret x->w floor
+  ex4-1115 render.com PUT /build-sources/{buildSourceId}/secret-files x->w floor
+  ex4-1132 render.com POST /disks/{diskId}/snapshots/restore x->w list
+  ex4-1299 render.com PUT /services/{serviceId}/headers x->w floor
+  ex4-1313 render.com PUT /services/{serviceId}/routes x->w floor
+  ex4-1318 render.com PUT /services/{serviceId}/secret-files x->w floor
+  ex4-1352 zulip.com GET /calls/bigbluebutton/create w->r floor
+  ex4-1435 zulip.com POST /remove_client_device x->w list
+
+too-loose rows, a-fp32-base (16): id provider method path truth->letter evidence
+  ex4-0170 goharbor.io PUT /jobservice/jobs/{job_id} x->w floor
+  ex4-0175 goharbor.io PUT /jobservice/queues/{job_type} x->w floor
+  ex4-0241 goharbor.io PATCH /projects/{project_name}/preheat/policies/{preheat_policy_name}/executions/{execution_id} x->w floor
+  ex4-0279 goharbor.io PUT /replication/executions/{id} x->w floor
+  ex4-0295 goharbor.io PATCH /retentions/{id}/executions/{eid} x->w floor
+  ex4-0327 goharbor.io PUT /system/gc/{gc_id} x->w floor
+  ex4-0335 goharbor.io PUT /system/purgeaudit/{purge_id} x->w floor
+  ex4-0358 goharbor.io PUT /users/{user_id}/cli_secret x->w floor
+  ex4-0464 immich.app PUT /cluster-groups/{id}/requests x->w floor
+  ex4-0573 immich.app POST /shared-links x->w rwxlite
+  ex4-0667 permit.io PUT /v2/elements/{proj_id}/{env_id}/config/{elements_config_id}/access_requests/{access_request_id}/deny x->w floor
+  ex4-0683 permit.io PUT /v2/elements/{proj_id}/{env_id}/config/{elements_config_id}/operation_approval/{operation_approval_id}/deny x->w floor
+  ex4-0692 permit.io PUT /v2/facts/{proj_id}/{env_id}/access_requests/{elements_config_id}/user/{user_id}/tenant/{tenant_id}/{access_request_id}/deny x->w floor
+  ex4-1132 render.com POST /disks/{diskId}/snapshots/restore x->w list
+  ex4-1352 zulip.com GET /calls/bigbluebutton/create w->r floor
+  ex4-1435 zulip.com POST /remove_client_device x->w list
+
+too-loose rows, a-fp32-cand (18): id provider method path truth->letter evidence
+  ex4-0170 goharbor.io PUT /jobservice/jobs/{job_id} x->w floor
+  ex4-0175 goharbor.io PUT /jobservice/queues/{job_type} x->w floor
+  ex4-0241 goharbor.io PATCH /projects/{project_name}/preheat/policies/{preheat_policy_name}/executions/{execution_id} x->w floor
+  ex4-0279 goharbor.io PUT /replication/executions/{id} x->w floor
+  ex4-0295 goharbor.io PATCH /retentions/{id}/executions/{eid} x->w floor
+  ex4-0327 goharbor.io PUT /system/gc/{gc_id} x->w floor
+  ex4-0358 goharbor.io PUT /users/{user_id}/cli_secret x->w floor
+  ex4-0464 immich.app PUT /cluster-groups/{id}/requests x->w floor
+  ex4-0573 immich.app POST /shared-links x->w rwxlite
+  ex4-0667 permit.io PUT /v2/elements/{proj_id}/{env_id}/config/{elements_config_id}/access_requests/{access_request_id}/deny x->w floor
+  ex4-0683 permit.io PUT /v2/elements/{proj_id}/{env_id}/config/{elements_config_id}/operation_approval/{operation_approval_id}/deny x->w floor
+  ex4-0692 permit.io PUT /v2/facts/{proj_id}/{env_id}/access_requests/{elements_config_id}/user/{user_id}/tenant/{tenant_id}/{access_request_id}/deny x->w floor
+  ex4-0813 permit.io POST /v2/projects/{proj_id}/envs/{env_id}/copy x->w rwxlite
+  ex4-1115 render.com PUT /build-sources/{buildSourceId}/secret-files x->w floor
+  ex4-1132 render.com POST /disks/{diskId}/snapshots/restore x->w list
+  ex4-1318 render.com PUT /services/{serviceId}/secret-files x->w floor
+  ex4-1352 zulip.com GET /calls/bigbluebutton/create w->r floor
+  ex4-1435 zulip.com POST /remove_client_device x->w list
+
+rows where a-fp32-base and a-fp32-cand differ (12): id provider method path truth base->cand
+  ex4-0250 goharbor.io POST /projects/{project_name}/repositories/{repository_name}/artifacts w x->w
+  ex4-0335 goharbor.io PUT /system/purgeaudit/{purge_id} x w->x
+  ex4-0571 immich.app POST /sessions/{id}/lock w w->x
+  ex4-0699 permit.io POST /v2/facts/{proj_id}/{env_id}/bulk/users w x->w
+  ex4-0813 permit.io POST /v2/projects/{proj_id}/envs/{env_id}/copy x x->w
+  ex4-0917 polar.sh POST /v1/checkouts/ w x->w
+  ex4-1100 render.com POST /build-sources w x->w
+  ex4-1115 render.com PUT /build-sources/{buildSourceId}/secret-files x x->w
+  ex4-1122 render.com POST /dedicated-ips w w->x
+  ex4-1275 render.com POST /services w x->w
+  ex4-1318 render.com PUT /services/{serviceId}/secret-files x x->w
+  ex4-1489 zulip.com POST /users/me/subscriptions w x->w
+
+scratch kept at /tmp/claude-1000/-home-hamr-PycharmProjects-rwxmap/ce972391-4bc3-4d00-985a-718bf1fd1fb1/scratchpad/ex4score/work (holds the CLI outputs; delete when done)

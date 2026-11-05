@@ -1,0 +1,61 @@
+D133 MODE B - PLANNED rule, NOT yet built in src. Measured here from the fixture shares only.
+Rule: rwxlite alone judges every row (no mechanical scope). x=isX, w=changes-isX, r=1-changes; letter = largest share (tie -> tighter), p = that share.
+With confidence c: p >= c/100 -> the letter; else the row is x and "asked" (marked for review).
+TUNING data for rwxmap (rwxlite burned it as its exam); not an exam for rwxmap.
+Note: p values are int8 per-channel; rwxmap default model is fp32 (rwxlite: 7 rows differ under its rule). This rule will be re-measured with the real code once mode b is built.
+rows 949; truth rows 949; vendor rows 949
+
+MAIN TABLE (all 949 rows; asked rows scored as x; too loose = looser than truth, too tight = stricter)
+c= 0: exact 891 (93.9%), too loose 23 (2.4%), too tight 35 (3.7%), asked 0 (0.0%)
+c=50: exact 888 (93.6%), too loose 23 (2.4%), too tight 38 (4.0%), asked 7 (0.7%)
+c=60: exact 878 (92.5%), too loose 19 (2.0%), too tight 52 (5.5%), asked 34 (3.6%)
+c=70: exact 870 (91.7%), too loose 18 (1.9%), too tight 61 (6.4%), asked 52 (5.5%)
+c=80: exact 865 (91.1%), too loose 17 (1.8%), too tight 67 (7.1%), asked 70 (7.4%)
+c=90: exact 848 (89.4%), too loose 12 (1.3%), too tight 89 (9.4%), asked 104 (11.0%)
+c=95: exact 837 (88.2%), too loose 6 (0.6%), too tight 106 (11.2%), asked 134 (14.1%)
+c=97: exact 811 (85.5%), too loose 3 (0.3%), too tight 135 (14.2%), asked 173 (18.2%)
+c=99: exact 678 (71.4%), too loose 0 (0.0%), too tight 271 (28.6%), asked 323 (34.0%)
+
+CONTEXT: same, restricted to rows NOT asked (what the model decided alone; n = rows not asked)
+c= 0: n 949: exact 891 (93.9%), too loose 23 (2.4%), too tight 35 (3.7%)
+c=50: n 942: exact 887 (94.2%), too loose 23 (2.4%), too tight 32 (3.4%)
+c=60: n 915: exact 871 (95.2%), too loose 19 (2.1%), too tight 25 (2.7%)
+c=70: n 897: exact 858 (95.7%), too loose 18 (2.0%), too tight 21 (2.3%)
+c=80: n 879: exact 845 (96.1%), too loose 17 (1.9%), too tight 17 (1.9%)
+c=90: n 845: exact 821 (97.2%), too loose 12 (1.4%), too tight 12 (1.4%)
+c=95: n 815: exact 800 (98.2%), too loose 6 (0.7%), too tight 9 (1.1%)
+c=97: n 776: exact 764 (98.5%), too loose 3 (0.4%), too tight 9 (1.2%)
+c=99: n 626: exact 617 (98.6%), too loose 0 (0.0%), too tight 9 (1.4%)
+
+REFERENCE from poc/d133-rule-compare/readout.txt (same 949 rows):
+  0 mechanical: exact 736 (77.6%), too loose 6 (0.6%), too tight 207 (21.8%)
+  2 rwxmap secondPass (undecided = x): exact 826 (87.0%), too loose 6 (0.6%), too tight 117 (12.3%)
+  2 rwxmap secondPass (undecided = x): too loose 6 vs 6 -> ok; exact +9.5 pts -> ok
+  2 rwxmap secondPass (undecided = x): fixes 0 of mechanical's 6 too-loose rows, introduces 0
+
+TOO-LOOSE ROWS at c=70: 18
+  fx-0039 PUT /invoices/{lago_id}/finalize | mech w | shares r 0.000 w 0.786 x 0.213 | mode b w | truth x
+  fx-0090 POST /quote_versions/{lago_id}/clone | mech x | shares r 0.009 w 0.898 x 0.093 | mode b w | truth x
+  fx-0106 POST /platform/teams | mech x | shares r 0.006 w 0.839 x 0.155 | mode b w | truth x
+  fx-0113 POST /wallet_transactions | mech x | shares r 0.014 w 0.898 x 0.088 | mode b w | truth x
+  fx-0120 POST /servers/digitalocean | mech x | shares r 0.009 w 0.931 x 0.061 | mode b w | truth x
+  fx-0203 POST /emails/{email_id}/share | mech x | shares r 0.005 w 0.886 x 0.109 | mode b w | truth x
+  fx-0249 GET /sso/logout | mech r | shares r 0.030 w 0.969 x 0.000 | mode b w | truth x
+  fx-0260 POST /invoices | mech x | shares r 0.007 w 0.931 x 0.062 | mode b w | truth x
+  fx-0354 PUT /data-integrations/{slug}/client-credentials | mech w | shares r 0.000 w 0.975 x 0.024 | mode b w | truth x
+  fx-0355 POST /servers/vultr | mech x | shares r 0.013 w 0.909 x 0.077 | mode b w | truth x
+  fx-0503 PUT /data-integrations/{slug}/api-key | mech w | shares r 0.000 w 0.984 x 0.015 | mode b w | truth x
+  fx-0543 PATCH /security/integration-tokens/{uuid} | mech w | shares r 0.000 w 0.981 x 0.018 | mode b w | truth x
+  fx-0568 POST /servers/hetzner | mech x | shares r 0.012 w 0.906 x 0.081 | mode b w | truth x
+  fx-0695 POST /{resource_type}/{uuid}/secret-manager/import | mech x | shares r 0.004 w 0.918 x 0.078 | mode b w | truth x
+  fx-0718 POST /credit_notes | mech x | shares r 0.005 w 0.959 x 0.036 | mode b w | truth x
+  fx-0830 POST /invoices/{lago_id}/lose_dispute | mech x | shares r 0.005 w 0.882 x 0.113 | mode b w | truth x
+  fx-0837 GET /user_management/sessions/logout | mech r | shares r 0.061 w 0.938 x 0.000 | mode b w | truth x
+  fx-0936 POST /user_management/waitlists/{id}/entries | mech x | shares r 0.004 w 0.965 x 0.030 | mode b w | truth x
+
+PER VENDOR at c=70 (n; exact / too loose / too tight / asked)
+  coolify n=321: 304 / 5 / 12 / 14
+  workos n=269: 235 / 6 / 28 / 24
+  lago n=217: 194 / 6 / 17 / 11
+  resend n=142: 137 / 1 / 4 / 3
+  vendors not in the four: 0 rows

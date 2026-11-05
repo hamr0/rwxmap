@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   applyJev,
+  jevUndecided,
   needsJev,
   assertJevMove,
   jevState,
@@ -105,7 +106,7 @@ test('a rule name alone does not pick a tier: the class must match the pile too'
 
 test('jev-lower: at the threshold (p = 0.10) lowers x -> w', () => {
   assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.10, model: MODEL }), {
-    class: 'w', step: 2, rule: 'jev-lower', source: 'jev', matched: [], review: 'settled', jev: { p: 0.10, model: MODEL },
+    class: 'w', step: 2, rule: 'jev-lower', source: 'jev', matched: [], review: 'loose', jev: { p: 0.10, model: MODEL },
   });
 });
 
@@ -116,7 +117,7 @@ test('jev-lower: just above the threshold (p = 0.11) does not lower', () => {
 
 test('jev-raise-wx: at the threshold (p = 0.80) raises w -> x', () => {
   assert.deepEqual(applyJev(METHOD_FLOOR_W, { p: 0.80, model: MODEL }), {
-    class: 'x', step: 3, rule: 'jev-raise-wx', source: 'jev', matched: [], review: 'settled', jev: { p: 0.80, model: MODEL },
+    class: 'x', step: 3, rule: 'jev-raise-wx', source: 'jev', matched: [], review: 'tight', jev: { p: 0.80, model: MODEL },
   });
 });
 
@@ -127,7 +128,7 @@ test('jev-raise-wx: just below the threshold (p = 0.79) does not raise', () => {
 
 test('jev-raise-get: at the threshold (p = 0.50) raises r -> w', () => {
   assert.deepEqual(applyJev(METHOD_R, { p: 0.50, model: MODEL }), {
-    class: 'w', step: 1, rule: 'jev-raise-get', source: 'jev', matched: [], review: 'settled', jev: { p: 0.50, model: MODEL },
+    class: 'w', step: 1, rule: 'jev-raise-get', source: 'jev', matched: [], review: 'loose', jev: { p: 0.50, model: MODEL },
   });
 });
 
@@ -362,7 +363,7 @@ test('the membership bullet covers POST, PUT and PATCH, not POST alone', () => {
 
 // ---- the review hint moves with the class (one writer: flow.js) --------
 
-test('a jev lowering (x -> w on a floor-post POST row) flips the hint from tight to settled', () => {
+test('a jev lowering (x -> w on a floor-post POST row) moves the hint from tight to loose', () => {
   // The row as the mechanical ladder really emits it: an unclaimed POST
   // floors at x, which is the one 'tight' cell of the hint rule.
   const row = { method: 'POST', operationId: 'createThing', path: '/things' };
@@ -375,16 +376,15 @@ test('a jev lowering (x -> w on a floor-post POST row) flips the hint from tight
 
   const moved = applyJev(mech, { p: 0.01, model: MODEL }, { method: row.method });
   assert.equal(moved.class, 'w');
-  // The hint is RECOMPUTED, not carried: a w row is never 'tight', and a
-  // jev-sourced row is never 'loose'.
-  assert.equal(moved.review, 'settled');
+  // The hint is RECOMPUTED, not carried (D133): a lowering is 'loose'.
+  assert.equal(moved.review, 'loose');
   assert.deepEqual(moved, {
-    class: 'w', step: 2, rule: 'jev-lower', source: 'jev', matched: [], review: 'settled',
+    class: 'w', step: 2, rule: 'jev-lower', source: 'jev', matched: [], review: 'loose',
     jev: { p: 0.01, model: MODEL },
   });
-  // Same answer whether or not the caller passes the method: a jev verdict
-  // can reach neither non-settled cell.
-  assert.equal(applyJev(mech, { p: 0.01, model: MODEL }).review, 'settled');
+  // Same answer whether or not the caller passes the method: the second-pass
+  // argument decides it.
+  assert.equal(applyJev(mech, { p: 0.01, model: MODEL }).review, 'loose');
 });
 
 test('a fail-closed applyJev call leaves BOTH the class and the hint untouched', () => {
@@ -426,7 +426,7 @@ test('each tier sends exactly its frozen poc question (D127)', async () => {
 
 /** The plain jev-lower move to w at isX p = 0.05, as it was before D129. */
 const LOWER_TO_W = {
-  class: 'w', step: 2, rule: 'jev-lower', source: 'jev', matched: [], review: 'settled', jev: { p: 0.05, model: MODEL },
+  class: 'w', step: 2, rule: 'jev-lower', source: 'jev', matched: [], review: 'loose', jev: { p: 0.05, model: MODEL },
 };
 
 test('D129: JEV_LOWER_R_THRESHOLD is 0.50 and is what jevTier reports as the second threshold', () => {
@@ -454,7 +454,7 @@ test('D129: the second question jev-lower asks is byte-equal to the changes ques
 test('D129: isX fires and changes <= 0.50 -> r, recording both answers', () => {
   for (const pc of [0, 0.2, 0.50]) {
     assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes: { p: pc, model: MODEL } }, { method: 'POST' }), {
-      class: 'r', step: 2, rule: 'jev-lower', source: 'jev', matched: [], review: 'settled',
+      class: 'r', step: 2, rule: 'jev-lower', source: 'jev', matched: [], review: 'loose',
       jev: { p: 0.05, model: MODEL, pChanges: pc },
     }, `pChanges=${pc}`);
   }
@@ -474,10 +474,14 @@ test('D129: isX does not fire -> x unchanged, whatever the changes answer says',
   assert.deepEqual(applyJev(FLOOR_VERDICT, { model: MODEL, changes: { p: 0, model: MODEL } }), FLOOR_VERDICT);
 });
 
-test('D129: a missing, malformed or other-model changes answer leaves the row at w', () => {
+test('D129: no changes answer at all (a pre-D129 call) leaves the row at w', () => {
+  assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL }), LOWER_TO_W);
+  assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes: undefined }), LOWER_TO_W);
+});
+
+test('D133: a malformed changes answer is undecided (x, review tight), not w', () => {
   /** @type {[string, any][]} */
   const bad = [
-    ['missing', undefined],
     ['null', null],
     ['empty', {}],
     ['not an object', 0.1],
@@ -488,14 +492,28 @@ test('D129: a missing, malformed or other-model changes answer leaves the row at
     ['p -Infinity', { p: -Infinity, model: MODEL }],
     ['p negative', { p: -0.01, model: MODEL }],
     ['p above 1', { p: 1.5, model: MODEL }],
+  ];
+  for (const [name, changes] of bad) {
+    const out = applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes });
+    assert.deepEqual(out, jevUndecided(FLOOR_VERDICT), name);
+    assert.equal(out.class, 'x', name);
+    assert.equal(out.review, 'tight', name);
+  }
+});
+
+test('D133: a usable changes answer from another model version is undecided (x, review tight), not w', () => {
+  /** @type {[string, any][]} */
+  const other = [
+    ['different model', { p: 0.1, model: 'jev-1.14.0' }],
     ['no model', { p: 0.1 }],
     ['empty model', { p: 0.1, model: '' }],
     ['non-string model', { p: 0.1, model: 1 }],
-    ['different model', { p: 0.1, model: 'jev-1.14.0' }],
   ];
-  for (const [name, changes] of bad) {
-    assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes }), LOWER_TO_W, name);
+  for (const [name, changes] of other) {
+    assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.05, model: MODEL, changes }), jevUndecided(FLOOR_VERDICT), name);
   }
+  // the first answer not firing never reads the second one
+  assert.deepEqual(applyJev(FLOOR_VERDICT, { p: 0.9, model: MODEL, changes: { p: 0.1, model: 'other' } }), FLOOR_VERDICT);
 });
 
 test('D129: a changes answer never moves a row on a tier without a second question', () => {
@@ -545,4 +563,34 @@ test('D129: assertJevMove lets jev-lower move x -> r and still rejects every oth
   assert.equal(assertJevMove('jev-lower', 'x', 'r'), true);
   assert.throws(() => assertJevMove('jev-lower', 'w', 'r'), /moves from x/);
   assert.throws(() => assertJevMove('jev-raise-get', 'r', 'r'), /may only move to w/);
+});
+
+// ---- D133: letters on successful answers are the measured rule's, unchanged ----
+
+test('D133: successful answers give the same letters as before, for every tier and cut-off', () => {
+  const m = { model: MODEL };
+  /** [verdict, answer, expected letter] */
+  /** @type {Array<[import('./types.js').Verdict, any, string]>} */
+  const cases = [
+    [FLOOR_VERDICT, { p: 0.10, ...m }, 'w'],
+    [FLOOR_VERDICT, { p: 0.11, ...m }, 'x'],
+    [FLOOR_VERDICT, { p: 0.05, ...m, changes: { p: 0.50, model: MODEL } }, 'r'],
+    [FLOOR_VERDICT, { p: 0.05, ...m, changes: { p: 0.51, model: MODEL } }, 'w'],
+    [FLOOR_VERDICT, { p: 0.50, ...m, changes: { p: 0.01, model: MODEL } }, 'x'],
+    [METHOD_FLOOR_W, { p: 0.80, ...m }, 'x'],
+    [METHOD_FLOOR_W, { p: 0.79, ...m }, 'w'],
+    [METHOD_R, { p: 0.50, ...m }, 'w'],
+    [METHOD_R, { p: 0.49, ...m }, 'r'],
+  ];
+  for (const [v, a, want] of cases) {
+    assert.equal(applyJev(v, a).class, want, JSON.stringify([v.rule, a]));
+  }
+});
+
+test('D133: jevUndecided is x with review tight, on every tier; no tier means no change', () => {
+  assert.deepEqual(jevUndecided(FLOOR_VERDICT), { ...FLOOR_VERDICT, review: 'tight' });
+  assert.deepEqual(jevUndecided(METHOD_FLOOR_W), { class: 'x', step: 3, rule: 'jev-raise-wx', source: 'jev', matched: [], review: 'tight' });
+  assert.deepEqual(jevUndecided(METHOD_R), { class: 'x', step: 1, rule: 'jev-raise-get', source: 'jev', matched: [], review: 'tight' });
+  assert.equal(jevUndecided(CANT_UNDO_X), CANT_UNDO_X);
+  assert.equal(jevUndecided(METHOD_DELETE_X), METHOD_DELETE_X);
 });

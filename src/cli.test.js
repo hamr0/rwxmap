@@ -6,15 +6,29 @@ import * as path from 'node:path';
 import fsDefault from 'node:fs';
 import { syncBuiltinESMExports } from 'node:module';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 
-import { run } from './cli.js';
+import { run as runCli } from './cli.js';
 import { matcherFrom } from './matcher.js';
 import { JEV_LOWER_THRESHOLD, JEV_LOWER_R_THRESHOLD, JEV_RAISE_WX_THRESHOLD, JEV_RAISE_GET_THRESHOLD, jevQuestions } from './jev.js';
 
 // ---------------------------------------------------------------------
 // Fixtures / helpers
 // ---------------------------------------------------------------------
+
+// Every test goes through this `run`: the model download sees an offline
+// network and an empty scratch cache unless a test passes its own, so no test
+// reaches the real network or the real ~/.cache.
+const offlineFetch = async () => { throw new Error('offline (test)'); };
+function run(argv, env) {
+  return runCli(argv, { modelFetch: offlineFetch, xdgCacheHome: mkScratch(), ...env });
+}
+
+// A package check that passes (the rwxlite package is not installed in this repo):
+// the default run checks the package before it looks for a model, so a test about
+// the model needs this to get that far. The fake package is never asked to load.
+const PKG_OK = { rwxliteImporter: async () => ({}), rwxliteVersionReader: () => '0.2.0' };
 
 // One operation of each class, by method-floor evidence alone (no word
 // list needs to fire): GET -> r, PUT -> w (floor, review "loose"), DELETE
@@ -405,7 +419,7 @@ test('run: a directory is not a file', async () => {
 });
 
 test('run: an option with no value, and an unknown option, are named as the user typed them', async () => {
-  const usage = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--force]';
+  const usage = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--engine rwxlite|jev|mechanical] [--confidence <0-99>] [--model small] [--force]';
   const cases = [
     [['spec.json', '-o'], 'rwxmap: -o needs a value'],
     [['spec.json', '--vendor'], 'rwxmap: --vendor needs a value'],
@@ -598,17 +612,18 @@ test('run: a write failure (target path is not a directory) exits 1 and writes n
 // Stdout summary always names the mode.
 // ---------------------------------------------------------------------
 
-test('run: stdout always says Jev is off (mechanical)', async () => {
+test('run: stdout always says rwxlite is off (mechanical) when no model can be got', async () => {
   const dir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', SPEC_DOC);
   const outDir = mkScratch();
   const stdout = captureStream();
   const stderr = captureStream();
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr, xdgCacheHome: mkScratch(), ...PKG_OK });
 
   assert.equal(code, 0, stderr.text());
-  assert.match(stdout.text(), /Jev: off \(mechanical\)/);
+  assert.match(stdout.text(), /^rwxmap: rwxlite: off \(mechanical\) — could not get the model \(offline \(test\)\); none in the cache$/m);
+  assert.doesNotMatch(stdout.text(), /Jev: on/);
   const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
   assert.deepEqual(combined.jev, {
     mode: 'off', model: null, sent: 0, answered: 0, failed: 0, changed: 0, tokens: { input: 0, output: 0 },
@@ -633,7 +648,7 @@ test('run: with a key, only the rows in a Jev tier are sent (bar 4)', async () =
     doMystery: { p: 0.1 },
   });
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
   });
 
@@ -658,7 +673,7 @@ test('run: jev-lower moves x -> w at p <= threshold, not above it (bar 2)', asyn
   const atThreshold = routedJevFetch({
     listThings: { p: 0 }, updateThing: { p: 0 }, doMystery: { p: JEV_LOWER_THRESHOLD, pChanges: JEV_LOWER_R_THRESHOLD + 0.01 },
   });
-  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example'], {
+  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: atThreshold.fetchImpl,
   });
   assert.equal(codeAt, 0);
@@ -668,7 +683,7 @@ test('run: jev-lower moves x -> w at p <= threshold, not above it (bar 2)', asyn
   const aboveThreshold = routedJevFetch({
     listThings: { p: 0 }, updateThing: { p: 0 }, doMystery: { p: JEV_LOWER_THRESHOLD + 0.01 },
   });
-  const codeAbove = await run([specPath2, '-o', outDir2, '--vendor', 'example'], {
+  const codeAbove = await run([specPath2, '-o', outDir2, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: aboveThreshold.fetchImpl,
   });
   assert.equal(codeAbove, 0);
@@ -686,7 +701,7 @@ test('run: jev-raise-wx moves w -> x at p >= threshold, not below it (bar 2)', a
   const atThreshold = routedJevFetch({
     listThings: { p: 0 }, updateThing: { p: JEV_RAISE_WX_THRESHOLD }, doMystery: { p: 1 },
   });
-  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example'], {
+  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: atThreshold.fetchImpl,
   });
   assert.equal(codeAt, 0);
@@ -696,7 +711,7 @@ test('run: jev-raise-wx moves w -> x at p >= threshold, not below it (bar 2)', a
   const belowThreshold = routedJevFetch({
     listThings: { p: 0 }, updateThing: { p: JEV_RAISE_WX_THRESHOLD - 0.01 }, doMystery: { p: 1 },
   });
-  const codeBelow = await run([specPath2, '-o', outDir2, '--vendor', 'example'], {
+  const codeBelow = await run([specPath2, '-o', outDir2, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: belowThreshold.fetchImpl,
   });
   assert.equal(codeBelow, 0);
@@ -714,7 +729,7 @@ test('run: jev-raise-get moves r -> w at p >= threshold, not below it (bar 2)', 
   const atThreshold = routedJevFetch({
     listThings: { p: JEV_RAISE_GET_THRESHOLD }, updateThing: { p: 0 }, doMystery: { p: 1 },
   });
-  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example'], {
+  const codeAt = await run([specPath1, '-o', outDir1, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: atThreshold.fetchImpl,
   });
   assert.equal(codeAt, 0);
@@ -724,7 +739,7 @@ test('run: jev-raise-get moves r -> w at p >= threshold, not below it (bar 2)', 
   const belowThreshold = routedJevFetch({
     listThings: { p: JEV_RAISE_GET_THRESHOLD - 0.01 }, updateThing: { p: 0 }, doMystery: { p: 1 },
   });
-  const codeBelow = await run([specPath2, '-o', outDir2, '--vendor', 'example'], {
+  const codeBelow = await run([specPath2, '-o', outDir2, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl: belowThreshold.fetchImpl,
   });
   assert.equal(codeBelow, 0);
@@ -733,7 +748,7 @@ test('run: jev-raise-get moves r -> w at p >= threshold, not below it (bar 2)', 
 });
 
 // bar 3: a bad answer never moves a letter — one case each.
-test('run: a bad answer (NaN, out-of-range, missing model, HTTP error, timeout-like failure, malformed JSON) never moves a letter (bar 3)', async () => {
+test('run: a bad answer (NaN, out-of-range, missing model, HTTP error, timeout-like failure, malformed JSON) is undecided: x, review tight (bar 3, D133)', async () => {
   const dir = mkScratch();
 
   /** @type {Array<[string, any]>} */
@@ -754,22 +769,27 @@ test('run: a bad answer (NaN, out-of-range, missing model, HTTP error, timeout-l
       : async () => response;
 
     const stdout = captureStream();
-    const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+    const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
       cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
     });
     assert.equal(code, 0, `[${label}] expected exit 0`);
 
     const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
-    // Every pile row keeps its MECHANICAL letter: r/w/x floors, untouched.
-    assert.equal(combined.mcp['GET /things']._meta['io.github.hamr0.rwxmap/class'], 'r', label);
-    assert.equal(combined.mcp['PUT /things/{id}']._meta['io.github.hamr0.rwxmap/class'], 'w', label);
+    // Every pile row is undecided (D133): x, whatever its mechanical letter was.
+    assert.equal(combined.mcp['GET /things']._meta['io.github.hamr0.rwxmap/class'], 'x', label);
+    assert.equal(combined.mcp['PUT /things/{id}']._meta['io.github.hamr0.rwxmap/class'], 'x', label);
     assert.equal(combined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/class'], 'x', label);
-    assert.equal(combined.jev.changed, 0, label);
+    const sc = readJson(path.join(outDir, 'example.rwxmap.review.json'));
+    for (const k of ['GET /things', 'PUT /things/{id}', 'POST /mystery']) {
+      const r = sc.rows.find((row) => `${row.method} ${row.path}` === k);
+      assert.equal(r.marker, 'tight', `${label} ${k}`);
+    }
+    assert.equal(combined.jev.changed, 2, label);
     assert.equal(combined.jev.failed, 3, label);
   }
 });
 
-// bar 6: never stops — every call fails, exit 0, all letters mechanical.
+// bar 6: never stops — every call fails, exit 0, every asked row is undecided (x).
 test('run: never stops when every Jev call fails (bar 6)', async () => {
   const dir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
@@ -777,7 +797,7 @@ test('run: never stops when every Jev call fails (bar 6)', async () => {
   const fetchImpl = async () => { throw new Error('offline'); };
   const stdout = captureStream();
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
   });
 
@@ -786,9 +806,9 @@ test('run: never stops when every Jev call fails (bar 6)', async () => {
   assert.equal(combined.jev.sent, 3);
   assert.equal(combined.jev.answered, 0);
   assert.equal(combined.jev.failed, 3);
-  assert.equal(combined.jev.changed, 0);
-  assert.equal(combined.mcp['GET /things']._meta['io.github.hamr0.rwxmap/class'], 'r');
-  assert.equal(combined.mcp['PUT /things/{id}']._meta['io.github.hamr0.rwxmap/class'], 'w');
+  assert.equal(combined.jev.changed, 2);
+  assert.equal(combined.mcp['GET /things']._meta['io.github.hamr0.rwxmap/class'], 'x');
+  assert.equal(combined.mcp['PUT /things/{id}']._meta['io.github.hamr0.rwxmap/class'], 'x');
   assert.equal(combined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/class'], 'x');
   assert.match(stdout.text(), /3 failed/);
 });
@@ -806,7 +826,7 @@ test('run: sends only method/path/operationId/summary/description, and the key n
   const stdout = captureStream();
   const stderr = captureStream();
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout, stderr, jevKey: SECRET, fetchImpl,
   });
   assert.equal(code, 0);
@@ -837,7 +857,7 @@ test('run: after Jev moves rows, mcp, bareguard and the sidecar all carry the fi
     doMystery: { p: JEV_LOWER_THRESHOLD, pChanges: JEV_LOWER_R_THRESHOLD + 0.01, model: 'jev-2.0.0' }, // x -> w (changes too high for r)
   });
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout: captureStream(), stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
   });
   assert.equal(code, 0);
@@ -887,7 +907,7 @@ test('run: with a key, stdout prints the disclosure banner and the on-mode summa
   });
   const stdout = captureStream();
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
   });
   assert.equal(code, 0);
@@ -896,7 +916,7 @@ test('run: with a key, stdout prints the disclosure banner and the on-mode summa
   assert.match(text, /Jev: on — sends method, path, operationId, summary, description of 3 operation/);
   assert.match(text, /api\.typesafe\.ai/);
   assert.match(text, /Your key, your cost\./);
-  assert.match(text, /Jev: on — 3 sent · 3 answered · 0 failed \(letter kept\) · 0 letters changed/);
+  assert.match(text, /Jev: on — 3 sent · 3 answered · 0 failed \(x, review tight\) · 0 letters changed/);
 });
 
 // Bar 8 cost figure: the `jev` summary sums answered rows' token usage;
@@ -912,7 +932,7 @@ test('run: jev.tokens sums answered rows usage, skips failed rows, and stays out
   });
   const stdout = captureStream();
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
   });
   assert.equal(code, 0);
@@ -921,7 +941,7 @@ test('run: jev.tokens sums answered rows usage, skips failed rows, and stays out
   assert.equal(combined.jev.answered, 2);
   assert.equal(combined.jev.failed, 1);
   assert.deepEqual(combined.jev.tokens, { input: 1200, output: 50 });
-  assert.match(stdout.text(), /Jev: on — 3 sent · 2 answered · 1 failed \(letter kept\) · 1 letters changed · 1200 in \/ 50 out tokens\n/);
+  assert.match(stdout.text(), /Jev: on — 3 sent · 2 answered · 1 failed \(x, review tight\) · 1 letters changed · 1200 in \/ 50 out tokens\n/);
 
   // The moved row carries exactly {p, model}; no row carries usage.
   const sidecarText = fs.readFileSync(path.join(outDir, 'example.rwxmap.review.json'), 'utf8');
@@ -970,7 +990,7 @@ async function runJevSpec(fetchImpl) {
   const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
   const outDir = mkScratch();
   const stdout = captureStream();
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], {
     cwd: dir, stdout, stderr: captureStream(), jevKey: 'sk-fake', fetchImpl,
   });
   assert.equal(code, 0);
@@ -1013,11 +1033,11 @@ test('run (D129): a fired jev-lower row gets one second call, the changes questi
   assert.equal(combined.jev.changed, 1);
   assert.deepEqual(combined.jev.tokens, { input: 140, output: 3 });
   assert.equal(mystery.letter, 'r');
-  assert.equal(mystery.marker, 'settled');
+  assert.equal(mystery.marker, 'loose');
   assert.equal(mystery.evidence, 'jev');
   assert.deepEqual(mystery.jev, { p: JEV_LOWER_THRESHOLD, model: 'jev-1.0.0', pChanges: JEV_LOWER_R_THRESHOLD });
   assert.equal(combined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/class'], 'r');
-  assert.match(stdout, /Jev: on — 4 sent · 4 answered · 0 failed \(letter kept\) · 1 letters changed · 140 in \/ 3 out tokens\n/);
+  assert.match(stdout, /Jev: on — 4 sent · 4 answered · 0 failed \(x, review tight\) · 1 letters changed · 140 in \/ 3 out tokens\n/);
 });
 
 test('run (D129): changes above 0.50 leaves a fired jev-lower row at w', async () => {
@@ -1030,14 +1050,19 @@ test('run (D129): changes above 0.50 leaves a fired jev-lower row at w', async (
   assert.deepEqual(mystery.jev, { p: 0.01, model: 'jev-1.0.0' });
 });
 
-test('run (D129): a failed, malformed or other-model second answer leaves the row at w and is reported', async () => {
+test('run (D129): a failed or malformed second answer makes the row undecided (x, review tight), and so does an other-model one (D129, D133)', async () => {
   /** @type {Array<[string, (body: any) => any, number]>} label, response, failed count */
   const cases = [
     ['HTTP error', () => ({ ok: false, status: 400, json: async () => ({}) }), 1],
     ['network failure', () => { throw new Error('offline'); }, 1],
     ['NaN p', () => ({ ok: true, status: 200, json: async () => ({ model: 'jev-1.0.0', answers: { changes: { noul: NaN } } }) }), 1],
     ['missing model', () => ({ ok: true, status: 200, json: async () => ({ answers: { changes: { noul: 0 } } }) }), 1],
-    ['other model', ok(0, 'jev-9.9.9'), 0],
+    ['other model', ok(0, 'jev-9.9.9'), 1],
+    ['p above 1', ok(1.5), 1],
+    ['p negative', ok(-0.1), 1],
+    ['p Infinity', () => ({ ok: true, status: 200, json: async () => ({ model: 'jev-1.0.0', answers: { changes: { noul: Infinity } } }) }), 1],
+    ['p string', () => ({ ok: true, status: 200, json: async () => ({ model: 'jev-1.0.0', answers: { changes: { noul: '0.1' } } }) }), 1],
+    ['p missing', () => ({ ok: true, status: 200, json: async () => ({ model: 'jev-1.0.0', answers: { changes: {} } }) }), 1],
   ];
   for (const [label, changes, failedCount] of cases) {
     const { fetchImpl, calls } = questionJevFetch({
@@ -1045,12 +1070,19 @@ test('run (D129): a failed, malformed or other-model second answer leaves the ro
     });
     const { combined, mystery } = await runJevSpec(fetchImpl);
     assert.equal(calls.length, 4, label);
-    assert.equal(mystery.letter, 'w', label);
-    assert.deepEqual(mystery.jev, { p: 0.01, model: 'jev-1.0.0' }, label);
+    if (failedCount === 1) {
+      assert.equal(mystery.letter, 'x', label);
+      assert.equal(mystery.marker, 'tight', label);
+      assert.equal(mystery.evidence, 'floor', label);
+      assert.equal(mystery.jev, undefined, label);
+    } else {
+      assert.equal(mystery.letter, 'w', label);
+      assert.deepEqual(mystery.jev, { p: 0.01, model: 'jev-1.0.0' }, label);
+    }
     assert.equal(combined.jev.sent, 4, label);
     assert.equal(combined.jev.failed, failedCount, label);
     assert.equal(combined.jev.answered, 4 - failedCount, label);
-    assert.equal(combined.jev.changed, 1, label);
+    assert.equal(combined.jev.changed, failedCount === 1 ? 0 : 1, label);
   }
 });
 
@@ -1248,7 +1280,7 @@ test('run: with Jev on, x-rwx and webmcp carry the final (post-Jev) letters (ite
     doMystery: { p: 0.01, pChanges: 0.99 },
   });
 
-  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr, jevKey: 'k', fetchImpl });
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', '--engine', 'jev'], { cwd: dir, stdout, stderr, jevKey: 'k', fetchImpl });
   assert.equal(code, 0, stderr.text());
   const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
   const copy = readJson(path.join(outDir, 'example.openapi.rwx.json'));
@@ -1493,7 +1525,7 @@ test('run: a successful --force leaves no backup file behind', async () => {
   readJson(path.join(outDir, 'example.openapi.rwx.json'));
 });
 
-test('run: OpenAPI 3.2 query/additionalOperations operations are counted as not labelled, and stay unlabelled', async () => {
+test('run: OpenAPI 3.2 query is labelled (D134); other additionalOperations are counted as not labelled and stay unlabelled', async () => {
   const doc = {
     openapi: '3.2.0',
     paths: {
@@ -1513,11 +1545,11 @@ test('run: OpenAPI 3.2 query/additionalOperations operations are counted as not 
 
   const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
   assert.equal(code, 0, stderr.text());
-  assert.match(stdout.text(), /\nrwxmap: 3 operation\(s\) under OpenAPI 3\.2 query\/additionalOperations are not labelled yet \(no letter, no key, no x-rwx\)\n/);
+  assert.match(stdout.text(), /\nrwxmap: 2 operation\(s\) under OpenAPI 3\.2 additionalOperations \(other than QUERY\) are not labelled yet \(no letter, no key, no x-rwx\)\n/);
   const review = readJson(path.join(outDir, 'example.rwxmap.review.json'));
-  assert.equal(review.counts.rows, 2);
+  assert.equal(review.counts.rows, 3);
   const copy = readJson(path.join(outDir, 'example.openapi.rwx.json'));
-  assert.equal('x-rwx' in copy.paths['/things'].query, false);
+  assert.equal(copy.paths['/things'].query['x-rwx'].class, 'r');
   assert.equal('x-rwx' in copy.paths['/things'].additionalOperations.COPY, false);
 });
 
@@ -1553,7 +1585,7 @@ test('run: a .env supplies only RWXMAP_JEV_KEY (CRLF), and no .env variable reac
   const stdout = captureStream();
   const stderr = captureStream();
 
-  const code = await run([specPath, '-o', mkScratch(), '--vendor', 'example'], { cwd: dir, stdout, stderr, fetchImpl });
+  const code = await run([specPath, '-o', mkScratch(), '--vendor', 'example', '--engine', 'jev'], { cwd: dir, stdout, stderr, fetchImpl });
   assert.equal(code, 0, stderr.text());
   assert.match(stdout.text(), /Jev: on — 3 sent/);
   assert.deepEqual(auth, ['Bearer sk-from-dotenv', 'Bearer sk-from-dotenv', 'Bearer sk-from-dotenv']);
@@ -1623,13 +1655,12 @@ test('run: --force never leaves a target absent — between backup and rename th
   for (const name of names) readJson(path.join(outDir, name));
 });
 
-test('run: a spec whose only operations are OpenAPI 3.2 query/additionalOperations exits 1, says so, and writes no file', async () => {
+test('run: a spec whose only operations are OpenAPI 3.2 additionalOperations other than QUERY exits 1, says so, and writes no file', async () => {
   const dir = mkScratch();
   const specPath = writeSpecFile(dir, 'spec.json', {
     openapi: '3.2.0',
     paths: {
       '/things': {
-        query: { operationId: 'queryThings' },
         additionalOperations: { COPY: { operationId: 'copyThings' } },
       },
     },
@@ -1641,7 +1672,7 @@ test('run: a spec whose only operations are OpenAPI 3.2 query/additionalOperatio
   assert.equal(code, 1);
   assert.equal(
     stderr.text(),
-    `rwxmap: no labelled operations in ${specPath} — 2 operation(s) under OpenAPI 3.2 query/additionalOperations are not read yet (item g)\n`,
+    `rwxmap: no labelled operations in ${specPath} — 1 operation(s) under OpenAPI 3.2 additionalOperations (other than QUERY) are not read yet (item g)\n`,
   );
   assert.deepEqual(fs.readdirSync(outDir), []);
 });
@@ -1666,7 +1697,7 @@ test('run: an empty RWXMAP_JEV_KEY counts as unset, so a .env key is still used'
   const stdout = captureStream();
   const stderr = captureStream();
 
-  const code = await run([specPath, '-o', mkScratch(), '--vendor', 'example'], { cwd: dir, stdout, stderr, fetchImpl });
+  const code = await run([specPath, '-o', mkScratch(), '--vendor', 'example', '--engine', 'jev'], { cwd: dir, stdout, stderr, fetchImpl });
   assert.equal(code, 0, stderr.text());
   assert.match(stdout.text(), /Jev: on — 3 sent/);
   assert.deepEqual(auth, ['Bearer sk-from-dotenv', 'Bearer sk-from-dotenv', 'Bearer sk-from-dotenv']);
@@ -1794,7 +1825,7 @@ test('run: no leftover files means no leftover line', async () => {
 // module through it but leaves argv[1] unresolved, so a plain path compare
 // made the installed `rwxmap` exit 0 doing nothing. Each spawn: a temp cwd
 // with no .env, RWXMAP_JEV_KEY removed, XDG_CACHE_HOME in a temp dir, and a
-// local spec file (no network).
+// local spec file with --engine mechanical (no network).
 // ---------------------------------------------------------------------
 
 const CLI_PATH = path.join(import.meta.dirname, 'cli.js');
@@ -1811,7 +1842,7 @@ function spawnCli(command, args) {
   assert.equal(fs.existsSync(path.join(cwd, '.env')), false);
   const outDir = mkScratch();
   const specPath = writeSpecFile(mkScratch(), 'spec.json', SPEC_DOC);
-  const res = spawnSync(command, [...args, specPath, '-o', outDir, '--vendor', 'example'], {
+  const res = spawnSync(command, [...args, '--engine', 'mechanical', specPath, '-o', outDir, '--vendor', 'example'], {
     cwd, env: childEnv(mkScratch()), encoding: 'utf8', timeout: 30_000,
   });
   return { res, outDir };
@@ -1905,4 +1936,417 @@ test('run: tenant-templated servers land in serverTemplates (and only those); ot
   const m = matcherFrom([sc]);
   assert.equal(m.match('DELETE', 'https://de.sentry.io/api/0/things/9').source, 'spec');
   assert.equal(m.match('DELETE', 'https://x.b.com/things/9').source, 'request'); // 1-label suffix: no route
+});
+
+// ---------------------------------------------------------------------
+// D133 pass 1: engines, --confidence, Jev only with --engine jev, the
+// rwxlite second pass (injected engine) and the model cache check.
+// ---------------------------------------------------------------------
+
+const D133_MODEL = 'rwxlite-0.2.0+0123abcd';
+
+/** Run the CLI on SPEC_JEV_DOC; returns {code, stdout, stderr, outDir}. */
+async function runD133(extraArgs, extraEnv = {}) {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', SPEC_JEV_DOC);
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example', ...extraArgs], {
+    cwd: dir, stdout, stderr, jevKey: '', xdgCacheHome: mkScratch(), ...extraEnv,
+  });
+  return { code, stdout: stdout.text(), stderr: stderr.text(), outDir };
+}
+
+/** marker and letter by operation, off the sidecar. */
+function d133Rows(outDir) {
+  const rows = readJson(path.join(outDir, 'example.rwxmap.review.json')).rows;
+  return Object.fromEntries(rows.map((r) => [`${r.method} ${r.path}`, `${r.letter}/${r.marker}`]));
+}
+
+test('run (D133): no model can be got -> "rwxlite: off (mechanical)", exit 0, mechanical letters, widened markers', async () => {
+  const { code, stdout, stderr, outDir } = await runD133([], PKG_OK);
+  assert.equal(code, 0, stderr);
+  assert.match(stdout, /^rwxmap: rwxlite: off \(mechanical\) — could not get the model \(offline \(test\)\); none in the cache$/m);
+  assert.deepEqual(d133Rows(outDir), {
+    'DELETE /things/{id}/permission': 'x/settled',
+    'GET /things': 'r/settled',
+    'POST /things/{id}/archive': 'w/loose', // a word list lowered a POST: loose since D133
+    'PUT /things/{id}': 'w/loose',
+    'POST /mystery': 'x/tight',
+  });
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.deepEqual(combined.rwxlite, {
+    mode: 'off', model: null, reason: 'could not get the model (offline (test)); none in the cache', sent: 0, raised: 0, lowered: 0, kept: 0, undecided: 0,
+  });
+});
+
+test('run (D133): --engine mechanical prints the off line, and never looks for a model or calls an engine', async () => {
+  let called = 0;
+  const { code, stdout, stderr, outDir } = await runD133(['--engine', 'mechanical'], {
+    rwxliteEngine: { model: D133_MODEL, run: async () => { called += 1; return []; } },
+  });
+  assert.equal(code, 0, stderr);
+  assert.match(stdout, /^rwxmap: rwxlite: off \(mechanical\)$/m);
+  assert.equal(called, 0);
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.equal(combined.rwxlite.mode, 'off');
+  assert.equal(combined.rwxlite.model, null);
+  assert.equal(combined.rwxlite.reason, 'engine mechanical');
+});
+
+test('run (D133): default mode a with an engine sends only loose and tight rows and applies the second pass', async () => {
+  const sent = [];
+  const engine = async (items) => {
+    sent.push(items.map((i) => i.operationId).sort());
+    return items.map((i) => {
+      if (i.operationId === 'updateThing') return { pIsX: 0.9, pChanges: 0.95, model: D133_MODEL }; // PUT w -> x
+      if (i.operationId === 'doMystery') return { pIsX: 0.01, pChanges: 0.02, model: D133_MODEL }; // POST x -> r at 0.98
+      return undefined; // updateThingArchive: error -> undecided
+    });
+  };
+  const { code, stdout, stderr, outDir } = await runD133([], { rwxliteEngine: { model: D133_MODEL, run: engine } });
+  assert.equal(code, 0, stderr);
+  assert.deepEqual(sent, [['doMystery', 'updateThing', 'updateThingArchive']]);
+  assert.deepEqual(d133Rows(outDir), {
+    'DELETE /things/{id}/permission': 'x/settled',
+    'GET /things': 'r/settled',
+    'POST /things/{id}/archive': 'x/tight',
+    'PUT /things/{id}': 'x/tight',
+    'POST /mystery': 'r/loose',
+  });
+  assert.match(stdout, new RegExp(`^rwxmap: rwxlite: on \\(${D133_MODEL.replace(/[+.]/g, '\\$&')}\\) — 3 sent · 1 raised · 1 lowered · 0 kept · 1 undecided`, 'm'));
+  assert.doesNotMatch(stdout, /rwxlite: off/);
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.deepEqual(combined.rwxlite, { mode: 'on', model: D133_MODEL, pass: 'a', confidence: null, sent: 3, raised: 1, lowered: 1, kept: 0, undecided: 1 });
+  assert.equal(combined.jev.mode, 'off');
+  // Every moved row publishes evidence rwxlite, in the sidecar, the MCP _meta and the OpenAPI copy.
+  const rows = readJson(path.join(outDir, 'example.rwxmap.review.json')).rows;
+  assert.deepEqual(rows.map((r) => r.evidence).sort(), ['floor', 'floor', 'rwxlite', 'rwxlite', 'rwxlite']);
+  assert.equal(readJson(path.join(outDir, 'example.rwxmap.review.json')).counts.byEvidence.rwxlite, 3);
+  assert.equal(combined.mcp['POST /mystery']._meta['io.github.hamr0.rwxmap/evidence'], 'rwxlite');
+});
+
+/** An answer whose letter is `letter` with share `p` (the same shares secondpass.test.js uses). */
+function d133Ans(letter, p, model = D133_MODEL) {
+  if (letter === 'x') return { pIsX: p, pChanges: p + (1 - p) / 2, model };
+  if (letter === 'w') return { pIsX: (1 - p) / 2, pChanges: (1 - p) / 2 + p, model };
+  return { pIsX: (1 - p) / 2, pChanges: 1 - p, model };
+}
+
+/** Mode b engine: answers by operationId, records what was sent. */
+function modeBEngine(byOp, sent = []) {
+  return async (items) => {
+    sent.push(items.map((i) => i.operationId).sort());
+    return items.map((i) => byOp[i.operationId]);
+  };
+}
+
+test('run (D133): --engine rwxlite (mode b) judges every row at the default confidence 95', async () => {
+  const sent = [];
+  const engine = modeBEngine({
+    deleteThingPermission: d133Ans('w', 0.96), // x -> w at 0.96 >= 0.95: lowered
+    listThings: d133Ans('r', 0.98), // kept
+    updateThingArchive: d133Ans('x', 0.99), // w -> x: raised
+    updateThing: d133Ans('w', 0.90), // under 0.95: undecided
+    // doMystery: no answer: undecided
+  }, sent);
+  const { code, stdout, stderr, outDir } = await runD133(['--engine', 'rwxlite'], { rwxliteEngine: { model: D133_MODEL, run: engine } });
+  assert.equal(code, 0, stderr);
+  assert.equal(sent.length, 1);
+  assert.equal(sent[0].length, 5, 'settled rows are sent too');
+  assert.deepEqual(d133Rows(outDir), {
+    'DELETE /things/{id}/permission': 'w/loose',
+    'GET /things': 'r/settled',
+    'POST /things/{id}/archive': 'x/tight',
+    'PUT /things/{id}': 'x/tight',
+    'POST /mystery': 'x/tight',
+  });
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.deepEqual(combined.rwxlite, { mode: 'on', model: D133_MODEL, pass: 'b', confidence: 95, sent: 5, raised: 1, lowered: 1, kept: 1, undecided: 2 });
+  assert.match(stdout, /^rwxmap: rwxlite: on \(.*\) — mode b, confidence 95 — 5 sent · 1 raised · 1 lowered · 1 kept · 2 undecided/m);
+  const byKey = Object.fromEntries(readJson(path.join(outDir, 'example.rwxmap.review.json')).rows.map((r) => [`${r.method} ${r.path}`, r.evidence]));
+  assert.equal(byKey['DELETE /things/{id}/permission'], 'rwxlite');
+  assert.equal(byKey['GET /things'], 'floor');
+  assert.equal(byKey['POST /mystery'], 'floor', 'an x row left undecided at x keeps its evidence');
+  assert.equal(byKey['PUT /things/{id}'], 'rwxlite');
+});
+
+test('run (D133): --confidence changes what mode b accepts (50 accepts a 0.90 answer, 99 asks about it)', async () => {
+  const answers = { deleteThingPermission: d133Ans('x', 0.995), listThings: d133Ans('r', 0.9), updateThingArchive: d133Ans('w', 0.9), updateThing: d133Ans('w', 0.9), doMystery: d133Ans('w', 0.9) };
+  for (const [c, expected] of [
+    ['50', { 'DELETE /things/{id}/permission': 'x/settled', 'GET /things': 'r/settled', 'POST /things/{id}/archive': 'w/loose', 'PUT /things/{id}': 'w/loose', 'POST /mystery': 'w/loose' }],
+    ['99', { 'DELETE /things/{id}/permission': 'x/settled', 'GET /things': 'x/tight', 'POST /things/{id}/archive': 'x/tight', 'PUT /things/{id}': 'x/tight', 'POST /mystery': 'x/tight' }],
+  ]) {
+    const r = await runD133(['--engine', 'rwxlite', '--confidence', c], { rwxliteEngine: { model: D133_MODEL, run: modeBEngine(answers) } });
+    assert.equal(r.code, 0, r.stderr);
+    assert.deepEqual(d133Rows(r.outDir), expected, `confidence ${c}`);
+    assert.equal(readJson(path.join(r.outDir, 'example.rwxmap.json')).rwxlite.confidence, Number(c));
+  }
+});
+
+test('run (D133): mode b with no model is mechanical and says so; with --model small it is accepted', async () => {
+  const noModel = await runD133(['--engine', 'rwxlite', '--confidence', '70'], PKG_OK);
+  assert.equal(noModel.code, 0, noModel.stderr);
+  assert.match(noModel.stdout, /rwxlite: off \(mechanical\) — could not get the model/);
+  assert.equal(d133Rows(noModel.outDir)['POST /mystery'], 'x/tight');
+  const small = await runD133(['--engine', 'rwxlite', '--confidence', '50', '--model', 'small'], PKG_OK);
+  assert.equal(small.code, 0, small.stderr);
+  assert.match(small.stdout, /rwxlite: off \(mechanical\)/);
+});
+
+test('run (D133): mode a with no loose or tight row fetches no model and says "nothing to check"', async () => {
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', { openapi: '3.0.0', paths: { '/things': { get: { operationId: 'listThings' } }, '/things/{id}': { delete: { operationId: 'deleteThing' } } } });
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  let calls = 0;
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], {
+    cwd: dir, stdout, stderr: captureStream(), jevKey: '', xdgCacheHome: mkScratch(), modelFetch: async () => { calls += 1; throw new Error('must not be called'); },
+  });
+  assert.equal(code, 0);
+  assert.equal(calls, 0);
+  assert.match(stdout.text(), /^rwxmap: rwxlite: nothing to check \(no row is marked loose or tight\); no model was fetched$/m);
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.equal(combined.rwxlite.mode, 'off');
+  assert.equal(combined.rwxlite.reason, 'nothing to check');
+});
+
+test('run (D133): --confidence is valid only with --engine rwxlite, and only as a whole number 0-99', async () => {
+  /** @type {Array<[string[], RegExp]>} */
+  const cases = [
+    [['--confidence', '50'], /--confidence is valid only with --engine rwxlite/],
+    [['--engine', 'jev', '--confidence', '50'], /--confidence is valid only with --engine rwxlite/],
+    [['--engine', 'mechanical', '--confidence', '50'], /--confidence is valid only with --engine rwxlite/],
+    [['--engine', 'rwxlite', '--confidence', '100'], /whole number from 0 to 99/],
+    [['--engine', 'rwxlite', '--confidence=-1'], /whole number from 0 to 99/],
+    [['--engine', 'rwxlite', '--confidence', '7.5'], /whole number from 0 to 99/],
+    [['--engine', 'rwxlite', '--confidence', 'abc'], /whole number from 0 to 99/],
+    [['--engine', 'rwxlite', '--confidence', ''], /whole number from 0 to 99/],
+  ];
+  for (const [args, message] of cases) {
+    const r = await runD133(args);
+    assert.equal(r.code, 1, args.join(' '));
+    assert.match(r.stderr, message, args.join(' '));
+    assert.deepEqual(fs.readdirSync(r.outDir), [], 'nothing written');
+  }
+  for (const ok of ['0', '70', '99']) {
+    const r = await runD133(['--engine', 'rwxlite', '--confidence', ok]);
+    assert.equal(r.code, 0, `${ok}: ${r.stderr}`);
+  }
+});
+
+test('run (D133): an unknown --engine value fails loudly', async () => {
+  const r = await runD133(['--engine', 'gpt']);
+  assert.equal(r.code, 1);
+  assert.match(r.stderr, /unknown --engine: gpt \(want rwxlite, jev or mechanical\)/);
+  assert.deepEqual(fs.readdirSync(r.outDir), []);
+});
+
+test('run (D133): --engine jev without a key fails loudly, sends nothing, writes nothing', async () => {
+  let calls = 0;
+  const r = await runD133(['--engine', 'jev'], { fetchImpl: async () => { calls += 1; throw new Error('must not be called'); } });
+  assert.equal(r.code, 1);
+  assert.match(r.stderr, /--engine jev needs a key/);
+  assert.equal(calls, 0);
+  assert.deepEqual(fs.readdirSync(r.outDir), []);
+});
+
+test('run (D133): a Jev key WITHOUT --engine jev leaves Jev off, says so, and sends no request', async () => {
+  for (const args of [[], ['--engine', 'mechanical'], ['--engine', 'rwxlite']]) {
+    let calls = 0;
+    const fetchImpl = async () => { calls += 1; throw new Error('must not be called'); };
+    const r = await runD133(args, { jevKey: 'sk-fake', fetchImpl });
+    assert.equal(r.code, 0, r.stderr);
+    assert.equal(calls, 0, args.join(' '));
+    assert.match(r.stdout, /^rwxmap: Jev: off — a Jev key is set, but Jev runs only with --engine jev; nothing was sent$/m);
+    assert.doesNotMatch(r.stdout, /Jev: on/);
+    assert.equal(readJson(path.join(r.outDir, 'example.rwxmap.json')).jev.mode, 'off');
+  }
+});
+
+test('run (D133): --engine jev with a key behaves as before and prints no rwxlite line', async () => {
+  const { fetchImpl, calls } = routedJevFetch({ listThings: { p: 0.1 }, updateThing: { p: 0.1 }, doMystery: { p: 0.1 } });
+  const r = await runD133(['--engine', 'jev'], { jevKey: 'sk-fake', fetchImpl });
+  assert.equal(r.code, 0, r.stderr);
+  assert.ok(calls.length > 0);
+  assert.match(r.stdout, /Jev: on — /);
+  assert.doesNotMatch(r.stdout, /rwxlite/);
+});
+
+/** A cached model directory in rwxlite's layout; `dirSha8` overrides the sha8 in the directory name. */
+function writeModelDir(xdg, bytes, dirSha8) {
+  const sha = (b) => createHash('sha256').update(b).digest('hex');
+  const model = `rwxlite-0.2.0+${dirSha8 ?? sha(bytes).slice(0, 8)}`;
+  const dir = path.join(xdg, 'rwxmap', model);
+  fs.mkdirSync(dir, { recursive: true });
+  const vocab = Buffer.from('vocab');
+  fs.writeFileSync(path.join(dir, 'model.bin'), bytes);
+  fs.writeFileSync(path.join(dir, 'vocab.txt'), vocab);
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ version: '0.2.0', modelFile: 'model.bin', model, files: { 'model.bin': sha(bytes), 'vocab.txt': sha(vocab) } }));
+  return dir;
+}
+
+test('run (D133): a cached model whose hash does not match its name is NOT used: loud warning, mechanical, exit 0', async () => {
+  const xdg = mkScratch();
+  writeModelDir(xdg, Buffer.from('weights'), 'deadbeef');
+  const r = await runD133([], { xdgCacheHome: xdg, ...PKG_OK });
+  assert.equal(r.code, 0, r.stderr);
+  assert.match(r.stderr, /WARNING: rwxlite model rejected \(hash mismatch.*rwxlite-0\.2\.0\+deadbeef was NOT used/);
+  assert.match(r.stdout, /rwxlite: off \(mechanical\) — could not get the model \(offline \(test\)\); the cached model was rejected/);
+  assert.equal(d133Rows(r.outDir)['POST /mystery'], 'x/tight');
+});
+
+/** A fake `rwxlite` package: its answerer reports `model`, and answers every request with the given p. */
+function fakeRwxlite(model, p, seen = []) {
+  return async (name) => {
+    assert.equal(name, 'rwxlite');
+    return {
+      loadAnswerer: async (opts) => {
+        seen.push(opts);
+        return { model, answerMany: async (reqs) => reqs.map(() => ({ model, answers: { isX: { noul: p.isX }, changes: { noul: p.changes } } })) };
+      },
+    };
+  };
+}
+
+test('run (D133): offline with a verified cached model -> "using cached ...", the second pass runs on it', async () => {
+  const xdg = mkScratch();
+  const bytes = Buffer.from('weights');
+  const sha8 = createHash('sha256').update(bytes).digest('hex').slice(0, 8);
+  const dir = writeModelDir(xdg, bytes);
+  const model = `rwxlite-0.2.0+${sha8}`;
+  const seen = [];
+  const r = await runD133([], { xdgCacheHome: xdg, rwxliteImporter: fakeRwxlite(model, { isX: 0.99, changes: 0.99 }, seen), rwxliteVersionReader: () => '0.2.0' });
+  assert.equal(r.code, 0, r.stderr);
+  assert.match(r.stderr, new RegExp(`^rwxmap: using cached ${model.replace(/[+.]/g, '\\$&')}( \\(no cached exact model, so the small one\\))?, could not reach the release`, 'm'));
+  assert.equal(seen.length, 1);
+  assert.equal(seen[0].dir, dir);
+  assert.match(r.stdout, /rwxlite: on \(/);
+  assert.equal(readJson(path.join(r.outDir, 'example.rwxmap.json')).rwxlite.model, model);
+});
+
+test('run (D133): a verified model but no rwxlite package -> mechanical alone, says how to install it', async () => {
+  const xdg = mkScratch();
+  writeModelDir(xdg, Buffer.from('weights'));
+  const importer = async () => { throw Object.assign(new Error("Cannot find package 'rwxlite' imported from /x/src/rwxliteengine.js"), { code: 'ERR_MODULE_NOT_FOUND' }); };
+  const r = await runD133([], { xdgCacheHome: xdg, rwxliteImporter: importer });
+  assert.equal(r.code, 0, r.stderr);
+  assert.match(r.stdout, /^rwxmap: rwxlite: off \(mechanical\) — the rwxlite package is not installed \(npm install rwxlite@0\.2\)$/m);
+  assert.equal(readJson(path.join(r.outDir, 'example.rwxmap.json')).rwxlite.mode, 'off');
+});
+
+test('run (D133): no rwxlite package -> nothing is fetched, mechanical alone, same reason (modes a and b)', async () => {
+  const importer = async () => { throw Object.assign(new Error("Cannot find package 'rwxlite' imported from /x/src/rwxliteengine.js"), { code: 'ERR_MODULE_NOT_FOUND' }); };
+  for (const args of [[], ['--engine', 'rwxlite']]) {
+    let calls = 0;
+    const r = await runD133(args, { rwxliteImporter: importer, modelFetch: async () => { calls += 1; throw new Error('must not be called'); } });
+    assert.equal(r.code, 0, r.stderr);
+    assert.equal(calls, 0, args.join(' '));
+    assert.match(r.stdout, /^rwxmap: rwxlite: off \(mechanical\) — the rwxlite package is not installed \(npm install rwxlite@0\.2\)$/m);
+    assert.equal(d133Rows(r.outDir)['POST /mystery'], 'x/tight');
+    assert.equal(readJson(path.join(r.outDir, 'example.rwxmap.json')).rwxlite.mode, 'off');
+  }
+});
+
+test('run (D133): rwxlite package out of range -> nothing is fetched, mechanical alone with the version reason', async () => {
+  let calls = 0;
+  const r = await runD133([], { rwxliteImporter: async () => ({}), rwxliteVersionReader: () => '0.3.0', modelFetch: async () => { calls += 1; throw new Error('must not be called'); } });
+  assert.equal(r.code, 0, r.stderr);
+  assert.equal(calls, 0);
+  assert.match(r.stdout, /^rwxmap: rwxlite: off \(mechanical\) — the rwxlite package is 0\.3\.0; this rwxmap accepts 0\.2\.x \(D135\); npm install rwxlite@0\.2$/m);
+  assert.equal(d133Rows(r.outDir)['POST /mystery'], 'x/tight');
+});
+
+test('run (D133): rwxlite package fine -> the model is fetched as before', async () => {
+  const urls = [];
+  const r = await runD133([], { ...PKG_OK, modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
+  assert.equal(r.code, 0, r.stderr);
+  assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest-exact.json']);
+  assert.match(r.stdout, /rwxlite: off \(mechanical\) — could not get the model/);
+});
+
+test('run (D133): --model small is accepted in the default run and --engine rwxlite, and fetches the small manifest', async () => {
+  for (const args of [['--model', 'small'], ['--engine', 'rwxlite', '--model', 'small']]) {
+    const urls = [];
+    const r = await runD133(args, { ...PKG_OK, modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
+    assert.equal(r.code, 0, r.stderr);
+    assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest.json'], args.join(' '));
+  }
+  const urls = [];
+  const r = await runD133([], { ...PKG_OK, modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
+  assert.equal(r.code, 0, r.stderr);
+  assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest-exact.json']);
+});
+
+test('run (D133): --model fails loudly with any other value, and with --engine jev or mechanical; nothing is fetched or written', async () => {
+  /** @type {Array<[string[], RegExp]>} */
+  const cases = [
+    [['--model', 'exact'], /--model takes only "small"/],
+    [['--model', ''], /--model takes only "small"/],
+    [['--engine', 'rwxlite', '--model', 'big'], /--model takes only "small"/],
+    [['--engine', 'mechanical', '--model', 'small'], /--model is valid only in the default run and with --engine rwxlite/],
+    [['--engine', 'jev', '--model', 'small'], /--model is valid only in the default run and with --engine rwxlite/],
+  ];
+  for (const [args, re] of cases) {
+    let calls = 0;
+    const r = await runD133(args, { modelFetch: async () => { calls += 1; throw new Error('must not be called'); } });
+    assert.equal(r.code, 1, args.join(' '));
+    assert.match(r.stderr, re, args.join(' '));
+    assert.equal(calls, 0);
+    assert.deepEqual(fs.readdirSync(r.outDir), []);
+  }
+});
+
+test('run (D133): --engine mechanical and --engine jev never touch the network for the model', async () => {
+  let calls = 0;
+  const modelFetch = async () => { calls += 1; throw new Error('must not be called'); };
+  const m = await runD133(['--engine', 'mechanical'], { modelFetch });
+  assert.equal(m.code, 0, m.stderr);
+  const { fetchImpl } = routedJevFetch({ listThings: { p: 0.1 }, updateThing: { p: 0.1 }, doMystery: { p: 0.1 } });
+  const j = await runD133(['--engine', 'jev'], { jevKey: 'sk-fake', fetchImpl, modelFetch });
+  assert.equal(j.code, 0, j.stderr);
+  assert.equal(calls, 0);
+});
+
+test('run (D133): --help names the engines, --confidence, and that a key alone does not turn Jev on', async () => {
+  const stdout = captureStream();
+  const code = await run(['--help'], { cwd: mkScratch(), stdout, stderr: captureStream() });
+  assert.equal(code, 0);
+  assert.match(stdout.text(), /--engine <e>/);
+  assert.match(stdout.text(), /--confidence <0-99>/);
+  assert.match(stdout.text(), /A key alone does not turn Jev on/);
+});
+
+test('D134: a 3.2 query op and an additionalOperations QUERY op get r, a key, x-rwx and readOnlyHint; COPY stays unread', async () => {
+  const doc = {
+    openapi: '3.2.0',
+    servers: [{ url: 'https://api.example.com' }],
+    paths: {
+      '/things': {
+        get: { operationId: 'listThings' },
+        post: { operationId: 'createThing' },
+        query: { operationId: 'purgeThingsQuery' },
+      },
+      '/reports': { additionalOperations: { QUERY: { operationId: 'runReport' }, COPY: { operationId: 'copyReport' } } },
+    },
+  };
+  const dir = mkScratch();
+  const specPath = writeSpecFile(dir, 'spec.json', doc);
+  const outDir = mkScratch();
+  const stdout = captureStream();
+  const stderr = captureStream();
+  const code = await run([specPath, '-o', outDir, '--vendor', 'example'], { cwd: dir, stdout, stderr });
+  assert.equal(code, 0, stderr.text());
+  const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
+  assert.deepEqual(combined.mcp['QUERY /things'].annotations, { readOnlyHint: true });
+  assert.deepEqual(combined.mcp['QUERY /reports'].annotations, { readOnlyHint: true });
+  assert.equal(combined.mcp['QUERY /things']._meta['io.github.hamr0.rwxmap/class'], 'r');
+  assert.ok(combined.webmcp['QUERY /things']);
+  const copy = readJson(path.join(outDir, 'example.openapi.rwx.json'));
+  assert.equal(copy.paths['/things'].query['x-rwx'].class, 'r');
+  assert.equal(copy.paths['/reports'].additionalOperations.QUERY['x-rwx'].class, 'r');
+  assert.equal('x-rwx' in copy.paths['/reports'].additionalOperations.COPY, false);
+  assert.equal(copy.paths['/things'].post['x-rwx'].class, 'x');
+  assert.match(stdout.text(), /\nrwxmap: 1 operation\(s\) under OpenAPI 3\.2 additionalOperations \(other than QUERY\) are not labelled yet/);
 });

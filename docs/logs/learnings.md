@@ -7336,7 +7336,7 @@ Node.
   `swagger` key is a tightening.
 - What it contains: the CLI polish (015d15f) and the debrief 6 fixes
   (b3feb7e), both in the entries above; the PRD cut to one shape and the
-  README rescoped; `docs/release-checklist.md` (12 items) and the
+  README rescoped; `docs/product/release-checklist.md` (12 items) and the
   CLAUDE.md line that a release is not cut with any item unrun
   (9fcfea2); `poc/conformance` reading its own `hint-snippets.md`
   instead of the README; the openvan.camp `check:live` record
@@ -8246,3 +8246,362 @@ Node.
 - Lesson: the lowering flag removed every wrong lowering; the remaining
   leaks are the mechanical floor's, so mechanical fixes help both
   projects.
+
+## 2026-11-03 — 0.9.0 released; D133 opened (rwxmap with rwxlite, three engines)
+
+- 0.9.0 released: PR #18, merge e9b697c, npm 0.9.0.
+- D133 opened on branch `feat/d133-rwxlite-engines`. User rulings: three
+  engines (mechanical -> rwxlite default, rwxlite alone, mechanical ->
+  Jev); rwxmap is the adapter for all three and rwxlite only returns p;
+  everything chosen by CLI options; the model downloads on first use and
+  is always the latest, so every run records the model string; if the
+  download fails, mechanical runs alone and says "rwxlite: off
+  (mechanical)"; in rwxlite-alone mode only, an accuracy rate between 70%
+  and 90% can be chosen, with the too-loose rate beside it; R1 and R2 are
+  tuning candidates only, each needing its own D-number after tuning.
+- Open: go/no-go bar, how an ask row is published, CLI option names,
+  model cache and hash check, shared exam #3 vendor list.
+- The PRD planned section became the D133 module spec; the engine-order
+  question is now decided and left the open questions.
+
+## 2026-11-03 — D133 settled-leak breakdown
+
+- Question: which rows does the second pass miss? The old scope sent
+  only `loose` and `tight` rows, and `settled` held 27 of 82
+  too-loose rows.
+- Method: classifyRow (src v0.9.0) over the two labelled CSVs
+  (data/combined-2026-09-21/labelled.csv 6557 rows and
+  data/relabel-buildset-2026-09-23/labelled.csv 1819 rows, 8376 total).
+  Marker from reviewHint. Too loose = predicted class looser than
+  truth_class. Scratch script, not kept.
+- Buckets, rows / too loose / too tight: settled 4608 / 27 / 42; loose
+  1652 / 51 / 1; tight 2116 / 0 / 1524.
+- The 27 settled leaks: 25 are POST rows a word list lowered (24 to w by
+  step-3 modify-verb or modify-verb-summary, 1 to r by step-1
+  read-verb-anywhere). Those rows are 577 of 4608 settled (12.5%), leak
+  density 4.3% against 0.59% for all settled. 15 vendors hold them;
+  one-vendor-held-out coverage 0.90-0.96. The other 2 are GET floor
+  rows (datadog GET /api/v1/graph/snapshot, intercom GET
+  /contacts/{id}/banners), accepted as risk: catching them means sending
+  all 2543 GET floor rows.
+- Rulings (user, 2026-11-03): (A) `loose` widens to "mechanical lowered
+  it": PUT/PATCH w floor plus any POST a word list lowered to w or r;
+  `tight` and `settled` keep their meaning; planned `reviewHint`
+  change. (B) Modes a and c send every `loose` and `tight` row, not
+  `settled`; about 4345 of 8376 rows (52%). (C) An errored or timed-out
+  call is undecided: x plus review; only a model missing for the whole
+  run falls back to mechanical alone.
+- Caveat: tuning-set figures. The rule is proven only on tuning data;
+  the D133 exam is its test. PRD updated.
+- Lesson: the leak is not in the marker's old definition but in rows a
+  word list lowered; "every lowered row gets a second pass" covers 25 of
+  the 27.
+
+## 2026-11-03 — D133 second-pass share per API
+
+- Question: what share of rows does the second pass (modes a and c)
+  send, per API, and how long does it take?
+- Method: read-only. classifyRow (src v0.9.0) over
+  data/combined-2026-09-21/labelled.csv and
+  data/relabel-buildset-2026-09-23/labelled.csv (8376 rows). "Sent" =
+  review marker `loose` or `tight`, or a POST with an evidence list
+  and class w or r.
+- Pooled: 4345 of 8376 sent (51.9%). 76 of the 78 too-loose rows fall
+  inside sent rows. The 2 missed: datadog GET /api/v1/graph/snapshot and
+  intercom GET /contacts/{id}/banners.
+- Per vendor, 36 vendors: median 62.8%, range 14.8% (figma) to 84.0%
+  (trello). Most of these vendors are capped write-heavy samples.
+- Complete official APIs (asana, canva, datadog, digitalocean, figma,
+  intercom, jira, mailchimp, meta-whatsapp, openai, paypal, spotify,
+  square, stripe, zoom; provider-corpus-2026-09-16, 4171 ops): 1734 sent
+  (41.6%), median 39.8% (intercom), range 14.8% (figma) to 60.0%
+  (paypal). The share tracks the API's GET share (figma 78% GET; trello
+  sample 0% GET).
+- Time at rwxlite's 20 ms/op bar: largest complete-API stripe 297 rows,
+  about 5.9 s; typical 2-5 s per complete API; one run per spec; local,
+  no money cost.
+- Lesson: a pooled share over a corpus with capped write-heavy samples
+  overstates per-API cost. Measure on complete APIs. PRD D133 evidence
+  updated.
+
+## 2026-11-04 — D133 decision-rule comparison
+
+- Question: which decision rule does rwxmap's second pass use, its own
+  (`src/secondpass.js`) or rwxlite's tier rule?
+- Method: `poc/d133-rule-compare/` (readout.txt, commit 466cda1) scored
+  both rules over the same p's on rwxlite's burned fresh exam, 949 rows
+  (coolify, workos, lago, resend). Fixture and truth are in
+  `data/rwxlite-fresh-2026-11-03/`. TUNING data for rwxmap, not an exam.
+  p's are the int8 per-channel model; rwxmap's default is fp32.
+- Rules. secondPass: send loose and tight rows; letter = largest of
+  x = isX, w = changes - isX, r = 1 - changes; raise accepted; lowering
+  accepted only at p >= 0.97; else x plus review tight; settled never
+  sent. Tier rule: only Jev's three tiers (jev-lower, jev-raise-wx,
+  jev-raise-get) move; cuts isX < 0.30 lower, POST changes < 0.40 to r,
+  isX >= 0.15 raise w to x, changes >= 0.05 raise r to w; then ask a
+  lowering under 0.97.
+
+| rule | exact | too loose | too tight | sent | undecided/asked |
+|---|---|---|---|---|---|
+| mechanical | 736 | 6 | 207 | 0 | 0 |
+| tier rule (asked at stricter letter) | 821 | 5 | 123 | 775 | 74 asked |
+| secondPass (undecided = x) | 826 | 6 | 117 | 425 | 99 undecided |
+
+Both pass the D133 mode-a bar on this set (too loose <= mechanical,
+exact >= +5 points): +9.0 and +9.5 points.
+
+- The 9 differing rows (mech / tier / secondPass / truth):
+  - fx-0036 GET /sso/profile: r / w / r / r (tier rule sends it)
+  - fx-0249 GET /sso/logout: r / w / r / x (too loose under both)
+  - fx-0549 GET /user_management/authorize: r / w / r / r
+  - fx-0594 GET /sso/authorize: r / w / r / r
+  - fx-0837 GET /user_management/sessions/logout: r / w / r / x (too loose under both)
+  - fx-0039 PUT /invoices/{lago_id}/finalize: w / x / w / x (tier rule fixes a leak)
+  - fx-0086 PUT /authorization/groups/{group_id}/role_assignments: w / x / w / w
+  - fx-0231 PATCH /organizations/{organizationId}/groups/{groupId}/organization-memberships: w / x / w / w
+  - fx-0643 PUT /user_management/organization_memberships/{id}/reactivate: w / x / w / w
+- Ruling (user, 2026-11-04): keep secondPass; do not adopt the tier
+  rule. A one-row leak difference is noise. Neither rule fixes the 5
+  remaining leaks (3 credential PUT/PATCH: workos client-credentials,
+  api-key, coolify integration-tokens; 2 workos logout GETs): the model
+  agrees with mechanical there, so R1 and R2 are the route. Caveat:
+  secondPass has only this one measurement; the D133 exam is its test.
+- Lesson: a model's measured scores belong to the decision rule they
+  were measured with; a different rule over the same p's needs its own
+  measurement. PRD D133 and decisions-log updated.
+
+## 2026-11-04 — R1/R2 pre-registered (tuning POC, bar set before measuring)
+
+- Goal: tuning POC for the two D133 candidates R1 and R2 (PRD D133,
+  "R1 and R2 are tuning candidates only"). Definitions and bar are set
+  here, before any scorer code is written or run.
+- Both rules only raise to x. They apply on top of the current
+  mechanical verdict (src classifyRow). A row already x is "already x",
+  not a move.
+- R1 (step 2, credential replace). Method PUT or PATCH. The row is not
+  already claimed by step 2's CANT_UNDO lead-verb check, nor by the
+  existing credential-set rule (D131). The LAST path segment is
+  literal (not a {param}) and, lowercased with "-" and "_" removed,
+  equals one of: apikey, clientcredentials, token, secret. Singular
+  only. Nothing else is read (no summary, no operationId).
+- R2 (step 1, end session). Any method. Fires when either (a) the
+  operationId, split with the project tokenizer ("_", "-", ".",
+  camelCase), has lead tokens forming logout, signout or endsession
+  (the single token, or the two-token sequences log+out, sign+out,
+  end+session at lead position), or (b) any literal path segment,
+  lowercased with "-" and "_" removed, equals logout, signout or
+  endsession.
+- Bar (D100 tighten-only, as for F2), per rule, judged separately:
+  1. Among moved rows, right (truth x, leak closed) > wrong (truth w
+     or r, new over-tight), on each tuning line.
+  2. Too loose never rises on any line.
+  3. Holds under leave-one-vendor-out. The rules are fixed lists, so
+     LOVO here is the per-vendor breakdown plus the result with each
+     vendor's rows removed in turn; right and wrong are stated with the
+     top vendor removed.
+  4. Prevalence: APIs.guru fires (no truth) across providers, as F2
+     did. FLAG if one vendor holds more than 50% of the fires on any
+     line or in prevalence. 4 of the 5 R2 source rows are workos, so
+     every line is also reported with workos excluded.
+- Also reported: R1 and R2 jointly (both on); counts with denominators;
+  exact / too loose / too tight before and after per line.
+- Tuning lines, scored and printed separately, never blended: combined
+  (6557), buildset (1819), rwxlite fresh 949 (mechanical baseline is
+  classifyRow, not the file's lean), and rwxlite gate-3 (800; credential
+  and general strata separately). Gate-3 was the D131 exam and is burned
+  for that rule; here it is a tuning line for new rules only.
+  Not used: gate4-2026-11-04, rwxlite's gate-2026-11-07, and the
+  vendors clerk, neon, supabase, mux, netbird, ory, novu.
+- Run file: poc/r1r2/score.mjs, output score.txt. No Jev calls.
+
+## 2026-11-04 — R1/R2 tuning POC: both FAIL
+
+- Goal: tuning POC for the two rules the D133 rule comparison left as the
+  route to the 5 remaining leaks on the 949 set. R1: PUT/PATCH replacing
+  a credential (api-key, client-credentials, token, secret) is x. R2:
+  logout, signout, end-session is x on any method. Bar set before
+  measuring (pre-registration entry above): D100 tighten-only, per rule.
+- Tried: poc/r1r2/score.mjs, output poc/r1r2/score.txt, 7 tests pass. The
+  orchestrator re-ran it; the output was identical. Lines: combined
+  (6557), buildset (1819), rwxlite fresh 949, rwxlite gate3 (800), plus
+  APIs.guru prevalence (123339 ops, no truth). Every line also reported
+  with workos excluded.
+- Outcome: both FAIL.
+  - R1. Combined 0 fires of 6557. Buildset 0 of 1819. Fresh949: 2 fires,
+    2 moved, 2 right (workos upsertClientCredentials, upsertApiKey); too
+    loose 6 -> 4. Gate3: 1 fire, 1 moved, wrong (files.com PATCH
+    /api_key, truth w). Workos excluded: 0 right on every line.
+    APIs.guru: 20 fires across 3 providers, github.com 18 (90%), FLAG.
+  - R2. Combined 3 fires of 6557: 1 already x (zendesk DELETE
+    /users/me/logout), 2 moved, both wrong (okta GET and PUT
+    /api/v1/brands/{brandId}/pages/sign-out/customized: page settings,
+    not a session; truth r and w). Buildset 4 fires, all already x
+    (clearblade x2, keycloak, dracoon). Fresh949: 4 fires, 2 moved right
+    (workos GET /sso/logout, GET /user_management/sessions/logout), 2
+    already x. Gate3 0 fires of 800. Workos excluded: 0 right.
+    APIs.guru: 35 fires across 31 providers, top amazonaws.com 8.6%, only
+    3 would move.
+  - Joint R1+R2 adds nothing. Combined: 3 fires, 2 moved, 0 right, 2
+    wrong (the okta rows). Fresh949: 6 fires, 4 moved, 4 right, all
+    workos; with workos excluded 1 fire, already x, 0 moved. Gate3: 1
+    moved, wrong (files.com).
+  - Process slip: gate3 (rwxlite gate-2026-11-06) was included as a tuning
+    line, but its README says it was used once and is never for tuning. It
+    contributed only the one R1 wrong row (files.com). The verdict is the
+    same without it.
+- Lesson: the 5 leaks left on the 949 set are workos-shaped, so the rules
+  were fitted by construction. With the source vendor removed neither
+  rule closes a leak. A path-segment match on "sign-out" catches page
+  settings, not sessions. Logout rows elsewhere are already x through the
+  POST floor or DELETE. Neither rule is built; no D-number.
+- Ledger item, not fixed: credential-set (D131) fires on "pin" meaning a
+  pinned item. whapi PUT /account/plusCard/pin is already its one wrong
+  gate-3 fire; circuitsandbox PUT /spaces/{topicId}/pin was reported by
+  rwxlite on 2026-11-04. Over-tight, not a leak.
+
+## 2026-11-04 — credential-set floor cross-checked with rwxlite on 32 rows: PASS
+
+- Goal: user ruling that rwxmap and rwxlite check the credential-set guard on the same rows and agree. rwxmap's floor: the second pass never lowers a credential-set verdict (NEVER_LOWER_RULES, src/secondpass.js, commit 25125a8). rwxlite's guard: it reads the rule name as cant-undo-verb (rwxlite a939e62).
+- Data: rwxlite's 32-row file (commit 2a5989f, m1), copied to data/credential-set-2026-11-04/. Model rwxlite-0.1.0+8ad0a182 int8-pc. "before" = raw rule name, "after" = rwxlite's guard. No truth labels. The first two lines are the same operation (appwrite PATCH /account/password): 32 lines, 31 distinct operations.
+- Run: poc/credential-set-check/check.mjs, output out.txt, real classifyRow and secondPass with a stub engine. Orchestrator re-ran it from a cwd with no .env: exit 0, output identical, fixture byte-identical to rwxlite's.
+- Outcome:
+  - Our classifier calls all 32 rows credential-set, x, settled. No disagreement on the rule name.
+  - Mode a as run sends 0 of 32 (settled rows are not sent).
+  - Every mode and answer set ends 32 of 32 at x, 0 lowered (a forced, b at 95, b at 0; before and after).
+  - Without the guard, the "before" answers would lower 3 of 32 at b 95 and a forced (britbox PUT /account/pin w 0.984, whapi PUT /account/plusCard/pin w 0.990, circuitsandbox PUT /spaces/{topicId}/pin w 0.973) and 12 of 32 at b 0. The "after" answers lower 0 (x at 1.000 on all 32).
+  - "before" at b 95: 29 undecided (x, review tight), 3 kept.
+- Lesson: a model trained before a rule existed can confidently lower that rule's rows. A floor on the rule name in the adapter makes the safety independent of the model version installed.
+
+## 2026-11-04 — Shared exam #3 scored once (rwxmap side): mode a PASS
+
+- Goal: score the shared fresh exam #3 once, as pre-registered (rwxmap prereg 46235ea, rwxlite 1cef41c), on rwxlite r10 = 0.3.0 at fe374c0.
+- Tried: 7 vendors' official specs (clerk, neon, supabase, mux, netbird, ory, novu), 1377 operations. Truth from two blind Sonnet labellers on BRIEF-v3 (1370 of 1377 agreed) plus 7 user rulings. Six configs scored; output in data/exam3-2026-11-04/score/score.txt.
+- Outcome (exact / too loose / too tight, of 1377):
+
+  | config | exact | too loose | too tight |
+  |---|---|---|---|
+  | mech | 1094 (79.4%) | 17 (1.2%) | 266 (19.3%) |
+  | a-fp32 | 1178 (85.5%) | 15 (1.1%) | 184 (13.4%) |
+  | a-int8 | 1180 (85.7%) | 15 (1.1%) | 182 (13.2%) |
+  | b95-fp32 | 1179 (85.6%) | 12 (0.9%) | 186 (13.5%) |
+  | b95-int8 | 1182 (85.8%) | 12 (0.9%) | 183 (13.3%) |
+  | c-jev | 1250 (90.8%) | 16 (1.2%) | 111 (8.1%) |
+
+  - rwxlite: a-fp32 sent 592, raised 3, lowered 83, kept 331, undecided 175. a-int8 sent 592, raised 3, lowered 85, kept 326, undecided 178. b95-fp32 sent 1377, raised 4, lowered 125, kept 1004, undecided 244. b95-int8 sent 1377, raised 4, lowered 128, kept 1004, undecided 241.
+  - Jev: sent 1276, answered 1276, failed 0, changed 194.
+  - Bars. Mode a gate (a-fp32): PASS; too loose 15 vs mech 17; exact +6.10 points vs bar 5.0 (69 more rows). a-int8: PASS (+6.25 points). Mode b: no bar. Mode c (M3 gate, user-confirmed): PASS; too loose 1.2% <= 2%, too tight 8.1% <= 20%.
+  - The 15 a-fp32 too-loose rows are all mechanical's own leaks the model kept. Mode a closed 2 of mech's 17: ex3-0422 mux PUT live-streams/{LIVE_STREAM_ID}/complete, ex3-1028 novu PUT /v2/workflows/{workflowId}/sync. The 15, grouped:
+    - Credential or identity replace: ex3-0018 clerk PUT /beta_features/domain; ex3-0230 clerk PUT /users/{user_id}/email_address; ex3-0243 clerk PUT /users/{user_id}/phone_number; ex3-0246 clerk POST /users/{user_id}/remove_password; ex3-1059 ory PUT /admin/keys/{set}; ex3-1159 ory POST /self-service/recovery; ex3-1171 ory POST /self-service/verification.
+    - Billing: ex3-0729 netbird POST /api/integrations/billing/aws/marketplace/activate; ex3-0738 netbird PUT /api/integrations/billing/subscription; ex3-1256 supabase PATCH /v1/projects/{ref}/billing/addons.
+    - Mux analyze-structure jobs: ex3-0318 POST /robots/v0/jobs/analyze-structure; ex3-0355 POST /robots/v1/jobs/analyze-structure.
+    - Mux mp4-support: ex3-0400 PUT /video/v1/assets/{ASSET_ID}/mp4-support.
+    - Ory logout GETs: ex3-1104 GET /oauth2/sessions/logout; ex3-1150 GET /self-service/logout.
+    - Two of the 15 (ex3-1256 supabase billing/addons, ex3-0400 mux mp4-support) were ruled x by the user on dispute.
+  - Jev's 16: closes ex3-0230, ex3-0243 (clerk email_address, phone_number) and ex3-1028 vs mech, but opens ex3-0774 netbird POST msp tenants/{id}/subscription and ex3-0823 netbird POST peers/{peerId}/jobs (both evidence jev), and raises the two ory logout GETs only to w.
+  - rwxlite side (relayed by rwxlite; their log /home/hamr/PycharmProjects/rwxlite/data/exam3/score.log): their own gate GONOGO_lba097 is NO-GO for r10 int8-pc (15 too loose = 1.22% of answered vs 0.5%) and for 0.2.0. Mechanical 17 matches ours.
+  - Process: one labeller (A, mux, first pass) labelled by script and was rejected. The labellers are one model family, so agreement may be inflated.
+- Lesson: the second pass helps exactness (+84 exact rows) without adding leaks, but leaves mechanical's leaks in place when the model agrees with them. The remaining leaks are credential/identity replace, billing commits and logout GETs: the same shapes R1 and R2 failed to fix on tuning.
+- State: exam #3 is BURNED for both sides. Usable for training or tuning, never an exam again.
+
+## 2026-11-04 — rwxlite 0.2.0 vs r10 inside rwxmap, exam #3 replay (analysis, exam burned)
+
+- Goal: rwxlite asked rwxmap to help decide which model ships, 0.2.0 or r10 (0.3.0). Exam #3 is already burned; this is analysis, not a new exam.
+- Tried: replayed rwxlite's frozen per-row p files (rwxlite commit 7cb5dc0) through rwxmap's real `secondPass`, with mechanical verdicts built the way the CLI builds them. Script `poc/exam3-v020/replay.mjs`, output `poc/exam3-v020/out.txt`. Two gates before any number counts:
+  - Gate 1, mechanical vs `rows-mech.csv`: 1377 of 1377 equal.
+  - Gate 2, r10 replay vs the committed CLI rows (letter and review): fp32 equal on 1377 of 1377 in mode a and in b95. int8 FAILED: 5 rows differ in mode a (ex3-0601, ex3-0661, ex3-0846, ex3-0910, ex3-1344) and 7 in b95 (ex3-0348, ex3-0948, ex3-0993, ex3-1046, ex3-1058, ex3-1148, ex3-1333). Every one sits within about 0.01 of a cut (0.97 or 0.95). rwxlite's int8 p file and the CLI's int8 run disagree by about 0.005 to 0.01. rwxlite is investigating; the suspects are thread count (the CLI uses min(4, cores), 4 on the i7-8665U) and batching per vendor.
+  - So 0.2.0 is reported for fp32 only. int8 0.2.0 was not computed.
+- Outcome (exact / too loose / too tight, of 1377):
+
+  | config | exact | too loose | too tight | secondPass |
+  |---|---|---|---|---|
+  | mech | 1094 | 17 | 266 | - |
+  | r10 a-fp32 | 1178 | 15 | 184 | sent 592, raised 3, lowered 83, kept 331, undecided 175 |
+  | 0.2.0 a-fp32 | 1192 | 15 | 170 | sent 592, raised 3, lowered 97, kept 329, undecided 163 |
+  | r10 b95-fp32 | 1179 | 12 | 186 | sent 1377, raised 4, lowered 125, kept 1004, undecided 244 |
+  | 0.2.0 b95-fp32 | 1181 | 14 | 182 | sent 1377, raised 3, lowered 134, kept 1007, undecided 233 |
+
+  - Mode a: 22 rows differ in letter, none a leak. 0.2.0 is right on 18 (POST creates that r10 raised to x: clerk, mux, neon, netbird, novu, ory, supabase). r10 is right on 4: ex3-0576 neon, ex3-1302 supabase, ex3-1331 supabase, ex3-1345 supabase. Same 15 too-loose rows. 0.2.0 passes the D133 mode-a bar: 15 too loose vs 17, exact +98 rows = +7.12 points vs 5.0 (r10: +6.10).
+  - Mode b95: 39 rows differ in letter. 0.2.0 is newly too loose on 4 truth-x rows that r10 got exact: ex3-0018 clerk PUT /beta_features/domain, ex3-0031 clerk POST price_transition, ex3-0257 clerk POST /waitlist_entries/bulk, ex3-0774 netbird POST msp tenants/{id}/subscription. It fixes 2 r10 leaks: ex3-1059 ory PUT /admin/keys/{set}, ex3-1104 ory GET /oauth2/sessions/logout. Net 14 too loose vs r10's 12 (12 + 4 - 2). Mode b has no bar.
+- Caveats:
+  - The 0.2.0 fp32 file carries the stale string `rwxlite-0.1.0+8503b655`. The published model is `rwxlite-0.2.0+8503b655`, same weights. Each file's own string was passed to `secondPass`; the file was not rewritten.
+  - The replay is post-hoc, not pre-registered.
+  - Choosing between two pre-fixed models on a burned exam is a mild form of fitting.
+- Lesson: a replay is trusted only after it reproduces the committed rows exactly. The int8 check caught a p drift that rwxlite's own parity test (2.2e-16) missed.
+
+## 2026-11-04 — D135: rwxlite 0.2.0 ships, download pinned to the tag
+
+- Goal: record the user's ruling (rwxmap ships rwxlite 0.2.0; a newer model needs a no-regression result on a fresh clean exam) and make the code match it.
+- Tried: read `src/modeldownload.js`. The manifest URLs used `releases/latest/download/`, so a new upstream rwxlite release would have reached users before any check. Second gap: the offline fallback took the highest verified cached model, so a cached 0.3.0 would beat 0.2.0 when the network failed.
+- Outcome: one constant `RWXLITE_TAG = 'v0.2.0'` builds the URLs; `RWXLITE_VERSION` is derived from it. Checked read-only that both v0.2.0 manifests say version 0.2.0. `findModel` takes an optional `onlyVersion` (callers that omit it behave as before; the only caller is `ensureModel`, which passes the pinned version). Cached 0.3.0 and 0.1.0 are now ignored; with none of the pinned version cached the run is off (mechanical, stated). The now-dead redirect-tag logic was removed. Offline note now says "could not reach the release". Tests: guard test fails if a manifest URL has `/latest/` or lacks the tag (broken by hand once: 13 modeldownload tests failed, it was one; restored). `npm test` 588 pass 0 fail, `npm run typecheck` 0, `npm run check:lockfile` 0, conformance 6/6 exit 0.
+- Also recorded: the int8 p drift traced by rwxlite to batch composition (answerMany pads to the longest row; int8-pc uses one dynamic scale over the batch), not threads. fp32 is unaffected. The fix is rwxlite's; re-check int8 parity when it ships.
+- Lesson: a pin on the download is not a pin on the run; every fallback path that reads the cache must name the same version.
+
+## 2026-11-04 — rwxlite 0.2.1 parity (code-only int8 fix) on exam #3
+
+- Goal: measure rwxlite's int8 batching fix before it is released, so the PRD's known limit can state what is true. Parity only; exam #3 is burned, so no score here picks anything.
+- Setup: rwxlite 0.2.0 (6c47fec) and 0.2.1 (308d8e9, branch fix/int8-batch1, unreleased) each ran through the real rwxmap CLI on the published v0.2.0 model files (fp32 `rwxlite-0.2.0+8503b655`, int8 `rwxlite-0.2.0+8ad0a182`; same model string in both runs). The requests were captured and were byte-identical in both runs: 592 rows in mode a (15 chunks), 1377 in b95 (25 chunks), for fp32 and int8 alike. Logs in `poc/rwxlite-021-parity/out/` (pcheck.log, compare.log).
+- Outcome:
+  - fp32: all 1377 rows are the same in letter and review marker, in mode a and mode b95 (0 differ). dp is 0 (answerMany vs one row at a time, and 0.2.1 vs 0.2.0). It reproduces the committed 0.2.0 replay, 1192 / 15 / 170 (exact / too loose / too tight, dcb4bd0).
+  - int8 under 0.2.0: batched (answerMany) vs one-row answers differ on 592 of 592 rows in mode a (max |dp| 0.169) and 1376 of 1377 in b95 (max |dp| 0.144). Under 0.2.1, dp is 0 exactly, in both modes.
+  - int8 letters, 0.2.1 vs 0.2.0: 9 rows differ in mode a, 13 in b95. Info only (burned exam): mode a 1192 / 15 / 170 -> 1189 / 16 / 172; b95 1181 / 13 / 183 -> 1180 / 14 / 183. Each mode gains one too-loose row: ex3-0422 mux PUT /video/v1/live-streams/{LIVE_STREAM_ID}/complete (mode a, truth x) and ex3-0257 clerk POST /waitlist_entries/bulk (b95, truth x). Both new leaks carry review marker loose.
+- Lesson: 0.2.1 makes int8 consistent, not more accurate. The rows 0.2.0's batching got right were luck from batch neighbours. fp32, the default, is untouched, so taking 0.2.1 does not change what D135 pins.
+
+## 2026-11-04 — D135: rwxlite npm package range-checked
+
+- Goal: the model files are pinned to v0.2.0, but the rwxlite package that runs them is installed by the user at any version, so a code change there could change answers unseen.
+- Outcome: `loadRwxliteEngine` reads the installed package's version (resolve the entry, walk up to the package.json named rwxlite; the package exports no version) and accepts only >=0.2.0 <0.3.0, derived from `RWXLITE_TAG`. Anything else, a pre-release (0.2.1-beta) or an unreadable version is off, mechanical alone, with the reason. Seam: `versionReader` beside `importer` (cli: `rwxliteVersionReader`). Tests cover 0.2.0, 0.2.1, 0.3.0, 0.1.9, garbage, missing and the reason text; range check broken by hand once (10 -> 9 pass, 1 fail), restored.
+- Lesson: pinning the data is not pinning the code that reads it; every piece the user installs separately needs its own gate.
+
+## 2026-11-05 — Shared exam #4 scored once (rwxmap side): rwxlite r11 NO-GO under D135
+
+- Goal: score the frozen exam #4 (chatwoot, harbor, immich, permit, polar, render, zulip; 1505 ops) once, at rwxmap 9f58894, for the D135 next-model gate (rwxlite r11 = v0.3.0 vs shipped 0.2.0). Jev was scored in a second run (below). Exam is BURNED for both sides.
+- Outcome (exact / too loose / too tight of 1505): mech 1262 / 21 / 222; a-fp32 base 1391 / 16 / 98; a-fp32 cand 1393 / 18 / 94; b95-fp32 base 1397 / 9 / 99, cand 1404 / 7 / 94. D135 gate: too loose 18 vs 16 FAIL, exact 1393 vs 1391 OK, so NO-GO and 0.2.0 stays. D133 mode a bar PASS for all four (base +8.57 points, 16 vs 21 too loose). Mode c (c-jev, jev-1.14.0, scored 2026-11-05): 1428 / 17 / 60 (94.9% exact, 1.1% too loose, 4.0% too tight), M3 gate PASS; Jev sent 1354, answered 1354, failed 0, changed 174. Not near the bar (1.1% vs 2%), so its non-determinism does not change the verdict.
+- Findings: 12 rows differ base vs cand. Cand opens 3 leaks (ex4-0813 permit POST env copy; ex4-1115, ex4-1318 render PUT secret-files) and closes 1 (ex4-0335 harbor PUT purgeaudit). Every base leak but one carries floor or list evidence; ex4-0573 is the only row rwxlite lowered itself. Of Jev's 17 leaks, 15 are mechanical leaks it kept (13 floor, 2 list) and 2 it opened itself (ex4-0023 chatwoot POST campaigns, ex4-0573 immich POST shared-links, both evidence jev); it closed 6 of mech's 21. Harbor PUT/PATCH job and execution stop rows (ex4-0170, 0175, 0241, 0279, 0295, 0327) are mechanical floor leaks both models keep.
+- rwxlite's own scorer (a_none): mech 1262/21/222 (same), base 1448/24/33, cand 1447/22/36, NO-GO on exact (1447 < 1448). Confirmed by rwxlite: a_none is offline mode a at exam #3's cuts, sends every row, never asks or reviews, so it lacks our lower-only-at-0.97 rule, settled-row skip and credential never-lower. They record naming a_none as the gate config as a prereg error; next exam their gate is rwxmap's CLI secondPass or a replay of their p-jsonl through our CLI.
+- Lesson: two scorers can agree on the verdict and disagree on the reason, so compare the rule each one applies before comparing numbers.
+
+## 2026-11-05 — rwxlite 0.2.0 replayed on six rwxlite sets through mode a (mistake sources for round 12)
+
+- Goal: give rwxlite its mistakes counted under the rule that ships (lower only at p >= 0.97 in mode a, otherwise x plus review tight; raise accepted; settled rows never sent), not under its offline a_none scorer, so round 12 trains against the real gate. The plan is targeted retraining on the mistakes plus variations, aimed at fewer too loose and too tight rows.
+- Setup: new tool `poc/replay-r12/replay.mjs` (commit c71d2bc) reads ops.csv + truth + p-jsonl and runs `src/exporter.js` classifyOperations and `src/secondpass.js`. Parity: on exam #4 it reproduced mechanical (1505/1505) and r11 mode a (1505/1505, 1393/18/94); both gates were broken by hand (one flipped letter) and failed with exit 3. Inputs come from rwxlite dev 4b172b2 at `/home/hamr/PycharmProjects/rwxlite/data/r12/replay/<set>/`, SHA256SUMS verified; model rwxlite-0.2.0+8503b655 fp32, T 0.844. Every op had a p row and a truth label; none skipped. Fresh-set mechanical 736/6/207 equals the committed D133 tuning figure. Output committed in 2f9a1a9 (`poc/replay-r12/out/`).
+- Caveat: exam-2026-11-03-fresh, gate-2026-11-06 and gate-2026-11-07 are in rwxlite training (-06 and -07 hold 95 rows with Jev's wrong label), so they are mistake sources, not held-out measures. r9-hand truth is the stricter of labellers A and B.
+- Outcome (exact / too loose / too tight, mechanical -> mode a):
+  - fresh, 949 ops: 736/6/207 -> 827/6/116
+  - gate-2026-11-03, 600 ops: 462/10/128 -> 511/8/81
+  - gate-2026-11-04, 600 ops: 476/7/117 -> 523/7/70
+  - gate-2026-11-06, 800 ops: 580/23/197 -> 648/20/132
+  - gate-2026-11-07, 800 ops: 599/10/191 -> 690/8/102
+  - r9-hand, 1200 ops: 412/10/778 -> 796/13/391 (all 1200 sent; no settled rows)
+- Findings:
+  1. Too tight is mostly confidence, not knowledge. Of 878 rows sent to the model that stayed x with review tight while truth was looser, the model's top letter was already right on 747 (85%): 516 at p 0.90-0.97, 116 at 0.80-0.90, 115 below 0.80. Only 115 had the model saying x; 16 said the other looser letter. Per set (tight sent / top letter right / of those at 0.90-0.97): fresh 111/81/38; gate-11-03 79/62/44; gate-11-04 69/57/35; gate-11-06 127/104/65; gate-11-07 101/72/55; r9-hand 391/371/279. Measured with p of the top letter (x = pIsX, w = pChanges - pIsX, r = 1 - pChanges); the exact quantity the 0.97 rule reads may differ, rwxlite told to check.
+  2. The model's own leaks (lowered x to w at >= 0.97, evidence rwxlite): 6 rows. gate3-0482 aws POST Route53Domains RegisterDomain (registers and pays for a domain); r9-0543 watchful.li POST /sites/{id}/audits createAudits; r9-0814 twilio POST /v2/Services/{ServiceSid}/Entities/{Identity}/Challenges CreateChallenge (sends a verification challenge to a real person's factor); r9-0897 azure POST .../operationalizationClusters/{clusterName}/updateSystemServices; r9-1109 shipengine POST /v1/manifests create_manifest (closes out shipments to a carrier); r9-1164 google POST .../clusters/{clusterId}/master (updates the cluster master). All are x->w, none x->r.
+  3. Raise misses: floor w, truth x, sent and not raised: 18 PUT + 11 PATCH across the six sets, the same shape as exam #4's harbor job stop and render secret-files rows. Raise has no threshold, so these are plain recall misses.
+  4. Unreachable by any model (never sent): GET floor r with truth w or x, 19 rows; settled list PUT/PATCH (mechanical x, truth w), 10 rows. Dropped from rwxlite's targets.
+- Open (not a ruling): how bad is x->w compared with x->r? The user's view (2026-11-05): x->w is not great, still loose, but not the worst kind. The orchestrator's view: agreed it is milder, because a w row is still flagged as a change and a gate that asks on every write still asks; an x->r row may be let through as a read. But how bad it is depends on the gate: if a policy lets w through as "undoable", RegisterDomain or a twilio challenge goes through unasked. Of the 6, 3 are clear x (RegisterDomain, twilio Challenge, shipengine manifest) and 3 sit on the label boundary (create audit, update system services, update cluster master), where a labeller could argue w. Proposal, not adopted: keep counting x->w as too loose (the invariant and every gate stay unchanged), but report a severity split beside the total (x->r, x->w, w->r), and suggest rwxlite weight its training loss x->r > x->w > w->r. Changing any gate's weighting would need a D-number and the user's ruling.
+- Lesson: under the shipped rule the cheap win is calibration, because the model already knows most of the tight rows; the risk to watch is the handful of confident wrong lowers, which sharpening could grow.
+
+## 2026-11-05 — Lowering cut-off what-if (0.99-0.90) and the rulings it led to (D136)
+
+- Goal: the user asked what a 95% lowering cut-off would do instead of 97%.
+- Setup: `replay.mjs --lower-min-p` through a temp copy of the second pass. Parity P1: temp copy at 0.97 = real module, exam #4 r11, 0 differ. P2: G1/G2 still pass. Exam #4 0.2.0 base reproduced 1391/16/98 row for row; exam #3 totals 1192/15/170 reproduced (no per-row 0.2.0 file exists). Sets: the six rwxlite r12 sets plus exam #3 and exam #4 (both burned; measurement only). Output in `poc/replay-r12/out/cutoff/` (c03b9eb).
+- Outcome, pooled over 8 sets (exact / too loose / too tight; leaks added vs 0.97):
+  - 7831 rows, 0.99: 5635/86/2110 (0 added); 0.97: 6578/93/1160; 0.95: 6903/105/823 (+12); 0.93: 7044/118/669 (+25); 0.90: 7163/130/538 (+37).
+  - Without the three training sets (5282 rows): 0.99 3717/53/1512; 0.97 4413/59/810; 0.95 4663/67/552 (+8); 0.93 4764/77/441 (+18); 0.90 4854/82/346 (+23).
+- Per set (exact / too loose / too tight at 0.99, 0.97, 0.95, 0.93, 0.90):
+  - fresh, 949: 735/6/208; 827/6/116; 845/8/96; 855/8/86; 856/15/78
+  - gate-2026-11-03, 600: 464/8/128; 511/8/81; 538/8/54; 547/10/43; 553/10/37
+  - gate-2026-11-04, 600: 477/7/116; 523/7/70; 536/8/56; 549/8/43; 557/8/35
+  - gate-2026-11-06, 800: 584/19/197; 648/20/132; 678/20/102; 694/21/85; 712/21/67
+  - gate-2026-11-07, 800: 599/8/193; 690/8/102; 717/10/73; 731/12/57; 741/12/47
+  - r9-hand, 1200: 413/8/779; 796/13/391; 959/15/226; 1014/20/166; 1066/23/111
+  - exam #4, 1505: 1268/15/222; 1391/16/98; 1407/18/80; 1411/21/73; 1419/22/64
+  - exam #3, 1377: 1095/15/267; 1192/15/170; 1223/18/136; 1243/18/116; 1259/19/99
+- The 12 leaks added at 0.95 (all x->w POST; id, provider, path, p): fx-0718 getlago /credit_notes 0.9578; fx-0936 workos /user_management/waitlists/{id}/entries 0.9637; gate2-0219 linode /linode/instances 0.9516; gate4-0667 googleapis /v1/{parent}/messages 0.9655; gate4-0672 windows.net /jobs/{jobId}/addtaskcollection 0.9683; r9-0713 microsoft /me/events/{event-id}/exceptionOccurrences/{event-id1}/microsoft.graph.tentativelyAccept 0.9516; r9-1129 elmah.io /v3/messages/{logId} 0.9670; ex4-0152 chatwoot .../conversations/{conversation_id}/messages 0.9692; ex4-0813 permit.io /v2/projects/{proj_id}/envs/{env_id}/copy 0.9638; ex3-0031 clerk /billing/subscription_items/{subscription_item_id}/price_transition 0.9643; ex3-0257 clerk /waitlist_entries/bulk 0.9526; ex3-0774 netbird /api/integrations/msp/tenants/{id}/subscription 0.9541. No x->r leak at any cut-off; one w->r at 0.93 (r9-0689 trakt POST /users/{id}/lists/{list_id}/like, p 0.9386).
+- Bar check: 0.95 breaks the D133 mode-a bar (too loose no worse than mechanical) on exam #3 (18 vs 17), gate-2026-11-04 (8 vs 7) and the fresh set (8 vs 6); 0.97 passes (mechanical too loose: exam #3 17, gate-2026-11-04 7, fresh 6; verify against poc/replay-r12/out/cutoff/log-*-0.97.txt mechanical lines).
+- Also, rwxlite review findings this session:
+  - (a) rwxlite's Jev cross-check for generated variants would drop about half of true-x variants (Jev x-recall 47.8%, x-precision 93%); rwxlite made it one-sided and will report the x share before/after.
+  - (b) Variants that drop the description can remove the only x evidence (influx gate-0579 "This will cancel all queued runs", vimeo gate-0597 "publish the page", vtex r9-0089 "Create a debit value"); such variants must keep that sentence or be relabelled by the brief.
+  - (c) Of 11 human truths rwxlite's generator flagged, 7 are right on the full description, 3 borderline (victorops resolve-all x, nexmo network-unblock w, azure listkeys r), 1 reads wrong under BRIEF-v3 (r9-0263 codat POST push/billCreditNotes, w; pushes to an outside accounting package, (e)/(d) x; rwxlite's truth, their call).
+- Decision: D136 (both rulings).
+- Lesson: a lower cut-off buys tight rows at ~28 per leak but every added leak is a confident x->w; the bar (no looser than mechanical) catches it per set, so the gain has to come from the model, not the rule.
+- Follow-up ruling (2026-11-05): clause (f) stands for job stops; truth-d136.csv copies added beside exam #3 and #4 truth (4 restart rows to w), originals untouched.

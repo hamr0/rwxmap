@@ -1,0 +1,591 @@
+row_id,provider,method,path,operationId,summary,description
+ex4-0903,polar.sh,GET,/v1/benefit-grants/,benefit-grants:list,List Benefit Grants,"List benefit grants across all benefits accessible to the authenticated subject.
+
+**Scopes**: `benefits:read` `benefits:write`"
+ex4-0904,polar.sh,GET,/v1/benefits/,benefits:list,List Benefits,"List benefits.
+
+**Scopes**: `benefits:read` `benefits:write`"
+ex4-0905,polar.sh,POST,/v1/benefits/,benefits:create,Create Benefit,"Create a benefit, for example license keys, file downloads or Discord access.
+
+**Scopes**: `benefits:write`"
+ex4-0906,polar.sh,DELETE,/v1/benefits/{id},benefits:delete,Delete Benefit,"Delete a benefit.
+
+> [!WARNING]
+> Every grants associated with the benefit will be revoked.
+> Users will lose access to the benefit.
+
+**Scopes**: `benefits:write`"
+ex4-0907,polar.sh,GET,/v1/benefits/{id},benefits:get,Get Benefit,"Get a benefit by ID.
+
+**Scopes**: `benefits:read` `benefits:write`"
+ex4-0908,polar.sh,PATCH,/v1/benefits/{id},benefits:update,Update Benefit,"Update a benefit.
+
+**Scopes**: `benefits:write`"
+ex4-0909,polar.sh,GET,/v1/benefits/{id}/files,benefits:files,List Benefit Files,"List the downloadable files for a benefit with their download statistics.
+
+**Scopes**: `benefits:read` `benefits:write`"
+ex4-0910,polar.sh,GET,/v1/benefits/{id}/grants,benefits:grants,List Benefit Grants,"List the individual grants for a benefit.
+
+It's especially useful to check if a user has been granted a benefit.
+
+**Scopes**: `benefits:read` `benefits:write`"
+ex4-0911,polar.sh,GET,/v1/checkout-links/,checkout-links:list,List Checkout Links,"List checkout links.
+
+**Scopes**: `checkout_links:read` `checkout_links:write`"
+ex4-0912,polar.sh,POST,/v1/checkout-links/,checkout-links:create,Create Checkout Link,"Create a checkout link.
+
+**Scopes**: `checkout_links:write`"
+ex4-0913,polar.sh,DELETE,/v1/checkout-links/{id},checkout-links:delete,Delete Checkout Link,"Delete a checkout link.
+
+**Scopes**: `checkout_links:write`"
+ex4-0914,polar.sh,GET,/v1/checkout-links/{id},checkout-links:get,Get Checkout Link,"Get a checkout link by ID.
+
+**Scopes**: `checkout_links:read` `checkout_links:write`"
+ex4-0915,polar.sh,PATCH,/v1/checkout-links/{id},checkout-links:update,Update Checkout Link,"Update a checkout link.
+
+**Scopes**: `checkout_links:write`"
+ex4-0916,polar.sh,GET,/v1/checkouts/,checkouts:list,List Checkout Sessions,"List checkout sessions.
+
+**Scopes**: `checkouts:read` `checkouts:write`"
+ex4-0917,polar.sh,POST,/v1/checkouts/,checkouts:create,Create Checkout Session,"Create a checkout session.
+
+**Scopes**: `checkouts:write`"
+ex4-0918,polar.sh,GET,/v1/checkouts/client/{client_secret},checkouts:client_get,Get Checkout Session from Client,Get a checkout session by client secret.
+ex4-0919,polar.sh,PATCH,/v1/checkouts/client/{client_secret},checkouts:client_update,Update Checkout Session from Client,Update a checkout session by client secret.
+ex4-0920,polar.sh,POST,/v1/checkouts/client/{client_secret}/confirm,checkouts:client_confirm,Confirm Checkout Session from Client,"Confirm a checkout session by client secret.
+
+Orders and subscriptions will be processed."
+ex4-0921,polar.sh,GET,/v1/checkouts/{id},checkouts:get,Get Checkout Session,"Get a checkout session by ID.
+
+**Scopes**: `checkouts:read` `checkouts:write`"
+ex4-0922,polar.sh,PATCH,/v1/checkouts/{id},checkouts:update,Update Checkout Session,"Update a checkout session.
+
+**Scopes**: `checkouts:write`"
+ex4-0923,polar.sh,GET,/v1/custom-fields/,custom-fields:list,List Custom Fields,"List custom fields.
+
+**Scopes**: `custom_fields:read` `custom_fields:write`"
+ex4-0924,polar.sh,POST,/v1/custom-fields/,custom-fields:create,Create Custom Field,"Create a custom field.
+
+**Scopes**: `custom_fields:write`"
+ex4-0925,polar.sh,DELETE,/v1/custom-fields/{id},custom-fields:delete,Delete Custom Field,"Delete a custom field.
+
+**Scopes**: `custom_fields:write`"
+ex4-0926,polar.sh,GET,/v1/custom-fields/{id},custom-fields:get,Get Custom Field,"Get a custom field by ID.
+
+**Scopes**: `custom_fields:read` `custom_fields:write`"
+ex4-0927,polar.sh,PATCH,/v1/custom-fields/{id},custom-fields:update,Update Custom Field,"Update a custom field.
+
+**Scopes**: `custom_fields:write`"
+ex4-0928,polar.sh,GET,/v1/customer-meters/,customer_meters:list,List Customer Meters,"List customer meters.
+
+**Scopes**: `customer_meters:read`"
+ex4-0929,polar.sh,GET,/v1/customer-meters/{id},customer_meters:get,Get Customer Meter,"Get a customer meter by ID.
+
+**Scopes**: `customer_meters:read`"
+ex4-0930,polar.sh,GET,/v1/customer-portal/benefit-grants/,customer_portal:benefit-grants:list,List Benefit Grants,"List benefits grants of the authenticated customer.
+
+**Scopes**: `customer_portal:read` `customer_portal:write`"
+ex4-0931,polar.sh,GET,/v1/customer-portal/benefit-grants/{id},customer_portal:benefit-grants:get,Get Benefit Grant,"Get a benefit grant by ID for the authenticated customer.
+
+**Scopes**: `customer_portal:read` `customer_portal:write`"
+ex4-0932,polar.sh,PATCH,/v1/customer-portal/benefit-grants/{id},customer_portal:benefit-grants:update,Update Benefit Grant,"Update a benefit grant for the authenticated customer.
+
+**Scopes**: `customer_portal:write`"
+ex4-0933,polar.sh,GET,/v1/customer-portal/customer-session/introspect,customer_portal:customer-session:introspect,Introspect Customer Session,"Introspect the current session and return its information.
+
+**Scopes**: `customer_portal:read` `customer_portal:write`"
+ex4-0934,polar.sh,GET,/v1/customer-portal/customer-session/user,customer_portal:customer-session:get_authenticated_user,Get Authenticated Portal User,"Get information about the currently authenticated portal user.
+
+**Scopes**: `customer_portal:read` `customer_portal:write`"
+ex4-0935,polar.sh,GET,/v1/customer-portal/customers/me,customer_portal:customers:get,Get Customer,"Get authenticated customer.
+
+**Scopes**: `customer_portal:read` `customer_portal:write`"
+ex4-0936,polar.sh,PATCH,/v1/customer-portal/customers/me,customer_portal:customers:update,Update Customer,Update authenticated customer.
+ex4-0937,polar.sh,GET,/v1/customer-portal/customers/me/email-update/check,customer_portal:customers:check_email_update,Check Email Change Token,Check if an email change verification token is still valid.
+ex4-0938,polar.sh,POST,/v1/customer-portal/customers/me/email-update/request,customer_portal:customers:request_email_update,Request Email Change,Request an email change for the authenticated customer.
+ex4-0939,polar.sh,POST,/v1/customer-portal/customers/me/email-update/verify,customer_portal:customers:verify_email_update,Verify Email Change,Verify an email change using the token from the verification email.
+ex4-0940,polar.sh,GET,/v1/customer-portal/customers/me/payment-methods,customer_portal:customers:list_payment_methods,List Customer Payment Methods,Get saved payment methods of the authenticated customer.
+ex4-0941,polar.sh,POST,/v1/customer-portal/customers/me/payment-methods,customer_portal:customers:add_payment_method,Add Customer Payment Method,Add a payment method to the authenticated customer.
+ex4-0942,polar.sh,POST,/v1/customer-portal/customers/me/payment-methods/confirm,customer_portal:customers:confirm_payment_method,Confirm Customer Payment Method,Confirm a payment method for the authenticated customer.
+ex4-0943,polar.sh,DELETE,/v1/customer-portal/customers/me/payment-methods/{id},customer_portal:customers:delete_payment_method,Delete Customer Payment Method,Delete a payment method from the authenticated customer.
+ex4-0944,polar.sh,GET,/v1/customer-portal/downloadables/,customer_portal:downloadables:list,List Downloadables,**Scopes**: `customer_portal:read` `customer_portal:write`
+ex4-0945,polar.sh,GET,/v1/customer-portal/license-keys/,customer_portal:license_keys:list,List License Keys,**Scopes**: `customer_portal:read` `customer_portal:write`
+ex4-0946,polar.sh,POST,/v1/customer-portal/license-keys/activate,customer_portal:license_keys:activate,Activate License Key,"Activate a license key instance.
+
+> This endpoint doesn't require authentication and can be safely used on a public
+> client, like a desktop application or a mobile app.
+> If you plan to validate a license key on a server, use the `/v1/license-keys/activate`
+> endpoint instead."
+ex4-0947,polar.sh,POST,/v1/customer-portal/license-keys/deactivate,customer_portal:license_keys:deactivate,Deactivate License Key,"Deactivate a license key instance.
+
+> This endpoint doesn't require authentication and can be safely used on a public
+> client, like a desktop application or a mobile app.
+> If you plan to validate a license key on a server, use the `/v1/license-keys/deactivate`
+> endpoint instead."
+ex4-0948,polar.sh,POST,/v1/customer-portal/license-keys/validate,customer_portal:license_keys:validate,Validate License Key,"Validate a license key.
+
+> This endpoint doesn't require authentication and can be safely used on a public
+> client, like a desktop application or a mobile app.
+> If you plan to validate a license key on a server, use the `/v1/license-keys/validate`
+> endpoint instead."
+ex4-0949,polar.sh,GET,/v1/customer-portal/license-keys/{id},customer_portal:license_keys:get,Get License Key,"Get a license key.
+
+**Scopes**: `customer_portal:read` `customer_portal:write`"
+ex4-0950,polar.sh,POST,/v1/customer-portal/license-keys/{id}/rotate,customer_portal:license_keys:rotate,Rotate License Key,"Rotate a license key.
+
+Generates a new key string for the same license key record. The previous
+key string immediately stops validating. Status, usage, limits, expiry,
+and activations are preserved.
+
+**Scopes**: `customer_portal:write`"
+ex4-0951,polar.sh,GET,/v1/customer-portal/members,customer_portal:members:list_members,List Members,"List all members of the customer's team.
+
+Only available to owners and billing managers of team customers."
+ex4-0952,polar.sh,POST,/v1/customer-portal/members,customer_portal:members:add_member,Add Member,"Add a new member to the customer's team.
+
+Only available to owners and billing managers of team customers.
+
+Rules:
+- Cannot add a member with the owner role (there must be exactly one owner)
+- If a member with this email already exists, the existing member is returned"
+ex4-0953,polar.sh,DELETE,/v1/customer-portal/members/{id},customer_portal:members:remove_member,Remove Member,"Remove a member from the team.
+
+Only available to owners and billing managers of team customers.
+
+Rules:
+- Cannot remove yourself
+- Cannot remove the only owner"
+ex4-0954,polar.sh,PATCH,/v1/customer-portal/members/{id},customer_portal:members:update_member,Update Member,"Update a member's name or role.
+
+Only available to owners and billing managers of team customers.
+
+Rules:
+- Cannot modify your own role (to prevent self-demotion)
+- Customer must have exactly one owner at all times"
+ex4-0955,polar.sh,GET,/v1/customer-portal/meters/,customer_portal:customer_meters:list,List Meters,"List meters of the authenticated customer.
+
+**Scopes**: `customer_portal:read` `customer_portal:write`"
+ex4-0956,polar.sh,GET,/v1/customer-portal/meters/{id},customer_portal:customer_meters:get,Get Customer Meter,"Get a meter by ID for the authenticated customer.
+
+**Scopes**: `customer_portal:read` `customer_portal:write`"
+ex4-0957,polar.sh,GET,/v1/customer-portal/orders/,customer_portal:orders:list,List Orders,List orders of the authenticated customer.
+ex4-0958,polar.sh,GET,/v1/customer-portal/orders/{id},customer_portal:orders:get,Get Order,Get an order by ID for the authenticated customer.
+ex4-0959,polar.sh,PATCH,/v1/customer-portal/orders/{id},customer_portal:orders:update,Update Order,Update an order for the authenticated customer.
+ex4-0960,polar.sh,POST,/v1/customer-portal/orders/{id}/confirm-payment,customer_portal:orders:confirm_retry_payment,Confirm Retry Payment,Confirm a retry payment using a Stripe confirmation token.
+ex4-0961,polar.sh,GET,/v1/customer-portal/orders/{id}/invoice,customer_portal:orders:invoice,Get Order Invoice,Get an order's invoice data.
+ex4-0962,polar.sh,POST,/v1/customer-portal/orders/{id}/invoice,customer_portal:orders:generate_invoice,Generate Order Invoice,Trigger generation of an order's invoice.
+ex4-0963,polar.sh,GET,/v1/customer-portal/orders/{id}/payment-status,customer_portal:orders:get_payment_status,Get Order Payment Status,Get the current payment status for an order.
+ex4-0964,polar.sh,GET,/v1/customer-portal/orders/{id}/receipt,customer_portal:orders:receipt,Get Order Receipt,Get a presigned URL to download an order's receipt PDF.
+ex4-0965,polar.sh,GET,/v1/customer-portal/organizations/{slug},customer_portal:organizations:get,Get Organization,Get a customer portal's organization by slug.
+ex4-0966,polar.sh,GET,/v1/customer-portal/seats,customer_portal:seats:list_seats,List Seats,**Scopes**: `customer_portal:read` `customer_portal:write`
+ex4-0967,polar.sh,POST,/v1/customer-portal/seats,customer_portal:seats:assign_seat,Assign Seat,
+ex4-0968,polar.sh,GET,/v1/customer-portal/seats/subscriptions,customer_portal:seats:list_claimed_subscriptions,List Claimed Subscriptions,"List all subscriptions where the authenticated customer has claimed a seat.
+
+**Scopes**: `customer_portal:read` `customer_portal:write`"
+ex4-0969,polar.sh,DELETE,/v1/customer-portal/seats/{seat_id},customer_portal:seats:revoke_seat,Revoke Seat,
+ex4-0970,polar.sh,POST,/v1/customer-portal/seats/{seat_id}/resend,customer_portal:seats:resend_invitation,Resend Invitation,
+ex4-0971,polar.sh,GET,/v1/customer-portal/subscriptions/,customer_portal:subscriptions:list,List Subscriptions,"List subscriptions of the authenticated customer.
+
+**Scopes**: `customer_portal:read` `customer_portal:write`"
+ex4-0972,polar.sh,DELETE,/v1/customer-portal/subscriptions/{id},customer_portal:subscriptions:cancel,Cancel Subscription,Cancel a subscription of the authenticated customer.
+ex4-0973,polar.sh,GET,/v1/customer-portal/subscriptions/{id},customer_portal:subscriptions:get,Get Subscription,"Get a subscription for the authenticated customer.
+
+**Scopes**: `customer_portal:read` `customer_portal:write`"
+ex4-0974,polar.sh,PATCH,/v1/customer-portal/subscriptions/{id},customer_portal:subscriptions:update,Update Subscription,Update a subscription of the authenticated customer.
+ex4-0975,polar.sh,GET,/v1/customer-portal/wallets/,customer_portal:wallets:list,List Wallets,List wallets of the authenticated customer.
+ex4-0976,polar.sh,GET,/v1/customer-portal/wallets/{id},customer_portal:wallets:get,Get Wallet,Get a wallet by ID for the authenticated customer.
+ex4-0977,polar.sh,GET,/v1/customer-seats,customer-seats:list_seats,List Seats,"List seats for a subscription or order.
+
+**Scopes**: `customer_seats:read`"
+ex4-0978,polar.sh,POST,/v1/customer-seats,customer-seats:assign_seat,Assign Seat,"Assign a seat for a subscription or order.
+
+**Scopes**: `customer_seats:write`"
+ex4-0979,polar.sh,POST,/v1/customer-seats/claim,customer-seats:claim_seat,Claim Seat,Claim a customer seat with an invitation token.
+ex4-0980,polar.sh,GET,/v1/customer-seats/claim/{invitation_token},customer-seats:get_claim_info,Get Claim Info,Get claim information for a customer seat invitation.
+ex4-0981,polar.sh,DELETE,/v1/customer-seats/{seat_id},customer-seats:revoke_seat,Revoke Seat,"Revoke a customer seat.
+
+**Scopes**: `customer_seats:write`"
+ex4-0982,polar.sh,POST,/v1/customer-seats/{seat_id}/resend,customer-seats:resend_invitation,Resend Invitation,"Resend an invitation for a pending customer seat.
+
+**Scopes**: `customer_seats:write`"
+ex4-0983,polar.sh,POST,/v1/customer-sessions/,customer-sessions:create,Create Customer Session,"Create a customer session.
+
+For organizations with `member_model_enabled`, this will automatically
+create a member session for the owner member of the customer.
+
+**Scopes**: `customer_sessions:write`"
+ex4-0984,polar.sh,GET,/v1/customers/,customers:list,List Customers,"List customers.
+
+**Scopes**: `customers:read` `customers:write`"
+ex4-0985,polar.sh,POST,/v1/customers/,customers:create,Create Customer,"Create a customer.
+
+Set `external_id` to the customer's ID in your system to look it up by that ID.
+
+**Scopes**: `customers:write`"
+ex4-0986,polar.sh,GET,/v1/customers/export,customers:export,Export Customers,"Export customers as a CSV file.
+
+**Scopes**: `customers:read` `customers:write`"
+ex4-0987,polar.sh,DELETE,/v1/customers/external/{external_id},customers:delete_external,Delete Customer by External ID,"Delete a customer by external ID.
+
+Immediately cancels any active subscriptions and revokes any active benefits.
+
+Set `anonymize=true` to also anonymize PII for GDPR compliance.
+
+**Scopes**: `customers:write`"
+ex4-0988,polar.sh,GET,/v1/customers/external/{external_id},customers:get_external,Get Customer by External ID,"Get a customer by external ID.
+
+**Scopes**: `customers:read` `customers:write`"
+ex4-0989,polar.sh,PATCH,/v1/customers/external/{external_id},customers:update_external,Update Customer by External ID,"Update a customer by external ID.
+
+**Scopes**: `customers:write`"
+ex4-0990,polar.sh,GET,/v1/customers/external/{external_id}/members,customers:members:list_external,List Members by Customer External ID,"List the members of a customer identified by its external ID.
+
+**Scopes**: `members:read` `members:write`"
+ex4-0991,polar.sh,POST,/v1/customers/external/{external_id}/members,customers:members:create_external,Create Member by Customer External ID,"Create a new member for a customer identified by its external ID.
+
+**Scopes**: `members:write`"
+ex4-0992,polar.sh,DELETE,/v1/customers/external/{external_id}/members/{member_external_id},customers:members:delete_external,Delete Member by External ID,"Delete a member by external ID for a customer identified by its external ID.
+
+**Scopes**: `members:write`"
+ex4-0993,polar.sh,GET,/v1/customers/external/{external_id}/members/{member_external_id},customers:members:get_external,Get Member by External ID,"Get a member by external ID for a customer identified by its external ID.
+
+**Scopes**: `members:read` `members:write`"
+ex4-0994,polar.sh,PATCH,/v1/customers/external/{external_id}/members/{member_external_id},customers:members:update_external,Update Member by External ID,"Update a member by external ID for a customer identified by its external ID.
+
+**Scopes**: `members:write`"
+ex4-0995,polar.sh,GET,/v1/customers/external/{external_id}/payment-methods,customers:list_payment_methods_external,List Customer Payment Methods by External ID,"Get saved payment methods of a customer by external ID.
+
+**Scopes**: `customers:read` `customers:write`"
+ex4-0996,polar.sh,GET,/v1/customers/external/{external_id}/state,customers:get_state_external,Get Customer State by External ID,"Get a customer state by external ID.
+
+The customer state includes information about
+the customer's active subscriptions and benefits.
+
+It's the ideal endpoint to use when you need to get a full overview
+of a customer's status.
+
+**Scopes**: `customers:read` `customers:write`"
+ex4-0997,polar.sh,DELETE,/v1/customers/{id},customers:delete,Delete Customer,"Delete a customer.
+
+This action cannot be undone and will immediately:
+- Cancel any active subscriptions for the customer
+- Revoke all their benefits
+- Clear any `external_id`
+
+Use it only in the context of deleting a user within your
+own service. Otherwise, use more granular API endpoints to cancel
+a specific subscription or revoke certain benefits.
+
+Note: The customers information will nonetheless be retained for historic
+orders and subscriptions.
+
+Set `anonymize=true` to also anonymize PII for GDPR compliance.
+
+**Scopes**: `customers:write`"
+ex4-0998,polar.sh,GET,/v1/customers/{id},customers:get,Get Customer,"Get a customer by ID.
+
+**Scopes**: `customers:read` `customers:write`"
+ex4-0999,polar.sh,PATCH,/v1/customers/{id},customers:update,Update Customer,"Update a customer.
+
+**Scopes**: `customers:write`"
+ex4-1000,polar.sh,GET,/v1/customers/{id}/members,customers:members:list,List Members,"List the members of a customer.
+
+**Scopes**: `members:read` `members:write`"
+ex4-1001,polar.sh,POST,/v1/customers/{id}/members,customers:members:create,Create Member,"Create a new member for a customer.
+
+Only B2B customers with the member management feature enabled can add members.
+The authenticated user or organization must have access to the customer's organization.
+
+**Scopes**: `members:write`"
+ex4-1002,polar.sh,DELETE,/v1/customers/{id}/members/{member_id},customers:members:delete,Delete Member,"Delete a member of a customer.
+
+**Scopes**: `members:write`"
+ex4-1003,polar.sh,GET,/v1/customers/{id}/members/{member_id},customers:members:get,Get Member,"Get a member of a customer by its ID.
+
+**Scopes**: `members:read` `members:write`"
+ex4-1004,polar.sh,PATCH,/v1/customers/{id}/members/{member_id},customers:members:update,Update Member,"Update a member of a customer.
+
+Only name, email and role can be updated.
+
+**Scopes**: `members:write`"
+ex4-1005,polar.sh,GET,/v1/customers/{id}/payment-methods,customers:list_payment_methods,List Customer Payment Methods,"Get saved payment methods of a customer.
+
+**Scopes**: `customers:read` `customers:write`"
+ex4-1006,polar.sh,GET,/v1/customers/{id}/state,customers:get_state,Get Customer State,"Get a customer state by ID.
+
+The customer state includes information about
+the customer's active subscriptions and benefits.
+
+It's the ideal endpoint to use when you need to get a full overview
+of a customer's status.
+
+**Scopes**: `customers:read` `customers:write`"
+ex4-1007,polar.sh,GET,/v1/discounts/,discounts:list,List Discounts,"List discounts.
+
+**Scopes**: `discounts:read` `discounts:write`"
+ex4-1008,polar.sh,POST,/v1/discounts/,discounts:create,Create Discount,"Create a discount.
+
+**Scopes**: `discounts:write`"
+ex4-1009,polar.sh,DELETE,/v1/discounts/{id},discounts:delete,Delete Discount,"Delete a discount.
+
+**Scopes**: `discounts:write`"
+ex4-1010,polar.sh,GET,/v1/discounts/{id},discounts:get,Get Discount,"Get a discount by ID.
+
+**Scopes**: `discounts:read` `discounts:write`"
+ex4-1011,polar.sh,PATCH,/v1/discounts/{id},discounts:update,Update Discount,"Update a discount.
+
+**Scopes**: `discounts:write`"
+ex4-1012,polar.sh,GET,/v1/disputes/,disputes:list,List Disputes,"List disputes.
+
+**Scopes**: `disputes:read` `disputes:write`"
+ex4-1013,polar.sh,GET,/v1/disputes/{id},disputes:get,Get Dispute,"Get a dispute by ID.
+
+**Scopes**: `disputes:read` `disputes:write`"
+ex4-1014,polar.sh,POST,/v1/disputes/{id}/accept,disputes:accept,Accept Dispute,"Accept a dispute, conceding the chargeback.
+
+Closes the dispute with the processor (settling it as `lost`) and records
+the merchant's decision on the dispute's support case.
+
+**Scopes**: `disputes:write`"
+ex4-1015,polar.sh,GET,/v1/event-types/,event-types:list,List Event Types,"List event types with aggregated statistics.
+
+**Scopes**: `events:read` `events:write`"
+ex4-1016,polar.sh,PATCH,/v1/event-types/{id},event-types:update,Update Event Type,"Update an event type's label.
+
+**Scopes**: `events:write`"
+ex4-1017,polar.sh,GET,/v1/events/,events:list,List Events,"List events.
+
+**Scopes**: `events:read` `events:write`"
+ex4-1018,polar.sh,POST,/v1/events/ingest,events:ingest,Ingest Events,"Ingest batch of events.
+
+**Scopes**: `events:write`"
+ex4-1019,polar.sh,GET,/v1/events/names,events:list_names,List Event Names,"List event names.
+
+**Scopes**: `events:read` `events:write`"
+ex4-1020,polar.sh,GET,/v1/events/{id},events:get,Get Event,"Get an event by ID.
+
+**Scopes**: `events:read` `events:write`"
+ex4-1021,polar.sh,GET,/v1/files/,files:list,List Files,"List files.
+
+**Scopes**: `files:read` `files:write`"
+ex4-1022,polar.sh,POST,/v1/files/,files:create,Create File,"Create a file.
+
+**Scopes**: `files:write`"
+ex4-1023,polar.sh,DELETE,/v1/files/{id},files:delete,Delete File,"Delete a file.
+
+**Scopes**: `files:write`"
+ex4-1024,polar.sh,PATCH,/v1/files/{id},files:update,Update File,"Update a file.
+
+**Scopes**: `files:write`"
+ex4-1025,polar.sh,POST,/v1/files/{id}/uploaded,files:uploaded,Complete File Upload,"Complete a file upload.
+
+**Scopes**: `files:write`"
+ex4-1026,polar.sh,GET,/v1/license-keys/,license_keys:list,List License Keys,"Get license keys connected to the given organization & filters.
+
+**Scopes**: `license_keys:read` `license_keys:write`"
+ex4-1027,polar.sh,POST,/v1/license-keys/activate,license_keys:activate,Activate License Key,"Activate a license key instance.
+
+**Scopes**: `license_keys:write`"
+ex4-1028,polar.sh,POST,/v1/license-keys/deactivate,license_keys:deactivate,Deactivate License Key,"Deactivate a license key instance.
+
+**Scopes**: `license_keys:write`"
+ex4-1029,polar.sh,POST,/v1/license-keys/validate,license_keys:validate,Validate License Key,"Validate a license key.
+
+**Scopes**: `license_keys:write`"
+ex4-1030,polar.sh,GET,/v1/license-keys/{id},license_keys:get,Get License Key,"Get a license key.
+
+**Scopes**: `license_keys:read` `license_keys:write`"
+ex4-1031,polar.sh,PATCH,/v1/license-keys/{id},license_keys:update,Update License Key,"Update a license key.
+
+**Scopes**: `license_keys:write`"
+ex4-1032,polar.sh,GET,/v1/license-keys/{id}/activations/{activation_id},license_keys:get_activation,Get Activation,"Get a license key activation.
+
+**Scopes**: `license_keys:read` `license_keys:write`"
+ex4-1033,polar.sh,POST,/v1/license-keys/{id}/rotate,license_keys:rotate,Rotate License Key,"Rotate a license key.
+
+Generates a new key string for the same license key record. The previous
+key string immediately stops validating. Status, usage, limits, expiry,
+and activations are preserved.
+
+**Scopes**: `license_keys:write`"
+ex4-1034,polar.sh,GET,/v1/meters/,meters:list,List Meters,"List meters.
+
+**Scopes**: `meters:read` `meters:write`"
+ex4-1035,polar.sh,POST,/v1/meters/,meters:create,Create Meter,"Create a meter.
+
+**Scopes**: `meters:write`"
+ex4-1036,polar.sh,GET,/v1/meters/{id},meters:get,Get Meter,"Get a meter by ID.
+
+**Scopes**: `meters:read` `meters:write`"
+ex4-1037,polar.sh,PATCH,/v1/meters/{id},meters:update,Update Meter,"Update a meter.
+
+**Scopes**: `meters:write`"
+ex4-1038,polar.sh,GET,/v1/meters/{id}/quantities,meters:quantities,Get Meter Quantities,"Get quantities of a meter over a time period.
+
+**Scopes**: `meters:read` `meters:write`"
+ex4-1039,polar.sh,GET,/v1/metrics/,metrics:get,Get Metrics,"Get metrics about your orders and subscriptions.
+
+Currency values are output in cents.
+
+**Scopes**: `metrics:read`"
+ex4-1040,polar.sh,GET,/v1/metrics/dashboards,metrics:list_dashboards,List Metric Dashboards,"List user-defined metric dashboards.
+
+**Scopes**: `metrics:read`"
+ex4-1041,polar.sh,POST,/v1/metrics/dashboards,metrics:create_dashboard,Create Metric Dashboard,"Create a user-defined metric dashboard.
+
+**Scopes**: `metrics:write`"
+ex4-1042,polar.sh,DELETE,/v1/metrics/dashboards/{id},metrics:delete_dashboard,Delete Metric Dashboard,"Delete a user-defined metric dashboard.
+
+**Scopes**: `metrics:write`"
+ex4-1043,polar.sh,GET,/v1/metrics/dashboards/{id},metrics:get_dashboard,Get Metric Dashboard,"Get a user-defined metric dashboard by ID.
+
+**Scopes**: `metrics:read`"
+ex4-1044,polar.sh,PATCH,/v1/metrics/dashboards/{id},metrics:update_dashboard,Update Metric Dashboard,"Update a user-defined metric dashboard.
+
+**Scopes**: `metrics:write`"
+ex4-1045,polar.sh,GET,/v1/metrics/export,metrics:export,Export Metrics,"Export metrics as a CSV file.
+
+**Scopes**: `metrics:read`"
+ex4-1046,polar.sh,GET,/v1/metrics/limits,metrics:limits,Get Metrics Limits,"Get the interval limits for the metrics endpoint.
+
+**Scopes**: `metrics:read`"
+ex4-1047,polar.sh,GET,/v1/oauth2/authorize,oauth2:authorize,Authorize,
+ex4-1048,polar.sh,POST,/v1/oauth2/introspect,oauth2:introspect_token,Introspect Token,Get information about an access token.
+ex4-1049,polar.sh,POST,/v1/oauth2/register,oauth2:clients:oauth2:create_client,Create Client,Create an OAuth2 client.
+ex4-1050,polar.sh,DELETE,/v1/oauth2/register/{client_id},oauth2:clients:oauth2:delete_client,Delete Client,Delete an OAuth2 client.
+ex4-1051,polar.sh,GET,/v1/oauth2/register/{client_id},oauth2:clients:oauth2:get_client,Get Client,Get an OAuth2 client by Client ID.
+ex4-1052,polar.sh,PUT,/v1/oauth2/register/{client_id},oauth2:clients:oauth2:update_client,Update Client,Update an OAuth2 client.
+ex4-1053,polar.sh,POST,/v1/oauth2/revoke,oauth2:revoke_token,Revoke Token,Revoke an access token or a refresh token.
+ex4-1054,polar.sh,POST,/v1/oauth2/token,oauth2:request_token,Request Token,Request an access token using a valid grant.
+ex4-1055,polar.sh,GET,/v1/oauth2/userinfo,oauth2:userinfo,Get User Info,Get information about the authenticated user.
+ex4-1056,polar.sh,GET,/v1/orders/,orders:list,List Orders,"List orders.
+
+**Scopes**: `orders:read`"
+ex4-1057,polar.sh,POST,/v1/orders/,orders:create,Create Order,"Create a draft order for an off-session charge against a saved payment
+method. The order is created with `status=draft` and no invoice number;
+call `POST /v1/orders/{id}/finalize` to attempt the charge.
+
+The organization must have the `off_session_charges_enabled` feature flag.
+
+**Scopes**: `orders:write`"
+ex4-1058,polar.sh,GET,/v1/orders/export,orders:export,Export Orders,"Export orders as a CSV file.
+
+**Scopes**: `orders:read`"
+ex4-1059,polar.sh,GET,/v1/orders/{id},orders:get,Get Order,"Get an order by ID.
+
+**Scopes**: `orders:read`"
+ex4-1060,polar.sh,PATCH,/v1/orders/{id},orders:update,Update Order,"Update an order.
+
+**Scopes**: `orders:write`"
+ex4-1061,polar.sh,POST,/v1/orders/{id}/finalize,orders:finalize,Finalize Order,"Finalize a draft order and synchronously attempt an off-session charge.
+
+On success, the order transitions to `paid` and benefit grants fire
+before the response returns. On failure (decline, missing payment method,
+SCA challenge), the order stays in `draft` and a 4xx error is returned.
+
+The request fails with 412 if the order is not in `draft` status.
+
+**Scopes**: `orders:write`"
+ex4-1062,polar.sh,GET,/v1/orders/{id}/invoice,orders:invoice,Get Order Invoice,"Get an order's invoice data.
+
+**Scopes**: `orders:read`"
+ex4-1063,polar.sh,POST,/v1/orders/{id}/invoice,orders:generate_invoice,Generate Order Invoice,"Trigger generation of an order's invoice.
+
+**Scopes**: `orders:read`"
+ex4-1064,polar.sh,GET,/v1/orders/{id}/receipt,orders:receipt,Get Order Receipt,"Get a presigned URL to download an order's receipt PDF.
+
+**Scopes**: `orders:read`"
+ex4-1065,polar.sh,GET,/v1/organizations/,organizations:list,List Organizations,"List organizations.
+
+**Scopes**: `organizations:read` `organizations:write`"
+ex4-1066,polar.sh,POST,/v1/organizations/,organizations:create,Create Organization,"Create an organization.
+
+**Scopes**: `organizations:write`"
+ex4-1067,polar.sh,GET,/v1/organizations/{id},organizations:get,Get Organization,"Get an organization by ID.
+
+**Scopes**: `organizations:read` `organizations:write`"
+ex4-1068,polar.sh,PATCH,/v1/organizations/{id},organizations:update,Update Organization,"Update an organization.
+
+**Scopes**: `organizations:write`"
+ex4-1069,polar.sh,GET,/v1/payments/,payments:list,List Payments,"List payments.
+
+**Scopes**: `payments:read`"
+ex4-1070,polar.sh,GET,/v1/payments/{id},payments:get,Get Payment,"Get a payment by ID.
+
+**Scopes**: `payments:read`"
+ex4-1071,polar.sh,GET,/v1/products/,products:list,List Products,"List products.
+
+**Scopes**: `products:read` `products:write`"
+ex4-1072,polar.sh,POST,/v1/products/,products:create,Create Product,"Create a product.
+
+**Scopes**: `products:write`"
+ex4-1073,polar.sh,DELETE,/v1/products/{id},products:delete,Delete Product,"Delete a product.
+
+Only products without orders, subscriptions, trials or discounts can be deleted.
+Products that are in use can only be archived.
+
+**Scopes**: `products:write`"
+ex4-1074,polar.sh,GET,/v1/products/{id},products:get,Get Product,"Get a product by ID.
+
+**Scopes**: `products:read` `products:write`"
+ex4-1075,polar.sh,PATCH,/v1/products/{id},products:update,Update Product,"Update a product.
+
+**Scopes**: `products:write`"
+ex4-1076,polar.sh,POST,/v1/products/{id}/benefits,products:update_benefits,Update Product Benefits,"Update benefits granted by a product.
+
+**Scopes**: `products:write`"
+ex4-1077,polar.sh,GET,/v1/refunds/,refunds:list,List Refunds,"List refunds.
+
+**Scopes**: `refunds:read` `refunds:write`"
+ex4-1078,polar.sh,POST,/v1/refunds/,refunds:create,Create Refund,"Create a refund.
+
+**Scopes**: `refunds:write`"
+ex4-1079,polar.sh,GET,/v1/subscriptions/,subscriptions:list,List Subscriptions,"List subscriptions.
+
+**Scopes**: `subscriptions:read` `subscriptions:write`"
+ex4-1080,polar.sh,POST,/v1/subscriptions/,subscriptions:create,Create Subscription,"Create a subscription programmatically.
+
+This endpoint only allows to create subscription on free products.
+For paid products, use the checkout flow.
+
+No initial order will be created and no confirmation email will be sent.
+
+**Scopes**: `subscriptions:write`"
+ex4-1081,polar.sh,GET,/v1/subscriptions/export,subscriptions:export,Export Subscriptions,"Export subscriptions as a CSV file.
+
+**Scopes**: `subscriptions:read` `subscriptions:write`"
+ex4-1082,polar.sh,DELETE,/v1/subscriptions/{id},subscriptions:revoke,Revoke Subscription,"Revoke a subscription, i.e cancel immediately.
+
+**Scopes**: `subscriptions:write`"
+ex4-1083,polar.sh,GET,/v1/subscriptions/{id},subscriptions:get,Get Subscription,"Get a subscription by ID.
+
+**Scopes**: `subscriptions:read` `subscriptions:write`"
+ex4-1084,polar.sh,PATCH,/v1/subscriptions/{id},subscriptions:update,Update Subscription,"Update a subscription.
+
+**Scopes**: `subscriptions:write`"
+ex4-1085,polar.sh,GET,/v1/webhooks/deliveries,webhooks:list_webhook_deliveries,List Webhook Deliveries,"List webhook deliveries.
+
+Deliveries are all the attempts to deliver a webhook event to an endpoint.
+
+**Scopes**: `webhooks:read` `webhooks:write`"
+ex4-1086,polar.sh,GET,/v1/webhooks/endpoints,webhooks:list_webhook_endpoints,List Webhook Endpoints,"List webhook endpoints.
+
+**Scopes**: `webhooks:read` `webhooks:write`"
+ex4-1087,polar.sh,POST,/v1/webhooks/endpoints,webhooks:create_webhook_endpoint,Create Webhook Endpoint,"Create a webhook endpoint.
+
+**Scopes**: `webhooks:write`"
+ex4-1088,polar.sh,DELETE,/v1/webhooks/endpoints/{id},webhooks:delete_webhook_endpoint,Delete Webhook Endpoint,"Delete a webhook endpoint.
+
+**Scopes**: `webhooks:write`"
+ex4-1089,polar.sh,GET,/v1/webhooks/endpoints/{id},webhooks:get_webhook_endpoint,Get Webhook Endpoint,"Get a webhook endpoint by ID.
+
+**Scopes**: `webhooks:read` `webhooks:write`"
+ex4-1090,polar.sh,PATCH,/v1/webhooks/endpoints/{id},webhooks:update_webhook_endpoint,Update Webhook Endpoint,"Update a webhook endpoint.
+
+**Scopes**: `webhooks:write`"
+ex4-1091,polar.sh,PATCH,/v1/webhooks/endpoints/{id}/secret,webhooks:reset_webhook_endpoint_secret,Reset Webhook Endpoint Secret,"Regenerate a webhook endpoint secret.
+
+**Scopes**: `webhooks:write`"
+ex4-1092,polar.sh,POST,/v1/webhooks/events/{id}/redeliver,webhooks:redeliver_webhook_event,Redeliver Webhook Event,"Schedule the re-delivery of a webhook event.
+
+**Scopes**: `webhooks:write`"

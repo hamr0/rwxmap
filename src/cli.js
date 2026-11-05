@@ -39,8 +39,10 @@
 // nothing here duplicates that), plus the spec's resolved `servers` (D126)
 // from servers.js, so `rwxmap/match` can route a call by host.
 //
-// JEV (PRD item c, D118-120): key configured -> used; no key -> mechanical,
-// never stops, and every run says loudly which mode ran. The key is
+// JEV (PRD item c, D118-120; D133): runs ONLY with --engine jev (a key alone
+// leaves it off and says so); --engine jev without a key exits 1; every run
+// says loudly which mode ran. Without Jev the default is the D133 rwxlite
+// second pass (secondpass.js); --engine rwxlite alone is mode b. The key is
 // RWXMAP_JEV_KEY from the environment, else the RWXMAP_JEV_KEY line of a
 // `.env` file in `cwd`, parsed with Node's own util.parseEnv (no dotenv
 // dependency) -- an already-set variable wins, only that one variable is
@@ -52,8 +54,9 @@
 // fails closed on anything unusable), and hand the FINAL verdicts to
 // buildOutput's `verdicts` option so exportGate/exportSidecar classify
 // nothing a second time. A row Jev cannot answer for -- a request
-// failure, a bad answer -- keeps its mechanical verdict; the run never
-// stops on a Jev error.
+// failure, a bad answer, on either question -- is undecided (D133): x with
+// review tight, through jev.js's jevUndecided; the run never stops on a Jev
+// error.
 //
 // LOCAL-FILE VENDOR DEFAULT (user ruling, orchestrator escalation 1
 // resolved): "a local file -> the spec's first server host." Reuses
@@ -72,8 +75,9 @@
 // keys or on which operation won a collision. A third file,
 // `<vendor>.openapi.rwx.json`, is a JSON copy of the parsed input with
 // `x-rwx` set on every operation object under a standard HTTP method
-// field (buildOpenApiCopy). OpenAPI 3.2 `query`/`additionalOperations`
-// operations are not labelled yet; the run counts them and says so
+// field (buildOpenApiCopy), including OpenAPI 3.2's `query` field and
+// `additionalOperations.QUERY` (D134). Any other `additionalOperations`
+// operation is not labelled yet; the run counts it and says so
 // (countUnlabelledOperations). The input
 // file itself is only ever read. For a discovered spec the parsed
 // document is not in findSpec's result (nor its cache), so resolveInput
@@ -92,8 +96,11 @@ import { loadSpec } from './load.js';
 import { findSpec, firstServerHost } from './discover.js';
 import { operationsFrom, operationEntries, exportGate, exportSidecar, classifyOperations } from './exporter.js';
 import { resolvedServers, tenantServerTemplates } from './servers.js';
-import { needsJev, applyJev, jevTier } from './jev.js';
+import { needsJev, applyJev, jevTier, jevUndecided } from './jev.js';
 import { runJevBatch } from './jev-client.js';
+import { secondPass } from './secondpass.js';
+import { ensureModel } from './modeldownload.js';
+import { checkRwxlitePackage, loadRwxliteEngine } from './rwxliteengine.js';
 
 // ---------------------------------------------------------------------
 // Small local helpers — each one trivial enough (a regex, a URL-API call,
@@ -412,9 +419,10 @@ function countJsonNumberIssues(doc) {
 
 /**
  * Count the OpenAPI 3.2 operations operationEntries does not walk (item g
- * will label them): each `paths[p].query` that is an object, plus each
- * object entry of `paths[p].additionalOperations`. Reporting only — this
- * never changes which operations are classified.
+ * will label them): each object entry of `paths[p].additionalOperations`
+ * whose key is not QUERY. `query` and `additionalOperations.QUERY` are
+ * walked by operationEntries (D134). Reporting only — this never changes
+ * which operations are classified.
  *
  * @param {any} doc
  * @returns {number}
@@ -425,10 +433,11 @@ function countUnlabelledOperations(doc) {
   let n = 0;
   for (const item of Object.values(paths)) {
     if (!item || typeof item !== 'object') continue;
-    if (item.query && typeof item.query === 'object') n += 1;
     const extra = item.additionalOperations;
     if (extra && typeof extra === 'object') {
-      for (const op of Object.values(extra)) if (op && typeof op === 'object') n += 1;
+      for (const [key, op] of Object.entries(extra)) {
+        if (key.toLowerCase() !== 'query' && op && typeof op === 'object') n += 1;
+      }
     }
   }
   return n;
@@ -621,6 +630,24 @@ function jevOffSummary() {
 }
 
 /**
+ * The `rwxlite` top-level field (D133), shaped like `jev`: mode, model and
+ * the second pass's counts. The one writer of this field: "off" carries the
+ * reason no model ran; "on" carries secondPass's own summary.
+ * "on" also records `pass` ('a' or 'b') and `confidence` (the mode b setting,
+ * else null).
+ * @param {{reason?: string, summary?: {model: string, pass: 'a'|'b', confidence: number|null, sent: number, raised: number, lowered: number, kept: number, undecided: number}}} [from]
+ * @returns {{mode: 'off'|'on', model: string|null, pass?: 'a'|'b', confidence?: number|null, reason?: string, sent: number, raised: number, lowered: number, kept: number, undecided: number}}
+ */
+function rwxliteSummary(from = {}) {
+  const { reason = 'not run', summary } = from;
+  if (summary) {
+    const { model, pass, confidence, sent, raised, lowered, kept, undecided } = summary;
+    return { mode: 'on', model, pass, confidence, sent, raised, lowered, kept, undecided };
+  }
+  return { mode: 'off', model: null, reason, sent: 0, raised: 0, lowered: 0, kept: 0, undecided: 0 };
+}
+
+/**
  * Build the combined output and the sidecar from an already-resolved
  * operation list. Pure — no I/O, no process exit — so both `run` (which
  * writes the result to disk) and `tools/proof-cli.js` (which never writes
@@ -630,13 +657,14 @@ function jevOffSummary() {
  * @param {import('./types.js').Operation[]} ops
  * @param {string} vendor
  * @param {string} source
- * @param {{verdicts?: import('./types.js').Verdict[], jevSummary?: object, doc?: any}} [options]
+ * @param {{verdicts?: import('./types.js').Verdict[], jevSummary?: object, rwxliteSummary?: object, doc?: any}} [options]
  *   `verdicts` is the FINAL (post-Jev, or plain mechanical) verdict list,
  *   same order as `ops` — omitted (mechanical-only callers, e.g.
  *   tools/proof-cli.js) falls back to exportGate/exportSidecar's own
  *   default of classifying `ops` themselves, unchanged from item d.
  *   `jevSummary` is the combined JSON's top-level `jev` field; omitted
- *   defaults to the "off" shape. `doc` is the parsed document `ops`
+ *   defaults to the "off" shape. `rwxliteSummary` is the top-level
+ *   `rwxlite` field, defaulting to off. `doc` is the parsed document `ops`
  *   came from (`ops` must be operationsFrom(doc)); given, the result
  *   also carries the OpenAPI copy (D124) as `openapiCopy` plus
  *   `xRwxOverwritten`, `openapiNonFinite` and `openapiBigIntegers`;
@@ -646,7 +674,7 @@ function jevOffSummary() {
  * @returns {{combined: any, sidecarOut: any, collisions: import('./exporter.js').Collision[], mcpCollisions: Array<{key: string, kept: string, dropped: string}>, openapiCopy: any, xRwxOverwritten: number, openapiNonFinite: number, openapiBigIntegers: number}}
  */
 export function buildOutput(ops, vendor, source, options = {}) {
-  const { verdicts, jevSummary = jevOffSummary(), doc } = options;
+  const { verdicts, jevSummary = jevOffSummary(), rwxliteSummary: rwxliteField = rwxliteSummary({ reason: 'not run' }), doc } = options;
   const { tools, collisions } = exportGate(ops, { vendor, verdicts });
   // The spec's own resolved servers go in the sidecar so `rwxmap/match`
   // can route a call by host. `source` is a base only when it is a URL; a
@@ -667,6 +695,7 @@ export function buildOutput(ops, vendor, source, options = {}) {
     mcp,
     webmcp,
     jev: jevSummary,
+    rwxlite: rwxliteField,
   };
   let sidecarOut = mcpCollisions.length > 0 ? { ...sidecar, mcpCollisions } : sidecar;
   if (openapiNonFinite > 0 || openapiBigIntegers > 0) {
@@ -711,10 +740,10 @@ function loadJevKey(cwd) {
 /**
  * Run the optional Jev tiers (D118-120) over one mechanically-classified
  * batch. NEVER THROWS and NEVER STOPS THE RUN: any row Jev cannot usefully
- * answer for (a request failure, a bad/missing answer) keeps exactly the
- * mechanical verdict `verdicts` already gave it — jev.js's applyJev is the
- * one place that decides that, and it already fails closed, so this
- * function only has to feed it real answers or nothing at all.
+ * answer for (a request failure, a bad/missing answer, on the first or the
+ * second question) is undecided (D133) — jev.js's jevUndecided makes it x
+ * with review tight. Successful answers go through applyJev, which decides
+ * the letter and fails closed.
  *
  * Sends ONLY the rows jev.js's needsJev names — one askJev call per such
  * row, never the whole operation list — plus, for a tier with a second
@@ -722,7 +751,7 @@ function loadJevKey(cwd) {
  * here), one more askJev call per row the first answer moved, and none
  * for any other row. "sent" is exactly the request count this run makes;
  * "answered" and "failed" count requests too, so a failed second call
- * shows as one failure while its row keeps the first answer's move.
+ * shows as one failure and its row is undecided (x, review tight).
  *
  * @param {import('./types.js').Operation[]} ops
  * @param {import('./types.js').Verdict[]} verdicts  mechanical, same
@@ -773,6 +802,7 @@ async function runJev(ops, verdicts, jevOpts) {
     const answer = answers[j];
     if (!answer) {
       failed += 1;
+      finalVerdicts[index] = jevUndecided(verdicts[index], { method: ops[index].method });
       continue;
     }
     count(answer);
@@ -790,7 +820,8 @@ async function runJev(ops, verdicts, jevOpts) {
     const { j, index } = seconds[k];
     const second = secondAnswers[k];
     if (!second) {
-      failed += 1; // the row keeps the first answer's move (w)
+      failed += 1;
+      finalVerdicts[index] = jevUndecided(verdicts[index], { method: ops[index].method });
       continue;
     }
     count(second);
@@ -800,6 +831,13 @@ async function runJev(ops, verdicts, jevOpts) {
       { p: first.p, model: first.model, changes: { p: second.p, model: second.model } },
       { method: ops[index].method },
     );
+    // D133: applyJev makes a malformed second answer, or one from another
+    // model version, undecided (a verdict with no `jev` block); count it as
+    // the failed call it is.
+    if (finalVerdicts[index].jev === undefined) {
+      answered -= 1;
+      failed += 1;
+    }
   }
 
   for (let i = 0; i < verdicts.length; i += 1) {
@@ -827,7 +865,12 @@ function argError(err) {
   return message;
 }
 
-const USAGE = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--force]';
+const ENGINES = ['rwxlite', 'jev', 'mechanical'];
+
+/** Mode b's confidence when --confidence is not given (user ruling, 2026-11-04). */
+const DEFAULT_CONFIDENCE = 95;
+
+const USAGE = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--engine rwxlite|jev|mechanical] [--confidence <0-99>] [--model small] [--force]';
 
 const HELP = `${USAGE}
 
@@ -839,15 +882,23 @@ Input:
 Options:
   -o <dir>       write the output files here (default: the current folder)
   --vendor <n>   name for the output files and tool keys (default: the host)
+  --engine <e>   rwxlite | jev | mechanical (default: mechanical, then rwxlite on the rows marked loose or tight)
+  --confidence <0-99>  only with --engine rwxlite: rwxlite alone judges every row; a row under this share is x, review tight (default 95)
+  --model small  the smaller rwxlite model (23 MB instead of 91 MB); only where rwxlite runs
   --force        overwrite existing output files
   -h, --help     this help
   -v, --version  the version
 
 Writes <vendor>.rwxmap.json, <vendor>.rwxmap.review.json, <vendor>.openapi.rwx.json.
 
-Jev (optional model pass): set RWXMAP_JEV_KEY, or put it in a .env in the run folder.
-With a key, each run sends method, path, operationId, summary and description of the
-rows it checks to api.typesafe.ai; your key, your cost. Without it the run is mechanical.
+rwxlite: the default run asks the rwxlite model about the rows marked loose or tight.
+The model is downloaded on first use from rwxlite's GitHub releases and cached in ~/.cache/rwxmap.
+No model (offline with none cached, package not installed) means "rwxlite: off (mechanical)" and the run is mechanical.
+--engine mechanical never looks for a model.
+
+Jev (paid, optional): --engine jev, with RWXMAP_JEV_KEY set or in a .env in the run folder.
+It sends method, path, operationId, summary and description of the rows it checks to
+api.typesafe.ai; your key, your cost. A key alone does not turn Jev on.
 
 Exit 0 on success; 1 on failure, with nothing written.
 `;
@@ -858,7 +909,7 @@ Exit 0 on success; 1 on failure, with nothing written.
  * tests never have to spawn a process.
  *
  * @param {string[]} argv  Arguments only (no "node"/script path).
- * @param {{cwd: string, stdout: {write: (s: string) => void}, stderr: {write: (s: string) => void}, cacheDir?: string, jevKey?: string, fetchImpl?: typeof fetch, jevConcurrency?: number, beforeReplace?: (targetPath: string) => void}} env
+ * @param {{cwd: string, stdout: {write: (s: string) => void}, stderr: {write: (s: string) => void}, cacheDir?: string, jevKey?: string, fetchImpl?: typeof fetch, jevConcurrency?: number, beforeReplace?: (targetPath: string) => void, rwxliteEngine?: {model: string, run: import('./secondpass.js').Engine}, xdgCacheHome?: string, modelFetch?: typeof fetch, rwxliteImporter?: (name: string) => Promise<any>, rwxliteVersionReader?: () => string}} env
  *   `jevKey`, `fetchImpl` and `jevConcurrency` are test-only overrides for
  *   the Jev wiring (D118), the same pattern `cacheDir` already uses for
  *   discovery: `jevKey` bypasses loadJevKey's environment/.env read
@@ -869,6 +920,10 @@ Exit 0 on success; 1 on failure, with nothing written.
  *   always uses loadJevKey and the real global fetch. `beforeReplace` is
  *   the same kind of test-only seam for atomicWriteFiles (called between
  *   a file's backup and its replacing rename); a real run never passes it.
+ *   `rwxliteEngine` (an engine function plus its model string) and
+ *   `xdgCacheHome` (where to look for a cached model) are test-only seams of
+ *   the same kind: a real run finds its model in the cache and never passes
+ *   either. `modelFetch`, `rwxliteImporter` and `rwxliteVersionReader` are the same kind: the fetch used to download the model, the `import('rwxlite')` call and the installed-version read.
  * @returns {Promise<number>}  Process exit code.
  */
 export async function run(argv, env) {
@@ -885,6 +940,9 @@ export async function run(argv, env) {
         outDir: { type: 'string', short: 'o' },
         vendor: { type: 'string' },
         force: { type: 'boolean', default: false },
+        engine: { type: 'string' },
+        confidence: { type: 'string' },
+        model: { type: 'string' },
         help: { type: 'boolean', short: 'h', default: false },
         version: { type: 'boolean', short: 'v', default: false },
       },
@@ -908,6 +966,38 @@ export async function run(argv, env) {
     return 1;
   }
   const address = positionals[0];
+
+  // D133 engine flags. Anything invalid fails loudly, before any work.
+  const engineName = values.engine;
+  if (engineName !== undefined && !ENGINES.includes(engineName)) {
+    stderr.write(`rwxmap: unknown --engine: ${engineName} (want rwxlite, jev or mechanical)\n${USAGE}\n`);
+    return 1;
+  }
+  if (values.confidence !== undefined) {
+    if (engineName !== 'rwxlite') {
+      stderr.write('rwxmap: --confidence is valid only with --engine rwxlite\n');
+      return 1;
+    }
+    if (!/^\d{1,2}$/.test(values.confidence)) {
+      stderr.write(`rwxmap: --confidence must be a whole number from 0 to 99: ${values.confidence}\n`);
+      return 1;
+    }
+  }
+  if (values.model !== undefined) {
+    if (engineName !== undefined && engineName !== 'rwxlite') {
+      stderr.write('rwxmap: --model is valid only in the default run and with --engine rwxlite\n');
+      return 1;
+    }
+    if (values.model !== 'small') {
+      stderr.write(`rwxmap: --model takes only "small" (or leave it out for the default model): ${values.model}\n`);
+      return 1;
+    }
+  }
+  const jevKeyFound = typeof env.jevKey === 'string' ? env.jevKey : loadJevKey(cwd);
+  if (engineName === 'jev' && !jevKeyFound) {
+    stderr.write('rwxmap: --engine jev needs a key: set RWXMAP_JEV_KEY, or put it in a .env in the run folder\n');
+    return 1;
+  }
   const named = values.vendor;
   if (
     named !== undefined &&
@@ -940,13 +1030,13 @@ export async function run(argv, env) {
   }
 
   // One rule for every input kind: nothing to classify -> exit 1, no file.
-  // A spec whose only operations sit under OpenAPI 3.2 query/
-  // additionalOperations (not read yet, item g) says so instead.
+  // A spec whose only operations sit under OpenAPI 3.2
+  // additionalOperations other than QUERY (not read yet, item g) says so instead.
   if (ops.length === 0) {
     const unread = countUnlabelledOperations(doc);
     stderr.write(
       unread > 0
-        ? `rwxmap: no labelled operations in ${source} — ${unread} operation(s) under OpenAPI 3.2 query/additionalOperations are not read yet (item g)\n`
+        ? `rwxmap: no labelled operations in ${source} — ${unread} operation(s) under OpenAPI 3.2 additionalOperations (other than QUERY) are not read yet (item g)\n`
         : `rwxmap: no operations found in ${source}\n`,
     );
     return 1;
@@ -992,7 +1082,63 @@ export async function run(argv, env) {
   const verdicts = classifyOperations(ops);
   /** @type {{mode: 'off'|'on', model: string|null, sent: number, answered: number, failed: number, changed: number, tokens: {input: number, output: number}}} */
   let jevSummary = jevOffSummary();
-  const key = typeof env.jevKey === 'string' ? env.jevKey : loadJevKey(cwd);
+  // Jev (paid) runs ONLY with --engine jev; a key alone never turns it on.
+  const key = engineName === 'jev' ? jevKeyFound : undefined;
+  if (engineName !== 'jev' && jevKeyFound) {
+    stdout.write('rwxmap: Jev: off — a Jev key is set, but Jev runs only with --engine jev; nothing was sent\n');
+  }
+  // The rwxlite line of the run summary (every non-Jev run prints one).
+  let engineLine = 'rwxmap: rwxlite: off (mechanical)\n';
+  let rwxliteField = rwxliteSummary({ reason: engineName === 'jev' ? 'engine jev' : 'engine mechanical' });
+  if (engineName !== 'jev' && engineName !== 'mechanical') {
+    // Mode a (default): mechanical -> rwxlite on the loose and tight rows.
+    // Mode b (--engine rwxlite): rwxlite alone on every row, accepted at
+    // --confidence (default 95). No model, no stop.
+    const modeB = engineName === 'rwxlite';
+    const confidence = modeB ? (values.confidence !== undefined ? Number(values.confidence) : DEFAULT_CONFIDENCE) : undefined;
+    const toSend = modeB ? verdicts.length : verdicts.reduce((n, v) => (v.review === 'loose' || v.review === 'tight' ? n + 1 : n), 0);
+    let engine = env.rwxliteEngine;
+    if (toSend === 0) {
+      const why = modeB ? 'the spec has no operations' : 'no row is marked loose or tight';
+      engineLine = `rwxmap: rwxlite: nothing to check (${why}); no model was fetched\n`;
+      rwxliteField = rwxliteSummary({ reason: 'nothing to check' });
+      engine = undefined;
+    } else if (!engine) {
+      // The cheap package check runs first: no package, no 87 MB download.
+      /** @type {string|null} */
+      let reason = null;
+      const pkg = await checkRwxlitePackage({ importer: env.rwxliteImporter, versionReader: env.rwxliteVersionReader });
+      if (pkg.status === 'off') {
+        reason = pkg.reason;
+      } else {
+        const got = await ensureModel({
+          variant: values.model === 'small' ? 'small' : 'exact',
+          environ: { XDG_CACHE_HOME: env.xdgCacheHome ?? process.env.XDG_CACHE_HOME },
+          fetchImpl: env.modelFetch,
+          log: (line) => stderr.write(`${line}\n`),
+        });
+        for (const n of got.notes) stderr.write(`${n}\n`);
+        if (got.status === 'off') {
+          reason = got.reason;
+        } else {
+          const loaded = await loadRwxliteEngine({ dir: got.dir, model: got.model, lib: pkg.lib });
+          if (loaded.status === 'on') engine = loaded.engine;
+          else reason = loaded.reason;
+        }
+      }
+      if (reason !== null) {
+        engineLine = `rwxmap: rwxlite: off (mechanical) — ${reason}\n`;
+        rwxliteField = rwxliteSummary({ reason });
+      }
+    }
+    if (engine && toSend > 0) {
+      const result = await secondPass(ops, verdicts, engine.run, { model: engine.model, confidence });
+      verdicts.splice(0, verdicts.length, ...result.verdicts);
+      const s = result.summary;
+      rwxliteField = rwxliteSummary({ summary: s });
+      engineLine = `rwxmap: rwxlite: on (${s.model})${modeB ? ` — mode b, confidence ${s.confidence}` : ''} — ${s.sent} sent · ${s.raised} raised · ${s.lowered} lowered · ${s.kept} kept · ${s.undecided} undecided (x, review tight)\n`;
+    }
+  }
   if (key) {
     const targetCount = verdicts.reduce((n, v) => (needsJev(v) ? n + 1 : n), 0);
     stdout.write(
@@ -1006,7 +1152,7 @@ export async function run(argv, env) {
 
   let built;
   try {
-    built = buildOutput(ops, vendor, source, { verdicts, jevSummary, doc });
+    built = buildOutput(ops, vendor, source, { verdicts, jevSummary, rwxliteSummary: rwxliteField, doc });
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
     stderr.write(`rwxmap: could not build output: ${reason}\n`);
@@ -1038,8 +1184,8 @@ export async function run(argv, env) {
   );
   stdout.write(
     jevSummary.mode === 'on'
-      ? `rwxmap: Jev: on — ${jevSummary.sent} sent · ${jevSummary.answered} answered · ${jevSummary.failed} failed (letter kept) · ${jevSummary.changed} letters changed · ${jevSummary.tokens.input} in / ${jevSummary.tokens.output} out tokens\n`
-      : 'rwxmap: Jev: off (mechanical)\n',
+      ? `rwxmap: Jev: on — ${jevSummary.sent} sent · ${jevSummary.answered} answered · ${jevSummary.failed} failed (x, review tight) · ${jevSummary.changed} letters changed · ${jevSummary.tokens.input} in / ${jevSummary.tokens.output} out tokens\n`
+      : engineLine,
   );
   stdout.write(`rwxmap: wrote ${path.basename(mapPath)} + ${path.basename(reviewPath)} + ${path.basename(openapiPath)}\n`);
   if (xRwxOverwritten > 0) {
@@ -1058,7 +1204,7 @@ export async function run(argv, env) {
   const unlabelled = countUnlabelledOperations(doc);
   if (unlabelled > 0) {
     stdout.write(
-      `rwxmap: ${unlabelled} operation(s) under OpenAPI 3.2 query/additionalOperations are not labelled yet (no letter, no key, no x-rwx)\n`,
+      `rwxmap: ${unlabelled} operation(s) under OpenAPI 3.2 additionalOperations (other than QUERY) are not labelled yet (no letter, no key, no x-rwx)\n`,
     );
   }
   const webhooks = countWebhookOperations(doc);

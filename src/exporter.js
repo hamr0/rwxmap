@@ -70,7 +70,7 @@ import { classifyRow } from './flow.js';
  * @property {string} path
  * @property {'r'|'w'|'x'} letter
  * @property {'tight'|'loose'|'settled'} marker
- * @property {'floor'|'list'|'jev'} evidence  WHY the row was decided (D77).
+ * @property {'floor'|'list'|'jev'|'rwxlite'} evidence  WHY the row was decided (D77).
  * @property {boolean} destructive  D86's refinement flag inside x. Always a
  *   real boolean here, unlike the verdict's optional `destructive`, because
  *   a report a human reads should not make them wonder what an absent field
@@ -84,8 +84,9 @@ import { classifyRow } from './flow.js';
 // The real HTTP methods an OpenAPI path item may carry (OpenAPI 3.x fixed
 // fields). Everything else at that level — `parameters`, `$ref`,
 // `summary`, `description`, `servers`, and any `x-` extension — is not an
-// operation and must not become a row.
-const HTTP_METHODS = new Set(['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
+// operation and must not become a row. 'query' is OpenAPI 3.2's QUERY
+// (RFC 10008, D134): safe like GET, read as an operation exactly like the rest.
+const HTTP_METHODS = new Set(['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace', 'query']);
 
 // TIGHTNESS — the project's one invariant, as a number so two letters can
 // be compared. r < w < x: x is the tightest, r the loosest. On a collision
@@ -105,7 +106,9 @@ const TIGHTNESS = { r: 0, w: 1, x: 2 };
  * No `$ref` is resolved, on a path item or anywhere else (D106): a path
  * item that is only a `$ref` has no method fields and yields nothing.
  * `field` is the key exactly as it appears in the document (it may be
- * upper case); the method is its upper-cased form.
+ * upper case); the method is its upper-cased form. OpenAPI 3.2's
+ * `additionalOperations` entries are yielded only when the key is QUERY
+ * (case-insensitive, D134); every other key there is not read.
  *
  * @param {any} spec  A parsed OpenAPI document (untrusted).
  * @returns {{path: string, field: string, operation: any}[]} in document
@@ -123,6 +126,14 @@ export function operationEntries(spec) {
       if (!HTTP_METHODS.has(field.toLowerCase())) continue;
       if (!operation || typeof operation !== 'object') continue;
       entries.push({ path, field, operation });
+    }
+    const extra = pathItem.additionalOperations;
+    if (extra && typeof extra === 'object') {
+      for (const [field, operation] of Object.entries(extra)) {
+        if (field.toLowerCase() !== 'query') continue;
+        if (!operation || typeof operation !== 'object') continue;
+        entries.push({ path, field, operation });
+      }
     }
   }
   return entries;
@@ -407,7 +418,7 @@ export function exportGate(operations, options = {}) {
  *     rows: number,
  *     byLetter: {r: number, w: number, x: number},
  *     byMarker: {tight: number, loose: number, settled: number},
- *     byEvidence: {floor: number, list: number, jev: number},
+ *     byEvidence: {floor: number, list: number, jev: number, rwxlite: number},
  *   },
  *   rows: SidecarRow[],
  *   review: SidecarRow[],
@@ -423,7 +434,7 @@ export function exportSidecar(operations, options = {}) {
     rows: rows.length,
     byLetter: { r: 0, w: 0, x: 0 },
     byMarker: { tight: 0, loose: 0, settled: 0 },
-    byEvidence: { floor: 0, list: 0, jev: 0 },
+    byEvidence: { floor: 0, list: 0, jev: 0, rwxlite: 0 },
   };
   for (const row of rows) {
     counts.byLetter[row.letter] += 1;

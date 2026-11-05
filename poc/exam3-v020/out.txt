@@ -1,0 +1,106 @@
+p file p-r10-fp32.jsonl: sha256 OK, 1377 rows, model string rwxlite-0.3.0+8514ddcc
+p file p-r10-int8pc.jsonl: sha256 OK, 1377 rows, model string rwxlite-0.3.0+093c908d
+p file p-v020-fp32.jsonl: sha256 OK, 1377 rows, model string rwxlite-0.1.0+8503b655
+p file p-v020-int8pc.jsonl: sha256 OK, 1377 rows, model string rwxlite-0.2.0+8ad0a182
+NOTE: v020-fp32 file carries stale local-dev model string rwxlite-0.1.0+8503b655 (published v0.2.0 fp32 = rwxlite-0.2.0+8503b655, same weights); each file's own string is passed to secondPass as the run model. Files not rewritten.
+mechanical verdicts built for 1377 ops over 7 specs (joined 1:1 to ops.csv)
+
+GATE 1 mechanical vs rows-mech.csv (class, review, evidence): 1377/1377 match
+
+GATE 2 r10 replay vs committed CLI rows (letter AND review; evidence shown separately):
+  a-fp32: letter+review match 1377/1377; evidence differs on 0
+  a-int8: letter+review match 1372/1377; evidence differs on 5
+    DIFF ex3-0601 csv x/tight replay w/loose
+    DIFF ex3-0661 csv r/loose replay x/tight
+    DIFF ex3-0846 csv w/loose replay x/tight
+    DIFF ex3-0910 csv x/tight replay w/loose
+    DIFF ex3-1344 csv x/tight replay r/loose
+  b95-fp32: letter+review match 1377/1377; evidence differs on 0
+  b95-int8: letter+review match 1370/1377; evidence differs on 7
+    DIFF ex3-0348 csv w/loose replay x/tight
+    DIFF ex3-0948 csv w/loose replay x/tight
+    DIFF ex3-0993 csv x/tight replay w/loose
+    DIFF ex3-1046 csv x/tight replay w/loose
+    DIFF ex3-1058 csv w/loose replay x/tight
+    DIFF ex3-1148 csv x/tight replay r/settled
+    DIFF ex3-1333 csv w/loose replay x/tight
+GATE 2: FAIL
+GATE 2 fp32 only (a-fp32, b95-fp32): PASS; int8 FAILED parity, so int8 0.2.0 is not computed or reported
+
+== scores (of 1377) ==
+mech             exact 1094 (79.4%)  too loose   17 ( 1.2%)  too tight  266 (19.3%)  of 1377
+r10 a-fp32       exact 1178 (85.5%)  too loose   15 ( 1.1%)  too tight  184 (13.4%)  of 1377  | sent 592 raised 3 lowered 83 kept 331 undecided 175
+v020 a-fp32      exact 1192 (86.6%)  too loose   15 ( 1.1%)  too tight  170 (12.3%)  of 1377  | sent 592 raised 3 lowered 97 kept 329 undecided 163
+r10 b95-fp32     exact 1179 (85.6%)  too loose   12 ( 0.9%)  too tight  186 (13.5%)  of 1377  | sent 1377 raised 4 lowered 125 kept 1004 undecided 244
+v020 b95-fp32    exact 1181 (85.8%)  too loose   14 ( 1.0%)  too tight  182 (13.2%)  of 1377  | sent 1377 raised 3 lowered 134 kept 1007 undecided 233
+
+== D133 mode-a bar vs mech (too loose <= 17, exact >= 1163 = mech 1094 + 69) ==
+r10 a-fp32: too loose 15 (OK); exact 1178, +84 rows = 6.10 pts (OK) => PASS
+v020 a-fp32: too loose 15 (OK); exact 1192, +98 rows = 7.12 pts (OK) => PASS
+
+== row-level diffs, 0.2.0 vs r10 (same variant, same mode) ==
+
+-- a-fp32: 22 rows differ in letter: r10 right & 0.2.0 wrong 4; 0.2.0 right & r10 wrong 18; neither right 0
+  ex3-0168 | clerk.com | POST | /redirect_urls | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0256 | clerk.com | POST | /waitlist_entries | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0265 | mux.com | POST | /data/v1/annotations | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0457 | neon.com | POST | /api_keys | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0576 | neon.com | POST | /projects/{project_id}/branches/{branch_id}/data-api/{database_name} | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-0617 | neon.com | POST | /projects/{project_id}/endpoints | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0746 | netbird.io | POST | /api/integrations/edr/fleetdm | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0750 | netbird.io | POST | /api/integrations/edr/huntress | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0761 | netbird.io | POST | /api/integrations/google-idp | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0777 | netbird.io | POST | /api/integrations/notifications/channels | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0783 | netbird.io | POST | /api/integrations/okta-scim-idp | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0790 | netbird.io | POST | /api/integrations/scim-idp | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0846 | netbird.io | POST | /api/reverse-proxies/services | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0910 | novu.co | POST | /v1/domains/{domain}/routes | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0952 | novu.co | POST | /v1/subscribers/{subscriberId}/messages/mark-all | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-1079 | ory.sh | POST | /admin/recovery/link | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-1114 | ory.sh | POST | /projects/{project_id}/eventstreams | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-1270 | supabase.com | POST | /v1/projects/{ref}/config/auth/signing-keys | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-1302 | supabase.com | POST | /v1/projects/{ref}/custom-hostname/initialize | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-1331 | supabase.com | POST | /v1/projects/{ref}/database/webhooks/enable | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-1333 | supabase.com | POST | /v1/projects/{ref}/functions | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-1345 | supabase.com | POST | /v1/projects/{ref}/network-bans/retrieve/enriched | truth r | r10 r (exact) | 0.2.0 x (too tight) | right: r10
+
+-- b95-fp32: 39 rows differ in letter: r10 right & 0.2.0 wrong 18; 0.2.0 right & r10 wrong 20; neither right 1
+  ex3-0005 | clerk.com | POST | /agents/tasks | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0018 | clerk.com | PUT | /beta_features/domain | truth x | r10 x (exact) | 0.2.0 w (too loose) | right: r10
+  ex3-0031 | clerk.com | POST | /billing/subscription_items/{subscription_item_id}/price_transition | truth x | r10 x (exact) | 0.2.0 w (too loose) | right: r10
+  ex3-0064 | clerk.com | PATCH | /enterprise_connections/{enterprise_connection_id} | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-0156 | clerk.com | PATCH | /organizations/{organization_id}/memberships/{user_id}/metadata | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0232 | clerk.com | POST | /users/{user_id}/lock | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0235 | clerk.com | PUT | /users/{user_id}/metadata | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-0257 | clerk.com | POST | /waitlist_entries/bulk | truth x | r10 x (exact) | 0.2.0 w (too loose) | right: r10
+  ex3-0311 | mux.com | POST | /robots/v0/directives | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-0383 | mux.com | POST | /system/v1/signing-keys | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0418 | mux.com | POST | /video/v1/live-streams | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0433 | mux.com | POST | /video/v1/live-streams/{LIVE_STREAM_ID}/simulcast-targets | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0453 | mux.com | POST | /video/v1/uploads | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0661 | netbird.io | POST | /api/agent-network/catalog/providers/models | truth r | r10 r (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-0742 | netbird.io | POST | /api/integrations/edr/falcon | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0754 | netbird.io | POST | /api/integrations/edr/intune | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0774 | netbird.io | POST | /api/integrations/msp/tenants/{id}/subscription | truth x | r10 x (exact) | 0.2.0 w (too loose) | right: r10
+  ex3-0877 | netbird.io | POST | /api/users/{userId}/tokens | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0931 | novu.co | POST | /v1/integrations | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0948 | novu.co | POST | /v1/subscribers/bulk | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-0965 | novu.co | POST | /v2/environments/{targetEnvironmentId}/diff | truth r | r10 r (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-0992 | novu.co | PATCH | /v2/subscribers/{subscriberId}/notifications/{notificationId}/read | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0994 | novu.co | PATCH | /v2/subscribers/{subscriberId}/notifications/{notificationId}/unarchive | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-0995 | novu.co | PATCH | /v2/subscribers/{subscriberId}/notifications/{notificationId}/unread | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-1011 | novu.co | POST | /v2/translations | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-1047 | ory.sh | POST | /admin/identities | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-1052 | ory.sh | PUT | /admin/identities/{id} | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-1058 | ory.sh | POST | /admin/keys/{set} | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-1059 | ory.sh | PUT | /admin/keys/{set} | truth x | r10 w (too loose) | 0.2.0 x (exact) | right: 0.2.0
+  ex3-1087 | ory.sh | PATCH | /admin/sessions/{id}/extend | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-1101 | ory.sh | GET | /oauth2/register/{id} | truth r | r10 x (too tight) | 0.2.0 r (exact) | right: 0.2.0
+  ex3-1104 | ory.sh | GET | /oauth2/sessions/logout | truth x | r10 w (too loose) | 0.2.0 x (exact) | right: 0.2.0
+  ex3-1111 | ory.sh | PATCH | /projects/{project_id} | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-1147 | ory.sh | GET | /self-service/login/browser | truth r | r10 w (too tight) | 0.2.0 x (too tight) | right: neither
+  ex3-1188 | ory.sh | PATCH | /v2alpha1/admin/importedApiKeys/{key_id} | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-1282 | supabase.com | POST | /v1/projects/{ref}/config/auth/third-party-auth | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-1331 | supabase.com | POST | /v1/projects/{ref}/database/webhooks/enable | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10
+  ex3-1333 | supabase.com | POST | /v1/projects/{ref}/functions | truth w | r10 x (too tight) | 0.2.0 w (exact) | right: 0.2.0
+  ex3-1351 | supabase.com | PUT | /v1/projects/{ref}/pgsodium | truth w | r10 w (exact) | 0.2.0 x (too tight) | right: r10

@@ -6,8 +6,9 @@ import { leadVerbAfterModifiers, tokensForRow, matchingMembers } from './tokens.
 /** @typedef {import('./types.js').Operation} Operation */
 /** @typedef {import('./types.js').StepVerdict} StepVerdict */
 
-// Methods whose floor is r: they are the read verbs of HTTP itself.
-const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+// Methods whose floor is r: they are the read verbs of HTTP itself. QUERY
+// (RFC 10008, D134) is safe and idempotent like GET, with a request body.
+const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'QUERY']);
 
 // READ_VERBS
 //

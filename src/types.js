@@ -40,13 +40,15 @@
  * @property {string} rule         The name of the rule within the step that
  *   fired (e.g. "method", "read-verb", "cant-undo-verb", "method-floor",
  *   "floor-post", "jev-lower", "jev-raise-wx", "jev-raise-get").
- * @property {'floor'|'list'|'jev'} source  WHY the row was decided, not
+ * @property {'floor'|'list'|'jev'|'rwxlite'} source  WHY the row was decided, not
  *   just what class it got (D77). 'floor' means the HTTP method alone
  *   decided it and NO word list matched — a default. 'list' means a word
  *   list fired: a word was read and matched, and that is final, nothing
  *   overrides it. 'jev' means one of the optional D95 tiers moved the
  *   verdict in the one direction it owns, based on a model answer, not a
- *   word or a method.
+ *   word or a method. 'rwxlite' means the D133 second pass moved the
+ *   verdict (raised, lowered, or undecided and pushed to x); a row it kept,
+ *   or left undecided at x, keeps mechanical's source.
  * @property {'tight'|'loose'|'settled'} review  WHICH ROWS A PROVIDER
  *   SHOULD LOOK AT — a published field beside `source`, and, like it, a
  *   statement about the decision rather than about the operation. It is

@@ -1,0 +1,53 @@
+ops.csv sha256 e9836ff2f9e8288e3721f97506ed666b871a3486f7b781c544b5234a0b5da0b4; truth.csv sha256 verified; 1505 ops
+candidate: none given; *-cand configs skipped (no D135 verdict possible)
+rwxmap 9f58894aed736639bba49d12db8f16a55e02a5d0 = 9f58894aed736639bba49d12db8f16a55e02a5d0; scratch copy /tmp/claude-1000/-home-hamr-PycharmProjects-rwxmap/ce972391-4bc3-4d00-985a-718bf1fd1fb1/scratchpad/ex4jev/work/rwxmap-base; src unchanged (tag v0.2.0)
+
+== c-jev ==  model(s): jev-1.14.0  rows 1505
+overall        exact 1428 (94.9%)  too loose   17 ( 1.1%)  too tight   60 ( 4.0%)  of 1505
+Jev: sent 1354 · answered 1354 · failed 0 · changed 174
+by vendor:
+  chatwoot.com   exact  153 (97.5%)  too loose    1 ( 0.6%)  too tight    3 ( 1.9%)  of 157
+  goharbor.io    exact  193 (95.1%)  too loose    7 ( 3.4%)  too tight    3 ( 1.5%)  of 203
+  immich.app     exact  264 (94.6%)  too loose    2 ( 0.7%)  too tight   13 ( 4.7%)  of 279
+  permit.io      exact  250 (95.1%)  too loose    3 ( 1.1%)  too tight   10 ( 3.8%)  of 263
+  polar.sh       exact  180 (94.7%)  too loose    0 ( 0.0%)  too tight   10 ( 5.3%)  of 190
+  render.com     exact  242 (96.0%)  too loose    3 ( 1.2%)  too tight    7 ( 2.8%)  of 252
+  zulip.com      exact  146 (90.7%)  too loose    1 ( 0.6%)  too tight   14 ( 8.7%)  of 161
+by method:
+  DELETE         exact  208 (99.5%)  too loose    0 ( 0.0%)  too tight    1 ( 0.5%)  of 209
+  GET            exact  683 (99.9%)  too loose    0 ( 0.0%)  too tight    1 ( 0.1%)  of 684
+  HEAD           exact    1 (100.0%)  too loose    0 ( 0.0%)  too tight    0 ( 0.0%)  of 1
+  PATCH          exact  115 (97.5%)  too loose    2 ( 1.7%)  too tight    1 ( 0.8%)  of 118
+  POST           exact  319 (84.6%)  too loose    4 ( 1.1%)  too tight   54 (14.3%)  of 377
+  PUT            exact  102 (87.9%)  too loose   11 ( 9.5%)  too tight    3 ( 2.6%)  of 116
+
+== D135 gate (next-model gate; user ruling 2026-11-04: better or same, no regression) ==
+no verdict: needs a-fp32-base and a-fp32-cand in this run
+
+== D133 mode a bar vs mech (reported for both models; it is not the D135 gate) ==
+
+== mode b (D133: no bar) ==
+
+== mode c ==
+mode c c-jev (existing Jev bars, M3 gate item 1+2 as amended by D94, Jev shipped on that gate by D119): too loose 17 (1.1%) <= 2% -> PASS; too tight 60 (4.0%) <= 20% (reported, never traded against item 1) -> within. Jev is non-deterministic: a near-bar result must repeat on a second run.
+
+too-loose rows, c-jev (17): id provider method path truth->letter evidence
+  ex4-0023 chatwoot.com POST /api/v1/accounts/{account_id}/campaigns x->w jev
+  ex4-0170 goharbor.io PUT /jobservice/jobs/{job_id} x->w floor
+  ex4-0175 goharbor.io PUT /jobservice/queues/{job_type} x->w floor
+  ex4-0241 goharbor.io PATCH /projects/{project_name}/preheat/policies/{preheat_policy_name}/executions/{execution_id} x->w floor
+  ex4-0279 goharbor.io PUT /replication/executions/{id} x->w floor
+  ex4-0295 goharbor.io PATCH /retentions/{id}/executions/{eid} x->w floor
+  ex4-0327 goharbor.io PUT /system/gc/{gc_id} x->w floor
+  ex4-0335 goharbor.io PUT /system/purgeaudit/{purge_id} x->w floor
+  ex4-0464 immich.app PUT /cluster-groups/{id}/requests x->w floor
+  ex4-0573 immich.app POST /shared-links x->w jev
+  ex4-0667 permit.io PUT /v2/elements/{proj_id}/{env_id}/config/{elements_config_id}/access_requests/{access_request_id}/deny x->w floor
+  ex4-0683 permit.io PUT /v2/elements/{proj_id}/{env_id}/config/{elements_config_id}/operation_approval/{operation_approval_id}/deny x->w floor
+  ex4-0692 permit.io PUT /v2/facts/{proj_id}/{env_id}/access_requests/{elements_config_id}/user/{user_id}/tenant/{tenant_id}/{access_request_id}/deny x->w floor
+  ex4-1132 render.com POST /disks/{diskId}/snapshots/restore x->w list
+  ex4-1299 render.com PUT /services/{serviceId}/headers x->w floor
+  ex4-1313 render.com PUT /services/{serviceId}/routes x->w floor
+  ex4-1435 zulip.com POST /remove_client_device x->w list
+
+scratch kept at /tmp/claude-1000/-home-hamr-PycharmProjects-rwxmap/ce972391-4bc3-4d00-985a-718bf1fd1fb1/scratchpad/ex4jev/work (holds the CLI outputs; delete when done)

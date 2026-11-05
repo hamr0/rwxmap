@@ -129,7 +129,7 @@ async function liveInput() {
   });
   process.stdout.write(r.stdout.split('\n').map((l) => (l ? `  live| ${l}` : l)).join('\n'));
   if (r.status !== 0) throw new Error(`live rwxmap run exited ${r.status}: ${r.stderr}`);
-  if (!/Jev: off/.test(r.stdout)) throw new Error('live run did not report "Jev: off"');
+  if (!/rwxlite: off/.test(r.stdout)) throw new Error('live run did not report "rwxlite: off"');
   const combined = readJson(path.join(outDir, 'api.intercom.io.rwxmap.json'));
   const copy = readJson(path.join(outDir, 'api.intercom.io.openapi.rwx.json'));
   const { doc } = await loadSpec(combined.source);

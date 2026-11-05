@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-11-05
+
+### Added
+
+- **The second pass never lowers a `credential-set` verdict, in any mode (D133, user ruling 2026-11-04).** A lowering answer leaves the row x, review `tight`, counted undecided.
+- **HTTP QUERY (RFC 10008) is r, handled exactly like GET (D134).** Step 1's method floor, the review marker, the MCP and WebMCP hints, the exporter letter, the key and the matcher all treat it as GET. OpenAPI 3.2's `query` field and `additionalOperations` entries keyed QUERY (any case) are now read, labelled, and get `x-rwx` in the copy. Other `additionalOperations` keys stay unread and are still counted in the stdout notice. No existing row's letter moves.
+- **`--engine rwxlite|jev|mechanical` and `--confidence <0-99>`.** `--confidence` is valid only with `--engine rwxlite`; elsewhere, out of range or non-integer, it exits 1. An unknown `--engine` exits 1.
+- **A second pass for the rows marked `loose` or `tight` (D133, mode a).** `src/secondpass.js` asks an engine about those rows only. A raise is accepted, a lowering only at p >= 0.97, and an error, timeout or malformed answer leaves the row x with review `tight`. Without the rwxlite package or a model, a normal run prints `rwxlite: off (mechanical)` with the reason and runs mechanically.
+- **A model cache check (`src/modelcache.js`).** The cache is `$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`. One directory per model, `rwxlite-<semver>+<sha8>/`, holds `manifest.json` (`version`, `modelFile`, `model`, `files` with a sha256 each), the model file and `vocab.txt`. Before use the manifest must parse, `model` must equal the directory name, every listed file must exist inside the directory and match its sha256, and sha8 must be the first 8 hex characters of the model file's sha256. Any failure means the model is not used: a WARNING on stderr, a mechanical run, and the `rwxlite` block reads off with the reason. The highest valid semver wins (0.10.0 beats 0.9.0); the offline fallback only accepts the pinned model version (D135). The download is below.
+- **`lean` goes to the engine.** Each row sent to the rwxlite engine carries `lean: {class, rule}`, rwxmap's own mechanical verdict for that row. It is never published; the output fields stay class, destructive, evidence and review.
+
+- **A fourth `evidence` value, `rwxlite` (D133).** A row the second pass moved (raised, lowered, or undecided and pushed to x) publishes `evidence: "rwxlite"` in the sidecar, MCP `_meta` and the OpenAPI copy; a kept row keeps mechanical's value. The sidecar's `counts.byEvidence` gains an `rwxlite` count. The bareguard export is unchanged.
+- **A top-level `rwxlite` block in the combined JSON,** beside `jev`: `mode` (`on`/`off`), `model`, and `sent`, `raised`, `lowered`, `kept`, `undecided`. With no model it reads `mode: "off"`, `model: null` and a `reason`.
+
+- **The rwxlite model download (D133, pass 2a).** `src/modeldownload.js`: a run that uses rwxlite fetches the manifest of the pinned rwxlite release (v0.2.0, D135) from rwxlite's GitHub releases (default `manifest-exact.json`, the fp32 model, about 91 MB; `--model small` is `manifest.json`, int8, about 23 MB), downloads every listed file into a temp folder in the cache, verifies every sha256 and the sha8 with the cache check, then renames it to `rwxlite-<semver>+<sha8>/`. https only; redirects only to github.com and `*.githubusercontent.com`, every hop re-checked; 200 MB cap; timeouts; one progress line per file. Offline or failing: a verified cached model of the pinned version is used ("using cached <model>, could not reach the release (<why>)"), else `rwxlite: off (mechanical) — <reason>`. `--engine mechanical` and `--engine jev` never fetch it.
+- **`--model small`.** Valid only in the default run and with `--engine rwxlite`; any other value or engine exits 1.
+- **The rwxlite adapter (`src/rwxliteengine.js`).** `import('rwxlite')` at run time; maps rwxmap's rows to rwxlite's `answerMany` and its `answers.isX.noul` / `answers.changes.noul` to the second pass. A failed slot, a malformed answer or a thrown call is undecided. rwxlite is not in `package.json`; install it yourself (`npm install rwxlite@0.2`). Without it the run is mechanical and says how to install it.
+
+- **Mode b: `--engine rwxlite` (D133).** rwxlite alone judges every row, `settled` ones too. x = pIsX, w = pChanges - pIsX, r = 1 - pChanges; the largest share is the letter. A row is accepted (raise, keep or lower) only when that share is at least `--confidence`/100; otherwise it is x with review `tight`, as is an errored or malformed answer. `--confidence` defaults to 95 (0-99). On rwxlite's 949 tuning rows: confidence 70 gives 870 exact / 18 too loose / 61 too tight / 52 asked, 95 gives 837 / 6 / 106 / 134, 97 gives 811 / 3 / 135 / 173 (mechanical alone: 736 / 6 / 207). The `rwxlite` block gains `pass` (`a` or `b`) and `confidence` when on.
+- **"rwxlite: nothing to check".** Mode a with no row marked loose or tight fetches no model.
+
+- **rwxlite is pinned to model release v0.2.0 (D135, user ruling 2026-11-04).** The manifest and every model file are fetched from the `v0.2.0` release tag, never `latest`, and the offline cache fallback ignores cached models of any other version. A newer model replaces it only after a no-regression result on a fresh exam.
+- **The installed `rwxlite` npm package must be 0.2.x (D135).** It is read from the nearest `package.json` named `rwxlite` above the resolved entry. Any other version, a pre-release or an unreadable version turns rwxlite off: mechanical alone, with the reason printed (`npm install rwxlite@0.2`).
+- **The package is checked before the model is downloaded.** A missing or wrong-version rwxlite package now costs no model download (the off reason is unchanged).
+
+### Changed
+
+- **A D129 second Jev answer that is malformed, or from a different model than the first, is now a failed call (D133).** Malformed means p missing, not a number, NaN, non-finite or outside [0,1]. The row is undecided (x, review `tight`) and counted in `failed`, instead of staying at w.
+- **BREAKING (Jev): a failed, errored or malformed Jev call is now undecided.** On the first or the second (D129) question the row becomes x with review `tight`, instead of keeping the mechanical letter (or w). Jev's tiers, cut-offs and the letters of successful answers are unchanged. Rows Jev moves now get their review marker from the second-pass rule (raised: `tight` if x else `loose`; lowered: `loose`). The summary line reads "failed (x, review tight)".
+- **Offline fallback prefers the chosen model variant.** A cached model of the variant you chose (exact or `--model small`) wins over a higher-version one of the other; the other variant is used only when none of the chosen kind is cached, and the line says so.
+- **BREAKING: a Jev key alone no longer turns Jev on.** Jev runs only with `--engine jev`. With a key and no `--engine jev` the run prints that Jev stays off and sends nothing. `--engine jev` without a key exits 1. `scripts/live-check.mjs --jev` now passes `--engine jev`.
+- **The run summary prints `rwxlite: off (mechanical)` (with a reason) instead of `Jev: off (mechanical)`** on every run that does not use Jev. The `jev` field in the combined JSON is unchanged.
+- **The `review` marker widened, in every mode (D133).** `loose` now also covers a POST row a word list lowered below the POST floor of x (class w or r, evidence `list`). `tight` also covers a row the second pass could not decide. Letters do not change; on the 6557-row tuning set 480 rows get a different marker.
+
 ## [0.9.0] - 2026-11-03
 
 ### Added
@@ -80,7 +114,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`-h`/`--help` and `-v`/`--version`** on the CLI: `--help` prints a short guide (inputs, options, the three output files, Jev, exit codes); `--version` prints the package version. Both exit 0.
 - **OpenAPI 3.1 webhooks notice**: webhook operations are counted in a stdout notice and never labelled, the same way 3.2 `query`/`additionalOperations` operations are.
 - **CI installs the packed tarball**: CI now packs the package, installs the tarball and runs the installed `rwxmap` bin on a tracked spec.
-- **`docs/release-checklist.md`**: a repo process document, not shipped in the package.
+- **`docs/product/release-checklist.md`**: a repo process document, not shipped in the package.
 
 ### Changed
 
