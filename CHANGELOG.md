@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **README rewritten (docs only, no code change).** It is shorter, says each fact once, and keeps the detail in collapsed Reference sections. A new "What it does" diagram shows the inputs (OpenAPI file or URL, API address with RFC 9727 api-catalog discovery, a live call with no spec), the decision, and the outputs (bareguard grants, MCP annotations + `_meta`, WebMCP hints, the OpenAPI copy with `x-rwx`, the review sidecar for `rwxmap/match`). One modes table covers a, b (rwxlite alone on every row), c (Jev) and mechanical, with a link to rwxlite. "How good it is" now shows shared exam #3 (1377 operations, 7 APIs) for all four modes, replacing the 949-row tuning table. The stale "two mechanical rules are being tested" line is gone (those rules failed tuning). Mode c is described correctly: Jev re-checks the rows the method alone decided (a POST at x can drop to w or r, a PUT or PATCH at w can rise to x, a GET at r can rise to w).
+
 ## [0.10.0] - 2026-11-05
 
 ### Added
