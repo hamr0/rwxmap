@@ -1237,9 +1237,9 @@ npm). Next: the truth-v4 plan (D137), steps listed in
 
 0. Ruling D137 (done 2026-11-05).
 1. Send rwxlite the shared wording.
-2. BRIEF-v4, calibrated blind on a practice set and a burned holdback.
+2. BRIEF-v4, approved 2026-11-05; calibrated through the step-4 pilot.
 3. Inventory of every labelled set in both repos.
-4. Relabel every row under BRIEF-v4; truth-v4.csv beside each original.
+4. Pilot (Jev vs two blind labellers on different models), then one pass over every w row; truth-v4.csv beside each original.
 5. Merged v4 export for rwxlite; rwxlite retrains (round 13).
 6. rwxmap code: second pass never lowers an access-widening x (new D-number).
 7. Fresh exam #5, pre-registered, scored once for both projects.
