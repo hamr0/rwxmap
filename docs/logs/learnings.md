@@ -8605,3 +8605,42 @@ exact >= +5 points): +9.0 and +9.5 points.
 - Decision: D136 (both rulings).
 - Lesson: a lower cut-off buys tight rows at ~28 per leak but every added leak is a confident x->w; the bar (no looser than mechanical) catches it per set, so the gain has to come from the model, not the rule.
 - Follow-up ruling (2026-11-05): clause (f) stands for job stops; truth-d136.csv copies added beside exam #3 and #4 truth (4 restart rows to w), originals untouched.
+
+## 2026-11-05 — rwxlite 0.2.1 accepted under D135 (int8 consistency)
+
+- Goal: decide whether rwxlite 0.2.1 (answerMany runs one row per session.run, so int8 answers no longer depend on batch neighbours) may ship on the same v0.2.0 model files.
+- Outcome: fp32 identical on every row (dp 0); int8 consistent (dp 0 batched vs one row). int8 exam #3 mode a 1192/15/170 -> 1189/16/172, b95 1181/13/183 -> 1180/14/183: one extra too-loose row per mode (ex3-0422 mux PUT live-streams complete; ex3-0257 clerk POST waitlist_entries/bulk). Only --model small is affected. Commit b737bba.
+- Decision: user ruling 2026-11-05: accepted under D135 (D135 row note); same model, so not a new model under the no-regression gate. rwxlite publishes it; the 0.2.x range picks it up.
+- Lesson: a fix that makes answers consistent can cost a lucky row; consistency wins when the cost is noise-level and the model is unchanged.
+
+## 2026-11-05 — rwxlite round 12 eval through the real mode a (harbor + render, 455 rows): no gain over shipped 0.2.0
+
+- Goal: score rwxlite's round 12 candidates (S0 = corrected labels + exam #4's other 5 vendors, no variants; S1 = S0 + generated variants x2, 2.4%; S2 = x5, 5.7%) plus their v020 and r11 baselines under rwxmap's real second pass, as agreed after exam #4. rwxlite prereg docs/wiki/prereg-r12.md (rwxlite adff5ef), predictions sha256 committed (rwxlite c0c022b) before truth was opened.
+- Setup: 455 exam #4 rows (goharbor.io 203, render.com 252), held out of all round 12 training; truth = rwxlite's 455-row truth.csv (sha256 8344fc9e..., CRLF), equal on all 455 labels to our truth-d136.csv subset (sha256 6c35a32f...). poc/replay-r12/replay.mjs --lower-min-p at 0.90/0.95/0.97/0.99. rwxlite's labels (rwxlite-r12-S1+446408a1 etc.) do not parse as rwxlite-<semver>+<sha8>, so they were mapped in scratch to rwxlite-0.0.N+<same sha8>; only string equality matters. Committed 15bf477 (poc/replay-r12/out/r12eval/). These rows are from burned exam #4: a pick signal for rwxlite only, never a rwxmap gate.
+- Outcome (exact / too loose / too tight of 455; mechanical 387/14/54):
+
+  | run | 0.90 | 0.95 | 0.97 | 0.99 |
+  |---|---|---|---|---|
+  | v020 | 433/9/13 | 428/9/18 | 418/9/28 | 392/9/54 |
+  | r11 | 431/10/14 | 428/10/17 | 422/10/23 | 391/10/54 |
+  | S0 | 435/9/11 | 428/9/18 | 424/9/22 | 391/9/55 |
+  | S1 | 435/10/10 | 428/10/17 | 421/9/25 | 390/9/56 |
+  | S2 | 437/10/8 | 430/9/16 | 423/9/23 | 395/9/51 |
+
+  Shipped 0.2.0 (onnx, T 0.844), rescored from exam4 score/rows-a-fp32-base.csv on the same 455 rows: 425/9/21.
+- Findings: (1) rwxlite's frozen pick rule (too loose <= v020's, exact >= v020 + 3) passed S0, S2, S1, but its v020 used T refit to 0.9211; against shipped 0.2.0 (T 0.844) no round 12 run beats it at 0.97 (best S0 424/9/22, inside noise). rwxlite recorded this as a prereg design error. (2) Temperature alone moved v020 by 7 exact at 0.97 (425 -> 418), more than any training change. (3) Leaks at 0.97: v020 ex4-0170 0175 0241 0279 0295 0327 0335 0358 1132; S0/S1/S2 ex4-0175 0241 0279 0295 0327 0358 1115 1132 1318 — round 12 closes harbor 0170 (job stop) and 0335 (purgeaudit), opens render 1115/1318 (PUT secret-files) as r11 did; 5 harbor job stops stay missed by every model. (4) Variants x5 (S2) did not beat no variants (S0).
+- Decision: none for rwxmap; 0.10.0 stays on 0.2.0 (D135). No exam #5 requested.
+- Lesson: compare a candidate against the shipped configuration, temperature included; a baseline rescored with a different T is a different model, and here it alone hid a 7-row gap.
+
+## 2026-11-05 — rwxlite calibration of 0.2.0 under the real second pass: one dial, 0.97 stays
+
+- Goal: see whether temperature (T) or our lower cut-off (0.97) could gain exact rows on the shipped 0.2.0 without new leaks. This is rwxlite's analysis (rwxlite docs/wiki/findings.md, commit 9f2827d, reported 2026-11-05), recorded by us. Row-level flips are in rwxlite's scratchpad calib/ folder.
+- Setup: rwxlite's copy of src/secondpass.js matched our real secondPass row for row on 9 sets (0 differing rows). Checks (exact / too loose / too tight): 455 harbor+render 425/9/21; exam #4 1391/16/98; exam #3 1192/15/170.
+- Outcome: no setting gains right rows without adding too-loose rows, except a boundary-noise gain of +9 rows.
+- Findings:
+  - (1) T and the 0.97 line move essentially the same rows (95% or more overlap), and the model's top letter never changes. They are one dial, not two.
+  - (2) Every setting that gains right rows also adds too-loose rows. T 0.80 gives +140 right and +6 loose. A 0.96 line gives +200 right and +7 loose. Raising the line to 0.975 fixes 3 loose but loses 187 right.
+  - (3) The best setting with no new loose rows is T 0.84. It gains +9 right on 5,031 clean rows (+2 of 455). These are rows at p 0.9700-0.9705, which is boundary noise.
+  - (4) The remaining leaks are confident wrong lowerings at p about 0.96-0.975, and no cut-off separates them: chatwoot ex4-0152 (inbox contacts), clerk ex3-0031 (billing price), workos fx-0936 (waitlist), permit.io ex4-0813 (env copy), googleapis gate4 (messages), elmah.io r9-1129.
+- Decision: none for rwxmap. 0.97 stays (D136). rwxlite keeps 0.2.0 at T 0.844 / 0.97 and will not spend a fresh exam on calibration. Their next model work waits for more real human-labelled dangerous POST/PUT examples.
+- Lesson: when a model's letter never changes across T, temperature and the cut-off are one lever. Its remaining leaks are confident errors, so only new training data can fix them, not calibration. This refines the round 12 lesson: T moved 7 rows there because it moves the same rows the line does.
