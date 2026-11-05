@@ -8612,3 +8612,22 @@ exact >= +5 points): +9.0 and +9.5 points.
 - Outcome: fp32 identical on every row (dp 0); int8 consistent (dp 0 batched vs one row). int8 exam #3 mode a 1192/15/170 -> 1189/16/172, b95 1181/13/183 -> 1180/14/183: one extra too-loose row per mode (ex3-0422 mux PUT live-streams complete; ex3-0257 clerk POST waitlist_entries/bulk). Only --model small is affected. Commit b737bba.
 - Decision: user ruling 2026-11-05: accepted under D135 (D135 row note); same model, so not a new model under the no-regression gate. rwxlite publishes it; the 0.2.x range picks it up.
 - Lesson: a fix that makes answers consistent can cost a lucky row; consistency wins when the cost is noise-level and the model is unchanged.
+
+## 2026-11-05 — rwxlite round 12 eval through the real mode a (harbor + render, 455 rows): no gain over shipped 0.2.0
+
+- Goal: score rwxlite's round 12 candidates (S0 = corrected labels + exam #4's other 5 vendors, no variants; S1 = S0 + generated variants x2, 2.4%; S2 = x5, 5.7%) plus their v020 and r11 baselines under rwxmap's real second pass, as agreed after exam #4. rwxlite prereg docs/wiki/prereg-r12.md (rwxlite adff5ef), predictions sha256 committed (rwxlite c0c022b) before truth was opened.
+- Setup: 455 exam #4 rows (goharbor.io 203, render.com 252), held out of all round 12 training; truth = rwxlite's 455-row truth.csv (sha256 8344fc9e..., CRLF), equal on all 455 labels to our truth-d136.csv subset (sha256 6c35a32f...). poc/replay-r12/replay.mjs --lower-min-p at 0.90/0.95/0.97/0.99. rwxlite's labels (rwxlite-r12-S1+446408a1 etc.) do not parse as rwxlite-<semver>+<sha8>, so they were mapped in scratch to rwxlite-0.0.N+<same sha8>; only string equality matters. Committed 15bf477 (poc/replay-r12/out/r12eval/). These rows are from burned exam #4: a pick signal for rwxlite only, never a rwxmap gate.
+- Outcome (exact / too loose / too tight of 455; mechanical 387/14/54):
+
+  | run | 0.90 | 0.95 | 0.97 | 0.99 |
+  |---|---|---|---|---|
+  | v020 | 433/9/13 | 428/9/18 | 418/9/28 | 392/9/54 |
+  | r11 | 431/10/14 | 428/10/17 | 422/10/23 | 391/10/54 |
+  | S0 | 435/9/11 | 428/9/18 | 424/9/22 | 391/9/55 |
+  | S1 | 435/10/10 | 428/10/17 | 421/9/25 | 390/9/56 |
+  | S2 | 437/10/8 | 430/9/16 | 423/9/23 | 395/9/51 |
+
+  Shipped 0.2.0 (onnx, T 0.844), rescored from exam4 score/rows-a-fp32-base.csv on the same 455 rows: 425/9/21.
+- Findings: (1) rwxlite's frozen pick rule (too loose <= v020's, exact >= v020 + 3) passed S0, S2, S1, but its v020 used T refit to 0.9211; against shipped 0.2.0 (T 0.844) no round 12 run beats it at 0.97 (best S0 424/9/22, inside noise). rwxlite recorded this as a prereg design error. (2) Temperature alone moved v020 by 7 exact at 0.97 (425 -> 418), more than any training change. (3) Leaks at 0.97: v020 ex4-0170 0175 0241 0279 0295 0327 0335 0358 1132; S0/S1/S2 ex4-0175 0241 0279 0295 0327 0358 1115 1132 1318 — round 12 closes harbor 0170 (job stop) and 0335 (purgeaudit), opens render 1115/1318 (PUT secret-files) as r11 did; 5 harbor job stops stay missed by every model. (4) Variants x5 (S2) did not beat no variants (S0).
+- Decision: none for rwxmap; 0.10.0 stays on 0.2.0 (D135). No exam #5 requested.
+- Lesson: compare a candidate against the shipped configuration, temperature included; a baseline rescored with a different T is a different model, and here it alone hid a 7-row gap.
