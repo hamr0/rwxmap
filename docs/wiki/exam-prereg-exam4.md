@@ -291,3 +291,67 @@ change after this needs a new exam.
 - int8 is reported but not gated. 0.2.0 int8 differs slightly from the CLI's
   replay near cut-offs (D133 parity finding), so int8 rows are information, not
   a basis for the decision.
+
+## Results and findings (after scoring, 2026-11-05)
+
+Scored once, at rwxmap 9f58894, exit 0, no Jev. Exam #4 is BURNED for both sides. Source: `data/exam4-2026-11-04/score/score.txt`.
+
+### rwxmap's scores (of 1505)
+
+| config | exact | too loose | too tight | rwxlite sent / raised / lowered / kept / undecided |
+|---|---|---|---|---|
+| mech | 1262 (83.9%) | 21 (1.4%) | 222 (14.8%) | none |
+| a-fp32-base (0.2.0) | 1391 (92.4%) | 16 (1.1%) | 98 (6.5%) | 602 / 6 / 125 / 369 / 102 |
+| a-fp32-cand (r11, 0.3.0) | 1393 (92.6%) | 18 (1.2%) | 94 (6.2%) | 602 / 5 / 130 / 376 / 91 |
+| a-int8-base | 1387 (92.2%) | 16 (1.1%) | 102 (6.8%) | 602 / 6 / 121 / 369 / 106 |
+| a-int8-cand | 1390 (92.4%) | 18 (1.2%) | 97 (6.4%) | 602 / 5 / 127 / 374 / 96 |
+| b95-fp32-base | 1397 (92.8%) | 9 (0.6%) | 99 (6.6%) | 1505 / 0 / 145 / 1208 / 152 |
+| b95-fp32-cand | 1404 (93.3%) | 7 (0.5%) | 94 (6.2%) | 1505 / 1 / 149 / 1208 / 147 |
+
+### D135 gate (next-model gate)
+
+a-fp32-cand (GATE) vs a-fp32-base: too loose 18 vs 16 (+2) -> FAIL (need <=); exact 1393 vs 1391 (+2) -> OK (need >=) => FAIL: 0.2.0 stays. Beside the gate: too tight 94 vs 98 (-4).
+
+Verdict: NO-GO. rwxlite r11 (v0.3.0) does not ship; rwxmap stays on 0.2.0. A later model needs a new exam.
+
+### D133 verdicts (mode a bar vs mech)
+
+- a-fp32-base: PASS. Too loose 16 vs mech 21; exact +8.57 points vs the 5.0 bar.
+- a-fp32-cand: PASS. Too loose 18 vs 21; +8.70 points.
+- a-int8-base: PASS. 16 vs 21; +8.31 points.
+- a-int8-cand: PASS. 18 vs 21; +8.50 points.
+- Mode b (no bar): b95-fp32-base 9 too loose (0.6%), 99 too tight (6.6%), asked 152 (10.1%); b95-fp32-cand 7 too loose (0.5%), 94 too tight (6.2%), asked 147 (9.8%).
+- Mode c (Jev): not scored, pending the user's decision.
+
+### Too-loose rows
+
+Mechanical (21): ex4-0170, 0175, 0241, 0279, 0295, 0302, 0327, 0335, 0358 (goharbor); ex4-0464 (immich); ex4-0667, 0683, 0692 (permit); ex4-1091 (polar); ex4-1115, 1132, 1299, 1313, 1318 (render); ex4-1352, 1435 (zulip). Evidence: floor on all but ex4-1132 and ex4-1435 (list).
+
+a-fp32-base (16): ex4-0170, 0175, 0241, 0279, 0295, 0327, 0335, 0358 (goharbor); ex4-0464, 0573 (immich); ex4-0667, 0683, 0692 (permit); ex4-1132 (render); ex4-1352, 1435 (zulip). Evidence: floor on 13, list on ex4-1132 and ex4-1435, rwxlite on ex4-0573 (POST /shared-links, truth x, scored w).
+
+a-fp32-cand (18): the base 16 minus ex4-0335, plus ex4-0813 (permit POST /v2/projects/{proj_id}/envs/{env_id}/copy, evidence rwxlite), ex4-1115 (render PUT /build-sources/{buildSourceId}/secret-files, floor) and ex4-1318 (render PUT /services/{serviceId}/secret-files, floor). That is 16 - 1 + 3 = 18.
+
+### Rows where base and cand differ (12), truth, base -> cand
+
+| id | vendor | method path | truth | base -> cand |
+|---|---|---|---|---|
+| ex4-0250 | goharbor.io | POST /projects/{project_name}/repositories/{repository_name}/artifacts | w | x -> w |
+| ex4-0335 | goharbor.io | PUT /system/purgeaudit/{purge_id} | x | w -> x |
+| ex4-0571 | immich.app | POST /sessions/{id}/lock | w | w -> x |
+| ex4-0699 | permit.io | POST /v2/facts/{proj_id}/{env_id}/bulk/users | w | x -> w |
+| ex4-0813 | permit.io | POST /v2/projects/{proj_id}/envs/{env_id}/copy | x | x -> w |
+| ex4-0917 | polar.sh | POST /v1/checkouts/ | w | x -> w |
+| ex4-1100 | render.com | POST /build-sources | w | x -> w |
+| ex4-1115 | render.com | PUT /build-sources/{buildSourceId}/secret-files | x | x -> w |
+| ex4-1122 | render.com | POST /dedicated-ips | w | w -> x |
+| ex4-1275 | render.com | POST /services | w | x -> w |
+| ex4-1318 | render.com | PUT /services/{serviceId}/secret-files | x | x -> w |
+| ex4-1489 | zulip.com | POST /users/me/subscriptions | w | x -> w |
+
+### Findings
+
+- (a) Cand opens 3 leaks (ex4-0813 permit POST env copy; ex4-1115 and ex4-1318 render PUT secret-files) and closes 1 (ex4-0335 harbor PUT purgeaudit). Net +2, which is the gate failure.
+- (b) Every base leak but one carries floor or list evidence (13 floor, 2 list: ex4-1132, ex4-1435). ex4-0573 (immich POST /shared-links) is the only one where rwxlite lowered the row itself.
+- (c) Harbor PUT/PATCH job and execution stop rows (ex4-0170, 0175, 0241, 0279, 0295, 0327) are mechanical floor leaks that both models keep.
+- (d) rwxlite's own scorer (rwxlite 594227f / 3ce3332, `train/exam4_score.py`, "a_none") reports: mech 1262/21/222 (the same as ours); base fp32 1448/24/33; cand 1447/22/36. Their NO-GO is on exact (1447 < 1448). The verdicts agree; the numbers differ. Confirmed by rwxlite (2026-11-05): "a_none" is offline mode a at exam #3's cuts (lower when pIsX < 0.30, the r cut 0.40 on POST, raise-wx 0.15, raise-get 0.05, credential rule forces x last). Every row is sent and it never asks or reviews. It is not rwxmap's `secondPass`: it has no lower-only-at-p >= 0.97-else-x-plus-review, does not skip settled rows, and has no credential-set never-lower. rwxlite agrees the D135 gate is the CLI number (base 1391/16/98, cand 1393/18/94, NO-GO on too loose), and records "a_none named as gate config" as a prereg error on their side. For the next exam their gate is rwxmap's CLI `secondPass`, or a replay of their p-jsonl through our CLI. A model's score belongs to the rule it was measured with.
+- (e) Jev (mode c) was not scored, pending the user's decision.

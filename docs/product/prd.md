@@ -1037,7 +1037,8 @@ decided; everything marked "proposal" or "open" is not decided.
   tag, read from the package's own package.json); any other version, a
   pre-release or an unreadable version turns rwxlite off, mechanical
   alone, with the reason printed (D135). A newer model replaces it only
-  after a no-regression result on a fresh clean exam. Every run records
+  after a no-regression result on a fresh clean exam (exam #4,
+  2026-11-05: rwxlite r11 failed it, 0.2.0 stays). Every run records
   the model string.
 - **Model cache and integrity.** The downloaded model is cached in a
   per-user folder, `~/.cache/rwxmap/` (or `$XDG_CACHE_HOME/rwxmap`),
@@ -1192,6 +1193,16 @@ NO-GO (15 too loose = 1.22% of answered vs 0.5%). The exam is burned for
 both sides. A parity-checked replay of rwxlite 0.2.0 fp32 (analysis, not a
 new exam) gives 1192 / 15 / 170 in mode a, also a PASS, and 14 too loose in
 b95 vs r10's 12.
+
+Shared exam #4 (scored once 2026-11-05; data in `data/exam4-2026-11-04/`;
+7 vendors, 1505 operations; BURNED for both sides). The D135 next-model
+gate scored rwxlite r11 (v0.3.0) NO-GO: mode a fp32 too loose 18 vs 16 for
+0.2.0 (exact 1393 vs 1391), so 0.2.0 stays and the next model needs a new
+exam. Mode a with 0.2.0 passed the D133 bar on this exam: 1391 / 16 / 98
+(exact / too loose / too tight) vs mechanical 1262 / 21 / 222, +8.57
+points. Jev (mode c) was not scored. rwxlite's own scorer also says NO-GO
+but with different numbers (it applies no ask rule); rwxlite confirmed the
+gate is the CLI number.
 
 ### Open
 
