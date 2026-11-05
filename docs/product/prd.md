@@ -1255,8 +1255,9 @@ Parked items and known limits below.
   quantisation with one scale over the whole padded batch, so p depends on
   which rows share a batch (max |dp| 0.11 on exam #3, 5 rows cross 0.97).
   fp32, the default, is unaffected. The fix is rwxlite's (one row per
-  session.run). It was measured as 0.2.1 on exam #3 before release: fp32 is
-  identical on every row, and int8 answers no longer depend on the batch.
+  session.run) and is accepted as 0.2.1 under D135 (same model files): fp32
+  is identical on every row and int8 answers no longer depend on the batch,
+  once rwxlite publishes it.
 - **Two plain error messages depend on wording.** The CLI recognises
   `load.js`'s "no usable paths" error and Node's `parseArgs` errors by
   their text. If either is reworded the user sees the raw message

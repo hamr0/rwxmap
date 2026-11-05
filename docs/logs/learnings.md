@@ -8605,3 +8605,10 @@ exact >= +5 points): +9.0 and +9.5 points.
 - Decision: D136 (both rulings).
 - Lesson: a lower cut-off buys tight rows at ~28 per leak but every added leak is a confident x->w; the bar (no looser than mechanical) catches it per set, so the gain has to come from the model, not the rule.
 - Follow-up ruling (2026-11-05): clause (f) stands for job stops; truth-d136.csv copies added beside exam #3 and #4 truth (4 restart rows to w), originals untouched.
+
+## 2026-11-05 — rwxlite 0.2.1 accepted under D135 (int8 consistency)
+
+- Goal: decide whether rwxlite 0.2.1 (answerMany runs one row per session.run, so int8 answers no longer depend on batch neighbours) may ship on the same v0.2.0 model files.
+- Outcome: fp32 identical on every row (dp 0); int8 consistent (dp 0 batched vs one row). int8 exam #3 mode a 1192/15/170 -> 1189/16/172, b95 1181/13/183 -> 1180/14/183: one extra too-loose row per mode (ex3-0422 mux PUT live-streams complete; ex3-0257 clerk POST waitlist_entries/bulk). Only --model small is affected. Commit b737bba.
+- Decision: user ruling 2026-11-05: accepted under D135 (D135 row note); same model, so not a new model under the no-regression gate. rwxlite publishes it; the 0.2.x range picks it up.
+- Lesson: a fix that makes answers consistent can cost a lucky row; consistency wins when the cost is noise-level and the model is unchanged.
