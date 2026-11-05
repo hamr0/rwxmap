@@ -7336,7 +7336,7 @@ Node.
   `swagger` key is a tightening.
 - What it contains: the CLI polish (015d15f) and the debrief 6 fixes
   (b3feb7e), both in the entries above; the PRD cut to one shape and the
-  README rescoped; `docs/release-checklist.md` (12 items) and the
+  README rescoped; `docs/product/release-checklist.md` (12 items) and the
   CLAUDE.md line that a release is not cut with any item unrun
   (9fcfea2); `poc/conformance` reading its own `hint-snippets.md`
   instead of the README; the openvan.camp `check:live` record

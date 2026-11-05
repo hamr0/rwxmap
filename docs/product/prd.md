@@ -902,7 +902,7 @@ above.
   e) — released as `rwxmap@0.6.0` on 2026-09-29.
 - **CLI polish and the release checklist** — `--help`, `--version`,
   plain error messages, the `openapi`/`swagger` key check and
-  `docs/release-checklist.md` — released as `rwxmap@0.7.0` on 2026-09-30.
+  `docs/product/release-checklist.md` — released as `rwxmap@0.7.0` on 2026-09-30.
 - **The proxy matcher** — `rwxmap/match` (D126) released as
   `rwxmap@0.8.0` on 2026-10-29.
 
