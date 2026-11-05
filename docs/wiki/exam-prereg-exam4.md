@@ -113,8 +113,7 @@ Model strings: fp32 `rwxlite-0.2.0+8503b655`, int8 `rwxlite-0.2.0+8ad0a182`.
 
 ### CANDIDATE: the model rwxlite enters
 
-**CANDIDATE ADDENDUM: pending.** The candidate does not exist yet; rwxlite's user
-is choosing it. This section is filled in, and committed, BEFORE the truth
+**CANDIDATE ADDENDUM: filled 2026-11-05.** The candidate is rwxlite round 11 (r11), entered by rwxlite's user; rwxlite's own prereg is rwxlite commit 594227f. Values checked by the orchestrator against the rwxlite repo and the model files before this commit. This section is filled in, and committed, BEFORE the truth
 sha256 is shared with rwxlite and before any scoring. The scorer refuses to
 score any `*-cand` config unless every value below is given on its command line,
 and checks each against the files (a model string must equal
@@ -126,15 +125,17 @@ the command line.
 
 | field | value |
 |---|---|
-| rwxlite package ref (commit in the rwxlite repo) | pending |
-| rwxlite tag / version (the tag rwxmap would pin) | pending |
-| manifest.json sha256 (int8) | pending |
-| manifest-exact.json sha256 (fp32) | pending |
-| model-int8-pc.onnx sha256 | pending |
-| model-fp32.onnx sha256 | pending |
-| vocab.txt sha256 | pending |
-| fp32 model string | pending |
-| int8 model string | pending |
+| rwxlite package ref (commit in the rwxlite repo) | `77e6bb485fcb3e119f3c3f02ceb649f1de0c9bbf` |
+| rwxlite tag / version (the tag rwxmap would pin) | `v0.3.0` |
+| manifest.json sha256 (int8) | `ff1ed6f12d7e6d237a96be2e600fa0da3438fd9a085801092b453df829cd052c` |
+| manifest-exact.json sha256 (fp32) | `65e84b7697f725bac41550afd001aefe532ad2dd2ed1ce41ca6a349138244a80` |
+| model-int8-pc.onnx sha256 | `adc6e6c130f8ba1716fa6b31e1ddce27e4b8eea8c76b336b8c1d53efdf3ea3e2` |
+| model-fp32.onnx sha256 | `252f31811a1a9316cea0c6fd3404f3674c9e253613604fcc46a5832377e43bf6` |
+| vocab.txt sha256 | `07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3` |
+| fp32 model string | `rwxlite-0.3.0+252f3181` |
+| int8 model string | `rwxlite-0.3.0+adc6e6c1` |
+
+Model files: /home/hamr/PycharmProjects/rwxlite/data/m1-r11/ (local, gitignored in rwxlite). Tag v0.3.0 is annotated, local and unpushed; package.json 0.3.0; src/ identical to rwxlite 95b83c5.
 
 How the candidate is scored: as it would ship (D135). Today's CLI accepts only
 rwxlite 0.2.x, so a candidate packaged as 0.3.x would be "rwxlite: off" through
