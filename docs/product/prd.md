@@ -1037,7 +1037,9 @@ decided; everything marked "proposal" or "open" is not decided.
   runs it must be in the same minor line (>=0.2.0 <0.3.0, derived from the
   tag, read from the package's own package.json); any other version, a
   pre-release or an unreadable version turns rwxlite off, mechanical
-  alone, with the reason printed (D135). A newer model replaces it only
+  alone, with the reason printed (D135). The package is checked before
+  the model is fetched, so a missing or wrong-version package costs no
+  download. A newer model replaces it only
   after a no-regression result on a fresh clean exam (exam #4,
   2026-11-05: rwxlite r11 failed it, 0.2.0 stays). Every run records
   the model string.
