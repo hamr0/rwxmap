@@ -21,6 +21,12 @@ The labelled data stays the source of truth. D137 only moves w to x, so only row
 
 This supersedes "every row of every set" in step 4 and in the Scope paragraph above.
 
+Further rulings (user, 2026-11-05):
+
+- (a) Vendor labels are a cross-check, not truth. After the pass, any row v4 calls w where AWS (Permissions management or Write) or GitHub (Administration, secrets, keys, roles write) says otherwise gets a second blind look, and a user ruling if still split. Source: rwxlite data/vendor/joined.jsonl.
+- (b) Generated variants: surface rewordings inherit their seed's v4 label; contrast variants are labelled directly.
+- (c) Pre-v3 sets data/calibration-2026-09-14 (543) and data/corpus/labelled.csv (1186) are relabelled in full; rwxlite holds no pre-v3 w or x labels.
+
 ## Why
 
 rwxlite's vendor-label check (rwxlite commit f86f5b1; `/home/hamr/PycharmProjects/rwxlite/data/vendor/report.md`). On AWS "Permissions management" actions (221 endpoints), Jev said w on 165 and 0.2.0 learned it. Our second pass lowered mechanical x to w on 38 of them at p 0.97-0.99: IAM PutRolePolicy/CreatePolicy, KMS PutKeyPolicy, PutResourcePolicy on ECR/Glue/Secrets Manager/Logs/SSM, SNS SetTopicAttributes, Lake Formation PutDataLakeSettings, GitHub create-deploy-key, branch-protection restrictions. Same family as the credential-set leaks.
@@ -35,7 +41,7 @@ The worry this answers: an agent granting itself access is a problem the user ma
 | 1 | Send rwxlite the shared wording. They relabel and retrain on the same test. | sent 2026-11-05, awaiting reply |
 | 2 | BRIEF-v4: rewrite BRIEF-v3 around the one test. Fold in D98, D130, D136 and D137 as examples, not clauses. Version-controlled under a new `data/relabel-v4-<date>/` folder. It states that it outranks the task prompt. Calibrated blind on a practice set, then a pre-registered holdback, both drawn from sets we hold; the holdback is burned after scoring. | drafted and approved by the user 2026-11-05 (seams 1-5 ruled x); calibration via the step-4 pilot |
 | 3 | Inventory: a table of every labelled set in both repos (columns below). In rwxmap it starts with `data/provider-corpus-2026-09-16`, `buildset-2026-09-18`, `exam-2026-09-17`, `exam-2026-09-20`, `exam-2026-09-22`, `exam3-2026-11-04`, `exam4-2026-11-04`, `calibration-2026-09-14`, `relabel-2026-09-22`, `relabel-buildset-2026-09-23`, `combined-2026-09-21`, `corpus`, `credential-set-2026-11-04`, `rwxlite-fresh-2026-11-03` and `gate4-2026-11-04`; the inventory confirms which actually hold truth labels. rwxlite's sets and its ~95k training rows come from rwxlite. | rwxmap side done 2026-11-05 (table below); rwxlite side in its own inventory |
-| 4 | Pilot, then one pass. Pilot: about 200 w rows from tuning sets (half drawn from rows likely to touch access, half random w), labelled under v4 by two blind labellers on DIFFERENT models (not two sessions of one model; disputes to the user), and by Jev with a v4 question. Bar, set before running: Jev must catch at least 95% of the rows the labellers' truth calls x, with its false x reported separately. Jev passes: Jev labels the full w pass, and a blind labeller checks every row Jev calls x plus a random sample of rows it keeps w. Jev fails: local blind labellers do the pass (user ruling). Exam #5 truth stays two blind labellers, no Jev. | not started |
+| 4 | Pilot, then one pass. Pilot: about 200 w rows from tuning sets (half drawn from rows likely to touch access, half random w), labelled under v4 by two blind labellers on DIFFERENT models (not two sessions of one model; disputes to the user), and by Jev with a v4 question. Bar, set before running: Jev must catch at least 95% of the rows the labellers' truth calls x, with its false x reported separately. Jev passes: Jev labels the full w pass, and a blind labeller checks every row Jev calls x plus a random sample of rows it keeps w. Jev fails: local blind labellers do the pass (user ruling). Exam #5 truth stays two blind labellers, no Jev. | pilot done 2026-11-05: Jev FAIL (18/28, 64.3% vs 95%); pass labelled locally by two Sonnet labellers (user ruling) |
 | 5 | Hand-off: one merged v4 export for rwxlite (id, set, method, path, operationId, summary, description, label, brief, burned-or-tuning flag), written as an addition. rwxlite retrains on it (round 13). | not started |
 | 6 | rwxmap code: the second pass never lowers an access-widening x, like D130. Own D-number, measured on the v4 tuning sets with leave-one-vendor-out. Check the mechanical side. The GET-twin question (AWS `GET /#Action=...` settled r while AWS calls it write; 848 endpoints) is a separate measured POC, not part of this. | not started |
 | 7 | Fresh exam #5: exclude every vendor that appears in any v4 set, and count the pool first. Pre-register it. Score once for both projects: rwxmap mode a against the D133 bar, and rwxlite standalone. Must be same or better on both. | not started |
@@ -79,6 +85,8 @@ Open on provenance: nothing in data/corpus says which brief labelled corpus/labe
 ### rwxlite inventory (2026-11-05)
 
 Source: rwxlite docs/wiki/label-inventory.md (rwxlite 570c25a). 104,855 distinct operations, all under BRIEF-v3 + D136. Round 12 training is 95,291 rows: Jev soft target 79.2% (75,483), mechanical only 16.0% (15,212), hand/ruled 4.8% (4,596). Their access-rule estimate is about 1,030 operations by a narrow pattern (1,027 currently w; Microsoft Graph 574, AWS 147) and about 5,400 by a broad one; both overcount. Their hand labels were two sessions of one model, so they count as one opinion.
+
+Sizing (rwxlite label-inventory.md section 9, 806ec1b): 29,327 unique w operations of 101,806 (Jev 21,673; hand/ruled 5,121; mechanical 1,920; generated 613); 615 variants from 160 seeds (570 surface, 45 contrast); a keyword scope of about 1,710 likely D137 rows.
 
 ## Rules
 

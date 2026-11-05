@@ -8651,3 +8651,11 @@ exact >= +5 points): +9.0 and +9.5 points.
 - Why: rwxlite's vendor-label check found Jev said w on 165 of 221 AWS "Permissions management" endpoints and 0.2.0 learned it. Our second pass lowered 38 of them from x to w at p 0.97-0.99 (PutRolePolicy, PutKeyPolicy, PutResourcePolicy, create-deploy-key, and more). Same family as the credential-set leaks.
 - Plan: `docs/wiki/truth-v4-plan.md`. Every set either project labelled is relabelled under BRIEF-v4; originals stay; rwxmap code waits for its own D-number and exam #5.
 - Lesson: adding one clause per finding makes pockets; one test with examples keeps the definition whole.
+
+## 2026-11-05 — v4 pilot: Jev misses the doubt rule (64.3% x recall); pass labelled locally
+
+- Goal: pilot the v4 labelling on 200 w rows (100 access-pattern, 100 random) with two blind labellers and Jev; bar set before running: Jev catches at least 95% of the truth x rows.
+- Numbers: labellers A and B (both Sonnet) agreed on 197 of 200; 3 disputes ruled x by the user (p164 zulip, p169 pagerduty, p186 gitlab). Truth 31 x, 169 w. Jev (jev-1.14.0, about 559k input tokens) on the 197 agreed rows: 18 of 28 x caught (64.3%), false x 0 of 169. FAIL. 7 of 10 misses are "widening direction not stated, x by doubt". Cut-off 0.3 gives 22/28 with 4 false x; 0.05 gives 27/28 with 81 false x. No cut-off is chosen after the fact.
+- Lesson: a model that never applies "unsure -> x" can't label a widening whose cases are mostly "direction not stated". Both labellers being Sonnet measures consistency, not independent opinion.
+- Decision: the pass is labelled locally by two Sonnet labellers (user ruling). Flips are reported as D137 vs other (p116, p188 flip for other reasons).
+- Where: data/pilot-v4-2026-11-05/ (README Result section, truth-v4.csv, rulings.csv), poc/v4-pilot/.
