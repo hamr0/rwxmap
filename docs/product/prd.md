@@ -139,10 +139,7 @@ reading:
 from a spec, because the words for "whose" mean different things per
 vendor (D81). Only "what does the call do" is asked.
 
-Truth today is BRIEF-v3 (`data/relabel-2026-09-22/BRIEF-v3.md`,
-amended by D98, D130, D136). BRIEF-v4 (D137) replaces it once
-calibrated, and every set is relabelled under it (plan:
-`docs/wiki/truth-v4-plan.md`).
+Truth today is BRIEF-v4 (D137, `data/relabel-v4-2026-11-05/BRIEF-v4.md`). Every row whose v3 or rwxlite truth was w was relabelled in one pass. D137 only turns w into x, so r and x rows keep their labels. The result is `data/pass-v4-2026-11-05/truth-v4-pass.csv` (33,321 operations: 7,170 x, 26,151 w). The merged export for rwxlite is `data/export-v4-2026-11-06/export-v4.csv` (36,578 source ids). Known gap: 18,576 rows carry Jev's w with no second look; a 5% sample found 2.1% of them were x. Plan and history: `docs/wiki/truth-v4-plan.md`.
 
 ## The core (frozen)
 
@@ -1232,18 +1229,15 @@ None.
 ## What is next
 
 0.10.0 is released (D133/D135, PR #19, npm 0.10.0, rwxlite 0.2.1 on
-npm). Next: the truth-v4 plan (D137), steps listed in
-`docs/wiki/truth-v4-plan.md`:
+npm). The truth-v4 relabel (D137) is done and handed to rwxlite
+(2026-11-06; plan `docs/wiki/truth-v4-plan.md`, steps 0-5).
 
-0. Ruling D137 (done 2026-11-05).
-1. Send rwxlite the shared wording.
-2. BRIEF-v4, approved 2026-11-05; calibrated through the step-4 pilot.
-3. Inventory of every labelled set in both repos.
-4. Pilot (Jev vs two blind labellers on different models), then one pass over every w row; truth-v4.csv beside each original.
-5. Merged v4 export for rwxlite; rwxlite retrains (round 13).
-6. rwxmap code: second pass never lowers an access-widening x (new D-number).
-7. Fresh exam #5, pre-registered, scored once for both projects.
-8. README "what x covers" section, exam #5 numbers, release.
+Next:
+
+1. Mechanical alignment with D137: measure how well the current mechanical steps match truth-v4 (too loose and too tight counted separately). Then add lead verbs for the new x cases, priced leave-one-vendor-out on the v4 tuning rows before adoption. A core change, so it gets a new D-number.
+2. The second pass under D137: possibly raising w to x, or lowering x to w, on top of the mechanical result. It is decided after item 1 is measured. It covers what old step 6 named: never lower an access-widening x.
+3. Fresh exam #5, pre-registered, scored once for both projects.
+4. README "what x covers" section, exam #5 numbers, release.
 
 Parked items and known limits below.
 
