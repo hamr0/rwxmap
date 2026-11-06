@@ -8709,7 +8709,7 @@ exact >= +5 points): +9.0 and +9.5 points.
 ## 2026-11-06 — Mechanical vs v4 truth: baseline before alignment (PRD What is next item 1)
 
 - Goal: measure how well current mechanical (src/flow.js classifyRow) matches v4 truth before changing anything, too loose and too tight counted separately.
-- Numbers: six complete rwxmap sets combined (relabel-buildset, exam-2026-09-22, exam3, exam4, rwxlite-fresh) = 16,486 ops. v4 truth = each set's v3 truth with the export-v4-gap-2026-11-06 label applied by set+id.
+- Numbers: six complete rwxmap sets (combined-2026-09-21, relabel-buildset, exam-2026-09-22, exam3, exam4, rwxlite-fresh) = 16,486 ops. v4 truth = each set's v3 truth with the export-v4-gap-2026-11-06 label applied by set+id.
 - Totals: v3 truth exact 13,339 (80.9%), too loose 156 (0.9%), too tight 2,991 (18.1%). v4 truth exact 13,484 (81.8%), too loose 861 (5.2%), too tight 2,141 (13.0%). 710 of the 861 leaks are rows v3 called w and v4 calls x.
 - Per set under v4 (exact/loose/tight): combined 6,557: 83.3/4.5/12.2%; buildset 1,819: 69.8/10.8/19.4%; exam22 4,279: 83.4/3.6/13.0%; exam3 1,377: 83.7/6.6/9.7%; exam4 1,505: 84.3/5.6/10.0%; fresh 949: 80.2/4.1/15.7%.
 - Leak distance under v4: x>w 844, w>r 4, x>r 13 (one step 848, two steps 13). Under v3: x>w 139, w>r 9, x>r 8.
