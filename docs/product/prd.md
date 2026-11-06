@@ -139,7 +139,7 @@ reading:
 from a spec, because the words for "whose" mean different things per
 vendor (D81). Only "what does the call do" is asked.
 
-Truth today is BRIEF-v4 (D137, `data/relabel-v4-2026-11-05/BRIEF-v4.md`). Every row whose v3 or rwxlite truth was w was relabelled in one pass. D137 only turns w into x, so r and x rows keep their labels. The result is `data/pass-v4-2026-11-05/truth-v4-pass.csv` (33,321 operations: 7,170 x, 26,151 w). The merged export for rwxlite is `data/export-v4-2026-11-06/export-v4.csv` (36,578 source ids). Known gap: 18,576 rows carry Jev's w with no second look; a 5% sample found 2.1% of them were x. Plan and history: `docs/wiki/truth-v4-plan.md`.
+Truth today is BRIEF-v4 (D137, `data/relabel-v4-2026-11-05/BRIEF-v4.md`). Every row whose v3 or rwxlite truth was w was relabelled in one pass. D137 only turns w into x, so r and x rows keep their labels. The result is `data/pass-v4-2026-11-05/truth-v4-pass-gap.csv` (33,321 operations: 7,406 x, 25,915 w); every row has had a second look, the 18,576 Jev-only w rows included (236 of them became x, 1.3%). The training export for rwxlite is `data/export-v4-gap-2026-11-06/export-v4.csv` (36,578 source ids: w 28,219, x 8,354, r 5); it supersedes `export-v4-2026-11-06` and was sent to rwxlite. Plan and history: `docs/wiki/truth-v4-plan.md`.
 
 ## The core (frozen)
 
