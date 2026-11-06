@@ -13,4 +13,4 @@ Total 14735 rows. Jev labels seen: {"w":25038,"x":8283}.
 - suspects-key.csv: row_id (s00001...), pass_id, category, jev_label, the five p values. Row ids assigned after a Fisher-Yates shuffle, mulberry32 seed 20261108. Never give this file to a labeller.
 - sbatch-NNN-blind.csv: 74 batches of 200 rows (last 135), taken in shuffled order, so all three categories are mixed. Header row_id,provider,method,path,operationId,summary,description. No category, no Jev answer, no source. Each has a .sha256.
 
-Labelled blind by one Sonnet labeller per batch under BRIEF-v4. Where Sonnet disagrees with Jev, a second blind Sonnet looks. Rows still split go to the user grouped by pattern.
+Labelled blind by one Sonnet labeller per batch under BRIEF-v4. Where Sonnet disagrees with Jev, the rows go to the user grouped by pattern (plan ruling (f), user 2026-11-06); there is no second Sonnet. Results: disagree/ (groups, rulings, final labels for all 4,688 disagreements); rcheck/ is a second blind look at the 201 Sonnet-r rows, kept as information only. It set no labels.
