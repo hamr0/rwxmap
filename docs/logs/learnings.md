@@ -8680,3 +8680,11 @@ exact >= +5 points): +9.0 and +9.5 points.
 - Lessons: (1) Follow the pre-registered plan; rules invented after seeing results pile up exceptions, and the user had to pull the work back. (2) High Sonnet confidence is not a safe tie-break against Jev x: it called sign-in, token and webhook changes "plain create". (3) Two Sonnets agreeing measures consistency, not truth. (4) Word families settle only clear concept groups; for the mixed rest, one stated test applied per row avoids a pile of carve-outs. (5) A group ruling on a ~50/50 group is wrong on hundreds of rows either way; split it first.
 - Next: AWS/GitHub vendor cross-check; the unchecked Jev-w rows stay a known gap. The suspects README still says "a second blind Sonnet looks" (a worker's line, not the plan); it gets fixed when everything is settled.
 - Where: data/pass-v4-2026-11-05/suspects/ (labels, disagree/, rcheck/), poc/v4-pass/ (suspects, disagree, settle, families, settle-c, rcheck).
+
+## 2026-11-06 — v4 pass: AWS/GitHub vendor cross-check, 8 of 45 rows raised to x
+
+- Goal: ruling (a) of the truth-v4 plan. Vendor labels are a cross-check, not truth. Any pass row v4 calls w where AWS (Permissions management) or GitHub (admin, secrets, keys, roles write) says x gets looked at.
+- Join: 7,472 of rwxlite's 21,536 vendor rows matched a pass row (4,672 by rwxlite id, 2,800 by merge key). Most vendor x rows are already x in v3, so they never entered this w-only pass.
+- Result: 45 candidates. The user ruled 8 x: aws Organizations DetachPolicy (removing a service control policy widens access), CodeStar UpdateUserProfile (SSH key), CodeStar CreateProject (roles and team), License Manager UpdateServiceSettings (cross-account discovery); github OIDC subject-claim template, create deployment branch policy, update repository (visibility), update Pages site (public). 37 stay w: AWS detach/remove/revoke calls that only narrow access, unattached CreateWebACL, and GitHub admin-only settings.
+- Lesson: a vendor "admin" or "Permissions management" level says who may call it, not whether the change can be undone. Most hits were narrowing, which stays w under D137. The real catches were the guardrail-removal and credential/visibility rows.
+- Where: data/pass-v4-2026-11-05/vendor/, truth-v4-pass.csv; poc/v4-pass/vendor-check.mjs, final-labels.mjs.
