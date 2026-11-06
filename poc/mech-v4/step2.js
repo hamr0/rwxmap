@@ -90,10 +90,12 @@ export const CREDENTIAL_CHANGE_VERBS = new Set(['change', 'regenerate', 'regen']
 // PATH_X_WORDS (36) — the path-word rule (rule name 'path-x-word').
 //
 // DIRECTION: claims x. Step 2 owns it (it only ever raises).
-// WHICH ROWS: PUT and PATCH only, and only rows no earlier step-2 rule
-// claimed (not CANT_UNDO, not credential-set), so a row that would
-// otherwise fall to step 3's PUT/PATCH method floor is raised to x when any
-// word matches. POST, DELETE and GET never reach it.
+// WHICH ROWS: PUT, PATCH and POST, and only rows no earlier step-2 rule
+// claimed (not CANT_UNDO, and for PUT/PATCH not credential-set; POST has no
+// credential-set rule), so a PUT/PATCH row that would otherwise fall to
+// step 3's method floor, or a POST that step 3's KEEP_W would lower to w, or
+// a POST that would otherwise reach step 2's floor-post, is x when any word
+// matches. DELETE and GET never reach it.
 // WHERE IT MATCHES: the path only. Split on '/', drop {param} segments,
 // split each remaining segment on '#', tokenize each piece with
 // splitTokens. A single word matches a token when stemMatches(token, word)
@@ -109,6 +111,9 @@ export const CREDENTIAL_CHANGE_VERBS = new Set(['change', 'regenerate', 'regen']
 // Under leave-one-vendor-out 360 of 682 PUT/PATCH floor leaks closed,
 // 120 new too tight. The 36 words are those that passed the bar; the F4
 // family (stop, cancel, ... complete) is excluded entirely.
+// On POST it was scored once on unseen rows (the words were picked on
+// PUT/PATCH): of the 570 rows KEEP_W lowers, it fires on 103, 78 truth x
+// (leaks closed), 25 truth w (new too tight).
 export const PATH_X_WORDS = new Set([
   'role', 'member', 'access', 'permission', 'share', 'membership', 'oauth',
   'authorization', 'scope', 'scim', 'shared_link', 'acl', 'invite',
@@ -120,7 +125,7 @@ export const PATH_X_WORDS = new Set([
 
 /**
  * The path-x-word rule's match, or [] when it does not fire.
- * @param {Operation} row a PUT or PATCH row
+ * @param {Operation} row a PUT, PATCH or POST row
  * @param {Set<string>} pathXWords
  * @returns {string[]} the PATH_X_WORDS entries that matched, sorted
  */
@@ -216,10 +221,11 @@ export function step2(row, words = {}) {
   const { verb, fromSummary } = verbForRow(row);
   const matched = matchingMembers(verb, cantUndo);
   if (matched.length === 0) {
-    if (method === 'POST') return null;
-    const credential = credentialSetMatch(row, credentialSet, changeVerbs);
-    if (credential.length > 0) {
-      return { class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: credential };
+    if (method !== 'POST') {
+      const credential = credentialSetMatch(row, credentialSet, changeVerbs);
+      if (credential.length > 0) {
+        return { class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: credential };
+      }
     }
     const pathWords = pathWordMatch(row, pathXWords);
     if (pathWords.length === 0) return null;

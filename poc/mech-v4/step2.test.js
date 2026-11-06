@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { step2, step2 as step2Full, floorPost, CANT_UNDO, REMOVES, CREDENTIAL_SET, CREDENTIAL_CHANGE_VERBS, PATH_X_WORDS } from './step2.js';
-import { KEEP_W } from './step3.js';
+import { KEEP_W, CONTENT_W } from './step3.js';
 import { stemMatches } from './tokens.js';
 
 test('method-delete rule: DELETE always floors to x, destructive true, empty matched', () => {
@@ -207,12 +207,24 @@ test('path-x-word: glued match inside one token, and multi-word entries', () => 
   assert.ok(pw('PUT', '/a/event-streams/{id}').matched.includes('event_stream'));
 });
 
-test('path-x-word: does not fire on other paths, POST or DELETE', () => {
+test('path-x-word: does not fire on other paths, a POST with no path word, or DELETE', () => {
   assert.equal(pw('PUT', '/boards/{id}/name'), null);
   assert.equal(pw('PUT', '/{role}/name'), null);
-  assert.equal(pw('POST', '/webhooks'), null);
+  assert.equal(pw('POST', '/boards'), null);
   const del = pw('DELETE', '/webhooks/{id}');
   assert.equal(del.rule, 'method-delete');
+});
+
+test('path-x-word: fires on POST too (after cant-undo; POST has no credential-set rule)', () => {
+  assert.deepEqual(
+    step2({ method: 'POST', operationId: 'assignRole', path: '/users/{id}/roles' }),
+    { class: 'x', step: 2, rule: 'path-x-word', source: 'list', matched: ['role'] },
+  );
+  assert.equal(pw('POST', '/webhooks').rule, 'path-x-word');
+  // cant-undo still runs first
+  assert.equal(step2({ method: 'POST', operationId: 'revokeToken', path: '/tokens/{id}' }).rule, 'cant-undo-verb');
+  // no credential-set on POST: a changePin POST with no path word is not claimed
+  assert.equal(step2({ method: 'POST', operationId: 'changePin', path: '/cards/{id}/pin' }), null);
 });
 
 test('path-x-word: sso and policy are not in the list; 36 words', () => {
@@ -225,4 +237,12 @@ test('path-x-word: sso and policy are not in the list; 36 words', () => {
 
 test('path-x-word: an earlier step-2 rule keeps the row', () => {
   assert.equal(step2({ method: 'PUT', operationId: 'revokeToken', path: '/tokens/{id}' }).rule, 'cant-undo-verb');
+});
+
+test('CONTENT_W is disjoint from CANT_UNDO and KEEP_W under stem matching', () => {
+  for (const c of CONTENT_W) {
+    for (const other of [...CANT_UNDO, ...KEEP_W]) {
+      assert.ok(!stemMatches(c, other) && !stemMatches(other, c), `${c} vs ${other} unexpectedly stem-match`);
+    }
+  }
 });

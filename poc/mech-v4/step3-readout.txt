@@ -1,0 +1,113 @@
+== 1) POST pile by current rule group (truth r/w/x) ==
+  cant-undo-verb*    n=318 truth r=4 w=29 x=285
+  floor-post         n=3586 truth r=253 w=1795 x=1538
+  modify-verb*       n=570 truth r=0 w=408 x=162
+  read-verb*         n=179 truth r=174 w=1 x=4
+  assert POST n = 4653: OK
+  assert floor-post truth 253/1795/1538: OK
+  assert KEEP_W truth 0/408/162: OK
+  assert all rows = 16486: OK
+  probe check: probe rule is only null or path-x-word on all POST rows (violations 0); probe matched list vs verbatim direct copy of pathWordMatch on the path: 0 differences over 4653 POST rows
+  A probe fires on POST: 852 (modify-verb*: 103, floor: 655, other: 94)
+  B eligible pile (floor-post, probe does not fire): 2931
+
+== 2) A alone (modify-verb* rows, path-x-word fires -> stays x) ==
+  rows fired: 103; truth r=0 w=25 x=78
+  leaks closed (truth x, were w): 78; new too tight (truth w or r, now x): 25 (w=25, r=0); ratio closed/new = 3.12
+  vendors with a closed leak (25): okta=13 openai=9 gitlab=8 permit.io=6 trello=5 mailchimp=4 jira=3 stripe=2 square=2 asana=2 atlassian=2 dracoon=2 pagerduty=2 sentry=2 clerk.com=2 neon.com=2 chatwoot.com=2 zulip.com=2 coolify.io=2 datadog=1 clearblade=1 keycloak=1 cloudflare=1 netbird.io=1 ory.sh=1
+
+== 3) B per word, fitted on the full pile (NOT quotable) ==
+  word          fires  r    w    x   vendors  passes-bar(w>10x)
+  tag              28    0   28    0      15   yes
+  project          28    0   23    5      17   no
+  label            14    0   14    0       8   yes
+  file             21    0   17    4      10   no
+  upload           40    0   32    8      18   no
+  domain           25    3   21    1      15   yes
+  template         24    1   22    1      14   yes
+  config           18    0   16    2       6   no
+  asset            16    1   14    1       8   yes
+  comment           8    0    8    0       6   yes
+  contact          12    0   10    2       8   no
+  custom_field      9    0    9    0       5   yes
+  repo              9    0    9    0       5   yes
+  card              9    0    9    0       5   yes
+  item             16    0   15    1       9   yes
+  flow              9    0    8    1       6   no
+  segment           8    0    7    1       5   no
+  alert             8    0    8    0       5   yes
+  location          6    0    6    0       6   yes
+  image            11    0    9    2       8   no
+  attachment        5    0    5    0       4   yes
+  note              8    0    6    2       6   no
+  ticket           12    0   11    1       4   yes
+  environment       8    0    7    1       6   no
+  create           58    1   40   17      13   no
+  copy             14    0   13    1      10   yes
+  restart          10    0   10    0       4   yes
+  lock              5    0    5    0       3   yes
+
+== 4) B leave-one-vendor-out ==
+  vendors with eligible floor rows (folds): 56
+  word          folds-admitted   (of 56)
+  tag              56
+  project           0
+  label            56
+  file              1
+  upload            0
+  domain           56
+  template         56
+  config            1
+  asset            55
+  comment          56
+  contact           0
+  custom_field     56
+  repo             56
+  card             56
+  item             56
+  flow              1
+  segment           1
+  alert            56
+  location         56
+  image             0
+  attachment       56
+  note              0
+  ticket           53
+  environment       1
+  create            0
+  copy             55
+  restart          56
+  lock             56
+  B LOVO totals (rows lowered x->w, 209): right (truth w)=191  new leaks (truth x)=14  truth r moved one step closer=4
+  ratio right/leak = 13.64  -> GO vs >10
+
+== 5) B fitted totals (admitted on full pile; NOT quotable) ==
+  admitted words (17): tag label domain template asset comment custom_field repo card item alert location attachment ticket copy restart lock
+  rows lowered 217: right (truth w)=206 new leaks (truth x)=6 truth r closer=5; ratio 34.33
+
+== 6) Joint: current v4 vs v4+A vs v4+A+B(LOVO) ==
+  -- POST rows (n=4653)
+    v4 current     exact=2405 (51.7%) loose-1=163 loose-2=4 too-tight=2081 | marked tight=3904 loose=749 settled=0 | too-loose non-settled 167/167, too-tight non-settled 2081/2081
+    v4+A           exact=2458 (52.8%) loose-1=85 loose-2=4 too-tight=2106 | marked tight=4007 loose=646 settled=0 | too-loose non-settled 89/89, too-tight non-settled 2106/2106
+    v4+A+B(LOVO)   exact=2635 (56.6%) loose-1=99 loose-2=4 too-tight=1915 | marked tight=3798 loose=855 settled=0 | too-loose non-settled 103/103, too-tight non-settled 1915/1915
+  -- all rows (n=16486)
+    v4 current     exact=13742 (83.4%) loose-1=483 loose-2=13 too-tight=2248 | marked tight=4441 loose=3204 settled=8841 | too-loose non-settled 484/496, too-tight non-settled 2209/2248
+    v4+A           exact=13795 (83.7%) loose-1=405 loose-2=13 too-tight=2273 | marked tight=4544 loose=3101 settled=8841 | too-loose non-settled 406/418, too-tight non-settled 2234/2273
+    v4+A+B(LOVO)   exact=13972 (84.8%) loose-1=419 loose-2=13 too-tight=2082 | marked tight=4335 loose=3310 settled=8841 | too-loose non-settled 420/432, too-tight non-settled 2043/2082
+
+== 7) B LOVO fires that are leaks (truth x) ==
+  [combined] pc-r1470 | paypal | /v1/customer/disputes/{id}/acknowledge-return-item | disputes.acknowledge-return-item | Acknowledge returned item | word=item (last-segment)
+  [combined] pc-r2318 | digitalocean | /v2/gen-ai/evaluation_datasets/file_upload_presigned_urls | genai_create_evaluation_dataset_file_upload_presigned_urls | Create Presigned URLs for Evaluation Dataset File Upload | word=file (last-segment)
+  [combined] pc-r2342 | digitalocean | /v2/gen-ai/knowledge_bases/data_sources/file_upload_presigned_urls | genai_create_data_source_file_upload_presigned_urls | Create Presigned URLs for Data Source File Upload | word=file (last-segment)
+  [combined] pc-r2351 | digitalocean | /v2/gen-ai/model_evaluation/datasets/file_upload_presigned_urls | genai_create_model_eval_dataset_upload_presigned_urls | Create Presigned URLs for Model Evaluation Dataset File Upload | word=file (last-segment)
+  [combined] pc-r2392 | digitalocean | /v2/gen-ai/scenario_sets/file_upload_presigned_urls | genai_create_scenario_set_upload_presigned_urls | Create Presigned URLs for Scenario Set File Upload | word=file (last-segment)
+  [combined] pc-r3469 | asana | /projects/{project_gid}/saveAsTemplate | projectSaveAsTemplate | Create a project template from a project | word=template (last-segment)
+  [combined] pc-r4070 | canva | /v1/url-asset-uploads | createUrlAssetUploadJob |  | word=asset (last-segment)
+  [combined] x20-e0209 | auth0 | /self-service-profiles/{id}/sso-ticket | post_sso-ticket | Create an access ticket to initiate the Self-Service Enterprise Configuration fl | word=ticket (last-segment)
+  [buildset] b0956 | keycloak | /{realm}/identity-provider/import-config |  | Import identity provider from uploaded JSON file | word=config (last-segment)
+  [buildset] b1557 | box | /shield_information_barrier_segment_restrictions | post_shield_information_barrier_segment_restrictions | Create shield information barrier segment restriction | word=segment (last-segment)
+  [exam3] ex3-0069 | clerk.com | /instance/change_domain | ChangeProductionInstanceDomain | Update production instance domain | word=domain (last-segment)
+  [exam3] ex3-0923 | novu.co | /v1/environments | EnvironmentsControllerV1_createEnvironment | Create an environment | word=environment (last-segment)
+  [exam3] ex3-1088 | ory.sh | /admin/test-login-flows | createTestLoginFlow | Create a test OIDC login flow | word=flow (last-segment)
+  [exam4] ex4-0813 | permit.io | /v2/projects/{proj_id}/envs/{env_id}/copy | copy_environment | Copy Environment | word=copy (last-segment)
+  (14 leaks)

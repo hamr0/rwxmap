@@ -16,6 +16,8 @@ D137 (truth v4) widened x. Against v4 truth the current mechanical (v3 code) is 
 - Marker rule (ruling 2026-11-06, v4 copy only): every PUT, PATCH and POST row is marked by which way it could be wrong: class x is tight, class w or r is loose. GET, HEAD, QUERY and DELETE are settled. The second-pass overrides are unchanged. Against the old rule this only moves the 65 PUT/PATCH rows that a word raised to x from settled to tight; it is what lets rwxlite (mode a) and a reviewer see the rows step 2 raises. User's reason: a marker by direction is more honest and makes rows easy to spot and prioritise, especially on the loose end.
 - Settled means (ruling 2026-11-06, v4 copy only): the method alone decides the class with near certainty, so the row is not flagged and is never sent to the second pass. Under the marker rule that is every GET, HEAD and QUERY row (class r; GET is 99.8% r under v4 truth, 6,271 of 6,283) and every DELETE row (class x; 98.5% x, 2,517 of 2,556). A write method (PUT, PATCH, POST) is never settled. Settled is not a promise the row is right: on the six sets 12 GET rows (truth x or w) and 39 DELETE rows (truth w or r) are settled and wrong; steps 4 and 5 target them.
 - Partial matching (ruling 2026-11-06): path words match by stem (stemMatches) or anywhere inside a token (substring scan), so registrycredentials matches credential. Jaccard was considered and not used (it needs a fitted cut-off and cannot name the matched word).
+- Rules grow (ruling 2026-11-06): each observation becomes a rule with its own named word list, adopted when it passes its bar. Lists are expected to gain words later as evidence appears; whatever the words miss is left for rwxlite (mode a) to correct, which the markers make visible.
+- Second word (ruling 2026-11-06): a word that fails alone can be rescued by a second word that marks the exception (a veto). Only veto words with x rows at two or more vendors are kept; single-vendor veto words do nothing under leave-one-vendor-out.
 
 ## The two tables (current code, six sets, 16,486 ops; HEAD 2 rows omitted)
 
@@ -60,7 +62,7 @@ The user's first layout put POST on a w floor; corrected (ruling above) to x. PA
 | 0 | Rulings above | done 2026-11-06 |
 | 1 | Copy v3 core to poc (parallel v4), prove byte-identical output on the 16,486 rows | done 2026-11-06 (poc/mech-v4/, proof 0 differences) |
 | 2 | PUT/PATCH x-extraction (682 leaks) | done 2026-11-06 (path-x-word rule + marker rule in poc/mech-v4/; LOVO 360 closed / 120 new too tight) |
-| 3 | POST w/r-extraction, re-tune KEEP_W (162 leaks, 2,081 too tight) | not started |
+| 3 | POST w/r-extraction, re-tune KEEP_W (162 leaks, 2,081 too tight) | done 2026-11-06 (A: path-x-word on POST; B: content-noun + veto; LOVO B 233 right / 15 leaks) |
 | 4 | GET x-extraction (12 unflagged two-step leaks; overlaps the parked GET-twin POC) | not started |
 | 5 | DELETE w-extraction (39 too tight) | not started |
 | 6 | D-number, exam #5 (truth-v4-plan step 7), archive v3 | not started |

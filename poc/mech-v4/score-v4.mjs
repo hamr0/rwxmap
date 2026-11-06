@@ -98,10 +98,10 @@ P('== asserts ==');
 let fail = false;
 const check = (name, ok) => { if (!ok) fail = true; P(`${ok ? 'PASS' : 'FAIL'}: ${name}`); };
 check('n == 16486', n === 16486);
-check('no row of a method other than PUT/PATCH changed class', changed.every((r) => r.method === 'PUT' || r.method === 'PATCH'));
-check("every class change is w->x with v4 rule 'path-x-word'", changed.every((r) => r.a.class === 'w' && r.b.class === 'x' && r.b.rule === 'path-x-word'));
-check('no row with a non-PUT/PATCH/POST method changed marker', rows.every((r) => ['PUT', 'PATCH', 'POST'].includes(r.method) || r.a.review === r.b.review));
-check('every POST row marker unchanged', rows.filter((r) => r.method === 'POST').every((r) => r.a.review === r.b.review));
+check('only PUT/PATCH/POST rows change class', changed.every((r) => ['PUT', 'PATCH', 'POST'].includes(r.method)));
+check("every PUT/PATCH class change is w->x rule path-x-word", changed.filter((r) => r.method !== 'POST').every((r) => r.a.class === 'w' && r.b.class === 'x' && r.b.rule === 'path-x-word'));
+check("every POST class change is w->x rule path-x-word or x->w rule content-noun", changed.filter((r) => r.method === 'POST').every((r) => (r.a.class === 'w' && r.b.class === 'x' && r.b.rule === 'path-x-word') || (r.a.class === 'x' && r.b.class === 'w' && r.b.rule === 'content-noun')));
+check('no GET/HEAD/DELETE row changes class or marker', rows.every((r) => !['GET', 'HEAD', 'DELETE'].includes(r.method) || (r.a.class === r.b.class && r.a.review === r.b.review)));
 
 const text = out.join('\n') + '\n';
 fs.writeFileSync(new URL('./score-v4-readout.txt', import.meta.url), text);
