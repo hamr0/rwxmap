@@ -98,10 +98,11 @@ P('== asserts ==');
 let fail = false;
 const check = (name, ok) => { if (!ok) fail = true; P(`${ok ? 'PASS' : 'FAIL'}: ${name}`); };
 check('n == 16486', n === 16486);
-check('only PUT/PATCH/POST rows change class', changed.every((r) => ['PUT', 'PATCH', 'POST'].includes(r.method)));
-check("every PUT/PATCH class change is w->x rule path-x-word", changed.filter((r) => r.method !== 'POST').every((r) => r.a.class === 'w' && r.b.class === 'x' && r.b.rule === 'path-x-word'));
+check('only GET/HEAD/PUT/PATCH/POST rows change class', changed.every((r) => ['GET', 'HEAD', 'PUT', 'PATCH', 'POST'].includes(r.method)));
+check("every PUT/PATCH class change is w->x rule path-x-word", changed.filter((r) => ['PUT', 'PATCH'].includes(r.method)).every((r) => r.a.class === 'w' && r.b.class === 'x' && r.b.rule === 'path-x-word'));
 check("every POST class change is w->x rule path-x-word or x->w rule content-noun", changed.filter((r) => r.method === 'POST').every((r) => (r.a.class === 'w' && r.b.class === 'x' && r.b.rule === 'path-x-word') || (r.a.class === 'x' && r.b.class === 'w' && r.b.rule === 'content-noun')));
-check('no GET/HEAD/DELETE row changes class or marker', rows.every((r) => !['GET', 'HEAD', 'DELETE'].includes(r.method) || (r.a.class === r.b.class && r.a.review === r.b.review)));
+check('every GET/HEAD/OPTIONS/QUERY class change is r->x rule get-action with marker tight', changed.filter((r) => ['GET', 'HEAD'].includes(r.method)).every((r) => r.a.class === 'r' && r.b.class === 'x' && r.b.rule === 'get-action' && r.b.review === 'tight'));
+check('no DELETE row changes class or marker', rows.every((r) => r.method !== 'DELETE' || (r.a.class === r.b.class && r.a.review === r.b.review)));
 
 const text = out.join('\n') + '\n';
 fs.writeFileSync(new URL('./score-v4-readout.txt', import.meta.url), text);

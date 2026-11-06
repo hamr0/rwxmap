@@ -1,10 +1,10 @@
 == a) totals (scored against v4 truth) ==
 n=16486
 v3: exact=13484 (81.8%) loose-1=848 (5.1%) loose-2=13 (0.1%) too-loose-total=861 (5.2%) too-tight=2141 (13.0%)
-v4: exact=14044 (85.2%) loose-1=413 (2.5%) loose-2=13 (0.1%) too-loose-total=426 (2.6%) too-tight=2016 (12.2%)
+v4: exact=14048 (85.2%) loose-1=413 (2.5%) loose-2=8 (0.0%) too-loose-total=421 (2.6%) too-tight=2017 (12.2%)
 
 == b) per method (v3 | v4): n, exact, loose-1, loose-2, tight ==
-GET     n=6283  v3: exact=6271 loose-1=3 loose-2=9 tight=0  |  v4: exact=6271 loose-1=3 loose-2=9 tight=0
+GET     n=6283  v3: exact=6271 loose-1=3 loose-2=9 tight=0  |  v4: exact=6275 loose-1=3 loose-2=4 tight=1
 HEAD    n=2  v3: exact=2 loose-1=0 loose-2=0 tight=0  |  v4: exact=2 loose-1=0 loose-2=0 tight=0
 POST    n=4653  v3: exact=2405 loose-1=163 loose-2=4 tight=2081  |  v4: exact=2707 loose-1=93 loose-2=4 tight=1849
 PUT     n=1956  v3: exact=1467 loose-1=475 loose-2=0 tight=14  |  v4: exact=1634 loose-1=230 loose-2=0 tight=92
@@ -26,7 +26,8 @@ others  n=0  v3: exact=0 loose-1=0 loose-2=0 tight=0  |  v4: exact=0 loose-1=0 l
   too-loose rows carrying a non-settled marker: 849/861 (98.6%)
   too-tight rows carrying a non-settled marker: 2084/2141 (97.3%)
 -- v4
-  GET     settled  n=6283 exact=6271 too-loose=12 too-tight=0
+  GET     tight    n=6 exact=5 too-loose=0 too-tight=1
+  GET     settled  n=6277 exact=6270 too-loose=7 too-tight=0
   HEAD    settled  n=2 exact=2 too-loose=0 too-tight=0
   POST    tight    n=3737 exact=1893 too-loose=0 too-tight=1844
   POST    loose    n=916 exact=814 too-loose=97 too-tight=5
@@ -35,11 +36,12 @@ others  n=0  v3: exact=0 loose-1=0 loose-2=0 tight=0  |  v4: exact=0 loose-1=0 l
   PATCH   tight    n=160 exact=124 too-loose=0 too-tight=36
   PATCH   loose    n=876 exact=789 too-loose=87 too-tight=0
   DELETE  settled  n=2556 exact=2517 too-loose=0 too-tight=39
-  too-loose rows carrying a non-settled marker: 414/426 (97.2%)
-  too-tight rows carrying a non-settled marker: 1977/2016 (98.1%)
+  too-loose rows carrying a non-settled marker: 414/421 (98.3%)
+  too-tight rows carrying a non-settled marker: 1978/2017 (98.1%)
 
 == d) class changes v3 -> v4 ==
-rows changed: 845
+rows changed: 851
+  GET r->x: n=6 truth x=5 w=0 r=1
   PATCH w->x: n=149 truth x=120 w=29 r=0
   POST w->x: n=103 truth x=78 w=25 r=0
   POST x->w: n=270 truth x=8 w=257 r=5
@@ -47,17 +49,19 @@ rows changed: 845
 full list: poc/mech-v4/score-v4-changes.tsv
 
 == e) marker changes v3 -> v4 (by method) ==
+  GET settled->tight: 6
   PATCH loose->tight: 149
   PATCH settled->tight: 11
   POST loose->tight: 103
   POST tight->loose: 270
   PUT loose->tight: 323
   PUT settled->tight: 54
-  total rows with a changed marker: 910
+  total rows with a changed marker: 916
 
 == asserts ==
 PASS: n == 16486
-PASS: only PUT/PATCH/POST rows change class
+PASS: only GET/HEAD/PUT/PATCH/POST rows change class
 PASS: every PUT/PATCH class change is w->x rule path-x-word
 PASS: every POST class change is w->x rule path-x-word or x->w rule content-noun
-PASS: no GET/HEAD/DELETE row changes class or marker
+PASS: every GET/HEAD/OPTIONS/QUERY class change is r->x rule get-action with marker tight
+PASS: no DELETE row changes class or marker

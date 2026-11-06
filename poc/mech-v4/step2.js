@@ -10,6 +10,7 @@
 // a class test entirely (see the PRD's "Why" paragraph) and step 2 now
 // asks only "can this be undone". The verb-reading helper (verbForRow) is
 // shared with step3.js via ./tokens.js.
+import { READ_METHODS } from './step1.js';
 import {
   matchingMembers, verbForRow, splitTokens, tokensForRow, leadVerbAfterModifiers, stemMatches,
 } from './tokens.js';
@@ -123,6 +124,48 @@ export const PATH_X_WORDS = new Set([
   'log_stream', 'logsink', 'log_drain', 'forwarding',
 ]);
 
+// GET_ACTION (3) — the get-action rule (rule name 'get-action').
+//
+// DIRECTION: claims x. Step 2 owns it (it only ever raises a read).
+// WHICH ROWS: READ_METHODS rows only (GET, HEAD, OPTIONS, QUERY). A GET that
+// names a one-way action (logout, revoke, close) is not a read. On a GET a
+// noun is what is read, so CANT_UNDO and PATH_X_WORDS never apply here (they
+// fired on 860 and 17 truth-r GETs).
+// WHERE IT MATCHES: the row's lead verb (verbForRow) stem-matches a word, OR
+// any token of the LAST static path segment (last non-{param} segment, split
+// on '#', splitTokens) stem-matches a word. No substring.
+// WHAT IT IS NOT: not CANT_UNDO and not path-x-word; the lists are separate
+// and a word may sit in more than one.
+//
+// PROVENANCE: measured in poc/mech-v4/step4-score.mjs on the 6,283 GET rows.
+// Under leave-one-vendor-out 4 two-step leaks closed (workos /sso/logout,
+// workos /sessions/logout, ory /self-service/logout, ory
+// /oauth2/sessions/logout) and 1 truth-r row was raised (ory
+// getOAuth2LogoutRequest); fitted 5 / 1 (close is cloudflare-only). connect,
+// create, acquire and activate failed (mostly reads: docusign Connect_*,
+// connected_accounts, created_rate). Lists grow with evidence; rwxlite
+// corrects the rest.
+export const GET_ACTION = new Set(['logout', 'revoke', 'close']);
+
+/**
+ * The get-action rule's match, or [] when it does not fire.
+ * @param {Operation} row a READ_METHODS row
+ * @param {Set<string>} getAction
+ * @returns {string[]} the GET_ACTION words that matched, sorted
+ */
+function getActionMatch(row, getAction) {
+  const isParam = (/** @type {string} */ seg) => seg.startsWith('{') && seg.endsWith('}');
+  const { verb } = verbForRow(row);
+  const statics = String(row.path || '').split('/').filter((s) => s && !isParam(s));
+  const last = statics.length ? statics[statics.length - 1] : '';
+  const tokens = last ? last.split('#').flatMap((p) => splitTokens(p)) : [];
+  const found = [];
+  for (const word of getAction) {
+    if ((verb && stemMatches(verb, word)) || tokens.some((t) => stemMatches(t, word))) found.push(word);
+  }
+  return found.sort();
+}
+
 /**
  * The path-x-word rule's match, or [] when it does not fire.
  * @param {Operation} row a PUT, PATCH or POST row
@@ -195,7 +238,7 @@ function credentialSetMatch(row, credentialSet, changeVerbs) {
 /**
  * Apply step 2 to one row.
  * @param {Operation} row
- * @param {{cantUndo?: Set<string>, removes?: Set<string>, credentialSet?: Set<string>, credentialChangeVerbs?: Set<string>, pathXWords?: Set<string>}} [words]
+ * @param {{cantUndo?: Set<string>, removes?: Set<string>, credentialSet?: Set<string>, credentialChangeVerbs?: Set<string>, pathXWords?: Set<string>, getAction?: Set<string>}} [words]
  *   Word lists to use in place of the module's own (LOVO passes rebuilt
  *   ones). Omitted fields fall back to CANT_UNDO / REMOVES /
  *   CREDENTIAL_SET / CREDENTIAL_CHANGE_VERBS / PATH_X_WORDS.
@@ -207,6 +250,7 @@ export function step2(row, words = {}) {
   const credentialSet = words.credentialSet ?? CREDENTIAL_SET;
   const changeVerbs = words.credentialChangeVerbs ?? CREDENTIAL_CHANGE_VERBS;
   const pathXWords = words.pathXWords ?? PATH_X_WORDS;
+  const getAction = words.getAction ?? GET_ACTION;
 
   const method = (row.method || '').toUpperCase();
   // DELETE beats every word (D87): it is always x, always destructive,
@@ -215,6 +259,11 @@ export function step2(row, words = {}) {
   // verdict is never overridden by anything downstream — see flow.js.
   if (method === 'DELETE') {
     return { class: 'x', step: 2, rule: 'method-delete', source: 'floor', matched: [], destructive: true };
+  }
+  if (READ_METHODS.has(method)) {
+    const act = getActionMatch(row, getAction);
+    if (act.length === 0) return null;
+    return { class: 'x', step: 2, rule: 'get-action', source: 'list', matched: act };
   }
   if (method !== 'POST' && method !== 'PUT' && method !== 'PATCH') return null;
 

@@ -246,3 +246,44 @@ test('CONTENT_W is disjoint from CANT_UNDO and KEEP_W under stem matching', () =
     }
   }
 });
+
+// ---- get-action (read methods) ---------------------------------------------
+
+import { GET_ACTION } from './step2.js';
+
+test('GET_ACTION is exactly logout, revoke, close', () => {
+  assert.deepEqual([...GET_ACTION].sort(), ['close', 'logout', 'revoke']);
+});
+
+test('GET_ACTION is disjoint from KEEP_W and CONTENT_W under stem matching', () => {
+  for (const a of GET_ACTION) {
+    for (const b of [...KEEP_W, ...CONTENT_W]) {
+      assert.ok(!stemMatches(a, b) && !stemMatches(b, a), `${a} vs ${b} unexpectedly stem-match`);
+    }
+  }
+});
+
+test('get-action fires on the last static segment, the lead verb, and every read method', () => {
+  const v = step2({ method: 'GET', operationId: 'x', path: '/sso/logout' });
+  assert.deepEqual(v, { class: 'x', step: 2, rule: 'get-action', source: 'list', matched: ['logout'] });
+  assert.deepEqual(step2({ method: 'GET', operationId: 'revokeOidcSession', path: '/oauth2/sessions/logout' }).matched, ['logout', 'revoke']);
+  assert.equal(step2({ method: 'GET', operationId: 'x', path: '/devtools/json/close/{id}' }).matched[0], 'close');
+  for (const method of ['HEAD', 'OPTIONS', 'QUERY']) assert.equal(step2({ method, operationId: 'x', path: '/a/logout' }).rule, 'get-action', method);
+});
+
+test('get-action does not fire on nouns, mid-path words, or CANT_UNDO/path words on a GET', () => {
+  assert.equal(step2({ method: 'GET', operationId: 'getSecrets', path: '/apps/secrets' }), null);
+  assert.equal(step2({ method: 'GET', operationId: 'getRefund', path: '/payments/refunds/{id}' }), null);
+  assert.equal(step2({ method: 'GET', operationId: 'listConnectedAccounts', path: '/connected_accounts' }), null);
+  assert.equal(step2({ method: 'GET', operationId: 'getThing', path: '/logout/things' }), null);
+  assert.equal(step2({ method: 'GET', operationId: 'sendThing', path: '/things' }), null);
+});
+
+test('get-action does not apply to POST: POST /logout keeps its existing verdict', () => {
+  const v = step2({ method: 'POST', operationId: 'logout', path: '/logout' });
+  assert.notEqual(v?.rule, 'get-action');
+});
+
+test('get-action words injection overrides GET_ACTION', () => {
+  assert.equal(step2({ method: 'GET', operationId: 'x', path: '/a/logout' }, { getAction: new Set(['zzz']) }), null);
+});

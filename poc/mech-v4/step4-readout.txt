@@ -1,0 +1,87 @@
+== 1) GET pile ==
+  n=6283 truth r=6271 w=3 x=9
+  current class r=6283 w=0 x=0; markers {"settled":6283}
+  assert n=6283, r/w/x=6271/3/9: OK
+  current leaks (12):
+    [combined] pc-r3636 | datadog | /api/v1/graph/snapshot | GetGraphSnapshot | truth=w cls=r | fired=-
+    [combined] pc-r3937 | intercom | /contacts/{id}/banners | listContactBanners | truth=w cls=r | fired=-
+    [exam22] x22-0342 | cloudflare | /accounts/{account_id}/alerting/v3/destinations/pagerduty/connect/{token_id} | notification-destinations-with-pager-duty-connect-pager-duty-token | truth=x cls=r | fired=connect/last-segment
+    [exam22] x22-0468 | cloudflare | /accounts/{account_id}/browser-rendering/devtools/browser | brapi-get_DevtoolsBrowserAcquire | truth=x cls=r | fired=-
+    [exam22] x22-0473 | cloudflare | /accounts/{account_id}/browser-rendering/devtools/browser/{session_id}/json/activate/{target_id} | brapi-get_DevtoolsJsonActivate | truth=w cls=r | fired=activate/last-segment
+    [exam22] x22-0474 | cloudflare | /accounts/{account_id}/browser-rendering/devtools/browser/{session_id}/json/close/{target_id} | brapi-get_DevtoolsJsonClose | truth=x cls=r | fired=close/last-segment
+    [exam22] x22-2484 | cloudflare | /accounts/{account_id}/workflows/{workflow_name}/instances/{instance_id}/subscribe/token | wor-create-workflow-instance-subscription-token | truth=x cls=r | fired=-
+    [exam3] ex3-1104 | ory.sh | /oauth2/sessions/logout | revokeOidcSession | truth=x cls=r | fired=logout/last-segment,revoke/lead-verb
+    [exam3] ex3-1150 | ory.sh | /self-service/logout | updateLogoutFlow | truth=x cls=r | fired=logout/last-segment
+    [exam4] ex4-1352 | zulip.com | /calls/bigbluebutton/create | create-big-blue-button-video-call | truth=x cls=r | fired=create/lead-verb
+    [fresh] fx-0249 | workos.com | /sso/logout | SsoController_logout | truth=x cls=r | fired=logout/last-segment
+    [fresh] fx-0837 | workos.com | /user_management/sessions/logout | UserlandSessionsController_logout | truth=x cls=r | fired=logout/last-segment
+
+== 2) Per word, fitted (NOT quotable) ==
+  word       fires  r    w    x   vendors(x|w fire)  top-vendor-share
+  logout        5    1    0    4        2   60.0% (ory.sh 3/5)
+  close         1    0    0    1        1   100.0% (cloudflare 1/1)
+  connect      17   16    0    1        1   52.9% (docusign 9/17)
+  create       15   14    0    1        1   86.7% (ory.sh 13/15)
+  acquire       0    0    0    0        0   n/a
+  revoke        1    0    0    1        1   100.0% (ory.sh 1/1)
+  activate      1    0    1    0        1   100.0% (cloudflare 1/1)
+  rows fired (any word): 39 truth r=31 w=1 x=7
+
+== 3) RAISE (fired -> x), LOVO by vendor (admit iff others: fires on truth x > fires on truth r) ==
+  folds (vendors with GET rows): 39
+  logout    admitted in 39/39 folds
+  close     admitted in 38/39 folds
+  connect   admitted in 0/39 folds
+  create    admitted in 0/39 folds
+  acquire   admitted in 0/39 folds
+  revoke    admitted in 38/39 folds
+  activate  admitted in 0/39 folds
+  LOVO: rows raised to x 5; leaks closed x->x (two-step fixed) 4; w rows raised to x (loose-1 -> too tight by one) 0; r rows raised to x (new two-step too tight) 1; leaks left 8 of 12 (a w row raised to x stops being a leak)
+  fitted (NOT quotable): admitted logout close revoke; raised 6; closed 5; w raised 0; r raised 1; leaks left 7 of 12
+
+== 4) FLAG (fired GET stays r, marker loose; no LOVO) ==
+  flagged rows 39; of 12 leaks flagged loose: 8; false flags (truth r) 31; share of flagged that are real leaks 8/39 = 20.5%
+  of flagged rows currently marked settled: 39/39
+
+== 5) All rows fired, verbatim ==
+  [combined] pc-r1543 | meta-whatsapp | /{Version}/{Application-ID}/connected_client_businesses | getConnectedClientBusinesses | truth=r | word=connect (last-segment)
+  [combined] pc-r2089 | digitalocean | /v2/monitoring/metrics/database/mysql/threads_connected | monitoring_get_database_mysql_threads_connected | truth=r | word=connect (last-segment)
+  [combined] pc-r2090 | digitalocean | /v2/monitoring/metrics/database/mysql/threads_created_rate | monitoring_get_database_mysql_threads_created_rate | truth=r | word=create (last-segment)
+  [combined] pc-r3038 | jira | /rest/atlassian-connect/1/migration/{connectKey}/{jiraIssueFieldsKey}/task | ConnectToForgeMigrationFetchTaskResource.fetchMigrationTask_get | truth=r | word=connect (lead-verb)
+  [combined] pc-r3120 | mailchimp | /connected-sites | getConnectedSites | truth=r | word=connect (last-segment)
+  [combined] pc-r3122 | mailchimp | /connected-sites/{connected_site_id} | getConnectedSitesId | truth=r | word=connect (last-segment)
+  [combined] x17-e0784 | docusign | /v2.1/accounts/{accountId}/connect | Connect_GetConnectConfigs | truth=r | word=connect (lead-verb)
+  [combined] x17-e0787 | docusign | /v2.1/accounts/{accountId}/connect/{connectId} | Connect_GetConnectConfig | truth=r | word=connect (lead-verb)
+  [combined] x17-e0789 | docusign | /v2.1/accounts/{accountId}/connect/{connectId}/all/users | Connect_GetConnectAllUsers | truth=r | word=connect (lead-verb)
+  [combined] x17-e0790 | docusign | /v2.1/accounts/{accountId}/connect/{connectId}/users | Connect_GetConnectUsers | truth=r | word=connect (lead-verb)
+  [combined] x17-e0794 | docusign | /v2.1/accounts/{accountId}/connect/failures | ConnectFailures_GetConnectLogs | truth=r | word=connect (lead-verb)
+  [combined] x17-e0796 | docusign | /v2.1/accounts/{accountId}/connect/logs | ConnectLog_GetConnectLogs | truth=r | word=connect (lead-verb)
+  [combined] x17-e0798 | docusign | /v2.1/accounts/{accountId}/connect/logs/{logId} | ConnectLog_GetConnectLog | truth=r | word=connect (lead-verb)
+  [combined] x17-e0800 | docusign | /v2.1/accounts/{accountId}/connect/oauth | ConnectOAuthConfig_GetConnectOAuthConfig | truth=r | word=connect (lead-verb)
+  [combined] x17-e0804 | docusign | /v2.1/accounts/{accountId}/connect/secret | ConnectHMAC_GetConnectSecret | truth=r | word=connect (lead-verb)
+  [exam22] x22-0342 | cloudflare | /accounts/{account_id}/alerting/v3/destinations/pagerduty/connect/{token_id} | notification-destinations-with-pager-duty-connect-pager-duty-token | truth=x | word=connect (last-segment)
+  [exam22] x22-0473 | cloudflare | /accounts/{account_id}/browser-rendering/devtools/browser/{session_id}/json/activate/{target_id} | brapi-get_DevtoolsJsonActivate | truth=w | word=activate (last-segment)
+  [exam22] x22-0474 | cloudflare | /accounts/{account_id}/browser-rendering/devtools/browser/{session_id}/json/close/{target_id} | brapi-get_DevtoolsJsonClose | truth=x | word=close (last-segment)
+  [exam3] ex3-1070 | ory.sh | /admin/oauth2/auth/requests/logout | getOAuth2LogoutRequest | truth=r | word=logout (last-segment)
+  [exam3] ex3-1104 | ory.sh | /oauth2/sessions/logout | revokeOidcSession | truth=x | word=logout (last-segment)
+  [exam3] ex3-1104 | ory.sh | /oauth2/sessions/logout | revokeOidcSession | truth=x | word=revoke (lead-verb)
+  [exam3] ex3-1143 | ory.sh | /self-service/fed-cm/parameters | createFedcmFlow | truth=r | word=create (lead-verb)
+  [exam3] ex3-1146 | ory.sh | /self-service/login/api | createNativeLoginFlow | truth=r | word=create (lead-verb)
+  [exam3] ex3-1147 | ory.sh | /self-service/login/browser | createBrowserLoginFlow | truth=r | word=create (lead-verb)
+  [exam3] ex3-1150 | ory.sh | /self-service/logout | updateLogoutFlow | truth=x | word=logout (last-segment)
+  [exam3] ex3-1152 | ory.sh | /self-service/logout/browser | createBrowserLogoutFlow | truth=r | word=create (lead-verb)
+  [exam3] ex3-1154 | ory.sh | /self-service/methods/saml/idp-initiated/{provider} | createIdPInitiatedSamlBrowserLoginFlow | truth=r | word=create (lead-verb)
+  [exam3] ex3-1160 | ory.sh | /self-service/recovery/api | createNativeRecoveryFlow | truth=r | word=create (lead-verb)
+  [exam3] ex3-1161 | ory.sh | /self-service/recovery/browser | createBrowserRecoveryFlow | truth=r | word=create (lead-verb)
+  [exam3] ex3-1164 | ory.sh | /self-service/registration/api | createNativeRegistrationFlow | truth=r | word=create (lead-verb)
+  [exam3] ex3-1165 | ory.sh | /self-service/registration/browser | createBrowserRegistrationFlow | truth=r | word=create (lead-verb)
+  [exam3] ex3-1168 | ory.sh | /self-service/settings/api | createNativeSettingsFlow | truth=r | word=create (lead-verb)
+  [exam3] ex3-1169 | ory.sh | /self-service/settings/browser | createBrowserSettingsFlow | truth=r | word=create (lead-verb)
+  [exam3] ex3-1172 | ory.sh | /self-service/verification/api | createNativeVerificationFlow | truth=r | word=create (lead-verb)
+  [exam3] ex3-1173 | ory.sh | /self-service/verification/browser | createBrowserVerificationFlow | truth=r | word=create (lead-verb)
+  [exam4] ex4-1352 | zulip.com | /calls/bigbluebutton/create | create-big-blue-button-video-call | truth=x | word=create (lead-verb)
+  [fresh] fx-0108 | workos.com | /organizations/{organization_id}/connected_accounts/{slug} | DataIntegrationsOrganizationController_getOrganizationDataInstallation | truth=r | word=connect (last-segment)
+  [fresh] fx-0201 | workos.com | /user_management/users/{user_id}/connected_accounts/{slug} | DataIntegrationsUserManagementController_getUserDataInstallation | truth=r | word=connect (last-segment)
+  [fresh] fx-0249 | workos.com | /sso/logout | SsoController_logout | truth=x | word=logout (last-segment)
+  [fresh] fx-0837 | workos.com | /user_management/sessions/logout | UserlandSessionsController_logout | truth=x | word=logout (last-segment)
+  (39 rows, 40 word fires)

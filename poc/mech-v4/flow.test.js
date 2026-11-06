@@ -9,6 +9,25 @@ test('classifyRow: a GET comes back from step 1 as r/method, on the floor', () =
   );
 });
 
+test('get-action: a GET naming a one-way action is x/get-action, review tight', () => {
+  const v = classifyRow({ method: 'GET', operationId: 'logout', path: '/sso/logout' });
+  assert.deepEqual(v, { class: 'x', step: 2, rule: 'get-action', source: 'list', matched: ['logout'], review: 'tight' });
+  assert.equal(classifyRow({ method: 'GET', operationId: 'revokeOidcSession', path: '/oauth2/sessions/logout' }).rule, 'get-action');
+  assert.equal(classifyRow({ method: 'GET', operationId: 'closeTarget', path: '/devtools/json/close/{id}' }).class, 'x');
+});
+
+test('get-action: GETs without the evidence stay r/settled; a POST /logout is unchanged', () => {
+  for (const [operationId, path] of [['getSecrets', '/apps/secrets'], ['getRefund', '/payments/refunds/{id}'], ['listConnectedAccounts', '/connected_accounts']]) {
+    assert.deepEqual(
+      classifyRow({ method: 'GET', operationId, path }),
+      { class: 'r', step: 1, rule: 'method', source: 'floor', matched: [], review: 'settled' },
+      path,
+    );
+  }
+  const post = classifyRow({ method: 'POST', operationId: 'logout', path: '/logout' });
+  assert.notEqual(post.rule, 'get-action');
+});
+
 test('classifyRow: a POST read verb comes back from step 1, reporting the word it read', () => {
   assert.deepEqual(
     classifyRow({ method: 'POST', operationId: 'SearchThings', path: '/things/search' }),
@@ -110,6 +129,8 @@ test('reviewHint: every method x every class x floor/list/jev, and the method ch
   // The whole rule, restated as a table rather than as code (D133 widening):
   //   PUT/PATCH/POST + class x               -> tight
   //   PUT/PATCH/POST + class w|r             -> loose (any source)
+  //   GET/HEAD/OPTIONS + r -> settled, x -> tight, w -> loose
+  //   DELETE + x -> settled, w|r -> loose
   //   every other method                     -> settled
   /** @type {Array<[string, 'r'|'w'|'x', 'floor'|'list'|'jev', 'tight'|'loose'|'settled']>} */
   const table = [];
@@ -123,6 +144,8 @@ test('reviewHint: every method x every class x floor/list/jev, and the method ch
       for (const source of sources) {
         let want = /** @type {'tight'|'loose'|'settled'} */ ('settled');
         if (method === 'PUT' || method === 'PATCH' || method === 'POST') want = cls === 'x' ? 'tight' : 'loose';
+        else if (['GET', 'HEAD', 'OPTIONS'].includes(method)) want = cls === 'r' ? 'settled' : cls === 'x' ? 'tight' : 'loose';
+        else if (method === 'DELETE') want = cls === 'x' ? 'settled' : 'loose';
         table.push([method, cls, source, want]);
       }
     }
@@ -141,8 +164,8 @@ test('reviewHint: every method x every class x floor/list/jev, and the method ch
 
   // The two non-settled cells actually occur in the table, so a reviewHint
   // that returned 'settled' for everything would fail this test.
-  assert.equal(table.filter(([, , , w]) => w === 'tight').length, 9);
-  assert.equal(table.filter(([, , , w]) => w === 'loose').length, 18);
+  assert.equal(table.filter(([, , , w]) => w === 'tight').length, 18);
+  assert.equal(table.filter(([, , , w]) => w === 'loose').length, 33);
 });
 
 /** "post" -> "PoSt", so the case-insensitivity check is not just two cases. */
