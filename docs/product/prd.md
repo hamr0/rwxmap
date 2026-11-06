@@ -1234,7 +1234,7 @@ npm). The truth-v4 relabel (D137) is done and handed to rwxlite
 
 Next:
 
-1. Mechanical alignment with D137: measure how well the current mechanical steps match truth-v4 (too loose and too tight counted separately). Then add lead verbs for the new x cases, priced leave-one-vendor-out on the v4 tuning rows before adoption. A core change, so it gets a new D-number.
+1. Mechanical alignment with D137: measure how well the current mechanical steps match truth-v4 (too loose and too tight counted separately). Then add lead verbs for the new x cases, priced leave-one-vendor-out on the v4 tuning rows before adoption. A core change, so it gets a new D-number. Baseline (2026-11-06, 16,486 ops, six complete sets): against v4 truth mechanical is 81.8% exact / 5.2% too loose / 13.0% too tight (against v3: 80.9 / 0.9 / 18.1); 682 of the 861 leaks are PUT/PATCH method-floor rows. Details in learnings.
 2. The second pass under D137: possibly raising w to x, or lowering x to w, on top of the mechanical result. It is decided after item 1 is measured. It covers what old step 6 named: never lower an access-widening x.
 3. Fresh exam #5, pre-registered, scored once for both projects.
 4. README "what x covers" section, exam #5 numbers, release.
