@@ -19,6 +19,7 @@ D137 (truth v4) widened x. Against v4 truth the current mechanical (v3 code) is 
 - Rules grow (ruling 2026-11-06): each observation becomes a rule with its own named word list, adopted when it passes its bar. Lists are expected to gain words later as evidence appears; whatever the words miss is left for rwxlite (mode a) to correct, which the markers make visible.
 - Second word (ruling 2026-11-06): a word that fails alone can be rescued by a second word that marks the exception (a veto). Only veto words with x rows at two or more vendors are kept; single-vendor veto words do nothing under leave-one-vendor-out.
 - GET by words only (ruling 2026-11-06): a GET is r by default; the only way to catch the rare GET that acts is an action word in its own list (get-action). Raised rows are x and tight, so they are safe with no model and visible to rwxlite. A GET with no word stays r and settled; flagging every GET would send all reads to the model to find a handful.
+- DELETE is DELETE (ruling 2026-11-06): every DELETE stays at the x floor, settled, with no word rule and no flag. A provider that uses DELETE for a soft or reversible action has misdescribed its API; that is the provider's fault, not something rwxmap guesses at. The 39 DELETE rows truth calls w or r stay too tight by design.
 
 ## The two tables (current code, six sets, 16,486 ops; HEAD 2 rows omitted)
 
@@ -65,7 +66,7 @@ The user's first layout put POST on a w floor; corrected (ruling above) to x. PA
 | 2 | PUT/PATCH x-extraction (682 leaks) | done 2026-11-06 (path-x-word rule + marker rule in poc/mech-v4/; LOVO 360 closed / 120 new too tight) |
 | 3 | POST w/r-extraction, re-tune KEEP_W (162 leaks, 2,081 too tight) | done 2026-11-06 (A: path-x-word on POST; B: content-noun + veto; LOVO B 233 right / 15 leaks) |
 | 4 | GET x-extraction (12 unflagged two-step leaks; overlaps the parked GET-twin POC) | done 2026-11-06 (get-action: logout, revoke, close; LOVO 4 two-step leaks closed / 1 read raised) |
-| 5 | DELETE w-extraction (39 too tight) | not started |
+| 5 | DELETE w-extraction (39 too tight) | closed 2026-11-06 by ruling: DELETE stays x, settled, no rule, no flag |
 | 6 | D-number, exam #5 (truth-v4-plan step 7), archive v3 | not started |
 
 Each step: candidates fixed before measuring; one learnings entry per step before the next starts.

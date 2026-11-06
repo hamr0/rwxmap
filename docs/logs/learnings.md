@@ -8795,3 +8795,13 @@ v4 truth:
 - Lessons: (1) A word means different things by method: the same noun that proves x on a write is just the object of a read. Each method needs its own list. (2) A flag is not a fix when the model may be absent; raise when the word is evidence, mark so the model can lower.
 - Next: plan step 5, DELETE w-extraction (39 too tight, trash/restore).
 - Where: poc/mech-v4/ (step1.js, step2.js, flow.js, step4-score.mjs, step4-readout.txt, score-v4-readout.txt).
+
+## 2026-11-06 — Mechanical v4 step 5: DELETE stays x (plan step 5, closed by ruling)
+
+- Goal: the 39 DELETE rows that v4 truth calls w (35) or r (4), all x and settled.
+- What they share: 18 say archive (hubspot crm "Archive a company" x15, intercom "Delete (archive) a conversation attribute", appcenter archiveTestRun); 17 are plain "Delete X" that the vendor docs call soft (asana deleteTask, canva deleteFolder, miro delete-board), with no word in the text; 4 r rows are cloudflare predefined DLP entries and a docusign view-URL revoke.
+- The only word (archive, trash or soft in operationId, summary or path) fires on 17 truth w and 16 truth x across all 2,556 DELETE rows: hubspot puts _archive in the operationId of real deletes, box /trash endpoints permanently remove, zulip archive-stream and mailchimp "Archive list member" are x. 1:1, far below the >10:1 lowering bar, and against D87 (every DELETE is x).
+- A flag-only option (keep x, mark tight so rwxlite could lower) was offered and declined.
+- Ruling (user 2026-11-06): DELETE is DELETE. It stays at the x floor, settled, no rule, no flag; a provider using DELETE for something reversible has misdescribed its API.
+- Lesson: when the method itself is the provider's statement of intent, rwxmap takes it at its word; truth labels that read past the method are noted, not chased.
+- Next: plan step 6, D-number, fresh exam #5 for both projects (rwxlite waits for it), archive v3.
