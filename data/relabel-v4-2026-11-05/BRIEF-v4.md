@@ -10,6 +10,8 @@ the other way. Even so, every row of every set is relabelled under v4
 
 Calibration status: DRAFT, not calibrated, not adopted. Seams 1-5 ruled x by the user 2026-11-05 (D137).
 
+Amendment 2026-11-06: the seam 3 rule now also covers changing where an existing webhook or subscription sends, following the user's ruling on pilot 2 row q129 (aws email event destination update, x). Pass suspect batches sbatch-001 to sbatch-006 were labelled before this amendment; every later batch was labelled after it.
+
 This brief outranks any task prompt a labeller is given.
 
 ## The brief, verbatim
@@ -168,7 +170,8 @@ Rules that trip people up:
   they could not do before. More: x by (g). Fewer: w. The text
   doesn't say: x.
 - Creating a webhook or subscription that will send events to an
-  outside URL is x by (c): data leaves the system from then on.
+  outside URL, or changing where an existing one sends, is x by (c):
+  data leaves the system from then on.
 - Creating a user or account that can log in is x by (g), even
   without an invite.
 - Adding a member to a team, org, project or group is x by (g) on

@@ -29,6 +29,8 @@ Further rulings (user, 2026-11-05):
 
 - (d) (2026-11-06) Rows both Sonnet labellers call r are corrected to r and reported separately as "fixes" (pilot 2: q016, q021, q044, q071, q106). Pilot 2's three disputes (q045, q075, q129) are x.
 - (e) (2026-11-06) Jev labels the full pass with the pilot-2 factual questions and rule (poc/v4-pilot2). Sonnet does a second pass on the suspect rows only, fixed before the run: every Jev-x row; Jev-w rows where any of the five questions has p >= 0.2 (and < 0.5); a seeded random 5% of the remaining Jev-w rows, to measure misses. Where Sonnet and Jev disagree, the rows go to the user grouped by pattern. The AWS/GitHub cross-check (a) runs afterwards.
+- (f) (user, 2026-11-06) Pass design: Jev labels every row; one Sonnet pass on the suspect rows; no second Sonnet; where Sonnet and Jev disagree, the rows go to the user grouped by pattern.
+- (g) (2026-11-06) BRIEF-v4 amended: the seam 3 rule now also covers changing where an existing webhook or subscription sends (user ruling on pilot 2 row q129, x). Suspect batches sbatch-001 to sbatch-006 were labelled before the amendment; later batches after it.
 
 Why pilot 1 was unfair to Jev: the access rules sat in the "ignore" part of its question; the x list opened with "the text must make plain"; and a probability model cannot express "unclear, so x". Pilot 2 asks five facts and applies the rule in code (poc/v4-pilot2/rule.mjs).
 
