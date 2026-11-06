@@ -55,7 +55,7 @@ The user's first layout put POST on a w floor; corrected (ruling above) to x. PA
 | # | Step | Status |
 |---|---|---|
 | 0 | Rulings above | done 2026-11-06 |
-| 1 | Copy v3 core to poc (parallel v4), prove byte-identical output on the 16,486 rows | not started |
+| 1 | Copy v3 core to poc (parallel v4), prove byte-identical output on the 16,486 rows | done 2026-11-06 (poc/mech-v4/, proof 0 differences) |
 | 2 | PUT/PATCH x-extraction (682 leaks) | not started |
 | 3 | POST w/r-extraction, re-tune KEEP_W (162 leaks, 2,081 too tight) | not started |
 | 4 | GET x-extraction (12 unflagged two-step leaks; overlaps the parked GET-twin POC) | not started |
