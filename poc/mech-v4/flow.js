@@ -33,14 +33,13 @@ import { step3 } from './step3.js';
  * jev.js's applyJev and secondpass.js recompute it through THIS function
  * whenever they move a verdict. Nothing else may decide a hint.
  *
- *   'tight'   "x, possibly tighter than needed": class x on a POST, or any
- *             row the second pass could not decide (D133). Review to
- *             loosen; safe to review, no leak has been observed in the
- *             x-on-POST bucket.
- *   'loose'   "mechanical lowered it" (D133): class w on a PUT/PATCH decided
- *             by the method floor, or a POST that a word list lowered below
- *             the POST floor of x (class w or r, source 'list').
- *   'settled' nothing lowered it and nobody was unsure.
+ * Which way a write-method row could be wrong. For PUT, PATCH and POST (after
+ * the three secondPass branches below, which win):
+ *   'tight'   class x: it may be tighter than needed, review to loosen.
+ *   'loose'   class w or r: it may be looser than needed, review to tighten.
+ * Every other method is 'settled'. The second pass overrides: undecided ->
+ * tight; raised -> tight if the final class is x, else loose; lowered ->
+ * loose.
  *
  * @param {string|undefined} method the row's HTTP method, read
  *   case-insensitively like every other method check in this library.
@@ -57,9 +56,7 @@ export function reviewHint(method, cls, source, secondPass) {
   if (secondPass === 'raised') return cls === 'x' ? 'tight' : 'loose';
   if (secondPass === 'lowered') return 'loose';
   const m = (method || '').toUpperCase();
-  if (cls === 'x' && m === 'POST') return 'tight';
-  if (cls === 'w' && (m === 'PUT' || m === 'PATCH') && source === 'floor') return 'loose';
-  if ((cls === 'w' || cls === 'r') && m === 'POST' && source === 'list') return 'loose';
+  if (m === 'PUT' || m === 'PATCH' || m === 'POST') return cls === 'x' ? 'tight' : 'loose';
   return 'settled';
 }
 

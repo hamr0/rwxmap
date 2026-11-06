@@ -11,7 +11,7 @@
 // asks only "can this be undone". The verb-reading helper (verbForRow) is
 // shared with step3.js via ./tokens.js.
 import {
-  matchingMembers, verbForRow, splitTokens, tokensForRow, leadVerbAfterModifiers,
+  matchingMembers, verbForRow, splitTokens, tokensForRow, leadVerbAfterModifiers, stemMatches,
 } from './tokens.js';
 
 /** @typedef {import('./types.js').Operation} Operation */
@@ -87,6 +87,75 @@ export const REMOVES = new Set(['delete', 'purge', 'revoke', 'expire', 'void', '
 export const CREDENTIAL_SET = new Set(['password', 'passcode', 'pin']);
 export const CREDENTIAL_CHANGE_VERBS = new Set(['change', 'regenerate', 'regen']);
 
+// PATH_X_WORDS (36) — the path-word rule (rule name 'path-x-word').
+//
+// DIRECTION: claims x. Step 2 owns it (it only ever raises).
+// WHICH ROWS: PUT and PATCH only, and only rows no earlier step-2 rule
+// claimed (not CANT_UNDO, not credential-set), so a row that would
+// otherwise fall to step 3's PUT/PATCH method floor is raised to x when any
+// word matches. POST, DELETE and GET never reach it.
+// WHERE IT MATCHES: the path only. Split on '/', drop {param} segments,
+// split each remaining segment on '#', tokenize each piece with
+// splitTokens. A single word matches a token when stemMatches(token, word)
+// or the token contains the word (so registrycredentials matches
+// credential). A multi-word entry (shared_link, api_key, event_stream,
+// log_stream, log_drain) matches as a consecutive token pair, the last word
+// via stemMatches, or as the glued string inside one token. The matching
+// helper (pathWordMatch) lives here, not in tokens.js: only this rule uses it.
+// WHAT IT IS NOT: not the operationId or summary; not a credential-set
+// rule; 'sso' and 'policy' are deliberately absent (they failed the bar).
+//
+// PROVENANCE: measured in poc/mech-v4/step2-score.mjs (mode C, site any).
+// Under leave-one-vendor-out 360 of 682 PUT/PATCH floor leaks closed,
+// 120 new too tight. The 36 words are those that passed the bar; the F4
+// family (stop, cancel, ... complete) is excluded entirely.
+export const PATH_X_WORDS = new Set([
+  'role', 'member', 'access', 'permission', 'share', 'membership', 'oauth',
+  'authorization', 'scope', 'scim', 'shared_link', 'acl', 'invite',
+  'invitation', 'allowlist', 'trusted', 'grant', 'collaborator', 'sharing',
+  'mfa', 'key', 'secret', 'token', 'credential', 'api_key', 'signing',
+  'hook', 'webhook', 'integration', 'destination', 'logpush', 'event_stream',
+  'log_stream', 'logsink', 'log_drain', 'forwarding',
+]);
+
+/**
+ * The path-x-word rule's match, or [] when it does not fire.
+ * @param {Operation} row a PUT or PATCH row
+ * @param {Set<string>} pathXWords
+ * @returns {string[]} the PATH_X_WORDS entries that matched, sorted
+ */
+function pathWordMatch(row, pathXWords) {
+  const pieces = [];
+  for (const seg of String(row.path || '').split('/')) {
+    if (seg === '' || (seg.startsWith('{') && seg.endsWith('}'))) continue;
+    for (const piece of seg.split('#')) {
+      const toks = splitTokens(piece);
+      if (toks.length) pieces.push(toks);
+    }
+  }
+  const found = [];
+  for (const word of pathXWords) {
+    const parts = word.split('_');
+    const n = parts.length;
+    let hit = false;
+    for (const toks of pieces) {
+      if (n === 1) {
+        hit = toks.some((t) => stemMatches(t, word) || t.includes(word));
+      } else {
+        for (let i = 0; i + n <= toks.length && !hit; i++) {
+          let ok = true;
+          for (let k = 0; k < n - 1 && ok; k++) ok = toks[i + k] === parts[k];
+          if (ok && (toks[i + n - 1] === parts[n - 1] || stemMatches(toks[i + n - 1], parts[n - 1]))) hit = true;
+        }
+        if (!hit) hit = toks.some((t) => t.includes(parts.join('')));
+      }
+      if (hit) break;
+    }
+    if (hit) found.push(word);
+  }
+  return found.sort();
+}
+
 /**
  * The credential-set rule's match, or [] when it does not fire.
  * @param {Operation} row a PUT or PATCH row
@@ -121,10 +190,10 @@ function credentialSetMatch(row, credentialSet, changeVerbs) {
 /**
  * Apply step 2 to one row.
  * @param {Operation} row
- * @param {{cantUndo?: Set<string>, removes?: Set<string>, credentialSet?: Set<string>, credentialChangeVerbs?: Set<string>}} [words]
+ * @param {{cantUndo?: Set<string>, removes?: Set<string>, credentialSet?: Set<string>, credentialChangeVerbs?: Set<string>, pathXWords?: Set<string>}} [words]
  *   Word lists to use in place of the module's own (LOVO passes rebuilt
  *   ones). Omitted fields fall back to CANT_UNDO / REMOVES /
- *   CREDENTIAL_SET / CREDENTIAL_CHANGE_VERBS.
+ *   CREDENTIAL_SET / CREDENTIAL_CHANGE_VERBS / PATH_X_WORDS.
  * @returns {StepVerdict|null} null when step 2 does not claim the row.
  */
 export function step2(row, words = {}) {
@@ -132,6 +201,7 @@ export function step2(row, words = {}) {
   const removes = words.removes ?? REMOVES;
   const credentialSet = words.credentialSet ?? CREDENTIAL_SET;
   const changeVerbs = words.credentialChangeVerbs ?? CREDENTIAL_CHANGE_VERBS;
+  const pathXWords = words.pathXWords ?? PATH_X_WORDS;
 
   const method = (row.method || '').toUpperCase();
   // DELETE beats every word (D87): it is always x, always destructive,
@@ -148,8 +218,12 @@ export function step2(row, words = {}) {
   if (matched.length === 0) {
     if (method === 'POST') return null;
     const credential = credentialSetMatch(row, credentialSet, changeVerbs);
-    if (credential.length === 0) return null;
-    return { class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: credential };
+    if (credential.length > 0) {
+      return { class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: credential };
+    }
+    const pathWords = pathWordMatch(row, pathXWords);
+    if (pathWords.length === 0) return null;
+    return { class: 'x', step: 2, rule: 'path-x-word', source: 'list', matched: pathWords };
   }
 
   /** @type {StepVerdict} */

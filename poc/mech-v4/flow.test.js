@@ -34,14 +34,14 @@ test('classifyRow: a PUT with a CANT_UNDO verb is claimed x by step 2 before ste
   // "revoke" is also a REMOVES member, so this comes back destructive too.
   assert.deepEqual(
     classifyRow({ method: 'PUT', operationId: 'revokeCertificate', path: '/certs/{id}' }),
-    { class: 'x', step: 2, rule: 'cant-undo-verb', source: 'list', matched: ['revoke'], destructive: true, review: 'settled' },
+    { class: 'x', step: 2, rule: 'cant-undo-verb', source: 'list', matched: ['revoke'], destructive: true, review: 'tight' },
   );
 });
 
 test('classifyRow: a PUT setting a password is claimed x by step 2 credential-set before step 3\'s w floor', () => {
   assert.deepEqual(
     classifyRow({ method: 'PUT', operationId: 'updateUserPassword', path: '/users/{id}/password' }),
-    { class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: ['password'], review: 'settled' },
+    { class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: ['password'], review: 'tight' },
   );
 });
 
@@ -108,9 +108,9 @@ test('classifyRow: passing nothing is unchanged — the same POST still claims w
 
 test('reviewHint: every method x every class x floor/list/jev, and the method check is case-insensitive', () => {
   // The whole rule, restated as a table rather than as code (D133 widening):
-  //   class x + POST                         -> tight
-  //   class w + PUT/PATCH + source 'floor'   -> loose
-  //   class w|r + POST + source 'list'       -> loose (a word list lowered the POST floor)
+  //   PUT/PATCH/POST + class x               -> tight
+  //   PUT/PATCH/POST + class w|r             -> loose (any source)
+  //   every other method                     -> settled
   /** @type {Array<[string, 'r'|'w'|'x', 'floor'|'list'|'jev', 'tight'|'loose'|'settled']>} */
   const table = [];
   const methods = ['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE', ''];
@@ -122,9 +122,7 @@ test('reviewHint: every method x every class x floor/list/jev, and the method ch
     for (const cls of classes) {
       for (const source of sources) {
         let want = /** @type {'tight'|'loose'|'settled'} */ ('settled');
-        if (cls === 'x' && method === 'POST') want = 'tight';
-        else if (cls === 'w' && (method === 'PUT' || method === 'PATCH') && source === 'floor') want = 'loose';
-        else if ((cls === 'w' || cls === 'r') && method === 'POST' && source === 'list') want = 'loose';
+        if (method === 'PUT' || method === 'PATCH' || method === 'POST') want = cls === 'x' ? 'tight' : 'loose';
         table.push([method, cls, source, want]);
       }
     }
@@ -143,8 +141,8 @@ test('reviewHint: every method x every class x floor/list/jev, and the method ch
 
   // The two non-settled cells actually occur in the table, so a reviewHint
   // that returned 'settled' for everything would fail this test.
-  assert.equal(table.filter(([, , , w]) => w === 'tight').length, 3);
-  assert.equal(table.filter(([, , , w]) => w === 'loose').length, 4);
+  assert.equal(table.filter(([, , , w]) => w === 'tight').length, 9);
+  assert.equal(table.filter(([, , , w]) => w === 'loose').length, 18);
 });
 
 /** "post" -> "PoSt", so the case-insensitivity check is not just two cases. */
@@ -173,11 +171,10 @@ test('classifyRow: the non-settled hints reach real rows through the whole ladde
   // loose (D133): a POST a word list lowered below the floor, to w and to r.
   assert.equal(classifyRow({ method: 'POST', operationId: 'updateThing', path: '/things/{id}' }).review, 'loose');
   assert.equal(classifyRow({ method: 'POST', operationId: 'searchThings', path: '/things/search' }).review, 'loose');
-  // settled: a PUT claimed x by a word list is not a POST, so no 'tight',
-  // and not a w, so no 'loose'.
+  // tight: a PUT claimed x by a word list (a write-method x may be too tight).
   const revoke = classifyRow({ method: 'PUT', operationId: 'revokeCertificate', path: '/certs/{id}' });
   assert.equal(revoke.source, 'list');
-  assert.equal(revoke.review, 'settled');
+  assert.equal(revoke.review, 'tight');
   // settled: a DELETE x is not a POST, and a GET r is neither cell.
   assert.equal(classifyRow({ method: 'DELETE', operationId: 'deleteThing', path: '/things/{id}' }).review, 'settled');
   assert.equal(classifyRow({ method: 'GET', operationId: 'listThings', path: '/things' }).review, 'settled');

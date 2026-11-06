@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { step2, floorPost, CANT_UNDO, REMOVES, CREDENTIAL_SET, CREDENTIAL_CHANGE_VERBS } from './step2.js';
+import { step2, step2 as step2Full, floorPost, CANT_UNDO, REMOVES, CREDENTIAL_SET, CREDENTIAL_CHANGE_VERBS, PATH_X_WORDS } from './step2.js';
 import { KEEP_W } from './step3.js';
 import { stemMatches } from './tokens.js';
 
@@ -143,6 +143,9 @@ test('credential-set change form: PATCH changePin, and a summary "Change PIN"', 
 });
 
 test('credential-set does not fire: plurals, trailing non-credential token, api keys, non-change lead', () => {
+  // path-x-word is switched off here (empty list) so only credential-set is under test;
+  // /api_keys/{id} would otherwise be claimed by path-x-word.
+  const step2 = (row) => step2Full(row, { pathXWords: new Set() });
   assert.equal(step2({ method: 'PUT', path: '/users/{id}/passwords', operationId: 'putUserPasswords' }), null);
   assert.equal(step2({ method: 'PUT', path: '/boards/{id}/pins', operationId: 'putBoardPins' }), null);
   assert.equal(step2({ method: 'PUT', path: '/settings/password_rules', operationId: 'putPasswordRules' }), null);
@@ -163,9 +166,11 @@ test('credential-set: a CANT_UNDO lead verb keeps its own rule', () => {
 });
 
 test('credential-set words injection overrides CREDENTIAL_SET and CREDENTIAL_CHANGE_VERBS', () => {
+  // path-x-word is switched off (empty list) so only credential-set is under test.
+  const off = { pathXWords: new Set() };
   const row = { method: 'PUT', path: '/users/{id}/secret', operationId: 'swapSecret' };
-  assert.equal(step2(row), null);
-  assert.deepEqual(step2(row, { credentialSet: new Set(['secret']) }), {
+  assert.equal(step2(row, off), null);
+  assert.deepEqual(step2(row, { ...off, credentialSet: new Set(['secret']) }), {
     class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: ['secret'],
   });
   const change = { method: 'PATCH', path: '/cards/{id}', operationId: 'swapPin' };
@@ -180,4 +185,44 @@ test('credential-set words injection overrides CREDENTIAL_SET and CREDENTIAL_CHA
 test('CREDENTIAL_SET and CREDENTIAL_CHANGE_VERBS hold exactly the D131 members', () => {
   assert.deepEqual([...CREDENTIAL_SET].sort(), ['passcode', 'password', 'pin']);
   assert.deepEqual([...CREDENTIAL_CHANGE_VERBS].sort(), ['change', 'regen', 'regenerate']);
+});
+
+// ---- path-x-word rule (PUT/PATCH path words raise the method floor to x)
+
+const pw = (method, path) => step2({ method, operationId: 'putThing', path });
+
+test('path-x-word: fires on PUT/PATCH path words, class x, not destructive', () => {
+  assert.deepEqual(pw('PUT', '/orgs/{org}/memberships/{u}'), {
+    class: 'x', step: 2, rule: 'path-x-word', source: 'list', matched: ['member', 'membership'],
+  });
+  assert.deepEqual(pw('PATCH', '/webhooks/{id}'), {
+    class: 'x', step: 2, rule: 'path-x-word', source: 'list', matched: ['hook', 'webhook'],
+  });
+});
+
+test('path-x-word: glued match inside one token, and multi-word entries', () => {
+  assert.deepEqual(pw('PUT', '/registrycredentials/{id}').matched, ['credential']);
+  assert.ok(pw('PUT', '/files/{id}#add_shared_link').matched.includes('shared_link'));
+  assert.ok(pw('PUT', '/a/{id}/apikeys').matched.includes('api_key'));
+  assert.ok(pw('PUT', '/a/event-streams/{id}').matched.includes('event_stream'));
+});
+
+test('path-x-word: does not fire on other paths, POST or DELETE', () => {
+  assert.equal(pw('PUT', '/boards/{id}/name'), null);
+  assert.equal(pw('PUT', '/{role}/name'), null);
+  assert.equal(pw('POST', '/webhooks'), null);
+  const del = pw('DELETE', '/webhooks/{id}');
+  assert.equal(del.rule, 'method-delete');
+});
+
+test('path-x-word: sso and policy are not in the list; 36 words', () => {
+  assert.equal(PATH_X_WORDS.size, 36);
+  assert.ok(!PATH_X_WORDS.has('sso'));
+  assert.ok(!PATH_X_WORDS.has('policy'));
+  assert.equal(pw('PUT', '/sso/{id}'), null);
+  assert.equal(pw('PUT', '/policies/{id}/policy'), null);
+});
+
+test('path-x-word: an earlier step-2 rule keeps the row', () => {
+  assert.equal(step2({ method: 'PUT', operationId: 'revokeToken', path: '/tokens/{id}' }).rule, 'cant-undo-verb');
 });

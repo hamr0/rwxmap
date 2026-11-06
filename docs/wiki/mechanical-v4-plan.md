@@ -13,6 +13,8 @@ D137 (truth v4) widened x. Against v4 truth the current mechanical (v3 code) is 
 - POST floor stays x (ruling): on the 3,586 no-word POST rows under v4 truth (r 253 / w 1,795 / x 1,538), floor x gives 1,538 exact, 2,048 too tight, 0 too loose; floor w would give 1,795 exact, 1,538 too loose, 253 too tight. A w floor breaks the invariant (on doubt, the tighter class). POST's pass pulls w and r out by evidence.
 - Bar (ruling): a candidate (word or rule) is adopted only if under leave-one-vendor-out it fires on truth-x rows more often than on truth-w rows (D100 tighten rule). For a pass that lowers a class (x to w, w to r), the D100 loosening rule applies: adopt only above 10 right lowerings per new leak. A pass is GO if it closes at least 1 point of its method's leaks and too tight rises by less than the leaks it closes. NO-GO: the method keeps v3 behaviour and its leaks are left to rwxlite (mode a), provided the marker is right.
 - If everything fails: keep mechanical as it is and let rwxlite correct the gap; 849 of the 861 leaks already carry the loose marker; the 12 unflagged are AWS-style action GETs (two steps loose).
+- Marker rule (ruling 2026-11-06, v4 copy only): every PUT, PATCH and POST row is marked by which way it could be wrong: class x is tight, class w or r is loose. GET, HEAD, QUERY and DELETE are settled. The second-pass overrides are unchanged. Against the old rule this only moves the 65 PUT/PATCH rows that a word raised to x from settled to tight; it is what lets rwxlite (mode a) and a reviewer see the rows step 2 raises. User's reason: a marker by direction is more honest and makes rows easy to spot and prioritise, especially on the loose end.
+- Partial matching (ruling 2026-11-06): path words match by stem (stemMatches) or anywhere inside a token (substring scan), so registrycredentials matches credential. Jaccard was considered and not used (it needs a fitted cut-off and cannot name the matched word).
 
 ## The two tables (current code, six sets, 16,486 ops; HEAD 2 rows omitted)
 
@@ -56,7 +58,7 @@ The user's first layout put POST on a w floor; corrected (ruling above) to x. PA
 |---|---|---|
 | 0 | Rulings above | done 2026-11-06 |
 | 1 | Copy v3 core to poc (parallel v4), prove byte-identical output on the 16,486 rows | done 2026-11-06 (poc/mech-v4/, proof 0 differences) |
-| 2 | PUT/PATCH x-extraction (682 leaks) | not started |
+| 2 | PUT/PATCH x-extraction (682 leaks) | done 2026-11-06 (path-x-word rule + marker rule in poc/mech-v4/; LOVO 360 closed / 120 new too tight) |
 | 3 | POST w/r-extraction, re-tune KEEP_W (162 leaks, 2,081 too tight) | not started |
 | 4 | GET x-extraction (12 unflagged two-step leaks; overlaps the parked GET-twin POC) | not started |
 | 5 | DELETE w-extraction (39 too tight) | not started |
