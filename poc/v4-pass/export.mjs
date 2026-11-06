@@ -71,6 +71,30 @@ let p1n = 0;
 for (const r of T.p1key) { const l = p1truth.get(r.pilot_id); if (!l) throw new Error('p1 no truth ' + r.pilot_id); p1n++; add(P1SET[r.source_set], r.source_id, l, 'pilot1-v4', textOf(r)); }
 const p2truth = new Map(T.p2truth.map((r) => [r.row_id, r.label]));
 for (const r of T.p2key) { const l = p2truth.get(r.pilot_id); if (!l) throw new Error('p2 no truth ' + r.pilot_id); for (const [s, id] of pairs(r.origins)) add(s, id, l, 'pilot2-v4', textOf(r)); }
+
+// rwxlite ids whose normalised key was pilot-1-labelled or an x-conflict: merge.mjs dropped the whole key, so the
+// rwxlite id sharing it was never labelled above. Same key as merge.mjs (copied).
+const ws = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+const meth = (m) => { const u = String(m || '').toUpperCase(); return u === 'QUERY' ? 'GET' : u; };
+const normProv = (p) => String(p || '').toLowerCase().replace(/\.(com|io|app|sh|dev|ai|co|net|org)$/, '');
+const normKey = (x) => [normProv(x.provider), meth(x.method), x.path, x.operationId || '', ws(x.summary)].join('|');
+const RWXLITE_UNIQUE = '/home/hamr/PycharmProjects/rwxlite/data/v4/rwxlite-w-unique.csv';
+const rlRaw = readFileSync(RWXLITE_UNIQUE); const rlAll = parseCsv(rlRaw.toString('utf8'));
+const p1ByKey = new Map();
+for (const r of T.p1key) { const k = normKey(r); if (!p1ByKey.has(k)) p1ByKey.set(k, []); p1ByKey.get(k).push(p1truth.get(r.pilot_id)); }
+const cfKeys = new Set(T.conflicts.map((c) => c.norm_key));
+const tightest = (ls) => ls.reduce((b, l) => (RANK[l] > RANK[b] ? l : b));
+const keyAdded = { p1: [], conflict: [] }, keyUnmatched = [];
+for (const r of rlAll) {
+  if (r.variant_kind === 'surface' || cands.has('rwxlite\0' + r.your_id)) continue;
+  const k = normKey(r);
+  if (p1ByKey.has(k)) { const l = tightest(p1ByKey.get(k)); add('rwxlite', r.your_id, l, 'pilot1-v4-by-key', textOf(r)); keyAdded.p1.push(l); }
+  else if (cfKeys.has(k)) { add('rwxlite', r.your_id, 'x', 'conflict-v3-x-by-key', textOf(r)); keyAdded.conflict.push('x'); }
+  else keyUnmatched.push(r.your_id);
+}
+if (keyUnmatched.length) { console.log('UNMATCHED rwxlite ids', keyUnmatched.length, keyUnmatched.slice(0, 20)); process.exit(1); }
+const tally = (ls) => ls.reduce((m, l) => { m[l] = (m[l] || 0) + 1; return m; }, {});
+console.log('by-key added: pilot1', keyAdded.p1.length, tally(keyAdded.p1), 'conflict', keyAdded.conflict.length, tally(keyAdded.conflict));
 const pilotCounts = (tr) => { const m = {}; for (const r of tr) m[r.label] = (m[r.label] || 0) + 1; return m; };
 const p1c = pilotCounts(T.p1truth), p2c = pilotCounts(T.p2truth);
 
@@ -131,6 +155,7 @@ ${Object.entries(IN).map(([k, p]) => `- ${p}: ${sha(raw[k])}`).join('\n')}
 - Conflicts: label x, label_source conflict-v3-x (v3 truth already has x). Text from conflicts.csv.
 - Pilots: label_source pilot1-v4 or pilot2-v4. Pilot1 source_set is normalised to the pass set names (provider-corpus-2026-09-16, exam-2026-09-17, exam-2026-09-20 -> combined; buildset-2026-09-18 -> buildset; exam-2026-09-22 -> exam22; exam3-2026-11-04 -> exam3; exam4-2026-11-04 -> exam4; rwxlite-fresh-2026-11-03 -> fresh). Pilot2 labels apply to every origin id of the row. Pilot2's 5 r labels are user-ruled fixes and stay r.
 - An id with labels from more than one source keeps the tighter label (x over w over r), except that pilot2's 5 user-ruled r labels override the pass label (the one loosening exception); on a tie the first source in the order pass, conflict, pilot1, pilot2 supplies label_source and text. Every such id is listed with its sources in multi-source-ids.csv (${multi.length} ids, ${differing} where the labels differ).
+- By-key rows: rwxlite ids (from rwxlite-w-unique.csv, sha256 ${sha(rlRaw)}) that merge.mjs left out because their normalised key was pilot-1-labelled or a v3 x-conflict get that row's label (pilot-1 truth label, or x), label_source pilot1-v4-by-key or conflict-v3-x-by-key, and their own text. Added: ${keyAdded.p1.length} by pilot1 key, ${keyAdded.conflict.length} by conflict key. The build fails if any non-surface rwxlite-w-unique id is missing, or any surface one is not in inherit-v4.csv.
 - brief is BRIEF-v4 for every row.
 - Flags: rwxlite -> rwxlite; combined by id prefix (pc- tuning; x17-, x20- burned); buildset, relabel-buildset -> tuning; exam22, exam3, exam4, fresh -> burned; calibA, calibB, calibC, corpus -> diagnostic.
 - inherit-v4.csv: ${T.inherit.length} rwxlite surface variants (your_id, variant_of). rwxlite gives each variant its seed's v4 label from this export: label is "seed" unless variant_of appears as an id in export-v4.csv, in which case that label is filled in (${inhResolved} resolved, ${inhAmbiguous} of them with an id shared across sets, tightest kept).
@@ -158,6 +183,13 @@ ${sorted(cnt.source)}
 `;
 writeFileSync(OUT + 'README.md', readme);
 
+{
+  const exp = new Set(rows.filter((r) => r.set === 'rwxlite').map((r) => r.id)), inhIds = new Set(inh.map((r) => r.your_id));
+  const bad = [];
+  for (const r of rlAll) { if (r.variant_kind === 'surface' ? !inhIds.has(r.your_id) : !exp.has(r.your_id)) bad.push(r.your_id); }
+  if (bad.length) { console.log('COVERAGE FAIL', bad.length, bad.slice(0, 20)); process.exit(1); }
+  console.log('coverage ok: rwxlite-w-unique', rlAll.length, 'non-surface in export, surface in inherit');
+}
 console.log('pass rows without key:', passMissing);
 console.log('pilot1 labels', p1c, 'pilot2 labels', p2c);
 console.log('export rows', rows.length);

@@ -19,12 +19,13 @@ The v4 training labels for rwxlite round 13, labelled under BRIEF-v4 and D137. W
 - Conflicts: label x, label_source conflict-v3-x (v3 truth already has x). Text from conflicts.csv.
 - Pilots: label_source pilot1-v4 or pilot2-v4. Pilot1 source_set is normalised to the pass set names (provider-corpus-2026-09-16, exam-2026-09-17, exam-2026-09-20 -> combined; buildset-2026-09-18 -> buildset; exam-2026-09-22 -> exam22; exam3-2026-11-04 -> exam3; exam4-2026-11-04 -> exam4; rwxlite-fresh-2026-11-03 -> fresh). Pilot2 labels apply to every origin id of the row. Pilot2's 5 r labels are user-ruled fixes and stay r.
 - An id with labels from more than one source keeps the tighter label (x over w over r), except that pilot2's 5 user-ruled r labels override the pass label (the one loosening exception); on a tie the first source in the order pass, conflict, pilot1, pilot2 supplies label_source and text. Every such id is listed with its sources in multi-source-ids.csv (231 ids, 24 where the labels differ).
+- By-key rows: rwxlite ids (from rwxlite-w-unique.csv, sha256 a40d1f59dc56b31628e1a48cf8b1c99e9159d6dff0b645050079e141d7edd558) that merge.mjs left out because their normalised key was pilot-1-labelled or a v3 x-conflict get that row's label (pilot-1 truth label, or x), label_source pilot1-v4-by-key or conflict-v3-x-by-key, and their own text. Added: 101 by pilot1 key, 0 by conflict key. The build fails if any non-surface rwxlite-w-unique id is missing, or any surface one is not in inherit-v4.csv.
 - brief is BRIEF-v4 for every row.
 - Flags: rwxlite -> rwxlite; combined by id prefix (pc- tuning; x17-, x20- burned); buildset, relabel-buildset -> tuning; exam22, exam3, exam4, fresh -> burned; calibA, calibB, calibC, corpus -> diagnostic.
 - inherit-v4.csv: 570 rwxlite surface variants (your_id, variant_of). rwxlite gives each variant its seed's v4 label from this export: label is "seed" unless variant_of appears as an id in export-v4.csv, in which case that label is filled in (0 resolved, 0 of them with an id shared across sets, tightest kept).
 
 ## Counts
-Rows: 36477
+Rows: 36578
 
 By set:
 - buildset: 1130
@@ -37,18 +38,18 @@ By set:
 - exam3: 439
 - exam4: 469
 - fresh: 328
-- rwxlite: 28656
+- rwxlite: 28757
 
 By flag:
 - burned: 3733
 - diagnostic: 1730
-- rwxlite: 28656
+- rwxlite: 28757
 - tuning: 2358
 
 By label:
 - r: 5
-- w: 28381
-- x: 8091
+- w: 28466
+- x: 8107
 
 By flag and label:
 - burned/w: 2739
@@ -57,8 +58,8 @@ By flag and label:
 - diagnostic/w: 969
 - diagnostic/x: 757
 - rwxlite/r: 1
-- rwxlite/w: 22849
-- rwxlite/x: 5806
+- rwxlite/w: 22934
+- rwxlite/x: 5822
 - tuning/w: 1824
 - tuning/x: 534
 
@@ -71,6 +72,7 @@ By label_source:
 - jev-sonnet-r-kept-w: 96
 - jev-unchecked: 19978
 - pilot1-v4: 200
+- pilot1-v4-by-key: 101
 - pilot2-v4: 7
 - vendor-ruling: 50
 
