@@ -1,0 +1,379 @@
+row_id,provider,method,path,operationId,summary,description
+s01401,asana,POST,/projects/{project_gid}/addFollowers,addFollowersForProject,Add followers to a project,"Adds the specified list of users as followers to the project. Followers are a subset of members who have opted in to receive ""tasks added"" notifications for a project. Therefore, if the users are not already members of the project, they will also become members as a result of this operation.
+Returns the updated project record."
+s01402,microsoft.com,PATCH,/tenantRelationships/managedTenants/managedTenantAlerts/{managedTenantAlert-id},tenantRelationships.managedTenants.UpdateManagedTenantAlerts,Update the navigation property managedTenantAlerts in tenantRelationships,
+s01403,twilio.com,POST,/v2/Services/{ServiceSid}/Channels/{ChannelSid}/Members,CreateMember,,
+s01404,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/certificates/{name},Certificates_CreateOrUpdate,Create or update a certificate.,Create or update a certificate.
+s01405,docusign,POST,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/views/correct,Views_PostEnvelopeCorrectView,Returns a URL to the envelope correction UI. Use after an envelope has been sent.,"Returns a URL that enables you to embed the envelope sender view of the Docusign UI. You can customize the appearance of the view via the settings request attribute. You can embed the view in an iframe. 
+
+**API request update**
+
+The request object for this API method was updated in June 2024. The new API request format is described below. Existing applications must update to the new version; it solves a security issue with the old version. The deprecation schedule has been announced in the [Docusign Core Release Notes](https://support.docusign.com/s/document-item?language=en_US&bundleId=adp1720620778794_24-2-02-00-demo&topicId=wcz1616195757589.html&_LANG=enus). While backwards compatibility will be provided for a while for existing applications, all applications must be updated to be secure. See below for migration information. 
+
+**Best practices**
+
+The returned URL expires after 10 minutes. Therefore, request the URL immediately before you redirect your user to it.
+
+Due to screen space issues, do not use an iframe for embedded operations on mobile devices. For mobile applications, use a [WebView](https://developer.android.com/reference/android/webkit/WebView) (Android) or [WKWebView](https://developer.apple.com/documentation/webkit/wkwebview) (iOS).
+
+## Customizing the user experience
+
+By default, the view includes two pages: the **Prepare** and **Tagger** pages. The settings object is used to control the user experience. For example, to limit the user to the **Tagger** page, and not allow the user to change the recipient information:
+
+* `""startingScreen"": ""Tagger""`
+* `""showBackButton"": ""false""`
+* `""showEditRecipients"": ""false""`
+
+
+Use the [Embedded Views Test Too](https://docusign.github.io/app-examples/embedded-views-v2/) to try the different UX controls. Some UI settings attributes are not yet implemented.
+
+### The envelope must be in the correct state for the Embedded View
+
+To use the Correct View, the envelope **must** be in the `sent` or `delivered` state. Otherwise, a 400 error will be returned with an error message in the response body:
+```
+{
+    ""errorCode"": ""ENVELOPE_INVALID_STATUS"",
+    ""message"": ""Invalid envelope status. Correct view cannot be created for an envelope in a Created state.""
+}
+```
+
+### Modifying the envelope after redirection
+If you set `""sendButtonAction"": ""redirect""` or `""backButtonAction"": ""redirect""`, and your app will modify the envelope before or after the view completes, you must lock the envelope before the API call and provide the lock as the lockToken attribute in the API request object.
+
+Delete the lock token after the browser has been redirected to your application.
+
+### Closing the view's iframe
+
+If you choose to embed the view in your application via an iframe, Docusign recommends this software pattern to close the iframe after the view has completed:
+
+* (One time) create a standalone âreturnâ page that you will use as the `returnUrl` target for the view. The view will redirect the iframe to this URL when it has completed. Here's an [example return page](https://github.com/docusign/docusign.github.io/blob/master/jsfiddleDsResponse.html). In this page, use JavaScript and the [postMessage](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) method to send a message to your application with the results of the view.
+* In your application, use `window.addEventListener(""message"", function_name)` to register a listener for incoming messages.
+* To show the view, use this API method, then set the iframe to load the URL from the API response.
+* In your application, receive the completion message, validate it, and then close the iframe.
+
+### Information security
+
+This view only has write access to the specific envelope referenced in the API call. It also has read access to templates and other secondary information that a user can access to modify the envelope. The read access corresponds to the access rights of the user associated with the access token used for the API call.
+
+>**Recommendations:**
+>* Use the access token of a service user who can access the templates appropriate for your use case.  
+>* Do not use the access token of a user with administrator privileges.
+
+## Migrating to the current version of the request object
+
+This section only applies to existing applications that use the older version of the request object.
+
+Migrating from the old API request object to the new version will take under a day of developer time.
+
+**Step 1.** Does your application set the `returnUrl` attribute?
+
+Yes: continue with step 2.
+
+No: In this case, your users first update the envelope, and then the Docusign eSignature home screen is shown. To accomplish this UI pattern with the new API request format:
+* Set the `returnUrl` to a new endpoint for your application. You can use query parameters or session data to manage state. Remember to authenticate the incoming requests. 
+* When the new endpoint is called, use the [EnvelopeViews:createConsole](/docs/esign-rest-api/reference/envelopes/envelopeviews/createconsole/) API call to obtain and then display the Docusign eSignature home page to your application's user.
+
+**Step 2.** Does your application modify the default UI of the view?
+
+No: continue with step 3.
+
+Yes: With the new API request object, UI controls for the view are now set when you make the API call via the `settings` attribute. 
+
+* Note the UI settings your application is currently modifying by adding and updating query parameters on the URL _returned_ by the API method.
+
+* Using the reference documentation below, create a settings object that accomplishes your UI goals. You can use the [Embedded Views Test tool](https://docusign.github.io/app-examples/embedded-views-v2/) to check your UI settings. Note that the `settings` object includes multiple objects and subobjects for various UI settings.
+
+* **Delete the code** in your application that modifies and adds query parameters to the URL returned by the API. With the new API format, your application will not make any changes to the returned URL. Exception: If you set the view's locale specifically, that is still accomplished by appending the `locale` query parameter.
+
+**Step 3.** Is the envelope always in the right state before you call the Embedded View?
+
+If your software may try to create the Embedded View when the envelope is not in the right state (see above), then you must add additional checks and logic to prevent this.
+
+**Step 4.** Check that these API attributes are set:
+* `""view"" = ""envelope""`
+* The `returnUrl` is set
+
+**Step 5.** All done! Test your application."
+s01406,contract-p.fit,POST,/users,post_users_resource,Create user,Create a new user with the provided attributes and roles **Permission required:** edit_users
+s01407,googleapis.com,PUT,/projects/{project}/global/firewalls/{firewall},compute.firewalls.update,,"Updates the specified firewall rule with the data included in the request. Note that all fields will be updated if using PUT, even fields that are not specified. To update individual fields, please use PATCH instead."
+s01408,adyen.com,POST,/merchants/{merchantId}/apiCredentials,post-merchants-merchantId-apiCredentials,Create an API credential,"Creates an [API credential](https://docs.adyen.com/development-resources/api-credentials) for the company account identified in the path. In the request, you can specify the roles and allowed origins for the new API credential. The response includes the: * [API key](https://docs.adyen.com/development-resources/api-authentication#api-key-authentication): used for API request authentication. * [Clie"
+s01409,microsoft.com,POST,/compliance/ediscovery/cases/{case-id}/reviewSets,compliance.ediscovery.cases.CreateReviewSets,Create reviewSet,"Create a new reviewSet object. The request body contains the display name of the review set, which is the only writable property."
+s01410,visualstudio.com,POST,/api/v1/Tokens/plans/{planName}/writeDelegates,,,
+s01411,amazonaws.com,GET,/#Action=ApplySecurityGroupsToClientVpnTargetNetwork,GET_ApplySecurityGroupsToClientVpnTargetNetwork,,Applies a security group to the association between the target network and the Client VPN endpoint. This action replaces the existing security groups with the specified security groups.
+s01412,atlassian,POST,/rest/api/3/filter/{id}/permission,addSharePermission,Add share permission,Add a share permissions to a filter. If you add a global share permission (one for all logged-in users or the public) it will overwrite all share permissions for the filter. Be aware that this operation uses different objects for updating share permissions compared to [Update filter](#api-rest-api-3-filter-id-put). **[Permissions](#permissions) required:** *Share dashboards and filters* [global permission](https://confluence.atlassian.com/x/x4dKLg) and the user must own the filter.
+s01413,amazonaws.com,POST,/groups,CreateGroup,,"Creates a resource group with the specified name and description. You can optionally include either a resource query or a service configuration. For more information about constructing a resource query, see Build queries and groups in Resource Groups in the Resource Groups User Guide . For more information about service-linked groups and service configurations, see <a href=""https://docs.aws.amazon"
+s01414,azure.com,PUT,/storage/{storage-account-name},SetStorageAccount,,Creates or updates a new storage account. This operation requires the storage/set permission.
+s01415,microsoft.com,PATCH,/teamwork/teamTemplates/{teamTemplate-id}/definitions/{teamTemplateDefinition-id}/teamDefinition/installedApps/{teamsAppInstallation-id},teamwork.teamTemplates.definitions.teamDefinition.UpdateInstalledApps,Update the navigation property installedApps in teamwork,
+s01416,permit.io,POST,/v2/policy_guards/scopes/{policy_guard_scope_id}/associate,associate_policy_guard_scope,Associate Policy Guard Scope,associate a project to a Policy guard scope.
+s01417,auth0,PUT,/guardian/factors/push-notification/providers/sns,put_sns,Configure AWS SNS configuration,Configure the [AWS SNS push notification provider configuration](https://auth0.com/docs/multifactor-authentication/developer/sns-configuration) (subscription required).
+s01418,googleapis.com,POST,/v1/jobs,youtubereporting.jobs.create,,Creates a job and returns it.
+s01419,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/Recordings/{RecordingSid}/Transcriptions/{Sid}.json,DeleteRecordingTranscription,,
+s01420,stream-io-api.com,POST,/channels/{type}/{id}/stop-watching,StopWatchingChannel,Stop watching channel,Call this method to stop receiving channel events
+s01421,microsoft.com,POST,/users/{user-id}/calendarView/{event-id}/exceptionOccurrences/{event-id1}/instances/{event-id2}/attachments,users.calendarView.exceptionOccurrences.instances.CreateAttachments,Add attachment,"Use this API to add an attachment to an existing event. This operation limits the size of the attachment you can add to under 3 MB. If an organizer adds an attachment to a meeting event, the organizer can subsequently update the event to send the attachment and update the event for each attendee as well."
+s01422,stripe,POST,/v1/test_helpers/issuing/cards/{card}/shipping/ship,PostTestHelpersIssuingCardsCardShippingShip,Ship a testmode card,<p>Updates the shipping status of the specified Issuing <code>Card</code> object to <code>shipped</code>.</p>
+s01423,microsoft.com,POST,/teamwork/teamTemplates/{teamTemplate-id}/definitions/{teamTemplateDefinition-id}/teamDefinition/channels/{channel-id}/messages/{chatMessage-id}/replies/{chatMessage-id1}/microsoft.graph.unsetReaction,teamwork.teamTemplates.teamTemplate.definitions.teamTemplateDefinition.teamDefinition.channels.channel.messages.chatMessage.replies.chatMessage.unsetReaction,Invoke action unsetReaction,
+s01424,microsoft.com,POST,/deviceManagement/deviceManagementScripts/{deviceManagementScript-id}/groupAssignments,deviceManagement.deviceManagementScripts.CreateGroupAssignments,Create new navigation property to groupAssignments for deviceManagement,
+s01425,microsoft.com,POST,/groupSettings,groupSettings.groupSetting.CreateGroupSetting,Create settings,"Create a new setting based on the templates available in groupSettingTemplates. These settings can be at the tenant-level or at the group level. Group settings apply to only Microsoft 365 groups. The template named `Group.Unified` can be used to configure tenant-wide Microsoft 365 group settings, while the template named `Group.Unified.Guest` can be used to configure group-specific settings."
+s01426,cloudflare,POST,/zones/{zone_id}/email/routing/enable,email-routing-settings-enable-email-routing,Enable Email Routing,Enable you Email Routing zone. Add and lock the necessary MX and SPF records.
+s01427,clever-cloud.com,PUT,/self/keys/{key},putSelfKeysKey,,
+s01428,here.com,PUT,/registry/v2/devices/{deviceOrExternalId},,Claims a device,"Claims a device, associating a device to a user account. The user who claimed a device is the device owner, which is different from the device vendor. Unclaimed devices cannot login or send any data to HERE Tracking. A claimed device data is stored in HERE Tracking and is available to the device owner's project, which the device has been claimed to. When a device is claimed, it gets assigned a `tr"
+s01429,microsoft.com,POST,/admin/windows/updates/deploymentAudiences/{deploymentAudience-id}/members/{updatableAsset-id}/microsoft.graph.windowsUpdates.removeMembersById,admin.windows.updates.deploymentAudiences.deploymentAudience.members.updatableAsset.removeMembersById,Invoke action removeMembersById,Remove members of the same type from an updatableAssetGroup. You can also use the method removeMembers to remove members.
+s01430,telnyx.com,GET,/reports/mdr_usage_reports/sync,getUsageReportSync_1,,Generate and fetch messaging usage report synchronously. This endpoint will both generate and fetch the messaging report over a specified time period. No polling is necessary but the response may take up to a couple of minutes.
+s01431,microsoft.com,POST,/groups/{group-id}/team/primaryChannel/members/microsoft.graph.add,groups.group.team.primaryChannel.members.add,Invoke action add,Add multiple members in a single request to a team. The response provides details about which memberships could and couldn't be created.
+s01432,docusign,POST,/v2.1/accounts/{accountId}/connect/secret,ConnectHMAC_CreateConnectSecret,Generates a new connect HMAC Secret.,
+s01433,ebay.com,PUT,/return_policy/{return_policy_id},updateReturnPolicy,,This method updates an existing return policy. Specify the policy you want to update using the return_policy_id path parameter. Supply a complete policy payload with the updates you want to make; this call overwrites the existing policy with the new details specified in the payload.
+s01434,appveyor.com,PUT,/collaborators,updateCollaborator,Update collaborator,
+s01435,amazonaws.com,GET,/#Action=UpdateSAMLProvider,GET_UpdateSAMLProvider,,Updates the metadata document for an existing SAML provider resource object. This operation requires Signature Version 4 .
+s01436,github.com,PUT,/enterprises/{enterprise}/actions/oidc/customization/issuer,actions/set-actions-oidc-custom-issuer-policy-for-enterprise,Set the GitHub Actions OIDC custom issuer policy for an enterprise,Sets the GitHub Actions OpenID Connect (OIDC) custom issuer policy for an enterprise. You must authenticate using an access token with the `admin:enterprise` scope to use this endpoint. GitHub Apps must have the `enterprise_administration:write` permission to use this endpoint.
+s01437,amazonaws.com,POST,/#X-Amz-Target=Logs_20140328.PutResourcePolicy,PutResourcePolicy,,"Creates or updates a resource policy allowing other Amazon Web Services services to put log events to this account, such as Amazon Route 53. An account can have up to 10 resource policies per Amazon Web Services Region."
+s01438,enode.io,PUT,/webhooks/firehose,putWebhooksFirehose,Update Firehose Webhook,
+s01439,amazon,PUT,/shipping/v2/carrierAccounts/{carrierId},linkCarrierAccount,,"This API associates/links the specified carrier account with the merchant. **Usage Plan:** | Rate (requests per second) | Burst | | ---- | ---- | | 80 | 100 | The `x-amzn-RateLimit-Limit` response header returns the usage plan rate limits that were applied to the requested operation, when available. The table above indicates the default rate and burst values for this operation. Selling partners whose business demands require higher throughput may see higher rate and burst values then those shown here. For more information, see [Usage Plans and Rate Limits in the Selling Partner API](https://developer-docs.amazon.com/sp-api/docs/usage-plans-and-rate-limits-in-the-sp-api)."
+s01440,amazonaws.com,GET,/#Action=AcceptTransitGatewayPeeringAttachment,GET_AcceptTransitGatewayPeeringAttachment,,Accepts a transit gateway peering attachment request. The peering attachment must be in the pendingAcceptance state.
+s01441,microsoft.com,POST,/directory/onPremisesSynchronization,directory.CreateOnPremisesSynchronization,Create new navigation property to onPremisesSynchronization for directory,
+s01442,meraki.com,POST,/networks/{networkId}/unbind,unbindNetwork,Unbind a network from a template.,Unbind a network from a template.
+s01443,microsoft.com,PATCH,/policies/activityBasedTimeoutPolicies/{activityBasedTimeoutPolicy-id},policies.UpdateActivityBasedTimeoutPolicies,Update the navigation property activityBasedTimeoutPolicies in policies,
+s01444,googleapis.com,POST,/v1/{parent}/connectionProfiles,datastream.projects.locations.connectionProfiles.create,,Use this method to create a connection profile in a project and location.
+s01445,amazonaws.com,PUT,/config/{configType}/{configId},UpdateConfig,,Updates the Config used when scheduling contacts. Updating a Config will not update the execution parameters for existing future contacts scheduled with this Config .
+s01446,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/firewallRules/{firewallRuleName},FirewallRules_CreateOrUpdate,,"Creates or updates the specified firewall rule. During update, the firewall rule with the specified name will be replaced with this new firewall rule."
+s01447,amazonaws.com,POST,/#Action=UnassignPrivateIpAddresses,POST_UnassignPrivateIpAddresses,,"Unassigns one or more secondary private IP addresses, or IPv4 Prefix Delegation prefixes from a network interface."
+s01448,amazonaws.com,POST,/#X-Amz-Target=AWSShield_20160616.DisassociateHealthCheck,DisassociateHealthCheck,,"Removes health-based detection from the Shield Advanced protection for a resource. Shield Advanced health-based detection uses the health of your Amazon Web Services resource to improve responsiveness and accuracy in attack detection and response. You define the health check in Route 53 and then associate or disassociate it with your Shield Advanced protection. For more information, see <a href=""h"
+s01449,docusign,PUT,/v2.1/accounts/{accountId}/signing_groups/{signingGroupId},SigningGroups_PutSigningGroup,Updates a signing group.,Updates signing group name and member information. You can also add new members to the signing group. A signing group can have a maximum of 50 members.
+s01450,amazonaws.com,POST,/#X-Amz-Target=WorkspacesService.RestoreWorkspace,RestoreWorkspace,,"Restores the specified WorkSpace to its last known healthy state. You cannot restore a WorkSpace unless its state is AVAILABLE , ERROR , UNHEALTHY , or STOPPED . Restoring a WorkSpace is a potentially destructive action that can result in the loss of data. For more information, see Restore a WorkSpace . This operation is asynchronou"
+s01451,microsoft.com,PATCH,/directory/administrativeUnits/{administrativeUnit-id}/scopedRoleMembers/{scopedRoleMembership-id},directory.administrativeUnits.UpdateScopedRoleMembers,Update the navigation property scopedRoleMembers in directory,
+s01452,amazonaws.com,POST,/#Action=RestoreTableFromClusterSnapshot,POST_RestoreTableFromClusterSnapshot,,"Creates a new table from a table in an Amazon Redshift cluster snapshot. You must create the new table within the Amazon Redshift cluster that the snapshot was taken from. You cannot use RestoreTableFromClusterSnapshot to restore a table with the same name as an existing table in an Amazon Redshift cluster. That is, you cannot overwrite an existing table in a cluster with a restored table. If you "
+s01453,amazonaws.com,GET,/#Action=RecordHandlerProgress,GET_RecordHandlerProgress,,Reports progress of a resource handler to CloudFormation. Reserved for use by the CloudFormation CLI . Don't use this API in your code.
+s01454,amazonaws.com,POST,/#X-Amz-Target=AWSInsightsIndexService.UpdateCostCategoryDefinition,UpdateCostCategoryDefinition,,Updates an existing Cost Category. Changes made to the Cost Category rules will be used to categorize the current month’s expenses and future expenses. This won’t change categorization for the previous months.
+s01455,jira,PUT,/rest/api/2/settings/columns,setIssueNavigatorDefaultColumns,Set issue navigator default columns,"Sets the default issue navigator columns.
+
+The `columns` parameter accepts a navigable field value and is expressed as HTML form data. To specify multiple columns, pass multiple `columns` parameters. For example, in curl:
+
+`curl -X PUT -d columns=summary -d columns=description https://your-domain.atlassian.net/rest/api/2/settings/columns`
+
+If no column details are sent, then all default columns are removed.
+
+A navigable field is one that can be used as a column on the issue navigator. Find details of navigable issue columns using [Get fields](#api-rest-api-2-field-get).
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+s01456,getgo.com,POST,/organizers/{organizerKey}/trainings,scheduleTraining,Create Training,"Schedules a training of one or more sessions. The call requires a training's name, at least one start and end time, and optionally may include additional sessions, a description, additional organizers (presenters), and registration settings. You can only add organizers to a training if you have a multi-user account. Once a training has been created with this method, you can accept registrations to"
+s01457,okta,PUT,/api/v1/security-events-providers/{securityEventProviderId},replaceSecurityEventsProviderInstance,Replace a security events provider,Replaces a security events provider instance specified by `id`
+s01458,ndhm.gov.in,POST,/v1/health/facility/createHealthIdWithPreVerified,createAadhaarAccountUsingPOST_1,Generate Health ID card SVG,
+s01459,amazonaws.com,POST,/timeseries/disassociate/#alias&assetId&propertyId,DisassociateTimeSeriesFromAssetProperty,,Disassociates a time series (data stream) from an asset property.
+s01460,alertersystem.com,PUT,/api/transport-twilio/{id},api_transport-twilio_id_put,Replaces the TransportTwilio resource.,Replaces the TransportTwilio resource.
+s01461,cloudflare,POST,/zones/{zone_id}/rulesets/{ruleset_id}/rules,createZoneRulesetRule,Create a zone ruleset rule,Adds a new rule to a zone ruleset. The rule will be added to the end of the existing list of rules in the ruleset by default.
+s01462,amazonaws.com,POST,/#X-Amz-Target=DynamoDB_20120810.UntagResource,UntagResource,,"Removes the association of tags from an Amazon DynamoDB resource. You can call UntagResource up to five times per second, per account. For an overview on tagging DynamoDB resources, see Tagging for DynamoDB in the Amazon DynamoDB Developer Guide ."
+s01463,gitea,POST,/orgs,orgCreate,Create an organization,
+s01464,microsoft.com,PATCH,/identityGovernance/privilegedAccess/group/eligibilitySchedules/{privilegedAccessGroupEligibilitySchedule-id},identityGovernance.privilegedAccess.group.UpdateEligibilitySchedules,Update the navigation property eligibilitySchedules in identityGovernance,
+s01465,mist.com,POST,/api/v1/orgs/{org_id}/mxedges,createOrgMxEdge,createOrgMxEdge,Create MxEdge
+s01466,alertersystem.com,PUT,/api/transport-message-media/{id},api_transport-message-media_id_put,Replaces the TransportMessageMedia resource.,Replaces the TransportMessageMedia resource.
+s01467,meraki.com,POST,/organizations/{organizationId}/samlRoles,createOrganizationSamlRole,Create a SAML role,Create a SAML role
+s01468,jira,PUT,/rest/api/2/project/{projectIdOrKey},updateProject,Update project,"Updates the [project details](https://confluence.atlassian.com/x/ahLpNw) of a project.
+
+All parameters are optional in the body of the request. Schemes will only be updated if they are included in the request, any omitted schemes will be left unchanged.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg). is only needed when changing the schemes or project key. Otherwise you will only need *Administer Projects* [project permission](https://confluence.atlassian.com/x/yodKLg)"
+s01469,auth0,PATCH,/organizations/{id}/clients/{client_id},patch_organization_client,Update an organization client association,Update an organization client association.
+s01470,contract-p.fit,PATCH,/connections/{connection_id},patch_connection_resource,Update connection,attributes **Permission required:** edit_integrations
+s01471,amazonaws.com,POST,/#Action=RebootCacheCluster,POST_RebootCacheCluster,,"Reboots some, or all, of the cache nodes within a provisioned cluster. This operation applies any modified cache parameter groups to the cluster. The reboot operation takes place as soon as possible, and results in a momentary outage to the cluster. During the reboot, the cluster status is set to REBOOTING. The reboot causes the contents of the cache (for each cache node being rebooted) to be lost"
+s01472,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{Sid}.json,UpdateCall,Initiates a call redirect or terminates a call,Initiates a call redirect or terminates a call
+s01473,sentry,POST,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/hooks/,Register a New Service Hook,,"Register a new service hook on a project.
+
+Events include:
+
+- event.alert: An alert is generated for an event (via rules).
+- event.created: A new event has been processed.
+
+This endpoint requires the 'servicehooks' feature to be enabled for your project."
+s01474,truanon.com,GET,/api/request_token,getToken,Get Token,"request_token Private API: Request a Proof token to let the member confirm in a popup interface {""id"":""qjgblv72bzzio"",""type"":""Proof"",""active"":true,""name"":""New Proof""} Step 2. Create a verifyProfile Public Web link: Use the Proof token id as the token argument in your public URL used to open a new target popup. This activity is where members may confirm immediately. https://staging.truanon.com/veri"
+s01475,wowza.com,PUT,/transcoders/{id}/stop,stopTranscoder,Stop a transcoder,This operation stops a transcoder.
+s01476,cloudflare,POST,/accounts/{account_id}/data-security/posture/findings/{storage_namespace_id}/instances/export,CreateFindingInstancesExportCSV,Create a finding instances export,"Creates a CSV export for Finding instances and accepts optional filters in the payload.
+
+The `storage_namespace_id` path parameter is derived from the finding ID by base64-decoding it
+(which yields `integration_id:finding_type_id`) and replacing the colon with a hyphen."
+s01477,trakt.tv,POST,/users/{id}/lists/reorder,Reorder a user's lists,Reorder a user's lists,#### 🔒 OAuth Required Reorder all lists by sending the updated `rank` of list ids. Use the [**/users/:id/lists**](#reference/users/lists) method to get all list ids.
+s01478,amazonaws.com,PUT,/amazonclouddirectory/2017-01-11/schema/apply#x-amz-data-partition,ApplySchema,,"Copies the input published schema, at the specified version, into the Directory with the same name and version as that of the published schema."
+s01479,azure.com,POST,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/slots/{slot}/recover,Sites_RecoverSiteSlot,Recovers a deleted web app,
+s01480,googleapis.com,PATCH,/userprofiles/{profileId}/floodlightConfigurations,dfareporting.floodlightConfigurations.patch,,Updates an existing floodlight configuration. This method supports patch semantics.
+s01481,microsoft.com,PATCH,/deviceManagement/assignmentFilters/{deviceAndAppManagementAssignmentFilter-id},deviceManagement.UpdateAssignmentFilters,Update the navigation property assignmentFilters in deviceManagement,
+s01482,klaviyo,POST,/api/lists/{id}/relationships/profiles,add_profiles_to_list,Add Profiles to List,"Add a profile to a list with the given list ID.
+
+It is recommended that you use the [Subscribe Profiles endpoint](https://developers.klaviyo.com/en/reference/subscribe_profiles) if you're trying to give a profile [consent](https://developers.klaviyo.com/en/docs/collect_email_and_sms_consent_via_api) to receive email marketing, SMS marketing, or both.
+
+This endpoint accepts a maximum of 1000 profiles per call.<br><br>*Rate limits*:<br>Burst: `10/s`<br>Steady: `150/m`
+
+**Scopes:**
+`lists:write`
+`profiles:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/add_profiles_to_list.json)"
+s01483,azure.com,POST,/subscriptions/{subscriptionId}/providers/Microsoft.Web/recommendations/reset,Recommendations_ResetAllFilters,Reset all recommendation opt-out settings for a subscription.,Reset all recommendation opt-out settings for a subscription.
+s01484,amazonaws.com,POST,/accounts/{accountId}#operation=disassociate-signin-delegate-groups,DisassociateSigninDelegateGroupsFromAccount,,Disassociates the specified sign-in delegate groups from the specified Amazon Chime account.
+s01485,canva,PATCH,/v1/assets/{assetId},updateAsset,,"You can update the name and tags of an asset by specifying its `assetId`. Updating the tags
+replaces all existing tags of the asset."
+s01486,cloudflare,POST,/organizations/{organization_id}/members:batchCreate,Members_batchCreate,Batch create organization members,Batch create multiple memberships that grant access to a specific Organization.
+s01487,fecru.local,PUT,/rest-service-fecru/admin/projects/{key}/default-reviewer-users,addDefaultReviewerUser,,Add user to project's default reviewer users list
+s01488,amazonaws.com,GET,/#Action=DeleteDomain,GET_DeleteDomain,,"Permanently deletes a search domain and all of its data. Once a domain has been deleted, it cannot be recovered. For more information, see Deleting a Search Domain in the Amazon CloudSearch Developer Guide ."
+s01489,googleapis.com,GET,/v1/{name}/csr,apigee.organizations.environments.keystores.aliases.csr,,Generates a PKCS #10 Certificate Signing Request for the private key in an alias.
+s01490,microsoft.com,PATCH,/policies/servicePrincipalCreationPolicies/{servicePrincipalCreationPolicy-id},policies.UpdateServicePrincipalCreationPolicies,Update the navigation property servicePrincipalCreationPolicies in policies,
+s01491,amazonaws.com,POST,/#X-Amz-Target=AmazonEC2ContainerServiceV20141113.DeregisterContainerInstance,DeregisterContainerInstance,,"<p>Deregisters an Amazon ECS container instance from the specified cluster. This instance is no longer available to run tasks.</p> <p>If you intend to use the container instance for some other purpose after deregistration, we recommend that you stop all of the tasks running on the container instance before deregistration. That prevents any orphaned tasks from consuming resources.</p> <p>Deregistering a container instance removes the instance from a cluster, but it doesn't terminate the EC2 insta"
+s01492,beezup.com,POST,/v2/user/channelCatalogs/{channelCatalogId}/products/{productId}/disable,DisableChannelCatalogProduct,Disable channel catalog product,By default a all your catalog products are exposed to the channel. You can disable a product by using this operation. /!\ In case of massive optimisation we recommand you to use the analytics api
+s01493,clickmeter.com,POST,/account,Account_Post,Update current account data,
+s01494,microsoft.com,PATCH,/roleManagement/exchange/roleAssignments/{unifiedRoleAssignment-id}/appScope,roleManagement.exchange.roleAssignments.UpdateAppScope,Update the navigation property appScope in roleManagement,
+s01495,github,PUT,/orgs/{org}/public_members/{username},orgs/set-public-membership-for-authenticated-user,Set public organization membership for the authenticated user,"The user can publicize their own membership. (A user cannot publicize the membership for another user.) Note that you'll need to set `Content-Length` to zero when calling out to this endpoint. For more information, see ""[HTTP verbs](https://docs.github.com/rest/overview/resources-in-the-rest-api#http-verbs)."""
+s01496,amazonaws.com,POST,/#Action=CreateSnapshot,POST_CreateSnapshot,,"Creates a snapshot of an EBS volume and stores it in Amazon S3. You can use snapshots for backups, to make copies of EBS volumes, and to save data before shutting down an instance. You can create snapshots of volumes in a Region and volumes on an Outpost. If you create a snapshot of a volume in a Region, the snapshot must be stored in the same Region as the volume. If you create a snapshot of a vo"
+s01497,microsoft.com,PATCH,/identity/conditionalAccess/authenticationStrengths/policies/{authenticationStrengthPolicy-id},identity.conditionalAccess.authenticationStrengths.UpdatePolicies,Update the navigation property policies in identity,
+s01498,zendesk,PUT,/api/v2/organizations/{organization_id},UpdateOrganization,Update Organization,"#### Allowed For
+
+* Admins
+* Agents
+
+Agents with no permissions restrictions can only update ""notes"" on organizations.
+
+**Note:** Updating an organization's `domain_names` property overwrites all existing `domain_names` values. To prevent this, submit a complete list of `domain_names` for the organization in your request.
+
+#### Example Request
+
+```js
+{
+  ""organization"": {
+    ""notes"": ""Something interesting""
+  }
+}
+```"
+s01499,appwrite.io,POST,/account,accountCreate,Create Account,"Use this endpoint to allow a new user to register a new account in your project. After the user registration completes successfully, you can use the [/account/verfication](/docs/client/account#accountCreateVerification) route to start verifying the user email address. To allow the new user to login to their new account, you need to create a new [account session](/docs/client/account#accountCreateS"
+s01500,amazonaws.com,POST,/2013-04-01/trafficpolicyinstance,CreateTrafficPolicyInstance,,"Creates resource record sets in a specified hosted zone based on the settings in a specified traffic policy version. In addition, CreateTrafficPolicyInstance associates the resource record sets with a specified domain name (such as example.com) or subdomain name (such as www.example.com). Amazon Route 53 responds to DNS queries for the domain or subdomain name by using the resource record sets tha"
+s01501,cenit.io,POST,/setup/webhook/,,Create or update a webhook,Creates or updates the specified webhook. Any parameters not provided will be left unchanged.
+s01502,twilio.com,POST,/v1/Devices/{DeviceSid}/Secrets/{Key},UpdateDeviceSecret,,Update a secret for a Microvisor Device.
+s01503,microsoft.com,POST,/me/chats/{chat-id}/microsoft.graph.markChatReadForUser,me.chats.chat.markChatReadForUser,Invoke action markChatReadForUser,Mark a chat as read for a user.
+s01504,amazonaws.com,POST,/#X-Amz-Target=Transcribe.CreateLanguageModel,CreateLanguageModel,,"Creates a new custom language model. When creating a new custom language model, you must specify: If you want a Wideband (audio sample rates over 16,000 Hz) or Narrowband (audio sample rates under 16,000 Hz) base model The location of your training and tuning files (this must be an Amazon S3 URI) The language of your model A unique name for your model"
+s01505,amazonaws.com,POST,/#X-Amz-Target=AWSGlue.PutResourcePolicy,PutResourcePolicy,,Sets the Data Catalog resource policy for access control.
+s01506,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Maps/accounts/{accountName},Accounts_Update,,"Updates a Maps Account. Only a subset of the parameters may be updated after creation, such as Sku and Tags."
+s01507,kumpeapps.com,PUT,/kkid/userlist,kkid_userlist_put,updates user,By passing in the appropriate variables this method updates the user's profile
+s01508,auth0,POST,/connections/{id}/scim-configuration/tokens,post_scim_token,Create a SCIM Token,Create a scim token for a scim client.
+s01509,magento.com,DELETE,/V1/gift-wrappings/{id},giftWrappingWrappingRepositoryV1DeleteByIdDelete,gift-wrappings/{id},Delete gift wrapping
+s01510,microsoft.com,POST,/deviceAppManagement/managedAppPolicies,deviceAppManagement.CreateManagedAppPolicies,Create new navigation property to managedAppPolicies for deviceAppManagement,
+s01511,microsoft.com,POST,/users/{user-id}/calendarGroups/{calendarGroup-id}/calendars/{calendar-id}/events/{event-id}/exceptionOccurrences/{event-id1}/microsoft.graph.accept,users.user.calendarGroups.calendarGroup.calendars.calendar.events.event.exceptionOccurrences.event.accept,Invoke action accept,Accept the specified event in a user calendar.
+s01512,okta,POST,/api/v1/directories/{appInstanceId}/groups/{groupId}/query,submitGroupAttributeQuery,Submit a query for AD Group,"Submits a query search on the on-premises agent to asynchronously fetch specific Active Directory (AD) attributes for a group.
+Returns a `resultId` that is used to poll for the results."
+s01513,statsocial.com,POST,/reports/custom/create/,,Step 3 of executing custom report,Used to create a custom report. This report treats the list of ids or handles as the audience (not their followers as in the twitter report). To create follower or tweet reports other methods must be used.
+s01514,stream-io-api.com,PATCH,/campaigns/{id}/schedule,ScheduleCampaign,Schedule campaign,Schedule a campaign
+s01515,github.com,PATCH,/repos/{owner}/{repo}/hooks/{hook_id},repos/update-webhook,Update a repository webhook,"Updates a webhook configured in a repository. If you previously had a `secret` set, you must provide the same `secret` or set a new `secret` or the secret will be removed. If you are only updating individual webhook `config` properties, use ""[Update a webhook configuration for a repository](/rest/reference/repos#update-a-webhook-configuration-for-a-repository)."""
+s01516,microsoft.com,POST,/governanceResources/{governanceResource-id}/roleAssignmentRequests,governanceResources.CreateRoleAssignmentRequests,Create new navigation property to roleAssignmentRequests for governanceResources,
+s01517,slack,POST,/conversations.create,conversations_create,,Initiates a public or private channel-based conversation
+s01518,googleapis.com,POST,/v1beta1/{parent}/externalAccountKeys,publicca.projects.locations.externalAccountKeys.create,,Creates a new ExternalAccountKey bound to the project.
+s01519,klaviyo,POST,/api/image-upload,upload_image_from_file,Upload Image From File,"Upload an image from a file.
+
+If you want to import an image from an existing url or a data uri, use the Upload Image From URL endpoint instead.<br><br>*Rate limits*:<br>Burst: `3/s`<br>Steady: `100/m`<br>Daily: `500/d`
+
+**Scopes:**
+`images:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/upload_image_from_file.json)"
+s01520,cloudflare,POST,/accounts/{account_id}/dlp/profiles/custom,dlp-profiles-create-custom-profiles,Create custom profile,Creates a DLP custom profile.
+s01521,twilio.com,POST,/understand/Assistants/{AssistantSid}/ModelBuilds/{Sid},UpdateUnderstandModelBuild,,
+s01522,apple.com,POST,/v1/profiles,profiles-create_instance,,
+s01523,auth0,POST,/clients,post_clients,Create a client,"Create a new client (application or SSO integration). For more information, read [Create Applications](https://www.auth0.com/docs/get-started/auth0-overview/create-applications)
+[API Endpoints for Single Sign-On](https://www.auth0.com/docs/authenticate/single-sign-on/api-endpoints-for-single-sign-on).
+
+Notes: 
+- We recommend leaving the `client_secret` parameter unspecified to allow the generation of a safe secret.
+- The `client_authentication_methods` and `token_endpoint_auth_method` properties are mutually exclusive. Use 
+`client_authentication_methods` to configure the client with Private Key JWT authentication method. Otherwise, use `token_endpoint_auth_method`
+to configure the client with client secret (basic or post) or with no authentication method (none).
+- When using `client_authentication_methods` to configure the client with Private Key JWT authentication method, specify fully defined credentials. 
+These credentials will be automatically enabled for Private Key JWT authentication on the client. 
+- To configure `client_authentication_methods`, the `create:client_credentials` scope is required.
+- To configure `client_authentication_methods`, the property `jwt_configuration.alg` must be set to RS256.
+
+SSO Integrations created via this endpoint will accept login requests and share user profile information."
+s01524,payrun.io,GET,/Report/P11SUM/run,GetP11SummaryReportOutput,Runs the P11 summary report,Returns the result of the executed P11 summary report for the given query parameters
+s01525,osisoft.com,PUT,/analyses/{webId}/securityentries/{name},Analysis_UpdateSecurityEntry,Update a security entry owned by the analysis.,
+s01526,googleapis.com,POST,/projects/{project}/zones/{zone}/disks/{resource}/setIamPolicy,compute.disks.setIamPolicy,,Sets the access control policy on the specified resource. Replaces any existing policy.
+s01527,linode.com,POST,/networking/ips/share,shareIPs,IP Addresses Share,Configure shared IPs. IP sharing allows IP address reassignment (also referred to as IP failover) from one Linode to another if the primary Linode becomes unresponsive. This means that requests to the primary Linode's IP address can be automatically rerouted to secondary Linodes at the configured shared IP addresses. IP failover requires configuration of a failover service (such as [Keepalived](/d
+s01528,amazonaws.com,PATCH,/clientcertificates/{clientcertificate_id},UpdateClientCertificate,,Changes information about an ClientCertificate resource.
+s01529,id4i.de,PUT,/api/v1/history/{id4n}/{organizationId}/{sequenceId}/visibility,updateItemVisibility,Set history item visibility,
+s01530,threatjammer.com,POST,/v1/denylist/private,create_private_denylist_of_the_user_v1_denylist_private_post,Creates a new private denylist binded to the user.,"### What Creates a new denylist with the information given and binded to the current user. The parameters are: - name - description - tags - expiry - Time to Live (TTL) - Resource Type (`CIDR`, `AS`, `COUNTRY`, `CONTINENT`, `DATACENTER_ID` and `USER AGENT`) This is an asynchronous operation. It can take several seconds until the operation completes, but the request will immediately return a 202 Ac"
+s01531,amazonaws.com,POST,/#Action=DisableVpcClassicLinkDnsSupport,POST_DisableVpcClassicLinkDnsSupport,,"Disables ClassicLink DNS support for a VPC. If disabled, DNS hostnames resolve to public IP addresses when addressed between a linked EC2-Classic instance and instances in the VPC to which it's linked. For more information, see ClassicLink in the Amazon Elastic Compute Cloud User Guide . You must specify a VPC ID in the request. We are retiring EC2-Classic. We recommend that you m"
+s01532,mailchimp,POST,/lists/{list_id}/surveys/{survey_id}/actions/unpublish,postListsIdSurveysIdActionsUnpublish,Unpublish a Survey,Unpublish a survey that has been published.
+s01533,contract-p.fit,POST,/auth/token,post_token_resource,Create a new token,"Bearer tokens can be used to authenticated without session or without sending credentials. If the user making the request has sufficient privileges, he is allowed to create a token on behalf of another user. Otherwise only a token for the request current user is allowed. **Permission required:** edit_users"
+s01534,codat.io,POST,/companies/{companyId}/connections/{connectionId}/push/invoices,create-invoice,Create invoice,"Posts a new invoice to the accounting package for a given company. Required data may vary by integration. To see what data to post, first call [Get create/update invoice model](https://docs.codat.io/accounting-api#/operations/get-create-update-invoices-model). > **Supported Integrations** > > Check out our [Knowledge UI](https://knowledge.codat.io/supported-features/accounting?view=tab-by-data-typ"
+s01535,okta,PUT,/api/v1/iam/resource-sets/{resourceSetIdOrLabel}/resources/{resourceId},replaceResourceSetResource,Replace the resource set resource conditions,Replaces the conditions of a resource identified by `resourceId` in a resource set
+s01536,microsoft.com,POST,/tenantRelationships/managedTenants/managedTenantTicketingEndpoints,tenantRelationships.managedTenants.CreateManagedTenantTicketingEndpoints,Create new navigation property to managedTenantTicketingEndpoints for tenantRelationships,
+s01537,onsched.com,POST,/setup/v1/companies/domains,,Create Company Domain,Use this endpoint to Create an OnSchedJs domain for your authorized company. To share the OnSchedJS booking widget on your website or in your application you must add the domain.
+s01538,amazonaws.com,POST,/#Action=UpdateRole,POST_UpdateRole,,Updates the description or maximum session duration setting of a role.
+s01539,amazonaws.com,POST,/#X-Amz-Target=SWBExternalService.UntagResource,UntagResource,,Disassociates a set of tags from a specified resource.
+s01540,microsoft.com,PATCH,/deviceAppManagement/wdacSupplementalPolicies/{windowsDefenderApplicationControlSupplementalPolicy-id}/assignments/{windowsDefenderApplicationControlSupplementalPolicyAssignment-id},deviceAppManagement.wdacSupplementalPolicies.UpdateAssignments,Update the navigation property assignments in deviceAppManagement,
+s01541,keycloak.local,PUT,/{realm}/users/{id},,Update the user,
+s01542,microsoft.com,PATCH,/deviceManagement/roleDefinitions/{roleDefinition-id}/roleAssignments/{roleAssignment-id},deviceManagement.roleDefinitions.UpdateRoleAssignments,Update the navigation property roleAssignments in deviceManagement,
+s01543,mist.com,PUT,/api/v1/sites/{site_id}/psks/{psk_id},updateSitePsk,updateSitePsk,Update Site PSK
+s01544,microsoft.com,POST,/users/{user-id}/usageRights,users.CreateUsageRights,Create new navigation property to usageRights for users,
+s01545,amazonaws.com,POST,/#X-Amz-Target=GlobalAccelerator_V20180706.CreateListener,CreateListener,,"Create a listener to process inbound connections from clients to an accelerator. Connections arrive to assigned static IP addresses on a port, port range, or list of port ranges that you specify."
+s01546,microsoft.com,POST,/roleManagement/deviceManagement/roleAssignments/{unifiedRoleAssignmentMultiple-id}/appScopes,roleManagement.deviceManagement.roleAssignments.CreateAppScopes,Create new navigation property to appScopes for roleManagement,
+s01547,twilio.com,POST,/v1/MediaProcessors,CreateMediaProcessor,,
+s01548,xero,POST,/ContactGroups/{ContactGroupID},updateContactGroup,Updates a specific contact group,
+s01549,zendesk,PUT,/api/v2/resource_collections/{resource_collection_id},UpdateResourceCollection,Update Resource Collection,"Updates a resource collection using a provided `payload` object. The `payload` object  is specified the same way as the content of a requirements.json file in a Zendesk app. See [Specifying Apps Requirements](/documentation/apps/app-developer-guide/apps_requirements/) in the Zendesk Apps framework docs.
+
+The response includes a [job
+status](/api-reference/ticketing/ticket-management/job_statuses/) for the resource updates.
+
+#### Allowed for
+
+* Admins"
+s01550,microsoft.com,POST,/chats/{chat-id}/members,chats.CreateMembers,Add member to a chat,Add a conversationMember to a chat.
+s01551,mist.com,POST,/api/v1/orgs/{org_id}/evpn_topologies,createOrgEvpnTopology,createOrgEvpnTopology,"While all the `evpn_id` / `downlink_ips` can be specifidd by hand, the easiest way is to call the `build_vpn_topology` API, allowing you to examine the diff, and update it yourself. You can also simply call it with `overwrite=true` which will apply the updates for you. **Notes:** 1. You can use `core` / `distribution` / `access` to create a CLOS topology 2. You can also use `core` / `distribution`"
+s01552,microsoft.com,POST,/me/managedDevices/{managedDevice-id}/windowsProtectionState/detectedMalwareState,me.managedDevices.windowsProtectionState.CreateDetectedMalwareState,Create new navigation property to detectedMalwareState for me,
+s01553,neon.com,POST,/projects/{project_id}/vpc_endpoints/{vpc_endpoint_id},assignProjectVPCEndpoint,Set VPC endpoint restriction,"Sets or updates a VPC endpoint restriction for a Neon project.
+When a VPC endpoint restriction is set, the project only accepts connections
+from the specified VPC.
+A VPC endpoint can be set as a restriction only after it is assigned to the
+parent organization of the Neon project.
+"
+s01554,amazonaws.com,PATCH,/transfer-certificate/{certificateId}#targetAwsAccount,TransferCertificate,,Transfers the specified certificate to the specified Amazon Web Services account. Requires permission to access the TransferCertificate action. You can cancel the transfer until it is acknowledged by the recipient. No notification is sent to the transfer destination's account. It is up to the caller to notify the transfer target. The certi
+s01555,kubernetes.io,PUT,/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/{name},replaceRbacAuthorizationV1ClusterRoleBinding,,replace the specified ClusterRoleBinding
+s01556,zuora.com,POST,/oauth/token,createToken,Create an OAuth token,"Creates a bearer token that enables an OAuth client to authenticate with the Zuora REST API. The OAuth client must have been created using the Zuora UI. See [Authentication](https://www.zuora.com/developer/api-reference/#section/Authentication) for more information. **Note:** When using this operation, do not set any authentication headers such as `Authorization`, `apiAccessKeyId`, or `apiSecretAc"
+s01557,auth0,PATCH,/connections/{id}/clients,patch_clients,Update enabled clients for a connection,
+s01558,uscann.net,POST,/authentication/register,register,register,
+s01559,microsoft.com,POST,/teamTemplateDefinition/{teamTemplateDefinition-id}/teamDefinition/tags/{teamworkTag-id}/members,teamTemplateDefinition.teamDefinition.tags.CreateMembers,Create teamworkTagMember,Create a new teamworkTagMember object in a team.
+s01560,goharbor.io,POST,/projects,createProject,Create a new project.,This endpoint is for user to create a new project.
+s01561,azure.com,POST,/apps/{appId}/versions/{versionId}/patternanyentities/{entityId}/roles,Model_CreatePatternAnyEntityRole,Create a role for an Pattern.any entity in a version of the application.,
+s01562,sakari.io,PUT,/v1/accounts/{accountId}/conversations/{conversationId}/close,conversations.close,Closes a conversation,
+s01563,amazonaws.com,POST,/#Action=CreateNatGateway,POST_CreateNatGateway,,"Creates a NAT gateway in the specified subnet. This action creates a network interface in the specified subnet with a private IP address from the IP address range of the subnet. You can create either a public NAT gateway or a private NAT gateway. With a public NAT gateway, internet-bound traffic from a private subnet can be routed to the NAT gateway, so that instances in a private subnet can conne"
+s01564,github.com,PUT,/orgs/{org}/codespaces/secrets/{secret_name}/repositories,codespaces/set-selected-repos-for-org-secret,Set selected repositories for an organization secret,Replaces all repositories for an organization secret when the `visibility` for repository access is set to `selected`. The visibility is set when you [Create or update an organization secret](https://docs.github.com/rest/reference/codespaces#create-or-update-an-organization-secret). You must authenticate using an access token with the `admin:org` scope to use this endpoint.
+s01565,keycloak,POST,/{realm}/identity-provider/instances/{alias}/mappers,,Add a mapper to identity provider,
+s01566,microsoft.com,POST,/me/joinedTeams/{team-id}/installedApps,me.joinedTeams.CreateInstalledApps,Add app to team,Install an app to the specified team.
+s01567,mandrillapp.com,POST,/subaccounts/resume.json,,,Resume a paused subaccount's sending
+s01568,asana,POST,/roles,createRole,Create a role,"<b>Required scope: </b><code>roles:write</code>
+
+Creates a new RBAC role in the workspace."
+s01569,naviplancentral.com,PUT,/api/RetirementGoals/{id},RetirementGoals_PutByIdModel,,Description: The operation updates a Retirement Goal. Purpose: Allows for complete replacement of a Retirement Goal on a Fact Finder.
+s01570,wiremock.org,POST,/__admin/recordings/stop,,Stop recording,End recording of stub mappings
+s01571,magento.com,POST,/V1/carts/,quoteCartManagementV1CreateEmptyCartPost,carts/,Creates an empty cart and quote for a guest.
+s01572,amazonaws.com,POST,/#X-Amz-Target=AmazonEC2ContainerServiceV20141113.CreateCluster,CreateCluster,,"Creates a new Amazon ECS cluster. By default, your account receives a default cluster when you launch your first container instance. However, you can create your own cluster with a unique name with the CreateCluster action. When you call the CreateCluster API operation, Amazon ECS attempts to create the Amazon ECS service-linked role for your account. This is so that it can manage required resourc"
+s01573,googleapis.com,PATCH,/projects/{project}/global/firewalls/{firewall},compute.firewalls.patch,,Updates the specified firewall rule with the data included in the request. This method supports PATCH semantics and uses the JSON merge patch format and processing rules.
+s01574,netbird.io,POST,/api/integrations/msp/tenants,,Create MSP tenant,
+s01575,stripe,POST,/v1/payment_records/{id}/report_payment_attempt_guaranteed,PostPaymentRecordsIdReportPaymentAttemptGuaranteed,Report payment attempt guaranteed,"<p>Report that the most recent payment attempt on the specified Payment Record
+ was guaranteed.</p>"
+s01576,twilio.com,POST,/v1/Services/{ServiceSid}/Maps/{Sid},UpdateSyncMap,,
+s01577,github,DELETE,/orgs/{org}/issue-fields/{issue_field_id},orgs/delete-issue-field,Delete issue field for an organization,"Deletes an issue field for an organization. You can find out more about issue fields in [Managing issue fields in an organization](https://docs.github.com/issues/tracking-your-work-with-issues/using-issues/managing-issue-fields-in-an-organization). To use this endpoint, the authenticated user must be an administrator for the organization. OAuth app tokens and personal access tokens (classic) need the `admin:org` scope to use this endpoint."
+s01578,combell.com,PUT,/mailzones/{domainName}/aliases/{emailAddress},ConfigureAlias,Configure a alias,
+s01579,amazonaws.com,POST,/metadata/v0/keys,CreateKey,,"Creates an API key resource in your Amazon Web Services account, which lets you grant geo:GetMap* actions for Amazon Location Map resources to the API key bearer. The API keys feature is in preview. We may add, change, or remove features before announcing general availability. For more information, see Using API keys ."
+s01580,workos.com,POST,/connections/{connectionId}/saml_idp_signing_certs,SamlIdpSigningCertificatesController_create,Create an IdP signing certificate,"Adds an Identity Provider signing certificate to the connection, so SAML responses signed with its key can be verified. Use this to import a new certificate ahead of an Identity Provider rotation — the existing certificates keep working until they are deleted or expire."
+s01581,cloudflare,PUT,/zones/{zone_id}/security-center/insights/{issue_id}/dismiss,archive-zone-security-center-insight,Archives Zone Security Center Insight,"Archives a zone-specific Security Center insight, removing it from the active zone insights while preserving historical data."
+s01582,meraki.com,PUT,/networks/{network_id}/sm/devices/lock,lockNetworkSmDevices,Lock a set of devices,Lock a set of devices
+s01583,googleapis.com,POST,/dns/v2/{resource}:setIamPolicy,dns.managedZones.setIamPolicy,,"Sets the access control policy on the specified resource. Replaces any existing policy. Can return `NOT_FOUND`, `INVALID_ARGUMENT`, and `PERMISSION_DENIED` errors."
+s01584,gitlab,PUT,/v3/projects/{id}/services/pushover,putV3ProjectsIdServicesPushover,Set pushover service for project,Set pushover service for project
+s01585,adyen,DELETE,/storedPaymentMethods/{storedPaymentMethodId},delete-storedPaymentMethods-storedPaymentMethodId,Delete a token for stored payment details,Deletes the token identified in the path. The token can no longer be used with payment requests.
+s01586,amazonaws.com,POST,/v1/apis/{apiId}/apikeys/{id},UpdateApiKey,,Updates an API key. You can update the key as long as it's not deleted.
+s01587,openai,POST,/organization/projects/{project_id}/archive,archive-project,Archive project,Archives a project in the organization. Archived projects cannot be used or updated.
+s01588,linode,POST,/{apiVersion}/databases/mysql/instances/{instanceId}/resume,resume-databases-mysql-instance,Resume a MySQL Managed Database,Resume a suspended MySQL Managed Database from your account. This resumes billing for the cluster. - The user needs `read_write` [user grant](https://techdocs.akamai.com/linode-api/reference/get-user-grants) access to the database. - The database's status needs to be `suspended`. - A successful request triggers a `database_resume` [event](https://techdocs.akamai.com/linode-api/reference/get-events). > --- - __OAuth scopes__. ``` databases:read_write ``` [Learn more...](https://techdocs.akamai.com/linode-api/reference/get-started#oauth)
+s01589,naviplancentral.com,PUT,/api/Expenses/{id},Expenses_PutByIdModel,,Description: The operation updates an Expense. Purpose: Allows for complete replacement of an Expense on a Fact Finder. Note: Expense type cannot be changed for expenses prepopulated from NaviPlan.
+s01590,googleapis.com,POST,/v1beta1/{name}:disable,serviceusage.services.disable,,Disables a service so that it can no longer be used with a project. This prevents unintended usage that may cause unexpected billing charges or security leaks. It is not valid to call the disable method on a service that is not currently enabled. Callers will receive a `FAILED_PRECONDITION` status if the target service is not currently enabled. Operation response type: `google.protobuf.Empty`
+s01591,cloudflare,POST,/accounts/{account_id}/access/users,zero-trust-users-create-user,Create a user,Creates a new user.
+s01592,motaword.com,POST,/password,updatePassword,Update your account password,"Password should contain at least one uppercase, lowercase character and one number"
+s01593,twilio.com,POST,/v1/Secrets,CreateAccountSecret,,Create a secret for an Account.
+s01594,microsoft.com,PATCH,/me/calendarGroups/{calendarGroup-id}/calendars/{calendar-id}/events/{event-id}/instances/{event-id1}/exceptionOccurrences/{event-id2}/extensions/{extension-id},me.calendarGroups.calendars.events.instances.exceptionOccurrences.UpdateExtensions,Update the navigation property extensions in me,
+s01595,twilio.com,POST,/v1/Subscriptions/{SubscriptionSid}/SubscribedEvents/{Type},UpdateSubscribedEvent,,Update an Event for a Subscription.
+s01596,bunq.com,PUT,/user/{userID}/monetary-account/{monetary-accountID}/share-invite-monetary-account-inquiry/{itemId},UPDATE_ShareInviteMonetaryAccountInquiry_for_User_MonetaryAccount,,"[DEPRECATED - use /share-invite-monetary-account-response] Update the details of a share. This includes updating status (revoking or cancelling it), granted permission and validity period of this share."
+s01597,gitea.io,PATCH,/repos/{owner}/{repo}/hooks/{id},repoEditHook,Edit a hook in a repository,
+s01598,microsoft.com,POST,/users/{user-id}/onenote/notebooks/{notebook-id}/sections/{onenoteSection-id}/microsoft.graph.copyToSectionGroup,users.user.onenote.notebooks.notebook.sections.onenoteSection.copyToSectionGroup,Invoke action copyToSectionGroup,"For Copy operations, you follow an asynchronous calling pattern: First call the Copy action, and then poll the operation endpoint for the result."
+s01599,amazonaws.com,GET,/#Action=PurchaseReservedDBInstancesOffering,GET_PurchaseReservedDBInstancesOffering,,Purchases a reserved DB instance offering.
+s01600,readme.io,POST,/swagger,uploadSwagger,,DEPRECATED. Instead use https://docs.readme.com/developers/reference/api-specification#uploadapispecification to upload a Swagger file to ReadMe
