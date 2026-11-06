@@ -8721,3 +8721,27 @@ exact >= +5 points): +9.0 and +9.5 points.
 - Lessons: (1) D137 moved the method leanings a lot (PUT x 6% -> 27%, PATCH 2% -> 20%, POST 22% -> 43%), so mechanical numbers quoted against v3 truth (README, PRD headline) no longer describe v4 truth. (2) Almost every leak (844 of 861) is one step, x read as w; only 13 are two steps (x read as r). (3) 79% of leaks (682 of 861) are PUT/PATCH rows decided by the method floor with no evidence.
 - User proposals under discussion (2026-11-06, not decided): grade too loose into loose-1 (one step: x>w, w>r) and loose-2 (two steps: x>r), since a w grant is less common than r and the two should not be equated; work big methods first, starting with the floor-decided rows; build a new per-method leanings table under v4; if all fails, keep mechanical as is and let rwxlite correct the gap, provided the marker is right.
 - Where: measured from a scratch script, not committed; the numbers can be rebuilt from the six sets' truth files plus data/export-v4-gap-2026-11-06/export-v4.csv.
+- Per-method view, current code, six complete sets (16,486 ops). HEAD (2 rows, r, exact) omitted.
+
+v3 truth:
+
+| method | n | truth r | truth w | truth x | floor | exact | too loose | too tight |
+|---|---|---|---|---|---|---|---|---|
+| GET | 6283 | 6271 (99.8%) | 8 (0.1%) | 4 (0.1%) | r | 6271 (99.8%) | 12 (0.2%) | 0 |
+| POST | 4653 | 431 (9.3%) | 3197 (68.7%) | 1025 (22.0%) | x | 1703 (36.6%) | 36 (0.8%) | 2914 (62.6%) |
+| DELETE | 2556 | 4 (0.2%) | 42 (1.6%) | 2510 (98.2%) | x | 2510 (98.2%) | 0 | 46 (1.8%) |
+| PUT | 1956 | 3 (0.2%) | 1833 (93.7%) | 120 (6.1%) | w | 1847 (94.4%) | 86 (4.4%) | 23 (1.2%) |
+| PATCH | 1036 | 0 | 1011 (97.6%) | 25 (2.4%) | w | 1006 (97.1%) | 22 (2.1%) | 8 (0.8%) |
+
+v4 truth:
+
+| method | n | truth r | truth w | truth x | floor | exact | too loose | too tight |
+|---|---|---|---|---|---|---|---|---|
+| GET | 6283 | 6271 (99.8%) | 3 (0.0%) | 9 (0.1%) | r | 6271 (99.8%) | 12 (0.2%) | 0 |
+| POST | 4653 | 431 (9.3%) | 2233 (48.0%) | 1989 (42.7%) | x | 2405 (51.7%) | 167 (3.6%) | 2081 (44.7%) |
+| DELETE | 2556 | 4 (0.2%) | 35 (1.4%) | 2517 (98.5%) | x | 2517 (98.5%) | 0 | 39 (1.5%) |
+| PUT | 1956 | 3 (0.2%) | 1435 (73.4%) | 518 (26.5%) | w | 1467 (75.0%) | 475 (24.3%) | 14 (0.7%) |
+| PATCH | 1036 | 0 | 825 (79.6%) | 211 (20.4%) | w | 822 (79.3%) | 207 (20.0%) | 7 (0.7%) |
+
+- POST by deciding source under v4 (truth r/w/x): no-word floor x 3,586 rows: 253 / 1,795 / 1,538; KEEP_W list w 570: 0 / 408 / 162; CANT_UNDO list x 318: 4 / 29 / 285; read-verb list r 179: 174 / 1 / 4. On the 3,586 no-word POST rows, floor x gives 1,538 exact, 2,048 too tight, 0 too loose; floor w would give 1,795 exact, 1,538 too loose (x read as w), 253 too tight.
+- User proposal 2026-11-06 (under discussion, not decided): keep v3 code intact in src/ and build a parallel v4 copy of the same code, changing only what is inside, until it is clean against v4 truth; then archive v3. Run the three steps from the method floor, then a per-method extraction pass: r floor GET/QUERY, extract x then w from it; w floor PATCH, PUT, POST, then extract r and x from POST; x floor DELETE, then extract x from PUT.
