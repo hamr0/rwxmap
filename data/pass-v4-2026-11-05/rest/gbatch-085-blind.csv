@@ -1,0 +1,360 @@
+row_id,provider,method,path,operationId,summary,description
+g16801,microsoft.com,PATCH,/groups/{group-id}/sites/{site-id}/termStores/{store-id}/sets/{set-id}/relations/{relation-id},groups.sites.termStores.sets.UpdateRelations,Update the navigation property relations in groups,
+g16802,amazonaws.com,GET,/#Action=CreateOptionGroup,GET_CreateOptionGroup,,Creates a new option group. You can create up to 20 option groups. This command doesn't apply to RDS Custom.
+g16803,azure.com,POST,/subscriptions/{subscriptionId}/providers/Microsoft.SerialConsole/consoleServices/{default}/disableConsole,DisableConsole,Disable Serial Console for a subscription,Disables the Serial Console service for all VMs and VM scale sets in the provided subscription
+g16804,microcks.local,PUT,/jobs/{id}/stop,StopImportJob,Stop an ImportJob,"Stopping an ImportJob desactivate it, so that it won't execute at next schedule"
+g16805,autotask.net,PUT,/V1.0/InventoryProducts,InventoryProducts_UpdateEntity,,
+g16806,amazonaws.com,POST,/#X-Amz-Target=AmazonEC2ContainerServiceV20141113.UpdateCluster,UpdateCluster,,Updates the cluster.
+g16807,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ExpressRoutePorts/{expressRoutePortName},ExpressRoutePorts_CreateOrUpdate,,Creates or updates the specified ExpressRoutePort resource.
+g16808,asana,POST,/attachments,createAttachmentForObject,Upload an attachment,"<b>Required scope: </b><code>attachments:write</code>
+
+Upload an attachment.
+
+This method uploads an attachment on an object and returns the compact
+record for the created attachment object. This is possible by either:
+
+- Providing the URL of the external resource being attached, or
+- Downloading the file content first and then uploading it as any other attachment. Note that it is not possible to attach
+files from third party services such as Dropbox, Box, Vimeo & Google Drive via the API
+
+The 100MB size limit on attachments in Asana is enforced on this endpoint.
+
+This endpoint expects a multipart/form-data encoded request containing the full contents of the file to be uploaded.
+
+Requests made should follow the HTTP/1.1 specification that line
+terminators are of the form `CRLF` or `\r\n` outlined
+[here](http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01#Basic-Rules) in order for the server to reliably and properly handle the request.
+
+For file names that contain non-ASCII characters, the file name should be URL-encoded. For example, a file named `résumé.pdf` should be encoded as
+`r%C3%A9sum%C3%A9.pdf` and the `filename` parameter in the `Content-Disposition` header should be set to the encoded file name.
+
+Below is an example of a cURL request with the `Content-Disposition` header:
+
+```
+export ASANA_PAT=""<YOUR_ASANA_PERSONAL_ACCESS_TOKEN>""
+export PARENT_ID=""<PARENT_GID>""
+export ENCODED_NAME=""r%C3%A9sum%C3%A9.pdf""
+curl --location 'https://app.asana.com/api/1.0/attachments' \
+  --header 'Content-Type: multipart/form-data' \
+  --header 'Accept: application/json' \
+  --header ""Authorization: Bearer $ASANA_PAT"" \
+  --form ""parent=$PARENT_ID"" \
+  --form ""file=@/Users/exampleUser/Downloads/résumé.pdf;headers=\""Content-Disposition: form-data; name=""file""; filename=""$ENCODED_NAME.pdf""; filename*=UTF-8''$ENCODED_NAME.pdf\""""
+```"
+g16809,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/profiling/profiles/{profile_id}/,getProjectProfilingProfile,Retrieve a Profile,"Retrieve a single profile by its ID. The response includes the profile's metadata, its sampled stack data, and the associated release, when one is found. Requires profiling to be enabled for the organization."
+g16810,vtex.local,PATCH,/api/dataentities/Address/documents/{id},UpdateCustomerAddress,Update customer address,"Partially updates a customer address. > You can use this request to update customer addresses according to any `AD` schema. Because of this, you are not restricted to using the fields exemplified below in your requests. But you should be aware of the fields allowed or required for the schemas you are using. Learn more about how to use [Master Data v2 schemas](https://developers.vtex.com/vtex-rest-"
+g16811,gitlab,POST,/v3/projects/{id}/repository/commits/{sha}/cherry_pick,postV3ProjectsIdRepositoryCommitsShaCherryPick,Cherry pick commit into a branch,This feature was introduced in GitLab 8.15
+g16812,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/applications/{galleryApplicationName},GalleryApplications_CreateOrUpdate,,Create or update a gallery Application Definition.
+g16813,dracoon.team,PUT,/v4/nodes/files,updateFiles,Updates a list of file’s metadata,🚀 Since v4.25.0 ### Description: Updates a list of file’s metadata. ### Precondition: User has 🔓 change permissions in parent room. ### Postcondition: File's metadata is changed. ### Further Information: Maximum number of files is 200
+g16814,intercom,POST,/events/summaries,dataEventSummaries,Create event summaries,"Create event summaries for a user. Event summaries are used to track the number of times an event has occurred, the first time it occurred and the last time it occurred."
+g16815,mastodon.local,POST,/api/v1/featured_tags,,,Create a feature a tag.
+g16816,googleapis.com,POST,/v3/{name}:move,cloudresourcemanager.projects.move,,"Move a project to another place in your resource hierarchy, under a new resource parent. Returns an operation which can be used to track the process of the project move workflow. Upon success, the `Operation.response` field will be populated with the moved project. The caller must have `resourcemanager.projects.move` permission on the project, on the project's current and proposed new parent. If p"
+g16817,mist.com,POST,/api/v1/sites/{site_id}/wxtags,createSiteWxTag,createSiteWxTag,Create Site WxTag
+g16818,github,PATCH,/teams/{team_id}/discussions/{discussion_number},teams/update-discussion-legacy,Update a discussion (Legacy),**Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [Update a discussion](https://docs.github.com/rest/reference/teams#update-a-discussion) endpoint. Edits the title and body text of a discussion post. Only the parameters you provide are updated. OAuth access tokens require the `write:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
+g16819,osf.io,POST,/schema_responses/,schema_response_ppost,Create a new Schema Response,"This endpoint creates a new Schema Response with an `in_progress` state. A new response can only be created if the current schema response is in an `approved` state. #### Returns Returns a JSON object with a `data` key containing an updated representation of the requested Schema Response, if the request is successful. #### Errors If the request is unsuccessful, an `errors` key containing informati"
+g16820,probely.com,PATCH,/targets/{target_id}/assets/{id}/,,Partial update assets,
+g16821,cloudflare,PUT,/accounts/{account_id}/magic/ipsec_tunnels/{ipsec_tunnel_id},magic-ipsec-tunnels-update-ipsec-tunnel,Update IPsec Tunnel,Updates a specific IPsec tunnel associated with an account. Use `?validate_only=true` as an optional query parameter to only run validation without persisting changes.
+g16822,amazonaws.com,POST,/2020-08-01/tags/{resourceArn},TagResource,,"Creates tags for a resource, given its ARN."
+g16823,beezup.com,POST,/v2/user/channelCatalogs/{channelCatalogId}/disable,DisableChannelCatalog,Disable a channel catalog,
+g16824,linode,POST,/{apiVersion}/domains,post-domain,Create a domain,"Adds a new Domain to Linode's DNS Manager. Linode is not a registrar, and you must own the domain before adding it here. Be sure to point your registrar to Linode's nameservers so that the records hosted here are used. > --- - __CLI__. ``` linode-cli domains create \ --type master \ --domain example.org \ --soa_email admin@example.org ``` [Learn more...](https://techdocs.akamai.com/cloud-computing/docs/getting-started-with-the-linode-cli) - __OAuth scopes__. ``` domains:read_write ``` [Learn more...](https://techdocs.akamai.com/linode-api/reference/get-started#oauth)"
+g16825,microsoft.com,PATCH,/users/{user-id}/calendars/{calendar-id}/singleValueExtendedProperties/{singleValueLegacyExtendedProperty-id},users.calendars.UpdateSingleValueExtendedProperties,Update the navigation property singleValueExtendedProperties in users,
+g16826,novu.co,POST,/v2/workflows,WorkflowController_create,Create a workflow,Creates a new workflow in the Novu Cloud environment
+g16827,microsoft.com,POST,/financials/companies/{company-id}/purchaseInvoices/{purchaseInvoice-id}/purchaseInvoiceLines/{purchaseInvoiceLine-id}/item/picture,financials.companies.purchaseInvoices.purchaseInvoiceLines.item.CreatePicture,Create new navigation property to picture for financials,
+g16828,atlassian.com,PUT,/rest/api/3/filter/{id}/columns,setColumns,Set columns,"Sets the columns for a filter. Only navigable fields can be set as columns. Use [Get fields](#api-rest-api-3-field-get) to get the list fields in Jira. A navigable field has `navigable` set to `true`. The parameters for this resource are expressed as HTML form data. For example, in curl: `curl -X PUT -d columns=summary -d columns=description https://your-domain.atlassian.net/rest/api/3/filter/1000"
+g16829,amazonaws.com,POST,/#Action=CreateGlobalCluster,POST_CreateGlobalCluster,,"Creates an Amazon DocumentDB global cluster that can span multiple multiple Amazon Web Services Regions. The global cluster contains one primary cluster with read-write capability, and up-to give read-only secondary clusters. Global clusters uses storage-based fast replication across regions with latencies less than one second, using dedicated infrastructure with no impact to your workload’s perfo"
+g16830,microsoft.com,POST,/sites/{site-id}/onenote/notebooks/{notebook-id}/sectionGroups/{sectionGroup-id}/sections/{onenoteSection-id}/pages/{onenotePage-id}/microsoft.graph.onenotePatchContent,sites.site.onenote.notebooks.notebook.sectionGroups.sectionGroup.sections.onenoteSection.pages.onenotePage.onenotePatchContent,Invoke action onenotePatchContent,
+g16831,vtex.local,PUT,/suggestions/configuration/autoapproval/toggle,Saveautoapproveforaccount,Activate autoApprove in Marketplace's Account,"This endpoint enables the autoapprove rule to a marketplace's whole Received SKUs module. Once enabling the rule, received SKUs will be automatically approved on your store, regardless of the seller. For the autoapprove rule to work as expected, the approval [Matcher score](https://help.vtex.com/en/tutorial/entendendo-a-pontuacao-do-vtex-matcher--tutorials_424) should be set up as 80 (default valu"
+g16832,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/openShiftManagedClusters/{resourceName},OpenShiftManagedClusters_UpdateTags,Updates tags on an OpenShift managed cluster.,Updates an OpenShift managed cluster with the specified tags.
+g16833,apideck.com,PATCH,/crm/activities/{id},activitiesUpdate,Update activity,Update activity
+g16834,just-eat.co.uk,PUT,/restaurants/{tenant}/{restaurantId}/customerclaims/{id}/restaurantresponse/justification,,Add reason and comments to the response,Add reason and optional comments in case of rejection of order claim
+g16835,googleapis.com,PUT,/userprofiles/{profileId}/advertiserGroups,dfareporting.advertiserGroups.update,,Updates an existing advertiser group.
+g16836,magento.com,POST,/V1/products/tier-prices,catalogTierPriceStorageV1UpdatePost,products/tier-prices,"Add or update product prices. If any items will have invalid price, price type, website id, sku, customer group or quantity, they will be marked as failed and excluded from update list and \Magento\Catalog\Api\Data\PriceUpdateResultInterface[] with problem description will be returned. If there were no failed items during update empty array will be returned. If error occurred during the update exc"
+g16837,amazonaws.com,POST,/contact-flows/{InstanceId}/{ContactFlowId}/metadata,UpdateContactFlowMetadata,,Updates metadata about specified flow.
+g16838,amazonaws.com,GET,/#Action=AssociateTransitGatewayPolicyTable,GET_AssociateTransitGatewayPolicyTable,,Associates the specified transit gateway attachment with a transit gateway policy table.
+g16839,docusign.net,PUT,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/attachments/{attachmentId},Attachments_PutAttachment,Adds an attachment to a draft or in-process envelope.,Adds an attachment to a draft or in-process envelope.
+g16840,azure.com,PATCH,/certificates/issuers/{issuer-name},UpdateCertificateIssuer,Updates the specified certificate issuer.,The UpdateCertificateIssuer operation performs an update on the specified certificate issuer entity. This operation requires the certificates/setissuers permission.
+g16841,payrun.io,PUT,/Employer/{EmployerId}/ThirdPartyTransaction/{ThirdPartyTransactionId}/Tag/{TagId},PutThirdPartyTransactionTag,insert third party transaction tag,Inserts a tag on the third party transaction
+g16842,cloudflare,POST,/accounts/{account_id}/magic/routes,magic-static-routes-create-routes,Create a Route,Creates a new Magic static route. Use `?validate_only=true` as an optional query parameter to run validation only without persisting changes.
+g16843,jira,POST,/rest/api/2/component,createComponent,Create component,"Creates a component. Use components to provide containers for issues within a project. Use components to provide containers for issues within a project.
+
+This operation can be accessed anonymously.
+
+**[Permissions](#permissions) required:** *Administer projects* [project permission](https://confluence.atlassian.com/x/yodKLg) for the project in which the component is created or *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+g16844,microsoft.com,PATCH,/app/onlineMeetings/{onlineMeeting-id}/meetingAttendanceReport/attendanceRecords/{attendanceRecord-id},app.onlineMeetings.meetingAttendanceReport.UpdateAttendanceRecords,Update the navigation property attendanceRecords in app,
+g16845,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CustomerInsights/hubs/{hubName}/views/{viewName},Views_CreateOrUpdate,,Creates a view or updates an existing view in the hub.
+g16846,amazonaws.com,POST,/#X-Amz-Target=AmazonSSM.UpdateAssociationStatus,UpdateAssociationStatus,,Updates the status of the Amazon Web Services Systems Manager document (SSM document) associated with the specified managed node. UpdateAssociationStatus is primarily used by the Amazon Web Services Systems Manager Agent (SSM Agent) to report status updates about your associations and is only used for associations created with the InstanceId legacy parameter.
+g16847,amazonaws.com,POST,/schedules,CreateSchedule,,"Creates a new schedule for one or more DataBrew jobs. Jobs can be run at a specific date and time, or at regular intervals."
+g16848,daniweb.com,POST,/positions,,,Update the OAuth'ed end user's Curriculum Vitae by adding a position.
+g16849,amazonaws.com,GET,/#Action=CreateApplication,GET_CreateApplication,,Creates an application that has one configuration template named default and no application versions.
+g16850,readme.io,POST,/version,createVersion,Create version,Create a new version
+g16851,amazonaws.com,POST,/v1/apis/{apiId}/functions/{functionId},UpdateFunction,,Updates a Function object.
+g16852,autotask.net,POST,/V1.0/ServiceCallTasks/{parentId}/Resources,ServiceCallTaskResourcesChild_CreateEntity,,
+g16853,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/actionGroups/{actionGroupName},ActionGroups_Update,,Updates an existing action group's tags. To update other fields use the CreateOrUpdate method.
+g16854,microsoft.com,POST,/groups/{group-id}/groupLifecyclePolicies,groups.CreateGroupLifecyclePolicies,Create new navigation property to groupLifecyclePolicies for groups,
+g16855,netbox.dev,PATCH,/dcim/inventory-item-templates/{id}/,dcim_inventory-item-templates_partial_update,,
+g16856,microsoft.com,PATCH,/me/onlineMeetings/{onlineMeeting-id}/meetingAttendanceReport/attendanceRecords/{attendanceRecord-id},me.onlineMeetings.meetingAttendanceReport.UpdateAttendanceRecords,Update the navigation property attendanceRecords in me,
+g16857,microsoft.com,POST,/termStore/sets/{set-id}/parentGroup/sets/{set-id1}/terms/{term-id}/children/{term-id1}/relations,termStore.sets.parentGroup.sets.terms.children.CreateRelations,Create new navigation property to relations for termStore,
+g16858,jira,POST,/rest/api/2/screens/{screenId}/tabs/{tabId}/fields,addScreenTabField,Add screen tab field,"Adds a field to a screen tab.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+g16859,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ddosProtectionPlans/{ddosProtectionPlanName},DdosProtectionPlans_UpdateTags,,Update a DDoS protection plan tags.
+g16860,telnyx.com,PATCH,/notification_profiles/{id},updateNotificationProfile,Update a notification profile,Update a notification profile.
+g16861,avaza.com,PUT,/api/Task,Task_Put,Update a Task.,Requires TaskID and a list of field names to update. The FieldsToUpdate field accepts a string array containing field names that should be updated.
+g16862,loket.nl,PUT,/providers/employers/employees/employments/notes/{noteId},PutEmploymentNoteByNoteId,Edit an employment note record,__Activity name :__ PutEmploymentNoteByNoteId __Metadata :__ Possible options for fields of the type 'metadata' can be acquired (GET) by adding ` / metadata ` to the PUT URL.
+g16863,microsoft.com,PATCH,/deviceManagement/deviceManagementScripts/{deviceManagementScript-id}/userRunStates/{deviceManagementScriptUserState-id},deviceManagement.deviceManagementScripts.UpdateUserRunStates,Update the navigation property userRunStates in deviceManagement,
+g16864,vtex.local,POST,/api/rns/pub/subscriptions/{id}/items,,Add item to subscription,Add a new item to a given subscription.
+g16865,amazonaws.com,POST,/#Action=ModifyIpam,POST_ModifyIpam,,Modify the configurations of an IPAM.
+g16866,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EngagementFabric/Accounts/{accountName},Accounts_Update,Update EngagementFabric account,
+g16867,sentry,GET,/api/0/organizations/{organization_id_or_slug}/detectors/,listOrganizationDetectors,Fetch an Organization's Monitors,List an Organization's Monitors
+g16868,amazonaws.com,POST,/#X-Amz-Target=GameLift.UpdateGameSessionQueue,UpdateGameSessionQueue,,"Updates the configuration of a game session queue, which determines how the queue processes new game session requests. To update settings, specify the queue name to be updated and provide the new settings. When updating destinations, provide a complete list of destinations. Learn more Using Multi-Region Queues"
+g16869,microsoft.com,POST,/me/todo/lists/{todoTaskList-id}/tasks,me.todo.lists.CreateTasks,Create todoTask,Create a new task object in a specified todoTaskList.
+g16870,amazonaws.com,POST,/#X-Amz-Target=DynamoDB_20120810.UpdateTimeToLive,UpdateTimeToLive,,The UpdateTimeToLive method enables or disables Time to Live (TTL) for the specified table. A successful UpdateTimeToLive call returns the current TimeToLiveSpecification . It can take up to one hour for the change to fully process. Any additional UpdateTimeToLive calls for the same table during this one hour duration result in a ValidationException . TTL compares the current time in epoch time fo
+g16871,pagerduty,PUT,/alert_grouping_settings/{id},putAlertGroupingSetting,Update an Alert Grouping Setting,"Update an Alert Grouping Setting.
+
+The settings part of Alert Grouper service allows us to create Alert Grouping Settings and configs that are required to be used during grouping of the alerts.
+
+if `services` are not provided in the request, then the existing services will not be removed from the setting.
+
+Scoped OAuth requires: `services.write`"
+g16872,gambitcomm.local,PUT,/mimic/agent/{agentNum}/set/oiddir/{oiddir},set_oiddir,MIB directory of the agent.,MIB directory of the agent.
+g16873,bunq.com,PUT,/user/{userID}/monetary-account/{monetary-accountID}/payment-batch/{payment-batchID}/note-text/{itemId},UPDATE_NoteText_for_User_MonetaryAccount_PaymentBatch,,Used to manage text notes.
+g16874,docusign,PUT,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/recipients/{recipientId}/tabs,Recipients_PutRecipientTabs,Updates the tabs for a recipient.,"Updates one or more tabs for a recipient in a draft envelope.
+A draft envelope is one that is not yet complete.
+
+**Note:** It is an error to update a tab that has the
+`templateLocked` property set to true.
+This property corresponds to the **Restrict changes** option in the web app."
+g16875,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkProfiles/{networkProfileName},NetworkProfiles_UpdateTags,,Updates network profile tags.
+g16876,microsoft.com,POST,/users/{user-id}/planner/plans/{plannerPlan-id}/buckets,users.planner.plans.CreateBuckets,Create new navigation property to buckets for users,
+g16877,amazonaws.com,POST,/#Action=MoveAddressToVpc,POST_MoveAddressToVpc,,"Moves an Elastic IP address from the EC2-Classic platform to the EC2-VPC platform. The Elastic IP address must be allocated to your account for more than 24 hours, and it must not be associated with an instance. After the Elastic IP address is moved, it is no longer available for use in the EC2-Classic platform, unless you move it back using the RestoreAddressToClassic request. You cannot move an "
+g16878,googleapis.com,PATCH,/projects/{project}/global/publicDelegatedPrefixes/{publicDelegatedPrefix},compute.globalPublicDelegatedPrefixes.patch,,Patches the specified global PublicDelegatedPrefix resource with the data included in the request. This method supports PATCH semantics and uses JSON merge patch format and processing rules.
+g16879,microsoft.com,PATCH,/approvalWorkflowProviders/{approvalWorkflowProvider-id},approvalWorkflowProviders.approvalWorkflowProvider.UpdateApprovalWorkflowProvider,Update entity in approvalWorkflowProviders,
+g16880,zuora.com,POST,/v1/object/product-rate-plan,Object_POSTProductRatePlan,CRUD: Create a product rate plan,
+g16881,amazonaws.com,POST,/#X-Amz-Target=secretsmanager.RestoreSecret,RestoreSecret,,"Cancels the scheduled deletion of a secret by removing the DeletedDate time stamp. You can access a secret again after it has been restored. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail .<"
+g16882,hetzner.cloud,POST,/load_balancers/{id}/actions/add_target,,Add Target,Adds a target to a Load Balancer. #### Call specific error codes | Code | Description | |-----------------------------------------|-------------------------------------------------------------------------------------------------------| | `cloud_resource_ip_not_allowed` | The IP you are trying to add as a target belongs to a Hetzner Cloud resource
+g16883,netbox.dev,PUT,/ipam/l2vpns/{id}/,ipam_l2vpns_update,,
+g16884,zulip.com,POST,/users/me/alert_words,add-alert-words,Add alert words,"Add words (or phrases) to the user's set of configured [alert words][alert-words].
+
+[alert-words]: /help/dm-mention-alert-notifications#alert-words
+"
+g16885,miro,POST,/v2/boards/{board_id}/frames,create-frame-item,Create frame,"Adds a frame to a board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+g16886,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/connections/{virtualNetworkGatewayConnectionName},VirtualNetworkGatewayConnections_UpdateTags,,Updates a virtual network gateway connection tags.
+g16887,bitbucket.org,POST,/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/approve,,Approve a pull request,Approve the specified pull request as the authenticated user.
+g16888,contentgroove.com,PUT,/api/v1/medias/{id},,update media,
+g16889,amazonaws.com,GET,/{AccountNumber}/{QueueName}/#Action=SetQueueAttributes,GET_SetQueueAttributes,,"Sets the value of one or more queue attributes. When you change a queue's attributes, the change can take up to 60 seconds for most of the attributes to propagate throughout the Amazon SQS system. Changes made to the MessageRetentionPeriod attribute can take up to 15 minutes. In the future, new attributes might be added. If you write code that calls this action, we recommend that you structure you"
+g16890,microsoft.com,POST,/reports/dailyPrintUsageByPrinter,reports.CreateDailyPrintUsageByPrinter,Create new navigation property to dailyPrintUsageByPrinter for reports,
+g16891,googleapis.com,PATCH,/v1beta/apps/{appsId}/services/{servicesId}/versions/{versionsId},appengine.apps.services.versions.patch,,Updates the specified Version resource. You can specify the following fields depending on the App Engine environment and type of scaling that the version resource uses:Standard environment instance_class (https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1beta/apps.services.versions#Version.FIELDS.instance_class)automatic scaling in the standard environment: automatic_scaling.min_i
+g16892,microsoft.com,POST,/users/{user-id}/chats/{chat-id}/messages/{chatMessage-id}/microsoft.graph.setReaction,users.user.chats.chat.messages.chatMessage.setReaction,Invoke action setReaction,
+g16893,intellifi.nl,PUT,/spots/{id}/sets/{setId},updateSpotSet,Update existing spotset,
+g16894,redirection.io,PUT,/users/{id}/edit-email,edit_emailUserItem,Replaces the User resource.,
+g16895,magento.com,POST,/V1/sharedCatalog/{id}/assignCategories,sharedCatalogCategoryManagementV1AssignCategoriesPost,sharedCatalog/{id}/assignCategories,Add categories into the shared catalog.
+g16896,jira,POST,/rest/api/2/dashboard/{id}/copy,copyDashboard,Copy dashboard,"Copies a dashboard. Any values provided in the `dashboard` parameter replace those in the copied dashboard.
+
+**[Permissions](#permissions) required:** None
+
+The dashboard to be copied must be owned by or shared with the user."
+g16897,coolify.io,POST,/s3-storages,create-s3-storage,Create S3 Storage,Create a new S3 storage configuration for the authenticated team.
+g16898,yodlee.com,PUT,/providerAccounts/{providerAccountId}/preferences,updatePreferences,Update Preferences,This endpoint is used to update preferences like data extracts and auto refreshes without triggering refresh for the providerAccount. Setting isDataExtractsEnabled to false will not trigger data extracts notification and dataExtracts/events will not reflect any data change that is happening for the providerAccount. Modified data will not be provided in the dataExtracts/userData endpoint. Setting i
+g16899,atlassian.com,PUT,/rest/api/3/dashboard/{dashboardId}/gadget/{gadgetId},updateGadget,Update gadget on dashboard,"Changes the title, position, and color of the gadget on a dashboard. **[Permissions](#permissions) required:** None."
+g16900,amazonaws.com,POST,/datasets/{datasetId}/dataviewsv2,CreateDataView,,Creates a Dataview for a Dataset.
+g16901,velopayments.com,POST,/v3/payouts/{payoutId}/quote,createQuoteForPayoutV3,Create a quote for the payout,Create quote for a payout
+g16902,stripe,POST,/v1/prices,PostPrices,Create a price,"<p>Creates a new <a href=""https://docs.stripe.com/api/prices"">Price</a> for an existing <a href=""https://docs.stripe.com/api/products"">Product</a>. The Price can be recurring or one-time.</p>"
+g16903,microsoft.com,PATCH,/tenantRelationships/managedTenants/managementActionTenantDeploymentStatuses/{managementActionTenantDeploymentStatus-id},tenantRelationships.managedTenants.UpdateManagementActionTenantDeploymentStatuses,Update the navigation property managementActionTenantDeploymentStatuses in tenantRelationships,
+g16904,kubernetes.io,PATCH,/apis/apps/v1/namespaces/{namespace}/deployments/{name},patchAppsV1NamespacedDeployment,,partially update the specified Deployment
+g16905,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName},Workspaces_Create,,Creates a Workspace.
+g16906,okta,POST,/api/v1/agentPools/{poolId}/updates/settings,updateAgentPoolsUpdateSettings,Update an agent pool update settings,Updates an agent pool update instance settings
+g16907,discord,GET,/guilds/{guild_id}/requests,get_guild_join_requests,,"List join requests for guild, optionally filtered by application status"
+g16908,amazonaws.com,POST,/#X-Amz-Target=SSMContacts.DeactivateContactChannel,DeactivateContactChannel,,"To no longer receive Incident Manager engagements to a contact channel, you can deactivate the channel."
+g16909,mist.com,POST,/api/v1/sites/{site_id}/wxrules,createSiteWxRule,createSiteWxRule,Create Site WxLan Rule
+g16910,gitea,POST,/orgs/{org}/labels,orgCreateLabel,Create a label for an organization,
+g16911,googleapis.com,PATCH,/projects/{project}/global/networks/{network},compute.networks.patch,,Patches the specified network with the data included in the request. Only the following fields can be modified: routingConfig.routingMode.
+g16912,amazonaws.com,POST,/#Action=ModifyInstanceMetadataOptions,POST_ModifyInstanceMetadataOptions,,"Modify the instance metadata parameters on a running or stopped instance. When you modify the parameters on a stopped instance, they are applied when the instance is started. When you modify the parameters on a running instance, the API responds with a state of “pending”. After the parameter modifications are successfully applied to the instance, the state of the modifications changes from “pendin"
+g16913,datadog,POST,/api/v1/slo/correction,CreateSLOCorrection,Create an SLO correction,"Create an SLO correction. Use `slo_id` to apply the correction to a single SLO, or `slo_query` to apply the
+correction to SLOs that match a query. Exactly one of `slo_id` or `slo_query` is required."
+g16914,googleapis.com,POST,/projects/{project}/global/interconnects/{resource}/setLabels,compute.interconnects.setLabels,,"Sets the labels on an Interconnect. To learn more about labels, read the Labeling Resources documentation."
+g16915,cloudflare,PATCH,/zones/{zone_id}/pay-per-crawl/configuration,pay-per-crawl.patchConfig,Changes pay-per-crawl config for a zone,Changes the pay-per-crawl config for a zone.
+g16916,amazonaws.com,POST,/#X-Amz-Target=InspectorService.CreateResourceGroup,CreateResourceGroup,,"Creates a resource group using the specified set of tags (key and value pairs) that are used to select the EC2 instances to be included in an Amazon Inspector assessment target. The created resource group is then used to create an Amazon Inspector assessment target. For more information, see CreateAssessmentTarget ."
+g16917,microsoft.com,PATCH,/devices/{device-id}/commands/{command-id},devices.UpdateCommands,Update the navigation property commands in devices,
+g16918,tvmaze.com,PUT,/user/votes/episodes/{episode_id},,Vote for an episode,
+g16919,microsoft.com,PATCH,/deviceManagement/userExperienceAnalyticsDeviceStartupHistory/{userExperienceAnalyticsDeviceStartupHistory-id},deviceManagement.UpdateUserExperienceAnalyticsDeviceStartupHistory,Update the navigation property userExperienceAnalyticsDeviceStartupHistory in deviceManagement,
+g16920,hetzner.cloud,POST,/primary_ips,,Create a Primary IP,"Creates a new Primary IP, optionally assigned to a Server. If you want to create a Primary IP that is not assigned to a Server, you need to provide the `datacenter` key instead of `assignee_id`. This can be either the ID or the name of the Datacenter this Primary IP shall be created in. Note that a Primary IP can only be assigned to a Server in the same Datacenter later on. #### Call specific erro"
+g16921,microsoft.com,PATCH,/financials/companies/{company-id}/customers/{customer-id}/paymentMethod,financials.companies.customers.UpdatePaymentMethod,Update the navigation property paymentMethod in financials,
+g16922,autotask.net,POST,/V1.0/Contracts/{parentId}/ServiceAdjustments,ContractServiceAdjustmentsChild_CreateEntity,,
+g16923,amazonaws.com,POST,/#X-Amz-Target=MTurkRequesterServiceV20170117.CreateQualificationType,CreateQualificationType,,"The CreateQualificationType operation creates a new Qualification type, which is represented by a QualificationType data structure."
+g16924,netbird.io,PUT,/api/networks/{networkId}/routers/{routerId},,Update a Network Router,Update a Network Router
+g16925,cloudflare,POST,/accounts/{account_id}/email-security/settings/url_ignore_patterns,email_security_create_url_ignore_pattern,Create a URL ignore pattern,Creates a new URL rewrite ignore pattern. URLs matching this pattern will not be rewritten.
+g16926,biapi.pro,PUT,/users/{id_user}/accounts/{id_account}/transactionsclusters/{id_transactionscluster},,Edit a clustered transaction,Form params : - next_date (date): Date of transaction - mean_amount (decimal): Mean Amount - wording (string): name of transaction - id_account (id): related account - id_category (id): related category - enabled (bool): is enabled
+g16927,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/serverEndpoints/{serverEndpointName},ServerEndpoints_Update,,Patch a given ServerEndpoint.
+g16928,googleapis.com,POST,/v1beta/{name}:stop,workstations.projects.locations.workstationClusters.workstationConfigs.workstations.stop,,"Stops running a workstation, reducing costs."
+g16929,telnyx.com,PATCH,/outbound_voice_profiles/{id},updateOutboundVoiceProfile,Updates an existing outbound voice profile.,Updates an existing outbound voice profile.
+g16930,circuitsandbox.net,PUT,/spaces/{spaceId}/topic/{topicId},updateSpaceTopic,Updates a topic,"Updates a topic OauthScopes: WRITE_SPACE, UPDATE_SPACE_CONTENT"
+g16931,microsoft.com,POST,/me/managedDevices,me.CreateManagedDevices,Create new navigation property to managedDevices for me,
+g16932,microsoft.com,PATCH,/security/attackSimulation/payloads/{payload-id},security.attackSimulation.UpdatePayloads,Update the navigation property payloads in security,
+g16933,azure.com,PATCH,/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{resourceName}/replicationFabrics/{fabricName}/replicationProtectionContainers/{protectionContainerName}/replicationProtectionContainerMappings/{mappingName},ReplicationProtectionContainerMappings_Update,Update protection container mapping.,The operation to update protection container mapping.
+g16934,microsoft.com,PATCH,/identityGovernance/termsOfUse/agreementAcceptances/{agreementAcceptance-id},identityGovernance.termsOfUse.UpdateAgreementAcceptances,Update the navigation property agreementAcceptances in identityGovernance,
+g16935,jira,POST,/rest/api/2/workflowscheme/{id}/createdraft,createWorkflowSchemeDraftFromParent,Create draft workflow scheme,"Create a draft workflow scheme from an active workflow scheme, by copying the active workflow scheme. Note that an active workflow scheme can only have one draft workflow scheme.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+g16936,jira,PUT,/rest/api/2/priorityscheme/{schemeId},updatePriorityScheme,Update priority scheme,"Updates a priority scheme. This includes its details, the lists of priorities and projects in it
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+g16937,amazonaws.com,POST,/#X-Amz-Target=FmrsService.CreateLocationSmb,CreateLocationSmb,,"Creates an endpoint for a Server Message Block (SMB) file server that DataSync can access for a transfer. For more information, see Creating an SMB location ."
+g16938,netbox.dev,PUT,/extras/saved-filters/,extras_saved-filters_bulk_update,,
+g16939,microsoft.com,POST,/users/{user-id}/todo/lists/{todoTaskList-id}/tasks/{todoTask-id}/checklistItems,users.todo.lists.tasks.CreateChecklistItems,Create new navigation property to checklistItems for users,
+g16940,amazonaws.com,POST,/#X-Amz-Target=TrentService.UpdateKeyDescription,UpdateKeyDescription,,"Updates the description of a KMS key. To see the description of a KMS key, use DescribeKey . The KMS key that you use for this operation must be in a compatible key state. For details, see Key states of KMS keys in the Key Management Service Developer Guide . Cross-account use : No. You cannot perform this operation on a KMS key in a different Amazon Web Services account."
+g16941,amazonaws.com,POST,/v1/templates/{template-name}/sms,CreateSmsTemplate,,Creates a message template for messages that are sent through the SMS channel.
+g16942,microsoft.com,POST,/deviceManagement/userExperienceAnalyticsAppHealthDevicePerformanceDetails,deviceManagement.CreateUserExperienceAnalyticsAppHealthDevicePerformanceDetails,Create new navigation property to userExperienceAnalyticsAppHealthDevicePerformanceDetails for deviceManagement,
+g16943,googleapis.com,PATCH,/v1beta1/{name},containeranalysis.projects.occurrences.patch,,Updates the specified occurrence.
+g16944,miro,POST,/v2-experimental/boards/{board_id}/code_widgets,create-code-widget-item,Create code widget item,"Adds a code widget item to a board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+g16945,paypal,POST,/v1/shipping/trackers,trackers.post,Add tracking information for PayPal transaction,Adds tracking information for a PayPal transaction.
+g16946,microsoft.com,PATCH,/me/calendars/{calendar-id}/calendarView/{event-id}/exceptionOccurrences/{event-id1}/instances/{event-id2}/multiValueExtendedProperties/{multiValueLegacyExtendedProperty-id},me.calendars.calendarView.exceptionOccurrences.instances.UpdateMultiValueExtendedProperties,Update the navigation property multiValueExtendedProperties in me,
+g16947,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/slots/{slot}/domainOwnershipIdentifiers/{domainOwnershipIdentifierName},WebApps_UpdateDomainOwnershipIdentifierSlot,"Creates a domain ownership identifier for web app, or updates an existing ownership identifier.","Creates a domain ownership identifier for web app, or updates an existing ownership identifier."
+g16948,magento.com,POST,/V1/negotiable-carts/{cartId}/giftCards,negotiableQuoteGiftCardAccountManagementV1SaveByQuoteIdPost,negotiable-carts/{cartId}/giftCards,
+g16949,agco-ats.com,PUT,/api/v2/agents/{agentID},Agents_PutAgent,Update an Agent,"Updates an Agent. The body of the PUT is the updated Agent. When successful, the response is empty. If unsuccessful, an appropriate ApiError is returned."
+g16950,zuora.com,POST,/objects/records/default/{object},POST_CustomObjectRecords,Create custom object records,"Creates custom object records with the given type. Upon creating records of a custom object type, the 200 response contains a list of records that have been successfully processed and stored. ## Limitations This call has the following limitations: * The maximum number of records that you can create by one call is 1,000. * The storage of empty strings in records is not supported. * Null values must"
+g16951,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/components/{resourceName}/pricingPlans/current,ComponentCurrentPricingPlan_CreateAndUpdate,,Replace current pricing plan for an Application Insights component.
+g16952,impala.travel,PUT,/bookings/{bookingId}/booking-contact,updateBookingContact,Change a booking contact,"Updates a confirmed booking with the booking contact details you provide in the request body. In addition, we require you to supply a `updateBookingVersionAtTimestamp` field with the `updatedAt` timestamp of the booking. You can find this value by looking up the booking via the [Retrieve a booking](https://docs.impala.travel/docs/booking-api/spec/openapi.seller.yaml/paths/~1bookings~1%7BbookingId%"
+g16953,googleapis.com,POST,/userprofiles/{profileId}/campaigns/{campaignId}/campaignCreativeAssociations,dfareporting.campaignCreativeAssociations.insert,,Associates a creative with the specified campaign. This method creates a default ad with dimensions matching the creative in the campaign if such a default ad does not exist already.
+g16954,amazonaws.com,POST,/#X-Amz-Target=CodeCommit_20150413.UpdateComment,UpdateComment,,Replaces the contents of a comment.
+g16955,ledgerlink.app,PUT,/v1/providerAccounts/nickname,providerAccountNicknameSet,Set the nickname of a provider account,
+g16956,microsoft.com,POST,/groups/{group-id}/sites/{site-id}/onenote/sectionGroups,groups.sites.onenote.CreateSectionGroups,Create new navigation property to sectionGroups for groups,
+g16957,microsoft.com,POST,/me/calendar/calendarView/{event-id}/exceptionOccurrences/{event-id1}/attachments,me.calendar.calendarView.exceptionOccurrences.CreateAttachments,Add attachment,"Use this API to add an attachment to an existing event. This operation limits the size of the attachment you can add to under 3 MB. If an organizer adds an attachment to a meeting event, the organizer can subsequently update the event to send the attachment and update the event for each attendee as well."
+g16958,microsoft.com,PATCH,/deviceManagement/remoteAssistanceSettings,deviceManagement.UpdateRemoteAssistanceSettings,Update the navigation property remoteAssistanceSettings in deviceManagement,
+g16959,microsoft.com,POST,/deviceManagement/userExperienceAnalyticsWorkFromAnywhereMetrics/{userExperienceAnalyticsWorkFromAnywhereMetric-id}/metricDevices,deviceManagement.userExperienceAnalyticsWorkFromAnywhereMetrics.CreateMetricDevices,Create new navigation property to metricDevices for deviceManagement,
+g16960,clever-cloud.com,POST,/organisations/{id}/addons,postOrganisationsIdAddons,,
+g16961,stripe.com,POST,/v1/subscription_items/{item},PostSubscriptionItemsItem,,Updates the plan or quantity of an item on a current subscription.
+g16962,gitlab.com,PUT,/v3/application/settings,putV3ApplicationSettings,Modify application settings,Modify application settings
+g16963,amazonaws.com,PATCH,/jobs/{jobId},UpdateClassificationJob,,Changes the status of a classification job.
+g16964,slack,GET,/files.remote.list,files_remote_list,,Retrieve information about a remote file added to Slack
+g16965,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteCrossConnections/{crossConnectionName}/peerings/{peeringName},ExpressRouteCrossConnectionPeerings_CreateOrUpdate,,Creates or updates a peering in the specified ExpressRouteCrossConnection.
+g16966,amazonaws.com,PUT,/amazonclouddirectory/2017-01-11/schema/update#x-amz-data-partition,UpdateSchema,,Updates the schema name with a new name. Only development schema names can be updated.
+g16967,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkInterfaces/{networkInterfaceName},NetworkInterfaces_CreateOrUpdate,,The Put NetworkInterface operation creates/updates a networkInterface
+g16968,microsoft.com,POST,/applications/{application-id}/synchronization/templates,applications.synchronization.CreateTemplates,Create new navigation property to templates for applications,
+g16969,microsoft.com,POST,/users/{user-id}/calendars/{calendar-id}/calendarView/{event-id}/instances/{event-id1}/exceptionOccurrences/{event-id2}/microsoft.graph.snoozeReminder,users.user.calendars.calendar.calendarView.event.instances.event.exceptionOccurrences.event.snoozeReminder,Invoke action snoozeReminder,Postpone a reminder for an event in a user calendar until a new time.
+g16970,azure.com,POST,/Nodes/{nodeName}/$/Activate,EnableNode,Activate a Service Fabric cluster node that is currently deactivated.,"Activates a Service Fabric cluster node that is currently deactivated. Once activated, the node will again become a viable target for placing new replicas, and any deactivated replicas remaining on the node will be reactivated."
+g16971,microsoft.com,PATCH,/me/calendarGroups/{calendarGroup-id}/calendars/{calendar-id}/calendarView/{event-id}/instances/{event-id1}/exceptionOccurrences/{event-id2}/multiValueExtendedProperties/{multiValueLegacyExtendedProperty-id},me.calendarGroups.calendars.calendarView.instances.exceptionOccurrences.UpdateMultiValueExtendedProperties,Update the navigation property multiValueExtendedProperties in me,
+g16972,twilio.com,POST,/Sync/Services/{ServiceSid}/Maps/{MapSid}/Items,CreateSyncSyncMapItem,,
+g16973,loket.nl,POST,/providers/employers/employees/employments/{employmentId}/fiscalcompanycars,PostFiscalCompanyCarByEmploymentId,Create a fiscal company car record for an employment,__Activity name:__ PostFiscalCompanyCarByEmploymentId Create a fiscal company cars record for an employment. Please note this resource is related for the registration of the company car for tax purposes and will be included in the salary calculations. This is NOT directly related to the registration of the company car(s) related to the HRM-module Verstrekking __Metadata :__ Possible options for fi
+g16974,stripe,POST,/v1/accounts/{account}/unreject,PostAccountsAccountUnreject,Unreject an account,"<p>With Connect, you can unreject accounts that you have previously rejected.</p>
+
+<p>Only accounts that were rejected by your platform can be unrejected. This API cannot be used to unreject accounts that were rejected by Stripe.</p>
+
+<p>Unreject will only enable charges and/or payouts if there are no other restrictions other than those placed by a previous rejection. If you have separately paused charges and/or payouts outside of rejection, those pauses will remain in place after unrejection.</p>"
+g16975,amazonaws.com,GET,/#Action=ModifyInstanceCreditSpecification,GET_ModifyInstanceCreditSpecification,,"Modifies the credit option for CPU usage on a running or stopped burstable performance instance. The credit options are standard and unlimited . For more information, see Burstable performance instances in the Amazon EC2 User Guide ."
+g16976,googleapis.com,PUT,/adclients/{adClientId}/customchannels,adsensehost.customchannels.update,,Update a custom channel in the host AdSense account.
+g16977,microsoft.com,PATCH,/me/mailFolders/{mailFolder-id}/messages/{message-id}/multiValueExtendedProperties/{multiValueLegacyExtendedProperty-id},me.mailFolders.messages.UpdateMultiValueExtendedProperties,Update the navigation property multiValueExtendedProperties in me,
+g16978,microsoft.com,POST,/security/cases/ediscoveryCases/{ediscoveryCase-id}/noncustodialDataSources,security.cases.ediscoveryCases.CreateNoncustodialDataSources,Create nonCustodialDataSources,Create a new ediscoveryNoncustodialDataSource object.
+g16979,docusign,POST,/v2.1/accounts/{accountId}/templates,Templates_PostTemplates,Creates one or more templates.,"Creates one or more template definitions, using a multipart
+request for each template.
+
+[Templates](/docs/esign-rest-api/esign101/concepts/templates/)
+help streamline the sending process when you frequently
+send the same or similar documents, or send different documents
+to the same group of people.
+
+When you create a template, you define placeholder roles. Rather
+than specifying a person, you specify a role that regularly
+participates in a transaction that uses the template. Then, when
+you create or send an envelope based on the template, you assign
+actual recipients to the template roles. The recipients
+automatically inherit all of the workflow that is defined for
+that role in the template, such as the tabs and routing
+information.
+
+## Template Email Subject Merge Fields
+
+Placeholder roles have associated merge fields that personalize
+the email notification that Docusign sends. For example, the
+template automatically personalizes the email message by adding
+placeholders for the recipient's name and email address within
+the email subject line, based on the recipient's role. When the
+sender adds the name and email information for the recipient and
+sends the envelope, the recipient information is automatically
+merged into the appropriate fields in the email subject line.
+
+Both the sender and the recipients will see the information in
+the email subject line for any emails associated with the
+template. This provides an easy way for senders to organize their
+envelope emails without having to open an envelope to find out
+who the recipient is.
+
+
+
+Use the following placeholders
+to insert a recipient's name or
+email address in the subject line
+
+To insert a recipient's name into the subject line,
+use the `[[<roleName>_UserName]]` placeholder
+in the  `emailSubject` property when you create the
+template:
+
+To include a recipient's name
+or email address in the subject line,
+use the following placeholders
+in the `emailSubject` property:
+
+- `[[<roleName>_UserName]]`
+- `[[<roleName>_Email]]`
+
+
+For example, if the role name is `Signer 1`,
+you might set `emailSubject` to one of these strings:
+
+- `""[[Signer 1_UserName]], Please sign this NDA""`
+- `""[[Signer 1_Email]], Please sign this NDA""`
+
+
+**Note:** The maximum length of the
+subject line is 100 characters,
+including any merged text.
+
+
+## Creating multiple templates
+
+To create multiple templates, you provide a zip file of JSON
+files. You can also use the Templates::ListTemplates method with
+the `is_download` query parameter to download a zip file
+containing your existing templates and use that as a guide. The
+API supports both .zip and .gzip file formats as input.
+
+You also need to set the
+`Content-Length`,
+`Content-Type`,
+and
+`Content-Disposition`
+headers:
+
+
+```
+Content-Length: 71068
+Content-Type: application/zip
+Content-Disposition: file; filename=""DocuSignTemplates_Nov_25_2019_20_40_21.zip""; fileExtension=.zip
+```
+
+### Related topics
+
+- [How to create a template](/docs/esign-rest-api/how-to/create-template/)"
+g16980,swaggerhub.com,PATCH,/domains/{owner}/{domain}/{version}/comments/{comment}/replies/{reply},updateDomainCommentReplyV2,Update a comment reply,
+g16981,amazonaws.com,GET,/#Action=ModifyTransitGatewayVpcAttachment,GET_ModifyTransitGatewayVpcAttachment,,Modifies the specified VPC attachment.
+g16982,netbox.dev,PUT,/wireless/wireless-links/{id}/,wireless_wireless-links_update,,
+g16983,microsoft.com,POST,/groups/{group-id}/events/{event-id}/instances/{event-id1}/exceptionOccurrences/{event-id2}/multiValueExtendedProperties,groups.events.instances.exceptionOccurrences.CreateMultiValueExtendedProperties,Create new navigation property to multiValueExtendedProperties for groups,
+g16984,openai,POST,/skills,CreateSkill,Create Skill,Create a new skill.
+g16985,dracoon,PUT,/v4/user/profileAttributes,updateProfileAttributes,Add or edit user profile attributes,"<h3 style='padding: 5px; background-color: #F6F7F8; border: 1px solid #AAA; border-radius: 5px; display: table-cell;'>&#128640; Since v4.7.0</h3> ### Description:   Add or edit custom user profile attributes. <br/><br/><span style=""font-weight: bold; color: red;""> &#128679; **Warning: Please note that the response with HTTP status code 200 (OK) is deprecated and will be replaced with HTTP status code 204 (No content)!**</span><br/> ### Precondition: None. ### Postcondition: Custom user profile a"
+g16986,apache.org,PATCH,/pools/{pool_name},patch_pool,Update a pool,
+g16987,supabase.com,PATCH,/v1/projects/{ref}/database/backups/schedule,v1-update-backup-schedule,Updates the backup schedule time for a project,"Sets the time at which the daily backup runs. The change takes effect on the next backup window that includes the new time. If the new time has already passed for today, the first backup at the new time will occur the following day. It can only be updated 3 times per 24 hours."
+g16988,googleapis.com,PUT,/v1/projects/{project}/instances/{instance}/databases/{database},sql.databases.update,,Updates a resource containing information about a database inside a Cloud SQL instance.
+g16989,mandrillapp.com,POST,/messages/reschedule.json,,,Reschedules a scheduled email.
+g16990,coolify.io,POST,/servers/{uuid}/envs,create-server-shared-env,Create Server Shared Env,Create a shared environment variable for a server (type=server).
+g16991,autotask.net,POST,/V1.0/Tickets,Tickets_CreateEntity,,
+g16992,docusign,PUT,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/workflow/scheduledSending,EnvelopeWorkflowScheduledSending_PutEnvelopeScheduledSendingDefinition,Updates the scheduled sending rules for an envelope's workflow.,Updates the scheduled sending rules for an envelope's workflow. The envelope must have an existing workflow object.
+g16993,jira,PUT,/rest/api/2/app/field/{fieldIdOrKey}/context/configuration,updateCustomFieldConfiguration,Update custom field configurations,"Update the configuration for contexts of a custom field of a [type](https://developer.atlassian.com/platform/forge/manifest-reference/modules/jira-custom-field-type/) created by a [Forge app](https://developer.atlassian.com/platform/forge/).
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg). Jira permissions are not required for the Forge app that created the custom field type."
+g16994,twilio.com,POST,/v1/Services/{ServiceSid}/Lists,CreateSyncList,,
+g16995,sendgrid.com,PATCH,/whitelabel/links/{id},PATCH_whitelabel-links-id,Update a branded link,**This endpoint allows you to update a specific branded link. You can use this endpoint to change a branded link's default status.** You can submit this request as one of your subusers if you include their ID in the `on-behalf-of` header in the request.
+g16996,twinehealth.com,POST,/bundle,createBundle,Create bundle,Create a bundle in a patient's plan
+g16997,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName},Topics_CreateOrUpdate,Create a topic.,Asynchronously creates a new topic with the specified parameters.
+g16998,cloudflare,PUT,/accounts/{account_id}/dlp/data_tag_categories/{category_id}/data_tags/{tag_id},dlp-data-tags-update,Update the attributes of a single data tag.,Updates a data tag in a category.
+g16999,amazonaws.com,POST,/#X-Amz-Target=AmazonEC2ContainerRegistry_V20150921.PutImageScanningConfiguration,PutImageScanningConfiguration,,"The PutImageScanningConfiguration API is being deprecated, in favor of specifying the image scanning configuration at the registry level. For more information, see PutRegistryScanningConfiguration . Updates the image scanning configuration for the specified repository."
+g17000,netbox.dev,PATCH,/dcim/device-roles/,dcim_device-roles_bulk_partial_update,,
