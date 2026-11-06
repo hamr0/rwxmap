@@ -4,9 +4,10 @@ import { createHash } from 'node:crypto';
 import { parseCsv, toCsv } from '../../tools/csv.js';
 
 const D = new URL('../../data/', import.meta.url).pathname;
-const OUT = D + 'export-v4-2026-11-06/';
+const OUT = D + (process.argv[3] || 'export-v4-2026-11-06') + '/';
+const GAP = (process.argv[2] || '') && process.argv[2] !== 'pass-v4-2026-11-05/truth-v4-pass.csv';
 const IN = {
-  pass: 'pass-v4-2026-11-05/truth-v4-pass.csv',
+  pass: process.argv[2] || 'pass-v4-2026-11-05/truth-v4-pass.csv',
   key: 'pass-v4-2026-11-05/pass-key.csv',
   conflicts: 'pass-v4-2026-11-05/conflicts.csv',
   inherit: 'pass-v4-2026-11-05/inherit.csv',
@@ -141,6 +142,9 @@ writeFileSync(OUT + 'inherit-v4.csv.sha256', sha(inhCsv) + '  inherit-v4.csv\n')
 
 const sorted = (o) => Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)).map(([k, v]) => `- ${k}: ${v}`).join('\n');
 const differing = multi.filter((m) => m.differ === 'yes').length;
+const gapNote = GAP
+  ? `The 18,576 Jev-only rows got a blind Sonnet check (data/pass-v4-2026-11-05/rest/): 236 were raised to x by user ruling 2026-11-06, 496 Sonnet-r rows were kept w. No Jev-only rows remain. This export supersedes export-v4-2026-11-06 for training.`
+  : `18,576 pass rows carry Jev's label only (Jev-w, never Sonnet-checked). Sonnet's 5% sample of such rows found 21 of 978 were x (2.1%).`;
 const readme = `# export-v4 (2026-11-06)
 
 ## Purpose
@@ -179,7 +183,7 @@ By label_source:
 ${sorted(cnt.source)}
 
 ## Known gap
-18,576 pass rows carry Jev's label only (Jev-w, never Sonnet-checked). Sonnet's 5% sample of such rows found 21 of 978 were x (2.1%).
+${gapNote}
 `;
 writeFileSync(OUT + 'README.md', readme);
 
