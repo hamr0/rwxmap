@@ -36,3 +36,5 @@
 ## [2026-11-05] index-flat | 48 row(s) (7 product, 40 logs, 1 archive)
 ## [2026-11-05] apply-reorg | moved 1, skipped 0, 0 oversized split candidate(s), 4 link(s) rewritten, 0 sync failure(s), 0 empty dir(s) removed, CLAUDE.md updated: true
 ## [2026-11-05] index-flat | 49 row(s) (8 product, 40 logs, 1 archive)
+## [2026-11-06] index-flat | 50 row(s) (9 product, 40 logs, 1 archive)
+## [2026-11-07] index-flat | 51 row(s) (10 product, 40 logs, 1 archive)

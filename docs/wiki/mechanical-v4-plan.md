@@ -67,7 +67,7 @@ The user's first layout put POST on a w floor; corrected (ruling above) to x. PA
 | 3 | POST w/r-extraction, re-tune KEEP_W (162 leaks, 2,081 too tight) | done 2026-11-06 (A: path-x-word on POST; B: content-noun + veto; LOVO B 233 right / 15 leaks) |
 | 4 | GET x-extraction (12 unflagged two-step leaks; overlaps the parked GET-twin POC) | done 2026-11-06 (get-action: logout, revoke, close; LOVO 4 two-step leaks closed / 1 read raised) |
 | 5 | DELETE w-extraction (39 too tight) | closed 2026-11-06 by ruling: DELETE stays x, settled, no rule, no flag |
-| 6 | D-number, exam #5 (truth-v4-plan step 7), archive v3 | not started |
+| 6 | D-number, exam #5 (truth-v4-plan step 7), archive v3 | done 2026-11-07 (exam #5 scored and burned; D138 ships v4 in src/, v3 in poc/archive/mech-v3) |
 
 Each step: candidates fixed before measuring; one learnings entry per step before the next starts.
 

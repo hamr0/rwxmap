@@ -158,8 +158,7 @@ move a row's letter or marker, it is core.
 
 ### The ladder
 
-The shape is mechanical v4 (D138, user override 2026-11-07). It lives in
-`poc/mech-v4/` today and moves into `src/` in the next code pass.
+The shape is mechanical v4 (D138, user override 2026-11-07), in `src/`.
 Three standalone steps (1 owns r, 2 owns x, 3 owns w), each with its own
 word lists. `flow.js` decides only the order: step 1, step 2, step 3,
 then the floor (`floorRead` for read methods, `floorPost` otherwise).
@@ -1301,19 +1300,15 @@ on unseen vendors. Shipping waits on rwxlite publishing 0.3.1. Until then
 
 Next, in order:
 
-1. Move v4 from `poc/mech-v4/` into `src/` and archive v3.
-2. Release: README "what x covers" section and headline numbers
+1. Release: README "what x covers" section and headline numbers
    updated to exam #5 (v4 mechanical 83.2% exact / 4.1% too loose /
    12.7% too tight of 1443), then `docs/product/release-checklist.md`
    item by item.
-3. Measure the candidate words from exam #5 leave-one-vendor-out across
-   all seven sets, adopting only if neither too loose nor too tight
-   worsens.
-4. Verify rwxlite 0.3.1 (GitHub release v0.3.1 with its model files, npm
+2. Verify rwxlite 0.3.1 (GitHub release v0.3.1 with its model files, npm
    0.3.1) from the real download path, then one code pass (D139): pin
    `RWXLITE_TAG` v0.3.1, cache fallback, accepted range 0.3.x, and
    `LOWER_MIN_P` 0.90, with tests and conformance.
-5. A new exam #6 for any change (exam #5 is burned; bunny.net is spent;
+3. A new exam #6 for any change (exam #5 is burned; bunny.net is spent;
    unused shortlist vendors: grafana, nocodb, radarr).
 
 Parked items and known limits below.
