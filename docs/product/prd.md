@@ -370,9 +370,9 @@ outside service, and the adopter must say so.
 | file | owns |
 |---|---|
 | `src/tokens.js` | splitter, tokenizer, verb stemmer, `verbForRow`, `LEAD_MODIFIERS`, `METHOD_WORDS` — readers only |
-| `src/step1.js` | step 1, r: `READ_VERBS`, `SAFE_VERBS`, the plural-noun guard (D74, D99) |
-| `src/step2.js` | step 2, x: `method-delete`, `cant-undo-verb(-summary)`, `credential-set`, `floor-post`; `CANT_UNDO` (29), `REMOVES` (6), `CREDENTIAL_SET` (3), `CREDENTIAL_CHANGE_VERBS` (3) |
-| `src/step3.js` | step 3, w: `method-floor`, `modify-verb(-summary)`; `KEEP_W` (14) |
+| `src/step1.js` | step 1, r: rules `method`, `read-verb`, `read-verb-anywhere`; `READ_METHODS` (4), `READ_VERBS` (23), `SAFE_VERBS` (10), the plural-noun guard (D74, D99); `floorRead` is the read floor |
+| `src/step2.js` | step 2, x: rules `method-delete`, `cant-undo-verb(-summary)`, `credential-set`, `path-x-word`, `get-action`, `floor-post`; `CANT_UNDO` (29), `REMOVES` (6), `CREDENTIAL_SET` (3), `CREDENTIAL_CHANGE_VERBS` (3), `PATH_X_WORDS` (36), `GET_ACTION` (3) |
+| `src/step3.js` | step 3, w: rules `method-floor`, `modify-verb(-summary)`, `content-noun`; `KEEP_W` (14), `CONTENT_W` (20), `CONTENT_VETO` (2) |
 | `src/flow.js` | `classifyRow` (the order, written once) and `reviewHint` (the one writer of `review`) |
 | `src/jev.js` | the three Jev tiers, thresholds, `applyJev`, `needsJev`, `jevState`, `jevQuestions` |
 | `src/exporter.js` | the bareguard exporter: `operationsFrom`, `exportGate`, `exportSidecar` |
@@ -384,17 +384,18 @@ outside service, and the adopter must say so.
 | `tools/corpus.js`, `tools/csv.js` | corpus loading and CSV reading, dev only, never shipped |
 | `src/load.js` | `loadSpec` (file or URL, JSON or YAML, 64 MB caps, binary refusal, no `$ref` resolution, D106), shipped as `rwxmap/load` (D107), and the only file that imports `yaml` |
 
-`poc/d87/` is the reference `src/` is proved against: `node
-poc/d87/proof-src.mjs` compares both over all 6557 rows of the combined
-set, must print 0 unexpected differences and exactly the 2 allowed
-D131 rows (pc-r1389, x20-e0999: the credential-set rule moves them;
-user ruling 2026-11-03), checked to fail when broken, and
-replays the recorded Jev answers through `applyJev` (804 lowered).
-`tools/proof-step1.js` still passes after D99 but is blind to the
-plural-noun guard, so it does not pin step 1's full behaviour (D99).
+`src/` is mechanical v4 (D138): its flow, step and test files are byte for
+byte the `poc/mech-v4/` copies, checked at commit 1268650 (`cmp` clean, src
+vs `poc/mech-v4` 0 differences on 16,486 rows). No runnable command pins
+that equivalence today: `node poc/mech-v4/proof-copy.mjs` still prints
+`differences == 0` but exits 1, because its pinned truth numbers are
+v3-era. `poc/d87/proof-src.mjs` is the v3-era reference (v3 itself is in
+`poc/archive/mech-v3/`), and fails against v4 by design.
+`tools/proof-step1.js` also exits 1 against v4 (1,960 class differences
+from old step 1 on 4,171 rows; its READ_VERBS and SAFE_VERBS equality lines
+still hold), so it is not a check either.
 
-Run: `npm test`, `npm run typecheck`, `node poc/d87/proof-src.mjs`,
-`node tools/proof-step1.js`.
+Run: `npm test` (616 pass), `npm run typecheck` (exit 0).
 
 ## Measured results
 
