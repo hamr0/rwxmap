@@ -384,18 +384,19 @@ outside service, and the adopter must say so.
 | `tools/corpus.js`, `tools/csv.js` | corpus loading and CSV reading, dev only, never shipped |
 | `src/load.js` | `loadSpec` (file or URL, JSON or YAML, 64 MB caps, binary refusal, no `$ref` resolution, D106), shipped as `rwxmap/load` (D107), and the only file that imports `yaml` |
 
-`src/` is mechanical v4 (D138): its flow, step and test files are byte for
-byte the `poc/mech-v4/` copies, checked at commit 1268650 (`cmp` clean, src
-vs `poc/mech-v4` 0 differences on 16,486 rows). No runnable command pins
-that equivalence today: `node poc/mech-v4/proof-copy.mjs` still prints
-`differences == 0` but exits 1, because its pinned truth numbers are
-v3-era. `poc/d87/proof-src.mjs` is the v3-era reference (v3 itself is in
-`poc/archive/mech-v3/`), and fails against v4 by design.
-`tools/proof-step1.js` also exits 1 against v4 (1,960 class differences
-from old step 1 on 4,171 rows; its READ_VERBS and SAFE_VERBS equality lines
-still hold), so it is not a check either.
+`src/` is mechanical v4 (D138). `node poc/mech-v4/proof-copy.mjs` proves it:
+it compares `src/` against the frozen `poc/mech-v4` copy over 16,486 rows of
+the six tuning sets and must print `differences == 0`, `skipped == 0`, and
+the pinned scores (v3 truth 13096 / 119 / 3271, v4 truth 14048 / 421 / 2017,
+exact / too loose / too tight). Checked to fail when broken: a one-line
+change in a scratch copy gave 2,556 differences, exit 1.
 
-Run: `npm test` (616 pass), `npm run typecheck` (exit 0).
+The v3-era proofs (`proof-src.mjs` from `poc/d87`, `tools/proof-step1.js`)
+are archived in `poc/archive/v3-proofs/` and fail against v4 by design.
+
+Run: `npm test` (616 pass), `npm run typecheck`,
+`node poc/mech-v4/proof-copy.mjs`, and conformance
+`(cd poc/conformance && node run.mjs)` (6/6).
 
 ## Measured results
 
