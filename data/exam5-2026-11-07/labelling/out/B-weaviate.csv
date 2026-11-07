@@ -1,0 +1,127 @@
+row_id,truth_class,confidence,reason
+ex5-1318,r,high,GET lists endpoint links
+ex5-1319,r,high,GET liveness health check
+ex5-1320,r,high,GET OIDC discovery info
+ex5-1321,r,high,GET readiness health check
+ex5-1322,r,high,i POST aggregate counts only reads
+ex5-1323,r,high,GET lists aliases
+ex5-1324,w,high,ii plain create of alias mapping
+ex5-1325,x,high,a deletes alias no restore
+ex5-1326,r,high,GET alias details
+ex5-1327,w,high,edits alias target collection
+ex5-1328,r,high,GET lists group names
+ex5-1329,x,high,g assigns role to group widens access
+ex5-1330,w,high,w narrows group roles on POST
+ex5-1331,r,high,GET roles of group
+ex5-1332,r,high,GET lists roles
+ex5-1333,w,low,ii creates role definition assigned to nobody
+ex5-1334,x,high,a deletes role and revokes from users
+ex5-1335,r,high,GET role by name
+ex5-1336,x,high,g adds permissions to role widens access
+ex5-1337,r,high,GET groups with role
+ex5-1338,r,high,i POST permission check only reads
+ex5-1339,x,low,narrows but removing all deletes role a
+ex5-1340,r,high,GET users with role
+ex5-1341,r,high,GET users with role deprecated
+ex5-1342,x,high,g assigns role to user
+ex5-1343,w,high,w narrows user roles on POST
+ex5-1344,r,high,GET user roles deprecated
+ex5-1345,r,high,GET user roles
+ex5-1346,r,high,GET lists backups
+ex5-1347,x,high,e starts backup job to outside storage
+ex5-1348,x,high,DELETE cancels running backup work lost f
+ex5-1349,r,high,GET backup status
+ex5-1350,x,high,DELETE cancels running restore f
+ex5-1351,r,high,GET restore status
+ex5-1352,x,high,e starts restore job
+ex5-1353,x,high,a batch deletes objects
+ex5-1354,w,high,ii batch create with overwrite like PUT
+ex5-1355,w,high,ii plain create of cross references
+ex5-1356,x,high,e starts background classification task
+ex5-1357,r,high,GET classification status
+ex5-1358,r,high,GET cluster statistics
+ex5-1359,x,low,exports all user credential hashes secret leaves
+ex5-1360,x,high,g creates login users with working keys
+ex5-1361,x,high,e starts export job to outside storage
+ex5-1362,x,high,DELETE cancels running export f
+ex5-1363,r,high,GET export status
+ex5-1364,r,high,i POST GraphQL query reads data
+ex5-1365,r,high,i POST batched GraphQL queries read
+ex5-1366,r,low,DELETE text says nothing to terminate
+ex5-1367,x,low,e invokes MCP tools which may run actions
+ex5-1368,r,high,GET instance metadata
+ex5-1369,r,high,GET lists namespaces
+ex5-1370,x,high,a namespace deleted and reclaimed no restore
+ex5-1371,r,high,GET namespace details
+ex5-1372,w,high,ii plain create of namespace
+ex5-1373,w,high,edits namespace home node setting
+ex5-1374,x,low,resume lets users authenticate again widens g
+ex5-1375,w,high,toggle suspend has resume
+ex5-1376,r,high,GET node status
+ex5-1377,r,high,GET node status by collection
+ex5-1378,r,high,GET lists objects
+ex5-1379,w,high,ii plain create of object
+ex5-1380,r,high,i validate without storing
+ex5-1381,x,high,a deletes object no restore
+ex5-1382,r,high,GET object
+ex5-1383,r,high,HEAD existence check
+ex5-1384,w,high,PATCH edits object properties
+ex5-1385,w,high,PUT replaces object properties
+ex5-1386,x,high,a DELETE removes reference
+ex5-1387,w,high,ii adds reference to property
+ex5-1388,w,high,PUT replaces reference set
+ex5-1389,x,high,a deletes object no restore
+ex5-1390,r,high,GET object
+ex5-1391,r,high,HEAD existence check
+ex5-1392,w,high,PATCH edits object
+ex5-1393,w,high,PUT updates object
+ex5-1394,x,high,a DELETE removes reference
+ex5-1395,w,high,ii adds reference
+ex5-1396,w,high,PUT replaces references
+ex5-1397,x,high,a deletes all replication operations
+ex5-1398,x,high,e starts replica move may decommission source
+ex5-1399,x,high,a force deletes operations risk of data loss
+ex5-1400,r,high,GET lists replication operations
+ex5-1401,x,high,a deletes and cancels replication operation
+ex5-1402,r,high,GET replication details
+ex5-1403,x,high,f cancels replication cannot be resumed
+ex5-1404,r,high,GET computes plan only
+ex5-1405,x,low,e applies scaling plan removing replicas
+ex5-1406,r,high,GET sharding state
+ex5-1407,r,high,GET all collection definitions
+ex5-1408,w,high,ii plain create of collection
+ex5-1409,x,high,a deletes collection and all data
+ex5-1410,r,high,GET collection definition
+ex5-1411,w,high,PUT edits collection configuration
+ex5-1412,r,high,GET index status
+ex5-1413,w,high,ii adds property definition
+ex5-1414,x,high,a deletes inverted index
+ex5-1415,x,low,e PUT submits reindex task
+ex5-1416,x,low,f cancels in-flight reindex work lost
+ex5-1417,x,high,e rebuilds index job
+ex5-1418,r,high,i tokenizes text returns result only
+ex5-1419,r,high,GET shard status
+ex5-1420,w,high,toggle shard READY READONLY
+ex5-1421,x,high,a deletes tenants and data
+ex5-1422,r,high,GET lists tenants
+ex5-1423,w,high,ii plain create of tenants
+ex5-1424,w,high,toggle tenant activity status
+ex5-1425,r,high,GET tenant details
+ex5-1426,r,high,HEAD tenant existence
+ex5-1427,x,high,a deletes vector index
+ex5-1428,r,high,i bm25 search
+ex5-1429,r,high,i hybrid search
+ex5-1430,r,high,i near-object search
+ex5-1431,r,high,i near-text search
+ex5-1432,r,high,i near-vector search
+ex5-1433,r,high,GET lists tasks
+ex5-1434,r,high,i stateless tokenize
+ex5-1435,r,high,GET lists users
+ex5-1436,x,high,a deletes user
+ex5-1437,r,high,GET user info
+ex5-1438,x,high,g creates login user and issues API key
+ex5-1439,x,low,activate lets user log in again widens g
+ex5-1440,w,high,toggle deactivate has activate
+ex5-1441,x,low,g sets or clears key expiry direction unstated
+ex5-1442,x,high,b revokes and rotates API key
+ex5-1443,r,high,GET own user info

@@ -1,6 +1,9 @@
 # Pre-registration (DRAFT): clean exam #5, rwxmap side (mechanical v4 gate)
 
-**Status: DRAFT, written 2026-11-07. Not frozen.** The CANDIDATE ADDENDUM is
+**Status: SCORED and BURNED (2026-11-07). Gate result NO-GO as pre-registered;
+the user overrode it and shipped v4 (D138). See "Results and findings" at the
+end.** The text below is the pre-registration as it stood before scoring.
+(Earlier status: DRAFT, written 2026-11-07. Not frozen.) The CANDIDATE ADDENDUM is
 filled in, rwxlite has committed its side (acfb8d1), and the truth sha256 is now
 filled in (see Labelling). The next step is sharing truth with rwxlite and
 scoring once. The only classifier output on the exam rows is lean.csv (v4
@@ -311,3 +314,161 @@ As exam #4.
   vendor). Langfuse was dropped by a loader limit, which is a selection effect.
 - The leakage check covers provider fields only.
 - A one-row gap is decided by the written rule, not by a significance test.
+
+## Results and findings (after scoring, 2026-11-07)
+
+Source: `.claude/scratchpad/exam5-score/score.txt`.
+
+### Run facts
+
+- Scored once at rwxmap 36fb827, exit 0. All copy guards passed.
+- 1443 of 1443 rows joined for every config. The lean check passed on 1443 rows.
+- Parity passed: the replay of predictions-r13.csv equals the a-r13-v4 CLI run on 1443 rows, and on the sent/raised/lowered/kept/undecided counts.
+- rwxlite scored its side with the same numbers (rwxlite a864560). Its secondPass replica matches our CLI letters on all 1443 rows.
+- Exam #5 is BURNED for both sides.
+
+### Main table (of 1443)
+
+| config | exact | loose-1 | loose-2 | too loose | too tight | rwxlite sent / raised / lowered / kept / undecided |
+|---|---|---|---|---|---|---|
+| mech-v3 | 1188 (82.3%) | 75 (5.2%) | 2 (0.1%) | 77 (5.3%) | 178 (12.3%) | none |
+| mech-v4 | 1201 (83.2%) | 57 (4.0%) | 2 (0.1%) | 59 (4.1%) | 183 (12.7%) | none |
+| a-020-v3 (ships today) | 1274 (88.3%) | 98 (6.8%) | 2 (0.1%) | 100 (6.9%) | 69 (4.8%) | 645 / 8 / 139 / 407 / 91 |
+| a-020-v4 | 1272 (88.1%) | 92 (6.4%) | 2 (0.1%) | 94 (6.5%) | 77 (5.3%) | 647 / 8 / 148 / 387 / 104 |
+| a-r13-v4 | 1220 (84.5%) | 35 (2.4%) | 2 (0.1%) | 37 (2.6%) | 186 (12.9%) | 647 / 49 / 23 / 457 / 118 |
+
+rwxlite's standalone scorer (exact / too loose / too tight): R13 1283 / 64 / 96; 0.2.0 1281 / 141 / 21.
+
+### By method (of the method's rows)
+
+mech-v3:
+
+| method | exact | too loose | too tight | rows |
+|---|---|---|---|---|
+| DELETE | 168 (98.8%) | 0 (0.0%) | 2 (1.2%) | 170 |
+| GET | 620 (99.5%) | 3 (0.5%) | 0 (0.0%) | 623 |
+| PATCH | 86 (78.2%) | 23 (20.9%) | 1 (0.9%) | 110 |
+| POST | 224 (54.0%) | 17 (4.1%) | 174 (41.9%) | 415 |
+| PUT | 87 (71.3%) | 34 (27.9%) | 1 (0.8%) | 122 |
+
+mech-v4:
+
+| method | exact | too loose | too tight | rows |
+|---|---|---|---|---|
+| DELETE | 168 (98.8%) | 0 (0.0%) | 2 (1.2%) | 170 |
+| GET | 620 (99.5%) | 3 (0.5%) | 0 (0.0%) | 623 |
+| PATCH | 86 (78.2%) | 16 (14.5%) | 8 (7.3%) | 110 |
+| POST | 242 (58.3%) | 17 (4.1%) | 156 (37.6%) | 415 |
+| PUT | 82 (67.2%) | 23 (18.9%) | 17 (13.9%) | 122 |
+
+a-r13-v4:
+
+| method | exact | too loose | too tight | rows |
+|---|---|---|---|---|
+| DELETE | 168 (98.8%) | 0 (0.0%) | 2 (1.2%) | 170 |
+| GET | 620 (99.5%) | 3 (0.5%) | 0 (0.0%) | 623 |
+| PATCH | 73 (66.4%) | 13 (11.8%) | 24 (21.8%) | 110 |
+| POST | 270 (65.1%) | 7 (1.7%) | 138 (33.3%) | 415 |
+| PUT | 86 (70.5%) | 14 (11.5%) | 22 (18.0%) | 122 |
+
+(HEAD, 3 rows, is exact in all three.)
+
+### Gate (mechanical v4 vs v3, mechanical alone, integer counts)
+
+1. Too loose (loose-1 + loose-2): v4 59 vs v3 77 (-18), OK.
+2. Loose-2: v4 2 vs v3 2 (+0), OK.
+3. Too tight: v4 183 vs v3 178 (+5), FAIL.
+
+Gate: NO-GO as pre-registered. Beside it: exact v4 1201 vs v3 1188, of 1443.
+
+**User override (2026-11-07, D138).** The user ruled to ship v4 anyway. Fewer leaks (-18, 23% fewer: 18 of 77) matter more than 5 more too-tight rows (+0.3 points of 1443), and every one of those rows is marked tight for review. The gate result is recorded unchanged. The override is a decision taken after the result, not a pass.
+
+### rwxlite's bar (reported only)
+
+a-r13-v4 vs a-020-v4: too loose 37 vs 94 (-57), OK; exact 1220 vs 1272 (-52), FAIL. Result: FAIL. rwxlite recorded R13 NO-GO (a864560). 0.2.0 stays; nothing released.
+
+### D133 mode a bar (reported only)
+
+Bar: too loose no worse than mech-v4 (59) and exact at least +5 points (73 more rows of 1443). All three mode a configs FAIL.
+
+- a-020-v3: too loose 100 vs 59, FAIL (exact +5.06 points, OK).
+- a-020-v4: too loose 94 vs 59, FAIL; exact +4.92 points, FAIL.
+- a-r13-v4: too loose 37 vs 59, OK; exact +1.32 points, FAIL.
+
+### Findings
+
+- (a) v4 vs v3: 65 rows differ in letter (2 more differ only in marker). POST content nouns turned 18 too-tight rows exact (POST too tight 174 -> 156) and opened 3 leaks: ex5-0276 and ex5-0281 (fusionauth CIMD domain, word "domain") and ex5-1148 (planetscale SSO domains). PUT/PATCH path words closed 18 leaks (PUT 11, PATCH 7) and made 23 rows too tight (PUT 16, PATCH 7), all marked tight. Three more leaks closed on POST (ex5-1157, ex5-1336, ex5-1339), so leaks went 77 - 21 + 3 = 59. The false fires on truth-w rows:
+  - fusionauth role, scope and permission edits: ex5-0266, 0268 (application role), 0272, 0274 (application scope), 0286, 0288 (cimd domain scope), 0335, 0337 (entity type permission), 0425 (key).
+  - hookdeck destination enable/disable/archive/unarchive and integration attach/detach: ex5-0664, 0665, 0666, 0667, 0679, 0680, 0681.
+  - planetscale keyspaces ("key" matched inside the word): ex5-0977, 0984, 0988; and roles ex5-1037.
+  - semaphore integration edits: ex5-1201, 1208, 1212.
+  - Exact rows where v3 and v4 differ in letter, id provider method path truth v3->v4 (markers v3/v4):
+    - ex5-0031 frontapp POST /company/tags w x->w (tight/loose)
+    - ex5-0134 frontapp POST /message_template_folders w x->w (tight/loose)
+    - ex5-0139 frontapp POST /message_template_folders/{message_template_folder_id}/message_template_folders w x->w (tight/loose)
+    - ex5-0141 frontapp POST /message_template_folders/{message_template_folder_id}/message_templates w x->w (tight/loose)
+    - ex5-0143 frontapp POST /message_templates w x->w (tight/loose)
+    - ex5-0165 frontapp POST /tags w x->w (tight/loose)
+    - ex5-0200 frontapp POST /teammates/{teammate_id}/message_template_folders w x->w (tight/loose)
+    - ex5-0202 frontapp POST /teammates/{teammate_id}/message_templates w x->w (tight/loose)
+    - ex5-0210 frontapp POST /teammates/{teammate_id}/tags w x->w (tight/loose)
+    - ex5-0225 frontapp POST /teams/{team_id}/message_template_folders w x->w (tight/loose)
+    - ex5-0227 frontapp POST /teams/{team_id}/message_templates w x->w (tight/loose)
+    - ex5-0234 frontapp POST /teams/{team_id}/tags w x->w (tight/loose)
+    - ex5-0252 fusionauth PATCH /api/api-key/{keyId} x w->x (loose/tight)
+    - ex5-0254 fusionauth PUT /api/api-key/{keyId} x w->x (loose/tight)
+    - ex5-0266 fusionauth PATCH /api/application/{applicationId}/role/{roleId} w w->x (loose/tight)
+    - ex5-0268 fusionauth PUT /api/application/{applicationId}/role/{roleId} w w->x (loose/tight)
+    - ex5-0272 fusionauth PATCH /api/application/{applicationId}/scope/{scopeId} w w->x (loose/tight)
+    - ex5-0274 fusionauth PUT /api/application/{applicationId}/scope/{scopeId} w w->x (loose/tight)
+    - ex5-0276 fusionauth POST /api/cimd/domain x x->w (tight/loose)
+    - ex5-0281 fusionauth POST /api/cimd/domain/{domainId} x x->w (tight/loose)
+    - ex5-0286 fusionauth PATCH /api/cimd/domain/{domainId}/scope/{scopeId} w w->x (loose/tight)
+    - ex5-0288 fusionauth PUT /api/cimd/domain/{domainId}/scope/{scopeId} w w->x (loose/tight)
+    - ex5-0310 fusionauth POST /api/email/template w x->w (tight/loose)
+    - ex5-0316 fusionauth POST /api/email/template/{emailTemplateId} w x->w (tight/loose)
+    - ex5-0335 fusionauth PATCH /api/entity/type/{entityTypeId}/permission/{permissionId} w w->x (loose/tight)
+    - ex5-0337 fusionauth PUT /api/entity/type/{entityTypeId}/permission/{permissionId} w w->x (loose/tight)
+    - ex5-0364 fusionauth PUT /api/group/member x w->x (loose/tight)
+    - ex5-0396 fusionauth PATCH /api/integration x w->x (loose/tight)
+    - ex5-0397 fusionauth PUT /api/integration x w->x (loose/tight)
+    - ex5-0401 fusionauth PATCH /api/ip-acl/{accessControlListId} x w->x (loose/tight)
+    - ex5-0403 fusionauth PUT /api/ip-acl/{accessControlListId} x w->x (loose/tight)
+    - ex5-0425 fusionauth PUT /api/key/{keyId} w w->x (loose/tight)
+    - ex5-0439 fusionauth POST /api/message/template w x->w (tight/loose)
+    - ex5-0444 fusionauth POST /api/message/template/{messageTemplateId} w x->w (tight/loose)
+    - ex5-0540 fusionauth POST /api/user/comment w x->w (tight/loose)
+    - ex5-0601 fusionauth PATCH /api/webhook/{webhookId} x w->x (loose/tight)
+    - ex5-0603 fusionauth PUT /api/webhook/{webhookId} x w->x (loose/tight)
+    - ex5-0659 hookdeck PUT /destinations x w->x (loose/tight)
+    - ex5-0663 hookdeck PUT /destinations/{id} x w->x (loose/tight)
+    - ex5-0664 hookdeck PUT /destinations/{id}/archive w w->x (loose/tight)
+    - ex5-0665 hookdeck PUT /destinations/{id}/disable w w->x (loose/tight)
+    - ex5-0666 hookdeck PUT /destinations/{id}/enable w w->x (loose/tight)
+    - ex5-0667 hookdeck PUT /destinations/{id}/unarchive w w->x (loose/tight)
+    - ex5-0679 hookdeck PUT /integrations/{id} w w->x (loose/tight)
+    - ex5-0680 hookdeck PUT /integrations/{id}/attach/{source_id} w w->x (loose/tight)
+    - ex5-0681 hookdeck PUT /integrations/{id}/detach/{source_id} w w->x (loose/tight)
+    - ex5-0702 hookdeck PUT /notifications/webhooks x w->x (loose/tight)
+    - ex5-0708 hookdeck PUT /organizations/current/api-keys/{id} x w->x (loose/tight)
+    - ex5-0759 paddle PATCH /client-tokens/{client_token_id} x w->x (loose/tight)
+    - ex5-0977 planetscale PATCH /organizations/{organization}/databases/{database}/branches/{branch}/keyspaces/{keyspace} w w->x (loose/tight)
+    - ex5-0984 planetscale PUT /organizations/{organization}/databases/{database}/branches/{branch}/keyspaces/{keyspace}/resizes w w->x (loose/tight)
+    - ex5-0988 planetscale PATCH /organizations/{organization}/databases/{database}/branches/{branch}/keyspaces/{keyspace}/vschema w w->x (loose/tight)
+    - ex5-1037 planetscale PATCH /organizations/{organization}/databases/{database}/branches/{branch}/roles/{id} w w->x (loose/tight)
+    - ex5-1118 planetscale PATCH /organizations/{organization}/databases/{database}/webhooks/{id} x w->x (loose/tight)
+    - ex5-1129 planetscale PATCH /organizations/{organization}/members/{id} x w->x (loose/tight)
+    - ex5-1148 planetscale POST /organizations/{organization}/sso/domains x x->w (tight/loose)
+    - ex5-1157 planetscale POST /organizations/{organization}/teams/{team}/members x w->x (loose/tight)
+    - ex5-1176 semaphoreui PUT /global-roles/{role_id} x w->x (loose/tight)
+    - ex5-1201 semaphoreui PUT /project/{project_id}/integrations/{integration_id} w w->x (loose/tight)
+    - ex5-1208 semaphoreui PUT /project/{project_id}/integrations/{integration_id}/matchers/{matcher_id} w w->x (loose/tight)
+    - ex5-1212 semaphoreui PUT /project/{project_id}/integrations/{integration_id}/values/{extractvalue_id} w w->x (loose/tight)
+    - ex5-1221 semaphoreui PUT /project/{project_id}/keys/{key_id} x w->x (loose/tight)
+    - ex5-1251 semaphoreui POST /project/{project_id}/templates w x->w (tight/loose)
+    - ex5-1336 weaviate POST /authz/roles/{id}/add-permissions x w->x (loose/tight)
+    - ex5-1339 weaviate POST /authz/roles/{id}/remove-permissions x w->x (loose/tight)
+- (b) Shipped mode a (0.2.0) makes too loose WORSE than mechanical alone on v4 truth: 100 vs 77 on v3 and 94 vs 59 on v4. 0.2.0 was trained before D137 widened x, so its confident lowerings land on rows that are now x (148 lowered on v4).
+- (c) R13 halves too loose against 0.2.0 (37 vs 94) and is the safest config measured. It pays in asks: it lowers only 23 rows at p >= 0.97 against 148, so 186 rows stay too tight (of 1443).
+- (d) v4's remaining 59 leaks by rule: PUT method-floor 23, PATCH method-floor 16, POST modify-verb 13, POST content-noun 3, GET method 3, POST read-verb 1. fusionauth holds 27 of the 59.
+- (e) Labeller agreement was 93.7%, against 98.7% on exam #4. All 91 disputes had Opus stricter, and 58 of the 91 were fusionauth.

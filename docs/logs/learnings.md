@@ -8805,3 +8805,14 @@ v4 truth:
 - Ruling (user 2026-11-06): DELETE is DELETE. It stays at the x floor, settled, no rule, no flag; a provider using DELETE for something reversible has misdescribed its API.
 - Lesson: when the method itself is the provider's statement of intent, rwxmap takes it at its word; truth labels that read past the method are noted, not chased.
 - Next: plan step 6, D-number, fresh exam #5 for both projects (rwxlite waits for it), archive v3.
+
+## 2026-11-07 — Exam #5 scored: mechanical v4 gate NO-GO on too tight, shipped by user override (D138)
+
+- Goal: score the frozen exam #5 (frontapp, fusionauth, hookdeck, paddle, planetscale, semaphoreui, weaviate; 1443 ops, v4 truth) once at rwxmap 36fb827, mechanical v4 against v3, plus rwxlite 0.2.0 and R13 through the real CLI.
+- Gate (mechanical alone, of 1443): too loose v4 59 vs v3 77 (-18) OK; loose-2 2 vs 2 OK; too tight 183 vs 178 (+5) FAIL. NO-GO as pre-registered.
+- Five configs (exact / too loose / too tight, of 1443): mech-v3 1188 / 77 / 178; mech-v4 1201 / 59 / 183; a-020-v3 1274 / 100 / 69; a-020-v4 1272 / 94 / 77; a-r13-v4 1220 / 37 / 186. All parity and copy guards passed; rwxlite's replica matches our CLI on all 1443 rows. Exam #5 is burned for both sides.
+- Override (user, 2026-11-07, D138): ship v4 anyway. Fewer leaks (-18, 23% fewer) outweigh 5 more too-tight rows (+0.3 points), each marked tight for review. The gate result stays as recorded; the override is a decision after the result, not a pass.
+- Finding (b): shipped mode a (0.2.0) is looser than mechanical alone on v4 truth, 100 vs 77 on v3 and 94 vs 59 on v4. It was trained before D137 widened x, so its 148 confident lowerings land on rows that are now x. Mode a bar fails for all three mode a configs.
+- Finding (c): R13 halves too loose against 0.2.0 (37 vs 94) and is the safest config, but lowers only 23 rows against 148, so 186 rows stay too tight. It fails rwxlite's bar on exact (1220 vs 1272); 0.2.0 stays, nothing released.
+- Lessons: (1) A word that is right on one vendor's PUT/PATCH (role, permission) is wrong on another's: fusionauth, hookdeck and semaphore truth-w edits were tightened to x. Same lesson as the mined lists. (2) Substring matching catches "key" inside "keyspaces" (3 planetscale rows). (3) A model trained before a truth change lowers onto the new x rows. (4) A written bar can fail on a usability margin the user weighs as minor; record the override separately and never rewrite the gate.
+- Where: docs/wiki/exam-prereg-exam5.md (results section), data/exam5-2026-11-07/score/, decision D138 in docs/wiki/decisions-log.md.
