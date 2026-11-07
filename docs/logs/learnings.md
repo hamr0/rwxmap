@@ -8816,3 +8816,75 @@ v4 truth:
 - Finding (c): R13 halves too loose against 0.2.0 (37 vs 94) and is the safest config, but lowers only 23 rows against 148, so 186 rows stay too tight. It fails rwxlite's bar on exact (1220 vs 1272); 0.2.0 stays, nothing released.
 - Lessons: (1) A word that is right on one vendor's PUT/PATCH (role, permission) is wrong on another's: fusionauth, hookdeck and semaphore truth-w edits were tightened to x. Same lesson as the mined lists. (2) Substring matching catches "key" inside "keyspaces" (3 planetscale rows). (3) A model trained before a truth change lowers onto the new x rows. (4) A written bar can fail on a usability margin the user weighs as minor; record the override separately and never rewrite the gate.
 - Where: docs/wiki/exam-prereg-exam5.md (results section), data/exam5-2026-11-07/score/, decision D138 in docs/wiki/decisions-log.md.
+
+## 2026-11-07 — PRD ladder moved to mechanical v4 (D138)
+
+The PRD's "The ladder" section now carries mechanical v4 (steps per method, v4 per-method tables from the tuning sets and exam #5). What follows is the v3/D87 shape it replaced, verbatim, plus the old "What is next" mechanical-v4 item.
+
+### Old ladder table (v3/D87)
+
+Three standalone steps, named by run order, each owning one letter and
+its own word lists, then step 2's floor. `src/flow.js` decides only the
+order: step 1, step 2, step 3, floor. The first step that claims a row
+decides it.
+
+| order | step | claims | rule | evidence |
+|---|---|---|---|---|
+| 1 | step 1, r | GET, HEAD, OPTIONS, QUERY | `method` | floor |
+| 1 | step 1, r | POST whose lead verb is in `READ_VERBS` | `read-verb` | list |
+| 1 | step 1, r | POST with a `SAFE_VERBS` word at any position | `read-verb-anywhere` | list |
+| 2 | step 2, x | DELETE, always, `destructive: true` | `method-delete` | floor |
+| 2 | step 2, x | POST, PUT or PATCH whose verb is in `CANT_UNDO` | `cant-undo-verb`, `cant-undo-verb-summary` | list |
+| 2 | step 2, x | PUT or PATCH that sets a password, passcode or pin (D131) | `credential-set` | list |
+| 3 | step 3, w | PUT, PATCH | `method-floor` | floor |
+| 3 | step 3, w | POST whose verb is in `KEEP_W` | `modify-verb`, `modify-verb-summary` | list |
+| last | step 2's floor, x | anything unclaimed: a POST with no word, or any other method | `floor-post` | floor |
+
+### Old "Why each floor sits where it does" (v3/D87, 2026-11-03)
+
+**Why each floor sits where it does.** Truth per method under the D87
+definition, and which step decides the rows. Tuning set first (6557
+rows, `data/combined-2026-09-21/labelled.csv`), then the burned M3 exam
+(4279 rows, `data/exam-2026-09-22/labelled.csv`); re-derived 2026-11-03
+with the current `classifyRow`.
+
+| method | set | n | truth r | truth w | truth x | floor | decided by (rows) |
+|---|---|---|---|---|---|---|---|
+| GET | tuning | 2543 | 2541 (100%) | 2 (0%) | 0 | r | method floor 2543 |
+| GET | M3 exam | 2099 | 2094 (100%) | 5 (0%) | 0 | r | method floor 2099 |
+| POST | tuning | 1994 | 169 (8%) | 1333 (67%) | 492 (25%) | x | no word → floor x 1336; step 3 `KEEP_W` → w 378; step 2 `CANT_UNDO` → x 178; step 1 read verb → r 102 |
+| POST | M3 exam | 892 | 128 (14%) | 636 (71%) | 128 (14%) | x | no word → floor x 808; step 2 `CANT_UNDO` → x 27; step 1 read verb → r 36; step 3 `KEEP_W` → w 21 |
+| DELETE | tuning | 951 | 1 (0%) | 26 (3%) | 924 (97%) | x | method floor 951 |
+| DELETE | M3 exam | 558 | 3 (1%) | 7 (1%) | 548 (98%) | x | method floor 558 |
+| PUT | tuning | 766 | 1 (0%) | 718 (94%) | 47 (6%) | w | method floor 751; step 2 `CANT_UNDO` → x 13; step 2 `credential-set` → x 2 |
+| PUT | M3 exam | 460 | 2 (0%) | 441 (96%) | 17 (4%) | w | method floor 456; step 2 `CANT_UNDO` → x 4 |
+| PATCH | tuning | 303 | 0 | 299 (99%) | 4 (1%) | w | method floor 301; step 2 `CANT_UNDO` → x 2 |
+| PATCH | M3 exam | 270 | 0 | 258 (96%) | 12 (4%) | w | method floor 268; step 2 `CANT_UNDO` → x 2 |
+
+Every floor follows its method's majority except POST: most POSTs are
+truly w, but a POST with no verb word cannot be told from a create
+(x), so the invariant takes the tighter class. Those floor rows (1336
+of 1994 on tuning) carry most of the too-tight cost and are the pile
+`jev-lower` lowers.
+
+### Old "method floor" table (v3)
+
+| method | floor | what can move it |
+|---|---|---|
+| GET, HEAD, OPTIONS, QUERY | r | nothing in the mechanical core |
+| DELETE | x, `destructive: true` | nothing — DELETE beats every word |
+| PUT, PATCH | w | a `CANT_UNDO` verb or `credential-set` raises it to x |
+| POST | none — decided by its verb | `READ_VERBS`/`SAFE_VERBS` → r; `CANT_UNDO` → x; `KEEP_W` → w; no word → x |
+| any other method, or none | x | nothing |
+
+### Old "What is next" mechanical-v4 item (2026-11-06 status, replaced)
+
+1. Mechanical alignment with D137 (baseline 2026-11-06, 16,486 ops, six complete sets: against v4 truth mechanical v3 81.8% exact / 5.2% too loose / 13.0% too tight; 682 of the 861 leaks PUT/PATCH method-floor rows). Steps 1-4 done in poc/mech-v4/ (PUT/PATCH path-word x rule, LOVO 360 of 682 floor leaks closed for 120 new too tight; POST path words keep x, content nouns lower to w, LOVO 233 right / 15 leaks; GET action words raise to x). v4 on the six sets: 85.2% exact / 2.6% too loose (loose-2 8) / 12.2% too tight (fitted) vs v3 81.8 / 5.2 (loose-2 13) / 13.0. Step 5 closed (DELETE stays x). Exam #5 vendors picked 2026-11-06: front, planetscale, paddle, hookdeck, fusionauth, semaphore, langfuse (1,437 ops).
+2. The second pass under D137: possibly raising w to x, or lowering x to w, after item 1 is measured; never lower an access-widening x.
+3. Fresh exam #5, pre-registered, scored once for both projects.
+4. README "what x covers" section, exam #5 numbers, release.
+
+### Code notes from the PRD pass
+
+- Checked against poc/mech-v4: READ_VERBS 23, SAFE_VERBS 10, CANT_UNDO 29, REMOVES 6, PATH_X_WORDS 36, GET_ACTION 3, CREDENTIAL_SET 3, CREDENTIAL_CHANGE_VERBS 3, KEEP_W 14, CONTENT_W 20, CONTENT_VETO 2. Rule order matches the brief. Only difference: in step 2, `credential-set` runs only when `cant-undo-verb` did not fire, and `path-x-word` only after both; the PRD table lists them in that order.
+- Exam #5 POST: 156 too-tight rows, 128 of them floor-post (checked on data/exam5-2026-11-07/score/rows-mech-v4.csv).

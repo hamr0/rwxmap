@@ -158,47 +158,94 @@ move a row's letter or marker, it is core.
 
 ### The ladder
 
-Three standalone steps, named by run order, each owning one letter and
-its own word lists, then step 2's floor. `src/flow.js` decides only the
-order: step 1, step 2, step 3, floor. The first step that claims a row
-decides it.
+The shape is mechanical v4 (D138, user override 2026-11-07). It lives in
+`poc/mech-v4/` today and moves into `src/` in the next code pass.
+Three standalone steps (1 owns r, 2 owns x, 3 owns w), each with its own
+word lists. `flow.js` decides only the order: step 1, step 2, step 3,
+then the floor (`floorRead` for read methods, `floorPost` otherwise).
+The first step that claims a row decides it. Read as steps per method:
+where the floor starts, then each rule that can move it, in the order
+the code runs.
 
-| order | step | claims | rule | evidence |
-|---|---|---|---|---|
-| 1 | step 1, r | GET, HEAD, OPTIONS, QUERY | `method` | floor |
-| 1 | step 1, r | POST whose lead verb is in `READ_VERBS` | `read-verb` | list |
-| 1 | step 1, r | POST with a `SAFE_VERBS` word at any position | `read-verb-anywhere` | list |
-| 2 | step 2, x | DELETE, always, `destructive: true` | `method-delete` | floor |
-| 2 | step 2, x | POST, PUT or PATCH whose verb is in `CANT_UNDO` | `cant-undo-verb`, `cant-undo-verb-summary` | list |
-| 2 | step 2, x | PUT or PATCH that sets a password, passcode or pin (D131) | `credential-set` | list |
-| 3 | step 3, w | PUT, PATCH | `method-floor` | floor |
-| 3 | step 3, w | POST whose verb is in `KEEP_W` | `modify-verb`, `modify-verb-summary` | list |
-| last | step 2's floor, x | anything unclaimed: a POST with no word, or any other method | `floor-post` | floor |
+| method | floor | rules in order | moves to |
+|---|---|---|---|
+| GET, HEAD, OPTIONS, QUERY | r | step 2 `get-action` | x |
+| DELETE | x, `destructive: true` | step 2 `method-delete` (no rule moves it) | stays x |
+| PUT, PATCH | w | step 2 `cant-undo-verb`; step 2 `credential-set`; step 2 `path-x-word` | x |
+| POST | x | step 1 `read-verb`; step 1 `read-verb-anywhere`; step 2 `cant-undo-verb`; step 2 `path-x-word`; step 3 `modify-verb`; step 3 `content-noun` | r, r, x, x, w, w |
 
-**Why each floor sits where it does.** Truth per method under the D87
-definition, and which step decides the rows. Tuning set first (6557
-rows, `data/combined-2026-09-21/labelled.csv`), then the burned M3 exam
-(4279 rows, `data/exam-2026-09-22/labelled.csv`); re-derived 2026-11-03
-with the current `classifyRow`.
+- GET, HEAD, OPTIONS, QUERY: floor r (step 1 `floorRead`, rule
+  `method`, evidence floor). `get-action` (`GET_ACTION`, 3 words:
+  logout, revoke, close) raises to x; otherwise r.
+- DELETE: always x, `destructive: true`, rule `method-delete`, settled.
+  Nothing downstream runs for it.
+- PUT, PATCH: floor w (step 3 `method-floor`). Three step 2 rules raise
+  to x, in this order. `cant-undo-verb`: the lead verb is in
+  `CANT_UNDO` (29 words: delete, purge, revoke, send, publish, run,
+  charge, refund, cancel, merge, rotate, reset, start). `credential-set`
+  (D131): password, passcode or pin set, or change, regenerate or regen
+  of one (`CREDENTIAL_SET` 3, `CREDENTIAL_CHANGE_VERBS` 3).
+  `path-x-word`: a `PATH_X_WORDS` word (36: role, member, permission,
+  scope, invite, grant, secret, token, key, webhook, integration,
+  destination) anywhere in the path, by stem or substring.
+- POST: floor x (step 2 `floor-post`). `read-verb`: the lead verb is in
+  `READ_VERBS` (23: list, get, search, fetch, count, validate, parse,
+  suggest) lowers to r, with the plural-noun guard (D99).
+  `read-verb-anywhere`: a `SAFE_VERBS` word (10: validate, evaluate,
+  analyze, parse, calculate, introspect, suggest, sanitize) at any
+  position lowers to r. `cant-undo-verb` and `path-x-word` keep x (the
+  same lists as above; POST has no `credential-set`). `modify-verb`: the
+  lead verb is in `KEEP_W` (14: update, remove, add, attach, assign,
+  activate, move, restore, pause, enable, suspend) lowers to w.
+  `content-noun`: a `CONTENT_W` word (20: tag, label, domain, template,
+  file, note, ticket, comment, restart, lock) lowers to w, unless a
+  `CONTENT_VETO` word (url, credit) is in the path. Otherwise x.
 
-| method | set | n | truth r | truth w | truth x | floor | decided by (rows) |
-|---|---|---|---|---|---|---|---|
-| GET | tuning | 2543 | 2541 (100%) | 2 (0%) | 0 | r | method floor 2543 |
-| GET | M3 exam | 2099 | 2094 (100%) | 5 (0%) | 0 | r | method floor 2099 |
-| POST | tuning | 1994 | 169 (8%) | 1333 (67%) | 492 (25%) | x | no word → floor x 1336; step 3 `KEEP_W` → w 378; step 2 `CANT_UNDO` → x 178; step 1 read verb → r 102 |
-| POST | M3 exam | 892 | 128 (14%) | 636 (71%) | 128 (14%) | x | no word → floor x 808; step 2 `CANT_UNDO` → x 27; step 1 read verb → r 36; step 3 `KEEP_W` → w 21 |
-| DELETE | tuning | 951 | 1 (0%) | 26 (3%) | 924 (97%) | x | method floor 951 |
-| DELETE | M3 exam | 558 | 3 (1%) | 7 (1%) | 548 (98%) | x | method floor 558 |
-| PUT | tuning | 766 | 1 (0%) | 718 (94%) | 47 (6%) | w | method floor 751; step 2 `CANT_UNDO` → x 13; step 2 `credential-set` → x 2 |
-| PUT | M3 exam | 460 | 2 (0%) | 441 (96%) | 17 (4%) | w | method floor 456; step 2 `CANT_UNDO` → x 4 |
-| PATCH | tuning | 303 | 0 | 299 (99%) | 4 (1%) | w | method floor 301; step 2 `CANT_UNDO` → x 2 |
-| PATCH | M3 exam | 270 | 0 | 258 (96%) | 12 (4%) | w | method floor 268; step 2 `CANT_UNDO` → x 2 |
+A row's `…-summary` rule names (`cant-undo-verb-summary`,
+`modify-verb-summary`) mean the verb came from the summary because the
+operationId's lead token was a bare HTTP method word.
+
+**Why each floor sits where it does.** Two measurements. (a) Truth per
+method on the six tuning sets (16,486 ops, v4 truth, fitted; from
+`docs/wiki/mechanical-v4-plan.md`):
+
+| method | truth r | truth w | truth x |
+|---|---|---|---|
+| GET | 99.8% | 0.0% | 0.1% |
+| POST | 9.3% | 48.0% | 42.7% |
+| DELETE | 0.2% | 1.4% | 98.5% |
+| PUT | 0.2% | 73.4% | 26.5% |
+| PATCH | 0% | 79.6% | 20.4% |
+
+So the floors: r is GET (99.8%; QUERY is treated as GET). w is PATCH
+(80%), PUT (73%), POST (48%), DELETE (1.4%). x is DELETE (98%), POST
+(42%), PUT (27%), PATCH (20%).
+
+(b) Exam #5, the clean figure (1443 unseen ops across frontapp,
+fusionauth, hookdeck, paddle, planetscale, semaphoreui, weaviate; v4
+truth), v4 output against truth, r / w / x per method, then v4's
+error rates:
+
+| method | rows | v4 output r / w / x | truth r / w / x | v4 exact | too loose | too tight |
+|---|---|---|---|---|---|---|
+| GET | 623 | 100 / 0 / 0 | 99.5 / 0.2 / 0.3 | 620 (99.5%) | 3 (0.5%) | 0 (0.0%) |
+| POST | 415 | 8.2 / 12.5 / 79.3 | 10.8 / 43.6 / 45.5 | 242 (58.3%) | 17 (4.1%) | 156 (37.6%) |
+| PUT | 122 | 0 / 76.2 / 23.8 | 0.8 / 69.7 / 29.5 | 82 (67.2%) | 23 (18.9%) | 17 (13.9%) |
+| PATCH | 110 | 0 / 87.3 / 12.7 | 0.9 / 78.2 / 20.9 | 86 (78.2%) | 16 (14.5%) | 8 (7.3%) |
+| DELETE | 170 | 0 / 0 / 100 | 0.6 / 0.6 / 98.8 | 168 (98.8%) | 0 (0.0%) | 2 (1.2%) |
 
 Every floor follows its method's majority except POST: most POSTs are
-truly w, but a POST with no verb word cannot be told from a create
-(x), so the invariant takes the tighter class. Those floor rows (1336
-of 1994 on tuning) carry most of the too-tight cost and are the pile
-`jev-lower` lowers.
+truly w (43.6% on exam #5, 48.0% on tuning), but a POST with no word
+cannot be told from a create (x), so the invariant takes the tighter
+class. On exam #5 the POST `floor-post` rows make 128 of POST's 156
+too-tight rows.
+
+**Review marker.** Every PUT, PATCH and POST gets a marker by
+direction: class x is `tight`, class w or r is `loose`. For GET, HEAD,
+OPTIONS and QUERY, r is `settled`, x `tight`, w `loose`; for DELETE, x
+is `settled`, w or r `loose`. Settled means the class equals the
+method's default (`reviewHint` in `flow.js`, the one writer of the
+field; the second pass can override it).
 
 **The method floor, as the code has it.** QUERY (RFC 10008, June 2026,
 Proposed Standard: safe and idempotent like GET, with a request body) is
@@ -210,13 +257,7 @@ entry keyed QUERY (any case). In modes a and b a QUERY row is sent with
 method `QUERY` as-is; rwxlite shows it to its model as GET (from rwxlite's
 next release; on its 383 GET exam rows relabelled QUERY, 1 top letter changed).
 
-| method | floor | what can move it |
-|---|---|---|
-| GET, HEAD, OPTIONS, QUERY | r | nothing in the mechanical core |
-| DELETE | x, `destructive: true` | nothing — DELETE beats every word |
-| PUT, PATCH | w | a `CANT_UNDO` verb or `credential-set` raises it to x |
-| POST | none — decided by its verb | `READ_VERBS`/`SAFE_VERBS` → r; `CANT_UNDO` → x; `KEEP_W` → w; no word → x |
-| any other method, or none | x | nothing |
+Any other method, or none, falls to `floorPost` (x).
 
 The labelling brief lets a DELETE be w when its text names a trash or
 restore; the core does not read description text, so it cannot see
@@ -235,11 +276,15 @@ operationId, a literal path segment or the summary (D131).
 
 | list | owner | size | matched where | moves the row to |
 |---|---|---|---|---|
-| `READ_VERBS` | step 1 | — | lead token only, after `LEAD_MODIFIERS` (bulk, batch, deprecated, beta, async); the plural-noun guard withholds a match reached only through `-s`/`-es`/`-ies` (D99) | r |
+| `READ_VERBS` | step 1 | 23 | lead token only, after `LEAD_MODIFIERS` (bulk, batch, deprecated, beta, async); the plural-noun guard withholds a match reached only through `-s`/`-es`/`-ies` (D99) | r |
 | `SAFE_VERBS` | step 1 | 10 | any token position — only words that are never nouns | r |
 | `CANT_UNDO` | step 2 | 29 | the row's verb | x |
 | `REMOVES` ⊂ `CANT_UNDO` | step 2 | 6 (delete purge revoke expire void redact) | the row's verb | sets `destructive: true` |
 | `KEEP_W` | step 3 | 14 | the row's verb | w |
+| `PATH_X_WORDS` | step 2 | 36 | anywhere in the path, stem or substring (PUT, PATCH, POST) | x |
+| `GET_ACTION` | step 2 | 3 | read methods | x |
+| `CREDENTIAL_SET` + `CREDENTIAL_CHANGE_VERBS` | step 2 | 3 + 3 | PUT, PATCH (D131) | x |
+| `CONTENT_W` (veto `CONTENT_VETO`, 2) | step 3 | 20 | POST path or operation words | w |
 
 "The row's verb" (`verbForRow` in `src/tokens.js`) is the lead token of
 the operationId, or of the path's last segment when there is no
@@ -1234,10 +1279,25 @@ npm). The truth-v4 relabel (D137) is done and handed to rwxlite
 
 Next:
 
-1. Mechanical alignment with D137: measure how well the current mechanical steps match truth-v4 (too loose and too tight counted separately). Then add lead verbs for the new x cases, priced leave-one-vendor-out on the v4 tuning rows before adoption. A core change, so it gets a new D-number. Baseline (2026-11-06, 16,486 ops, six complete sets): against v4 truth mechanical is 81.8% exact / 5.2% too loose / 13.0% too tight (against v3: 80.9 / 0.9 / 18.1); 682 of the 861 leaks are PUT/PATCH method-floor rows. Details in learnings. Plan (user rulings 2026-11-06): a parallel v4 copy of the core in poc/, v3 untouched in src/; floor first, then one extraction pass per method; POST floor stays x; plan and bar in docs/wiki/mechanical-v4-plan.md. Progress: steps 1-4 are done in poc/mech-v4/ (parallel copy proven identical; PUT/PATCH path-word x rule, LOVO 360 of 682 floor leaks closed for 120 new too tight; POST path words keep x and content nouns lower to w, LOVO 233 right / 15 leaks; GET action words logout, revoke, close raise to x; a marker by direction, settled only at the method default). On the six sets v4 is 85.2% exact / 2.6% too loose (loose-2 8) / 12.2% too tight (fitted) against v3 81.8 / 5.2 (loose-2 13) / 13.0. Step 5 closed by ruling (DELETE stays x, settled). Step 6 (D-number, exam #5, archive v3) remains. Exam #5 vendors picked 2026-11-06: front, planetscale, paddle, hookdeck, fusionauth, semaphore, langfuse (1,437 ops); fetched specs are held in .claude/scratchpad/exam5/ until frozen into data/exam5-<date>/, and the candidate check is in poc/exam5-shortlist/.
-2. The second pass under D137: possibly raising w to x, or lowering x to w, on top of the mechanical result. It is decided after item 1 is measured. It covers what old step 6 named: never lower an access-widening x.
-3. Fresh exam #5, pre-registered, scored once for both projects.
-4. README "what x covers" section, exam #5 numbers, release.
+Mechanical v4 ships by D138 (2026-11-07). Exam #5 (1443 ops, v4 truth)
+gate was NO-GO on too tight, 183 vs 178 for v3, and the user overrode it
+because too loose fell from 77 to 59. Shipped mode a (rwxlite 0.2.0) is
+looser than mechanical alone on v4 truth (94 vs 59 too loose on exam #5):
+it was trained before D137 widened x. 0.2.0 stays shipped because the
+R13 candidate is NO-GO on rwxlite's bar (exact 1220 vs 1272).
+
+Next, in order:
+
+1. Move v4 from `poc/mech-v4/` into `src/` and archive v3.
+2. Release: README "what x covers" section and headline numbers
+   updated to exam #5 (v4 mechanical 83.2% exact / 4.1% too loose /
+   12.7% too tight of 1443), then `docs/product/release-checklist.md`
+   item by item.
+3. Measure the candidate words from exam #5 leave-one-vendor-out across
+   all seven sets, adopting only if neither too loose nor too tight
+   worsens.
+4. A what-if of R13 at lower lowering cut-offs.
+5. A new exam #6 for any change (exam #5 is burned).
 
 Parked items and known limits below.
 
