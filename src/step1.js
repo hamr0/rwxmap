@@ -8,7 +8,7 @@ import { leadVerbAfterModifiers, tokensForRow, matchingMembers } from './tokens.
 
 // Methods whose floor is r: they are the read verbs of HTTP itself. QUERY
 // (RFC 10008, D134) is safe and idempotent like GET, with a request body.
-const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'QUERY']);
+export const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'QUERY']);
 
 // READ_VERBS
 //
@@ -108,7 +108,17 @@ export const SAFE_VERBS = new Set([
 ]);
 
 /**
- * Apply step 1 to one row.
+ * Step 1's read floor: the verdict for a GET/HEAD/OPTIONS/QUERY row no word
+ * rule above it claimed. flow.js calls it last (after steps 1-3), so a word
+ * on a read-method row can raise it before this floor is reached.
+ * @returns {StepVerdict}
+ */
+export function floorRead() {
+  return { class: 'r', step: 1, rule: 'method', source: 'floor', matched: [] };
+}
+
+/**
+ * Apply step 1 to one row. Read-method rows return null (see floorRead).
  * @param {Operation} row
  * @param {{readVerbs?: Set<string>, safeVerbs?: Set<string>}} [words]
  *   Word lists to use in place of the module's own (LOVO passes rebuilt
@@ -120,9 +130,7 @@ export function step1(row, words = {}) {
   const safeVerbs = words.safeVerbs ?? SAFE_VERBS;
 
   const method = (row.method || '').toUpperCase();
-  if (READ_METHODS.has(method)) {
-    return { class: 'r', step: 1, rule: 'method', source: 'floor', matched: [] };
-  }
+  if (READ_METHODS.has(method)) return null;
   if (method !== 'POST') return null;
 
   const leadVerb = leadVerbAfterModifiers(row);

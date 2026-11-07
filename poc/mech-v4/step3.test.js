@@ -103,7 +103,7 @@ test('content-noun does not fire: not POST, or word not in the last static segme
 });
 
 test('content-noun: KEEP_W runs first and keeps its own rule', () => {
-  assert.equal(post('/tags/{id}', 'updateTag').rule, 'modify-verb');
+  assert.equal(post('/tags/{id}', 'updateTag')?.rule, 'modify-verb');
 });
 
 test('content-noun in the ladder: path-x-word claims x first; otherwise w; floor when unmatched', () => {
@@ -117,6 +117,6 @@ test('content lists: sizes, verbatim, and injection', () => {
   assert.equal(CONTENT_W.size, 20);
   assert.equal(CONTENT_VETO.size, 2);
   assert.ok(CONTENT_VETO.has('url') && CONTENT_VETO.has('credit'));
-  assert.equal(step3({ method: 'POST', operationId: 'createThing', path: '/things/bananas' }, { contentW: new Set(['banana']) }).rule, 'content-noun');
+  assert.equal(step3({ method: 'POST', operationId: 'createThing', path: '/things/bananas' }, { contentW: new Set(['banana']) })?.rule, 'content-noun');
   assert.equal(post('/projects/{id}/tags') && step3({ method: 'POST', operationId: 'x', path: '/a/tags' }, { contentW: new Set() }), null);
 });

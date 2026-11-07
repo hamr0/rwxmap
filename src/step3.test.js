@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { step3, KEEP_W } from './step3.js';
+import { step3, KEEP_W, CONTENT_W, CONTENT_VETO } from './step3.js';
+import { classifyRow } from './flow.js';
 
 test('method-floor rule: PUT floors to w with an empty matched list', () => {
   const v = step3({ method: 'PUT', operationId: 'updateWidget' });
@@ -73,4 +74,49 @@ test('KEEP_W has 14 members, verbatim', () => {
   ]) {
     assert.equal(KEEP_W.has(word), true, `${word} should be in KEEP_W`);
   }
+});
+
+// ---- content-noun rule
+
+const post = (path, operationId = 'createThing') => step3({ method: 'POST', operationId, path });
+
+test('content-noun fires: last static segment holds a content noun', () => {
+  assert.deepEqual(post('/projects/{id}/tags'), { class: 'w', step: 3, rule: 'content-noun', source: 'list', matched: ['tag'] });
+  assert.deepEqual(post('/files/{id}/copy'), { class: 'w', step: 3, rule: 'content-noun', source: 'list', matched: ['copy'] });
+  assert.deepEqual(post('/boards/{id}/attachments'), { class: 'w', step: 3, rule: 'content-noun', source: 'list', matched: ['attachment'] });
+  assert.deepEqual(post('/contacts/custom_fields'), { class: 'w', step: 3, rule: 'content-noun', source: 'list', matched: ['custom_field'] });
+});
+
+test('content-noun: restart and lock match only as the lead verb', () => {
+  assert.deepEqual(post('/services/{id}', 'restartService'), { class: 'w', step: 3, rule: 'content-noun', source: 'list', matched: ['restart'] });
+  assert.equal(post('/services/{id}/restart', 'createThing'), null);
+});
+
+test('content-noun does not fire: veto words anywhere in the static path', () => {
+  assert.equal(post('/uploads/presigned_url'), null);
+  assert.equal(post('/credit_notes'), null);
+});
+
+test('content-noun does not fire: not POST, or word not in the last static segment', () => {
+  assert.deepEqual(step3({ method: 'PUT', operationId: 'putTag', path: '/tags/{id}' }), { class: 'w', step: 3, rule: 'method-floor', source: 'floor', matched: [] });
+  assert.equal(post('/tags/{id}/subscribe'), null);
+});
+
+test('content-noun: KEEP_W runs first and keeps its own rule', () => {
+  assert.equal(post('/tags/{id}', 'updateTag')?.rule, 'modify-verb');
+});
+
+test('content-noun in the ladder: path-x-word claims x first; otherwise w; floor when unmatched', () => {
+  assert.equal(classifyRow({ method: 'POST', operationId: 'createLabel', path: '/webhooks/{id}/labels' }).rule, 'path-x-word');
+  assert.equal(classifyRow({ method: 'POST', operationId: 'createLabel', path: '/webhooks/{id}/labels' }).class, 'x');
+  assert.equal(classifyRow({ method: 'POST', operationId: 'createTag', path: '/projects/{id}/tags' }).rule, 'content-noun');
+  assert.equal(classifyRow({ method: 'POST', operationId: 'createThing', path: '/things' }).rule, 'floor-post');
+});
+
+test('content lists: sizes, verbatim, and injection', () => {
+  assert.equal(CONTENT_W.size, 20);
+  assert.equal(CONTENT_VETO.size, 2);
+  assert.ok(CONTENT_VETO.has('url') && CONTENT_VETO.has('credit'));
+  assert.equal(step3({ method: 'POST', operationId: 'createThing', path: '/things/bananas' }, { contentW: new Set(['banana']) })?.rule, 'content-noun');
+  assert.equal(post('/projects/{id}/tags') && step3({ method: 'POST', operationId: 'x', path: '/a/tags' }, { contentW: new Set() }), null);
 });
