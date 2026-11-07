@@ -974,8 +974,8 @@ Status: spec in progress on branch `feat/d133-rwxlite-engines`. Pass 1
 `rwxlite`, the `rwxlite` JSON block, the cache check), pass 2a (model
 download from rwxlite's GitHub releases, `--model small`, the rwxlite
 adapter) and pass 2b (mode b, mode c's undecided rule, the 2a fixes) are
-built on the branch, unreleased. rwxlite 0.2.0 is published, so the default
-run uses it when the `rwxlite@0.2` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
+built on the branch, unreleased. rwxlite 0.3.1 is published and pinned (D139), so the default
+run uses it when the `rwxlite@0.3` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
 decided; everything marked "proposal" or "open" is not decided.
 
 ### Decided (user rulings, 2026-11-03 and 2026-11-04)
@@ -990,7 +990,7 @@ decided; everything marked "proposal" or "open" is not decided.
     stay exactly as today. Mode c uses the same scope. On a `loose`
     row rwxlite is asked whether it is really x (raise or keep). On a `tight` row rwxlite is asked
     whether it can be lowered; a lowering is accepted only at max p >=
-    0.97 (rwxlite's measured cut-off). If rwxlite cannot decide, the row
+    0.90 (D139). If rwxlite cannot decide, the row
     is x and marked for review. Raised, lowered and undecided rows all
     get the review mark.
   - **b: rwxlite alone (built, pass 2b).** rwxlite judges every row,
@@ -1093,18 +1093,14 @@ decided; everything marked "proposal" or "open" is not decided.
 - **Distribution.** Ships on npm. The model is downloaded on first use
   and is pinned to one rwxlite release tag in each rwxmap release (D135;
   `RWXLITE_TAG` in `src/modeldownload.js`). The rwxlite npm package that
-  runs it must be in the same minor line (>=0.2.0 <0.3.0, derived from the
+  runs it must be in the same minor line (>=0.3.0 <0.4.0, derived from the
   tag, read from the package's own package.json); any other version, a
   pre-release or an unreadable version turns rwxlite off, mechanical
   alone, with the reason printed (D135). The package is checked before
   the model is fetched, so a missing or wrong-version package costs no
-  download. A newer model replaces it only
-  after a no-regression result on a fresh clean exam (exam #4,
-  2026-11-05: rwxlite r11 failed it, 0.2.0 stays). Decided (D139, user
-  override 2026-11-07): the pin moves to rwxlite 0.3.1 (R13), tag v0.3.1,
-  accepted range 0.3.x, once rwxlite publishes it and we verify the real
-  download; this pin text is replaced in that pass. Every run records
-  the model string.
+  download. Current pin (D139, user override 2026-11-07, built
+  5e6b9cb, unreleased): rwxlite 0.3.1 (R13), tag v0.3.1, cache fallback
+  0.3.1, accepted range 0.3.x. Every run records the model string.
 - **Model cache and integrity.** The downloaded model is cached in a
   per-user folder, `~/.cache/rwxmap/` (or `$XDG_CACHE_HOME/rwxmap`),
   one directory per model: `rwxlite-<semver>+<sha8>/` holding
@@ -1131,7 +1127,7 @@ decided; everything marked "proposal" or "open" is not decided.
   session, 2026-11-04).** GitHub releases on `hamr0/rwxlite`. Assets per
   release: `manifest.json` (int8 per-channel), `manifest-exact.json`
   (fp32), `model-int8-pc.onnx`, `model-fp32.onnx`, `vocab.txt`. Pinned
-  tag (D135): `https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest-exact.json`
+  tag (D135): `https://github.com/hamr0/rwxlite/releases/download/v0.3.1/manifest-exact.json`
   (rwxmap default) and `.../manifest.json` (`--model small`). Not live
   yet. On download rwxmap stores the chosen manifest as `manifest.json`
   inside the model's own folder `rwxlite-<semver>+<sha8>/` (the cache
@@ -1148,13 +1144,12 @@ decided; everything marked "proposal" or "open" is not decided.
   rule (`src/secondpass.js`): send `loose` and `tight` rows; the
   engine's letter is the largest of x = isX, w = changes - isX, r = 1 -
   changes; a raise is accepted; a lowering is accepted only at p >=
-  0.97; otherwise the row is x plus review `tight`; `settled` rows are
+  0.90 (D139); otherwise the row is x plus review `tight`; `settled` rows are
   never sent. rwxlite's tier rule is NOT adopted (it moves only Jev's
   three tiers, with per-tier cuts and then asks a lowering under 0.97).
   A `credential-set` verdict (D131) is never lowered by the second pass,
   in any mode (user ruling 2026-11-04).
-  Shipped at 0.97 (D136, measured for 0.2.0). Decided to move to 0.90
-  with rwxlite R13 (D139); not built until the pin pass.
+  Cut-off 0.90 with rwxlite R13 (D139, built; was 0.97 under D136 for 0.2.0).
   Evidence: "Rule comparison" under Evidence so far. Caveat:
   secondPass has only that one tuning measurement; the D133 exam is its
   test.
@@ -1286,19 +1281,27 @@ Next:
 
 Mechanical v4 ships by D138 (2026-11-07). Exam #5 (1443 ops, v4 truth)
 gate was NO-GO on too tight, 183 vs 178 for v3, and the user overrode it
-because too loose fell from 77 to 59. Shipped mode a (rwxlite 0.2.0) is
+because too loose fell from 77 to 59. Mode a as scored then (rwxlite 0.2.0) was
 looser than mechanical alone on v4 truth (94 vs 59 too loose on exam #5):
 it was trained before D137 widened x.
 
-Decided, not built (D139, user override 2026-11-07): rwxmap will ship
-rwxlite R13 (rwxlite 0.3.1) with the lowering cut-off LOWER_MIN_P at 0.90,
-overriding D135 (R13 failed its exact bar) and D136 (cut-off 0.97), for the
-same reason as D138: fewer leaks matter more than more review asks. Exam
-#5, mode a, 1443 ops, exact / too loose / too tight: shipped 0.2.0 at 0.97
-1272 / 94 / 77; R13 at 0.97 1220 / 37 / 186; R13 at 0.90 1269 / 40 / 134.
-The 0.90 cut is tuned on burned exam #5 and rwxlite's val set, not proven
-on unseen vendors. Shipping waits on rwxlite publishing 0.3.1. Until then
-0.2.0 at 0.97 is what ships.
+Built (D139, user override 2026-11-07, commit 5e6b9cb, unreleased): src/
+ships rwxlite R13 (rwxlite 0.3.1) with the lowering cut-off LOWER_MIN_P at
+0.90, overriding D135 (R13 failed its exact bar) and D136 (cut-off 0.97),
+for the same reason as D138: fewer leaks matter more than more review asks.
+Pin: RWXLITE_TAG v0.3.1, cache fallback 0.3.1, accepted package range 0.3.x
+(0.2.x and 0.4.0 refused); 617 tests, guards for tag/fallback agreement,
+range, cut and credential-set never lowered, each broken by hand once.
+Verified 2026-11-07: GitHub release v0.3.1 assets and npm rwxlite@0.3.1
+sha256/integrity match rwxlite's list and the exam #5 addendum; the
+published package differs from the exam #5 tarball only in comments and
+README/CHANGELOG/package.json metadata. Real install on exam #5 (npm
+0.3.1, model downloaded into an empty cache, current src/), mode a, 1443
+ops, exact / too loose / too tight: 1269 / 40 (38 loose-1, 2 loose-2) /
+134; 78 lowered, 63 undecided; equal to the replay at 0.90. Against the
+scored 0.2.0 at 0.97 (1272 / 94 / 77) too loose falls from 94 to 40 and too
+tight rises from 77 to 134. The 0.90 cut is tuned on burned exam #5 and
+rwxlite's val set, not proven on unseen vendors.
 
 Next, in order:
 
@@ -1306,11 +1309,7 @@ Next, in order:
    updated to exam #5 (v4 mechanical 83.2% exact / 4.1% too loose /
    12.7% too tight of 1443), then `docs/product/release-checklist.md`
    item by item.
-2. Verify rwxlite 0.3.1 (GitHub release v0.3.1 with its model files, npm
-   0.3.1) from the real download path, then one code pass (D139): pin
-   `RWXLITE_TAG` v0.3.1, cache fallback, accepted range 0.3.x, and
-   `LOWER_MIN_P` 0.90, with tests and conformance.
-3. A new exam #6 for any change (exam #5 is burned; bunny.net is spent;
+2. A new exam #6 for any change (exam #5 is burned; bunny.net is spent;
    unused shortlist vendors: grafana, nocodb, radarr).
 
 Parked items and known limits below.
