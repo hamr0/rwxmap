@@ -1,10 +1,9 @@
 # Pre-registration (DRAFT): clean exam #5, rwxmap side (mechanical v4 gate)
 
-**Status: DRAFT, written 2026-11-07. Not frozen.** It freezes when this file is
-committed together with the scorer (`data/exam5-2026-11-07/score/`, not built
-yet), the CANDIDATE ADDENDUM below is filled in, the truth sha256 is filled in,
-and rwxlite has committed its side. Nothing has been classified on the exam
-rows.
+**Status: DRAFT, written 2026-11-07. Not frozen.** The CANDIDATE ADDENDUM is
+filled in and rwxlite has committed its side (acfb8d1). What remains is the
+commit of this file with the scorer (`data/exam5-2026-11-07/score/`) and the
+truth sha256. Nothing has been classified on the exam rows.
 
 ## The question
 
@@ -76,7 +75,9 @@ Leakage check.
 
 User ruling 2026-11-07: score v4 as it would ship, through the real CLI.
 
-- rwxmap ref: the prereg commit (**pending**). The scorer makes three scratch
+- rwxmap ref: the commit that freezes this file with the scorer (the one
+  holding the filled addendum); it is passed explicitly as `--rwxmap-ref`, never
+  left to the HEAD default. The scorer makes three scratch
   copies of `src/` and `package.json` at that ref, via `git archive`.
 - Copy V3 is unchanged.
 - Copy V4 is the same, with exactly four files replaced by their `poc/mech-v4`
@@ -107,9 +108,17 @@ User ruling 2026-11-07: score v4 as it would ship, through the real CLI.
 
 Lean file for rwxlite. After both preregs are committed, rwxmap runs
 `poc/mech-v4/lean.mjs` (commit 94f6cc4) on `ops.csv` and sends `lean.csv`
-(`id,class,rule,marker`) plus its sha256 to rwxlite. The scorer checks that
-copy V4's CLI letters, rules and markers equal `lean.csv` row for row. Any
-difference stops the exam.
+(`id,class,rule,marker`) plus its sha256 to rwxlite. The CLI publishes no rule
+names (by design), so the scorer checks (a) copy V4's real CLI class and marker
+against `lean.csv`, and (b) the rule, by running copy V4's own `flow.js`
+`classifyRow` in-process on the ops rows and comparing class, rule and marker
+to `lean.csv`. Copy V4's `flow.js` is byte-identical to `poc/mech-v4/flow.js`.
+Any difference stops the exam (user ruling 2026-11-07).
+
+`lean.csv` was produced 2026-11-07, sha256
+`93a76c5fad8f5baceecef4c087a95e03f070addeabbab1e356253221a09eb39d`, committed at
+bbd9ab4 (`data/exam5-2026-11-07/lean.csv.sha256`). The file itself is kept out of
+git at `.claude/scratchpad/exam5-lean/` so labellers never see a letter.
 
 ## Models
 
@@ -139,24 +148,40 @@ model runs at its own manifest temperature, and nothing is overridden.
 
 ### CANDIDATE: rwxlite R13
 
-**CANDIDATE ADDENDUM: pending.** It is filled in, and committed, BEFORE the
+**CANDIDATE ADDENDUM: filled 2026-11-07.** The candidate is rwxlite R13;
+rwxlite's own prereg is rwxlite commit acfb8d1 (`docs/wiki/prereg-exam5.md` in
+the rwxlite repo). The orchestrator checked these values against the files in
+the rwxlite repo. It is filled in, and committed, BEFORE the
 truth sha256 is shared with rwxlite and before any scoring. The scorer refuses
 to score any R13 config unless every value is filled in and checked against the
 files.
 
 | field | value |
 |---|---|
-| rwxlite package ref (commit in the rwxlite repo) | **pending** |
-| rwxlite tag / version | **pending** |
-| manifest.json sha256 (int8) | **pending** |
-| manifest-exact.json sha256 (fp32) | **pending** |
-| model-int8-pc.onnx sha256 | **pending** |
-| model-fp32.onnx sha256 | **pending** |
-| vocab.txt sha256 | **pending** |
-| fp32 model string | **pending** |
-| int8 model string | **pending** |
-| temperature (from the fp32 manifest) | **pending** (rwxlite announced T 0.991463) |
+| rwxlite package ref (commit in the rwxlite repo) | `f7456a2acc66ce84fd8c87d7426c9001bab8ceb7` |
+| rwxlite tag / version | `v0.3.1` |
+| manifest.json sha256 (int8) | `e8477a1595578eec1e45020277319877d45cfb809785b22eaeb83bfb66c0a5b8` |
+| manifest-exact.json sha256 (fp32) | `c6bac86970888049952305f72434abe5c9d8f854224a5537f14e5a428a977739` |
+| model-int8-pc.onnx sha256 | `984714f0342ce551779f0ed9d95be57f71ab30b2ef72baec1d9818ce96d465d7` |
+| model-fp32.onnx sha256 | `bbe1997d43020724f9eab9e42e8f6337e9640fe46f764b6fceac1eb1d000a3cf` |
+| vocab.txt sha256 | `07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3` |
+| fp32 model string | `rwxlite-0.3.1+bbe1997d` |
+| int8 model string | `rwxlite-0.3.1+984714f0` |
+| temperature (from the fp32 manifest) | `0.991463` |
 | model.safetensors sha256 | `d16276d8b0ff93221821e2c3bd107b7d6898a8804bba93c40a2f4b06bbd6b30d` |
+
+Model files at /home/hamr/PycharmProjects/rwxlite/data/m1-r13/ (local,
+gitignored in rwxlite). The installable package is `rwxlite-0.3.1.tgz` in that
+folder, sha256
+`698c0191a772879ff424875f062fd54810dbd0eb7310b2bd8bb077c67476f7c0`. The scorer
+extracts the tarball into its scratch package folder, not from the git ref
+(rwxlite's dev package.json still says 0.2.1). Before use it checks that the
+tarball's sha256 is the one above, that its package.json is rwxlite@0.3.1, and
+that every file under its `src/` is byte-identical to `src/` at the package ref
+f7456a2 (the same file list, the same bytes). onnxruntime-node comes from the
+rwxlite checkout's node_modules, exactly as for the 0.2.0 baseline, so no npm
+install runs. Tag v0.3.1 is proposed by rwxlite and not yet
+created; 0.3.1 is the exam label.
 
 Known now: rwxlite will send a scratch-installable R13 tarball. rwxlite will
 feed v4's lean as is, with no aliases (rwxlite commit 4e2bc5e).
@@ -168,7 +193,22 @@ Parity. rwxlite commits its R13 fp32 predictions (`id,model,p_is_x,p_changes`,
 one row per op, in `ops.csv` order; sha256 committed before truth) before the
 truth is shared. The scorer checks that the real CLI run with R13 gives the
 same verdicts (the real CLI run on copy V4-R13) as a replay of those committed predictions through the same
-`secondPass`, row for row. A mismatch stops the exam and is reported.
+`secondPass`, row for row. The replay takes its mechanical verdicts from copy
+V4-R13's `flow.js` in-process. A mismatch stops the exam and is reported.
+
+rwxlite committed its predictions at acfb8d1 (hashes in rwxlite
+`docs/wiki/exam5-predictions.sha256`). The parity check uses
+`predictions-r13.csv`.
+
+| file | model, setting | sha256 |
+|---|---|---|
+| predictions-r13.csv | rwxlite-0.3.1+bbe1997d, T 0.991463, fp32, batch 1 | `1633417853a141cab079513dc78e8b538714bd6f46b729adb95876b34d3a73de` |
+| predictions-v020.csv | rwxlite-0.2.0+8503b655, T 0.844, fp32, batch 1 | `906c0edd1a237172b3e08884f87faa538be7aacee64a633399f55905aa14f162` |
+
+Both models were fed the same lean (id,class,rule), sha256
+`e17922ad3b0c1cb90604af2d9c03dd60bcf2fde73fab8434cbaf8d1bcc370d80`, equal on
+id,class,rule to rwxmap's `lean.csv`. Files:
+/home/hamr/PycharmProjects/rwxlite/data/exam5-2026-11-07/ (gitignored).
 
 ## Configs
 
@@ -212,7 +252,7 @@ scored on rwxlite's side.
 - **rwxlite's bar (theirs, frozen by them, recorded here).** R13 vs 0.2.0,
   through rwxmap's `secondPass` (a-r13-v4 vs a-020-v4) and standalone on their
   side: no more too loose and no fewer exact; a tie passes. rwxlite's own
-  pre-registration is authoritative for its bar; rwxlite commit: **pending**.
+  pre-registration is authoritative for its bar; rwxlite commit: acfb8d1.
 - **D133 mode a bar, reported only.** a-r13-v4 and a-020-v4 vs mech-v4: too
   loose <= mech-v4's, and exact >= mech-v4's exact + 5.0 points. That is
   ceil(0.05 x 1443) = 73 more exact rows (72.15 rounded up).
