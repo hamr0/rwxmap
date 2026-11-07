@@ -170,7 +170,7 @@ function putVariant(xdg, version, modelFile) {
 test('findModel: preferModelFile picks the highest valid model of that variant even under a higher one of the other', () => {
   const xdg = scratch();
   const exact = putVariant(xdg, '0.1.0', 'model-fp32.onnx');
-  const small = putVariant(xdg, '0.2.0', 'model-int8-pc.onnx');
+  const small = putVariant(xdg, '0.3.1', 'model-int8-pc.onnx');
   const env = { XDG_CACHE_HOME: xdg };
   const a = /** @type {any} */ (findModel(env, 'model-fp32.onnx'));
   assert.deepEqual([a.status, a.model, a.otherVariant], ['ok', exact.model, undefined]);
@@ -182,7 +182,7 @@ test('findModel: preferModelFile picks the highest valid model of that variant e
 test('findModel: with none of the preferred variant, the highest valid of the other is returned and flagged otherVariant', () => {
   const xdg = scratch();
   putVariant(xdg, '0.1.0', 'model-int8-pc.onnx');
-  const hi = putVariant(xdg, '0.2.0', 'model-int8-pc.onnx');
+  const hi = putVariant(xdg, '0.3.1', 'model-int8-pc.onnx');
   const r = /** @type {any} */ (findModel({ XDG_CACHE_HOME: xdg }, 'model-fp32.onnx'));
   assert.deepEqual([r.status, r.model, r.otherVariant], ['ok', hi.model, true]);
 });

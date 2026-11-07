@@ -91,7 +91,7 @@ export function verifyModelDir(dir) {
  *            NOT used
  * @param {{XDG_CACHE_HOME?: string}} [environ]
  * @param {string} [preferModelFile]
- * @param {string} [onlyVersion] e.g. "0.2.0": folders of any other version are ignored (D135)
+ * @param {string} [onlyVersion] e.g. "0.3.1": folders of any other version are ignored (D135)
  * @returns {{status: 'none'} | {status: 'ok', model: string, file: string, otherVariant?: true, rejected: Array<{dir: string, reason: string}>} | {status: 'bad', dir: string, reason: string}}
  */
 export function findModel(environ = process.env, preferModelFile, onlyVersion) {

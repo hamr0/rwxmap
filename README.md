@@ -63,7 +63,7 @@ How it decides:
 | mechanical | `rwxmap spec.json --engine mechanical` | rules only | offline; nothing downloaded; same answer every run | no model at all |
 
 rwxlite is a small local model, a separate project: [github.com/hamr0/rwxlite](https://github.com/hamr0/rwxlite), npm package `rwxlite`.
-Install it with `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.2`. Without it, modes a and b run mechanically and say `rwxlite: off (mechanical)`.
+Install it with `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.3`. Without it, modes a and b run mechanically and say `rwxlite: off (mechanical)`.
 
 What leaves your machine: mechanical, nothing. Modes a and b, only the model download from GitHub. Mode c, each checked row's method, path, operationId, summary and description go to Jev.
 
@@ -74,10 +74,11 @@ Exam #5: 1443 operations, 7 complete official APIs (frontapp, planetscale, paddl
 | mode | exact | too loose | too tight |
 |---|---|---|---|
 | mechanical (v4) | 1201 (83.2%) | 59 (4.1%) | 183 (12.7%) |
-| a (default, rwxlite 0.2.0) | 1272 (88.1%) | 94 (6.5%) | 77 (5.3%) |
+| a (default, rwxlite 0.3.1, lowering cut 0.90) | 1269 (87.9%) | 40 (2.8%) | 134 (9.3%) |
 
 - Too loose (looser than the truth label) is the safety cost. Too tight (stricter) is a usability cost. They are kept apart.
-- On this exam mode a is looser than mechanical alone (94 against 59 too loose). rwxlite 0.2.0 was trained before x was widened to cover anything that cannot be put back, so it lowers rows that are now x. A newer model is decided and will replace it.
+- On this exam mode a leaks less than mechanical alone (40 against 59 too loose) and has fewer too-tight rows (134 against 183).
+- The 0.90 cut was tuned on this exam and on rwxlite's validation set, so it is not yet proven on unseen vendors (D139).
 - Mechanical v4 shipped by choice although it failed its own too-tight gate: 183 too tight against 178 for the older rules. It has 59 too-loose rows against 77, and every added too-tight row is marked for review.
 - The exam was scored once and is used up. Any rule or model change needs a new exam.
 - Modes b and c were not scored on this exam.
@@ -180,15 +181,15 @@ Exit 0 on success, 1 on any failure. An existing output file is not overwritten 
 
 <details><summary>rwxlite model</summary>
 
-- A run that uses rwxlite fetches the manifest of the pinned rwxlite release, v0.2.0 (a small request), downloads the model if it is not cached, checks every sha256, and only then puts it in place.
+- A run that uses rwxlite fetches the manifest of the pinned rwxlite release, v0.3.1 (a small request), downloads the model if it is not cached, checks every sha256, and only then puts it in place.
 - Default: the exact fp32 model, about 91 MB, downloaded once. `--model small`: the int8 model, about 23 MB.
 - Cache: `$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`, one folder per model.
 - Downloads are https only, from github.com and its githubusercontent.com hosts, capped at 200 MB. A failed or tampered download installs nothing.
 - Offline (manifest unreachable): the run uses the verified cached model of the pinned version and says "using cached <model>, could not reach the release". With none cached it prints `rwxlite: off (mechanical) — <reason>` and runs mechanically. It never stops the run.
 - The model is pinned in each rwxmap release. A new model ships only after it passes a fresh exam. The combined JSON records the model string.
-- The `rwxlite` package is optional; you install it. Use `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.2`: on Linux x64, `onnxruntime-node` otherwise downloads about 285 MB of GPU (CUDA/TensorRT) libraries.
-- Only rwxlite package versions 0.2.x are accepted (D135). Any other version turns the second pass off (mechanical alone, reason printed).
-- Without the package: `rwxlite: off (mechanical) — the rwxlite package is not installed (npm install rwxlite@0.2)`.
+- The `rwxlite` package is optional; you install it. Use `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.3`: on Linux x64, `onnxruntime-node` otherwise downloads about 285 MB of GPU (CUDA/TensorRT) libraries.
+- Only rwxlite package versions 0.3.x are accepted (D135). Any other version turns the second pass off (mechanical alone, reason printed).
+- Without the package: `rwxlite: off (mechanical) — the rwxlite package is not installed (npm install rwxlite@0.3)`.
 
 </details>
 

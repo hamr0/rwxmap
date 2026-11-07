@@ -10,7 +10,7 @@ import { findModel } from './modelcache.js';
 
 const sha256 = (b) => createHash('sha256').update(b).digest('hex');
 const scratch = () => fs.mkdtempSync(path.join(os.tmpdir(), 'rwxmap-modeldl-'));
-const BASE = 'https://github.com/hamr0/rwxlite/releases/download/v0.2.0/';
+const BASE = 'https://github.com/hamr0/rwxlite/releases/download/v0.3.1/';
 
 /**
  * A fake release: the small and exact manifests plus their files, served by an
@@ -19,7 +19,7 @@ const BASE = 'https://github.com/hamr0/rwxlite/releases/download/v0.2.0/';
  * opts.redirect ({name: url}: that file answers 302 to url), opts.hostile.
  */
 function release(opts = {}) {
-  const version = opts.version ?? '0.2.0';
+  const version = opts.version ?? '0.3.1';
   const weights = opts.weights ?? Buffer.from('fp32-weights-' + version);
   const vocab = Buffer.from('vocab-' + version);
   const model = `rwxlite-${version}+${sha256(weights).slice(0, 8)}`;
@@ -198,7 +198,7 @@ test('ensureModel: HTTP 404 (not published) or offline with no cache -> off with
 
 test('ensureModel: offline or failing with a verified cached pinned model -> uses it and says so; other versions are ignored (D135)', async () => {
   const xdg = scratch();
-  const pinned = release({ version: '0.2.0' });
+  const pinned = release({ version: '0.3.1' });
   await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: pinned.fetchImpl });
   putCached(xdg, '0.3.0', 'model-fp32.onnx');
   putCached(xdg, '0.1.0', 'model-fp32.onnx');
@@ -209,6 +209,17 @@ test('ensureModel: offline or failing with a verified cached pinned model -> use
     assert.match(got.notes.join('\n'), new RegExp(`using cached ${pinned.model.replace(/[+.]/g, '\\$&')}, could not reach the release`));
   }
   assert.equal(cacheFolders(xdg).length, 3); // the failed 0.9.0 left nothing
+});
+
+test('D139: the pin is v0.3.1 and the offline cache fallback names the same version (a 0.2.0 cache is not used)', async () => {
+  assert.equal(RWXLITE_TAG, 'v0.3.1');
+  const xdg = scratch();
+  putCached(xdg, '0.2.0', 'model-fp32.onnx');
+  const off = /** @type {any} */ (await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: release({ offline: true }).fetchImpl }));
+  assert.equal(off.status, 'off');
+  const pinned = putCached(xdg, '0.3.1', 'model-fp32.onnx');
+  const got = /** @type {any} */ (await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: release({ offline: true }).fetchImpl }));
+  assert.deepEqual([got.status, got.model], ['ready', pinned]);
 });
 
 test('ensureModel: offline with only cached models of other versions (0.3.0, 0.1.0) -> off, none in the cache (D135)', async () => {
@@ -247,7 +258,7 @@ test('ensureModel: a cached model that is corrupt is re-downloaded when the netw
   fs.rmSync(path.join(xdg, 'rwxmap', rel.model), { recursive: true });
   const got = await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: release().fetchImpl });
   assert.equal(got.status, 'ready');
-  assert.equal(fs.readFileSync(path.join(got.dir, 'vocab.txt'), 'utf8'), 'vocab-0.2.0');
+  assert.equal(fs.readFileSync(path.join(got.dir, 'vocab.txt'), 'utf8'), 'vocab-0.3.1');
 });
 
 /** Put an already-valid model of a variant straight into the cache. */
@@ -265,8 +276,8 @@ function putCached(xdg, version, modelFile) {
 
 test('ensureModel: offline, the cached model of the CHOSEN variant wins over a higher one of the other', async () => {
   const xdg = scratch();
-  const exact = putCached(xdg, '0.2.0', 'model-fp32.onnx');
-  const small = putCached(xdg, '0.2.0', 'model-int8-pc.onnx');
+  const exact = putCached(xdg, '0.3.1', 'model-fp32.onnx');
+  const small = putCached(xdg, '0.3.1', 'model-int8-pc.onnx');
   const offline = release({ offline: true }).fetchImpl;
   const a = /** @type {any} */ (await ensureModel({ variant: 'exact', environ: { XDG_CACHE_HOME: xdg }, fetchImpl: offline }));
   assert.deepEqual([a.status, a.model], ['ready', exact]);
@@ -277,12 +288,12 @@ test('ensureModel: offline, the cached model of the CHOSEN variant wins over a h
 
 test('ensureModel: offline with no cached model of the chosen variant, the other variant is used and the line says so', async () => {
   const xdg = scratch();
-  const small = putCached(xdg, '0.2.0', 'model-int8-pc.onnx');
+  const small = putCached(xdg, '0.3.1', 'model-int8-pc.onnx');
   const got = /** @type {any} */ (await ensureModel({ variant: 'exact', environ: { XDG_CACHE_HOME: xdg }, fetchImpl: release({ offline: true }).fetchImpl }));
   assert.deepEqual([got.status, got.model], ['ready', small]);
-  assert.match(got.notes.join('\n'), /using cached rwxlite-0\.2\.0\+[0-9a-f]{8} \(no cached exact model, so the small one\), could not reach the release/);
+  assert.match(got.notes.join('\n'), /using cached rwxlite-0\.3\.1\+[0-9a-f]{8} \(no cached exact model, so the small one\), could not reach the release/);
   const xdg2 = scratch();
-  const exact = putCached(xdg2, '0.2.0', 'model-fp32.onnx');
+  const exact = putCached(xdg2, '0.3.1', 'model-fp32.onnx');
   const got2 = /** @type {any} */ (await ensureModel({ variant: 'small', environ: { XDG_CACHE_HOME: xdg2 }, fetchImpl: release({ offline: true }).fetchImpl }));
   assert.equal(got2.model, exact);
   assert.match(got2.notes.join('\n'), /\(no cached small model, so the exact one\)/);
