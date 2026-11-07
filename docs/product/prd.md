@@ -322,16 +322,15 @@ for debugging and are never published (D28/D76/D77).
   from method + class + evidence and nothing else; its one writer is
   `reviewHint` in `src/flow.js`, and `applyJev` recomputes it through
   the same function when a tier moves a row.
-  - `tight` — x, possibly tighter than needed (D133, built in commit
-    aea12f1). It covers class x on a POST and any row the second pass
-    could not decide and pushed to x, a PUT/PATCH included.
-  - `loose` — mechanical lowered it (D133, built in commit aea12f1):
-    class w on a PUT or PATCH decided by the method floor, plus any POST
-    row a word list lowered below the POST floor of x (class w or r,
-    evidence `list`). Where most of the too-loose rows live.
-    `settled` means nothing lowered the row, mostly GET r and DELETE x
-    floor rows.
-  - `settled` — neither of the other two. It is NOT signed or
+  - `tight` — x, possibly tighter than needed. Under D138 it is every
+    PUT, PATCH or POST at class x (a path word, a floor-post), a GET at
+    x, and any row the second pass could not decide and pushed to x.
+  - `loose` — possibly looser than needed. Under D138 it is every PUT,
+    PATCH or POST at class w or r, a GET at w, and a DELETE below x.
+    Where most of the too-loose rows live. See "Review marker" above for
+    the exact rule.
+  - `settled` — the class equals the method's default (GET r, DELETE x).
+    It is NOT signed or
     confirmed by anyone. A signed state would be a fourth value only a
     human writes after the export; rwxmap never emits it.
 
@@ -394,7 +393,7 @@ change in a scratch copy gave 2,556 differences, exit 1.
 The v3-era proofs (`proof-src.mjs` from `poc/d87`, `tools/proof-step1.js`)
 are archived in `poc/archive/v3-proofs/` and fail against v4 by design.
 
-Run: `npm test` (616 pass), `npm run typecheck`,
+Run: `npm test` (617 pass), `npm run typecheck`,
 `node poc/mech-v4/proof-copy.mjs`, and conformance
 `(cd poc/conformance && node run.mjs)` (6/6).
 
@@ -559,8 +558,9 @@ saves none while costing 51 (D101).
   change state leaks through that floor (5 of 2099 GET rows on the M3
   exam). `jev-raise-get` is the only thing that can catch them.
 - **The review rule is fitted.** D101's `tight`/`loose`/`settled`
-  rule was read off the M3 exam; it reproduces on the tuning pool and
-  needs a fresh exam.
+  rule was read off the M3 exam; it reproduced on the tuning pool and
+  needed a fresh exam. D138 replaced it with a rule by direction (see
+  "Review marker"); the table below measures the older D101/D133 rule.
 - **The tuning pool is a tuning set, not an exam** (D24). Its lists were
   written and priced on it.
 - **An unknown method floors at x, and `jev-lower` can lower it.** A
@@ -1043,17 +1043,13 @@ decided; everything marked "proposal" or "open" is not decided.
   review marker. No new per-row field; the two additions below (a
   fourth `evidence` value and a top-level `rwxlite` block) are the only
   output changes.
-- **The `tight` marker is wider (built, commit aea12f1).** It means "x,
-  possibly tighter than needed, review". It covers x-on-POST rows and
-  rows the second pass could not decide, including an undecided
-  PUT/PATCH pushed to x. The change is in `reviewHint` in
-  `src/flow.js` (core-adjacent, its one writer). Output format is
-  unchanged.
-- **The `loose` marker is wider (built, commit aea12f1).** It means
-  "mechanical lowered it". It covers PUT/PATCH rows left at w by the
-  method floor plus any POST row a word list lowered below the POST
-  floor of x (class w or r, evidence `list`). `settled` is rows
-  nothing lowered. Output format is unchanged. It applies in every mode,
+- **The `tight` and `loose` markers are by direction (built in D133,
+  commit aea12f1; widened to every PUT, PATCH, POST, GET and DELETE row
+  by D138).** `tight` means "x, possibly tighter than needed, review",
+  `loose` means "w or r, possibly looser than needed", `settled` means
+  the class equals the method default; the rule is in "Review marker"
+  above. The change is in `reviewHint` in `src/flow.js` (its one
+  writer). Output format is unchanged. It applies in every mode,
   `--engine mechanical` included.
 - **A moved row's evidence is `rwxlite` (user ruling, 2026-11-04).** A
   row the second pass moved (raised, lowered, or undecided and moved to
@@ -1426,7 +1422,8 @@ no Jev, through a symlink to `src/cli.js` the way npm's bin link and
 npx run it (a direct `node src/cli.js` run cannot see a symlink bug). A FAIL exits 1; drift on the small sites prints CHANGED and
 does not fail. It is not in `npm test` or CI because it hits the
 network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
-(commit 001be9a).
+(commit 001be9a); intercom and ibanforge were re-recorded 2026-11-07
+under mechanical v4 (commit 9040a4c).
 
 
 ## Open questions

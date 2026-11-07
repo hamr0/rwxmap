@@ -50,7 +50,7 @@ rwxmap reads specs and writes every format. The deciding is rules, plus a model 
 How it decides:
 
 - Method floor: GET, HEAD, OPTIONS and QUERY are r, unless the name is a one-way action (logout, revoke, close), which raises it to x. DELETE is x. PUT and PATCH are w, raised to x by a path word (role, member, token, webhook and the like) or a credential-set verb. POST is x, lowered to w by a content noun (tag, file, comment and the like) or a short list of verbs, or to r by a read verb (list, get, search and the like).
-- Unsure rows get a marker. `loose`: the rules lowered the letter; a reviewer checks if it should be x (most too-loose rows live here). `tight`: an x that may be stricter than needed, including rows the second pass could not decide; too tight costs usability, not safety. `settled`: nothing lowered it, nothing is doubtful; not signed, not verified.
+- Unsure rows get a marker. `loose`: a PUT, PATCH or POST left at w or r; a reviewer checks if it should be x (most too-loose rows live here). `tight`: an x that may be stricter than needed, including rows the second pass could not decide; too tight costs usability, not safety. `settled`: nothing lowered it, nothing is doubtful; not signed, not verified.
 - Still unsure: x plus review. Never a looser guess.
 
 ## Modes
@@ -186,7 +186,7 @@ Exit 0 on success, 1 on any failure. An existing output file is not overwritten 
 - Cache: `$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`, one folder per model.
 - Downloads are https only, from github.com and its githubusercontent.com hosts, capped at 200 MB. A failed or tampered download installs nothing.
 - Offline (manifest unreachable): the run uses the verified cached model of the pinned version and says "using cached <model>, could not reach the release". With none cached it prints `rwxlite: off (mechanical) — <reason>` and runs mechanically. It never stops the run.
-- The model is pinned in each rwxmap release. A new model ships only after it passes a fresh exam. The combined JSON records the model string.
+- The model is pinned in each rwxmap release. A new model replaces it only by the maintainer's decision, on exam numbers published here (0.3.1 shipped that way, D139). The combined JSON records the model string.
 - The `rwxlite` package is optional; you install it. Use `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.3`: on Linux x64, `onnxruntime-node` otherwise downloads about 285 MB of GPU (CUDA/TensorRT) libraries.
 - Only rwxlite package versions 0.3.x are accepted (D135). Any other version turns the second pass off (mechanical alone, reason printed).
 - Without the package: `rwxlite: off (mechanical) — the rwxlite package is not installed (npm install rwxlite@0.3)`.
