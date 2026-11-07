@@ -1,0 +1,136 @@
+row_id,provider,method,path,operationId,summary,description
+ex5-0611,hookdeck.com,GET,/attempts,getAttempts,Retrieve attempts,"This endpoint lists attempts, or a subset of attempts."
+ex5-0612,hookdeck.com,GET,/attempts/{id},getAttempt,Retrieve an attempt,"This endpoint retrieves a specific attempt. When retrieving a completed attempt, the response will contain the `body` of the destination's response. If the `body` is not yet available in our backend service the `body` will be set to `NOT_AVAILABLE_YET`."
+ex5-0613,hookdeck.com,GET,/bookmarks,getBookmarks,Retrieve bookmarks,"This endpoint lists bookmarks, or a subset of bookmarks."
+ex5-0614,hookdeck.com,POST,/bookmarks,createBookmark,Create a bookmark,This endpoint creates a bookmark from a specific event.
+ex5-0615,hookdeck.com,DELETE,/bookmarks/{id},deleteBookmark,Delete a bookmark,This endpoint permanently deletes a bookmark. This action cannot be undone.
+ex5-0616,hookdeck.com,GET,/bookmarks/{id},getBookmark,Retrieve a bookmark,This endpoint retrieves a specific bookmark.
+ex5-0617,hookdeck.com,PUT,/bookmarks/{id},updateBookmark,Update a bookmark,This endpoint updates a bookmark.
+ex5-0618,hookdeck.com,GET,/bookmarks/{id}/raw_body,getBookmarkRawBody,Get a bookmark raw body data,
+ex5-0619,hookdeck.com,POST,/bookmarks/{id}/trigger,triggerBookmark,Trigger a bookmark,"This endpoint triggers a bookmark, replaying its associated event against all matching connections."
+ex5-0620,hookdeck.com,GET,/bulk/events/cancel,getEventBulkCancels,Retrieve events bulk cancels,This endpoint lists events bulk cancels.
+ex5-0621,hookdeck.com,POST,/bulk/events/cancel,createEventBulkCancel,Create events bulk cancel,This endpoint creates and starts an events bulk cancel using the provided query.
+ex5-0622,hookdeck.com,GET,/bulk/events/cancel/plan,generateEventBulkCancelPlan,Generate events bulk cancel plan,This endpoint estimates the number of events matched by the provided query before creating a bulk cancel.
+ex5-0623,hookdeck.com,GET,/bulk/events/cancel/{id},getEventBulkCancel,Retrieve events bulk cancel,This endpoint retrieves a specific events bulk cancel.
+ex5-0624,hookdeck.com,GET,/bulk/events/retry,getEventBulkRetries,Retrieve events bulk retries,This endpoint lists events bulk retries.
+ex5-0625,hookdeck.com,POST,/bulk/events/retry,createEventBulkRetry,Create events bulk retry,This endpoint creates and starts an events bulk retry using the provided query.
+ex5-0626,hookdeck.com,GET,/bulk/events/retry/plan,generateEventBulkRetryPlan,Generate events bulk retry plan,This endpoint estimates the number of events matched by the provided query before creating a bulk retry. Use the plan to preview impact.
+ex5-0627,hookdeck.com,GET,/bulk/events/retry/{id},getEventBulkRetry,Retrieve events bulk retry,This endpoint retrieves a specific events bulk retry.
+ex5-0628,hookdeck.com,POST,/bulk/events/retry/{id}/cancel,cancelEventBulkRetry,Cancel events bulk retry,This endpoint cancels a pending or in-progress events bulk retry.
+ex5-0629,hookdeck.com,GET,/bulk/ignored-events/retry,getIgnoredEventBulkRetries,Retrieve ignored events bulk retries,This endpoint lists ignored events bulk retries.
+ex5-0630,hookdeck.com,POST,/bulk/ignored-events/retry,createIgnoredEventBulkRetry,Create ignored events bulk retry,This endpoint creates and starts an ignored events bulk retry using the provided query.
+ex5-0631,hookdeck.com,GET,/bulk/ignored-events/retry/plan,generateIgnoredEventBulkRetryPlan,Generate ignored events bulk retry plan,This endpoint estimates the number of ignored events matched by the provided query before creating a bulk retry.
+ex5-0632,hookdeck.com,GET,/bulk/ignored-events/retry/{id},getIgnoredEventBulkRetry,Retrieve ignored events bulk retry,This endpoint retrieves a specific ignored events bulk retry.
+ex5-0633,hookdeck.com,POST,/bulk/ignored-events/retry/{id}/cancel,cancelIgnoredEventBulkRetry,Cancel ignored events bulk retry,This endpoint cancels a pending or in-progress ignored events bulk retry.
+ex5-0634,hookdeck.com,GET,/bulk/requests/replay,getRequestBulkReplays,Retrieve requests bulk replays,This endpoint lists requests bulk replays.
+ex5-0635,hookdeck.com,POST,/bulk/requests/replay,createRequestBulkReplay,Create requests bulk replay,"Creates and starts a requests bulk replay. The `query.target` object selects where to replay: `source_id` targets a source — alone it replays onto all of the source’s active connections (resolved as the replay runs), or combine it with `webhook_ids` to target specific connections on that source. The remaining `query` fields filter which historical requests to replay."
+ex5-0636,hookdeck.com,GET,/bulk/requests/replay/plan,generateRequestBulkReplayPlan,Generate requests bulk replay plan,"Estimates the number of requests matched by the provided filter before creating a bulk replay. Pass the same `query` payload that you will POST to create the bulk replay — except `query.target`, which is not a filter and may be omitted."
+ex5-0637,hookdeck.com,GET,/bulk/requests/replay/{id},getRequestBulkReplay,Retrieve requests bulk replay,This endpoint retrieves a specific requests bulk replay.
+ex5-0638,hookdeck.com,POST,/bulk/requests/replay/{id}/cancel,cancelRequestBulkReplay,Cancel requests bulk replay,This endpoint cancels a pending or in-progress requests bulk replay.
+ex5-0639,hookdeck.com,GET,/bulk/requests/retry,getRequestBulkRetries,Retrieve requests bulk retries,This endpoint lists requests bulk retries.
+ex5-0640,hookdeck.com,POST,/bulk/requests/retry,createRequestBulkRetry,Create requests bulk retry,This endpoint creates and starts a requests bulk retry using the provided query.
+ex5-0641,hookdeck.com,GET,/bulk/requests/retry/plan,generateRequestBulkRetryPlan,Generate requests bulk retry plan,This endpoint estimates the number of requests matched by the provided query before creating a bulk retry.
+ex5-0642,hookdeck.com,GET,/bulk/requests/retry/{id},getRequestBulkRetry,Retrieve requests bulk retry,This endpoint retrieves a specific requests bulk retry.
+ex5-0643,hookdeck.com,POST,/bulk/requests/retry/{id}/cancel,cancelRequestBulkRetry,Cancel requests bulk retry,This endpoint cancels a pending or in-progress requests bulk retry.
+ex5-0644,hookdeck.com,GET,/connections,getConnections,Retrieve connections,"This endpoint lists connections, or a subset of connections."
+ex5-0645,hookdeck.com,POST,/connections,createConnection,Create a connection,"This endpoint creates a connection. You can create a connection's underlying source, destination, and rules with a single call by declaring an object for any of those resources. You can reuse a source or destination by referencing their ID."
+ex5-0646,hookdeck.com,PUT,/connections,upsertConnection,Create/Update a connection,"This endpoint creates a connection, or updates an existing connection by name. A connection's source and destination cannot be updated."
+ex5-0647,hookdeck.com,GET,/connections/count,countConnections,Count connections,
+ex5-0648,hookdeck.com,DELETE,/connections/{id},deleteConnection,Delete a connection,This endpoint permanently deletes a connection. This action cannot be undone.
+ex5-0649,hookdeck.com,GET,/connections/{id},getConnection,Retrieve a connection,This endpoint retrieves a specific connection.
+ex5-0650,hookdeck.com,PUT,/connections/{id},updateConnection,Update a connection,This endpoint updates a connection.
+ex5-0651,hookdeck.com,PUT,/connections/{id}/archive,disableConnection_archive,Disable a connection,This endpoint disables a connection. Notice that a connection is enabled by default when created. A disabled connection will no longer receive or deliver any events.
+ex5-0652,hookdeck.com,PUT,/connections/{id}/disable,disableConnection,Disable a connection,This endpoint disables a connection. Notice that a connection is enabled by default when created. A disabled connection will no longer receive or deliver any events.
+ex5-0653,hookdeck.com,PUT,/connections/{id}/enable,enableConnection,Enable a connection,This endpoint enables a connection that has been previously disabled. The associated source and destination will also be enabled if they were previously disabled.
+ex5-0654,hookdeck.com,PUT,/connections/{id}/pause,pauseConnection,Pause a connection,"This endpoint pauses a connection. A paused connection will still receive events, but those events will be marked with a status of `HOLD` and will be delivered only once the connection is unpaused."
+ex5-0655,hookdeck.com,PUT,/connections/{id}/unarchive,enableConnection_unarchive,Enable a connection,This endpoint enables a connection that has been previously disabled. The associated source and destination will also be enabled if they were previously disabled.
+ex5-0656,hookdeck.com,PUT,/connections/{id}/unpause,unpauseConnection,Unpause a connection,"This endpoint unpauses a connection. Any event with a status of `HOLD` will be attempted. Destination delivery rate will be respected. This operation is asynchronous, so it may take some time for all events to be `QUEUED` for delivery."
+ex5-0657,hookdeck.com,GET,/destinations,getDestinations,Retrieve destinations,"This endpoint lists destinations, or a subset of destinations."
+ex5-0658,hookdeck.com,POST,/destinations,createDestination,Create a destination,This endpoint creates a destination.
+ex5-0659,hookdeck.com,PUT,/destinations,upsertDestination,Create/Update a destination,"This endpoint creates a destination, or updates an existing destination by name."
+ex5-0660,hookdeck.com,GET,/destinations/count,countDestinations,Count destinations,
+ex5-0661,hookdeck.com,DELETE,/destinations/{id},deleteDestination,Delete a destination,This endpoint permanently deletes a destination. This action cannot be undone.
+ex5-0662,hookdeck.com,GET,/destinations/{id},getDestination,Retrieve a destination,This endpoint retrieves a specific destination.
+ex5-0663,hookdeck.com,PUT,/destinations/{id},updateDestination,Update a destination,This endpoint updates a destination.
+ex5-0664,hookdeck.com,PUT,/destinations/{id}/archive,disableDestination_archive,Disable a destination,This endpoint disables a destination. A disabled destination will no longer deliver any events.
+ex5-0665,hookdeck.com,PUT,/destinations/{id}/disable,disableDestination,Disable a destination,This endpoint disables a destination. A disabled destination will no longer deliver any events.
+ex5-0666,hookdeck.com,PUT,/destinations/{id}/enable,enableDestination,Enable a destination,This endpoint enables a destination that was previously disabled.
+ex5-0667,hookdeck.com,PUT,/destinations/{id}/unarchive,enableDestination_unarchive,Enable a destination,This endpoint enables a destination that was previously disabled.
+ex5-0668,hookdeck.com,GET,/events,getEvents,Retrieve events,"This endpoint lists events, or a subset of events."
+ex5-0669,hookdeck.com,GET,/events/{id},getEvent,Retrieve an event,"This endpoint retrieves a specific event. The response contains the `data` object with the properties `body` and `headers`, representing the original data for that request."
+ex5-0670,hookdeck.com,PUT,/events/{id}/cancel,cancelEvent,Cancel an event,"This endpoint cancels a pending event. Only events with a status of `QUEUED`, `SCHEDULED`, or `HOLD` can be cancelled."
+ex5-0671,hookdeck.com,PUT,/events/{id}/mute,cancelEvent_mute,Cancel an event,"This endpoint cancels a pending event. Only events with a status of `QUEUED`, `SCHEDULED`, or `HOLD` can be cancelled."
+ex5-0672,hookdeck.com,GET,/events/{id}/raw_body,getEventRawBody,Get a event raw body data,
+ex5-0673,hookdeck.com,POST,/events/{id}/replay,replayEvent,Replay an event,"Replays an event by re-ingesting the original request through the full pipeline, creating a new request and new events. The original event remains unchanged. By default, replays to the same connection as the original event. Optionally specify one or more connections via `webhook_ids` — any connections in the project. When the target connections span multiple sources, the replay fans out into one new request per target source. Alternatively specify `source_id` to target another source — alone it replays onto all of that source’s active connections, or combine it with `webhook_ids` to target specific connections on that source."
+ex5-0674,hookdeck.com,POST,/events/{id}/retry,retryEvent,Retry an event,This endpoint retries a specific event. Retrying an event will cause a new attempt to be made to deliver it to the destination.
+ex5-0675,hookdeck.com,GET,/integrations,getIntegrations,Get integrations,
+ex5-0676,hookdeck.com,POST,/integrations,createIntegration,Create an integration,
+ex5-0677,hookdeck.com,DELETE,/integrations/{id},deleteIntegration,Delete an integration,
+ex5-0678,hookdeck.com,GET,/integrations/{id},getIntegration,Get an integration,
+ex5-0679,hookdeck.com,PUT,/integrations/{id},updateIntegration,Update an integration,
+ex5-0680,hookdeck.com,PUT,/integrations/{id}/attach/{source_id},attachIntegrationToSource,Attach an integration to a source,
+ex5-0681,hookdeck.com,PUT,/integrations/{id}/detach/{source_id},detachIntegrationToSource,Detach an integration from a source,
+ex5-0682,hookdeck.com,GET,/issue-triggers,getIssueTriggers,Retrieve issue triggers,This endpoint lists issue triggers.
+ex5-0683,hookdeck.com,POST,/issue-triggers,createIssueTrigger,Create an issue trigger,This endpoint creates an issue trigger.
+ex5-0684,hookdeck.com,PUT,/issue-triggers,upsertIssueTrigger,Create/Update an issue trigger,"This endpoint creates an issue trigger, or updates an existing issue trigger by name."
+ex5-0685,hookdeck.com,DELETE,/issue-triggers/{id},deleteIssueTrigger,Delete an issue trigger,This endpoint permanently deletes an issue trigger. This action cannot be undone.
+ex5-0686,hookdeck.com,GET,/issue-triggers/{id},getIssueTrigger,Retrieve an issue trigger,This endpoint retrieves a specific issue trigger.
+ex5-0687,hookdeck.com,PUT,/issue-triggers/{id},updateIssueTrigger,Update an issue trigger,This endpoint updates an issue trigger.
+ex5-0688,hookdeck.com,PUT,/issue-triggers/{id}/disable,disableIssueTrigger,Disable an issue trigger,This endpoint disables an issue trigger so it stops producing issues.
+ex5-0689,hookdeck.com,PUT,/issue-triggers/{id}/enable,enableIssueTrigger,Enable an issue trigger,This endpoint enables a previously disabled issue trigger.
+ex5-0690,hookdeck.com,GET,/issues,getIssues,Retrieve issues,"This endpoint lists issues, or a subset of issues."
+ex5-0691,hookdeck.com,GET,/issues/count,getIssueCount,Get the number of issues,
+ex5-0692,hookdeck.com,DELETE,/issues/{id},dismissIssue,Dismiss an issue,This endpoint dismisses an issue.
+ex5-0693,hookdeck.com,GET,/issues/{id},getIssue,Retrieve an issue,This endpoint retrieves a specific issue.
+ex5-0694,hookdeck.com,PUT,/issues/{id},updateIssue,Update an issue,This endpoint updates an issue's status.
+ex5-0695,hookdeck.com,GET,/metrics/attempts,queryAttemptMetrics,Query attempt metrics,Query aggregated attempt metrics with time-based grouping and filtering
+ex5-0696,hookdeck.com,GET,/metrics/events,queryEventMetrics,Query event metrics,Query aggregated event metrics with time-based grouping and filtering
+ex5-0697,hookdeck.com,GET,/metrics/events-by-issue,queryEventsByIssueMetrics,Query event metrics grouped by individual issue,"Returns metrics for events broken down by individual issue IDs. Uses arrayJoin to create one row per issue per event, enabling per-issue analytics. Useful for tracking which issues affect the most events over time."
+ex5-0698,hookdeck.com,GET,/metrics/events-pending-timeseries,queryEventsPendingTimeseriesMetrics,Query events pending timeseries metrics,Query aggregated events pending timeseries metrics with time-based grouping and filtering
+ex5-0699,hookdeck.com,GET,/metrics/queue-depth,queryQueueDepthMetrics,Query queue depth metrics,Query queue depth metrics for destinations and delivery groups (pending events count and age)
+ex5-0700,hookdeck.com,GET,/metrics/requests,queryRequestMetrics,Query request metrics,Query aggregated request metrics with time-based grouping and filtering
+ex5-0701,hookdeck.com,GET,/metrics/transformations,queryTransformationMetrics,Query transformation execution metrics,Query aggregated transformation execution metrics with time-based grouping and filtering
+ex5-0702,hookdeck.com,PUT,/notifications/webhooks,toggleWebhookNotifications,Webhook Notifications,"This endpoint enables or disables webhook notifications for the project, and sets the topics and source to deliver them to."
+ex5-0703,hookdeck.com,GET,/organizations/current,getCurrentOrganization,Get the current organization,
+ex5-0704,hookdeck.com,PUT,/organizations/current,updateCurrentOrganization,Update the current organization,
+ex5-0705,hookdeck.com,GET,/organizations/current/api-keys,listApiKeys,List API keys,"List the active organization and project API keys of the current organization. When called with an organization API key, secrets are only included for project keys whose scopes the calling key holds on that project; organization key secrets are never included. An organization API key limited to selected projects only lists the project keys of those projects."
+ex5-0706,hookdeck.com,POST,/organizations/current/api-keys,createApiKey,Create an API key,"Create an organization or project API key. Grants limit an organization key to specific projects; a project key is already limited to its own project. Creating organization API keys requires an admin session. Organization API keys can only create project keys, and only with scopes they hold on that project."
+ex5-0707,hookdeck.com,DELETE,/organizations/current/api-keys/{id},deleteApiKey,Delete an API key,Delete an API key. The key stops authenticating immediately. Organization API keys can only delete project keys whose scopes they hold on that project.
+ex5-0708,hookdeck.com,PUT,/organizations/current/api-keys/{id},updateApiKey,Update an API key,"Update the scopes of an API key, and the projects an organization key is limited to (`grants`). The secret is unchanged. Organization API keys can only update project keys whose scopes they hold on that project, before and after the update."
+ex5-0709,hookdeck.com,POST,/organizations/current/api-keys/{id}/roll,rollApiKey,Roll an API key,Roll an API key: the current key expires after the rollover delay and a replacement key is returned. Organization API keys can only roll project keys whose scopes they hold on that project.
+ex5-0710,hookdeck.com,GET,/projects,listProjects,List projects,List all projects for the authenticated organization or user.
+ex5-0711,hookdeck.com,POST,/projects,createProject,Create a project,Create a new project within an organization. An organization API key restricted to selected projects is automatically granted access to the project it creates.
+ex5-0712,hookdeck.com,DELETE,/projects/{id},deleteProject,Delete a project,Delete a project by ID.
+ex5-0713,hookdeck.com,GET,/projects/{id},getProject,Get a project,Retrieve a project by ID.
+ex5-0714,hookdeck.com,PUT,/projects/{id},updateProject,Update a project,Update a project by ID.
+ex5-0715,hookdeck.com,GET,/projects/{id}/custom_domains,listCustomDomains,List all custom domains and their verification statuses for the project,
+ex5-0716,hookdeck.com,POST,/projects/{id}/custom_domains,addCustomDomain,Add a custom domain to the project,
+ex5-0717,hookdeck.com,DELETE,/projects/{id}/custom_domains/{domain_id},deleteCustomDomain,Removes a custom domain from the project,
+ex5-0718,hookdeck.com,GET,/requests,getRequests,Retrieve requests,"This endpoint lists requests, or a subset of requests."
+ex5-0719,hookdeck.com,GET,/requests/{id},getRequest,Retrieve a request,This endpoint retrieves a specific request.
+ex5-0720,hookdeck.com,GET,/requests/{id}/events,getRequestEvents,Retrieve request events,This endpoint retrieves all events that were created as a result of the specified request.
+ex5-0721,hookdeck.com,GET,/requests/{id}/ignored_events,getRequestIgnoredEvents,Retrieve request ignored events,This endpoint retrieves all events that were ignored (filtered out) for the specified request.
+ex5-0722,hookdeck.com,GET,/requests/{id}/raw_body,getRequestRawBody,Get a request raw body data,
+ex5-0723,hookdeck.com,POST,/requests/{id}/replay,replayRequest,Replay a request,"Replays a request through the full pipeline, creating a new request and new events. The original request and its events remain unchanged. Transformations, filters, and other pipeline rules are re-evaluated with the current configuration. By default, replays to all currently active connections on the request source — this also backfills traffic onto connections added after the original request was ingested. If the source has no active connections, the replay still creates a new request, rejected with cause `NO_CONNECTION`. Optionally specify `source_id` to target another source — alone it replays onto all of that source’s active connections, or combine it with `webhook_ids` to target specific connections on that source. `webhook_ids` without `source_id` may target any connections in the project; when they span multiple sources the replay fans out into one new request per target source."
+ex5-0724,hookdeck.com,POST,/requests/{id}/retry,retryRequest,Retry a request,This endpoint retries a specific request. Retrying a request creates new events based on the request for the specified connections (or all matching connections if none specified).
+ex5-0725,hookdeck.com,GET,/sources,getSources,Retrieve sources,"This endpoint lists sources, or a subset of sources."
+ex5-0726,hookdeck.com,POST,/sources,createSource,Create a source,This endpoint creates a source.
+ex5-0727,hookdeck.com,PUT,/sources,upsertSource,Create/Update a source,"This endpoint creates a source, or updates an existing source by name."
+ex5-0728,hookdeck.com,GET,/sources/count,countSources,Count sources,
+ex5-0729,hookdeck.com,DELETE,/sources/{id},deleteSource,Delete a source,This endpoint permanently deletes a source. This action cannot be undone.
+ex5-0730,hookdeck.com,GET,/sources/{id},getSource,Retrieve a source,This endpoint retrieves a specific source.
+ex5-0731,hookdeck.com,PUT,/sources/{id},updateSource,Update a source,This endpoint updates a source.
+ex5-0732,hookdeck.com,PUT,/sources/{id}/archive,disableSource_archive,Disable a source,"This endpoint disables a source. A disabled source will no longer receive any events, and all connections associated with this source will also be disabled."
+ex5-0733,hookdeck.com,PUT,/sources/{id}/disable,disableSource,Disable a source,"This endpoint disables a source. A disabled source will no longer receive any events, and all connections associated with this source will also be disabled."
+ex5-0734,hookdeck.com,PUT,/sources/{id}/enable,enableSource,Enable a source,This endpoint enables a source that was previously disabled.
+ex5-0735,hookdeck.com,PUT,/sources/{id}/unarchive,enableSource_unarchive,Enable a source,This endpoint enables a source that was previously disabled.
+ex5-0736,hookdeck.com,GET,/transformations,getTransformations,Retrieve transformations,"This endpoint lists transformations, or a subset of transformations."
+ex5-0737,hookdeck.com,POST,/transformations,createTransformation,Create a transformation,This endpoint creates a transformation.
+ex5-0738,hookdeck.com,PUT,/transformations,upsertTransformation,Create/Update a transformation,"This endpoint creates a transformation, or updates an existing transformation by name."
+ex5-0739,hookdeck.com,GET,/transformations/count,getTransformationsCount,Get transformations count,
+ex5-0740,hookdeck.com,PUT,/transformations/run,testTransformation,Test a transformation,This endpoint executes a transformation against a sample request payload and returns the transformed result without persisting anything.
+ex5-0741,hookdeck.com,DELETE,/transformations/{id},deleteTransformation,Delete a transformation,This endpoint permanently deletes a transformation. This action cannot be undone.
+ex5-0742,hookdeck.com,GET,/transformations/{id},getTransformation,Retrieve a transformation,This endpoint retrieves a specific transformation.
+ex5-0743,hookdeck.com,PUT,/transformations/{id},updateTransformation,Update a transformation,This endpoint updates a transformation.
+ex5-0744,hookdeck.com,GET,/transformations/{id}/executions,getTransformationExecutions,Get transformation executions,
+ex5-0745,hookdeck.com,GET,/transformations/{id}/executions/{execution_id},getTransformationExecution,Get a transformation execution,

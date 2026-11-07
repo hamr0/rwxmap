@@ -1,0 +1,634 @@
+row_id,provider,method,path,operationId,summary,description
+ex5-0746,paddle.com,GET,/,get-api-root,Get API root,"Returns information about the Paddle API and the caller making the request, including their account and permissions.
+
+Authentication is optional. A request with no credentials still succeeds, with `caller.auth_type` and `caller.account` set to `null` and an empty `caller.permissions`. A request with an API key that isn't valid returns a `403` error, like any other operation. To check that an API key works, make sure `caller.account` isn't `null`."
+ex5-0747,paddle.com,GET,/account,get-account,Get account,Returns the business identity of the account that you're authenticated as.
+ex5-0748,paddle.com,PATCH,/account,patch-account,Update account,"Updates the business identity of the account that you're authenticated as.
+
+Send only the fields that you want to change. Fields that you omit keep their current value.
+
+`email` is the only field that you can change. `legal_name`, `display_name`, and `website` appear
+on legal and compliance documents, so only Paddle can change them. To change them, contact Paddle support.
+
+Returns an `account_email_conflict` error if the email address is already in use by another account.
+
+If successful, your response includes a copy of the updated account entity."
+ex5-0749,paddle.com,GET,/adjustments,list-adjustments,List adjustments,Returns a paginated list of adjustments. Use the query parameters to page through results.
+ex5-0750,paddle.com,POST,/adjustments,create-adjustment,Create an adjustment,"Creates an adjustment for one or more transaction items.
+
+You can create adjustments to refund or credit all or part of a transaction and its items:
+
+* Refunds return an amount to a customer's original payment method. You can create refund adjustments for transactions that are `completed`.
+* Credits reduce the amount that a customer has to pay for a transaction. You can create credit adjustments for manually-collected transactions that are `billed` or `past_due`.
+
+You can create adjustments to refund transactions that are `completed`, or to reduce the amount to due on manually-collected transactions that are `billed` or `past_due`.
+Most refunds for live accounts are created with the status of `pending_approval` until reviewed by Paddle, but [some are automatically approved](https://developer.paddle.com/build/transactions/create-transaction-adjustments#background-refunds). For sandbox accounts, Paddle automatically approves refunds every ten minutes.
+
+Adjustments can apply to some or all items on a transaction. You'll need the Paddle ID of the transaction to create a refund or credit for, along with the Paddle ID of any transaction items (`details.line_items[].id`).
+
+If successful, your response includes a copy of the new adjustment entity."
+ex5-0751,paddle.com,GET,/adjustments/{adjustment_id}/credit-note,get-adjustment-credit-note,Get a PDF credit note for an adjustment,"Returns a link to a credit note PDF for an adjustment.
+
+Credit note PDFs are created for refunds and credits as a record of an adjustment.
+
+The link returned is not a permanent link. It expires after an hour."
+ex5-0752,paddle.com,GET,/checkout-domains,list-checkout-domains,List checkout domains,Returns a paginated list of checkout domains submitted for your account. Use the query parameters to page through results.
+ex5-0753,paddle.com,DELETE,/checkout-domains/{domain_id},delete-checkout-domain,Delete a checkout domain,"Deletes a checkout domain using its ID.
+
+Deleted checkout domains are no longer able to be used to load checkouts for your account."
+ex5-0754,paddle.com,GET,/checkout-domains/{domain_id},get-checkout-domain,Get a checkout domain,Returns a checkout domain using its ID. The response includes the domain's approval status and payment method verification details.
+ex5-0755,paddle.com,POST,/checkout-domains/{domain_id}/verify-payment-method,verify-checkout-domain-payment-method,Verify a payment method for a checkout domain,"Triggers payment method verification for a checkout domain. Currently supports Apple Pay only.
+
+Before verifying, the checkout domain must be in `approved` status and the domain association file must be correctly hosted."
+ex5-0756,paddle.com,GET,/client-tokens,list-client-tokens,List client-side tokens,Returns a paginated list of client-side tokens. Use the query parameters to [page through results](https://developer.paddle.com/api-reference/about/pagination).
+ex5-0757,paddle.com,POST,/client-tokens,create-client-token,Create a client-side token,"Creates a new client-side token.
+
+If successful, your response includes a copy of the new client-side token entity."
+ex5-0758,paddle.com,GET,/client-tokens/{client_token_id},get-client-token,Get a client-side token,Returns a client-side token using its ID.
+ex5-0759,paddle.com,PATCH,/client-tokens/{client_token_id},update-client-token,Update a client-side token,"Updates a client-side token using its ID.
+
+You can revoke a client-side token by changing its `status` to `revoked`. Client-side tokens that are revoked can't be updated to `active`.
+
+If successful, your response includes a copy of the updated client-side token entity."
+ex5-0760,paddle.com,GET,/countries,list-countries,List Paddle countries,"Returns a list of countries known to the Paddle platform, including the currency used for
+automatic price conversion and whether Paddle supports sales to customers there.
+
+The response is not paginated."
+ex5-0761,paddle.com,GET,/currencies,list-currencies,List Paddle currencies,"Returns a list of currencies that Paddle supports, including the number of decimal places
+used and the minimum amount that Paddle can process.
+
+The response is not paginated."
+ex5-0762,paddle.com,GET,/customers,list-customers,List customers,"Returns a paginated list of customers. Use the query parameters to page through results.
+
+By default, Paddle returns customers that are `active`. Use the `status` query parameter to return customers that are archived."
+ex5-0763,paddle.com,POST,/customers,create-customer,Create a customer,"Creates a new customer.
+
+If successful, your response includes a copy of the new customer entity."
+ex5-0764,paddle.com,GET,/customers/{customer_id},get-customer,Get a customer,Returns a customer using its ID.
+ex5-0765,paddle.com,PATCH,/customers/{customer_id},update-customer,Update a customer,"Updates a customer using its ID.
+
+If successful, your response includes a copy of the updated customer entity."
+ex5-0766,paddle.com,GET,/customers/{customer_id}/addresses,list-addresses,List addresses for a customer,"Returns a paginated list of addresses for a customer. Use the query parameters to page through results.
+
+By default, Paddle returns addresses that are `active`. Use the `status` query parameter to return addresses that are archived."
+ex5-0767,paddle.com,POST,/customers/{customer_id}/addresses,create-address,Create an address for a customer,"Creates a new address for a customer.
+
+For tax calculation, fraud prevention, and compliance purposes, you must include a `postal_code` when creating addresses for some countries. For example, ZIP codes in the USA and postcodes in the UK. See: [Supported countries](https://developer.paddle.com/concepts/sell/supported-countries-locales)
+
+If successful, your response includes a copy of the new address entity."
+ex5-0768,paddle.com,GET,/customers/{customer_id}/addresses/{address_id},get-address,Get an address for a customer,Returns an address for a customer using its ID and related customer ID.
+ex5-0769,paddle.com,PATCH,/customers/{customer_id}/addresses/{address_id},update-address,Update an address for a customer,"Updates an address for a customer using its ID and related customer ID.
+
+If successful, your response includes a copy of the updated address entity."
+ex5-0770,paddle.com,POST,/customers/{customer_id}/auth-token,generate-customer-authentication-token,Generate an authentication token for a customer,"Generates an authentication token for a customer. You can pass a generated authentication token to Paddle.js when opening a checkout to let customers work with saved payment methods.
+
+Authentication tokens are temporary and shouldn't be cached. They're valid until the `expires_at` date returned in the response."
+ex5-0771,paddle.com,GET,/customers/{customer_id}/businesses,list-businesses,List businesses for a customer,"Returns a paginated list of businesses for a customer. Use the query parameters to page through results.
+
+By default, Paddle returns businesses that are `active`. Use the `status` query parameter to return businesses that are archived."
+ex5-0772,paddle.com,POST,/customers/{customer_id}/businesses,create-business,Create a business for a customer,"Creates a new business for a customer.
+
+If successful, your response includes a copy of the new business entity."
+ex5-0773,paddle.com,GET,/customers/{customer_id}/businesses/{business_id},get-business,Get a business for a customer,Returns a business for a customer using its ID and related customer ID.
+ex5-0774,paddle.com,PATCH,/customers/{customer_id}/businesses/{business_id},update-business,Update a business for a customer,"Updates a business for a customer using its ID and related customer ID.
+
+If successful, your response includes a copy of the updated business entity."
+ex5-0775,paddle.com,GET,/customers/{customer_id}/credit-balances,list-credit-balances,List credit balances for a customer,"Returns a list of credit balances for each currency for a customer. Each balance has three totals:
+
+* `available`: total available to use.
+* `reserved`: total temporarily reserved for billed transactions.
+* `used`: total amount of credit used.
+
+Credit is added to the `available` total initially. When used, it moves to the `used` total.
+
+The `reserved` total is used when a credit balance is applied to a transaction that's marked as `billed`, like when working with an issued invoice. It's not available for other transactions at this point, but isn't considered `used` until the transaction is completed. If a `billed` transaction is `canceled`, any reserved credit moves back to `available`.
+
+Credit balances are created automatically by Paddle when you take an action that results in Paddle creating a credit for a customer, like making prorated changes to a subscription. An empty `data` array is returned where a customer has no credit balances.
+
+The response is not paginated."
+ex5-0776,paddle.com,GET,/customers/{customer_id}/payment-methods,list-customer-payment-methods,List payment methods for a customer,"Returns a paginated list of payment methods that a customer has saved.  Use the query parameters to page through results.
+
+Customers can choose to save payment methods when purchasing one-time items and subscriptions by checking a box when completing checkout. You can present customers with their saved payment methods when they make a purchase in the future.
+
+Returns an empty list where customers have not saved any payment methods, or have deleted all previously saved payment methods."
+ex5-0777,paddle.com,DELETE,/customers/{customer_id}/payment-methods/{payment_method_id},delete-customer-payment-method,Delete a payment method for a customer,"Deletes a customer payment method using its ID.
+
+Deleted payment methods are no longer saved and presented to the customer for future purchases.
+
+Saved payment methods can't be deleted if tied to an `active`, `trialing`, `paused`, or `past_due` subscription. Update the subscription's payment method first, then delete the saved payment method.
+
+There's no way to recover a deleted saved payment method. It's permanently removed from that customer."
+ex5-0778,paddle.com,GET,/customers/{customer_id}/payment-methods/{payment_method_id},get-customer-payment-method,Get a payment method for a customer,Returns a payment method for a customer using its ID and related customer ID.
+ex5-0779,paddle.com,POST,/customers/{customer_id}/portal-sessions,create-customer-portal-session,Create a customer portal session,"Creates a customer portal session for a customer.
+
+The [customer portal](https://developer.paddle.com/concepts/customer-portal) is a secure, Paddle-hosted site that allows
+customers to manage their own subscriptions, payments, and account information without you having to build custom billing screens.
+
+Customers can:
+
+* View transaction history
+* Download invoices
+* Update payment methods
+* Manage their subscriptions including making changes or cancellations
+* Revise details on completed transactions
+
+You can create a customer portal session to generate authenticated links for a customer
+so that they're automatically signed in to the portal. It's typically used when linking to
+the customer portal from your app where customers are already authenticated.
+
+You can include an array of `subscription_ids` to generate authenticated portal links that let customers make
+changes to their subscriptions. You can use these links as part of subscription management workflows rather than
+building your own billing screens.
+
+Customer portal sessions are temporary and shouldn't be cached.
+
+The customer portal is fully hosted by Paddle. For security and the best customer experience, don't embed the customer
+portal in an iframe."
+ex5-0780,paddle.com,GET,/discount-groups,list-discount-groups,List discount groups,Returns a paginated list of discount groups. Use the query parameters to page through results.
+ex5-0781,paddle.com,POST,/discount-groups,create-discount-group,Create a discount group,"Creates a new discount group.
+
+If successful, your response includes a copy of the new discount group entity."
+ex5-0782,paddle.com,GET,/discount-groups/{discount_group_id},get-discount-group,Get a discount group,Returns a discount group using its ID.
+ex5-0783,paddle.com,PATCH,/discount-groups/{discount_group_id},update-discount-group,Update a discount group,"Updates a discount group using its ID.
+
+If successful, your response includes a copy of the updated discount group entity."
+ex5-0784,paddle.com,GET,/discounts,list-discounts,List discounts,"Returns a paginated list of discounts. Use the query parameters to page through results.
+
+By default, Paddle returns discounts that are `active`. Use the `status` query parameter to return discounts that are archived."
+ex5-0785,paddle.com,POST,/discounts,create-discount,Create a discount,"Creates a new discount.
+
+If successful, your response includes a copy of the new discount entity."
+ex5-0786,paddle.com,GET,/discounts/{discount_id},get-discount,Get a discount,Returns a discount using its ID.
+ex5-0787,paddle.com,PATCH,/discounts/{discount_id},update-discount,Update a discount,"Updates a discount using its ID.
+
+If successful, your response includes a copy of the updated discount entity.
+
+To update a checkout recovery discount, configure your checkout recovery settings in the dashboard."
+ex5-0788,paddle.com,GET,/event-types,list-event-types,List events types,"Returns a list of event types.
+
+The response is not paginated."
+ex5-0789,paddle.com,GET,/events,list-events,List events,"Returns a paginated list of events that have occurred in the last 90 days. Use the query parameters to page through results.
+
+Events older than 90 days aren't retained.
+
+This is sometimes referred to as ""the event stream."""
+ex5-0790,paddle.com,GET,/ips,get-ip-addresses,Get Paddle IP addresses,"Returns Paddle IP addresses. You can add these IP addresses to your allowlist.
+
+IP addresses returned are for the environment that you're making the request in. For example, making the request to the production base URL returns all production IP addresses."
+ex5-0791,paddle.com,GET,/metrics/active-subscribers,get-metrics-active-subscribers,Get active subscribers metrics,"Returns timeseries data for active subscriber counts in a given date range. Trends have a daily granularity.
+Current number of paying users with active subscriptions (does not include trialling users).
+
+When `to` and `from` are the same, returns an empty timeseries."
+ex5-0792,paddle.com,GET,/metrics/chargebacks,get-metrics-chargebacks,Get chargeback metrics,"Returns timeseries data for chargebacks in a given date range. Trends have a daily granularity.
+Total number of chargebacks received for the period. Does not include pre-chargeback alerts or chargeback reversals.
+
+When `to` and `from` are the same, returns an empty timeseries."
+ex5-0793,paddle.com,GET,/metrics/checkout-conversion,get-metrics-checkout-conversion,Get checkout conversion metrics,"Returns timeseries data for checkout conversion in a given date range. Trends have a daily granularity.
+The conversion rate for checkouts in the period. A checkout is considered converted when a payment is successfully completed.
+
+When `to` and `from` are the same, returns an empty timeseries."
+ex5-0794,paddle.com,POST,/metrics/explore,run-explore-metrics-query,Run an Explore metrics query,"Runs a query against a single Explore metric and returns timeseries data for it.
+
+Pass the `entity` you want to query, a date range using `from` and `to`, an `interval`, and one or more `measures`. Include `dimensions` to break results down, `filters` to narrow them, and `order_by` to control which results are returned first.
+
+Use the [list Explore metric entities](https://developer.paddle.com/api-reference/metrics/list-explore-metric-entities) operation to see the dimensions, measures, and filters available for a metric.
+
+Results are broken down into segments, where a segment is one combination of the dimensions you grouped by. `per_page` limits the number of segments returned, not the number of datapoints. A page can hold up to 10,000 datapoints, calculated as `per_page` multiplied by the number of time buckets in your range. Requests over this limit return `too_many_datapoints`.
+
+If successful, your response includes the query results in `data`, with a self-describing `fields` block and one entry in `series` for each segment."
+ex5-0795,paddle.com,GET,/metrics/explore/entities,list-explore-metric-entities,List Explore metric entities,"Returns a list of queryable Explore metrics and their related metadata, including time dimension, the dimensions you can group by, and measures with their allowed aggregations.
+
+`subscriptions` isn't available in sandbox, where it's treated as `unknown_entity`.
+
+By default, Paddle returns all metrics that are available. Use the `entity` query parameter to return a single one.
+
+The response is not paginated."
+ex5-0796,paddle.com,GET,/metrics/monthly-recurring-revenue,get-metrics-monthly-recurring-revenue,Get MRR (monthly recurring revenue) metrics,"Returns timeseries data for monthly recurring revenue in a given date range. Trends have a daily granularity.
+Current monthly recurring revenue total. Includes new subscriptions, upgrades, downgrades and churn. Does not include one-time payments or deductions for Paddle fees.
+
+When `to` and `from` are the same, returns an empty timeseries."
+ex5-0797,paddle.com,GET,/metrics/monthly-recurring-revenue-change,get-metrics-monthly-recurring-revenue-change,Get MRR change (monthly recurring revenue change) metrics,"Returns timeseries data for monthly recurring revenue change in a given date range. Trends have a daily granularity.
+Monthly recurring revenue (MRR) change compared to the same time interval last month.
+
+When `to` and `from` are the same, returns an empty timeseries."
+ex5-0798,paddle.com,GET,/metrics/refunds,get-metrics-refunds,Get refund metrics,"Returns timeseries data for refunds in a given date range. Trends have a daily granularity.
+The transaction subtotal (base cost minus discounts excluding taxes and fees) of refunded products returned to the customer. This does not include chargebacks.
+
+When `to` and `from` are the same, returns an empty timeseries."
+ex5-0799,paddle.com,GET,/metrics/revenue,get-metrics-revenue,Get net revenue metrics,"Returns timeseries data for revenue in a given date range. Trends have a daily granularity.
+Net revenue from completed payments (e.g. single purchase, subscription, B2B invoices) after tax & fees have been deducted, but before adjustments such as refunds or chargebacks.
+
+When `to` and `from` are the same, returns an empty timeseries."
+ex5-0800,paddle.com,GET,/notification-settings,list-notification-settings,List notification settings,Returns a paginated list of notification settings (notification destinations).
+ex5-0801,paddle.com,POST,/notification-settings,create-notification-setting,Create a notification setting,"Creates a new notification setting (notification destination).
+
+Pass an array of event type names to `subscribed_events` to say which events you'd like to subscribe to. Paddle responds with the full event type object for each event type.
+
+If successful, your response includes a copy of the new notification setting entity. Use the returned `endpoint_secret_key` for webhook signature verification."
+ex5-0802,paddle.com,DELETE,/notification-settings/{notification_setting_id},delete-notification-setting,Delete a notification setting,"Deletes a notification setting (notification destination) using its ID.
+
+When you delete a notification setting, it's permanently removed from your account. Paddle stops sending events to your destination, and you'll lose access to all the logs for this notification setting.
+
+There's no way to recover a deleted notification setting. Deactivate a notification setting using the update notification setting operation if you'll need access to the logs or want to reactivate later on."
+ex5-0803,paddle.com,GET,/notification-settings/{notification_setting_id},get-notification-setting,Get a notification setting,Returns a notification setting (notification destination) using its ID.
+ex5-0804,paddle.com,PATCH,/notification-settings/{notification_setting_id},update-notification-setting,Update a notification setting,"Updates a notification setting (notification destination) using its ID.
+
+When updating subscribed events, send the complete list of event types that you'd like to subscribe to — including existing event types. If you omit event types, they're removed from the notification setting.
+
+You only need to pass an event type name. Paddle responds with the full event type object for each event type.
+
+If successful, your response includes a copy of the updated notification setting entity."
+ex5-0805,paddle.com,GET,/notifications,list-notifications,List notifications,"Returns a paginated list of notifications created in the last 90 days. Use the query parameters to page through results.
+
+Notifications older than 90 days aren't retained."
+ex5-0806,paddle.com,GET,/notifications/{notification_id},get-notification,Get a notification,"Returns a notification using its ID.
+
+Notifications older than 90 days aren't retained. If you try to get a notification that's no longer retained, Paddle returns an error."
+ex5-0807,paddle.com,GET,/notifications/{notification_id}/logs,list-notification-logs,List logs for a notification,"Returns a paginated list of notification logs for a notification. A log includes information about delivery attempts, including failures.
+
+Notifications older than 90 days aren't retained. If you try to list logs for a notification that's no longer retained, Paddle returns an error."
+ex5-0808,paddle.com,POST,/notifications/{notification_id}/replay,replay-notification,Replay a notification,"Attempts to resend a `delivered` or `failed` notification using its ID.
+
+Paddle creates a new notification entity for the replay, related to the same `event_id`. Your response includes the new `notification_id` of the created notification.
+
+Notifications older than 90 days aren't retained. If you try to replay a notification that's no longer retained, Paddle returns an error.
+
+Only notifications with the `origin` of `event` can be replayed. You can't replay a notification created for a replay."
+ex5-0809,paddle.com,GET,/prices,list-prices,List prices,"Returns a paginated list of prices. Use the query parameters to page through results.
+
+By default, Paddle returns prices that are `active`. Use the `status` query parameter to return prices that are archived.
+
+Use the `include` parameter to include the related product entity in the response."
+ex5-0810,paddle.com,POST,/prices,create-price,Create a price,"Creates a new price.
+
+Prices describe how you charge for products. You must include a `product_id` in your request to relate this price to a product.
+
+If you omit the `quantity` object, Paddle automatically sets a minimum of `1` and a maximum of `100` for you. This means the most units that a customer can buy is 100. Set a quantity if you'd like to offer a different amount.
+
+If successful, your response includes a copy of the new price entity."
+ex5-0811,paddle.com,GET,/prices/{price_id},get-price,Get a price,"Returns a price using its ID.
+
+Use the `include` parameter to include the related product entity in the response."
+ex5-0812,paddle.com,PATCH,/prices/{price_id},update-price,Update a price,"Updates a price using its ID.
+
+If successful, your response includes a copy of the updated price entity."
+ex5-0813,paddle.com,POST,/pricing-preview,preview-prices,Preview prices,"Previews calculations for one or more prices. Typically used for building pricing pages.
+
+You can provide location information when previewing prices. You must provide this if you want Paddle to calculate tax or [automatically localize prices](https://developer.paddle.com/build/products/offer-localized-pricing). You can provide one of:
+
+* `customer_ip_address`: Paddle fetches location using the IP address to calculate totals.
+* `address`: Paddle uses the country and ZIP code (where supplied) to calculate totals.
+* `customer_id`, `address_id`, `business_id`: Paddle uses existing customer data to calculate totals. Typically used for logged-in customers.
+
+If successful, your response includes the data you sent with a `details` object that includes totals for the supplied prices.
+
+Each line item includes `formatted_unit_totals` and `formatted_totals` objects that return totals formatted for the country or region you're working with, including the currency symbol.
+
+You can work with the preview prices operation using the [`Paddle.PricePreview()`](https://developer.paddle.com/paddlejs/methods/paddle-pricepreview) method in Paddle.js. When working with `Paddle.PricePreview()`, request and response fields are `camelCase` rather than `snake_case`."
+ex5-0814,paddle.com,GET,/products,list-products,List products,"Returns a paginated list of products. Use the query parameters to page through results.
+
+By default, Paddle returns products that are `active`. Use the `status` query parameter to return products that are archived.
+
+Use the `include` parameter to include related price entities in the response."
+ex5-0815,paddle.com,POST,/products,create-product,Create a product,"Creates a new product.
+
+Paddle does not upload product images to a CDN. For `image_url`, you should host images on an HTTPS server that's publicly accessible. We recommend using square images (`1:1` ratio).
+
+If successful, your response includes a copy of the new product entity."
+ex5-0816,paddle.com,GET,/products/{product_id},get-product,Get a product,"Returns a product using its ID.
+
+Use the `include` parameter to include related price entities in the response."
+ex5-0817,paddle.com,PATCH,/products/{product_id},update-product,Update a product,"Updates a product using its ID.
+
+Paddle does not upload product images to a CDN. For `image_url`, you should host images on an HTTPS server that's publicly accessible. We recommend using square images (`1:1` ratio).
+
+If successful, your response includes a copy of the updated product entity."
+ex5-0818,paddle.com,GET,/reports,list-reports,List reports,"Returns a paginated list of reports. Use the query parameters to page through results.
+
+By default, Paddle returns reports that are `pending` or `ready`. Use the `status` query parameter to return reports that are `failed`, `expired`, or `deleted`."
+ex5-0819,paddle.com,POST,/reports,create-report,Create a report,"Creates a new report.
+
+Reports are created as `pending` initially while Paddle generates your report. They move to `ready` when they're ready to download.
+
+You can download a report when it's ready using the [get a CSV file for a report operation](https://developer.paddle.com/api-reference/reports/get-report-csv).
+
+If successful, your response includes a copy of the new report entity."
+ex5-0820,paddle.com,GET,/reports/{report_id},get-report,Get a report,Returns a report using its ID.
+ex5-0821,paddle.com,GET,/reports/{report_id}/download-url,get-report-csv,Get a CSV file for a report,"Returns a link to a CSV file for a report.
+
+Only returned for reports that are `ready`. This means Paddle has completed processing the report and it's ready to download.
+
+The link returned is not a permanent link. It expires after 3 minutes."
+ex5-0822,paddle.com,GET,/settings/balance-currency,get-balance-currency,Get balance currency settings,"Returns the balance currency settings for your account.
+
+Includes the currency that your Paddle balance is held in and paid out from (`primary`), the currency that you'd like it to be held in instead (`preferred`), and the currencies enabled for your account (`enabled`)."
+ex5-0823,paddle.com,PATCH,/settings/balance-currency,update-balance-currency,Update balance currency settings,"Updates the balance currency settings for your account.
+
+You can only change `preferred`. Paddle then updates `primary` to match, but when depends on your account.
+
+If more than one currency is in `enabled`, Paddle updates `primary` immediately. `preferred` must be one of the currencies in `enabled`, otherwise the request returns an `invalid_field` error.
+
+Otherwise, Paddle updates `primary` when your balance is zero. That's immediately if it's already zero, or after your next payout if it isn't. Until then, `primary` and `preferred` are different.
+
+If successful, your response includes a copy of the updated balance currency settings entity."
+ex5-0824,paddle.com,GET,/settings/checkout-features,get-checkout-features,Get checkout feature settings,"Returns the checkout feature settings for your account.
+
+Includes whether discount codes (`discounts_enabled`), the marketing consent checkbox (`audience_opt_in`), and saved payment methods (`saved_payment_methods_enabled`) are enabled at checkout."
+ex5-0825,paddle.com,PATCH,/settings/checkout-features,update-checkout-features,Update checkout feature settings,"Updates the checkout feature settings for your account.
+
+Send only the fields that you want to change. Fields that you omit keep their current value.
+
+If successful, your response includes a copy of the updated checkout feature settings entity."
+ex5-0826,paddle.com,GET,/settings/checkout-payment-methods,get-checkout-payment-method-settings,Get checkout payment method settings,"Returns the checkout payment method settings for your account.
+
+Every supported payment method is always present, with your stored preference (`enabled`) and whether Paddle offers it on your account (`available`)."
+ex5-0827,paddle.com,PATCH,/settings/checkout-payment-methods,update-checkout-payment-method-settings,Update checkout payment method settings,"Updates the checkout payment method settings for your account.
+
+Send only the payment methods that you want to change. Payment methods that you omit keep their current value. Paddle sets `available`, so you can't update it.
+
+Returns a `checkout_payment_method_not_available` error if you enable a payment method that isn't available on your account, and a `checkout_payment_method_unknown` error if the request includes a payment method that Paddle doesn't recognize.
+
+If successful, your response includes a copy of the updated checkout payment method settings entity."
+ex5-0828,paddle.com,GET,/settings/checkout-recovery,get-checkout-recovery,Get checkout recovery settings,"Returns the checkout recovery settings for your account.
+
+These control whether Paddle emails customers who abandon a checkout, and the discount that the email offers."
+ex5-0829,paddle.com,PATCH,/settings/checkout-recovery,update-checkout-recovery,Update checkout recovery settings,"Updates the checkout recovery settings for your account.
+
+Send only the fields that you want to change. Fields that you omit keep their current value. Pass `null` to clear `discount` and stop offering a discount.
+
+If successful, your response includes a copy of the updated checkout recovery settings entity."
+ex5-0830,paddle.com,GET,/settings/checkout-styles-overlay,get-checkout-styles-overlay,Get overlay checkout style settings,"Returns the overlay checkout style settings for your account.
+
+Includes the brand color (`primary_checkout_color`) used by overlay checkout."
+ex5-0831,paddle.com,PATCH,/settings/checkout-styles-overlay,update-checkout-styles-overlay,Update overlay checkout style settings,"Updates the overlay checkout style settings for your account.
+
+Send only the fields that you want to change. Fields that you omit keep their current value. Pass `null` to clear `primary_checkout_color` and use the default checkout color.
+
+If successful, your response includes a copy of the updated overlay checkout style settings entity."
+ex5-0832,paddle.com,GET,/settings/checkout-url,get-checkout-url,Get checkout URL settings,"Returns the checkout URL settings for your account.
+
+Includes your default payment link (`default_url`), which is the URL that Paddle opens when a checkout is created without a URL of its own."
+ex5-0833,paddle.com,PATCH,/settings/checkout-url,update-checkout-url,Update checkout URL settings,"Updates the checkout URL settings for your account.
+
+Pass `null` to clear `default_url`.
+
+In live accounts, the URL's domain must be an approved checkout domain for your account, or the request returns a `checkout_url_domain_not_approved` error. Sandbox accounts accept any `https` URL.
+
+If successful, your response includes a copy of the updated checkout URL settings entity."
+ex5-0834,paddle.com,GET,/settings/currency-conversions,get-currency-conversions,Get currency conversion settings,"Returns the currency conversion settings for your account.
+
+When a currency is enabled, Paddle automatically converts prices into it at checkout for customers whose local currency it is. A price override for the customer's country takes precedence over the converted price. When a currency isn't enabled, those customers see the price in its base currency instead. These settings don't limit which currencies you can use for prices or price overrides.
+
+The response is keyed by currency code and includes every supported currency, whether or not you've changed it. It isn't paginated."
+ex5-0835,paddle.com,PATCH,/settings/currency-conversions,update-currency-conversions,Update currency conversion settings,"Updates the currency conversion settings for your account.
+
+Send only the currency codes that you want to change. Currency codes that you omit keep their current value. You can't add or remove a currency code.
+
+If successful, your response includes a copy of the updated currency conversion settings entity, with every supported currency, not only the ones that you changed."
+ex5-0836,paddle.com,GET,/settings/statement-descriptor,get-statement-descriptor-settings,Get statement descriptor settings,"Returns the statement descriptor settings for your account.
+
+The statement descriptor is the name that appears on a customer's bank or card statement.
+
+Returns a `statement_descriptor_not_found` error if no statement descriptor exists for your account yet."
+ex5-0837,paddle.com,PATCH,/settings/statement-descriptor,update-statement-descriptor-settings,Update statement descriptor settings,"Updates the statement descriptor settings for your account.
+
+Paddle sets `preview` based on `name`, so you can't update it directly.
+
+Returns a `statement_descriptor_invalid_name` error if the supplied name doesn't meet the format requirements, a `statement_descriptor_in_use` error if the supplied name is already in use, and a `statement_descriptor_not_found` error if no statement descriptor exists for your account yet.
+
+If successful, your response includes a copy of the updated statement descriptor settings entity."
+ex5-0838,paddle.com,GET,/settings/tax,get-tax-settings,Get tax settings,"Returns the tax settings for your account.
+
+Includes the default tax mode (`default_tax_mode`) that Paddle uses for prices with a `tax_mode` of `account_setting`."
+ex5-0839,paddle.com,PATCH,/settings/tax,update-tax-settings,Update tax settings,"Updates the tax settings for your account.
+
+If successful, your response includes a copy of the updated tax settings entity."
+ex5-0840,paddle.com,GET,/simulation-types,list-simulation-types,List simulation types,Returns a list of simulation types (events and scenarios) that you can choose from when creating simulations.
+ex5-0841,paddle.com,GET,/simulations,list-simulations,List simulations,Returns a paginated list of simulations. Use the query parameters to [page through results](https://developer.paddle.com/api-reference/about/pagination).
+ex5-0842,paddle.com,POST,/simulations,create-simulation,Create a simulation,"Creates a new simulation for a notification setting (notification destination).
+
+simulated webhook payloads with real data. The API key making the request needs read permissions:
+
+* For the entities you provided, or the request fails.
+* For related entities which aren't nested in the entities you provided, or static examples will be used instead.
+
+For example, when creating a subscription renewal scenario simulation with an API key that has a `subscription.read` permission but not a `transaction.read` permission,
+the request succeeds and the subscription data will be used in simulated payloads, but the related transaction data won't be used in payloads and falls back to a static example.
+
+If you don't provide a `config.entities` object, simulated webhook payloads are populated with static examples.
+
+If successful, your response includes a copy of the new simulation entity."
+ex5-0843,paddle.com,GET,/simulations/{simulation_id},get-simulation,Get a simulation,Returns a simulation using its ID.
+ex5-0844,paddle.com,PATCH,/simulations/{simulation_id},update-simulation,Update a simulation,"Updates a simulation using its ID.
+
+For scenario simulations, you can optionally include a `config.entities` object in the request body with entity IDs to populate
+simulated webhook payloads with real data. The API key making the request needs read permissions:
+
+* For the entities you provided, or the request fails.
+* For related entities which aren't nested in the entities you provided, or static examples will be used instead.
+
+For example, when updating a subscription renewal scenario simulation with an API key that has a `subscription.read` permission but not a `transaction.read` permission,
+the request succeeds and the subscription data will be used in simulated payloads, but the related transaction data won't be used in payloads and falls back to a static example.
+
+If you don't provide a `config.entities` object, simulated webhook payloads are populated with static examples.
+
+If successful, your response includes a copy of the updated simulation entity."
+ex5-0845,paddle.com,GET,/simulations/{simulation_id}/runs,list-simulation-runs,List runs for a simulation,"Returns a paginated list of simulation runs. Use the query parameters to [page through results](https://developer.paddle.com/api-reference/about/pagination).
+
+Use the `include` parameter to [include related entities](https://developer.paddle.com/api-reference/about/include-entities) in the response."
+ex5-0846,paddle.com,POST,/simulations/{simulation_id}/runs,create-simulation-run,Create a run for a simulation,"Creates a new simulation run for a simulation.
+
+If successful, your response includes a copy of the new simulation run entity."
+ex5-0847,paddle.com,GET,/simulations/{simulation_id}/runs/{simulation_run_id},get-simulation-run,Get a run for a simulation,"Returns a simulation run using its ID.
+
+Use the `include` parameter to include related entities in the response."
+ex5-0848,paddle.com,GET,/simulations/{simulation_id}/runs/{simulation_run_id}/events,list-simulations-events,List events for a simulation run,Returns a paginated list of simulations. Use the query parameters to [page through results](https://developer.paddle.com/api-reference/about/pagination).
+ex5-0849,paddle.com,GET,/simulations/{simulation_id}/runs/{simulation_run_id}/events/{simulation_event_id},get-simulation-event,Get an event for a simulation run,Returns a simulation event using its ID.
+ex5-0850,paddle.com,POST,/simulations/{simulation_id}/runs/{simulation_run_id}/events/{simulation_event_id}/replay,replay-simulation-run-event,Replay an event for a simulation run,"Attempts to resend a simulation run log using its ID.
+
+Paddle creates a new simulation run log entity for the replay, related to the same simulation run.
+
+If successful, your response includes the new simulation run log entity."
+ex5-0851,paddle.com,GET,/subscriptions,list-subscriptions,List subscriptions,Returns a paginated list of subscriptions. Use the query parameters to page through results.
+ex5-0852,paddle.com,GET,/subscriptions/{subscription_id},get-subscription,Get a subscription,"Returns a subscription using its ID.
+
+Use the `include` parameter to include transaction information in the response."
+ex5-0853,paddle.com,PATCH,/subscriptions/{subscription_id},update-subscription,Update a subscription,"Updates a subscription using its ID.
+
+When making changes to items or the next billing date for a subscription, you must include the `proration_billing_mode` field to tell Paddle how to bill for those changes.
+
+Send the complete list of items that you'd like to be on a subscription — including existing items. If you omit items, they're removed from the subscription.
+
+For each item, send `price_id` and `quantity`. Paddle responds with the full price object for each price. If you're updating an existing item, you can omit the `quantity` if you don't want to update it.
+
+If successful, your response includes a copy of the updated subscription entity. When an update results in an immediate charge, responses may take longer than usual while a payment attempt is processed.
+
+You can't update a subscription that's `past_due`, except to remove a scheduled change by setting `scheduled_change` to `null`."
+ex5-0854,paddle.com,POST,/subscriptions/{subscription_id}/activate,activate-subscription,Activate a trialing subscription,"Activates a trialing subscription using its ID. Only automatically-collected subscriptions where the status is `trialing` can be activated.
+
+On activation, Paddle bills for a subscription immediately. Subscription billing dates are recalculated based on the activation date (the time the activation request is made).
+
+If successful, Paddle returns a copy of the updated subscription entity. The subscription status is `active`, and billing dates are updated to reflect the activation date.
+
+This operation results in an immediate charge, so responses may take longer than usual while a payment attempt is processed."
+ex5-0855,paddle.com,POST,/subscriptions/{subscription_id}/cancel,cancel-subscription,Cancel a subscription,"Cancels a subscription using its ID.
+
+By default, active subscriptions are canceled at the end of the billing period. When you send a request to cancel, Paddle creates a `scheduled_change` against the subscription entity to say that it should cancel at the end of the current billing period. Its `status` remains `active` until after the effective date of the scheduled change, at which point it changes to `canceled`.
+
+You can cancel a subscription right away by including `effective_from` in your request, setting the value to `immediately`. If successful, your response includes a copy of the updated subscription entity with the `status` of `canceled`. Paused subscriptions can only be canceled immediately, so you must set `effective_from` to `immediately` to cancel them.
+
+You can cancel subscriptions that are `past_due`. If you cancel at the end of the billing period, the `status` remains `past_due` until the end of the current billing period. Cancel immediately to stop the subscription right away.
+
+You can't reinstate a canceled subscription."
+ex5-0856,paddle.com,POST,/subscriptions/{subscription_id}/charge,create-subscription-charge,Create a one-time charge for a subscription,"Creates a new one-time charge for a subscription. Use to bill non-recurring items to a subscription. Non-recurring items are price entities where the `billing_cycle` is `null`.
+
+You can't create one-time charges for subscriptions that are `past_due`.
+
+If successful, Paddle responds with the updated subscription entity. However, one-time charges aren't held against the subscription entity, so the charges billed aren't returned in the response.
+
+Once created, to get details of a one-time charge:
+
+* When created with `effective_from` as `next_billing_period`, get the subscription the charge was billed to and use the `include` query parameter with the `next_transaction` value.
+* When created with `effective_from` as `immediately`, list transactions and use the `subscription_id` query parameter with the subscription ID of the subscription the charge was billed to.
+
+When an update results in an immediate charge, responses may take longer than usual while a payment attempt is processed."
+ex5-0857,paddle.com,POST,/subscriptions/{subscription_id}/charge/preview,preview-subscription-charge,Preview a one-time charge for a subscription,"Previews creating a one-time charge for a subscription without billing that charge. Typically used for previewing calculations before making changes to a subscription.
+
+One-time charges are non-recurring items. These are price entities where the `billing_cycle` is `null`.
+
+You can't preview one-time charges for subscriptions that are `past_due`.
+
+If successful, your response includes `immediate_transaction`, `next_transaction`, and `recurring_transaction_details` so you can see expected transactions for the changes."
+ex5-0858,paddle.com,GET,/subscriptions/{subscription_id}/history,list-subscription-history,List history for a subscription,"Returns a paginated list of history entries for a subscription. Use the query parameters to filter and page through results.
+
+Subscription history records the changes made to a subscription over its lifetime, so you can see what changed, when it happened, where it originated, and who made the change. Each change is a separate history entry, and some entries also include a reason.
+
+Paddle began recording subscription history on June 29, 2026. For subscriptions that existed before then, Paddle automatically creates `subscription_created` and `subscription_canceled` entries and attempts to infer details from the subscription's initial state.
+
+History entries are ordered by newest first by default (`id` in descending order)."
+ex5-0859,paddle.com,POST,/subscriptions/{subscription_id}/pause,pause-subscription,Pause a subscription,"Pauses a subscription using its ID.
+
+By default, subscriptions are paused at the end of the billing period. When you send a request to pause, Paddle creates a `scheduled_change` against the subscription entity to say that it should pause at the end of the current billing period. Its `status` remains `active` until after the effective date of the scheduled change, at which point it changes to `paused`.
+
+You can pause a subscription right away by including `effective_from` in your request, setting the value to `immediately`. If successful, your response includes a copy of the updated subscription entity with the `status` of `paused`.
+
+To set a resume date, include the `resume_at` field in your request. The subscription remains paused until the resume date, or until you send a resume request. Omit to create an open-ended pause. The subscription remains paused indefinitely, until you send a resume request.
+
+You can pause subscriptions that are `past_due`, but you can't set `on_resume` to `continue_existing_billing_period` for them."
+ex5-0860,paddle.com,PATCH,/subscriptions/{subscription_id}/preview,preview-subscription-update,Preview an update to a subscription,"Previews an update for a subscription without applying those changes. Typically used for previewing proration before making changes to a subscription.
+
+If successful, your response includes `immediate_transaction`, `next_transaction`, and `recurring_transaction_details` so you can see expected transactions for the changes.
+
+The `update_summary` object contains details of prorated credits and charges created, along with the overall result of the update.
+
+You can't preview updates for a subscription that's `past_due`, except to remove a scheduled change by setting `scheduled_change` to `null`."
+ex5-0861,paddle.com,POST,/subscriptions/{subscription_id}/resume,resume-subscription,Resume a paused subscription,"Resumes a paused subscription using its ID. Only `paused` subscriptions can be resumed. If an `active` subscription has a scheduled change to pause in the future, use this operation to set or change the resume date.
+
+You can't resume a `canceled` subscription.
+
+On resume, Paddle bills for a subscription immediately by default. Subscription billing dates are recalculated based on the resume date. Use the `on_resume` field to change this behavior.
+
+If successful, Paddle returns a copy of the updated subscription entity:
+
+* When resuming a `paused` subscription immediately, the subscription status is `active`, and billing dates are updated to reflect the resume date.
+* When scheduling a `paused` subscription to resume on a date in the future, the subscription status is `paused`, and `scheduled_change.action` is `resume` with `scheduled_change.effective_at` set to the scheduled resume date.
+* When changing the resume date for an `active` subscription that's scheduled to pause, the subscription status remains `active`, and `scheduled_change.resume_at` is updated on the existing `pause` scheduled change.
+
+This operation may result in an immediate charge, so responses may take longer than usual while a payment attempt is processed."
+ex5-0862,paddle.com,GET,/subscriptions/{subscription_id}/update-payment-method-transaction,get-subscription-update-payment-method-transaction,Get a transaction to update payment method,"Returns a transaction that you can pass to a checkout to let customers update their payment details. Only for subscriptions where `collection_mode` is `automatic`.
+
+The transaction returned depends on the status of the related subscription:
+
+* Where a subscription is `past_due`, it returns the most recent `past_due` transaction.
+* Where a subscription is `active`, it creates a new zero amount transaction for the items on a subscription.
+
+You can use the returned `checkout.url`, or pass the returned transaction ID to Paddle.js to open a checkout to present customers with a way of updating their payment details.
+
+The `customer`, `address`, `business`, `discount`, `adjustments` and `adjustments_totals` properties are only returned in the response if the API key has read permissions for those related entities."
+ex5-0863,paddle.com,GET,/transactions,list-transactions,List transactions,"Returns a paginated list of transactions. Use the query parameters to page through results.
+
+Use the `include` parameter to include related entities in the response."
+ex5-0864,paddle.com,POST,/transactions,create-transaction,Create a transaction,"Creates a new transaction.
+
+Transactions are typically created with the status of `draft` or `ready` initially:
+
+* Draft transactions have `items` against them, but don't have all of the required fields for billing. Paddle creates draft transactions automatically when a checkout is opened.
+* Paddle automatically marks transactions as `ready` when all of the required fields are present for billing. This includes `customer_id` and `address_id` for automatically-collected transactions, and `billing_details` for manually-collected transactions.
+
+The `collection_mode` against a transaction determines how Paddle tries to collect for payment:
+
+* Manually-collected transactions are for sales-assisted billing. Paddle sends an invoice to your customer when a transaction is `billed`. Payment is often by wire transfer.
+* Automatically-collected transactions are for self-serve checkouts. You may pass the transaction to a checkout or use the returned `checkout.url` to collect for payment.
+
+When a manually-collected transaction is marked as `billed` or an automatically-collected transaction is `completed`, Paddle automatically creates a related subscription for the items on the transaction.
+
+If successful, your response includes a copy of the new transaction entity.
+
+Use the `include` parameter to include related entities in the response."
+ex5-0865,paddle.com,POST,/transactions/preview,preview-transaction-create,Preview a transaction,"Previews a transaction without creating a transaction entity. Typically used for creating more advanced, dynamic pricing pages where users can build their own plans.
+
+Consider using [the preview prices operation](https://developer.paddle.com/api-reference/pricing-preview/preview-prices) for simpler pricing pages.
+
+You can provide location information when previewing a transaction. You must provide this if you want Paddle to calculate tax or [automatically localize prices](https://developer.paddle.com/build/products/offer-localized-pricing). You can provide one of:
+
+* `customer_ip_address`: Paddle fetches location using the IP address to calculate totals.
+* `address`: Paddle uses the country and ZIP code (where supplied) to calculate totals.
+* `customer_id`, `address_id`, `business_id`: Paddle uses existing customer data to calculate totals. Typically used for logged-in customers.
+
+When supplying items, you can exclude items from the total calculation using the `include_in_totals` boolean.
+
+By default, recurring items with trials are considered to have a zero charge when previewing. Set `ignore_trials` to `true` to ignore trial periods against prices for transaction preview calculations.
+
+If successful, your response includes the data you sent with a `details` object that includes totals for the supplied prices.
+
+Transaction previews don't create transactions, so no `id` is returned."
+ex5-0866,paddle.com,GET,/transactions/{transaction_id},get-transaction,Get a transaction,"Returns a transaction using its ID.
+
+Use the `include` parameter to include related entities in the response."
+ex5-0867,paddle.com,PATCH,/transactions/{transaction_id},update-transaction,Update a transaction,"Updates a transaction using its ID.
+
+You can update transactions that are `draft` or `ready`. `billed` and `completed` transactions are considered records for tax and legal purposes, so they can't be changed. You can either:
+
+* Create [an adjustment](https://developer.paddle.com/api-reference/adjustments/overview) to record a refund or credit for a transaction.
+* Cancel a `billed` transaction by sending a PATCH request to set `status` to `canceled`.
+
+You can cancel transactions that are `draft`, `ready`, `billed`, or `past_due`. When canceling, only include `status` in your request. You can't use the API to cancel transactions that Paddle created for a subscription, where `origin` starts with `subscription_`, or automatically-collected transactions that are `past_due`. Cancel transactions created for a subscription using the Paddle dashboard.
+
+The transaction `status` may only be set to `billed` or `canceled`. Other statuses are set automatically by Paddle. Set a manually-collected transaction to `billed` to mark it as finalized. This is essentially issuing an invoice. At this point, it becomes a legal record so you can't make changes to it, only cancel it. Paddle automatically assigns an invoice number, creates [a related subscription](https://developer.paddle.com/api-reference/subscriptions/overview), and sends it to your customer.
+
+When making changes to items on a transaction, send the complete list of items that you'd like to be on a transaction — including existing items. For each item, send an object containing `price_id` and `quantity`. Paddle responds with the full `price` object for each item. See: [Work with lists](https://developer.paddle.com/api-reference/about/lists)
+
+If successful, your response includes a copy of the updated transaction entity."
+ex5-0868,paddle.com,GET,/transactions/{transaction_id}/invoice,get-transaction-invoice,Get a PDF invoice for a transaction,"Returns a link to an invoice PDF for a transaction.
+
+Invoice PDFs are available for both automatically and manually-collected transactions:
+
+* The PDF for manually-collected transactions includes payment terms, purchase order number, and notes for your customer. It's a demand for payment from your customer. It's available for transactions that are `billed` or `completed`.
+* The PDF for automatically-collected transactions lets your customer know that payment was taken successfully. Customers may require this for for tax-reporting purposes. It's available for transactions that are `completed`.
+
+Invoice PDFs aren't available for zero-value transactions.
+
+The link returned is not a permanent link. It expires after an hour."
+ex5-0869,paddle.com,POST,/transactions/{transaction_id}/revise,revise-transaction,Revise customer information on a billed or completed transaction,"Revises customer information for a billed or completed transaction.
+
+Revise a transaction to rectify incorrect customer, address, or business information on invoice documents generated by Paddle.
+
+You can revise transaction details that don't impact the tax rates on a transaction. This includes:
+
+* Customer name
+* Business name and tax or VAT number (`tax_identifier`)
+* Address details, apart from the country
+
+You can't remove a valid tax or VAT number, only replace it with another valid one. If a valid tax or VAT number is added, Paddle automatically creates an adjustment to refund any tax where applicable.
+
+Transactions can only be revised once.
+
+If successful, your response includes a copy of the transaction entity. [Get a transaction](https://developer.paddle.com/api-reference/transactions/get-transaction) using the `include` parameter with the `customer`, `address`, and `business` values to see the revised customer information.
+
+Only the customer information for this transaction is updated. The related customer, address, and business entities aren't updated."
+ex5-0870,paddle.com,GET,/verifications,list-verifications,List verifications,"Returns a paginated list of verifications. Use the query parameters to page through results.
+
+Filter by `verification_type=onboarding` and use the returned verification's `status` to check whether your account is ready for live payments or needs action."
+ex5-0871,paddle.com,GET,/verifications/{verification_id},get-verification,Get a verification,"Returns a verification using its ID.
+
+The response includes the verification steps."
