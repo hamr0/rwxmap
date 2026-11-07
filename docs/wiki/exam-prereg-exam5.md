@@ -1,9 +1,11 @@
 # Pre-registration (DRAFT): clean exam #5, rwxmap side (mechanical v4 gate)
 
 **Status: DRAFT, written 2026-11-07. Not frozen.** The CANDIDATE ADDENDUM is
-filled in and rwxlite has committed its side (acfb8d1). What remains is the
-commit of this file with the scorer (`data/exam5-2026-11-07/score/`) and the
-truth sha256. Nothing has been classified on the exam rows.
+filled in, rwxlite has committed its side (acfb8d1), and the truth sha256 is now
+filled in (see Labelling). The next step is sharing truth with rwxlite and
+scoring once. The only classifier output on the exam rows is lean.csv (v4
+letters, rules and markers, produced for rwxlite and kept away from the
+labellers); no row has been scored.
 
 ## The question
 
@@ -69,7 +71,26 @@ Leakage check.
   and B labels and a reason). Jev is never used.
 - Custody is as exam #4: `truth.csv` and `labelling/out/` stay out of git until
   both sides have scored, and only their sha256 are committed.
-- `truth.csv` sha256: **pending**.
+- `truth.csv` sha256: **772ca84edf1e537f5e9b162229f59e3b0c439e55ba8f6f21f3070e058c70005a**
+  (`truth.csv.sha256`). Built by `labelling/build-truth.mjs` from the 14
+  labeller files and `labelling/rulings.csv`; two runs gave the same sha.
+- Measured facts: 14 labeller files (A Sonnet and B Opus, for each of the 7
+  vendors), all validated directly. Distinct reasons per file ranged from 98 to
+  294. A and B agree on 1352 of 1443 rows (93.7%). Disagreements per vendor:
+  fusionauth 58, semaphore 10, planetscale 9, hookdeck 5, weaviate 4, front 3,
+  paddle 2. All 91 disagreements have the stricter label from B (Opus): 87 are
+  A w vs B x, and 4 are A r vs B x. The user ruled all 91 on 2026-11-07, in
+  pattern groups (`labelling/rulings.csv`, each row with its A and B labels and
+  a note). 84 were ruled x and 7 were ruled w: the user-consent create/update
+  rows ex5-0544, 0547, 0548 and 0549 (a non-access policy record, revocable)
+  and the report or export rows ex5-0010, 0012 and 0819. Truth classes: r 671,
+  w 354, x 418.
+- Rejected file: the first B-front file was set aside in
+  `labelling/rejected/B-front-truncated260.csv`. Its labeller cut every
+  description to 260 characters (29 of the 246 front rows are longer), so
+  B-front was relabelled from scratch by a new Opus labeller told to read every
+  description in full. The remaining labellers got the same instruction; no
+  file was rejected as scripted.
 
 ## Code under test
 
