@@ -17,17 +17,17 @@
 // correctness is pinned only by the constructed multi-match test in
 // src/step1.test.js, not by this proof.
 //
-// Run with: node tools/proof-step1.js
+// Run with: node poc/archive/v3-proofs/proof-step1.js
 // Prints "All pins hold." and exits 0 when every comparison is clean;
 // otherwise prints the TRUE total differing-row count per comparison (every
 // row is counted, not just the ones kept for display) plus a sample of up
 // to the first 10, and exits 1.
-import { loadRows } from './corpus.js';
+import { loadRows } from '../../../tools/corpus.js';
 
-import { applyStep1, READ_VERBS as OLD_READ_VERBS, SAFE_VERBS as OLD_SAFE_VERBS } from '../poc/step1/step1.mjs';
-import { sourceForRule, matchedWordsForRule } from '../poc/step3/step3.mjs';
+import { applyStep1, READ_VERBS as OLD_READ_VERBS, SAFE_VERBS as OLD_SAFE_VERBS } from '../../../poc/step1/step1.mjs';
+import { sourceForRule, matchedWordsForRule } from '../../../poc/step3/step3.mjs';
 
-import { step1, READ_VERBS as NEW_READ_VERBS, SAFE_VERBS as NEW_SAFE_VERBS } from '../src/step1.js';
+import { step1, READ_VERBS as NEW_READ_VERBS, SAFE_VERBS as NEW_SAFE_VERBS } from '../../../src/step1.js';
 
 const rows = loadRows();
 const MAX_REPORT = 10;

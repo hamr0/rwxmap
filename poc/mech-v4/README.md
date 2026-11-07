@@ -1,21 +1,21 @@
 # poc/mech-v4
 
-Parallel v4 copy of the v3 mechanical core, per `docs/wiki/mechanical-v4-plan.md`
-(step 1: copy only, no behaviour change).
+Frozen reference for mechanical v4. v4 shipped to `src/` in commit 1268650 (D138);
+`src/flow.js`, `step1-3.js`, `tokens.js`, `types.js` and their tests are byte
+copies of the files here, and v3 is archived in `poc/archive/mech-v3/`.
+This folder is what `proof-copy.mjs` checks `src/` against; do not edit it
+unless `src/` changes on purpose in the same commit.
 
-- `tokens.js step1.js step2.js step3.js flow.js types.js` and their tests are
-  byte-identical copies of `src/`; `diff src/X poc/mech-v4/X` must stay empty
-  until a later plan step changes the copy on purpose.
-- `src/` stays v3 and untouched. Nothing here imports from `src/` except
-  `proof-copy.mjs`, which uses `src/flow.js` as the v3 reference.
 - `sets.mjs` loads the six tuning sets (16,486 labelled ops) with v3 and v4 truth.
+- `proof-copy.mjs` is the only file that imports from `src/`.
 
 Run tests: `node --test poc/mech-v4/*.test.js`
 
 Run the proof: `node poc/mech-v4/proof-copy.mjs [path/to/other/flow.js]`
-(the optional path lets you break a scratch copy and watch the proof fail).
+(the optional path swaps in a scratch copy of the reference `flow.js`, so you can
+break it and watch the proof fail).
 
 Pinned numbers (exit 1 if any differs):
-- compared 16486, differences 0
-- vs v3 truth: exact/too loose/too tight 13339/156/2991
-- vs v4 truth: 13484/861/2141
+- compared 16486, differences 0, skipped (no truth) 0
+- src vs v3 truth (original labels): exact/too loose/too tight 13096/119/3271
+- src vs v4 truth (D137 labels): 14048/421/2017

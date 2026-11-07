@@ -41,19 +41,19 @@
 //      rows were lowered (expect 804) and the model versions seen. Exits 1
 //      if the lowered count is not 804.
 //
-// Run: node poc/d87/proof-src.mjs
+// Run: node poc/archive/v3-proofs/proof-src.mjs
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 
-import { classifyRow as srcClassifyRow } from '../../src/flow.js';
-import { applyJev } from '../../src/jev.js';
-import { classifyRow as pocClassifyRow } from './flow.mjs';
+import { classifyRow as srcClassifyRow } from '../../../src/flow.js';
+import { applyJev } from '../../../src/jev.js';
+import { classifyRow as pocClassifyRow } from '../../d87/flow.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.join(__dirname, '..', '..');
+const ROOT = path.join(__dirname, '..', '..', '..');
 
 function readGzJson(p) {
   return JSON.parse(zlib.gunzipSync(fs.readFileSync(p)));

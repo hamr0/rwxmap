@@ -1,12 +1,15 @@
-// Proof: the v4 copy of the v3 core is byte-identical in output on the six tuning sets.
-// Usage: node poc/mech-v4/proof-copy.mjs [path-to-v4-flow.js]
+// Proof: src/ (shipped v4, D138) equals the frozen reference poc/mech-v4 in output on the
+// six tuning sets: same JSON verdict for every row, plus pinned scores against two truths.
+// Exit 0 only if every pin holds; exit 1 otherwise. Rows without truth are counted as skipped.
+// Usage: node poc/mech-v4/proof-copy.mjs [path-to-reference-flow.js]
+// (the optional path swaps in a scratch copy of poc/mech-v4/flow.js to prove the proof can fail)
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { classifyRow as classifyV3 } from '../../src/flow.js';
+import { classifyRow as classifySrc } from '../../src/flow.js';
 import { loadSets } from './sets.mjs';
 
-const v4Path = process.argv[2] ? path.resolve(process.argv[2]) : new URL('./flow.js', import.meta.url).pathname;
-const { classifyRow: classifyV4 } = await import(pathToFileURL(v4Path).href);
+const refPath = process.argv[2] ? path.resolve(process.argv[2]) : new URL('./flow.js', import.meta.url).pathname;
+const { classifyRow: classifyRef } = await import(pathToFileURL(refPath).href);
 
 const ord = { r: 0, w: 1, x: 2 };
 const cls = (pred, truth) => (ord[pred] === ord[truth] ? 'exact' : ord[pred] < ord[truth] ? 'loose' : 'tight');
@@ -25,10 +28,10 @@ for (const s of all) {
   loaded.set(s.set, (loaded.get(s.set) || 0) + 1);
   if (!s.v3) { skipped.set(s.set, (skipped.get(s.set) || 0) + 1); continue; }
   compared++;
-  const a = classifyV3(s.row), b = classifyV4(s.row);
+  const a = classifySrc(s.row), b = classifyRef(s.row);
   if (JSON.stringify(a) !== JSON.stringify(b)) {
     diffs++;
-    if (samples.length < 10) samples.push({ set: s.set, id: s.id, method: s.row.method, operationId: s.row.operationId, v3: a, v4: b });
+    if (samples.length < 10) samples.push({ set: s.set, id: s.id, method: s.row.method, operationId: s.row.operationId, src: a, ref: b });
   }
   const c3 = cls(b.class, s.v3), c4 = cls(b.class, s.v4);
   tot3.n++; tot3[c3]++; tot4.n++; tot4[c4]++;
@@ -43,8 +46,8 @@ console.log(`skipped total ${skipTotal}`);
 console.log(`compared ${compared}`);
 console.log(`differences ${diffs}`);
 for (const d of samples) console.log('DIFF', JSON.stringify(d));
-console.log('\nv4-copy verdicts vs v3 truth:', line('ALL', tot3));
-console.log('v4-copy verdicts vs v4 truth:', line('ALL', tot4));
+console.log('\nsrc verdicts vs v3 truth (original labels):', line('ALL', tot3));
+console.log('src verdicts vs v4 truth (D137 labels):', line('ALL', tot4));
 console.log('\nper set (v4 truth):');
 for (const [k, t] of perSet) console.log(' ' + line(k, t));
 console.log('\nper method (v4 truth): method, n, truth r/w/x, exact, too loose, too tight');
@@ -56,8 +59,9 @@ for (const [k, t] of [...perMethod].sort((a, b) => b[1].n - a[1].n)) {
 const checks = [
   ['compared == 16486', compared === 16486],
   ['differences == 0', diffs === 0],
-  ['v3 truth exact/loose/tight == 13339/156/2991', tot3.exact === 13339 && tot3.loose === 156 && tot3.tight === 2991],
-  ['v4 truth exact/loose/tight == 13484/861/2141', tot4.exact === 13484 && tot4.loose === 861 && tot4.tight === 2141],
+  ['skipped (no truth) == 0', skipTotal === 0],
+  ['v3 truth (original labels) exact/loose/tight == 13096/119/3271', tot3.exact === 13096 && tot3.loose === 119 && tot3.tight === 3271],
+  ['v4 truth (D137 labels) exact/loose/tight == 14048/421/2017', tot4.exact === 14048 && tot4.loose === 421 && tot4.tight === 2017],
 ];
 console.log('');
 let fail = false;
