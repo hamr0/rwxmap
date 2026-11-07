@@ -49,7 +49,7 @@ rwxmap reads specs and writes every format. The deciding is rules, plus a model 
 
 How it decides:
 
-- Method floor: GET, HEAD, OPTIONS and QUERY are r. PUT and PATCH are w. DELETE is x. POST is decided by its first verb. A word can raise a PUT or PATCH to x.
+- Method floor: GET, HEAD, OPTIONS and QUERY are r, unless the name is a one-way action (logout, revoke, close), which raises it to x. DELETE is x. PUT and PATCH are w, raised to x by a path word (role, member, token, webhook and the like) or a credential-set verb. POST is x, lowered to w by a content noun (tag, file, comment and the like) or a short list of verbs, or to r by a read verb (list, get, search and the like).
 - Unsure rows get a marker. `loose`: the rules lowered the letter; a reviewer checks if it should be x (most too-loose rows live here). `tight`: an x that may be stricter than needed, including rows the second pass could not decide; too tight costs usability, not safety. `settled`: nothing lowered it, nothing is doubtful; not signed, not verified.
 - Still unsure: x plus review. Never a looser guess.
 
@@ -69,20 +69,27 @@ What leaves your machine: mechanical, nothing. Modes a and b, only the model dow
 
 ## How good it is
 
-Exam #3: 1377 operations, 7 complete official APIs (clerk, neon, supabase, mux, netbird, ory, novu), labelled blind by two labellers, scored once on 2026-11-04.
+Exam #5: 1443 operations, 7 complete official APIs (frontapp, planetscale, paddle, hookdeck, fusionauth, semaphoreui, weaviate), labelled blind, scored once on 2026-11-07. Counts are of those 1443 operations.
 
 | mode | exact | too loose | too tight |
 |---|---|---|---|
-| mechanical | 1094 (79.4%) | 17 (1.2%) | 266 (19.3%) |
-| a (default, rwxlite 0.2.0) | 1192 (86.6%) | 15 (1.1%) | 170 (12.3%) |
+| mechanical (v4) | 1201 (83.2%) | 59 (4.1%) | 183 (12.7%) |
+| a (default, rwxlite 0.2.0) | 1272 (88.1%) | 94 (6.5%) | 77 (5.3%) |
+
+- Too loose (looser than the truth label) is the safety cost. Too tight (stricter) is a usability cost. They are kept apart.
+- On this exam mode a is looser than mechanical alone (94 against 59 too loose). rwxlite 0.2.0 was trained before x was widened to cover anything that cannot be put back, so it lowers rows that are now x. A newer model is decided and will replace it.
+- Mechanical v4 shipped by choice although it failed its own too-tight gate: 183 too tight against 178 for the older rules. It has 59 too-loose rows against 77, and every added too-tight row is marked for review.
+- The exam was scored once and is used up. Any rule or model change needs a new exam.
+- Modes b and c were not scored on this exam.
+
+Older numbers for modes b and c, from exam #3 (1377 operations, 7 other APIs, scored 2026-11-04, older truth, older rules). Not comparable with the table above.
+
+| mode | exact | too loose | too tight |
+|---|---|---|---|
 | b at 95 | 1181 (85.8%) | 14 (1.0%) | 182 (13.2%) |
 | c (Jev, one run) | 1250 (90.8%) | 16 (1.2%) | 111 (8.1%) |
 
-- Too loose (looser than the truth label) is the safety cost. Too tight (stricter) is a usability cost. They are kept apart.
-- The rwxlite 0.2.0 rows are a replay through the real second pass, checked row for row. The exam was scored for an earlier candidate model, so it is used up; a new model needs a fresh exam.
 - Jev is one run of a model that can answer differently next time.
-
-An earlier clean exam (cloudflare, pagerduty, sentry; 4279 operations) gave mechanical 82.3% exact / 0.8% too loose / 16.9% too tight.
 
 ## Ways to use it
 
