@@ -1099,7 +1099,10 @@ decided; everything marked "proposal" or "open" is not decided.
   the model is fetched, so a missing or wrong-version package costs no
   download. A newer model replaces it only
   after a no-regression result on a fresh clean exam (exam #4,
-  2026-11-05: rwxlite r11 failed it, 0.2.0 stays). Every run records
+  2026-11-05: rwxlite r11 failed it, 0.2.0 stays). Decided (D139, user
+  override 2026-11-07): the pin moves to rwxlite 0.3.1 (R13), tag v0.3.1,
+  accepted range 0.3.x, once rwxlite publishes it and we verify the real
+  download; this pin text is replaced in that pass. Every run records
   the model string.
 - **Model cache and integrity.** The downloaded model is cached in a
   per-user folder, `~/.cache/rwxmap/` (or `$XDG_CACHE_HOME/rwxmap`),
@@ -1149,7 +1152,8 @@ decided; everything marked "proposal" or "open" is not decided.
   three tiers, with per-tier cuts and then asks a lowering under 0.97).
   A `credential-set` verdict (D131) is never lowered by the second pass,
   in any mode (user ruling 2026-11-04).
-  Kept at 0.97 after a measured 0.95/0.93/0.90 what-if (D136).
+  Shipped at 0.97 (D136, measured for 0.2.0). Decided to move to 0.90
+  with rwxlite R13 (D139); not built until the pin pass.
   Evidence: "Rule comparison" under Evidence so far. Caveat:
   secondPass has only that one tuning measurement; the D133 exam is its
   test.
@@ -1283,8 +1287,17 @@ Mechanical v4 ships by D138 (2026-11-07). Exam #5 (1443 ops, v4 truth)
 gate was NO-GO on too tight, 183 vs 178 for v3, and the user overrode it
 because too loose fell from 77 to 59. Shipped mode a (rwxlite 0.2.0) is
 looser than mechanical alone on v4 truth (94 vs 59 too loose on exam #5):
-it was trained before D137 widened x. 0.2.0 stays shipped because the
-R13 candidate is NO-GO on rwxlite's bar (exact 1220 vs 1272).
+it was trained before D137 widened x.
+
+Decided, not built (D139, user override 2026-11-07): rwxmap will ship
+rwxlite R13 (rwxlite 0.3.1) with the lowering cut-off LOWER_MIN_P at 0.90,
+overriding D135 (R13 failed its exact bar) and D136 (cut-off 0.97), for the
+same reason as D138: fewer leaks matter more than more review asks. Exam
+#5, mode a, 1443 ops, exact / too loose / too tight: shipped 0.2.0 at 0.97
+1272 / 94 / 77; R13 at 0.97 1220 / 37 / 186; R13 at 0.90 1269 / 40 / 134.
+The 0.90 cut is tuned on burned exam #5 and rwxlite's val set, not proven
+on unseen vendors. Shipping waits on rwxlite publishing 0.3.1. Until then
+0.2.0 at 0.97 is what ships.
 
 Next, in order:
 
@@ -1296,8 +1309,12 @@ Next, in order:
 3. Measure the candidate words from exam #5 leave-one-vendor-out across
    all seven sets, adopting only if neither too loose nor too tight
    worsens.
-4. A what-if of R13 at lower lowering cut-offs.
-5. A new exam #6 for any change (exam #5 is burned).
+4. Verify rwxlite 0.3.1 (GitHub release v0.3.1 with its model files, npm
+   0.3.1) from the real download path, then one code pass (D139): pin
+   `RWXLITE_TAG` v0.3.1, cache fallback, accepted range 0.3.x, and
+   `LOWER_MIN_P` 0.90, with tests and conformance.
+5. A new exam #6 for any change (exam #5 is burned; bunny.net is spent;
+   unused shortlist vendors: grafana, nocodb, radarr).
 
 Parked items and known limits below.
 
