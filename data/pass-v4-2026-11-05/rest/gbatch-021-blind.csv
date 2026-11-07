@@ -1,0 +1,268 @@
+row_id,provider,method,path,operationId,summary,description
+g04001,microsoft.com,POST,/projects/{projectId}/images/regions,CreateImageRegions,Create a set of image regions.,"This API accepts a batch of image regions, and optionally tags, to update existing images with region information. There is a limit of 64 entries in the batch."
+g04002,coolify.io,POST,/projects/{uuid}/environments/{environment_name_or_uuid}/envs,create-environment-shared-env,Create Environment Shared Env,Create a shared environment variable for a project environment (type=environment).
+g04003,cloudflare,PATCH,/zones/{zone_id}/settings/{setting_id},zone-settings-edit-single-setting,Edit zone setting,Updates a single zone setting by the identifier
+g04004,googleapis.com,PATCH,/management/accounts/{accountId}/webproperties/{webPropertyId}/profiles/{profileId}/profileFilterLinks/{linkId},analytics.management.profileFilterLinks.patch,,Update an existing profile filter link. This method supports patch semantics.
+g04005,googleapis.com,POST,/projects/{project}/regions/{region}/targetPools,compute.targetPools.insert,,Creates a target pool in the specified project and region using the data included in the request.
+g04006,sentry,PUT,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/,Bulk Mutate a List of Issues,,"Bulk mutate various attributes on issues.  The list of issues to modify is given through the `id` query parameter.  It is repeated for each issue that should be modified.
+
+- For non-status updates, the `id` query parameter is required.
+- For status updates, the `id` query parameter may be omitted
+for a batch ""update all"" query.
+- An optional `status` query parameter may be used to restrict
+mutations to only events with the given status.
+
+The following attributes can be modified and are supplied as JSON object in the body:
+
+If any IDs are out of scope this operation will succeed without any data mutation."
+g04007,pagerduty,PUT,/v3/schedules/{id},updateScheduleV3,Update a schedule,"<!-- theme: info -->
+
+> **Important note:** Shift-based schedules use the V3 API and are not compatible with V2 automations. **To create automations for Shift-Based Schedules, you need to:**
+>
+> 1. **Update your automations** to use the V3 API for all new shift-based schedules
+> 2. **Keep the V2 endpoint** for your existing schedules
+>
+> An upgrade tool for existing schedules is coming soon; your legacy schedules will keep working in the meantime. [Learn more](https://support.pagerduty.com/main/docs/shift-based-schedules-api-upgrade-examples).
+
+Update schedule metadata (name, description, time zone). All fields are
+optional — only provided fields are updated.
+
+To modify rotations or events, use their respective endpoints.
+
+**Rejected fields:** `rotations` and `escalation_policies` are not
+accepted and will result in a 400 error."
+g04008,coolify.io,PATCH,/projects/{uuid},update-project-by-uuid,Update,Update Project.
+g04009,autotask.net,POST,/V1.0/Departments,Departments_CreateEntity,,
+g04010,googleapis.com,PUT,/v1beta1/{name},runtimeconfig.projects.configs.variables.update,,Updates an existing variable with a new value.
+g04011,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/mongodbDatabases/{databaseName}/collections/{collectionName}/throughputSettings/default,MongoDBResources_UpdateMongoDBCollectionThroughput,,Update the RUs per second of an Azure Cosmos DB MongoDB collection
+g04012,square,POST,/v2/locations/custom-attribute-definitions,CreateLocationCustomAttributeDefinition,CreateLocationCustomAttributeDefinition,"Creates a location-related [custom attribute definition](entity:CustomAttributeDefinition) for a Square seller account.
+Use this endpoint to define a custom attribute that can be associated with locations.
+A custom attribute definition specifies the `key`, `visibility`, `schema`, and other properties
+for a custom attribute. After the definition is created, you can call
+[UpsertLocationCustomAttribute](api-endpoint:LocationCustomAttributes-UpsertLocationCustomAttribute) or
+[BulkUpsertLocationCustomAttributes](api-endpoint:LocationCustomAttributes-BulkUpsertLocationCustomAttributes)
+to set the custom attribute for locations."
+g04013,microsoft.com,POST,/communications/calls/{call-id}/participants/microsoft.graph.muteAll,communications.calls.call.participants.muteAll,Invoke action muteAll,Mute all participants in the call.
+g04014,amazonaws.com,POST,/#X-Amz-Target=ACMPrivateCA.UpdateCertificateAuthority,UpdateCertificateAuthority,,Updates the status or configuration of a private certificate authority (CA). Your private CA must be in the ACTIVE or DISABLED state before you can update it. You can disable a private CA that is in the ACTIVE state or make a CA that is in the DISABLED state active again. Both Amazon Web Services Private CA and the IAM principal must have permission to write to the S3 bucket that you specify. If t
+g04015,microsoft.com,PATCH,/identityGovernance/termsOfUse/agreements/{agreement-id}/file/localizations/{agreementFileLocalization-id},identityGovernance.termsOfUse.agreements.file.UpdateLocalizations,Update the navigation property localizations in identityGovernance,
+g04016,microsoft.com,PATCH,/me/calendar/calendarView/{event-id}/exceptionOccurrences/{event-id1}/multiValueExtendedProperties/{multiValueLegacyExtendedProperty-id},me.calendar.calendarView.exceptionOccurrences.UpdateMultiValueExtendedProperties,Update the navigation property multiValueExtendedProperties in me,
+g04017,semantria.com,PUT,/categories.{content_type},updateCategories,Updates user categories,This method updates user categories by unique IDs on Semantria side.
+g04018,microsoft.com,POST,/groups/{group-id}/sites/{site-id}/termStore/groups/{group-id1}/sets/{set-id}/children/{term-id}/children,groups.sites.termStore.groups.sets.children.CreateChildren,Create new navigation property to children for groups,
+g04019,microsoft.com,PATCH,/me/mailFolders/{mailFolder-id}/childFolders/{mailFolder-id1}/messages/{message-id}/singleValueExtendedProperties/{singleValueLegacyExtendedProperty-id},me.mailFolders.childFolders.messages.UpdateSingleValueExtendedProperties,Update the navigation property singleValueExtendedProperties in me,
+g04020,microsoft.com,PATCH,/users/{user-id}/calendarGroups/{calendarGroup-id}/calendars/{calendar-id}/events/{event-id}/exceptionOccurrences/{event-id1}/multiValueExtendedProperties/{multiValueLegacyExtendedProperty-id},users.calendarGroups.calendars.events.exceptionOccurrences.UpdateMultiValueExtendedProperties,Update the navigation property multiValueExtendedProperties in users,
+g04021,amazon,POST,/mfn/v0/eligibleShippingServices,getEligibleShipmentServices,,"Returns a list of shipping service offers that satisfy the specified shipment request details. **Usage Plan:** | Rate (requests per second) | Burst | | ---- | ---- | | 6 | 12 | The `x-amzn-RateLimit-Limit` response header returns the usage plan rate limits that are applied to the requested operation when available. The preceding table indicates the default rate and burst values for this operation. Selling partners whose business demands require higher throughput may have higher rate and burst values than those shown here. For more information, refer to [Usage Plans and Rate Limits in the SP-API](https://developer-docs.amazon.com/sp-api/docs/usage-plans-and-rate-limits-in-the-sp-api)."
+g04022,loket.nl,PUT,/providers/employers/employees/employments/costperhour/{costperhourId},PutCostperhourByCostperhourId,Edit a cost per hour record,__Activity name :__ PutCostperhourByCostperhourId __Metadata :__ No metadata.
+g04023,pagerduty,PUT,/incidents/{id}/notes/{note_id},updateIncidentNote,Update a note on an incident,"Update an existing note for the specified incident.
+
+An incident represents a problem or an issue that needs to be addressed and resolved.
+
+For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#incidents)
+
+Scoped OAuth requires: `incidents.write`"
+g04024,netbox.dev,PATCH,/ipam/service-templates/,ipam_service-templates_bulk_partial_update,,
+g04025,square,PUT,/v2/team-members/jobs/{job_id},UpdateJob,UpdateJob,"Updates the title or tip eligibility of a job. Changes to the title propagate to all
+`JobAssignment`, `Shift`, and `TeamMemberWage` objects that reference the job ID. Changes to
+tip eligibility propagate to all `TeamMemberWage` objects that reference the job ID."
+g04026,github.com,PATCH,/user/codespaces/{codespace_name},codespaces/update-for-authenticated-user,Update a codespace for the authenticated user,Updates a codespace owned by the authenticated user. Currently only the codespace's machine type and recent folders can be modified using this endpoint. If you specify a new machine type it will be applied the next time your codespace is started. You must authenticate using an access token with the `codespace` scope to use this endpoint. GitHub Apps must have write access to the `codespaces` repos
+g04027,microsoft.com,PATCH,/users/{user-id}/calendarGroups/{calendarGroup-id}/calendars/{calendar-id}/events/{event-id}/instances/{event-id1}/singleValueExtendedProperties/{singleValueLegacyExtendedProperty-id},users.calendarGroups.calendars.events.instances.UpdateSingleValueExtendedProperties,Update the navigation property singleValueExtendedProperties in users,
+g04028,gitlab.com,POST,/v3/projects/{id}/merge_requests/{merge_request_id}/comments,postV3ProjectsIdMergeRequestsMergeRequestIdComments,Post a comment to a merge request,Duplicate. DEPRECATED and WILL BE REMOVED in 9.0
+g04029,amazonaws.com,POST,/#X-Amz-Target=SageMaker.CreateAction,CreateAction,,"Creates an action . An action is a lineage tracking entity that represents an action or activity. For example, a model deployment or an HPO job. Generally, an action involves at least one input or output artifact. For more information, see Amazon SageMaker ML Lineage Tracking ."
+g04030,sentry,GET,/api/0/organizations/{organization_id_or_slug}/projects/,listOrganizationProjects,List an Organization's Projects,Return a list of projects bound to a organization.
+g04031,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/queryPacks/{queryPackName},QueryPacks_CreateOrUpdate,,Creates (or updates) a Log Analytics QueryPack. Note: You cannot specify a different value for InstrumentationKey nor AppId in the Put operation.
+g04032,microsoft.com,PATCH,/deviceManagement/mobileAppTroubleshootingEvents/{mobileAppTroubleshootingEvent-id},deviceManagement.UpdateMobileAppTroubleshootingEvents,Update the navigation property mobileAppTroubleshootingEvents in deviceManagement,
+g04033,amazonaws.com,PATCH,/wireless-gateways/{Id},UpdateWirelessGateway,,Updates properties of a wireless gateway.
+g04034,microsoft.com,POST,/termStore/groups/{group-id}/sets/{set-id}/children/{term-id}/children/{term-id1}/relations,termStore.groups.sets.children.children.CreateRelations,Create new navigation property to relations for termStore,
+g04035,amazonaws.com,POST,/#X-Amz-Target=SageMaker.UpdateHub,UpdateHub,,Update a hub. Hub APIs are only callable through SageMaker Studio.
+g04036,microsoft.com,POST,/messageTraces,messageTraces.messageTrace.CreateMessageTrace,Add new entity to messageTraces,
+g04037,microsoft.com,POST,/users/{user-id}/events/{event-id}/exceptionOccurrences/{event-id1}/microsoft.graph.snoozeReminder,users.user.events.event.exceptionOccurrences.event.snoozeReminder,Invoke action snoozeReminder,Postpone a reminder for an event in a user calendar until a new time.
+g04038,cloud-elements.com,POST,/{objectName},createByObjectName,Create an {objectName},
+g04039,pagerduty,PUT,/automation_actions/runners/{id},updateAutomationActionsRunner,Update an Automation Action runner,Update an Automation Action runner
+g04040,dracoon,PUT,/v4/nodes/rooms/{room_id}/encrypt,encryptRoom,Encrypt room,### Description:   Activates the client-side encryption for a room. ### Precondition: User needs to be a <span style='padding: 3px; background-color: #F6F7F8; border: 1px solid #000; border-radius: 5px; display: inline;'>&#128100; Room Administrator</span>. ### Postcondition: Encryption of room is activated. ### Further Information: Only empty rooms at the top level may be encrypted.   This endpoint may also be used to disable encryption of an empty room.
+g04041,microsoft.com,POST,/me/mailFolders/{mailFolder-id}/microsoft.graph.move,me.mailFolders.mailFolder.move,Invoke action move,Move a mailfolder and its contents to another mailfolder.
+g04042,opensuse.org,PUT,/group/{group_title},,Write group data.,Write group data.
+g04043,appcenter,PATCH,/v0.1/apps/{owner_name}/{app_name}/distribution_stores/{store_name},stores_patch,,Update the store.
+g04044,telnyx.com,POST,/private_wireless_gateways,createPrivateWirelessGateway,Create a Private Wireless Gateway,Asynchronously create a Private Wireless Gateway for SIM cards for a previously created network.
+g04045,microsoft.com,POST,/users/{user-id}/informationProtection/threatAssessmentRequests/{threatAssessmentRequest-id}/results,users.informationProtection.threatAssessmentRequests.CreateResults,Create new navigation property to results for users,
+g04046,x,POST,/2/notes/evaluate,evaluateCommunityNotes,Evaluate Community Notes,
+g04047,slack,POST,/stars.add,stars_add,,Adds a star to an item.
+g04048,mist.com,POST,/api/v1/sites/{site_id}/alarms/{alarm_id}/ack,ackSiteAlarm,ackSiteAlarm,Ack Site Alarm
+g04049,nexmo.com,POST,/conversations/{conversation_id}/events,createEvent,Create an event,
+g04050,microsoft.com,POST,/app/calls/{call-id}/microsoft.graph.mute,app.calls.call.mute,Invoke action mute,"Allows the application to mute itself. This is a server mute, meaning that the server will drop all audio packets for this participant, even if the participant continues to stream audio. For more details about how to handle mute operations, see muteParticipantOperation"
+g04051,amazonaws.com,POST,/CreateReplicationConfigurationTemplate,CreateReplicationConfigurationTemplate,,Creates a new ReplicationConfigurationTemplate.
+g04052,pagerduty,GET,/analytics/raw/incidents/{id}/responses,getAnalyticsIncidentResponsesById,Get raw responses from a single incident,"Provides enriched responder data for a single incident. Example metrics include Time to Respond, Responder Type, and Response Status. See metric definitions below. > **Note:** Data availability reflects [pipeline processing cycles](https://support.pagerduty.com/main/docs/insights#:~:text=Data%20Update%20Schedule) and is generally within 24 hours under normal conditions. Scoped OAuth requires: `analytics.read`"
+g04053,microsoft.com,PATCH,/me/onenote/notebooks/{notebook-id}/sectionGroups/{sectionGroup-id},me.onenote.notebooks.UpdateSectionGroups,Update the navigation property sectionGroups in me,
+g04054,azure.com,POST,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/scaleUnitNodes/{scaleUnitNode}/PowerOff,ScaleUnitNodes_PowerOff,,Power off a scale unit node.
+g04055,microsoft.com,GET,/compliance/ediscovery/cases/{case-id}/sourceCollections/{sourceCollection-id}/additionalSources/{dataSource-id},compliance.ediscovery.cases.sourceCollections.GetAdditionalSources,Get additionalSources from compliance,Adds an additional source to the sourceCollection.
+g04056,microsoft.com,POST,/users/{user-id}/events/{event-id}/exceptionOccurrences/{event-id1}/singleValueExtendedProperties,users.events.exceptionOccurrences.CreateSingleValueExtendedProperties,Create new navigation property to singleValueExtendedProperties for users,
+g04057,googleapis.com,PUT,/calendars/{calendarId},calendar.calendars.update,,Updates metadata for a calendar.
+g04058,drchrono.com,POST,/api/patient_risk_assessments,patient_risk_assessments_create,,
+g04059,drchrono.com,PUT,/api/problems/{id},problems_update,,Update an existing patient problems
+g04060,netbox,PUT,/dcim/module-bays/,dcim_module-bays_bulk_update,,
+g04061,jellyfin.local,POST,/Users/{userId}/FavoriteItems/{itemId},MarkFavoriteItem,Marks an item as a favorite.,
+g04062,netatmo.net,POST,/setpersonshome,setpersonshome,,Sets a person as 'At home'.
+g04063,iqualify.com,POST,/offerings/{offeringId}/users/{userEmail}/badges/award,,Award badge,Awards a badge to a user in the offering.
+g04064,cloudflare,PATCH,/zones/{zone_id}/environments,zonesEnvironmentsEdit,Partially update zone environments,Applies partial updates to zone environments.
+g04065,amazonaws.com,POST,/#X-Amz-Target=AWSGlue.CreateTable,CreateTable,,Creates a new table definition in the Data Catalog.
+g04066,googleapis.com,POST,/userprofiles/{profileId}/creatives,dfareporting.creatives.insert,,Inserts a new creative.
+g04067,vtex.local,POST,/api/checkout/pub/orderForm/{orderFormId}/coupons,AddCoupons,Add coupons to the cart,Use this request to add coupons to a given shopping cart.
+g04068,microsoft.com,POST,/users/{user-id}/outlook/taskGroups/{outlookTaskGroup-id}/taskFolders,users.outlook.taskGroups.CreateTaskFolders,Create new navigation property to taskFolders for users,
+g04069,koomalooma.com,POST,/users/{user_id}/commitments,,Assign points to a User,
+g04070,intercom,POST,/ticket_types,createTicketType,Create a ticket type,"You can create a new ticket type.
+> 📘 Creating ticket types.
+>
+> Every ticket type will be created with two default attributes: _default_title_ and _default_description_.
+> For the `icon` propery, use an emoji from [Twemoji Cheatsheet](https://twemoji-cheatsheet.vercel.app/)"
+g04071,amazonaws.com,PUT,/2020-06-30/functions/{FunctionName}/code-signing-config,PutFunctionCodeSigningConfig,,Update the code signing configuration for the function. Changes to the code signing configuration take effect the next time a user tries to deploy a code package to the function.
+g04072,microsoft.com,PATCH,/users/{user-id}/planner/plans/{plannerPlan-id}/tasks/{plannerTask-id}/assignedToTaskBoardFormat,users.planner.plans.tasks.UpdateAssignedToTaskBoardFormat,Update the navigation property assignedToTaskBoardFormat in users,
+g04073,microsoft.com,PATCH,/me/pendingAccessReviewInstances/{accessReviewInstance-id}/decisions/{accessReviewInstanceDecisionItem-id}/instance/stages/{accessReviewStage-id}/decisions/{accessReviewInstanceDecisionItem-id1}/insights/{governanceInsight-id},me.pendingAccessReviewInstances.decisions.instance.stages.decisions.UpdateInsights,Update the navigation property insights in me,
+g04074,microsoft.com,POST,/teamwork/teamTemplates/{teamTemplate-id}/definitions/{teamTemplateDefinition-id}/teamDefinition/tags,teamwork.teamTemplates.definitions.teamDefinition.CreateTags,Create teamworkTag,Create a standard tag for members in the team.
+g04075,microsoft.com,POST,/compliance/ediscovery/cases/{case-id}/microsoft.graph.ediscovery.reopen,compliance.ediscovery.cases.case.reopen,Invoke action reopen,"Reopen an eDiscovery case that was closed. For details, see Reopen a closed case."
+g04076,mist.com,POST,/api/v1/orgs/{org_id}/sites,createOrgSite,createOrgSite,Create Org Site
+g04077,microsoft.com,POST,/users/{user-id}/joinedTeams/{team-id}/primaryChannel/messages/{chatMessage-id}/microsoft.graph.undoSoftDelete,users.user.joinedTeams.team.primaryChannel.messages.chatMessage.undoSoftDelete,Invoke action undoSoftDelete,
+g04078,amazonaws.com,PUT,/UpdateInfrastructureConfiguration,UpdateInfrastructureConfiguration,,Updates a new infrastructure configuration. An infrastructure configuration defines the environment in which your image will be built and tested.
+g04079,mastodon.local,POST,/api/v1/accounts/{id}/follow,,,Follow the given account. Can also be used to update whether to show reblogs or enable notifications.
+g04080,microsoft.com,PATCH,/directory/customSecurityAttributeDefinitions/{customSecurityAttributeDefinition-id},directory.UpdateCustomSecurityAttributeDefinitions,Update the navigation property customSecurityAttributeDefinitions in directory,
+g04081,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}/transactionNodes/{transactionNodeName},TransactionNodes_Create,,Create or update the transaction node.
+g04082,zuora.com,PUT,/v1/revpro-accounting-codes,PUT_RevProAccountingCodes,Update a Zuora Revenue accounting code,Update the Zuora Revenue accounting code that corresponds to a specific Product Rate Plan Charge Id in Zuora Billing.
+g04083,xtrf.eu,PUT,/users/{userId}/customFields,updateCustomFields_2,Updates custom fields of a given user.,Updates custom fields of a given user.
+g04084,bufferapp.com,POST,/profiles/{id}/updates/reorder{mediaTypeExtension},,,Edit the order at which statuses for the specified social media profile will be sent out of the buffer.
+g04085,amazonaws.com,POST,/applications/{ApplicationId}/configurationprofiles,CreateConfigurationProfile,,"Creates a configuration profile, which is information that enables AppConfig to access the configuration source. Valid configuration sources include the following: Configuration data in YAML, JSON, and other formats stored in the AppConfig hosted configuration store Configuration data stored as objects in an Amazon Simple Storage Service (Amazon S3) bucket Pipelines stored in CodePipeline Secrets "
+g04086,reverb.com,POST,/my/follows/articles,,Set a user's ArticleCategoryFollows,Set a user's ArticleCategoryFollows
+g04087,combell.com,PUT,/linuxhostings/{domainName}/phpsettings/version,ChangePhpVersion,Change the Linux hosting PHP version.,
+g04088,microsoft.com,POST,/domains/{domain-id}/serviceConfigurationRecords,domains.CreateServiceConfigurationRecords,Create new navigation property to serviceConfigurationRecords for domains,
+g04089,microsoft.com,PATCH,/solutions/bookingCurrencies/{bookingCurrency-id},solutions.UpdateBookingCurrencies,Update the navigation property bookingCurrencies in solutions,
+g04090,azure.com,POST,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/alerts/{alertName}/reactivate,Alerts_UpdateResourceGroupLevelAlertStateToReactivate,,Update the alert's state
+g04091,netbox,PATCH,/dcim/module-bays/{id}/,dcim_module-bays_partial_update,,
+g04092,files.com,POST,/user_requests,PostUserRequests,Create User Request,Create User Request
+g04093,amazonaws.com,GET,/#Action=CreateReceiptRuleSet,GET_CreateReceiptRuleSet,,"Creates an empty receipt rule set. For information about setting up receipt rule sets, see the Amazon SES Developer Guide . You can execute this operation no more than once per second."
+g04094,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peeringServices/{peeringServiceName},PeeringServices_CreateOrUpdate,,Creates a new peering service or updates an existing peering with the specified name under the given subscription and resource group.
+g04095,loket.nl,PUT,/providers/employers/employees/employments/employmentfunds/{employmentFundId},PutEmploymentFundByEmploymentFundId,Edit a employment fund record,"__Activity name :__ PutEmploymentFundByEmploymentFundId __Metadata :__ Possible options for fields of the type ""metadata"" can be acquired (GET) by adding `/metadata` to the PUT URL."
+g04096,amazonaws.com,POST,/#X-Amz-Target=Lightsail_20161128.AttachStaticIp,AttachStaticIp,,Attaches a static IP address to a specific Amazon Lightsail instance.
+g04097,amazonaws.com,POST,/#Action=CreateDBClusterEndpoint,POST_CreateDBClusterEndpoint,,Creates a new custom endpoint and associates it with an Amazon Neptune DB cluster.
+g04098,microsoft.com,POST,/tenantRelationships/managedTenants/managementTemplateCollectionTenantSummaries,tenantRelationships.managedTenants.CreateManagementTemplateCollectionTenantSummaries,Create new navigation property to managementTemplateCollectionTenantSummaries for tenantRelationships,
+g04099,microsoft.com,PUT,/organization/{organization-id}/branding/squareLogo,organization.UpdateBrandingSquareLogo,Update squareLogo for the navigation property branding in organization,A square version of your company logo that appears in Windows 10 out-of-box experiences (OOBE) and when Windows Autopilot is enabled for deployment. Allowed types are PNG or JPEG no larger than 240 x 240 pixels and no more than 10 KB in size. We recommend using a transparent image with no padding around the logo.
+g04100,googleapis.com,PATCH,/v2/customBiddingAlgorithms/{customBiddingAlgorithmId},displayvideo.customBiddingAlgorithms.patch,,Updates an existing custom bidding algorithm. Returns the updated custom bidding algorithm if successful.
+g04101,microsoft.com,POST,/users/{user-id}/calendar/events/{event-id}/instances/{event-id1}/extensions,users.calendar.events.instances.CreateExtensions,Create open extension,"Create an open extension (openTypeExtension object) and add custom properties in a new or existing instance of a resource. You can create an open extension in a resource instance and store custom data to it all in the same operation, except for specific resources. See known limitations of open extensions for more information. The table in the Permissions section lists the resources that support op"
+g04102,microsoft.com,PATCH,/directory/deletedItems/{directoryObject-id},directory.UpdateDeletedItems,Update the navigation property deletedItems in directory,
+g04103,azure.com,PUT,/{scope}/providers/Microsoft.Consumption/budgets/{budgetName},Budgets_CreateOrUpdate,,The operation to create or update a budget. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
+g04104,amazonaws.com,POST,/#Action=UpdateServerCertificate,POST_UpdateServerCertificate,,"Updates the name and/or the path of the specified server certificate stored in IAM. For more information about working with server certificates, see Working with server certificates in the IAM User Guide . This topic also includes a list of Amazon Web Services services that can use the server certificates that you manage with IAM. You should understand the implicatio"
+g04105,zulip.com,POST,/realm/emoji/{emoji_name},upload-custom-emoji,Upload custom emoji,"This endpoint is used to upload a custom emoji for use in the user's
+organization. Access to this endpoint depends on the
+[organization's configuration](https://zulip.com/help/custom-emoji#change-who-can-add-custom-emoji).
+"
+g04106,box,GET,/retention_policy_assignments/{retention_policy_assignment_id}/file_versions_under_retention,get_retention_policy_assignments_id_file_versions_under_retention,Get file versions under retention,Returns a list of file versions under retention for a retention policy assignment.
+g04107,amazonaws.com,GET,/#Action=ModifySnapshotCopyRetentionPeriod,GET_ModifySnapshotCopyRetentionPeriod,,"Modifies the number of days to retain snapshots in the destination Amazon Web Services Region after they are copied from the source Amazon Web Services Region. By default, this operation only changes the retention period of copied automated snapshots. The retention periods for both new and existing copied automated snapshots are updated with the new retention period. You can set the manual option "
+g04108,amazonaws.com,GET,/#Action=CreateLaunchConfiguration,GET_CreateLaunchConfiguration,,"Creates a launch configuration. If you exceed your maximum limit of launch configurations, the call fails. To query this limit, call the DescribeAccountLimits API. For information about updating this limit, see Quotas for Amazon EC2 Auto Scaling in the Amazon EC2 Auto Scaling User Guide . For more information, see <a href=""https://docs.aws.amazon.com/autoscaling/ec2/user"
+g04109,amazonaws.com,PUT,/{Bucket}#tagging,PutBucketTagging,,"Sets the tags for a bucket. Use tags to organize your Amazon Web Services bill to reflect your own cost structure. To do this, sign up to get your Amazon Web Services account bill with tag key values included. Then, to see the cost of combined resources, organize your billing information according to resources with the same tag key values. For example, you can tag several resources with a specific"
+g04110,vmware.local,PUT,/data-sources/ucs-managers/{id},updateUcsManager,Update an ucs manager data source,Update an ucs manager data source
+g04111,vmware.local,POST,/data-sources/juniper-switches/{id}/disable,disableJuniperSwitch,Disable a juniper switch data source,Disable a juniper switch data source
+g04112,permit.io,POST,/v2/elements/{proj_id}/{env_id}/config,create_elements_config,Create Elements Config,Creates a new elements_config under the active organization.
+g04113,zoom.us,PATCH,/tsp,tspUpdate,Update account's TSP information,Update information of the Telephony Service Provider set up on an account. **Prerequisites**: TSP account option should be enabled. **Scopes:** `tsp:write:admin` **[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `Light`
+g04114,hetzner.cloud,POST,/load_balancers/{id}/actions/change_dns_ptr,,Change reverse DNS entry for this Load Balancer,Changes the hostname that will appear when getting the hostname belonging to the public IPs (IPv4 and IPv6) of this Load Balancer. Floating IPs assigned to the Server are not affected by this.
+g04115,apacta.com,PUT,/projects/{project_id}/project_files/{project_file_id}/,,Edit project file,
+g04116,gambitcomm.local,PUT,/mimic/agent/{agentNum}/protocol/msg/telnet/set/trace/{enableOrNot},protocol_telnet_set_trace,Set the agent's TELNET traffic tracing,"1 to enable, 0 to disable"
+g04117,microsoft.com,POST,/users/{user-id}/mailFolders/{mailFolder-id}/childFolders/{mailFolder-id1}/multiValueExtendedProperties,users.mailFolders.childFolders.CreateMultiValueExtendedProperties,Create new navigation property to multiValueExtendedProperties for users,
+g04118,microsoft.com,PATCH,/chats/{chat-id}/operations/{teamsAsyncOperation-id},chats.UpdateOperations,Update the navigation property operations in chats,
+g04119,microsoft.com,PATCH,/groups/{group-id}/planner/plans/{plannerPlan-id}/buckets/{plannerBucket-id}/tasks/{plannerTask-id},groups.planner.plans.buckets.UpdateTasks,Update the navigation property tasks in groups,
+g04120,netatmo.net,POST,/setthermpoint,setthermpoint,,The method setthermpoint changes the Thermostat manual temperature setpoint.
+g04121,rebilly.com,POST,/payment-instruments,PostPaymentInstrument,Create a Payment Instrument,Create a payment instrument. If such payment card or bank account payment instrument already exists then updates it instead.
+g04122,ix-api.net,PATCH,/network-feature-configs/{id},network_feature_configs_partial_update,,Update parts of a network feature configuration
+g04123,googleapis.com,PATCH,/v1/{name},monitoring.projects.dashboards.patch,,"Replaces an existing custom dashboard with a new definition.This method requires the monitoring.dashboards.update permission on the specified dashboard. For more information, see Cloud Identity and Access Management (https://cloud.google.com/iam)."
+g04124,gerermesaffaires.com,PATCH,/spaces/{spaceId}/folders/{folderId}/contractual-documents/{documentId},,,modify a contractual document
+g04125,amazonaws.com,POST,/#Action=EnableAvailabilityZonesForLoadBalancer,POST_EnableAvailabilityZonesForLoadBalancer,,"Adds the specified Availability Zones to the set of Availability Zones for the specified load balancer in EC2-Classic or a default VPC. For load balancers in a non-default VPC, use AttachLoadBalancerToSubnets . The load balancer evenly distributes requests across all its registered Availability Zones that contain instances. For more information, see Add or Remove Availability Z"
+g04126,zendesk,PUT,/api/v2/users/me/settings,UpdateCurrentUserSettings,Update Current User Settings,"Updates the settings for the currently authenticated user. This includes UI preferences for onboarding, tooltips, keyboard shortcuts, theme preferences, and other feature toggles.
+
+Settings are grouped into:
+- **Support**: Support UI preferences (onboarding, tooltips, shortcuts, theme)
+- **admin_center**: Admin Center UI preferences (navigation, onboarding)
+- **shared_views_order**: Optional array of view IDs for custom ordering
+- **agent_home_pinned_views**: Optional ordered array of view IDs pinned in the Agent Home sidebar (max 8)
+
+Only the specified settings will be updated. Other settings will remain unchanged.
+
+#### Allowed For
+
+* Agents"
+g04127,netboxdemo.com,PUT,/dcim/front-ports/{id}/,dcim_front-ports_update,,
+g04128,microsoft.com,PATCH,/me/calendarGroups/{calendarGroup-id}/calendars/{calendar-id}/events/{event-id}/singleValueExtendedProperties/{singleValueLegacyExtendedProperty-id},me.calendarGroups.calendars.events.UpdateSingleValueExtendedProperties,Update the navigation property singleValueExtendedProperties in me,
+g04129,polar.sh,PATCH,/v1/customers/external/{external_id},customers:update_external,Update Customer by External ID,"Update a customer by external ID.
+
+**Scopes**: `customers:write`"
+g04130,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/products/{productId}/tags/{tagId},Tag_AssignToProduct,,Assign tag to the Product.
+g04131,mandrillapp.com,POST,/templates/update.json,,,"Update the code for an existing template. If null is provided for any fields, the values will remain unchanged."
+g04132,microsoft.com,PATCH,/users/{user-id}/calendarGroups/{calendarGroup-id}/calendars/{calendar-id}/calendarView/{event-id}/multiValueExtendedProperties/{multiValueLegacyExtendedProperty-id},users.calendarGroups.calendars.calendarView.UpdateMultiValueExtendedProperties,Update the navigation property multiValueExtendedProperties in users,
+g04133,amazonaws.com,POST,/#X-Amz-Target=Lightsail_20161128.CreateInstancesFromSnapshot,CreateInstancesFromSnapshot,,"Creates one or more new instances from a manual or automatic snapshot of an instance. The create instances from snapshot operation supports tag-based access control via request tags and resource tags applied to the resource identified by instance snapshot name . For more information, see the Amazon Lightsail Developer Guide ."
+g04134,pagerduty,GET,/teams/{id},getTeam,Get a team,Get details about an existing team. A team is a collection of Users and Escalation Policies that represent a group of people within an organization. For more information see the [API Concepts Document](../../api-reference/a47605517c19a-api-concepts#teams) Scoped OAuth requires: `teams.read`
+g04135,atlassian.com,PUT,/rest/api/3/comment/{commentId}/properties/{propertyKey},setCommentProperty,Set comment property,"Creates or updates the value of a property for a comment. Use this resource to store custom data against a comment. The value of the request body must be a [valid](http://tools.ietf.org/html/rfc4627), non-empty JSON blob. The maximum length is 32768 characters. **[Permissions](#permissions) required:** either of: * *Edit All Comments* [project permission](https://confluence.atlassian.com/x/yodKLg)"
+g04136,amazonaws.com,POST,/#X-Amz-Target=PhotonAdminProxyService.AssociateApplicationFleet,AssociateApplicationFleet,,Associates the specified application with the specified fleet. This is only supported for Elastic fleets.
+g04137,kubernetes.io,PUT,/api/v1/nodes/{name}/proxy,connectCoreV1PutNodeProxy,,connect PUT requests to proxy of Node
+g04138,azure.com,PATCH,/providers/Microsoft.Management/managementGroups/{groupId},ManagementGroups_Update,,Update a management group.
+g04139,microsoft.com,POST,/groups/{group-id}/calendar/calendarView/{event-id}/instances/{event-id1}/multiValueExtendedProperties,groups.calendar.calendarView.instances.CreateMultiValueExtendedProperties,Create new navigation property to multiValueExtendedProperties for groups,
+g04140,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/config/azurestorageaccounts,WebApps_UpdateAzureStorageAccounts,Updates the Azure storage account configurations of an app.,Updates the Azure storage account configurations of an app.
+g04141,gerermesaffaires.com,PATCH,/spaces/{spaceId}/folders/{folderId}/expense-proofs/{documentId},,,modify an expense report
+g04142,cloudflare,PATCH,/zones/{zone_id}/cache/tiered_cache_smart_topology_enable,smart-tiered-cache-patch-smart-tiered-cache-setting,Patch Smart Tiered Cache setting,"Smart Tiered Cache dynamically selects the single closest upper tier for each of your website’s origins with no configuration required, using our in-house performance and routing data. Cloudflare collects latency data for each request to an origin, and uses the latency data to determine how well any upper-tier data center is connected with an origin. As a result, Cloudflare can select the data center with the lowest latency to be the upper-tier for an origin."
+g04143,amazonaws.com,POST,/#X-Amz-Target=AWSServerMigrationService_V2016_10_24.UpdateApp,UpdateApp,,Updates the specified application.
+g04144,apideck.com,PATCH,/accounting/invoices/{id},invoicesUpdate,Update Invoice,Update Invoice
+g04145,microsoft.com,PATCH,/users/{user-id}/security/informationProtection,users.security.UpdateInformationProtection,Update the navigation property informationProtection in users,
+g04146,microsoft.com,POST,/tenantRelationships/managedTenants/managedDeviceCompliances,tenantRelationships.managedTenants.CreateManagedDeviceCompliances,Create new navigation property to managedDeviceCompliances for tenantRelationships,
+g04147,coolify.io,POST,/services/{uuid}/envs,create-env-by-service-uuid,Create Env,Create env by service UUID.
+g04148,netbox.dev,PUT,/circuits/provider-networks/{id}/,circuits_provider-networks_update,,
+g04149,cloudflare,POST,/zones/{zone_id}/addressing/regional_hostnames,dls-zone-regional-hostnames-create,Create Regional Hostname,Create a new Regional Hostname entry. Cloudflare will only use data centers that are physically located within the chosen region to decrypt and service HTTPS traffic. Learn more about [Regional Services](https://developers.cloudflare.com/data-localization/regional-services/get-started/).
+g04150,azure.com,POST,/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{resourceName}/replicationFabrics/{fabricName}/checkConsistency,ReplicationFabrics_CheckConsistency,Checks the consistency of the ASR fabric.,The operation to perform a consistency check on the fabric.
+g04151,hetras-certification.net,PATCH,/api/booking/v0/bookings/{confirmationId}/reservations/{reservationNumber},Bookings_Patch,Partially updates a reservation.,"The hetras API is using this Patch Specification to partially update an existing resource. Currently this call allows to update the following fields: external_id, market_code, channel_code, subchannel_code, guarantee_type, comment, addon_services, labels, guests, contact and company. A request example: [ {"
+g04152,netbox.dev,PUT,/dcim/device-types/{id}/,dcim_device-types_update,,
+g04153,vocadb.net,POST,/api/comments/{entryType}-comments,,,
+g04154,intercom,PUT,/visitors,updateVisitor,Update a visitor,"Sending a PUT request to `/visitors` will result in an update of an existing Visitor.
+
+**Option 1.** You can update a visitor by passing in the `user_id` of the visitor in the Request body.
+
+**Option 2.** You can update a visitor by passing in the `id` of the visitor in the Request body."
+g04155,data2crm.com,POST,/application/entity/call,createCallEntity,POST for call,Add call into the system
+g04156,vercel,GET,/v1/query/web-analytics/events/count,countEvents,Counts custom events,"Counts the number of custom events on a project (production only), since Web Analytics was enabled. Results can be filtered on supported dimensions."
+g04157,microsoft.com,POST,/me/notifications,me.CreateNotifications,Create new navigation property to notifications for me,
+g04158,googleapis.com,PUT,/userprofiles/{profileId}/targetingTemplates,dfareporting.targetingTemplates.update,,Updates an existing targeting template.
+g04159,amazonaws.com,POST,/applications,CreateApplication,,"Creates an application. In AppConfig, an application is simply an organizational construct like a folder. This organizational construct has a relationship with some unit of executable code. For example, you could create an application called MyMobileApp to organize and manage configuration data for a mobile application installed by your users."
+g04160,waterlinked.com,PUT,/api/v1/config/antenna,config#ModifyAntennaConfig,ModifyAntennaConfig config,Modify Antenna configuration
+g04161,microsoft.com,PATCH,/identityGovernance/accessReviews/definitions/{accessReviewScheduleDefinition-id}/instances/{accessReviewInstance-id}/decisions/{accessReviewInstanceDecisionItem-id}/instance/stages/{accessReviewStage-id}/decisions/{accessReviewInstanceDecisionItem-id1}/insights/{governanceInsight-id},identityGovernance.accessReviews.definitions.instances.decisions.instance.stages.decisions.UpdateInsights,Update the navigation property insights in identityGovernance,
+g04162,netbox.dev,PUT,/ipam/prefixes/{id}/,ipam_prefixes_update,,
+g04163,stripe.com,POST,/v1/billing_portal/configurations,PostBillingPortalConfigurations,,Creates a configuration that describes the functionality and behavior of a PortalSession
+g04164,atlassian.com,PUT,/rest/api/3/fieldconfigurationscheme/project,assignFieldConfigurationSchemeToProject,Assign field configuration scheme to project,"Assigns a field configuration scheme to a project. If the field configuration scheme ID is `null`, the operation assigns the default field configuration scheme. Field configuration schemes can only be assigned to classic projects. **[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+g04165,microsoft.com,PATCH,/deviceManagement/deviceComplianceScripts/{deviceComplianceScript-id}/deviceRunStates/{deviceComplianceScriptDeviceState-id},deviceManagement.deviceComplianceScripts.UpdateDeviceRunStates,Update the navigation property deviceRunStates in deviceManagement,
+g04166,cloudflare,PUT,/accounts/{account_id}/workers/scripts/{script_name}/schedules,worker-cron-trigger-update-cron-triggers,Update Worker Script Schedules (Cron Triggers),Update the schedules (Cron Triggers) for a Worker script.
+g04167,googleapis.com,PATCH,/v2/guaranteedOrders/{guaranteedOrderId},displayvideo.guaranteedOrders.patch,,Updates an existing guaranteed order. Returns the updated guaranteed order if successful.
+g04168,cloudflare,PATCH,/accounts/{account_id}/brand-protection/refute,patchAccountsAccountIdBrandProtectionRefute,Update verification statuses of submitted URLs to disproven by ID,Return a success message after updating verification statuses of submitted URLs to disproven by ID
+g04169,amazonaws.com,POST,/#X-Amz-Target=TransferService.CreateProfile,CreateProfile,,Creates the local or partner profile to use for AS2 transfers.
+g04170,microsoft.com,POST,/users/{user-id}/planner/plans,users.planner.CreatePlans,Create new navigation property to plans for users,
+g04171,sentry,GET,/api/0/organizations/{organization_id_or_slug}/repos/{repo_id}/commits/,listOrganizationRepoCommits,List a Repository's Commits,List a Repository's Commits
+g04172,adyen.com,PATCH,/merchants/{merchantId}/stores/{reference}/terminalSettings,patch-merchants-merchantId-stores-reference-terminalSettings,Update terminal settings,"Updates payment terminal settings for the store identified in the path. These settings apply to all terminals under the store, unless different values are configured for an individual terminal. * To change a parameter value, include the full object that contains the parameter, even if you don't want to change all parameters in the object. * To restore a parameter value inherited from a higher leve"
+g04173,xero,PUT,/Contacts/{ContactID}/History,createContactHistory,Creates a new history record for a specific contact,
+g04174,rebilly.com,POST,/products,PostProduct,Create a Product,Create a Product.
+g04175,googleapis.com,PATCH,/userprofiles/{profileId}/creativeFields/{creativeFieldId}/creativeFieldValues,dfareporting.creativeFieldValues.patch,,Updates an existing creative field value. This method supports patch semantics.
+g04176,microsoft.com,PATCH,/deviceAppManagement/androidManagedAppProtections/{androidManagedAppProtection-id}/apps/{managedMobileApp-id},deviceAppManagement.androidManagedAppProtections.UpdateApps,Update the navigation property apps in deviceAppManagement,
+g04177,vtex.local,POST,/api/logistics/pvt/inventory/reservations,CreateReservation,Create reservation,Creates [reservation](https://help.vtex.com/en/tutorial/how-does-reservation-work--tutorials_92).
+g04178,microsoft.com,PATCH,/planner/buckets/{plannerBucket-id}/tasks/{plannerTask-id}/assignedToTaskBoardFormat,planner.buckets.tasks.UpdateAssignedToTaskBoardFormat,Update the navigation property assignedToTaskBoardFormat in planner,
+g04179,amazonaws.com,POST,/#X-Amz-Target=AWSGlue.CreateMLTransform,CreateMLTransform,,"Creates an Glue machine learning transform. This operation creates the transform and all the necessary parameters to train it. Call this operation as the first step in the process of using a machine learning transform (such as the FindMatches transform) for deduplicating data. You can provide an optional Description , in addition to the parameters that you want to use for your algorithm. You must "
+g04180,render.com,PUT,/metrics-stream/{ownerId},upsertOwnerMetricsStream,Create or update metrics stream,Creates or updates the metrics stream for the specified workspace.
+g04181,amazonaws.com,POST,/missionprofile,CreateMissionProfile,,Creates a mission profile. dataflowEdges is a list of lists of strings. Each lower level list of strings has two elements: a from ARN and a to ARN.
+g04182,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/subnets/{subnetName},Subnets_CreateOrUpdate,,The Put Subnet operation creates/updates a subnet in the specified virtual network
+g04183,netboxdemo.com,POST,/extras/graphs/,extras_graphs_create,,
+g04184,linuxfoundation.org,POST,/reimbursement/{projectId},createReimbursement,Create Reimbursement,Create a new Reimbursement policy
+g04185,microsoft.com,POST,/me/outlook/taskGroups/{outlookTaskGroup-id}/taskFolders/{outlookTaskFolder-id}/tasks/{outlookTask-id}/attachments,me.outlook.taskGroups.taskFolders.tasks.CreateAttachments,Create attachment (deprecated),Use this API to add an attachment to an outlookTask. The attachment can be a file (of fileAttachment type) or Outlook item (itemAttachment type).
+g04186,ijenko.net,PATCH,/functionalities/{functionalityId},Functionality.patch,Modify a Functionality,Modify information about a *Functionality*: its name.
+g04187,xero,PUT,/TaxRates,createTaxRates,Creates one or more tax rates,
+g04188,microsoft.com,PATCH,/me/insights/trending/{trending-id},me.insights.UpdateTrending,Update the navigation property trending in me,
+g04189,vtex.local,PUT,/api/catalog_system/pvt/seller,UpdateSeller,Update Seller,Updates a seller.
+g04190,googleapis.com,PATCH,/androidpublisher/v3/applications/{packageName}/edits/{editId}/apks/{apkVersionCode}/expansionFiles/{expansionFileType},androidpublisher.edits.expansionfiles.patch,,Patches the APK's expansion file configuration to reference another APK's expansion file. To add a new expansion file use the Upload method.
+g04191,amazonaws.com,POST,/#Action=UpdateAvailabilityOptions,POST_UpdateAvailabilityOptions,,"Configures the availability options for a domain. Enabling the Multi-AZ option expands an Amazon CloudSearch domain to an additional Availability Zone in the same Region to increase fault tolerance in the event of a service disruption. Changes to the Multi-AZ option can take about half an hour to become active. For more information, see Configuring Availability Options"
+g04192,twilio.com,POST,/v1/Services/{ServiceSid}/Documents/{Sid},UpdateDocument,,
+g04193,microsoft.com,PATCH,/groups/{group-id}/sites/{site-id}/termStores/{store-id}/sets/{set-id}/children/{term-id}/relations/{relation-id},groups.sites.termStores.sets.children.UpdateRelations,Update the navigation property relations in groups,
+g04194,googleapis.com,POST,/dns/v2/projects/{project}/locations/{location}/managedZones/{managedZone}/changes,dns.changes.create,,Atomically updates the ResourceRecordSet collection.
+g04195,amazonaws.com,POST,/greengrass/definition/functions/{FunctionDefinitionId}/versions,CreateFunctionDefinitionVersion,,Creates a version of a Lambda function definition that has already been defined.
+g04196,amazonaws.com,POST,/#X-Amz-Target=CodeDeploy_20141006.CreateApplication,CreateApplication,,Creates an application.
+g04197,azure.com,POST,/apps/{appId}/versions/{versionId}/intents/{intentId}/features,Features_AddIntentFeature,,Adds a new feature relation to be used by the intent in a version of the application.
+g04198,okta,PUT,/api/v1/apps/{appId},replaceApplication,Replace an application,"Replaces properties for an application
+> **Notes:**
+> * All required properties must be specified in the request body
+> * You can't modify system-assigned properties, such as `id`, `name`, `status`, `created`, and `lastUpdated`. The values for these properties in the PUT request body are ignored."
+g04199,sinao.app,POST,/me,account.update,Update current user,Update current user informations
+g04200,apacta.com,POST,/offers,,Add new offer,

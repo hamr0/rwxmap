@@ -1,0 +1,321 @@
+row_id,provider,method,path,operationId,summary,description
+s11001,netbox.dev,POST,/users/permissions/,users_permissions_create,,
+s11002,amazonaws.com,POST,/#X-Amz-Target=Comprehend_20171127.UpdateEndpoint,UpdateEndpoint,,"Updates information about the specified endpoint. For information about endpoints, see Managing endpoints ."
+s11003,microsoft.com,POST,/servicePrincipals/{servicePrincipal-id}/appRoleAssignments,servicePrincipals.CreateAppRoleAssignments,Grant an appRoleAssignment to a service principal,"Assign an app role to a client service principal. App roles that are assigned to service principals are also known as application permissions. Application permissions can be granted directly with app role assignments, or through a consent experience. To grant an app role assignment to a client service principal, you need three identifiers:"
+s11004,microsoft.com,PATCH,/deviceManagement/virtualEndpoint/reports/exportJobs/{cloudPcExportJob-id},deviceManagement.virtualEndpoint.reports.UpdateExportJobs,Update the navigation property exportJobs in deviceManagement,
+s11005,jira,PUT,/rest/api/2/field/association,createAssociations,Create associations,"Associates fields with projects.
+
+Fields will be associated with each issue type on the requested projects.
+
+Fields will be associated with all projects that share the same field configuration which the provided projects are using. This means that while the field will be associated with the requested projects, it will also be associated with any other projects that share the same field configuration.
+
+If a success response is returned it means that the field association has been created in any applicable contexts where it wasn't already present.
+
+Up to 50 fields and up to 100 projects can be associated in a single request. If more fields or projects are provided a 400 response will be returned.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+s11006,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/virtualNetworkRules/{virtualNetworkRuleName},VirtualNetworkRules_CreateOrUpdate,,Creates or updates an existing virtual network rule.
+s11007,permit.io,PATCH,/v2/facts/{proj_id}/{env_id}/user_invites/{user_invite_id},update_user_invite,Update User Invite,
+s11008,ritc.io,POST,/triggers,addTrigger,,Create a new trigger in an app
+s11009,amazonaws.com,POST,/create-flow,CreateFlow,,"Enables your application to create a new flow using Amazon AppFlow. You must create a connector profile before calling this API. Please note that the Request Syntax below shows syntax for multiple destinations, however, you can only transfer data to one item in this list at a time. Amazon AppFlow does not currently support flows to multiple destinations at once."
+s11010,discord,GET,/guilds/{guild_id}/invites,list_guild_invites,,
+s11011,okta,PUT,/api/v1/apps/{appId}/federated-claims/{claimId},replaceFederatedClaim,Replace a federated claim,Replaces a claim that will be included in tokens produced by federation protocols (for example: OIDC `id_tokens` or SAML Assertions)
+s11012,gitlab,POST,/v3/projects/fork/{id},postV3ProjectsForkId,Fork new project for the current user or provided namespace.,Fork new project for the current user or provided namespace.
+s11013,stripe.com,POST,/v1/payment_methods,PostPaymentMethods,,"Creates a PaymentMethod object. Read the Stripe.js reference to learn how to create PaymentMethods via Stripe.js. Instead of creating a PaymentMethod directly, we recommend using the PaymentIntents API to accept a payment immediately or the SetupIntent API to collect payment method details ahead of a future payment."
+s11014,bigredcloud.com,POST,/v1/bankAccounts,BankAccounts_Post,Creates a new Bank Account.,
+s11015,amazonaws.com,POST,/#X-Amz-Target=AWSLicenseManager.CreateGrantVersion,CreateGrantVersion,,"Creates a new version of the specified grant. For more information, see Granted licenses in License Manager in the License Manager User Guide ."
+s11016,googleapis.com,POST,/v2/{parent}/tenants,identitytoolkit.projects.tenants.create,,Create a tenant. Requires write permission on the Agent project.
+s11017,increase.com,POST,/wire_drawdown_requests,create_a_wire_drawdown_request,Create a Wire Drawdown Request,
+s11018,asana,POST,/webhooks,createWebhook,Establish a webhook,"<b>Required scope: </b><code>webhooks:write</code>
+
+Establishing a webhook is a two-part process. First, a simple HTTP POST
+request initiates the creation similar to creating any other resource.
+
+Next, in the middle of this request comes the confirmation handshake.
+When a webhook is created, we will send a test POST to the target with an
+`X-Hook-Secret` header. The target must respond with a `200 OK` or `204
+No Content` and a matching `X-Hook-Secret` header to confirm that this
+webhook subscription is indeed expected. We strongly recommend storing
+this secret to be used to verify future webhook event signatures.
+
+The POST request to create the webhook will then return with the status
+of the request. If you do not acknowledge the webhook’s confirmation
+handshake it will fail to setup, and you will receive an error in
+response to your attempt to create it. This means you need to be able to
+receive and complete the webhook *while* the POST request is in-flight
+(in other words, have a server that can handle requests asynchronously).
+
+Invalid hostnames like localhost will receive a 403 Forbidden status code.
+
+```
+# Request
+curl -H ""Authorization: Bearer <personal_access_token>"" \
+-X POST https://app.asana.com/api/1.0/webhooks \
+-d ""resource=8675309"" \
+-d ""target=https://example.com/receive-webhook/7654""
+```
+
+```
+# Handshake sent to https://example.com/
+POST /receive-webhook/7654
+X-Hook-Secret: b537207f20cbfa02357cf448134da559e8bd39d61597dcd5631b8012eae53e81
+```
+
+```
+# Handshake response sent by example.com
+HTTP/1.1 200
+X-Hook-Secret: b537207f20cbfa02357cf448134da559e8bd39d61597dcd5631b8012eae53e81
+```
+
+```
+# Response
+HTTP/1.1 201
+{
+  ""data"": {
+    ""gid"": ""43214"",
+    ""resource"": {
+      ""gid"": ""8675309"",
+      ""name"": ""Bugs""
+    },
+    ""target"": ""https://example.com/receive-webhook/7654"",
+    ""active"": false,
+    ""last_success_at"": null,
+    ""last_failure_at"": null,
+    ""last_failure_content"": null
+  },
+  ""X-Hook-Secret"": ""b537207f20cbfa02357cf448134da559e8bd39d61597dcd5631b8012eae53e81""
+}
+```"
+s11019,amazonaws.com,GET,/#Action=DeleteVpcEndpointConnectionNotifications,GET_DeleteVpcEndpointConnectionNotifications,,Deletes the specified VPC endpoint connection notifications.
+s11020,amazonaws.com,POST,/#X-Amz-Target=com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.CreateTrail,CreateTrail,,Creates a trail that specifies the settings for delivery of log data to an Amazon S3 bucket.
+s11021,googleapis.com,POST,/projects/{project}/regions/{region}/forwardingRules/{forwardingRule}/setTarget,compute.forwardingRules.setTarget,,Changes target URL for forwarding rule. The new target should be of the same type as the old target.
+s11022,github.com,PUT,/scim/v2/Users/{scim_user_id},enterprise-admin/set-information-for-provisioned-enterprise-user,Set SCIM information for a provisioned enterprise user,"**Note:** The SCIM API endpoints for enterprise accounts are currently in *private* beta and are subject to change. Replaces an existing provisioned user's information. You must provide all the information required for the user as if you were provisioning them for the first time. Any existing user information that you don't provide will be removed. If you want to only update a specific attribute, "
+s11023,amazonaws.com,POST,/#Action=UpdateSigningCertificate,POST_UpdateSigningCertificate,,"Changes the status of the specified user signing certificate from active to disabled, or vice versa. This operation can be used to disable an IAM user's signing certificate as part of a certificate rotation work flow. If the UserName field is not specified, the user name is determined implicitly based on the Amazon Web Services access key ID used to sign the request. This operation works for acces"
+s11024,amazonaws.com,PATCH,/global-settings,UpdateGlobalSettings,,Updates whether the Amazon Web Services account is opted into organization sharing features.
+s11025,probely.com,PUT,/targets/{target_id}/integrations/slack/,,Update slack integration data,
+s11026,amazonaws.com,GET,/#Action=DeleteLaunchConfiguration,GET_DeleteLaunchConfiguration,,"Deletes the specified launch configuration. The launch configuration must not be attached to an Auto Scaling group. When this call completes, the launch configuration is no longer available for use."
+s11027,microsoft.com,POST,/admin/windows/updates/deployments/{deployment-id}/audience/members,admin.windows.updates.deployments.audience.CreateMembers,Create new navigation property to members for admin,
+s11028,azure.com,POST,/Services/{serviceId}/$/ResumeBackup,ResumeServiceBackup,Resumes periodic backup of a Service Fabric service which was previously suspended.,The previously suspended Service Fabric service resumes taking periodic backup as per the backup policy currently configured for the same.
+s11029,microsoft.com,PATCH,/users/{user-id}/calendar/events/{event-id}/exceptionOccurrences/{event-id1}/instances/{event-id2}/extensions/{extension-id},users.calendar.events.exceptionOccurrences.instances.UpdateExtensions,Update the navigation property extensions in users,
+s11030,illumidesk.com,POST,/v1/{namespace}/projects/{project}/servers/{server}/triggers/,service_trigger_create,Create a new server trigger,
+s11031,googleapis.com,POST,/v1beta1/{parent}/models,automl.projects.locations.models.create,,"Creates a model. Returns a Model in the response field when it completes. When you create a model, several model evaluations are created for it: a global evaluation, and one evaluation for each annotation spec."
+s11032,microsoft.com,POST,/policies/tokenLifetimePolicies,policies.CreateTokenLifetimePolicies,Create tokenLifetimePolicy,Create a new tokenLifetimePolicy object.
+s11033,amazon,POST,/vendor/directFulfillment/sandbox/2021-10-28/orders,generateOrderScenarios,,Submits a request to generate test order data for Vendor Direct Fulfillment API entities.
+s11034,victorops.com,PATCH,/api-public/v1/team/{team}/oncall/user,,Create an on-call override (take on-call),__NOTE: This API call is deprecated. Please use `PATCH /api-public/v2/policies/{policy}/oncall/user`__ Replaces a currently on-call user on the team with another. This API may be called a maximum of 60 times per minute.
+s11035,twilio.com,POST,/v1/Sinks/{Sid},UpdateSink,,Update a specific Sink
+s11036,amazonaws.com,GET,/#Action=CancelResize,GET_CancelResize,,Cancels a resize operation for a cluster.
+s11037,amazonaws.com,POST,/#Action=CopyDBSnapshot,POST_CopyDBSnapshot,,"Copies the specified DB snapshot. The source DB snapshot must be in the available state. You can copy a snapshot from one Amazon Web Services Region to another. In that case, the Amazon Web Services Region where you call the CopyDBSnapshot operation is the destination Amazon Web Services Region for the DB snapshot copy. This command doesn't apply to RDS Custom. For more information about copying s"
+s11038,amazonaws.com,PUT,/backup-vaults/{backupVaultName}/vault-lock,PutBackupVaultLockConfiguration,,"Applies Backup Vault Lock to a backup vault, preventing attempts to delete any recovery point stored in or created in a backup vault. Vault Lock also prevents attempts to update the lifecycle policy that controls the retention period of any recovery point currently stored in a backup vault. If specified, Vault Lock enforces a minimum and maximum retention period for future backup and copy jobs tha"
+s11039,clicksend.com,POST,/automations/voice/receipts,,Create a new rule,
+s11040,github,POST,/user/emails,users/add-email-for-authenticated-user,Add an email address for the authenticated user,This endpoint is accessible with the `user` scope.
+s11041,cloudflare,PUT,/accounts/{account_id}/builds/workers/{script_name}/deploy_hooks/{deploy_hook_uuid},updateDeployHook,Update a deploy hook,Replace the name and target branch for a deploy hook.
+s11042,amazonaws.com,POST,/detector/{detectorId}/ipset,CreateIPSet,,"Creates a new IPSet, which is called a trusted IP list in the console user interface. An IPSet is a list of IP addresses that are trusted for secure communication with Amazon Web Services infrastructure and applications. GuardDuty doesn't generate findings for IP addresses that are included in IPSets. Only users from the administrator account can use this operation."
+s11043,neon.com,PATCH,/projects/{project_id}/branches/{branch_id}/auth/plugins/oauth-provider,updateNeonAuthOAuthProviderPlugin,Update OAuth provider plugin configuration,"Updates the OAuth provider plugin configuration for Neon Auth.
+Only the fields provided in the request body are updated; omitted fields retain their current values.
+A provided `resources` list replaces the stored list.
+A provided `mcp` object replaces the stored MCP configuration and must include `resource`.
+The plugin can only be enabled on the project's root branch.
+"
+s11044,amazonaws.com,POST,/otaUpdates/{otaUpdateId},CreateOTAUpdate,,Creates an IoT OTA update on a target group of things or groups. Requires permission to access the CreateOTAUpdate action.
+s11045,twilio,POST,/2010-04-01/Accounts/{AccountSid}/SIP/Domains/{DomainSid}/IpAccessControlListMappings.json,CreateSipIpAccessControlListMapping,Create a new IpAccessControlListMapping resource.,Create a new IpAccessControlListMapping resource.
+s11046,permit.io,PATCH,/v2/elements/{proj_id}/{env_id}/config/{elements_config_id}/operation_approval/{operation_approval_id}/reviewer,update_operation_approval_reviewer,Update Operation Approval Reviewer,
+s11047,gitlab,POST,/v3/projects/{id}/merge_requests/{merge_request_id}/reset_spent_time,postV3ProjectsIdMergeRequestsMergeRequestIdResetSpentTime,Reset spent time for a project merge_request,Reset spent time for a project merge_request
+s11048,googleapis.com,POST,/v1/{environment}:addPublicKey,cloudshell.users.environments.addPublicKey,,"Adds a public SSH key to an environment, allowing clients with the corresponding private key to connect to that environment via SSH. If a key with the same content already exists, this will error with ALREADY_EXISTS."
+s11049,x,POST,/2/broadcasts/scheduled/{id}/live,goLiveScheduledBroadcast,Go live on a scheduled broadcast,Publishes a schedule that was created or updated with `manual_publish: true`. Without that flag the coordinator auto-publishes at start and this call is rejected.
+s11050,etsi.local,PUT,/app_packages/{appPkgId}/package_content,appPkgPUT,Uploads the content of application package.,Uploads the content of application package.
+s11051,gerermesaffaires.com,POST,/business-groups,,,Adds a group (only for managers and ADN collaborators)
+s11052,keycloak,PUT,/{realm}/clients/{id}/roles/{role-name}/management/permissions,,Return object stating whether role Authoirzation permissions have been initialized or not and a reference,
+s11053,microsoft.com,PATCH,/app/calls/{call-id}/contentSharingSessions/{contentSharingSession-id},app.calls.UpdateContentSharingSessions,Update the navigation property contentSharingSessions in app,
+s11054,amazonaws.com,POST,/clitoken/{Name},CreateCliToken,,"Creates a CLI token for the Airflow CLI. To learn more, see Creating an Apache Airflow CLI token ."
+s11055,amazonaws.com,GET,/#Action=CreateNetworkAcl,GET_CreateNetworkAcl,,"Creates a network ACL in a VPC. Network ACLs provide an optional layer of security (in addition to security groups) for the instances in your VPC. For more information, see Network ACLs in the Amazon Virtual Private Cloud User Guide ."
+s11056,stream-io-api.com,POST,/users/{user_id}/deactivate,DeactivateUser,Deactivate user,Deactivates user with possibility to activate it back
+s11057,files.com,DELETE,/groups/{id},DeleteGroupsId,Delete Group,Delete Group
+s11058,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/jitNetworkAccessPolicies/{jitNetworkAccessPolicyName},JitNetworkAccessPolicies_CreateOrUpdate,,Create a policy for protecting resources using Just-in-Time access control
+s11059,googleapis.com,PATCH,/projects/{projectId}/datasets/{datasetId},bigquery.datasets.patch,,"Updates information in an existing dataset. The update method replaces the entire dataset resource, whereas the patch method only replaces fields that are provided in the submitted dataset resource. This method supports patch semantics."
+s11060,googleapis.com,PATCH,/v2/{name},identitytoolkit.projects.tenants.oauthIdpConfigs.patch,,Update an Oidc Idp configuration for an Identity Toolkit project.
+s11061,walletobjects.googleapis.com,POST,/walletobjects/v1/offerObject/{resourceId}/addMessage,walletobjects.offerobject.addmessage,,Adds a message to the offer object referenced by the given object ID.
+s11062,trello,PUT,/lists/{idList}/subscribed,updateListsSubscribedByIdList,updateListsSubscribedByIdList(),
+s11063,microsoft.com,POST,/users/{user-id}/onenote/notebooks/{notebook-id}/sectionGroups/{sectionGroup-id}/sections/{onenoteSection-id}/microsoft.graph.copyToSectionGroup,users.user.onenote.notebooks.notebook.sectionGroups.sectionGroup.sections.onenoteSection.copyToSectionGroup,Invoke action copyToSectionGroup,"For Copy operations, you follow an asynchronous calling pattern: First call the Copy action, and then poll the operation endpoint for the result."
+s11064,exavault.com,PATCH,/shares/{id},updateShareById,Update a share,"Change the settings on an active share. Any changes made will affect all users that have access to the share.  When updating invitees, pass the `recipients` body paramater with the full list of people who should be included on the share. If you resend the list without an existing recipient, they will be removed from the share. **Setting the Share Permissions** Only 5 different combinations of permissions are valid for the `accessMode` object: - **Upload Only**: This allows share visitors to uplo"
+s11065,googleapis.com,POST,/v1/courses/{courseId}/students,classroom.courses.students.create,,Adds a user as a student of a course. Domain administrators are permitted to [directly add](https://developers.google.com/classroom/guides/manage-users) users within their domain as students to courses within their domain. Students are permitted to add themselves to a course using an enrollment code. This method returns the following error codes: * `PERMISSION_DENIED` if the requesting user is not
+s11066,amazonaws.com,POST,/#Action=CreateNetworkInsightsAccessScope,POST_CreateNetworkInsightsAccessScope,,"Creates a Network Access Scope. Amazon Web Services Network Access Analyzer enables cloud networking and cloud operations teams to verify that their networks on Amazon Web Services conform to their network security and governance objectives. For more information, see the Amazon Web Services Network Access Analyzer Guide ."
+s11067,bbc.co.uk,PUT,/my/radio/follows,putPersonalisedRadioFollowsBatch,Followed Brands and Series,Update 'brands' or 'series' items from a users iPlayer Radio follows N.B. Any HTML tags submitted in metadata will be removed
+s11068,amazonaws.com,POST,/#X-Amz-Target=AWSIESnowballJobManagementService.UpdateCluster,UpdateCluster,,"While a cluster's ClusterState value is in the AwaitingQuorum state, you can update some of the information associated with a cluster. Once the cluster changes to a different job state, usually 60 minutes after the cluster being created, this action is no longer available."
+s11069,vercel,DELETE,/v1/bulk-redirects,deleteRedirects,Delete project-level redirects.,Deletes the provided redirects from the latest version of the projects' bulk redirects. Stages a new change with the new redirects and returns the alias for the new version in the response.
+s11070,mist.com,POST,/api/v1/sites/{site_id}/setting/whitelist,createSiteClientsAllowlist,createSiteClientsAllowlist,This endpoint is to provide list of client macs for annotation as whitelist. Retrieve the current clients list from `whitelist_url` under Site:Setting
+s11071,amazonaws.com,POST,/2015-03-31/functions,CreateFunction,,"Creates a Lambda function. To create a function, you need a deployment package and an execution role . The deployment package is a .zip file archive or container image that contains your function code. The execution role grants the function permission to use Amazon Web Services, such as Amazon C"
+s11072,cloudflare,PATCH,/accounts/{account_id}/r2/buckets/{bucket_name},r2-patch-bucket,Patch Bucket,Updates properties of an existing R2 bucket.
+s11073,okta,POST,/api/v1/users/{id}/lifecycle/unlock,unlockUser,Unlock a user,"Unlocks a user with a `LOCKED_OUT` status or unlocks a user with an `ACTIVE` status that's blocked from unknown devices. Unlocked users have an `ACTIVE` status and can sign in with their current password.
+> **Note:** This operation works with Okta-sourced users. It doesn't support directory-sourced accounts such as Active Directory."
+s11074,googleapis.com,PUT,/{userId}/sessions/{sessionId},fitness.users.sessions.update,,Updates or insert a given session.
+s11075,alertersystem.com,PUT,/api/partition/{id},api_partition_id_put,Replaces the Partition resource.,Replaces the Partition resource.
+s11076,autotask.net,POST,/V1.0/Projects,Projects_CreateEntity,,
+s11077,netbox.dev,PATCH,/dcim/inventory-item-roles/{id}/,dcim_inventory-item-roles_partial_update,,
+s11078,openpolicy.local,PUT,/v1/data/{path},putDocument,Create or overwrite a document,"If the path does not refer to an existing document (for example *us-west/servers*), the server will attempt to create all the necessary containing documents. This behavior is similar to the Unix command [mkdir -p](https://en.wikipedia.org/wiki/Mkdir#Options)."
+s11079,apidapp.com,POST,/wallet/account,,,
+s11080,stream-io-api.com,POST,/moderation/unmute/channel,UnmuteChannel,Unmute channel,Unmutes channel for user
+s11081,hubspot,PUT,/app-webhooks/2027-03-beta/{appId}/settings,put-/app-webhooks/2027-03-beta/{appId}/settings_/app-webhooks/2027-03-beta/{appId}/settings,,
+s11082,cloudflare,POST,/accounts/{account_id}/access/apps/{app_id}/ca,access-short-lived-certificate-c-as-create-a-short-lived-certificate-ca,Create a short-lived certificate CA,Generates a new short-lived certificate CA and public key.
+s11083,jira.local,PUT,/api/2/project/{projectIdOrKey}/role/{id},setActors,,Updates a project role to include the specified actors (users or groups).
+s11084,ritc.io,DELETE,/actions/{action_id},removeAction,,Delete an action
+s11085,microsoft.com,POST,/users/{user-id}/calendarView/{event-id}/exceptionOccurrences/{event-id1}/attachments,users.calendarView.exceptionOccurrences.CreateAttachments,Add attachment,"Use this API to add an attachment to an existing event. This operation limits the size of the attachment you can add to under 3 MB. If an organizer adds an attachment to a meeting event, the organizer can subsequently update the event to send the attachment and update the event for each attendee as well."
+s11086,jira.local,POST,/api/2/role,createProjectRole,,Creates a new ProjectRole to be available in JIRA. The created role does not have any default actors assigned.
+s11087,amazonaws.com,POST,/updateDeletionProtection,UpdateDeletionProtection,,Update deletion protection to either allow or deny deletion of the final Region in a replication set.
+s11088,amazonaws.com,POST,/#X-Amz-Target=AWSCognitoIdentityProviderService.SetUserMFAPreference,SetUserMFAPreference,,"Set the user's multi-factor authentication (MFA) method preference, including which MFA factors are activated and if any are preferred. Only one factor can be set as preferred. The preferred MFA factor will be used to authenticate a user if multiple factors are activated. If multiple options are activated and no preference is set, a challenge to choose an MFA option will be returned during sign-in"
+s11089,launchdarkly,PATCH,/roles/{customRoleKey},patchCustomRole,Modify a custom role by key.,
+s11090,loket.nl,POST,/providers/{providerId}/employers,PostEmployerByProviderId,Create an employer,__Activity name :__ PostEmployerByProviderId Create an employee for the provider (administratiekantoor) identified by the given providerId. Please take note of the following; a newly created Employer is not immediately accessible for the user. As this would require adding the Employer to a specific Loket team (which is a separate activity) __Metadata :__ Possible options for fields of the type 'me
+s11091,okta,POST,/api/v1/apps/{appId}/credentials/jwks/{keyId}/lifecycle/deactivate,deactivateOAuth2ClientJsonWebKey,Deactivate an OAuth 2.0 client JSON Web Key,"Deactivates an OAuth 2.0 client JSON Web Key by `keyId`
+> **Note:** You can only deactivate signing keys. Deactivating the active encryption key isn't allowed if the client has ID token encryption enabled. You can activate another encryption key, which makes the current key inactive."
+s11092,billbee.io,PUT,/api/v1/orders/{id}/orderstate,OrderApi_UpdateState,Changes the main state of a single order,### REMARKS ### Use this call to change the state of an order to i.e. paid or sent. The state is transfered to the external shop/marketplace if configured. This is the list of known states: - 1: ordered - 2: confirmed - 3: paid - 4: shipped - 5: reclamation - 6: deleted - 7: closed - 8: canceled - 9: archived - 10: not used - 11: demand note 1 - 12: demand note 2 - 13: packed - 14: offered - 15: payment reminder - 16: fulfilling
+s11093,amazonaws.com,POST,/policy/{resourceArn}/,CreateResourcePolicy,,Creates a new resource policy with the specified policy statements.
+s11094,amazonaws.com,GET,/#Action=DetachGroupPolicy,GET_DetachGroupPolicy,,"Removes the specified managed policy from the specified IAM group. A group can also have inline policies embedded with it. To delete an inline policy, use DeleteGroupPolicy . For information about policies, see Managed policies and inline policies in the IAM User Guide ."
+s11095,microsoft.com,POST,/me/calendarGroups/{calendarGroup-id}/calendars/{calendar-id}/events/{event-id}/instances/{event-id1}/attachments/microsoft.graph.createUploadSession,me.calendarGroups.calendarGroup.calendars.calendar.events.event.instances.event.attachments.createUploadSession,Invoke action createUploadSession,"Create an upload session that allows an app to iteratively upload ranges of a file, so as to attach the file to the specified Outlook item. The item can be a message or event. Use this approach to attach a file if the file size is between 3 MB and 150 MB. To attach a file that's smaller than 3 MB, do a `POST` operation on the **attachments** navigation property of the Outlook item; see how to do t"
+s11096,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.AzureStack/registrations/{registrationName}/customerSubscriptions/{customerSubscriptionName},CustomerSubscriptions_Create,,Creates a new customer subscription under a registration.
+s11097,googleapis.com,PATCH,/v1/{name},cloudchannel.accounts.customers.customerRepricingConfigs.patch,,"Updates a CustomerRepricingConfig. Call this method to set modifications for a specific customer's bill. This method overwrites the existing CustomerRepricingConfig. You can only update configs if the RepricingConfig.effective_invoice_month is a future month. To make changes to configs for the current month, use CreateCustomerRepricingConfig, taking note of its restrictions. You cannot update the "
+s11098,trakt.tv,POST,/users/{id}/lists/{list_id}/items/remove,Remove items from personal list,Remove items from personal list,#### 🔒 OAuth Required Remove one or more items from a personal list. #### JSON POST Data | Key | Type | Value | |---|---|---| | `movies` | array | Array of `movie` objects. (see examples →) | | `shows` | array | Array of `show` objects. | | `seasons` | array | Array of `season` objects. | | `episodes` | array | Array of `episode` objects. | | `people` | array | Array of `person` objects. |
+s11099,azure.com,PUT,/pools/{poolId}/nodes/{nodeId}/users/{userName},ComputeNode_UpdateUser,Updates the password and expiration time of a user Account on the specified Compute Node.,"This operation replaces of all the updatable properties of the Account. For example, if the expiryTime element is not specified, the current value is replaced with the default value, not left unmodified. You can update a user Account on a Compute Node only when it is in the idle or running state."
+s11100,zendesk,POST,/api/v2/uploads,UploadFiles,Upload Files,"Uploads a file that can be attached to a ticket comment. It doesn't attach the file to the comment. For details and examples, see [Attaching ticket comments with the API](/documentation/ticketing/managing-tickets/adding-ticket-attachments-with-the-api/).
+
+The endpoint has a required `filename` query parameter. The parameter specifies what the file will be named when attached to the ticket comment (to give the agent more context about the file). The parameter does not specify the file on the local system to be uploaded. While the two names can be different, their file extensions must be the same. If they don't match, the agent's browser or file reader could give an error when attempting to open the attachment.
+
+The `Content-Type` header must contain a recognized MIME type that correctly describes the type of the uploaded file. Failing to send a recognized, correct type may cause undesired behavior. For example, in-browser audio playback may be interrupted by the browser's security mechanisms for MP3s uploaded with an incorrect type.
+
+Adding multiple files to the same upload is handled by splitting requests and passing the API token received from the first request to each subsequent request. The token is valid for 60 minutes.
+
+**Note**: Even if [private attachments](https://support.zendesk.com/hc/en-us/articles/8435939957914) are enabled in the Zendesk Support instance, uploaded files are visible to any authenticated user at the `content_URL` specified in the [JSON response](#json-format) until the upload token is consumed. Once a file is associated with a ticket or post, visibility is restricted to users with access to the ticket or post with the attachment.
+
+#### Allowed For
+
+* End users"
+s11101,microsoft.com,PATCH,/identityGovernance/entitlementManagement/accessPackageAssignmentApprovals/{approval-id},identityGovernance.entitlementManagement.UpdateAccessPackageAssignmentApprovals,Update the navigation property accessPackageAssignmentApprovals in identityGovernance,
+s11102,amazonaws.com,POST,/#Action=DetachRolePolicy,POST_DetachRolePolicy,,"Removes the specified managed policy from the specified role. A role can also have inline policies embedded with it. To delete an inline policy, use DeleteRolePolicy . For information about policies, see Managed policies and inline policies in the IAM User Guide ."
+s11103,cloudflare,POST,/user/tokens,user-api-tokens-create-token,Create Token,Create a new access token.
+s11104,microsoft.com,PATCH,/deviceManagement/compliancePolicies/{deviceManagementCompliancePolicy-id}/assignments/{deviceManagementConfigurationPolicyAssignment-id},deviceManagement.compliancePolicies.UpdateAssignments,Update the navigation property assignments in deviceManagement,
+s11105,pagerduty,POST,/services/{id}/rules/convert,convertServiceEventRulesToEventOrchestration,Convert a Service's Event Rules into Event Orchestration Rules,"Convert this Service's Event Rules into functionally equivalent Event Orchestration Rules.
+
+Sending a request to this API endpoint has several effects:
+
+1. Automatically creates Event Orchestration Rules for this Service that will behave identically as this Service's currently configured Event Rules.
+2. Makes all existing Event Rules for this Service read-only. All future updates need to be made via the newly created Event Orchestration rules.
+
+Sending a request to this API endpoint will **not** change how future events will be processed. If past events for this Service have been evaluated via Event Rules then new events sent to this Service will also continue to be evaluated via the (now read-only) Event Rules. To change this Service so that new events start being evaluated via the newly created Event Orchestration Rules use the [Update the Service Orchestration active status for a Service API](https://developer.pagerduty.com/api-reference/855659be83d9e-update-the-service-orchestration-active-status-for-a-service).
+
+> ### End-of-life
+> Event Rules will end-of-life soon. We highly recommend that you use this API to [migrate to Event Orchestration](https://support.pagerduty.com/docs/migrate-to-event-orchestration) as soon as possible so you can take advantage of the new functionality, such as improved UI, rule creation, APIs and Terraform support, advanced conditions, and rule nesting.
+
+Scoped OAuth requires: `services.write`"
+s11106,workos.com,POST,/auth/factors/enroll,AuthenticationFactorsController_create,Enroll Factor,Enrolls an Authentication Factor to be used as an additional factor of authentication. The returned ID should be used to create an authentication Challenge.
+s11107,datadog,POST,/api/v1/synthetics/private-locations,CreatePrivateLocation,Create a private location,Create a new Synthetic private location.
+s11108,amazonaws.com,GET,/#Action=DeregisterTransitGatewayMulticastGroupMembers,GET_DeregisterTransitGatewayMulticastGroupMembers,,Deregisters the specified members (network interfaces) from the transit gateway multicast group.
+s11109,amazonaws.com,GET,/#Action=DeleteClientVpnRoute,GET_DeleteClientVpnRoute,,"Deletes a route from a Client VPN endpoint. You can only delete routes that you manually added using the CreateClientVpnRoute action. You cannot delete routes that were automatically added when associating a subnet. To remove routes that have been automatically added, disassociate the target subnet from the Client VPN endpoint."
+s11110,amazonaws.com,POST,/#Action=RemoveTagsFromResource,POST_RemoveTagsFromResource,,Removes metadata tags from an Amazon DocumentDB resource.
+s11111,azure.com,PUT,/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/diskmigrationjobs/{migrationId},DiskMigrationJobs_Create,,Create a disk migration job.
+s11112,apacta.com,POST,/vendors,addVendor,Add a new vendor,
+s11113,files.com,POST,/requests,PostRequests,Create Request,Create Request
+s11114,render.com,PUT,/logs/streams/resource/{resourceId},update-resource-log-stream,Update log stream override,Updates log stream override information for the specified resource. A log stream override takes precedence over a workspace's default log stream.
+s11115,twinehealth.com,PUT,/patient,upsertPatient,Upsert patient,Create a new patient or update an existing patient
+s11116,microsoft.com,POST,/users/{user-id}/mobileAppTroubleshootingEvents,users.CreateMobileAppTroubleshootingEvents,Create new navigation property to mobileAppTroubleshootingEvents for users,
+s11117,amazonaws.com,GET,/#Action=ModifyEventSubscription,GET_ModifyEventSubscription,,Modifies an existing Amazon DocumentDB event notification subscription.
+s11118,googleapis.com,PUT,/calendars/{calendarId}/acl/{ruleId},calendar.acl.update,,Updates an access control rule.
+s11119,coolify.io,POST,/github-apps,create-github-app,Create GitHub App,Create a new GitHub app.
+s11120,square,POST,/v2/apple-pay/domains,RegisterDomain,RegisterDomain,"Activates a domain for use with Apple Pay on the Web and Square. A validation
+is performed on this domain by Apple to ensure that it is properly set up as
+an Apple Pay enabled domain.
+
+This endpoint provides an easy way for platform developers to bulk activate
+Apple Pay on the Web with Square for merchants using their platform.
+
+Note: You will need to host a valid domain verification file on your domain to support Apple Pay.  The
+current version of this file is always available at https://app.squareup.com/digital-wallets/apple-pay/apple-developer-merchantid-domain-association,
+and should be hosted at `.well_known/apple-developer-merchantid-domain-association` on your
+domain.  This file is subject to change; we strongly recommend checking for updates regularly and avoiding
+long-lived caches that might not keep in sync with the correct file version.
+
+To learn more about the Web Payments SDK and how to add Apple Pay, see [Take an Apple Pay Payment](https://developer.squareup.com/docs/web-payments/apple-pay)."
+s11121,square,POST,/v2/gift-cards/{gift_card_id}/unlink-customer,UnlinkCustomerFromGiftCard,UnlinkCustomerFromGiftCard,"Unlinks a customer from a gift card, which is also referred to as removing a card on file."
+s11122,amazonaws.com,POST,/#X-Amz-Target=StarlingDoveService.PutStoredQuery,PutStoredQuery,,Saves a new query or updates an existing saved query. The QueryName must be unique for a single Amazon Web Services account and a single Amazon Web Services Region. You can create upto 300 queries in a single Amazon Web Services account and a single Amazon Web Services Region. PutStoredQuery is an idempotent API. Subsequent requests won’t create a duplicate resource if one was already created. If 
+s11123,cloudflare,POST,/accounts/{account_id}/access/tags,access-tags-create-tag,Create a tag,Create a tag
+s11124,amazonaws.com,GET,/#Action=AllocateHosts,GET_AllocateHosts,,"Allocates a Dedicated Host to your account. At a minimum, specify the supported instance type or instance family, the Availability Zone in which to allocate the host, and the number of hosts to allocate."
+s11125,amazonaws.com,POST,/#X-Amz-Target=AWSEvents.UpdateEndpoint,UpdateEndpoint,,"Update an existing endpoint. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide.."
+s11126,amazonaws.com,POST,/#X-Amz-Target=Route53Resolver.PutFirewallRuleGroupPolicy,PutFirewallRuleGroupPolicy,,Attaches an Identity and Access Management (Amazon Web Services IAM) policy for sharing the rule group. You can use the policy to share the rule group using Resource Access Manager (RAM).
+s11127,amazonaws.com,PUT,/{Bucket}/{Key},PutObject,,"Adds an object to a bucket. You must have WRITE permissions on a bucket to add an object to it. Amazon S3 never adds partial objects; if you receive a success response, Amazon S3 added the entire object to the bucket. Amazon S3 is a distributed system. If it receives multiple write requests for the same object simultaneously, it overwrites all but the last object written. Amazon S3 does not provid"
+s11128,microsoft.com,POST,/deviceManagement/groupPolicyConfigurations,deviceManagement.CreateGroupPolicyConfigurations,Create new navigation property to groupPolicyConfigurations for deviceManagement,
+s11129,azure.com,POST,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/frontDoors/{frontDoorName}/frontendEndpoints/{frontendEndpointName}/disableHttps,FrontendEndpoints_DisableHttps,,Disables a frontendEndpoint for HTTPS traffic
+s11130,netbox.dev,PATCH,/users/permissions/{id}/,users_permissions_partial_update,,
+s11131,gitea,POST,/repos/{owner}/{repo}/releases,repoCreateRelease,Create a release,
+s11132,amazonaws.com,GET,/#Action=ReplaceNetworkAclEntry,GET_ReplaceNetworkAclEntry,,"Replaces an entry (rule) in a network ACL. For more information, see Network ACLs in the Amazon Virtual Private Cloud User Guide ."
+s11133,amazonaws.com,GET,/#Action=DetachVolume,GET_DetachVolume,,"Detaches an EBS volume from an instance. Make sure to unmount any file systems on the device within your operating system before detaching the volume. Failure to do so can result in the volume becoming stuck in the busy state while detaching. If this happens, detachment can be delayed indefinitely until you unmount the volume, force detachment, reboot the instance, or all three. If an EBS volume i"
+s11134,statsocial.com,POST,/reports/custom/insert/,,Step 2 of executing custom report,Inserting twitter ids or handles into a custom report. This is used for custom reports only
+s11135,orbit.love,POST,/{workspace_slug}/activities,,Create a Custom or a Content activity for a new or existing member,"Use this method when you know an identity of the member (github, email, twitter, etc.) but not their Orbit ID. Pass fields in the member object to update the member in addition to creating the activity."
+s11136,amazonaws.com,POST,/#Action=CreateDBSecurityGroup,POST_CreateDBSecurityGroup,,"Creates a new DB security group. DB security groups control access to a DB instance. A DB security group controls access to EC2-Classic DB instances that are not in a VPC. EC2-Classic was retired on August 15, 2022. If you haven't migrated from EC2-Classic to a VPC, we recommend that you migrate as soon as possible. For more information, see Migrate from EC2-Classic to a VPC in the Amazo"
+s11137,visualstudio.com,PUT,/api/v1/GenevaActions/Environments/{environmentId}/shutdown,,,
+s11138,microsoft.com,POST,/deviceManagement/windowsDriverUpdateProfiles/{windowsDriverUpdateProfile-id}/microsoft.graph.assign,deviceManagement.windowsDriverUpdateProfiles.windowsDriverUpdateProfile.assign,Invoke action assign,
+s11139,vtex.local,PUT,/api/dataentities/{acronym}/documents/{id},Updateentiredocument,Update entire document,
+s11140,gsmtasks.com,POST,/webhooks/,webhooks_create,,
+s11141,netbird.io,POST,/api/setup,,Setup Instance,"Creates the initial admin user for the instance. This endpoint does not require authentication but only works when setup is required (no accounts exist and embedded IDP is enabled).
+
+When the management server is started with `NB_SETUP_PAT_ENABLED=true` and the request includes `create_pat: true`, the endpoint also provisions the NetBird account for the new owner user and returns the plain text Personal Access Token in `personal_access_token`. The optional `pat_expire_in` value applies only when `create_pat` is true and defaults to 1 day when omitted. If a post-user step fails, setup-created resources are rolled back when safe; if account cleanup fails, the owner user is left in place to avoid leaving an account without its admin user.
+"
+s11142,okta,POST,/api/v1/meta/types/user,createUserType,Create a user type,"Creates a new user type. Okta automatically creates a `default` user type for your org. You may add up to nine additional user types.
+> **Note**: New user types are based on the current default schema template. Modifications to this schema do not automatically propagate to previously created user types."
+s11143,motaword.com,POST,/projects,createProject,Create a new project,Create a new translation project. Projects are not launched (you are not charged) until you `/launch` the created project.
+s11144,microsoft.com,POST,/admin/windows/updates/deploymentAudiences/{deploymentAudience-id}/exclusions/{updatableAsset-id}/microsoft.graph.windowsUpdates.removeMembersById,admin.windows.updates.deploymentAudiences.deploymentAudience.exclusions.updatableAsset.removeMembersById,Invoke action removeMembersById,Remove members of the same type from an updatableAssetGroup. You can also use the method removeMembers to remove members.
+s11145,contract-p.fit,PATCH,/auth/api-key/{key},patch_api_key_resource,Edit an API-Key,**roles** can't be modified after creation: you need to create a new token if you want other roles. **Permission required:** edit_backend_settings
+s11146,x,POST,/2/chat/conversations/{id}/keys,addConversationKeys,Add Conversation Keys,"Adds (initializes or rotates) the encryption keys for a Chat conversation. Call this before sending messages in a new 1:1 conversation, and again with a newer key version to rotate the conversation key. For 1:1 conversations, provide the recipient's user ID as the conversation id; the server constructs the canonical conversation ID from the authenticated user and recipient. The request body must contain the conversation key version and participant keys (the conversation key encrypted for each participant using their public key)."
+s11147,amazonaws.com,GET,/#Action=EnableIpamOrganizationAdminAccount,GET_EnableIpamOrganizationAdminAccount,,"Enable an Organizations member account as the IPAM admin account. You cannot select the Organizations management account as the IPAM admin account. For more information, see Enable integration with Organizations in the Amazon VPC IPAM User Guide ."
+s11148,googleapis.com,POST,/v1alpha1/customers:provisionDeployment,sasportal.customers.provisionDeployment,,Creates a new SAS deployment through the GCP workflow. Creates a SAS organization if an organization match is not found.
+s11149,6-dot-authentiqio.appspot.com,PUT,/key/{PK},key_bind,,"Update Authentiq ID by replacing the object. v4: `JWT(sub,email,phone)` to bind email/phone hash; v5: POST issuer-signed email & phone scopes and PUT to update registration `JWT(sub, pk, devtoken, ...)` See: https://github.com/skion/authentiq/wiki/JWT-Examples"
+s11150,amazonaws.com,POST,/UpdateLFTag,UpdateLFTag,,"Updates the list of possible values for the specified LF-tag key. If the LF-tag does not exist, the operation throws an EntityNotFoundException. The values in the delete key values will be deleted from list of possible values. If any value in the delete key values is attached to a resource, then API errors out with a 400 Exception - ""Update not allowed"". Untag the attribute before deleting the LF-"
+s11151,adafruit.com,PATCH,/{username}/triggers/{id},updateTrigger,Update properties of an existing Trigger,
+s11152,okta,PUT,/okta-personal-settings/api/v1/export-blocklists,replaceBlockedEmailDomains,Replace the blocked email domains,Replaces the list of blocked email domains which are excluded from app migration
+s11153,googleapis.com,POST,/v1/{resource}:setIamPolicy,servicemanagement.services.consumers.setIamPolicy,,"Sets the access control policy on the specified resource. Replaces any existing policy. Can return `NOT_FOUND`, `INVALID_ARGUMENT`, and `PERMISSION_DENIED` errors."
+s11154,amazonaws.com,PUT,/greengrass/groups/{GroupId},UpdateGroup,,Updates a group.
+s11155,azure.com,POST,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/actionGroups/{actionGroupName}/subscribe,ActionGroups_EnableReceiver,,Enable a receiver in an action group. This changes the receiver's status from Disabled to Enabled. This operation is only supported for Email or SMS receivers.
+s11156,apideck.com,POST,/accounting/tax-rates,taxRatesAdd,Create Tax Rate,Create Tax Rate
+s11157,alertersystem.com,PUT,/api/transport-termii/{id},api_transport-termii_id_put,Replaces the TransportTermii resource.,Replaces the TransportTermii resource.
+s11158,twilio.com,POST,/2010-04-01/Accounts/{AccountSid}/SIP/IpAccessControlLists.json,CreateSipIpAccessControlList,,Create a new IpAccessControlList resource
+s11159,api2cart.com,POST,/webhook.create.json,WebhookCreate,,Create webhook on the store and subscribe to it.
+s11160,gambitcomm.local,PUT,/mimic/agent/{agentNum}/protocol/msg/netflow/flow/change/tfs_interval/{interval},protocol_netflow_change_tfs,Change NETFLOW template export interval,Interval in msec .
+s11161,microsoft.com,POST,/users/{user-id}/calendar/calendarView/{event-id}/exceptionOccurrences/{event-id1}/attachments/microsoft.graph.createUploadSession,users.user.calendar.calendarView.event.exceptionOccurrences.event.attachments.createUploadSession,Invoke action createUploadSession,"Create an upload session that allows an app to iteratively upload ranges of a file, so as to attach the file to an Outlook item. The item can be a message or event. Use this approach to attach a file if the file size is between 3 MB and 150 MB. To attach a file that's smaller than 3 MB, do a `POST` operation on the **attachments** navigation property of the Outlook item; see how to do this for a m"
+s11162,netbox.dev,PATCH,/tenancy/tenant-groups/{id}/,tenancy_tenant-groups_partial_update,,
+s11163,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/OutgoingCallerIds/{Sid}.json,DeleteOutgoingCallerId,Delete the caller-id specified from the account,Delete the caller-id specified from the account
+s11164,azure.com,POST,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/slots/{slot}/backups/{backupId}/list,WebApps_ListBackupStatusSecretsSlot,"Gets status of a web app backup that may be in progress, including secrets associated with the backup, such as the Azure Storage SAS URL. Also can be used to update the SAS URL for the backup if a new","Gets status of a web app backup that may be in progress, including secrets associated with the backup, such as the Azure Storage SAS URL. Also can be used to update the SAS URL for the backup if a new URL is passed in the request body."
+s11165,microsoft.com,POST,/users/{user-id}/chats/{chat-id}/microsoft.graph.hideForUser,users.user.chats.chat.hideForUser,Invoke action hideForUser,Hide a chat for a user.
+s11166,trakt.tv,POST,/sync/ratings/remove,Remove ratings,Remove ratings,#### 🔒 OAuth Required Remove ratings for one or more items. #### JSON POST Data | Key | Type | Value | |---|---|---| | `movies` | array | Array of `movie` objects. (see examples →) | | `shows` | array | Array of `show` objects. | | `seasons` | array | Array of `season` objects. | | `episodes` | array | Array of `episode` objects. |
+s11167,xtrf.eu,PUT,/v2/jobs/{jobId}/files/sharedReferenceFiles/share,shareAsReferenceFiles,Shares selected files as Reference Files with a job in a project.,"Shares selected files as Reference Files with a job in a project. The files and the job have to be part of the same project. The operation is finished successfully even if some of the selected files were already shared with the job. If a file was shared with the job as Work File, it will now be shared as Reference File (and not as Work File)."
+s11168,googleapis.com,POST,/v1beta2/{resource}:setIamPolicy,pubsub.projects.topics.setIamPolicy,,"Sets the access control policy on the specified resource. Replaces any existing policy. Can return `NOT_FOUND`, `INVALID_ARGUMENT`, and `PERMISSION_DENIED` errors."
+s11169,microsoft.com,PUT,/financials/companies/{company-id}/salesQuotes/{salesQuote-id}/salesQuoteLines/{salesQuoteLine-id}/item/picture/{picture-id}/content,financials.companies.salesQuotes.salesQuoteLines.item.UpdatePictureContent,Update content for the navigation property picture in financials,
+s11170,docusign,PUT,/v2.1/accounts/{accountId}/connect/oauth,ConnectOAuthConfig_PutConnectOAuthConfig,Updates the existing Connect OAuth configuration for the account.,
+s11171,alertersystem.com,POST,/api/transport-microsoft-teams,api_transport-microsoft-teams_post,Creates a TransportMicrosoftTeams resource.,Creates a TransportMicrosoftTeams resource.
+s11172,adyen.com,POST,/createAccountHolder,post-createAccountHolder,Create an account holder,"Creates an account holder that [represents the sub-merchant's entity](https://docs.adyen.com/marketplaces-and-platforms/classic/account-structure#your-platform) in your platform. The details that you need to provide in the request depend on the sub-merchant's legal entity type. For more information, refer to [Account holder and accounts](https://docs.adyen.com/marketplaces-and-platforms/classic/ac"
+s11173,gambitcomm.local,PUT,/mimic/access/load/{filename},access_load,Loads the specified file for access control data.,If filename is not specified then the currently set 'acldb' parameter is used.
+s11174,illumidesk.com,PATCH,/v1/{namespace}/projects/{project}/servers/{server}/triggers/{trigger}/,service_trigger_update,Update a server trigger,
+s11175,vtex.local,POST,/api/creditcontrol/accounts/{creditAccountId}/transaction,CreateaPreAuthorization,Create a Pre Authorization,
+s11176,amazonaws.com,POST,/#X-Amz-Target=AWSLicenseManager.UpdateLicenseManagerReportGenerator,UpdateLicenseManagerReportGenerator,,"Updates a report generator. After you make changes to a report generator, it starts generating new reports within 60 minutes of being updated."
+s11177,microsoft.com,POST,/groups/{group-id}/onenote/sectionGroups/{sectionGroup-id}/sections/{onenoteSection-id}/microsoft.graph.copyToSectionGroup,groups.group.onenote.sectionGroups.sectionGroup.sections.onenoteSection.copyToSectionGroup,Invoke action copyToSectionGroup,"For Copy operations, you follow an asynchronous calling pattern: First call the Copy action, and then poll the operation endpoint for the result."
+s11178,jira,PUT,/rest/api/2/notificationscheme/{id},updateNotificationScheme,Update notification scheme,"Updates a notification scheme.
+
+**[Permissions](#permissions) required:** *Administer Jira* [global permission](https://confluence.atlassian.com/x/x4dKLg)."
+s11179,gambitcomm.local,POST,/mimic/agent/{agentNum}/from/add/{IP}/{port},from_add,Add a source address that the agent will accept messages from.,"An empty ipaddress or 0.0.0.0 both imply any address. Similarly an empty port or 0 both imply any port. For agents with source-address-indexing enabled, messages which do not match any source address will be discarded with an ERROR message, similar to community string mismatches."
+s11180,googleapis.com,POST,/v1/{parent}/cloudFunctions,integrations.projects.locations.products.cloudFunctions.create,,Creates an cloud function project.
+s11181,microsoft.com,POST,/chats/{chat-id}/permissionGrants/{resourceSpecificPermissionGrant-id}/microsoft.graph.restore,chats.chat.permissionGrants.resourceSpecificPermissionGrant.restore,Invoke action restore,"Restore a recently deleted application, group, servicePrincipal, administrative unit, or user object from deleted items. If an item was accidentally deleted, you can fully restore the item. This is not applicable to security groups, which are deleted permanently. A recently deleted item will remain available for up to 30 days. After 30 days, the item is permanently deleted."
+s11182,velopayments.com,POST,/v1/webhooks/{webhookId},updateWebhookV1,Update Webhook,Update Webhook
+s11183,neon.com,PATCH,/projects/{project_id}/auth/email_server,updateNeonAuthEmailServer,Update email server configuration,"Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Removal scheduled for March 1, 2026.
+"
+s11184,autotask.net,PUT,/V1.0/Companies/{parentId}/Contacts,CompanyContactsChild_UpdateEntity,,
+s11185,okta,PUT,/api/v1/iam/governance/bundles/{bundleId},replaceGovernanceBundle,Replace a governance bundle,Replaces the properties of a governance bundle for the Admin Console
+s11186,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Siprec/{Sid}.json,UpdateSiprec,Stop a Siprec using either the SID of the Siprec resource or the `name` used when creating the resource,Stop a Siprec using either the SID of the Siprec resource or the `name` used when creating the resource
+s11187,vocadb.net,DELETE,/api/tags/comments/{commentId},,,
+s11188,here.com,PUT,/associations/v3/{trackingId}/sensors/{sensorRuleId},,Associates a device with a sensor rule,"Associates the device with `trackingId` to the sensor rule with `sensorRuleId`. A single device can only have one sensor rule per sensor type associated. The associated sensor rule settings will be automatically synchronised to the `system.sensorAlarmConfig` section of the device `desired shadow`. Every time the associated sensor rule gets triggered by the device ingestion, an event will be genera"
+s11189,amazonaws.com,POST,/#X-Amz-Target=AWSEvents.PutPermission,PutPermission,,"Running PutPermission permits the specified Amazon Web Services account or Amazon Web Services organization to put events to the specified event bus . Amazon EventBridge (CloudWatch Events) rules in your account are triggered by these events arriving to an event bus in your account. For another account to send events to your account, that external account must have an EventBridge rule with your ac"
+s11190,appcenter,POST,/v0.1/apps/{owner_name}/{app_name}/subscriptions,test_createSubscription,,Accept a free trial subscription
+s11191,telnyx.com,POST,/telephony_credentials/{id}/token,CreateTelephonyCredentialToken,Create an Access Token.,Create an Access Token (JWT) for the credential.
+s11192,microsoft.com,PATCH,/groups/{group-id}/calendar/events/{event-id}/exceptionOccurrences/{event-id1}/instances/{event-id2}/extensions/{extension-id},groups.calendar.events.exceptionOccurrences.instances.UpdateExtensions,Update the navigation property extensions in groups,
+s11193,i-cue.solutions,POST,/administration/entity,,Create organization,This is an iCUE only endpoint or Enterprise feature.
+s11194,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Transcriptions/{Sid}.json,UpdateRealtimeTranscription,Stop a Transcription using either the SID of the Transcription resource or the `name` used when creating the resource,Stop a Transcription using either the SID of the Transcription resource or the `name` used when creating the resource
+s11195,microsoft.com,GET,/users/{user-id}/microsoft.graph.exportDeviceAndAppManagementData(),users.user.exportDeviceAndAppManagementData-d390,Invoke function exportDeviceAndAppManagementData,
+s11196,amazonaws.com,PATCH,/global-networks/{globalNetworkId}/sites/{siteId},UpdateSite,,"Updates the information for an existing site. To remove information for any of the parameters, specify an empty string."
+s11197,hubspot,PATCH,/crm/v3/properties/{objectType}/{propertyName},patch-/crm/v3/properties/{objectType}/{propertyName}_update,Update a property,Perform a partial update of a property identified by '{propertyName}'. Provided fields will be overwritten.
+s11198,cloudflare,PUT,/zones/{zone_id}/email/routing/rules/{rule_identifier},email-routing-routing-rules-update-routing-rule,Update routing rule,"Update actions and matches, or enable/disable specific routing rules. Forward actions require exactly one verified destination address."
+s11199,googleapis.com,POST,/b/{bucket}/acl,storage.bucketAccessControls.insert,,Creates a new ACL entry on the specified bucket.
+s11200,agco-ats.com,PUT,/api/v2/UpdateGroupSubscriptions/{UpdateGroupSubscriptionID},UpdateGroupSubscriptions_PutUpdateGroupSubscription,Update an Update Group Subscription,No Documentation Found.

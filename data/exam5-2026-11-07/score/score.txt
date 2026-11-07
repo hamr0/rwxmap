@@ -1,0 +1,386 @@
+exam dir /home/hamr/PycharmProjects/rwxmap/data/exam5-2026-11-07; ops.csv sha256 f6e245ed8e6953b8a7170a0bf6b6a371860460fc7206db6a5cbe23fbba1f26ea; truth.csv sha256 verified; 1443 ops
+candidate addendum: every field matches docs/wiki/exam-prereg-exam5.md at 36fb827feb5975fbe64ccdadf62be23bab9fd18c; tarball sha256 matches the file and the prereg
+rwxmap 36fb827feb5975fbe64ccdadf62be23bab9fd18c = 36fb827feb5975fbe64ccdadf62be23bab9fd18c; scratch copies V3 /home/hamr/PycharmProjects/rwxmap/.claude/scratchpad/exam5-score/work/rwxmap-v3, V4 /home/hamr/PycharmProjects/rwxmap/.claude/scratchpad/exam5-score/work/rwxmap-v4, V4-R13 /home/hamr/PycharmProjects/rwxmap/.claude/scratchpad/exam5-score/work/rwxmap-v4-r13
+copy guards passed (same file list; V3 vs V4 differ in exactly flow/step1/step2/step3.js, each byte-identical to poc/mech-v4 at the ref; tokens.js and types.js equal in poc/mech-v4 and src/). V4-R13 vs V4, the whole change:
+--- a/src/modeldownload.js
++++ b/src/modeldownload.js
+@@ -32,7 +32,7 @@
+ export const VARIANT_MODEL_FILE = { exact: 'model-fp32.onnx', small: 'model-int8-pc.onnx' };
+ 
+ /** The one rwxlite release rwxmap ships with (D135). */
+-export const RWXLITE_TAG = 'v0.2.0';
++export const RWXLITE_TAG = 'v0.3.1';
+ /** The model version that tag carries, derived so there is one literal. */
+ export const RWXLITE_VERSION = RWXLITE_TAG.slice(1);
+ const RELEASE_BASE = `https://github.com/hamr0/rwxlite/releases/download/${RWXLITE_TAG}/`;
+
+base: model set verified (5 files); rwxlite ref 6c47fec6734e666462164025674b55e8323d5b86 = 6c47fec6734e666462164025674b55e8323d5b86; models rwxlite-0.2.0+8503b655, rwxlite-0.2.0+8ad0a182; fp32 temperature 0.844 matches its manifest
+cand: model set verified (5 files); rwxlite ref f7456a2acc66ce84fd8c87d7426c9001bab8ceb7 = f7456a2acc66ce84fd8c87d7426c9001bab8ceb7; models rwxlite-0.3.1+bbe1997d, rwxlite-0.3.1+984714f0; fp32 temperature 0.991463 matches its manifest
+mech-v3: CLI run ok, 1443 of 1443 ops rows joined 1:1 (1443 sidecar rows, 0 unmatched, 0 extra)
+mech-v4: CLI run ok, 1443 of 1443 ops rows joined 1:1 (1443 sidecar rows, 0 unmatched, 0 extra)
+a-020-v3: CLI run ok, 1443 of 1443 ops rows joined 1:1 (1443 sidecar rows, 0 unmatched, 0 extra); rwxlite model rwxlite-0.2.0+8503b655, sent 645
+a-020-v4: CLI run ok, 1443 of 1443 ops rows joined 1:1 (1443 sidecar rows, 0 unmatched, 0 extra); rwxlite model rwxlite-0.2.0+8503b655, sent 647
+a-r13-v4: CLI run ok, 1443 of 1443 ops rows joined 1:1 (1443 sidecar rows, 0 unmatched, 0 extra); rwxlite model rwxlite-0.3.1+bbe1997d, sent 647
+lean check passed: mech-v4 CLI class and marker, and V4's in-process class, rule and marker, equal lean.csv on all 1443 rows
+parity passed: the replay of 1443 committed predictions equals the a-r13-v4 CLI run on all 1443 rows (class, marker, evidence) and on sent/raised/lowered/kept/undecided
+
+== mech-v3 ==  model(s): (none)  rows 1443
+overall        exact 1188 (82.3%)  loose-1   75 ( 5.2%)  loose-2    2 ( 0.1%)  too loose   77 ( 5.3%)  too tight  178 (12.3%)  of 1443
+markers on the 77 too-loose rows: tight 0 · loose 74 · settled 3
+by vendor:
+  frontapp.com   exact  186 (75.6%)  loose-1   11 ( 4.5%)  loose-2    0 ( 0.0%)  too loose   11 ( 4.5%)  too tight   49 (19.9%)  of 246
+  fusionauth.io  exact  284 (78.0%)  loose-1   33 ( 9.1%)  loose-2    1 ( 0.3%)  too loose   34 ( 9.3%)  too tight   46 (12.6%)  of 364
+  hookdeck.com   exact  123 (91.1%)  loose-1    6 ( 4.4%)  loose-2    0 ( 0.0%)  too loose    6 ( 4.4%)  too tight    6 ( 4.4%)  of 135
+  paddle.com     exact  106 (84.1%)  loose-1    6 ( 4.8%)  loose-2    0 ( 0.0%)  too loose    6 ( 4.8%)  too tight   14 (11.1%)  of 126
+  planetscale.com exact  256 (88.0%)  loose-1    7 ( 2.4%)  loose-2    0 ( 0.0%)  too loose    7 ( 2.4%)  too tight   28 ( 9.6%)  of 291
+  semaphoreui.com exact  135 (87.1%)  loose-1    5 ( 3.2%)  loose-2    1 ( 0.6%)  too loose    6 ( 3.9%)  too tight   14 ( 9.0%)  of 155
+  weaviate.io    exact   98 (77.8%)  loose-1    7 ( 5.6%)  loose-2    0 ( 0.0%)  too loose    7 ( 5.6%)  too tight   21 (16.7%)  of 126
+by method:
+  DELETE         exact  168 (98.8%)  loose-1    0 ( 0.0%)  loose-2    0 ( 0.0%)  too loose    0 ( 0.0%)  too tight    2 ( 1.2%)  of 170
+  GET            exact  620 (99.5%)  loose-1    1 ( 0.2%)  loose-2    2 ( 0.3%)  too loose    3 ( 0.5%)  too tight    0 ( 0.0%)  of 623
+  HEAD           exact    3 (100.0%)  loose-1    0 ( 0.0%)  loose-2    0 ( 0.0%)  too loose    0 ( 0.0%)  too tight    0 ( 0.0%)  of 3
+  PATCH          exact   86 (78.2%)  loose-1   23 (20.9%)  loose-2    0 ( 0.0%)  too loose   23 (20.9%)  too tight    1 ( 0.9%)  of 110
+  POST           exact  224 (54.0%)  loose-1   17 ( 4.1%)  loose-2    0 ( 0.0%)  too loose   17 ( 4.1%)  too tight  174 (41.9%)  of 415
+  PUT            exact   87 (71.3%)  loose-1   34 (27.9%)  loose-2    0 ( 0.0%)  too loose   34 (27.9%)  too tight    1 ( 0.8%)  of 122
+
+== mech-v4 ==  model(s): (none)  rows 1443
+overall        exact 1201 (83.2%)  loose-1   57 ( 4.0%)  loose-2    2 ( 0.1%)  too loose   59 ( 4.1%)  too tight  183 (12.7%)  of 1443
+markers on the 59 too-loose rows: tight 0 · loose 56 · settled 3
+by vendor:
+  frontapp.com   exact  198 (80.5%)  loose-1   11 ( 4.5%)  loose-2    0 ( 0.0%)  too loose   11 ( 4.5%)  too tight   37 (15.0%)  of 246
+  fusionauth.io  exact  287 (78.8%)  loose-1   26 ( 7.1%)  loose-2    1 ( 0.3%)  too loose   27 ( 7.4%)  too tight   50 (13.7%)  of 364
+  hookdeck.com   exact  120 (88.9%)  loose-1    2 ( 1.5%)  loose-2    0 ( 0.0%)  too loose    2 ( 1.5%)  too tight   13 ( 9.6%)  of 135
+  paddle.com     exact  107 (84.9%)  loose-1    5 ( 4.0%)  loose-2    0 ( 0.0%)  too loose    5 ( 4.0%)  too tight   14 (11.1%)  of 126
+  planetscale.com exact  254 (87.3%)  loose-1    5 ( 1.7%)  loose-2    0 ( 0.0%)  too loose    5 ( 1.7%)  too tight   32 (11.0%)  of 291
+  semaphoreui.com exact  135 (87.1%)  loose-1    3 ( 1.9%)  loose-2    1 ( 0.6%)  too loose    4 ( 2.6%)  too tight   16 (10.3%)  of 155
+  weaviate.io    exact  100 (79.4%)  loose-1    5 ( 4.0%)  loose-2    0 ( 0.0%)  too loose    5 ( 4.0%)  too tight   21 (16.7%)  of 126
+by method:
+  DELETE         exact  168 (98.8%)  loose-1    0 ( 0.0%)  loose-2    0 ( 0.0%)  too loose    0 ( 0.0%)  too tight    2 ( 1.2%)  of 170
+  GET            exact  620 (99.5%)  loose-1    1 ( 0.2%)  loose-2    2 ( 0.3%)  too loose    3 ( 0.5%)  too tight    0 ( 0.0%)  of 623
+  HEAD           exact    3 (100.0%)  loose-1    0 ( 0.0%)  loose-2    0 ( 0.0%)  too loose    0 ( 0.0%)  too tight    0 ( 0.0%)  of 3
+  PATCH          exact   86 (78.2%)  loose-1   16 (14.5%)  loose-2    0 ( 0.0%)  too loose   16 (14.5%)  too tight    8 ( 7.3%)  of 110
+  POST           exact  242 (58.3%)  loose-1   17 ( 4.1%)  loose-2    0 ( 0.0%)  too loose   17 ( 4.1%)  too tight  156 (37.6%)  of 415
+  PUT            exact   82 (67.2%)  loose-1   23 (18.9%)  loose-2    0 ( 0.0%)  too loose   23 (18.9%)  too tight   17 (13.9%)  of 122
+
+== a-020-v3 ==  model(s): rwxlite-0.2.0+8503b655  rows 1443
+overall        exact 1274 (88.3%)  loose-1   98 ( 6.8%)  loose-2    2 ( 0.1%)  too loose  100 ( 6.9%)  too tight   69 ( 4.8%)  of 1443
+rwxlite: sent 645 · raised 8 · lowered 139 · kept 407 · undecided (asked, scored x) 91
+markers on the 100 too-loose rows: tight 0 · loose 97 · settled 3
+by vendor:
+  frontapp.com   exact  227 (92.3%)  loose-1   11 ( 4.5%)  loose-2    0 ( 0.0%)  too loose   11 ( 4.5%)  too tight    8 ( 3.3%)  of 246
+  fusionauth.io  exact  310 (85.2%)  loose-1   41 (11.3%)  loose-2    1 ( 0.3%)  too loose   42 (11.5%)  too tight   12 ( 3.3%)  of 364
+  hookdeck.com   exact  123 (91.1%)  loose-1   10 ( 7.4%)  loose-2    0 ( 0.0%)  too loose   10 ( 7.4%)  too tight    2 ( 1.5%)  of 135
+  paddle.com     exact  111 (88.1%)  loose-1    7 ( 5.6%)  loose-2    0 ( 0.0%)  too loose    7 ( 5.6%)  too tight    8 ( 6.3%)  of 126
+  planetscale.com exact  256 (88.0%)  loose-1    7 ( 2.4%)  loose-2    0 ( 0.0%)  too loose    7 ( 2.4%)  too tight   28 ( 9.6%)  of 291
+  semaphoreui.com exact  141 (91.0%)  loose-1   13 ( 8.4%)  loose-2    1 ( 0.6%)  too loose   14 ( 9.0%)  too tight    0 ( 0.0%)  of 155
+  weaviate.io    exact  106 (84.1%)  loose-1    9 ( 7.1%)  loose-2    0 ( 0.0%)  too loose    9 ( 7.1%)  too tight   11 ( 8.7%)  of 126
+by method:
+  DELETE         exact  168 (98.8%)  loose-1    0 ( 0.0%)  loose-2    0 ( 0.0%)  too loose    0 ( 0.0%)  too tight    2 ( 1.2%)  of 170
+  GET            exact  620 (99.5%)  loose-1    1 ( 0.2%)  loose-2    2 ( 0.3%)  too loose    3 ( 0.5%)  too tight    0 ( 0.0%)  of 623
+  HEAD           exact    3 (100.0%)  loose-1    0 ( 0.0%)  loose-2    0 ( 0.0%)  too loose    0 ( 0.0%)  too tight    0 ( 0.0%)  of 3
+  PATCH          exact   86 (78.2%)  loose-1   23 (20.9%)  loose-2    0 ( 0.0%)  too loose   23 (20.9%)  too tight    1 ( 0.9%)  of 110
+  POST           exact  303 (73.0%)  loose-1   47 (11.3%)  loose-2    0 ( 0.0%)  too loose   47 (11.3%)  too tight   65 (15.7%)  of 415
+  PUT            exact   94 (77.0%)  loose-1   27 (22.1%)  loose-2    0 ( 0.0%)  too loose   27 (22.1%)  too tight    1 ( 0.8%)  of 122
+
+== a-020-v4 ==  model(s): rwxlite-0.2.0+8503b655  rows 1443
+overall        exact 1272 (88.1%)  loose-1   92 ( 6.4%)  loose-2    2 ( 0.1%)  too loose   94 ( 6.5%)  too tight   77 ( 5.3%)  of 1443
+rwxlite: sent 647 · raised 8 · lowered 148 · kept 387 · undecided (asked, scored x) 104
+markers on the 94 too-loose rows: tight 0 · loose 91 · settled 3
+by vendor:
+  frontapp.com   exact  227 (92.3%)  loose-1   11 ( 4.5%)  loose-2    0 ( 0.0%)  too loose   11 ( 4.5%)  too tight    8 ( 3.3%)  of 246
+  fusionauth.io  exact  311 (85.4%)  loose-1   39 (10.7%)  loose-2    1 ( 0.3%)  too loose   40 (11.0%)  too tight   13 ( 3.6%)  of 364
+  hookdeck.com   exact  121 (89.6%)  loose-1    9 ( 6.7%)  loose-2    0 ( 0.0%)  too loose    9 ( 6.7%)  too tight    5 ( 3.7%)  of 135
+  paddle.com     exact  112 (88.9%)  loose-1    6 ( 4.8%)  loose-2    0 ( 0.0%)  too loose    6 ( 4.8%)  too tight    8 ( 6.3%)  of 126
+  planetscale.com exact  254 (87.3%)  loose-1    5 ( 1.7%)  loose-2    0 ( 0.0%)  too loose    5 ( 1.7%)  too tight   32 (11.0%)  of 291
+  semaphoreui.com exact  140 (90.3%)  loose-1   14 ( 9.0%)  loose-2    1 ( 0.6%)  too loose   15 ( 9.7%)  too tight    0 ( 0.0%)  of 155
+  weaviate.io    exact  107 (84.9%)  loose-1    8 ( 6.3%)  loose-2    0 ( 0.0%)  too loose    8 ( 6.3%)  too tight   11 ( 8.7%)  of 126
+by method:
+  DELETE         exact  168 (98.8%)  loose-1    0 ( 0.0%)  loose-2    0 ( 0.0%)  too loose    0 ( 0.0%)  too tight    2 ( 1.2%)  of 170
+  GET            exact  620 (99.5%)  loose-1    1 ( 0.2%)  loose-2    2 ( 0.3%)  too loose    3 ( 0.5%)  too tight    0 ( 0.0%)  of 623
+  HEAD           exact    3 (100.0%)  loose-1    0 ( 0.0%)  loose-2    0 ( 0.0%)  too loose    0 ( 0.0%)  too tight    0 ( 0.0%)  of 3
+  PATCH          exact   86 (78.2%)  loose-1   18 (16.4%)  loose-2    0 ( 0.0%)  too loose   18 (16.4%)  too tight    6 ( 5.5%)  of 110
+  POST           exact  304 (73.3%)  loose-1   47 (11.3%)  loose-2    0 ( 0.0%)  too loose   47 (11.3%)  too tight   64 (15.4%)  of 415
+  PUT            exact   91 (74.6%)  loose-1   26 (21.3%)  loose-2    0 ( 0.0%)  too loose   26 (21.3%)  too tight    5 ( 4.1%)  of 122
+
+== a-r13-v4 ==  model(s): rwxlite-0.3.1+bbe1997d  rows 1443
+overall        exact 1220 (84.5%)  loose-1   35 ( 2.4%)  loose-2    2 ( 0.1%)  too loose   37 ( 2.6%)  too tight  186 (12.9%)  of 1443
+rwxlite: sent 647 · raised 49 · lowered 23 · kept 457 · undecided (asked, scored x) 118
+markers on the 37 too-loose rows: tight 0 · loose 34 · settled 3
+by vendor:
+  frontapp.com   exact  209 (85.0%)  loose-1    6 ( 2.4%)  loose-2    0 ( 0.0%)  too loose    6 ( 2.4%)  too tight   31 (12.6%)  of 246
+  fusionauth.io  exact  298 (81.9%)  loose-1   20 ( 5.5%)  loose-2    1 ( 0.3%)  too loose   21 ( 5.8%)  too tight   45 (12.4%)  of 364
+  hookdeck.com   exact  120 (88.9%)  loose-1    2 ( 1.5%)  loose-2    0 ( 0.0%)  too loose    2 ( 1.5%)  too tight   13 ( 9.6%)  of 135
+  paddle.com     exact  109 (86.5%)  loose-1    3 ( 2.4%)  loose-2    0 ( 0.0%)  too loose    3 ( 2.4%)  too tight   14 (11.1%)  of 126
+  planetscale.com exact  241 (82.8%)  loose-1    0 ( 0.0%)  loose-2    0 ( 0.0%)  too loose    0 ( 0.0%)  too tight   50 (17.2%)  of 291
+  semaphoreui.com exact  137 (88.4%)  loose-1    1 ( 0.6%)  loose-2    1 ( 0.6%)  too loose    2 ( 1.3%)  too tight   16 (10.3%)  of 155
+  weaviate.io    exact  106 (84.1%)  loose-1    3 ( 2.4%)  loose-2    0 ( 0.0%)  too loose    3 ( 2.4%)  too tight   17 (13.5%)  of 126
+by method:
+  DELETE         exact  168 (98.8%)  loose-1    0 ( 0.0%)  loose-2    0 ( 0.0%)  too loose    0 ( 0.0%)  too tight    2 ( 1.2%)  of 170
+  GET            exact  620 (99.5%)  loose-1    1 ( 0.2%)  loose-2    2 ( 0.3%)  too loose    3 ( 0.5%)  too tight    0 ( 0.0%)  of 623
+  HEAD           exact    3 (100.0%)  loose-1    0 ( 0.0%)  loose-2    0 ( 0.0%)  too loose    0 ( 0.0%)  too tight    0 ( 0.0%)  of 3
+  PATCH          exact   73 (66.4%)  loose-1   13 (11.8%)  loose-2    0 ( 0.0%)  too loose   13 (11.8%)  too tight   24 (21.8%)  of 110
+  POST           exact  270 (65.1%)  loose-1    7 ( 1.7%)  loose-2    0 ( 0.0%)  too loose    7 ( 1.7%)  too tight  138 (33.3%)  of 415
+  PUT            exact   86 (70.5%)  loose-1   14 (11.5%)  loose-2    0 ( 0.0%)  too loose   14 (11.5%)  too tight   22 (18.0%)  of 122
+
+== GATE: mech-v4 vs mech-v3 (user ruling 2026-11-06; mechanical alone decides; integer counts) ==
+1. too loose (loose-1 + loose-2): v4 59 vs v3 77 (-18) -> OK (need strictly lower; a tie fails)
+2. loose-2: v4 2 vs v3 2 (+0) -> OK (need <=)
+3. too tight: v4 183 vs v3 178 (+5) -> FAIL (need <=)
+GATE => NO-GO: v3 stays in src/   (beside it: exact v4 1201 vs v3 1188, of 1443)
+
+== rwxlite's bar, REPORTED ONLY (theirs, not rwxmap's gate): a-r13-v4 vs a-020-v4, too loose <= and exact >=, a tie passes ==
+too loose 37 vs 94 (-57) -> OK; exact 1220 vs 1272 (-52) -> FAIL  => FAIL   (beside it: too tight 186 vs 77, +109)
+
+== D133 mode a bar vs mech-v4, REPORTED ONLY: too loose <= mech-v4 and exact >= mech-v4 exact + ceil(5% of n) rows ==
+a-020-v3: too loose 100 vs mech-v4 59 -> FAIL; exact 1274 (88.3%) vs mech-v4 1201 (83.2%) = 5.06 points, need 73 more rows -> OK  => FAIL
+a-020-v4: too loose 94 vs mech-v4 59 -> FAIL; exact 1272 (88.1%) vs mech-v4 1201 (83.2%) = 4.92 points, need 73 more rows -> FAIL  => FAIL
+a-r13-v4: too loose 37 vs mech-v4 59 -> OK; exact 1220 (84.5%) vs mech-v4 1201 (83.2%) = 1.32 points, need 73 more rows -> FAIL  => FAIL
+
+too-loose rows, mech-v3 (77): id provider method path truth->letter marker evidence
+  ex5-0021 frontapp.com POST /channels/{channel_id}/validate w->r loose list
+  ex5-0098 frontapp.com POST /inboxes/{inbox_id}/teammates x->w loose list
+  ex5-0110 frontapp.com PATCH /knowledge_base_categories/{category_id}/content x->w loose floor
+  ex5-0112 frontapp.com PATCH /knowledge_base_categories/{category_id}/locales/{locale}/content x->w loose floor
+  ex5-0121 frontapp.com PATCH /knowledge_bases/{knowledge_base_id}/content x->w loose floor
+  ex5-0125 frontapp.com PATCH /knowledge_bases/{knowledge_base_id}/locales/{locale}/content x->w loose floor
+  ex5-0179 frontapp.com POST /teammate_groups/{teammate_group_id}/inboxes x->w loose list
+  ex5-0182 frontapp.com POST /teammate_groups/{teammate_group_id}/teammates x->w loose list
+  ex5-0185 frontapp.com POST /teammate_groups/{teammate_group_id}/teams x->w loose list
+  ex5-0236 frontapp.com POST /teams/{team_id}/teammates x->w loose list
+  ex5-0246 frontapp.com POST /views/{view_id}/teammates x->w loose list
+  ex5-0252 fusionauth.io PATCH /api/api-key/{keyId} x->w loose floor
+  ex5-0254 fusionauth.io PUT /api/api-key/{keyId} x->w loose floor
+  ex5-0280 fusionauth.io PATCH /api/cimd/domain/{domainId} x->w loose floor
+  ex5-0282 fusionauth.io PUT /api/cimd/domain/{domainId} x->w loose floor
+  ex5-0296 fusionauth.io PATCH /api/connector/{connectorId} x->w loose floor
+  ex5-0298 fusionauth.io PUT /api/connector/{connectorId} x->w loose floor
+  ex5-0323 fusionauth.io PUT /api/entity/search x->w loose floor
+  ex5-0364 fusionauth.io PUT /api/group/member x->w loose floor
+  ex5-0369 fusionauth.io PATCH /api/group/{groupId} x->w loose floor
+  ex5-0371 fusionauth.io PUT /api/group/{groupId} x->w loose floor
+  ex5-0388 fusionauth.io PATCH /api/identity-provider/{identityProviderId} x->w loose floor
+  ex5-0390 fusionauth.io PUT /api/identity-provider/{identityProviderId} x->w loose floor
+  ex5-0396 fusionauth.io PATCH /api/integration x->w loose floor
+  ex5-0397 fusionauth.io PUT /api/integration x->w loose floor
+  ex5-0401 fusionauth.io PATCH /api/ip-acl/{accessControlListId} x->w loose floor
+  ex5-0403 fusionauth.io PUT /api/ip-acl/{accessControlListId} x->w loose floor
+  ex5-0406 fusionauth.io GET /api/jwt/issue x->r settled floor
+  ex5-0435 fusionauth.io PUT /api/login x->w loose floor
+  ex5-0436 fusionauth.io PUT /api/login/{userId}/{applicationId} x->w loose floor
+  ex5-0450 fusionauth.io PATCH /api/messenger/{messengerId} x->w loose floor
+  ex5-0452 fusionauth.io PUT /api/messenger/{messengerId} x->w loose floor
+  ex5-0459 fusionauth.io PUT /api/reactor x->w loose floor
+  ex5-0488 fusionauth.io PATCH /api/tenant-manager/identity-provider/{type} x->w loose floor
+  ex5-0490 fusionauth.io PUT /api/tenant-manager/identity-provider/{type} x->w loose floor
+  ex5-0556 fusionauth.io PUT /api/user/family/{familyId} x->w loose floor
+  ex5-0563 fusionauth.io PATCH /api/user/registration/{userId} x->w loose floor
+  ex5-0565 fusionauth.io PUT /api/user/registration/{userId} x->w loose floor
+  ex5-0570 fusionauth.io PUT /api/user/search x->w loose floor
+  ex5-0574 fusionauth.io POST /api/user/two-factor/{userId} x->w loose list
+  ex5-0575 fusionauth.io PUT /api/user/two-factor/{userId} x->w loose floor
+  ex5-0577 fusionauth.io PUT /api/user/verify-email x->w loose floor
+  ex5-0579 fusionauth.io PUT /api/user/verify-registration x->w loose floor
+  ex5-0601 fusionauth.io PATCH /api/webhook/{webhookId} x->w loose floor
+  ex5-0603 fusionauth.io PUT /api/webhook/{webhookId} x->w loose floor
+  ex5-0646 hookdeck.com PUT /connections x->w loose floor
+  ex5-0656 hookdeck.com PUT /connections/{id}/unpause x->w loose floor
+  ex5-0659 hookdeck.com PUT /destinations x->w loose floor
+  ex5-0663 hookdeck.com PUT /destinations/{id} x->w loose floor
+  ex5-0702 hookdeck.com PUT /notifications/webhooks x->w loose floor
+  ex5-0708 hookdeck.com PUT /organizations/current/api-keys/{id} x->w loose floor
+  ex5-0759 paddle.com PATCH /client-tokens/{client_token_id} x->w loose floor
+  ex5-0804 paddle.com PATCH /notification-settings/{notification_setting_id} x->w loose floor
+  ex5-0853 paddle.com PATCH /subscriptions/{subscription_id} x->w loose floor
+  ex5-0854 paddle.com POST /subscriptions/{subscription_id}/activate x->w loose list
+  ex5-0862 paddle.com GET /subscriptions/{subscription_id}/update-payment-method-transaction w->r settled floor
+  ex5-0867 paddle.com PATCH /transactions/{transaction_id} x->w loose floor
+  ex5-1019 planetscale.com PATCH /organizations/{organization}/databases/{database}/branches/{branch}/passwords/{id} x->w loose floor
+  ex5-1077 planetscale.com PATCH /organizations/{organization}/databases/{database}/cidrs/{id} x->w loose floor
+  ex5-1118 planetscale.com PATCH /organizations/{organization}/databases/{database}/webhooks/{id} x->w loose floor
+  ex5-1129 planetscale.com PATCH /organizations/{organization}/members/{id} x->w loose floor
+  ex5-1143 planetscale.com POST /organizations/{organization}/sso x->w loose list
+  ex5-1146 planetscale.com POST /organizations/{organization}/sso/directory x->w loose list
+  ex5-1157 planetscale.com POST /organizations/{organization}/teams/{team}/members x->w loose list
+  ex5-1168 semaphoreui.com GET /auth/oidc/{provider_id}/redirect x->r settled floor
+  ex5-1176 semaphoreui.com PUT /global-roles/{role_id} x->w loose floor
+  ex5-1221 semaphoreui.com PUT /project/{project_id}/keys/{key_id} x->w loose floor
+  ex5-1259 semaphoreui.com PUT /project/{project_id}/templates/{template_id}/perms/{perm_id} x->w loose floor
+  ex5-1264 semaphoreui.com PUT /project/{project_id}/users/{user_id} x->w loose floor
+  ex5-1279 semaphoreui.com PUT /project/{project_id}/workflows/{workflow_id}/perms/{perm_id} x->w loose floor
+  ex5-1329 weaviate.io POST /authz/groups/{id}/assign x->w loose list
+  ex5-1336 weaviate.io POST /authz/roles/{id}/add-permissions x->w loose list
+  ex5-1339 weaviate.io POST /authz/roles/{id}/remove-permissions x->w loose list
+  ex5-1342 weaviate.io POST /authz/users/{id}/assign x->w loose list
+  ex5-1415 weaviate.io PUT /schema/{className}/properties/{propertyName}/index/{indexName} x->w loose floor
+  ex5-1439 weaviate.io POST /users/db/{user_id}/activate x->w loose list
+  ex5-1441 weaviate.io PUT /users/db/{user_id}/expiration x->w loose floor
+
+too-loose rows, mech-v4 (59): id provider method path truth->letter marker evidence
+  ex5-0021 frontapp.com POST /channels/{channel_id}/validate w->r loose list
+  ex5-0098 frontapp.com POST /inboxes/{inbox_id}/teammates x->w loose list
+  ex5-0110 frontapp.com PATCH /knowledge_base_categories/{category_id}/content x->w loose floor
+  ex5-0112 frontapp.com PATCH /knowledge_base_categories/{category_id}/locales/{locale}/content x->w loose floor
+  ex5-0121 frontapp.com PATCH /knowledge_bases/{knowledge_base_id}/content x->w loose floor
+  ex5-0125 frontapp.com PATCH /knowledge_bases/{knowledge_base_id}/locales/{locale}/content x->w loose floor
+  ex5-0179 frontapp.com POST /teammate_groups/{teammate_group_id}/inboxes x->w loose list
+  ex5-0182 frontapp.com POST /teammate_groups/{teammate_group_id}/teammates x->w loose list
+  ex5-0185 frontapp.com POST /teammate_groups/{teammate_group_id}/teams x->w loose list
+  ex5-0236 frontapp.com POST /teams/{team_id}/teammates x->w loose list
+  ex5-0246 frontapp.com POST /views/{view_id}/teammates x->w loose list
+  ex5-0276 fusionauth.io POST /api/cimd/domain x->w loose list
+  ex5-0280 fusionauth.io PATCH /api/cimd/domain/{domainId} x->w loose floor
+  ex5-0281 fusionauth.io POST /api/cimd/domain/{domainId} x->w loose list
+  ex5-0282 fusionauth.io PUT /api/cimd/domain/{domainId} x->w loose floor
+  ex5-0296 fusionauth.io PATCH /api/connector/{connectorId} x->w loose floor
+  ex5-0298 fusionauth.io PUT /api/connector/{connectorId} x->w loose floor
+  ex5-0323 fusionauth.io PUT /api/entity/search x->w loose floor
+  ex5-0369 fusionauth.io PATCH /api/group/{groupId} x->w loose floor
+  ex5-0371 fusionauth.io PUT /api/group/{groupId} x->w loose floor
+  ex5-0388 fusionauth.io PATCH /api/identity-provider/{identityProviderId} x->w loose floor
+  ex5-0390 fusionauth.io PUT /api/identity-provider/{identityProviderId} x->w loose floor
+  ex5-0406 fusionauth.io GET /api/jwt/issue x->r settled floor
+  ex5-0435 fusionauth.io PUT /api/login x->w loose floor
+  ex5-0436 fusionauth.io PUT /api/login/{userId}/{applicationId} x->w loose floor
+  ex5-0450 fusionauth.io PATCH /api/messenger/{messengerId} x->w loose floor
+  ex5-0452 fusionauth.io PUT /api/messenger/{messengerId} x->w loose floor
+  ex5-0459 fusionauth.io PUT /api/reactor x->w loose floor
+  ex5-0488 fusionauth.io PATCH /api/tenant-manager/identity-provider/{type} x->w loose floor
+  ex5-0490 fusionauth.io PUT /api/tenant-manager/identity-provider/{type} x->w loose floor
+  ex5-0556 fusionauth.io PUT /api/user/family/{familyId} x->w loose floor
+  ex5-0563 fusionauth.io PATCH /api/user/registration/{userId} x->w loose floor
+  ex5-0565 fusionauth.io PUT /api/user/registration/{userId} x->w loose floor
+  ex5-0570 fusionauth.io PUT /api/user/search x->w loose floor
+  ex5-0574 fusionauth.io POST /api/user/two-factor/{userId} x->w loose list
+  ex5-0575 fusionauth.io PUT /api/user/two-factor/{userId} x->w loose floor
+  ex5-0577 fusionauth.io PUT /api/user/verify-email x->w loose floor
+  ex5-0579 fusionauth.io PUT /api/user/verify-registration x->w loose floor
+  ex5-0646 hookdeck.com PUT /connections x->w loose floor
+  ex5-0656 hookdeck.com PUT /connections/{id}/unpause x->w loose floor
+  ex5-0804 paddle.com PATCH /notification-settings/{notification_setting_id} x->w loose floor
+  ex5-0853 paddle.com PATCH /subscriptions/{subscription_id} x->w loose floor
+  ex5-0854 paddle.com POST /subscriptions/{subscription_id}/activate x->w loose list
+  ex5-0862 paddle.com GET /subscriptions/{subscription_id}/update-payment-method-transaction w->r settled floor
+  ex5-0867 paddle.com PATCH /transactions/{transaction_id} x->w loose floor
+  ex5-1019 planetscale.com PATCH /organizations/{organization}/databases/{database}/branches/{branch}/passwords/{id} x->w loose floor
+  ex5-1077 planetscale.com PATCH /organizations/{organization}/databases/{database}/cidrs/{id} x->w loose floor
+  ex5-1143 planetscale.com POST /organizations/{organization}/sso x->w loose list
+  ex5-1146 planetscale.com POST /organizations/{organization}/sso/directory x->w loose list
+  ex5-1148 planetscale.com POST /organizations/{organization}/sso/domains x->w loose list
+  ex5-1168 semaphoreui.com GET /auth/oidc/{provider_id}/redirect x->r settled floor
+  ex5-1259 semaphoreui.com PUT /project/{project_id}/templates/{template_id}/perms/{perm_id} x->w loose floor
+  ex5-1264 semaphoreui.com PUT /project/{project_id}/users/{user_id} x->w loose floor
+  ex5-1279 semaphoreui.com PUT /project/{project_id}/workflows/{workflow_id}/perms/{perm_id} x->w loose floor
+  ex5-1329 weaviate.io POST /authz/groups/{id}/assign x->w loose list
+  ex5-1342 weaviate.io POST /authz/users/{id}/assign x->w loose list
+  ex5-1415 weaviate.io PUT /schema/{className}/properties/{propertyName}/index/{indexName} x->w loose floor
+  ex5-1439 weaviate.io POST /users/db/{user_id}/activate x->w loose list
+  ex5-1441 weaviate.io PUT /users/db/{user_id}/expiration x->w loose floor
+
+too-loose rows, a-r13-v4 (37): id provider method path truth->letter marker evidence
+  ex5-0021 frontapp.com POST /channels/{channel_id}/validate w->r loose list
+  ex5-0110 frontapp.com PATCH /knowledge_base_categories/{category_id}/content x->w loose floor
+  ex5-0112 frontapp.com PATCH /knowledge_base_categories/{category_id}/locales/{locale}/content x->w loose floor
+  ex5-0121 frontapp.com PATCH /knowledge_bases/{knowledge_base_id}/content x->w loose floor
+  ex5-0125 frontapp.com PATCH /knowledge_bases/{knowledge_base_id}/locales/{locale}/content x->w loose floor
+  ex5-0246 frontapp.com POST /views/{view_id}/teammates x->w loose list
+  ex5-0276 fusionauth.io POST /api/cimd/domain x->w loose list
+  ex5-0280 fusionauth.io PATCH /api/cimd/domain/{domainId} x->w loose floor
+  ex5-0281 fusionauth.io POST /api/cimd/domain/{domainId} x->w loose list
+  ex5-0282 fusionauth.io PUT /api/cimd/domain/{domainId} x->w loose floor
+  ex5-0296 fusionauth.io PATCH /api/connector/{connectorId} x->w loose floor
+  ex5-0298 fusionauth.io PUT /api/connector/{connectorId} x->w loose floor
+  ex5-0318 fusionauth.io POST /api/entity x->w loose rwxlite
+  ex5-0323 fusionauth.io PUT /api/entity/search x->w loose floor
+  ex5-0369 fusionauth.io PATCH /api/group/{groupId} x->w loose floor
+  ex5-0371 fusionauth.io PUT /api/group/{groupId} x->w loose floor
+  ex5-0388 fusionauth.io PATCH /api/identity-provider/{identityProviderId} x->w loose floor
+  ex5-0390 fusionauth.io PUT /api/identity-provider/{identityProviderId} x->w loose floor
+  ex5-0406 fusionauth.io GET /api/jwt/issue x->r settled floor
+  ex5-0450 fusionauth.io PATCH /api/messenger/{messengerId} x->w loose floor
+  ex5-0452 fusionauth.io PUT /api/messenger/{messengerId} x->w loose floor
+  ex5-0488 fusionauth.io PATCH /api/tenant-manager/identity-provider/{type} x->w loose floor
+  ex5-0490 fusionauth.io PUT /api/tenant-manager/identity-provider/{type} x->w loose floor
+  ex5-0563 fusionauth.io PATCH /api/user/registration/{userId} x->w loose floor
+  ex5-0565 fusionauth.io PUT /api/user/registration/{userId} x->w loose floor
+  ex5-0570 fusionauth.io PUT /api/user/search x->w loose floor
+  ex5-0575 fusionauth.io PUT /api/user/two-factor/{userId} x->w loose floor
+  ex5-0646 hookdeck.com PUT /connections x->w loose floor
+  ex5-0656 hookdeck.com PUT /connections/{id}/unpause x->w loose floor
+  ex5-0804 paddle.com PATCH /notification-settings/{notification_setting_id} x->w loose floor
+  ex5-0862 paddle.com GET /subscriptions/{subscription_id}/update-payment-method-transaction w->r settled floor
+  ex5-0867 paddle.com PATCH /transactions/{transaction_id} x->w loose floor
+  ex5-1168 semaphoreui.com GET /auth/oidc/{provider_id}/redirect x->r settled floor
+  ex5-1238 semaphoreui.com POST /project/{project_id}/schedules x->w loose rwxlite
+  ex5-1415 weaviate.io PUT /schema/{className}/properties/{propertyName}/index/{indexName} x->w loose floor
+  ex5-1439 weaviate.io POST /users/db/{user_id}/activate x->w loose list
+  ex5-1441 weaviate.io PUT /users/db/{user_id}/expiration x->w loose floor
+
+rows where mech-v3 and mech-v4 differ in letter (65; a further 2 differ only in marker): id provider method path truth v3->v4 (markers v3/v4)
+  ex5-0031 frontapp.com POST /company/tags w x->w (tight/loose)
+  ex5-0134 frontapp.com POST /message_template_folders w x->w (tight/loose)
+  ex5-0139 frontapp.com POST /message_template_folders/{message_template_folder_id}/message_template_folders w x->w (tight/loose)
+  ex5-0141 frontapp.com POST /message_template_folders/{message_template_folder_id}/message_templates w x->w (tight/loose)
+  ex5-0143 frontapp.com POST /message_templates w x->w (tight/loose)
+  ex5-0165 frontapp.com POST /tags w x->w (tight/loose)
+  ex5-0200 frontapp.com POST /teammates/{teammate_id}/message_template_folders w x->w (tight/loose)
+  ex5-0202 frontapp.com POST /teammates/{teammate_id}/message_templates w x->w (tight/loose)
+  ex5-0210 frontapp.com POST /teammates/{teammate_id}/tags w x->w (tight/loose)
+  ex5-0225 frontapp.com POST /teams/{team_id}/message_template_folders w x->w (tight/loose)
+  ex5-0227 frontapp.com POST /teams/{team_id}/message_templates w x->w (tight/loose)
+  ex5-0234 frontapp.com POST /teams/{team_id}/tags w x->w (tight/loose)
+  ex5-0252 fusionauth.io PATCH /api/api-key/{keyId} x w->x (loose/tight)
+  ex5-0254 fusionauth.io PUT /api/api-key/{keyId} x w->x (loose/tight)
+  ex5-0266 fusionauth.io PATCH /api/application/{applicationId}/role/{roleId} w w->x (loose/tight)
+  ex5-0268 fusionauth.io PUT /api/application/{applicationId}/role/{roleId} w w->x (loose/tight)
+  ex5-0272 fusionauth.io PATCH /api/application/{applicationId}/scope/{scopeId} w w->x (loose/tight)
+  ex5-0274 fusionauth.io PUT /api/application/{applicationId}/scope/{scopeId} w w->x (loose/tight)
+  ex5-0276 fusionauth.io POST /api/cimd/domain x x->w (tight/loose)
+  ex5-0281 fusionauth.io POST /api/cimd/domain/{domainId} x x->w (tight/loose)
+  ex5-0286 fusionauth.io PATCH /api/cimd/domain/{domainId}/scope/{scopeId} w w->x (loose/tight)
+  ex5-0288 fusionauth.io PUT /api/cimd/domain/{domainId}/scope/{scopeId} w w->x (loose/tight)
+  ex5-0310 fusionauth.io POST /api/email/template w x->w (tight/loose)
+  ex5-0316 fusionauth.io POST /api/email/template/{emailTemplateId} w x->w (tight/loose)
+  ex5-0335 fusionauth.io PATCH /api/entity/type/{entityTypeId}/permission/{permissionId} w w->x (loose/tight)
+  ex5-0337 fusionauth.io PUT /api/entity/type/{entityTypeId}/permission/{permissionId} w w->x (loose/tight)
+  ex5-0364 fusionauth.io PUT /api/group/member x w->x (loose/tight)
+  ex5-0396 fusionauth.io PATCH /api/integration x w->x (loose/tight)
+  ex5-0397 fusionauth.io PUT /api/integration x w->x (loose/tight)
+  ex5-0401 fusionauth.io PATCH /api/ip-acl/{accessControlListId} x w->x (loose/tight)
+  ex5-0403 fusionauth.io PUT /api/ip-acl/{accessControlListId} x w->x (loose/tight)
+  ex5-0425 fusionauth.io PUT /api/key/{keyId} w w->x (loose/tight)
+  ex5-0439 fusionauth.io POST /api/message/template w x->w (tight/loose)
+  ex5-0444 fusionauth.io POST /api/message/template/{messageTemplateId} w x->w (tight/loose)
+  ex5-0540 fusionauth.io POST /api/user/comment w x->w (tight/loose)
+  ex5-0601 fusionauth.io PATCH /api/webhook/{webhookId} x w->x (loose/tight)
+  ex5-0603 fusionauth.io PUT /api/webhook/{webhookId} x w->x (loose/tight)
+  ex5-0659 hookdeck.com PUT /destinations x w->x (loose/tight)
+  ex5-0663 hookdeck.com PUT /destinations/{id} x w->x (loose/tight)
+  ex5-0664 hookdeck.com PUT /destinations/{id}/archive w w->x (loose/tight)
+  ex5-0665 hookdeck.com PUT /destinations/{id}/disable w w->x (loose/tight)
+  ex5-0666 hookdeck.com PUT /destinations/{id}/enable w w->x (loose/tight)
+  ex5-0667 hookdeck.com PUT /destinations/{id}/unarchive w w->x (loose/tight)
+  ex5-0679 hookdeck.com PUT /integrations/{id} w w->x (loose/tight)
+  ex5-0680 hookdeck.com PUT /integrations/{id}/attach/{source_id} w w->x (loose/tight)
+  ex5-0681 hookdeck.com PUT /integrations/{id}/detach/{source_id} w w->x (loose/tight)
+  ex5-0702 hookdeck.com PUT /notifications/webhooks x w->x (loose/tight)
+  ex5-0708 hookdeck.com PUT /organizations/current/api-keys/{id} x w->x (loose/tight)
+  ex5-0759 paddle.com PATCH /client-tokens/{client_token_id} x w->x (loose/tight)
+  ex5-0977 planetscale.com PATCH /organizations/{organization}/databases/{database}/branches/{branch}/keyspaces/{keyspace} w w->x (loose/tight)
+  ex5-0984 planetscale.com PUT /organizations/{organization}/databases/{database}/branches/{branch}/keyspaces/{keyspace}/resizes w w->x (loose/tight)
+  ex5-0988 planetscale.com PATCH /organizations/{organization}/databases/{database}/branches/{branch}/keyspaces/{keyspace}/vschema w w->x (loose/tight)
+  ex5-1037 planetscale.com PATCH /organizations/{organization}/databases/{database}/branches/{branch}/roles/{id} w w->x (loose/tight)
+  ex5-1118 planetscale.com PATCH /organizations/{organization}/databases/{database}/webhooks/{id} x w->x (loose/tight)
+  ex5-1129 planetscale.com PATCH /organizations/{organization}/members/{id} x w->x (loose/tight)
+  ex5-1148 planetscale.com POST /organizations/{organization}/sso/domains x x->w (tight/loose)
+  ex5-1157 planetscale.com POST /organizations/{organization}/teams/{team}/members x w->x (loose/tight)
+  ex5-1176 semaphoreui.com PUT /global-roles/{role_id} x w->x (loose/tight)
+  ex5-1201 semaphoreui.com PUT /project/{project_id}/integrations/{integration_id} w w->x (loose/tight)
+  ex5-1208 semaphoreui.com PUT /project/{project_id}/integrations/{integration_id}/matchers/{matcher_id} w w->x (loose/tight)
+  ex5-1212 semaphoreui.com PUT /project/{project_id}/integrations/{integration_id}/values/{extractvalue_id} w w->x (loose/tight)
+  ex5-1221 semaphoreui.com PUT /project/{project_id}/keys/{key_id} x w->x (loose/tight)
+  ex5-1251 semaphoreui.com POST /project/{project_id}/templates w x->w (tight/loose)
+  ex5-1336 weaviate.io POST /authz/roles/{id}/add-permissions x w->x (loose/tight)
+  ex5-1339 weaviate.io POST /authz/roles/{id}/remove-permissions x w->x (loose/tight)
+
+scratch kept at /home/hamr/PycharmProjects/rwxmap/.claude/scratchpad/exam5-score/work (holds the CLI outputs; delete when done)
+exit 0

@@ -1,19 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { step1, READ_VERBS, SAFE_VERBS } from './step1.js';
+import { step1, floorRead, READ_METHODS, READ_VERBS, SAFE_VERBS } from './step1.js';
 
-test('method rule: GET floors to r with an empty matched list', () => {
-  const v = step1({ method: 'GET', operationId: 'listUsers' });
-  assert.deepEqual(v, { class: 'r', step: 1, rule: 'method', source: 'floor', matched: [] });
+test('floorRead: the read floor verdict, r/method on the floor with an empty matched list', () => {
+  assert.deepEqual(floorRead(), { class: 'r', step: 1, rule: 'method', source: 'floor', matched: [] });
 });
 
-test('method rule: HEAD and OPTIONS also floor to r', () => {
-  const head = step1({ method: 'HEAD', operationId: 'x' });
-  const options = step1({ method: 'OPTIONS', operationId: 'x' });
-  assert.ok(head);
-  assert.ok(options);
-  assert.equal(head.rule, 'method');
-  assert.equal(options.rule, 'method');
+test('step1 returns null for every read-method row (flow.js applies floorRead after the word steps)', () => {
+  assert.deepEqual([...READ_METHODS].sort(), ['GET', 'HEAD', 'OPTIONS', 'QUERY']);
+  for (const method of READ_METHODS) assert.equal(step1({ method, operationId: 'listUsers' }), null, method);
 });
 
 test('read-verb rule: POST with a READ_VERBS lead verb', () => {
@@ -173,7 +168,8 @@ test('D99 guard: an exact match alongside a plural match still claims', () => {
 
 test('D99 guard: does not touch the GET/HEAD/OPTIONS method floor', () => {
   const v = step1({ method: 'GET', operationId: 'checks/list-suites' });
-  assert.deepEqual(v, { class: 'r', step: 1, rule: 'method', source: 'floor', matched: [] });
+  assert.equal(v, null);
+  assert.deepEqual(floorRead(), { class: 'r', step: 1, rule: 'method', source: 'floor', matched: [] });
 });
 
 test('D99 guard: does not touch read-verb-anywhere', () => {

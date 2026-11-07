@@ -1,0 +1,4911 @@
+---
+swagger: '2.0'
+info:
+  title: Semaphore API
+  description: |
+    Semaphore API provides endpoints for managing and interacting with the Semaphore UI.
+    This documentation outlines the available operations and data models.
+  version: "2.16.14"
+
+consumes:
+  - application/json
+produces:
+  - application/json
+  - text/plain; charset=utf-8
+
+tags:
+  - name: authentication
+    description: Authentication, Logout & API Tokens
+  - name: project
+    description: Everything related to a project
+  - name: user
+    description: User-related API
+  - name: integration
+    description: Integration API
+  - name: runner
+    description: Runner management (project and global runners)
+  - name: workflow
+    description: Workflows
+
+schemes:
+  - http
+  - https
+
+basePath: /api
+
+definitions:
+  App:
+    type: object
+
+  Option:
+    type: object
+    properties:
+      key:
+        type: string
+        example: "nav.unpinnedItems"
+      value:
+        type: string
+        example: "[\"dashboard\",\"history\"]"
+
+  Pong:
+    type: string
+    x-example: pong
+
+  Login:
+    type: object
+    properties:
+      auth:
+        type: string
+        description: Username/Email address
+        x-example: user@semaphoreui.com
+      password:
+        type: string
+        format: password
+        description: Password
+
+  LoginMetadata:
+    type: object
+    properties:
+      oidc_providers:
+        type: array
+        description: List of OIDC providers
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              description: ID of the provider, used in the login URL
+              x-example: mysso
+            name:
+              type: string
+              description: Text to show on the login button
+              x-example: Sign in with MySSO
+
+  UserRequest:
+    type: object
+    properties:
+      name:
+        type: string
+        x-example: Integration Test User
+        example: Integration Test User
+      username:
+        type: string
+        x-example: test-user
+        example: test-user
+      email:
+        type: string
+        x-example: test@ansiblesemaphore.test
+        example: test@ansiblesemaphore.test
+      password:
+        type: string
+        format: password
+      alert:
+        type: boolean
+      admin:
+        type: boolean
+      external:
+        type: boolean
+
+  UserPutRequest:
+    type: object
+    properties:
+      name:
+        type: string
+        x-example: Integration Test User2
+        example: Integration Test User2
+      username:
+        type: string
+        x-example: test-user2
+        example: test-user2
+      email:
+        type: string
+        x-example: test2@ansiblesemaphore.test
+        example: test2@ansiblesemaphore.test
+      alert:
+        type: boolean
+      admin:
+        type: boolean
+
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+        minimum: 1
+      name:
+        type: string
+      username:
+        type: string
+      email:
+        type: string
+      created:
+        type: string
+      alert:
+        type: boolean
+      admin:
+        type: boolean
+      external:
+        type: boolean
+
+  GlobalPermissionDefinition:
+    type: object
+    properties:
+      id:
+        type: string
+        example: global.users.manage
+      permission:
+        type: integer
+        description: "Bit value: 1 manage users, 2 manage global roles, 4 manage system settings, 8 read the audit log"
+        example: 1
+      description:
+        type: string
+        example: Manage users
+
+  GlobalRole:
+    type: object
+    properties:
+      id:
+        type: integer
+        minimum: 1
+      slug:
+        type: string
+        example: auditor
+      name:
+        type: string
+        example: Auditor
+      permissions:
+        type: integer
+        description: "Mask of global permission bits: 1 manage users, 2 manage global roles, 4 manage system settings, 8 read the audit log"
+        example: 8
+
+  GlobalRoleRequest:
+    type: object
+    required:
+      - slug
+      - name
+    properties:
+      slug:
+        type: string
+        description: Unique identifier, 1 to 100 letters, digits, '_' or '-'. It cannot change after creation.
+        example: auditor
+      name:
+        type: string
+        example: Auditor
+      permissions:
+        type: integer
+        description: Mask of global permission bits
+        example: 8
+
+  GlobalRoleAssignment:
+    type: object
+    properties:
+      id:
+        type: integer
+        minimum: 1
+      user_id:
+        type: integer
+        minimum: 1
+      role_id:
+        type: integer
+        minimum: 1
+      role_slug:
+        type: string
+        example: auditor
+      role_name:
+        type: string
+        example: Auditor
+      global_permissions:
+        type: integer
+        description: Mask of global permission bits granted by the role
+        example: 8
+
+  EffectiveGlobalPermissions:
+    type: object
+    properties:
+      permissions:
+        type: integer
+        description: Mask of the global permissions the user holds
+        example: 8
+      decisions:
+        type: array
+        items:
+          type: object
+          properties:
+            permission:
+              type: string
+              example: global.audit.read
+            allowed:
+              type: boolean
+            role_id:
+              type: integer
+            role_name:
+              type: string
+
+  ProjectUser:
+    type: object
+    properties:
+      id:
+        type: integer
+        minimum: 1
+      name:
+        type: string
+      username:
+        type: string
+      role:
+        type: string
+        description: "Role slug when the member has exactly one role, otherwise empty"
+        example: manager
+      roles:
+        type: array
+        items:
+          type: string
+        description: "Slugs of all roles of the member. `role` is set only when this list has one role"
+        example: [manager]
+      mapped_roles:
+        type: array
+        readOnly: true
+        description: Roles from IdP group mappings, present only when the member has some. They cannot be changed through this API.
+        items:
+          type: object
+          properties:
+            role:
+              type: string
+            provider:
+              type: string
+            group:
+              type: string
+
+  ProjectInvite:
+    type: object
+    properties:
+      id:
+        type: integer
+        minimum: 1
+      project_id:
+        type: integer
+        minimum: 1
+      user_id:
+        type: integer
+        minimum: 1
+        description: User ID for user-based invites (optional)
+      email:
+        type: string
+        format: email
+        description: Email address for email-based invites (optional)
+      role:
+        type: string
+        enum: [owner, manager, task_runner, guest]
+        example: manager
+      status:
+        type: string
+        enum: [pending, accepted, declined, expired]
+        example: pending
+      inviter_user_id:
+        type: integer
+        minimum: 1
+        description: ID of the user who created the invite
+      created:
+        type: string
+        format: date-time
+        description: When the invite was created
+      expires_at:
+        type: string
+        format: date-time
+        description: When the invite expires (optional)
+      accepted_at:
+        type: string
+        format: date-time
+        description: When the invite was accepted (optional)
+      inviter_user:
+        $ref: "#/definitions/User"
+        description: Details of the user who created the invite
+      user:
+        $ref: "#/definitions/User"
+        description: Details of the invited user (for user-based invites)
+
+  ProjectInviteRequest:
+    type: object
+    properties:
+#      user_id:
+#        type: integer
+#        minimum: 1
+#        description: User ID to invite (use either user_id or email, not both)
+      email:
+        type: string
+        format: email
+        description: Email address to invite (use either user_id or email, not both)
+        x-example: user@example.com
+      role:
+        type: string
+        enum: [owner, manager, task_runner, guest]
+        example: manager
+      expires_at:
+        type: string
+        format: date-time
+        description: When the invite should expire (optional, defaults to 7 days)
+    required:
+      - role
+
+  AcceptInviteRequest:
+    type: object
+    properties:
+      token:
+        type: string
+        description: The invitation token
+        x-example: "a1b2c3d4e5f6..."
+    required:
+      - token
+
+  ProjectBackup:
+    type: object
+    example: {"version":4,"meta":{"name":"homelab","alert":true,"alert_chat":"Test","max_parallel_tasks":0,"type":null},"templates":[{"inventory":"Build","repository":"Demo","environment":"Empty","name":"Build","playbook":"build.yml","app":"ansible","working_directory":".","arguments":"[]","allow_override_args_in_task":false,"description":"Build Job","vault_key":null,"type":"build","start_version":"1.0.0","build_template":null,"view":"Build","autorun":false,"survey_vars":[],"suppress_success_alerts":false,"suppress_error_alerts":false,"cron":"* * * * *"}],"repositories":[{"name":"Demo","git_url":"https://github.com/semaphoreui/semaphore-demo.git","git_branch":"main","ssh_key":"None"}],"keys":[{"name":"None","type":"none"},{"name":"Vault Password","type":"login_password"}],"views":[{"title":"Build","position":0}],"inventories":[{"name":"Build","inventory":"","ssh_key":"None","become_key":"None","type":"static"},{"name":"Dev","inventory":"","ssh_key":"None","become_key":"None","type":"file"},{"name":"Prod","inventory":"","ssh_key":"None","become_key":"None","type":"file"}],"environments":[{"name":"Empty","password":null,"json":"{}","env":null}],"roles":[{"slug":"deployer","name":"Deployer","permissions":129}]}
+    properties:
+      version:
+        type: integer
+        description: Format version of the backup file, 4. Files written by a newer version are refused. A version 2 file is accepted and its roles get the workflow verbs the upgrade gives stored roles. A file of version 3 or older is accepted and its roles and permissions get read_project. A file without a version is accepted only when it carries no roles and no template permissions.
+      meta:
+        type: object
+        properties:
+          name:
+            type: string
+          alert:
+            type: boolean
+          alert_chat:
+            type: string
+          max_parallel_tasks:
+            type: integer
+            minimum: 0
+          type:
+            type: string
+      templates:
+        type: array
+        items:
+          type: object
+          properties:
+            inventory:
+              type: string
+            repository:
+              type: string
+            environment:
+              type: string
+            view:
+              type: string
+            name:
+              type: string
+            playbook:
+              type: string
+            app:
+              type: string
+              example: ansible
+            working_directory:
+              type: string
+              description: >-
+                Repository-relative working directory for Ansible commands. It is
+                valid only for Ansible templates and must stay inside the repository.
+              x-nullable: true
+            arguments:
+              type: string
+            description:
+              type: string
+            allow_override_args_in_task:
+              type: boolean
+            suppress_success_alerts:
+              type: boolean
+            suppress_error_alerts:
+              type: boolean
+            cron:
+              type: string
+            build_template:
+              type: string
+            autorun:
+              type: boolean
+            survey_vars:
+              type: string
+            start_version:
+              type: string
+            type:
+              type: string
+            vault_key:
+              type: string
+            allow_override_branch_in_task:
+              type: boolean
+            roles:
+              type: array
+              description: Template permissions granted to roles, by role slug.
+              items:
+                type: object
+                properties:
+                  slug:
+                    type: string
+                  permissions:
+                    type: integer
+      repositories:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            git_url:
+              type: string
+            git_branch:
+              type: string
+            ssh_key:
+              type: string
+      keys:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            type:
+              type: string
+              enum: [ssh, login_password, none, string]
+      views:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            position:
+              type: integer
+              minimum: 0
+      inventories:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            inventory:
+              type: string
+            ssh_key:
+              type: string
+            become_key:
+              type: string
+            type:
+              type: string
+              enum: [static, static-yaml, file]
+      environments:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            password:
+              type: string
+            json:
+              type: string
+            env:
+              type: string
+      roles:
+        type: array
+        description: Project roles. Template and workflow permissions refer to them by slug.
+        items:
+          type: object
+          properties:
+            slug:
+              type: string
+            name:
+              type: string
+            permissions:
+              type: integer
+      workflows:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+            start_version:
+              type: string
+            survey_vars:
+              type: array
+              items:
+                $ref: "#/definitions/TemplateSurveyVar"
+            nodes:
+              type: array
+              items:
+                $ref: "#/definitions/BackupWorkflowNode"
+            edges:
+              type: array
+              items:
+                $ref: "#/definitions/BackupWorkflowEdge"
+            roles:
+              type: array
+              description: Workflow permissions granted to roles, by role slug.
+              items:
+                type: object
+                properties:
+                  slug:
+                    type: string
+                  permissions:
+                    type: integer
+
+  BackupWorkflowNode:
+    type: object
+    description: A workflow node in a backup. The template is referred to by name, ids of the database are left out.
+    properties:
+      id:
+        type: integer
+        description: Node number inside the workflow, referred to by the edges.
+      template:
+        type: string
+        description: Name of the template a task node runs.
+      kind:
+        type: string
+        enum: [task, approval, note, delay]
+      convergence_mode:
+        type: string
+        enum: [all, any]
+      approval_timeout:
+        type: integer
+      approval_message:
+        type: string
+      task_params:
+        $ref: '#/definitions/BackupTaskParams'
+      note:
+        type: string
+      delay_seconds:
+        type: integer
+      survey_inputs:
+        type: array
+        items:
+          $ref: "#/definitions/WorkflowNodeSurveyInput"
+      position_x:
+        type: integer
+      position_y:
+        type: integer
+
+  BackupTaskParams:
+    type: object
+    description: Task parameters of a workflow node in a backup. The inventory is referred to by name.
+    properties:
+      environment:
+        type: string
+      git_branch:
+        type: string
+      message:
+        type: string
+      version:
+        type: string
+      arguments:
+        type: string
+      inventory_name:
+        type: string
+      params:
+        allOf:
+          - $ref: '#/definitions/AnsibleTaskParams'
+          - $ref: '#/definitions/TerraformTaskParams'
+
+  BackupWorkflowEdge:
+    type: object
+    description: A workflow edge in a backup, between node numbers of the same workflow.
+    properties:
+      source_node_id:
+        type: integer
+      destination_node_id:
+        type: integer
+      condition:
+        type: string
+        enum: [on_success, on_failure, always]
+      input_mode:
+        type: string
+        enum: [by_name, explicit]
+      input_mappings:
+        type: array
+        items:
+          $ref: "#/definitions/WorkflowInputMapping"
+
+  TemplateRolePermission:
+    type: object
+    description: A role grant on one template. The role is addressed by slug.
+    properties:
+      id:
+        type: integer
+      template_id:
+        type: integer
+      project_id:
+        type: integer
+      role_slug:
+        type: string
+      permissions:
+        type: integer
+        description: read_project (128), run_tasks (1) and manage_resources (4). A verb includes read_project, the server adds it.
+
+  WorkflowRolePermission:
+    type: object
+    description: A role grant on one workflow. The role is addressed by slug.
+    properties:
+      id:
+        type: integer
+      workflow_id:
+        type: integer
+      project_id:
+        type: integer
+      role_slug:
+        type: string
+      permissions:
+        type: integer
+        description: read_project (128), run_workflows (16), edit_workflows (32) and approve_workflows (64). A verb includes read_project, the server adds it.
+
+  APIToken:
+    type: object
+    properties:
+      id:
+        type: string
+      created:
+        type: string
+      #        pattern: ^\d{4}-(?:0[0-9]{1}|1[0-2]{1})-[0-9]{2}T\d{2}:\d{2}:\d{2}Z$
+      expired:
+        type: boolean
+      user_id:
+        type: integer
+        minimum: 1
+      name:
+        type: string
+
+  ProjectRequest:
+    type: object
+    properties:
+      name:
+        type: string
+        example: Test
+      alert:
+        type: boolean
+      alert_chat:
+        type: string
+        x-nullable: true
+        example: Test
+      max_parallel_tasks:
+        type: integer
+        minimum: 0
+      type:
+        type: string
+      demo:
+        description: Create Demo project resources?
+        type: boolean
+
+  Project:
+    type: object
+    properties:
+      id:
+        type: integer
+        minimum: 1
+      name:
+        type: string
+        example: Test
+      created:
+        type: string
+      #        pattern: ^\d{4}-(?:0[0-9]{1}|1[0-2]{1})-[0-9]{2}T\d{2}:\d{2}:\d{2}Z$
+      alert:
+        type: boolean
+      alert_chat:
+        type: string
+        x-nullable: true
+        example: Test
+      max_parallel_tasks:
+        type: integer
+        minimum: 0
+      type:
+        type: string
+
+  RestoredProject:
+    allOf:
+      - $ref: "#/definitions/Project"
+      - type: object
+        properties:
+          unassigned_roles:
+            type: array
+            description: >-
+              Roles the restore left for you to decide about. A template or workflow grant to a role that is
+              neither in the file nor a built-in role (reason not_in_file) or a project role whose slug a
+              shared role already holds (reason slug_taken) is not restored. Assign the templates and
+              workflows to a role of this instance yourself.
+            example: []
+            items:
+              type: object
+              properties:
+                slug:
+                  type: string
+                reason:
+                  type: string
+                  enum: [not_in_file, slug_taken]
+                name:
+                  type: string
+                  description: Name of the role in the file, only for slug_taken.
+                permissions:
+                  type: integer
+                  description: Permissions of the role in the file, only for slug_taken.
+                templates:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      permissions:
+                        type: integer
+                workflows:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      permissions:
+                        type: integer
+
+  AccessKeyRequest:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+        x-example: None
+        example: None
+      type:
+        type: string
+        enum: [none, ssh, login_password, string]
+        x-example: none
+      project_id:
+        type: integer
+        minimum: 1
+        x-example: 2
+      override_secret:
+        type: boolean
+      string:
+        type: string
+        description: Value of a key of type `string` — a single secret with no login (a token, an API key). Stored encrypted, never returned.
+        x-example: secret-token
+        example: secret-token
+      login_password:
+        type: object
+        properties:
+          password:
+            type: string
+            x-example: password
+            example: password
+          login:
+            type: string
+            x-example: username
+            example: username
+      ssh:
+        type: object
+        properties:
+          login:
+            type: string
+            x-example: user
+            example: user
+          passphrase:
+            type: string
+            x-example: passphrase
+            example: passphrase
+          private_key:
+            type: string
+            x-example: private key
+            example: private key
+
+  AccessKey:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+        example: Test
+      type:
+        type: string
+        enum: [none, ssh, login_password, string]
+      project_id:
+        type: integer
+
+  EnvironmentSecret:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      type:
+        type: string
+        enum: [env, var]
+
+  EnvironmentSecretRequest:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+        example: Test
+      secret:
+        type: string
+      type:
+        type: string
+        enum: [env, var]
+      operation:
+        type: string
+        enum: [create, update, delete]
+
+  EnvironmentRequest:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      name:
+        type: string
+        example: Test
+      project_id:
+        type: integer
+        minimum: 1
+      password:
+        type: string
+      json:
+        type: string
+        example: '{}'
+      env:
+        type: string
+        example: '{}'
+      secrets:
+        type: array
+        items:
+          $ref: '#/definitions/EnvironmentSecretRequest'
+
+  Environment:
+    type: object
+    properties:
+      id:
+        type: integer
+        minimum: 1
+      name:
+        type: string
+        example: Test
+      project_id:
+        type: integer
+        minimum: 1
+      password:
+        type: string
+      json:
+        type: string
+        example: '{}'
+      env:
+        type: string
+        example: '{}'
+      secrets:
+        type: array
+        items:
+          $ref: '#/definitions/EnvironmentSecret'
+
+  HostConfig:
+    type: object
+    properties:
+      id:
+        type: integer
+      project_id:
+        type: integer
+        minimum: 1
+      type:
+        type: string
+        enum: [host, url]
+        description: host matches an ssh host name, url matches a git URL or prefix
+      host:
+        type: string
+        example: github.com
+        description: an ssh host name, or a git URL/prefix for the url type
+      ssh_key_id:
+        type: integer
+        description: >
+          the credential used to reach the host. A host mapping needs an SSH key;
+          a URL mapping also accepts a login/password, which authenticates over
+          HTTPS.
+        example: 1
+
+  HostConfigRequest:
+    type: object
+    required:
+      - project_id
+      - type
+      - host
+      - ssh_key_id
+    properties:
+      id:
+        type: integer
+        description: required on update, must equal the id in the path
+      project_id:
+        type: integer
+        minimum: 1
+      type:
+        type: string
+        enum: [host, url]
+      host:
+        type: string
+        example: github.com
+      ssh_key_id:
+        type: integer
+        example: 1
+
+  InventoryRequest:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+        example: Test
+      project_id:
+        type: integer
+        minimum: 1
+      inventory:
+        type: string
+      ssh_key_id:
+        type: integer
+        minimum: 1
+      become_key_id:
+        type: integer
+        minimum: 1
+      repository_id:
+        type: integer
+        minimum: 1
+        description: Repository holding the inventory file. Used only by a "file" inventory; for any other type it is dropped and stored as null.
+      type:
+        type: string
+        enum: [static, static-yaml, file, terraform-workspace]
+
+  Inventory:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+        example: Test
+      project_id:
+        type: integer
+      inventory:
+        type: string
+      ssh_key_id:
+        type: integer
+      become_key_id:
+        type: integer
+      repository_id:
+        type: integer
+        x-nullable: true
+        description: Repository holding the inventory file. Set only for a "file" inventory, null otherwise.
+      template_id:
+        type: integer
+        x-nullable: true
+      type:
+        type: string
+        enum: [static, static-yaml, file, terraform-workspace]
+
+  Integration:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+        example: deploy
+      project_id:
+        type: integer
+        minimum: 1
+      template_id:
+        type: integer
+        x-nullable: true
+        description: The task template the integration starts. Exactly one of template_id and workflow_id is set.
+      workflow_id:
+        type: integer
+        x-nullable: true
+        description: The workflow the integration starts instead of a template (Pro). Extracted values become the answers to the workflow's survey.
+      auth_method:
+        type: string
+        example: ""
+        enum: ['', token, hmac, github, gitlab, bitbucket]
+      auth_secret_id:
+        type: integer
+        x-nullable: true
+      auth_header:
+        type: string
+      searchable:
+        type: boolean
+      task_params:
+        $ref: '#/definitions/TaskPrams'
+
+  IntegrationRequest:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+        example: deploy
+      project_id:
+        type: integer
+      template_id:
+        type: integer
+        x-nullable: true
+        description: The task template to start. Exactly one of template_id and workflow_id must be set.
+      workflow_id:
+        type: integer
+        x-nullable: true
+        description: The workflow to start instead of a template (Pro). task_params do not apply to a workflow and are dropped.
+      auth_method:
+        type: string
+        example: ""
+        enum: ['', token, hmac, github, gitlab, bitbucket]
+      auth_secret_id:
+        type: integer
+        x-nullable: true
+      auth_header:
+        type: string
+      searchable:
+        type: boolean
+      task_params:
+        $ref: '#/definitions/TaskPrams'
+
+  IntegrationExtractValueRequest:
+    type: object
+    properties:
+      name:
+        type: string
+        example: deploy
+      value_source:
+        type: string
+        enum: [body, header]
+      body_data_type:
+        type: string
+        enum: [json, xml, string]
+      key:
+        type: string
+        example: key
+      variable:
+        type: string
+        example: variable
+      variable_type:
+        type: string
+        enum: [environment, task]
+
+  IntegrationExtractValue:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+        example: extract this value
+      value_source:
+        type: string
+        enum: [body, header]
+      body_data_type:
+        type: string
+        enum: [json, xml, string]
+      key:
+        type: string
+        example: key
+      variable:
+        type: string
+        example: variable
+      variable_type:
+        type: string
+        enum: [environment, task]
+      integration_id:
+        type: integer
+
+  IntegrationMatcherRequest:
+    type: object
+    properties:
+      name:
+        type: string
+        example: deploy
+      match_type:
+        type: string
+        enum: [body, header]
+      method:
+        type: string
+        enum: [equals, unequals, contains]
+      body_data_type:
+        type: string
+        enum: [json, xml, string]
+      key:
+        type: string
+        example: key
+      value:
+        type: string
+        example: value
+
+  IntegrationMatcher:
+    type: object
+    properties:
+      id:
+        type: integer
+      integration_id:
+        type: integer
+      name:
+        type: string
+        example: deploy
+      match_type:
+        type: string
+        enum: [body, header]
+      method:
+        type: string
+        enum: [equals, unequals, contains]
+      body_data_type:
+        type: string
+        enum: [json, xml, string]
+      key:
+        type: string
+        example: key
+      value:
+        type: string
+        example: value
+
+  IntegrationAlias:
+    type: object
+    properties:
+      id:
+        type: integer
+      url:
+        type: string
+
+  RepositoryRequest:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+        example: Test
+      project_id:
+        type: integer
+      git_url:
+        type: string
+        example: git@example.com
+      git_branch:
+        type: string
+        example: master
+      ssh_key_id:
+        type: integer
+      monorepo:
+        type: boolean
+        description: Share one checkout of this repository between all templates instead of cloning it per template. Templates of a monorepo can not have a branch of their own or let tasks override the branch or commit.
+        example: false
+
+  Repository:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+        example: Test
+      project_id:
+        type: integer
+      git_url:
+        type: string
+        example: git@example.com
+      git_branch:
+        type: string
+        example: master
+      ssh_key_id:
+        type: integer
+      monorepo:
+        type: boolean
+        description: Share one checkout of this repository between all templates instead of cloning it per template. Templates of a monorepo can not have a branch of their own or let tasks override the branch or commit.
+        example: false
+
+  Task:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 23
+      template_id:
+        type: integer
+      status:
+        type: string
+      playbook:
+        type: string
+      environment:
+        type: string
+      secret:
+        type: string
+      arguments:
+        type: string
+      git_branch:
+        type: string
+      message:
+        type: string
+      inventory_id:
+        type: integer
+      params:
+        allOf:
+          - $ref: '#/definitions/AnsibleTaskParams'
+          - $ref: '#/definitions/TerraformTaskParams'
+      limit:
+        type: string
+      workflow_run_id:
+        type: integer
+        description: Set by the server when the task is a node of a workflow run. Ignored on create.
+      workflow_node_id:
+        type: integer
+        description: Node of the workflow revision that started the task. Ignored on create.
+      workflow_template_id:
+        type: integer
+        description: Workflow the run of workflow_run_id belongs to. Resolved by the server before the task starts, not stored. Ignored on create.
+      workflow_version:
+        type: string
+        description: Version of the workflow run the task belongs to. Resolved by the server before the task starts, not stored. Ignored on create.
+      artifacts:
+        type: string
+        description: >
+          Outputs of a workflow task, as a JSON document in a string:
+          {"values": {"<name>": <any JSON value>}, "skipped": {"<name>": "<reason>"}}.
+          Set by the server after the task succeeded with outputs; reasons are sensitive, too_large,
+          invalid_name and limit. Ignored on create.
+
+  AnsibleTaskParams:
+    type: object
+    properties:
+      debug:
+        type: boolean
+      debug_level:
+        type: integer
+      dry_run:
+        type: boolean
+      diff:
+        type: boolean
+      limit:
+        type: array
+        items:
+          type: string
+      tags:
+        type: array
+        items:
+          type: string
+      skip_tags:
+        type: array
+        items:
+          type: string
+      skip_galaxy_install:
+        type: boolean
+
+  TerraformTaskParams:
+    type: object
+    properties:
+      plan:
+        type: boolean
+      destroy:
+        type: boolean
+      auto_approve:
+        type: boolean
+      upgrade:
+        type: boolean
+      reconfigure:
+        type: boolean
+
+  TaskPrams:
+    type: object
+    properties:
+      environment:
+        type: string
+      git_branch:
+        type: string
+      message:
+        type: string
+#      inventory_id:
+#        type: integer
+#        x-nullable: true
+      arguments:
+        type: string
+      params:
+        allOf:
+          - $ref: '#/definitions/AnsibleTaskParams'
+          - $ref: '#/definitions/TerraformTaskParams'
+
+  TaskOutput:
+    type: object
+    properties:
+      task_id:
+        type: integer
+        example: 23
+      time:
+        type: string
+        format: date-time
+      output:
+        type: string
+
+  TemplateRequest:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      project_id:
+        type: integer
+        minimum: 1
+      inventory_id:
+        type: integer
+        minimum: 1
+      repository_id:
+        type: integer
+        minimum: 1
+      environment_id:
+        type: integer
+        minimum: 1
+      environment_ids:
+        type: array
+        items:
+          type: integer
+      view_id:
+        type: integer
+        minimum: 1
+      vaults:
+        type: array
+        items:
+          $ref: '#/definitions/TemplateVault'
+      name:
+        type: string
+        example: Test
+      playbook:
+        type: string
+        example: test.yml
+      working_directory:
+        type: string
+        example: .
+        description: >-
+          Repository-relative working directory for Ansible commands. It is
+          valid only for Ansible templates and must stay inside the repository.
+        x-nullable: true
+      arguments:
+        type: string
+        example: '[]'
+      description:
+        type: string
+        example: Hello, World!
+      allow_override_args_in_task:
+        type: boolean
+        example: false
+      limit:
+        type: string
+        example: ''
+      suppress_success_alerts:
+        type: boolean
+      suppress_error_alerts:
+        type: boolean
+      app:
+        type: string
+        example: ansible
+      git_branch:
+        type: string
+        example: main
+      survey_vars:
+        type: array
+        items:
+          $ref: "#/definitions/TemplateSurveyVar"
+      type:
+        type: string
+        enum: ["", build, deploy]
+      start_version:
+        type: string
+      build_template_id:
+        type: integer
+      autorun:
+        type: boolean
+      task_params:
+        $ref: '#/definitions/TaskPrams'
+
+  Template:
+    type: object
+    properties:
+      id:
+        type: integer
+        minimum: 1
+      project_id:
+        type: integer
+        minimum: 1
+      inventory_id:
+        type: integer
+        minimum: 1
+      repository_id:
+        type: integer
+      environment_id:
+        type: integer
+        minimum: 1
+      environment_ids:
+        type: array
+        items:
+          type: integer
+      view_id:
+        type: integer
+        minimum: 1
+      name:
+        type: string
+        example: Test
+      playbook:
+        type: string
+        example: test.yml
+      working_directory:
+        type: string
+        description: >-
+          Repository-relative working directory for Ansible commands. It is
+          valid only for Ansible templates and must stay inside the repository.
+        x-nullable: true
+      arguments:
+        type: string
+        example: '[]'
+      description:
+        type: string
+        example: Hello, World!
+      allow_override_args_in_task:
+        type: boolean
+        example: false
+      suppress_success_alerts:
+        type: boolean
+      suppress_error_alerts:
+        type: boolean
+      app:
+        type: string
+      git_branch:
+        type: string
+        example: main
+      type:
+        type: string
+        enum: ["", build, deploy]
+      start_version:
+        type: string
+      build_template_id:
+        type: integer
+      autorun:
+        type: boolean
+      survey_vars:
+        type: array
+        items:
+          $ref: "#/definitions/TemplateSurveyVar"
+      vaults:
+        type: array
+        items:
+          $ref: "#/definitions/TemplateVault"
+      task_params:
+        $ref: '#/definitions/TaskPrams'
+      executor_image:
+        type: string
+        description: >-
+          Container image used to run the task by the Docker and Kubernetes runner
+          executors. Empty means the image configured on the runner is used.
+        example: semaphoreui/job:latest
+
+  TemplateSurveyVar:
+    type: object
+    properties:
+      name:
+        type: string
+      title:
+        type: string
+      description:
+        type: string
+      type:
+        type: string
+        enum: ["", int, enum, select, secret, text] # String => "", Integer => "int", Text (multiline) => "text"
+        example: int
+      target:
+        type: string
+        enum: ["", env] # CLI (extra-vars / -var / argument) => "", Environment variable => "env"
+        example: env
+      required:
+        type: boolean
+      values:
+        type: array
+        items:
+          $ref: "#/definitions/TemplateSurveyVarValue"
+      default_value:
+        description: A string, or an array of strings for a select variable.
+        x-nullable: true
+
+  TemplateSurveyVarValue:
+    type: object
+    properties:
+      name:
+        type: string
+      value:
+        type: string
+
+  TemplateVault:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+        example: default
+      type:
+        type: string
+        enum: [password, script]
+        example: script
+      vault_key_id:
+        type: integer
+      script:
+        type: string
+        example: path/to/script-client.py
+
+  ScheduleRequest:
+    type: object
+    properties:
+      id:
+        type: integer
+      cron_format:
+        type: string
+        x-example: "* * * 1 *"
+        example: "* * * 1 *"
+      project_id:
+        type: integer
+      template_id:
+        type: integer
+      name:
+        type: string
+      active:
+        type: boolean
+      run_at:
+        type: string
+        format: date-time
+      type:
+        type: string
+        enum: ['', 'run_at']
+      task_params:
+        $ref: '#/definitions/TaskPrams'
+
+  Schedule:
+    type: object
+    properties:
+      id:
+        type: integer
+      cron_format:
+        type: string
+      project_id:
+        type: integer
+      template_id:
+        type: integer
+      name:
+        type: string
+      active:
+        type: boolean
+      run_at:
+        type: string
+        format: date-time
+      type:
+        type: string
+        enum: ['', 'run_at']
+      task_params:
+        $ref: '#/definitions/TaskPrams'
+
+  ViewRequest:
+    type: object
+    properties:
+      id:
+        type: integer
+        minimum: 1
+      title:
+        type: string
+        example: Test
+      project_id:
+        type: integer
+        minimum: 1
+      position:
+        type: integer
+        minimum: 1
+  View:
+    type: object
+    properties:
+      id:
+        type: integer
+      title:
+        type: string
+      project_id:
+        type: integer
+      position:
+        type: integer
+      hidden:
+        type: boolean
+      type:
+        type: string
+        enum: ["", all]
+      sort_column:
+        type: string
+        enum: [name]
+      sort_reverse:
+        type: boolean
+
+  Runner:
+    type: object
+    properties:
+      id:
+        type: integer
+        readOnly: true
+      project_id:
+        type: integer
+        description: Owning project. Null for global runners.
+        x-nullable: true
+      name:
+        type: string
+      webhook:
+        type: string
+        description: URL called by the runner to report task events.
+      max_parallel_tasks:
+        type: integer
+      active:
+        type: boolean
+      is_default:
+        type: boolean
+      tags:
+        type: array
+        x-nullable: true
+        items:
+          type: string
+      touched:
+        type: string
+        format: date-time
+        description: Last time the runner contacted the server.
+        x-nullable: true
+      cleaning_requested:
+        type: string
+        format: date-time
+        x-nullable: true
+      registered:
+        type: boolean
+        description: Whether the runner has been registered (has an auth token).
+
+  RunnerRequest:
+    type: object
+    properties:
+      project_id:
+        type: integer
+        description: Required for project runners and must match the URL project. Ignored for global runners.
+      name:
+        type: string
+      webhook:
+        type: string
+      max_parallel_tasks:
+        type: integer
+      active:
+        type: boolean
+      tags:
+        type: array
+        items:
+          type: string
+      registered:
+        type: boolean
+        description: >
+          Defaults to true. When false, the runner is created with no credentials
+          at all (no auth token and no registration token) and stays inactive. A
+          one-time registration token must then be generated for it (see the
+          registration-token endpoint) and used to register the runner. Useful for
+          tools like Terraform that create the runner up front.
+
+  RunnerWithToken:
+    allOf:
+      - $ref: "#/definitions/Runner"
+      - type: object
+        properties:
+          token:
+            type: string
+            description: Token the runner uses to authenticate.
+          private_key:
+            type: string
+            description: Generated private key, returned only when the server creates the key pair.
+
+  RunnerActive:
+    type: object
+    properties:
+      active:
+        type: boolean
+
+  RunnerRegistrationToken:
+    type: object
+    properties:
+      registration_token:
+        type: string
+        description: One-time, short-lived token used to register the runner.
+      runner_id:
+        type: integer
+        readOnly: true
+      project_id:
+        type: integer
+        description: Owning project. Null for global runners.
+        x-nullable: true
+
+  RunnerTag:
+    type: object
+    properties:
+      tag:
+        type: string
+      number_of_runners:
+        type: integer
+
+  Event:
+    type: object
+    properties:
+      project_id:
+        type: integer
+      user_id:
+        type: integer
+      object_id:
+        type: integer
+      object_type:
+        type: string
+      description:
+        type: string
+
+  InfoType:
+    type: object
+    properties:
+      version:
+        type: string
+      ansible:
+        type: string
+      web_host:
+        type: string
+      use_remote_runner:
+        type: boolean
+      auth_methods:
+        type: object
+      git_client:
+        type: string
+      schedule_timezone:
+        type: string
+      features:
+        type: object
+
+  ClusterTaskRecord:
+    type: object
+    properties:
+      task_id:
+        type: integer
+      project_id:
+        type: integer
+      template_id:
+        type: integer
+      status:
+        type: string
+      runner_id:
+        type: integer
+      username:
+        type: string
+      alias:
+        type: string
+      node_id:
+        type: string
+        description: owning node, empty if unknown
+
+  WorkflowNode:
+    type: object
+    properties:
+      id:
+        type: integer
+      workflow_template_id:
+        type: integer
+      template_id:
+        type: integer
+      kind:
+        type: string
+        enum: [task, approval, note, delay]
+      convergence_mode:
+        type: string
+        enum: [all, any]
+      approval_timeout:
+        type: integer
+      approval_message:
+        type: string
+      delay_seconds:
+        type: integer
+        minimum: 1
+        description: Number of seconds to wait before continuing (delay kind only).
+      task_params:
+        $ref: '#/definitions/TaskPrams'
+      survey_inputs:
+        type: array
+        description: >-
+          Task nodes only. Feeds survey variables of the node's template from the workflow's
+          survey variables (the answers the run was started with). A workflow value reaches a
+          variable only through such a binding, whatever the names. When several sources offer
+          a value for one variable: explicit edge mapping, then workflow variable, then by-name
+          edge delivery, then the node's static value, then the variable's default.
+        items:
+          $ref: "#/definitions/WorkflowNodeSurveyInput"
+
+  WorkflowEdge:
+    type: object
+    properties:
+      id:
+        type: integer
+      workflow_template_id:
+        type: integer
+      source_node_id:
+        type: integer
+      destination_node_id:
+        type: integer
+      condition:
+        type: string
+        enum: [on_success, on_failure, always]
+      input_mode:
+        type: string
+        enum: [by_name, explicit]
+        description: >
+          How the outputs of the source node feed the survey variables of the destination task node.
+          by_name (default) delivers every output whose name equals a non-secret survey variable;
+          explicit delivers only the pairs listed in input_mappings. Allowed only on an edge whose
+          destination is a task node.
+      input_mappings:
+        type: array
+        description: Pairs delivered in explicit mode. An empty list means the edge passes nothing.
+        items:
+          $ref: "#/definitions/WorkflowInputMapping"
+
+  WorkflowNodeSurveyInput:
+    type: object
+    required:
+      - var
+      - workflow_var
+    properties:
+      var:
+        type: string
+        description: Non-secret survey variable of the node's template.
+      workflow_var:
+        type: string
+        description: Non-secret survey variable of the workflow whose value the run collected.
+
+  WorkflowInputMapping:
+    type: object
+    required: [var, key]
+    properties:
+      var:
+        type: string
+        description: Name of a non-secret survey variable of the destination template.
+      key:
+        type: string
+        description: Name of a top-level output of the source node.
+        pattern: '^[A-Za-z_][A-Za-z0-9_-]*$'
+
+  WorkflowTemplate:
+    type: object
+    properties:
+      id:
+        type: integer
+      project_id:
+        type: integer
+      name:
+        type: string
+      description:
+        type: string
+      permissions:
+        type: integer
+        description: What the caller may do with this workflow, the project verbs plus the grants on it (read-only).
+      revision_id:
+        type: integer
+        description: Revision the nodes and edges were read from (read-only).
+      revision:
+        type: integer
+        description: Ordinal of that revision within the workflow (read-only).
+      survey_vars:
+        type: array
+        description: >-
+          Survey asked when a run is started (the same shape as a template's survey; a secret
+          type is rejected). Stored with the graph revision, so every run knows the survey it
+          answered.
+        items:
+          $ref: "#/definitions/TemplateSurveyVar"
+      nodes:
+        type: array
+        items:
+          $ref: "#/definitions/WorkflowNode"
+      edges:
+        type: array
+        items:
+          $ref: "#/definitions/WorkflowEdge"
+
+  WorkflowRunRequest:
+    type: object
+    description: >-
+      Body of "Run workflow"; optional. The answers to the workflow's survey. The server applies
+      the survey defaults, rejects the start with a validation error when a required variable has
+      no value or a value does not fit its type, and drops keys that are not survey variables.
+    properties:
+      environment:
+        type: object
+        description: Survey variable name → value (a select variable takes a list of strings).
+        additionalProperties: true
+
+  WorkflowRun:
+    type: object
+    properties:
+      id:
+        type: integer
+      project_id:
+        type: integer
+      workflow_template_id:
+        type: integer
+      revision_id:
+        type: integer
+        description: Graph revision the run executes; edits of the workflow do not affect it.
+      status:
+        type: string
+        enum: [running, success, failed, stopped, approval]
+      environment:
+        type: object
+        description: >-
+          Survey answers the run was started with, after defaults and type checks (read-only).
+          Absent for a workflow without a survey. Never holds a secret.
+        additionalProperties: true
+      start:
+        type: string
+        format: date-time
+      end:
+        type: string
+        format: date-time
+      root_task_id:
+        type: integer
+
+  WorkflowApproval:
+    type: object
+    properties:
+      id:
+        type: integer
+      project_id:
+        type: integer
+      workflow_run_id:
+        type: integer
+      workflow_node_id:
+        type: integer
+      status:
+        type: string
+        enum: [pending, approved, rejected]
+      created:
+        type: string
+        format: date-time
+      resolved:
+        type: string
+        format: date-time
+      resolved_by_user_id:
+        type: integer
+
+  WorkflowNodeRunStatus:
+    type: object
+    properties:
+      node:
+        $ref: "#/definitions/WorkflowNode"
+      task:
+        $ref: "#/definitions/Task"
+      approval:
+        $ref: "#/definitions/WorkflowApproval"
+
+  WorkflowRunDetails:
+    type: object
+    properties:
+      run:
+        $ref: "#/definitions/WorkflowRun"
+      workflow_name:
+        type: string
+      revision_id:
+        type: integer
+      revision:
+        type: integer
+      nodes:
+        type: array
+        items:
+          $ref: "#/definitions/WorkflowNodeRunStatus"
+      edges:
+        type: array
+        items:
+          $ref: "#/definitions/WorkflowEdge"
+
+  WorkflowRevision:
+    type: object
+    properties:
+      id:
+        type: integer
+      project_id:
+        type: integer
+      workflow_template_id:
+        type: integer
+      number:
+        type: integer
+      created:
+        type: string
+        format: date-time
+      created_by_user_id:
+        type: integer
+      has_runs:
+        type: boolean
+        description: At least one run pins this revision, so it survives later saves.
+      survey_vars:
+        type: array
+        description: Survey of this revision (see WorkflowTemplate.survey_vars).
+        items:
+          $ref: "#/definitions/TemplateSurveyVar"
+
+  WorkflowApprovalResolveRequest:
+    type: object
+    required:
+      - status
+    properties:
+      status:
+        type: string
+        enum: [approved, rejected]
+
+securityDefinitions:
+  cookie:
+    type: apiKey
+    name: Cookie
+    in: header
+  bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+
+security:
+  - bearer: []
+  - cookie: []
+
+parameters:
+  project_id:
+    name: project_id
+    description: Project ID
+    in: path
+    type: integer
+    required: true
+    x-example: 1
+  host_config_id:
+    name: host_config_id
+    description: Host config ID
+    in: path
+    type: integer
+    required: true
+    x-example: 21
+  revision_id:
+    name: revision_id
+    description: workflow revision ID
+    in: path
+    type: integer
+    required: true
+    x-example: 22
+  user_id:
+    name: user_id
+    description: User ID
+    in: path
+    type: integer
+    required: true
+    x-example: 2
+  assignment_id:
+    name: assignment_id
+    description: Global role assignment ID
+    in: path
+    type: integer
+    required: true
+    x-example: 23
+  role_id:
+    name: role_id
+    description: Global role ID
+    in: path
+    type: integer
+    required: true
+    x-example: 24
+  key_id:
+    name: key_id
+    description: key ID
+    in: path
+    type: integer
+    required: true
+    x-example: 3
+  repository_id:
+    name: repository_id
+    description: repository ID
+    in: path
+    type: integer
+    required: true
+    x-example: 4
+  inventory_id:
+    name: inventory_id
+    description: inventory ID
+    in: path
+    type: integer
+    required: true
+    x-example: 5
+  environment_id:
+    name: environment_id
+    description: environment ID
+    in: path
+    type: integer
+    required: true
+    x-example: 6
+  template_id:
+    name: template_id
+    description: template ID
+    in: path
+    type: integer
+    required: true
+    x-example: 7
+  workflow_id:
+    name: workflow_id
+    description: workflow template ID
+    in: path
+    type: integer
+    required: true
+    x-example: 18
+  perm_id:
+    name: perm_id
+    description: role grant ID
+    in: path
+    type: integer
+    required: true
+    x-example: 25
+  run_id:
+    name: run_id
+    description: workflow run ID
+    in: path
+    type: integer
+    required: true
+    x-example: 19
+  node_id:
+    name: node_id
+    description: workflow node ID
+    in: path
+    type: integer
+    required: true
+    x-example: 20
+  task_id:
+    name: task_id
+    description: task ID
+    in: path
+    type: integer
+    required: true
+    x-example: 8
+  schedule_id:
+    name: schedule_id
+    description: schedule ID
+    in: path
+    type: integer
+    required: true
+    x-example: 9
+  view_id:
+    name: view_id
+    description: view ID
+    in: path
+    type: integer
+    required: true
+    x-example: 10
+  integration_id:
+    name: integration_id
+    description: integration ID
+    in: path
+    type: integer
+    required: true
+    x-example: 11
+  extractvalue_id:
+    name: extractvalue_id
+    description: extractValue ID
+    in: path
+    type: integer
+    required: true
+    x-example: 12
+  matcher_id:
+    name: matcher_id
+    description: matcher ID
+    in: path
+    type: integer
+    required: true
+    x-example: 13
+  alias_id:
+    name: alias_id
+    description: Integration Alias ID
+    in: path
+    type: integer
+    required: true
+    x-example: 15
+  invite_id:
+    name: invite_id
+    description: Invite ID
+    in: path
+    type: integer
+    required: true
+    x-example: 14
+  runner_id:
+    name: runner_id
+    description: Project runner ID
+    in: path
+    type: integer
+    required: true
+    x-example: 16
+  global_runner_id:
+    name: runner_id
+    description: Global runner ID
+    in: path
+    type: integer
+    required: true
+    x-example: 17
+
+paths:
+  /ping:
+    get:
+      summary: PING test
+      produces:
+        - text/plain
+      security: []   # No security
+      responses:
+        200:
+          description: Successful "PONG" reply
+          schema:
+            $ref: "#/definitions/Pong"
+          headers:
+            content-type:
+              type: string
+              x-example: text/plain; charset=utf-8
+
+  /ws:
+    get:
+      summary: Websocket handler
+      schemes:
+        - ws
+        - wss
+      responses:
+        200:
+          description: OK
+        401:
+          description: not authenticated
+
+  /info:
+    get:
+      summary: Fetches information about semaphore
+      description: you must be authenticated to use this
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: "#/definitions/InfoType"
+
+  # Cluster Dashboard (admin only)
+#  /cluster:
+#    get:
+#      tags:
+#        - cluster
+#      summary: Fetches cluster (HA) status
+#      description: >
+#        Admin only. Returns HA mode, this node's ID, cluster membership and
+#        Redis stats. When HA is disabled only ha_enabled is returned.
+#      responses:
+#        200:
+#          description: Cluster status
+#          schema:
+#            type: object
+#            properties:
+#              ha_enabled:
+#                type: boolean
+#              node_id:
+#                type: string
+#              nodes:
+#                type: array
+#                items:
+#                  type: object
+#                  properties:
+#                    node_id:
+#                      type: string
+#                    alive:
+#                      type: boolean
+#                    is_self:
+#                      type: boolean
+#                    last_heartbeat:
+#                      type: string
+#                      format: date-time
+#                    started_at:
+#                      type: string
+#                      format: date-time
+#                    version:
+#                      type: string
+#              redis:
+#                type: object
+#                properties:
+#                  addr:
+#                    type: string
+#                  connected:
+#                    type: boolean
+#                  version:
+#                    type: string
+#                  used_memory:
+#                    type: string
+#                  used_memory_bytes:
+#                    type: integer
+#                    format: int64
+#                  total_keys:
+#                    type: integer
+#                  key_groups:
+#                    type: object
+#                    additionalProperties:
+#                      type: integer
+#
+#  /cluster/tasks:
+#    get:
+#      tags:
+#        - cluster
+#      summary: Fetches a snapshot of task pool records
+#      description: >
+#        Admin only. Returns queued, running and active tasks, aliases and
+#        claims kept by the task state store (Redis in HA mode, in-memory
+#        otherwise).
+#      responses:
+#        200:
+#          description: Task state snapshot
+#          schema:
+#            type: object
+#            properties:
+#              queue:
+#                type: array
+#                items:
+#                  $ref: "#/definitions/ClusterTaskRecord"
+#              running:
+#                type: array
+#                items:
+#                  $ref: "#/definitions/ClusterTaskRecord"
+#              active_by_project:
+#                type: object
+#                additionalProperties:
+#                  type: array
+#                  items:
+#                    $ref: "#/definitions/ClusterTaskRecord"
+#              aliases:
+#                type: object
+#                additionalProperties:
+#                  type: integer
+#              claims:
+#                type: array
+#                items:
+#                  type: integer
+#    delete:
+#      tags:
+#        - cluster
+#      summary: Clears task records from the backend
+#      description: >
+#        Admin only. Maintenance action to recover from a stuck cluster state.
+#        The request body scope selects which record groups to clear.
+#      parameters:
+#        - name: Clear Scope
+#          in: body
+#          required: true
+#          schema:
+#            type: object
+#            properties:
+#              scope:
+#                type: object
+#                properties:
+#                  queue:
+#                    type: boolean
+#                  running:
+#                    type: boolean
+#                  active:
+#                    type: boolean
+#                  aliases:
+#                    type: boolean
+#                  claims:
+#                    type: boolean
+#                  runtime_fields:
+#                    type: boolean
+#      responses:
+#        200:
+#          description: Clear result
+#          schema:
+#            type: object
+#            properties:
+#              deleted_keys:
+#                type: integer
+#              per_group:
+#                type: object
+#                additionalProperties:
+#                  type: integer
+#        400:
+#          description: missing body or no record groups selected
+
+  # Authentication
+  /auth/login:
+    get:
+      tags:
+        - authentication
+      summary: Fetches login metadata
+      description: Fetches metadata for login, such as available OIDC providers
+      security: []
+      responses:
+        200:
+          description: Login metadata
+          schema:
+            $ref: "#/definitions/LoginMetadata"
+    post:
+      tags:
+        - authentication
+      summary: Performs Login
+      description: Upon success you will be logged in
+      security: []   # No security
+      parameters:
+        - name: Login Body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Login'
+      responses:
+        204:
+          description: You are logged in
+        400:
+          description: something in body is missing / is invalid
+
+  /auth/logout:
+    post:
+      tags:
+        - authentication
+      summary: Destroys current session
+      responses:
+        204:
+          description: Your session was successfully nuked
+
+  /auth/oidc/{provider_id}/login:
+    parameters:
+      - name: provider_id
+        in: path
+        type: string
+        required: true
+        x-example: "mysso"
+    get:
+      tags:
+        - authentication
+      summary: Begin OIDC authentication flow and redirect to OIDC provider
+      description: The user agent is redirected to this endpoint when chosing to sign in via OIDC
+      responses:
+        302:
+          description: Redirection to the OIDC provider on success, or to the login page on error
+
+  /auth/oidc/{provider_id}/redirect:
+    parameters:
+      - name: provider_id
+        in: path
+        type: string
+        required: true
+        x-example: "mysso"
+    get:
+      tags:
+        - authentication
+      summary: Finish OIDC authentication flow, upon succes you will be logged in
+      description: The user agent is redirected here by the OIDC provider to complete authentication
+      responses:
+        302:
+          description: Redirection to the Semaphore root URL on success, or to the login page on error
+
+  # User Tokens
+  /user/:
+    get:
+      tags:
+        - user
+      summary: Fetch logged in user
+      responses:
+        200:
+          description: User
+          schema:
+            $ref: "#/definitions/User"
+
+  /user/tokens:
+    get:
+      tags:
+        - authentication
+        - user
+      summary: Fetch API tokens for user
+      responses:
+        200:
+          description: API Tokens
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/APIToken"
+    post:
+      tags:
+        - authentication
+        - user
+      summary: Create an API token
+      parameters:
+        - name: body
+          in: body
+          required: false
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "my CI token"
+      responses:
+        201:
+          description: API Token
+          schema:
+            $ref: "#/definitions/APIToken"
+
+  /user/tokens/{api_token_id}:
+    parameters:
+      - name: api_token_id
+        in: path
+        type: string
+        required: true
+        x-example: "kwofd61g93-yuqvex8efmhjkgnbxlo8mp1tin6spyhu="
+    delete:
+      tags:
+        - authentication
+        - user
+      summary: Expires API token
+      responses:
+        204:
+          description: Expired API Token
+
+  /user/options:
+    get:
+      tags:
+        - user
+      summary: Fetches the current user's stored options
+      description: >
+        Returns the per-user options of the authenticated user as a
+        key/value map. Keys are returned without the internal
+        `user<id>.` namespace prefix. Returns an empty object when the
+        user has no stored options.
+      responses:
+        200:
+          description: User options
+          schema:
+            type: object
+            additionalProperties:
+              type: string
+            example:
+              nav.unpinnedItems: "[\"dashboard\",\"history\"]"
+    post:
+      tags:
+        - user
+      summary: Stores a single option for the current user
+      description: >
+        Stores one option for the authenticated user. The `key` is an
+        allowlisted suffix (e.g. `nav.unpinnedItems`); the server prepends
+        the user namespace, so a request can never read or write another
+        user's options or a global option. Unknown keys are rejected
+        with 400.
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/Option"
+      responses:
+        200:
+          description: Stored option
+          schema:
+            $ref: "#/definitions/Option"
+        400:
+          description: Unknown user option key
+
+  # User Profiles
+  /users:
+    get:
+      tags:
+        - user
+      summary: Fetches all users
+      responses:
+        200:
+          description: Users
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User"
+    post:
+      tags:
+        - user
+      summary: Creates a user
+      consumes:
+        - application/json
+      parameters:
+        - name: User
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/UserRequest"
+      responses:
+        400:
+          description: User creation failed
+        201:
+          description: User created
+          schema:
+            $ref: "#/definitions/User"
+
+  /users/{user_id}/:
+    parameters:
+      - $ref: "#/parameters/user_id"
+    get:
+      tags:
+        - user
+      summary: Fetches a user profile
+      responses:
+        200:
+          description: User profile
+          schema:
+            $ref: "#/definitions/User"
+    put:
+      tags:
+        - user
+      summary: Updates user details
+      consumes:
+        - application/json
+      parameters:
+        - name: User
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/UserPutRequest"
+      responses:
+        204:
+          description: User Updated
+
+    delete:
+      tags:
+        - user
+      summary: Deletes user
+      responses:
+        204:
+          description: User deleted
+
+  /users/{user_id}/password:
+    parameters:
+      - $ref: "#/parameters/user_id"
+    post:
+      tags:
+        - user
+      summary: Updates user password
+      consumes:
+        - application/json
+      parameters:
+        - name: Password
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              password:
+                type: string
+                format: password
+      responses:
+        204:
+          description: Password updated
+
+  /users/{user_id}/global-roles:
+    parameters:
+      - $ref: "#/parameters/user_id"
+    get:
+      tags:
+        - user
+      summary: Lists the global roles assigned to the user
+      description: Requires the global permission "Can manage global roles".
+      responses:
+        200:
+          description: Global role assignments
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/GlobalRoleAssignment"
+    post:
+      tags:
+        - user
+      summary: Assigns a global role to the user
+      description: Requires the global permission "Can manage global roles". Only a global role can be assigned.
+      consumes:
+        - application/json
+      parameters:
+        - name: Assignment
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - role_id
+            properties:
+              role_id:
+                type: integer
+                minimum: 1
+                example: 1
+      responses:
+        201:
+          description: Global role assigned
+          schema:
+            $ref: "#/definitions/GlobalRoleAssignment"
+        400:
+          description: Unknown global role or the user already holds it
+
+  /users/{user_id}/global-roles/{assignment_id}:
+    parameters:
+      - $ref: "#/parameters/user_id"
+      - $ref: "#/parameters/assignment_id"
+    delete:
+      tags:
+        - user
+      summary: Removes a global role from the user
+      description: Refused when the user is the last one who can manage global roles.
+      responses:
+        204:
+          description: Global role removed
+        409:
+          description: The instance would be left without an administrator
+
+  /users/{user_id}/global-permissions:
+    parameters:
+      - $ref: "#/parameters/user_id"
+    get:
+      tags:
+        - user
+      summary: Effective global permissions of the user
+      description: Everything for an admin, otherwise the union of the assigned global roles, with the role that grants each permission.
+      responses:
+        200:
+          description: Effective global permissions
+          schema:
+            $ref: "#/definitions/EffectiveGlobalPermissions"
+
+  /global-roles/permissions:
+    get:
+      tags:
+        - user
+      summary: Lists the global permissions a global role can grant
+      description: Requires the global permission "Can manage global roles".
+      responses:
+        200:
+          description: Global permission catalog
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/GlobalPermissionDefinition"
+
+  /global-roles:
+    get:
+      tags:
+        - user
+      summary: Lists global roles
+      description: A global role grants instance-wide permissions to the users it is assigned to. Requires the global permission "Can manage global roles".
+      responses:
+        200:
+          description: Global roles
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/GlobalRole"
+    post:
+      tags:
+        - user
+      summary: Creates a global role
+      description: Requires the global permission "Can manage global roles".
+      consumes:
+        - application/json
+      parameters:
+        - name: Global role
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/GlobalRoleRequest"
+      responses:
+        201:
+          description: Global role created
+          schema:
+            $ref: "#/definitions/GlobalRole"
+        400:
+          description: Invalid role or the slug is taken
+
+  /global-roles/{role_id}:
+    parameters:
+      - $ref: "#/parameters/role_id"
+    get:
+      tags:
+        - user
+      summary: Gets a global role
+      responses:
+        200:
+          description: Global role
+          schema:
+            $ref: "#/definitions/GlobalRole"
+    put:
+      tags:
+        - user
+      summary: Updates a global role
+      description: Changes the name and the permissions; the slug stays. Refused when the role would stop being the only way to manage global roles.
+      consumes:
+        - application/json
+      parameters:
+        - name: Global role
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/GlobalRoleRequest"
+      responses:
+        204:
+          description: Global role updated
+        400:
+          description: Invalid role
+        409:
+          description: The instance would be left without an administrator
+    delete:
+      tags:
+        - user
+      summary: Deletes a global role
+      description: A role that users hold is refused with the number of holders; with force=true the assignments are removed too, unless the holders are the last administrators.
+      parameters:
+        - name: force
+          in: query
+          required: false
+          type: boolean
+          description: Delete the role together with its assignments
+      responses:
+        204:
+          description: Global role deleted
+        409:
+          description: The role is assigned to users, or the instance would be left without an administrator
+
+  # Projects
+  /projects:
+    get:
+      tags:
+        - project
+      summary: Get projects
+      responses:
+        200:
+          description: List of projects
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Project"
+    post:
+      tags:
+        - project
+      summary: Create a new project
+      consumes:
+        - application/json
+      parameters:
+        - name: Project
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectRequest'
+      responses:
+        201:
+          description: Created project
+          schema:
+            $ref: "#/definitions/Project"
+
+  /projects/restore:
+    post:
+      tags:
+        - project
+      summary: Restore Project
+      consumes:
+        - application/json
+      parameters:
+        - name: Backup
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectBackup'
+      responses:
+        200:
+          description: Created project
+          schema:
+            $ref: "#/definitions/RestoredProject"
+
+  /events:
+    get:
+      summary: Get Events related to Semaphore and projects you are part of
+      responses:
+        200:
+          description: Array of events in chronological order
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Event'
+
+  /events/last:
+    get:
+      summary: Get last 200 Events related to Semaphore and projects you are part of
+      responses:
+        200:
+          description: Array of events in chronological order
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Event'
+
+  /project/{project_id}/:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - project
+      summary: Fetch project
+      responses:
+        200:
+          description: Project
+          schema:
+            $ref: "#/definitions/Project"
+    put:
+      tags:
+        - project
+      summary: Update project
+      parameters:
+        - name: Project
+          in: body
+          required: true
+          schema:
+            allOf:
+              - $ref: '#/definitions/ProjectRequest'
+              - properties:
+                  id:
+                    type: integer
+                    minimum: 1
+      responses:
+        204:
+          description: Project saved
+    delete:
+      tags:
+        - project
+      summary: Delete project
+      responses:
+        204:
+          description: Project deleted
+
+  /project/{project_id}/backup:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - project
+      summary: Backup A Project
+      responses:
+        200:
+          description: Backup
+          schema:
+            $ref: '#/definitions/ProjectBackup'
+
+  /project/{project_id}/role:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - project
+      summary: Fetch permissions of the current user for project
+      responses:
+        200:
+          description: Permissions
+          schema:
+            type: object
+            properties:
+              role:
+                type: string
+                description: "Role slug when the user has exactly one role, otherwise empty"
+                example: owner
+              roles:
+                type: array
+                items:
+                  type: string
+                example: [owner]
+              permissions:
+                type: number
+                example: 0
+
+
+  /project/{project_id}/events:
+    parameters:
+      - $ref: '#/parameters/project_id'
+    get:
+      tags:
+        - project
+      summary: Get Events related to this project
+      responses:
+        200:
+          description: Array of events in chronological order
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Event'
+
+  # User management
+  /project/{project_id}/users:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - project
+      summary: Get users linked to project
+      parameters:
+        - name: sort
+          in: query
+          required: true
+          type: string
+          enum: [name, username, email, role]
+          description: sorting name
+          x-example: email
+        - name: order
+          in: query
+          required: true
+          type: string
+          enum: [asc, desc]
+          description: ordering manner
+          x-example: desc
+      responses:
+        200:
+          description: Users
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/ProjectUser"
+    post:
+      tags:
+        - project
+      summary: Link user to project
+      parameters:
+        - name: User
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              user_id:
+                type: integer
+                minimum: 2
+              role:
+                type: string
+                description: "Role slug: a built-in role (owner, manager, task_runner, guest) or a custom role"
+                example: manager
+              roles:
+                type: array
+                items:
+                  type: string
+                description: "Several role slugs. Send either role or roles"
+      responses:
+        204:
+          description: User added
+  /project/{project_id}/users/{user_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/user_id"
+    delete:
+      tags:
+        - project
+      summary: Removes user from project
+      responses:
+        204:
+          description: User removed
+    put:
+      parameters:
+        - name: Project User
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              role:
+                type: string
+                description: "Role slug: a built-in role (owner, manager, task_runner, guest) or a custom role"
+                example: manager
+              roles:
+                type: array
+                items:
+                  type: string
+                description: "Several role slugs. Send either role or roles"
+      summary: Update user roles
+      tags:
+        - project
+      responses:
+        204:
+          description: User updated
+
+  # Invite management
+#  /project/{project_id}/invites:
+#    parameters:
+#      - $ref: "#/parameters/project_id"
+#    get:
+#      tags:
+#        - project
+#      summary: Get invitations for project
+#      parameters:
+#        - name: sort
+#          in: query
+#          required: false
+#          type: string
+#          enum: [created, status, role]
+#          description: sorting field
+#          x-example: created
+#        - name: order
+#          in: query
+#          required: false
+#          type: string
+#          enum: [asc, desc]
+#          description: ordering manner
+#          x-example: desc
+#      responses:
+#        200:
+#          description: Project invitations
+#          schema:
+#            type: array
+#            items:
+#              $ref: "#/definitions/ProjectInvite"
+#    post:
+#      tags:
+#        - project
+#      summary: Create project invitation
+#      parameters:
+#        - name: Invite
+#          in: body
+#          required: true
+#          schema:
+#            $ref: "#/definitions/ProjectInviteRequest"
+#      responses:
+#        201:
+#          description: Invitation created
+#          schema:
+#            $ref: "#/definitions/ProjectInvite"
+#        400:
+#          description: Bad request (invalid role, missing user_id/email, or both provided)
+#        409:
+#          description: User already a member or invitation already exists
+#
+#  /project/{project_id}/invites/{invite_id}:
+#    parameters:
+#      - $ref: "#/parameters/project_id"
+#      - $ref: "#/parameters/invite_id"
+#    get:
+#      tags:
+#        - project
+#      summary: Get specific project invitation
+#      responses:
+#        200:
+#          description: Project invitation
+#          schema:
+#            $ref: "#/definitions/ProjectInvite"
+#        404:
+#          description: Invitation not found
+#    put:
+#      tags:
+#        - project
+#      summary: Update project invitation status
+#      parameters:
+#        - name: Invite Update
+#          in: body
+#          required: true
+#          schema:
+#            type: object
+#            properties:
+#              status:
+#                type: string
+#                enum: [pending, declined, expired]
+#                example: declined
+#      responses:
+#        204:
+#          description: Invitation updated
+#        400:
+#          description: Invalid status or status transition
+#    delete:
+#      tags:
+#        - project
+#      summary: Delete project invitation
+#      responses:
+#        204:
+#          description: Invitation deleted
+#
+#  /invites/accept:
+#    post:
+#      tags:
+#        - project
+#      summary: Accept project invitation
+#      parameters:
+#        - name: Accept Invite
+#          in: body
+#          required: true
+#          schema:
+#            $ref: "#/definitions/AcceptInviteRequest"
+#      responses:
+#        204:
+#          description: Invitation accepted successfully
+#        400:
+#          description: Invalid token, invitation expired, or user already a member
+#        403:
+#          description: Invitation not for this user
+#        404:
+#          description: Invitation not found
+
+  /project/{project_id}/integrations:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - integration
+      summary: get all integrations
+      responses:
+        200:
+          description: integration
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Integration"
+    post:
+      summary: create a new integration
+      tags:
+        - integration
+      parameters:
+        - name: Integration
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/IntegrationRequest"
+      responses:
+        201:
+          description: Integration Created
+          schema:
+            $ref: "#/definitions/Integration"
+
+  /project/{project_id}/integrations/{integration_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/integration_id"
+    get:
+      tags:
+        - integration
+      summary: Get Integration
+      responses:
+        200:
+          description: Integration Value
+          schema:
+            $ref: "#/definitions/Integration"
+    put:
+      tags:
+        - integration
+      summary: Update Integration
+      parameters:
+        - name: Integration
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/IntegrationRequest"
+      responses:
+        204:
+          description: Integration updated
+    delete:
+      tags:
+        - integration
+      summary: Remove integration
+      responses:
+        204:
+          description: integration removed
+  /project/{project_id}/integrations/{integration_id}/values:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/integration_id"
+    get:
+      tags:
+        - integration
+      summary: Get Integration Extracted Values linked to integration extractor
+      responses:
+        200:
+          description: Integration Extracted Value
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/IntegrationExtractValue"
+    post:
+      tags:
+        - integration
+      summary: Add Integration Extracted Value
+      parameters:
+        - name: Integration Extracted Value
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/IntegrationExtractValue"
+      responses:
+        201:
+          description: Integration Extract Value Created
+        400:
+          description: Bad Integration Extract Value params
+  /project/{project_id}/integrations/{integration_id}/values/{extractvalue_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/integration_id"
+      - $ref: "#/parameters/extractvalue_id"
+    put:
+      tags:
+        - integration
+      summary: Updates Integration ExtractValue
+      parameters:
+        - name: Integration ExtractValue
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/IntegrationExtractValueRequest"
+      responses:
+        204:
+          description: Integration Extract Value updated
+        400:
+          description: Bad integration extract value parameter
+    delete:
+      tags:
+        - integration
+      summary: Removes integration extract value
+      responses:
+        204:
+          description: integration extract value removed
+  /project/{project_id}/integrations/{integration_id}/matchers:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/integration_id"
+    get:
+      tags:
+        - integration
+      summary: Get Integration Matcher linked to integration extractor
+      responses:
+        200:
+          description: Integration Matcher
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/IntegrationMatcher"
+    post:
+      tags:
+        - integration
+      summary: Add Integration Matcher
+      parameters:
+        - name: Integration Matcher
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/IntegrationMatcher"
+      responses:
+        200:
+          description: Integration Matcher Created
+        400:
+          description: Bad Integration Matcher params
+  /project/{project_id}/integrations/{integration_id}/matchers/{matcher_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/integration_id"
+      - $ref: "#/parameters/matcher_id"
+    put:
+      tags:
+        - integration
+      summary: Updates Integration Matcher
+      parameters:
+        - name: Integration Matcher
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/IntegrationMatcherRequest"
+      responses:
+        204:
+          description: Integration Matcher updated
+        400:
+          description: Bad integration matcher parameter
+    delete:
+      tags:
+        - integration
+      summary: Removes integration matcher
+      responses:
+        204:
+          description: integration matcher removed
+
+  /project/{project_id}/integrations/aliases:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - integration
+      summary: Get all integration aliases for the project
+      responses:
+        200:
+          description: Integration Aliases
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/IntegrationAlias"
+    post:
+      tags:
+        - integration
+      summary: Create a new integration alias for the project
+      responses:
+        200:
+          description: Integration Alias Created
+          schema:
+            $ref: "#/definitions/IntegrationAlias"
+
+  /project/{project_id}/integrations/aliases/{alias_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/alias_id"
+    delete:
+      tags:
+        - integration
+      summary: Remove integration alias
+      responses:
+        204:
+          description: integration alias removed
+
+  /project/{project_id}/integrations/{integration_id}/aliases:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/integration_id"
+    get:
+      tags:
+        - integration
+      summary: Get all aliases for an integration
+      responses:
+        200:
+          description: Integration Aliases
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/IntegrationAlias"
+    post:
+      tags:
+        - integration
+      summary: Create a new alias for an integration
+      responses:
+        200:
+          description: Integration Alias Created
+          schema:
+            $ref: "#/definitions/IntegrationAlias"
+
+  /project/{project_id}/integrations/{integration_id}/aliases/{alias_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/integration_id"
+      - $ref: "#/parameters/alias_id"
+    delete:
+      tags:
+        - integration
+      summary: Remove integration alias
+      responses:
+        204:
+          description: integration alias removed
+
+  # project access keys
+  /project/{project_id}/keys:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - key-store
+      summary: Get access keys linked to project
+      parameters:
+        # TODO - the space in this parameter name results in a dredd warning
+        - name: Key type
+          in: query
+          required: false
+          type: string
+          enum: [none, ssh, login_password, string]
+          description: Filter by key type
+          x-example: none
+        - name: sort
+          in: query
+          required: true
+          type: string
+          enum: [name, type]
+          description: sorting name
+          x-example: type
+        - name: order
+          in: query
+          required: true
+          type: string
+          enum: [asc, desc]
+          description: ordering manner
+          x-example: asc
+      responses:
+        200:
+          description: Access Keys
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/AccessKey"
+    post:
+      tags:
+        - key-store
+      summary: Add access key
+      parameters:
+        - name: Access Key
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/AccessKeyRequest"
+      responses:
+        201:
+          description: Access Key created
+          schema:
+            $ref: "#/definitions/AccessKey"
+        400:
+          description: Bad type
+  /project/{project_id}/keys/{key_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/key_id"
+    put:
+      tags:
+        - key-store
+      summary: Updates access key
+      parameters:
+        - name: Access Key
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/AccessKeyRequest"
+      responses:
+        204:
+          description: Key updated
+        400:
+          description: Bad type
+    delete:
+      tags:
+        - key-store
+      summary: Removes access key
+      responses:
+        204:
+          description: access key removed
+
+  # project repositories
+  /project/{project_id}/repositories:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - repository
+      summary: Get repositories
+      parameters:
+        - name: sort
+          in: query
+          required: true
+          type: string
+          enum: [name, git_url, ssh_key]
+          description: sorting name
+        - name: order
+          in: query
+          required: true
+          type: string
+          format: asc/desc
+          enum: [asc, desc]
+          description: ordering manner
+      responses:
+        200:
+          description: repositories
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Repository"
+    post:
+      tags:
+        - repository
+      summary: Add repository
+      parameters:
+        - name: Repository
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/RepositoryRequest"
+      responses:
+        201:
+          description: Repository created
+          schema:
+            $ref: "#/definitions/Repository"
+
+  /project/{project_id}/repositories/{repository_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/repository_id"
+    get:
+      tags:
+        - repository
+      summary: Get repository
+      responses:
+        200:
+          description: repository object
+          schema:
+            $ref: "#/definitions/Repository"
+    put:
+      tags:
+        - repository
+      summary: Updates repository
+      parameters:
+        - name: Repository
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/RepositoryRequest"
+      responses:
+        204:
+          description: Repository updated
+        400:
+          description: Bad request
+    delete:
+      tags:
+        - repository
+      summary: Removes repository
+      responses:
+        204:
+          description: repository removed
+
+  # project inventory
+  /project/{project_id}/host_configs:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - project
+      summary: Get the credential mappings of the project
+      responses:
+        200:
+          description: host configs
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/HostConfig"
+    post:
+      tags:
+        - project
+      summary: Add a credential mapping
+      parameters:
+        - name: Host config
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/HostConfigRequest"
+      responses:
+        201:
+          description: host config created
+          schema:
+            $ref: "#/definitions/HostConfig"
+        400:
+          description: invalid mapping
+
+  /project/{project_id}/host_configs/{host_config_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/host_config_id"
+    get:
+      tags:
+        - project
+      summary: Get a credential mapping
+      responses:
+        200:
+          description: host config
+          schema:
+            $ref: "#/definitions/HostConfig"
+    put:
+      tags:
+        - project
+      summary: Update a credential mapping
+      parameters:
+        - name: Host config
+          in: body
+          required: true
+          schema:
+            allOf:
+              - $ref: "#/definitions/HostConfigRequest"
+              - type: object
+                required:
+                  - id
+      responses:
+        204:
+          description: host config updated
+        400:
+          description: invalid mapping
+    delete:
+      tags:
+        - project
+      summary: Delete a credential mapping
+      responses:
+        204:
+          description: host config deleted
+
+  /project/{project_id}/inventory:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - inventory
+      summary: Get inventory
+      parameters:
+        - name: sort
+          in: query
+          required: true
+          type: string
+          description: sorting name
+          enum: [name, type]
+        - name: order
+          in: query
+          required: true
+          type: string
+          description: ordering manner
+          enum: [asc, desc]
+      responses:
+        200:
+          description: inventory
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Inventory"
+    post:
+      tags:
+        - inventory
+      summary: create inventory
+      parameters:
+        - name: Inventory
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/InventoryRequest"
+      responses:
+        201:
+          description: inventory created
+          schema:
+            $ref: "#/definitions/Inventory"
+  /project/{project_id}/inventory/{inventory_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/inventory_id"
+    get:
+      tags:
+        - inventory
+      summary: Get inventory
+      responses:
+        200:
+          description: inventory object
+          schema:
+            $ref: "#/definitions/Inventory"
+    put:
+      tags:
+        - inventory
+      summary: Updates inventory
+      parameters:
+        - name: Inventory
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/InventoryRequest"
+      responses:
+        204:
+          description: Inventory updated
+    delete:
+      tags:
+        - inventory
+      summary: Removes inventory
+      responses:
+        204:
+          description: inventory removed
+
+  # project environment
+  /project/{project_id}/environment:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - variable-group
+      summary: Get environment
+      parameters:
+        - name: sort
+          in: query
+          required: true
+          type: string
+          format: name
+          description: sorting name
+          x-example: name
+        - name: order
+          in: query
+          required: true
+          type: string
+          format: asc/desc
+          description: ordering manner
+          x-example: desc
+      responses:
+        200:
+          description: environment
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Environment"
+    post:
+      tags:
+        - variable-group
+      summary: Add environment
+      parameters:
+        - name: environment
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/EnvironmentRequest"
+      responses:
+        201:
+          description: Environment created
+          schema:
+            $ref: "#/definitions/Environment"
+  /project/{project_id}/environment/{environment_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/environment_id"
+    get:
+      tags:
+        - variable-group
+      summary: Get environment
+      responses:
+        200:
+          description: environment object
+          schema:
+            $ref: "#/definitions/Environment"
+    put:
+      tags:
+        - variable-group
+      summary: Update environment
+      parameters:
+        - name: environment
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/EnvironmentRequest"
+      responses:
+        204:
+          description: Environment Updated
+    delete:
+      tags:
+        - variable-group
+      summary: Removes environment
+      responses:
+        204:
+          description: environment removed
+
+  # project templates
+  /project/{project_id}/templates:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - template
+      summary: Get template
+      parameters:
+        - name: sort
+          in: query
+          required: true
+          type: string
+          description: sorting name
+          enum: [name, playbook, ssh_key, inventory, environment, repository]
+        - name: order
+          in: query
+          required: true
+          type: string
+          description: ordering manner
+          enum: [asc, desc]
+      responses:
+        200:
+          description: template
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Template"
+              properties:
+                survey_vars:
+                  type: array
+                  items:
+                    $ref: "#/definitions/TemplateSurveyVar"
+                last_task:
+                  $ref: "#/definitions/Task"
+    post:
+      tags:
+        - template
+      summary: create template
+      parameters:
+        - name: template
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/TemplateRequest"
+      responses:
+        201:
+          description: template created
+          schema:
+            $ref: "#/definitions/Template"
+
+  /project/{project_id}/templates/{template_id}/stop_all_tasks:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/template_id"
+    post:
+      tags:
+        - template
+      summary: Stop all active tasks of template
+      parameters:
+        - name: body
+          in: body
+          required: false
+          schema:
+            type: object
+            properties:
+              force:
+                type: boolean
+                description: Force stop (kill) all tasks immediately
+      responses:
+        204:
+          description: tasks stopped
+
+  /project/{project_id}/templates/{template_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/template_id"
+    get:
+      tags:
+        - template
+      summary: Get template
+      responses:
+        200:
+          description: template object
+          schema:
+            $ref: "#/definitions/Template"
+        404:
+          description: no such template, or the member may not read it
+    put:
+      tags:
+        - template
+      summary: Updates template
+      parameters:
+        - name: template
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/TemplateRequest"
+      responses:
+        204:
+          description: template updated
+    delete:
+      tags:
+        - template
+      summary: Removes template
+      responses:
+        204:
+          description: template removed
+
+  /project/{project_id}/templates/{template_id}/perms:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/template_id"
+    get:
+      tags:
+        - template
+      summary: Get template permissions
+      responses:
+        200:
+          description: role grants on the template
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/TemplateRolePermission"
+    post:
+      tags:
+        - template
+      summary: Grant a role on the template
+      parameters:
+        - name: permission
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/TemplateRolePermission"
+      responses:
+        201:
+          description: grant created
+          schema:
+            $ref: "#/definitions/TemplateRolePermission"
+        400:
+          description: unknown role or permissions outside the template verbs
+
+  /project/{project_id}/templates/{template_id}/perms/{perm_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/template_id"
+      - $ref: "#/parameters/perm_id"
+    get:
+      tags:
+        - template
+      summary: Get one template permission
+      responses:
+        200:
+          description: role grant
+          schema:
+            $ref: "#/definitions/TemplateRolePermission"
+    put:
+      tags:
+        - template
+      summary: Change the permissions of a grant
+      parameters:
+        - name: permission
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/TemplateRolePermission"
+      responses:
+        204:
+          description: grant updated
+    delete:
+      tags:
+        - template
+      summary: Remove a grant
+      responses:
+        204:
+          description: grant removed
+
+  # project workflows
+  /project/{project_id}/workflows:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - workflow
+      summary: Get workflows
+      responses:
+        200:
+          description: workflow templates
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/WorkflowTemplate"
+    post:
+      tags:
+        - workflow
+      summary: Add workflow
+      parameters:
+        - name: workflow
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/WorkflowTemplate"
+      responses:
+        201:
+          description: Workflow template created
+          schema:
+            $ref: "#/definitions/WorkflowTemplate"
+
+  /project/{project_id}/workflows/{workflow_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/workflow_id"
+    get:
+      tags:
+        - workflow
+      summary: Get workflow
+      responses:
+        200:
+          description: workflow template
+          schema:
+            $ref: "#/definitions/WorkflowTemplate"
+        404:
+          description: no such workflow, or the member may not read it
+    put:
+      tags:
+        - workflow
+      summary: Update workflow
+      parameters:
+        - name: workflow
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/WorkflowTemplate"
+      responses:
+        204:
+          description: Workflow updated
+    delete:
+      tags:
+        - workflow
+      summary: Remove workflow
+      responses:
+        204:
+          description: workflow removed
+
+  /project/{project_id}/workflows/{workflow_id}/revisions:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/workflow_id"
+    get:
+      tags:
+        - workflow
+      summary: Get workflow revisions
+      description: Surviving graph revisions of the workflow, newest first. A revision is written on every save; revisions no run refers to are dropped when a newer one is saved.
+      responses:
+        200:
+          description: workflow revisions
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/WorkflowRevision"
+
+  /project/{project_id}/workflows/{workflow_id}/revisions/{revision_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/workflow_id"
+      - $ref: "#/parameters/revision_id"
+    get:
+      tags:
+        - workflow
+      summary: Get workflow revision
+      description: The workflow with the nodes and edges of the given revision instead of the latest one.
+      responses:
+        200:
+          description: workflow template at the revision
+          schema:
+            $ref: "#/definitions/WorkflowTemplate"
+
+  /project/{project_id}/workflows/{workflow_id}/perms:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/workflow_id"
+    get:
+      tags:
+        - workflow
+      summary: Get workflow permissions
+      responses:
+        200:
+          description: role grants on the workflow
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/WorkflowRolePermission"
+    post:
+      tags:
+        - workflow
+      summary: Grant a role on the workflow
+      parameters:
+        - name: permission
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/WorkflowRolePermission"
+      responses:
+        201:
+          description: grant created
+          schema:
+            $ref: "#/definitions/WorkflowRolePermission"
+        400:
+          description: unknown role or permissions outside the workflow verbs
+
+  /project/{project_id}/workflows/{workflow_id}/perms/{perm_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/workflow_id"
+      - $ref: "#/parameters/perm_id"
+    get:
+      tags:
+        - workflow
+      summary: Get one workflow permission
+      responses:
+        200:
+          description: role grant
+          schema:
+            $ref: "#/definitions/WorkflowRolePermission"
+    put:
+      tags:
+        - workflow
+      summary: Change the permissions of a grant
+      parameters:
+        - name: permission
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/WorkflowRolePermission"
+      responses:
+        204:
+          description: grant updated
+    delete:
+      tags:
+        - workflow
+      summary: Remove a grant
+      responses:
+        204:
+          description: grant removed
+
+  /project/{project_id}/workflows/{workflow_id}/runs:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/workflow_id"
+    get:
+      tags:
+        - workflow
+      summary: Get workflow runs
+      responses:
+        200:
+          description: workflow runs
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/WorkflowRun"
+    post:
+      tags:
+        - workflow
+      summary: Run workflow
+      parameters:
+        - name: Workflow run
+          in: body
+          required: false
+          schema:
+            $ref: "#/definitions/WorkflowRunRequest"
+      responses:
+        201:
+          description: workflow run created
+          schema:
+            $ref: "#/definitions/WorkflowRun"
+
+  /project/{project_id}/workflows/{workflow_id}/runs/{run_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/workflow_id"
+      - $ref: "#/parameters/run_id"
+    get:
+      tags:
+        - workflow
+      summary: Get workflow run details
+      responses:
+        200:
+          description: workflow run details
+          schema:
+            $ref: "#/definitions/WorkflowRunDetails"
+
+  /project/{project_id}/workflows/{workflow_id}/runs/{run_id}/stop:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/workflow_id"
+      - $ref: "#/parameters/run_id"
+    post:
+      tags:
+        - workflow
+      summary: Stop workflow run
+      responses:
+        200:
+          description: workflow run stopped
+          schema:
+            $ref: "#/definitions/WorkflowRun"
+
+  /project/{project_id}/workflows/{workflow_id}/runs/{run_id}/approvals:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/workflow_id"
+      - $ref: "#/parameters/run_id"
+    get:
+      tags:
+        - workflow
+      summary: Get workflow run approvals
+      responses:
+        200:
+          description: workflow approvals
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/WorkflowApproval"
+
+  /project/{project_id}/workflows/{workflow_id}/runs/{run_id}/artifacts:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/workflow_id"
+      - $ref: "#/parameters/run_id"
+    get:
+      tags:
+        - workflow
+      summary: Get merged workflow run artifacts
+      description: >
+        The output values of every successful task of the run merged into one object, later tasks
+        overriding earlier ones. Meant for debugging; the outputs of each node are in the
+        artifacts field of its task in the run details.
+      responses:
+        200:
+          description: merged output values
+          schema:
+            type: object
+            additionalProperties: true
+
+  /project/{project_id}/workflows/{workflow_id}/runs/{run_id}/approvals/{node_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/workflow_id"
+      - $ref: "#/parameters/run_id"
+      - $ref: "#/parameters/node_id"
+    post:
+      tags:
+        - workflow
+      summary: Resolve workflow approval
+      parameters:
+        - name: approval
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/WorkflowApprovalResolveRequest"
+      responses:
+        200:
+          description: approval resolved
+          schema:
+            $ref: "#/definitions/WorkflowApproval"
+
+  # project schedules
+  /project/{project_id}/schedules/{schedule_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/schedule_id"
+    get:
+      tags:
+        - schedule
+      summary: Get schedule
+      responses:
+        200:
+          description: Schedule
+          schema:
+            $ref: "#/definitions/Schedule"
+    delete:
+      tags:
+        - schedule
+      summary: Deletes schedule
+      responses:
+        204:
+          description: schedule deleted
+    put:
+      tags:
+        - schedule
+      summary: Updates schedule
+      parameters:
+        - name: schedule
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/ScheduleRequest"
+      responses:
+        204:
+          description: schedule updated
+
+  /project/{project_id}/schedules:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    post:
+      tags:
+        - schedule
+      summary: create schedule
+      parameters:
+        - name: schedule
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/ScheduleRequest"
+      responses:
+        201:
+          description: schedule created
+          schema:
+            $ref: "#/definitions/Schedule"
+
+  # project views
+  /project/{project_id}/views:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - project
+      summary: Get view
+      responses:
+        200:
+          description: view
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/View"
+    post:
+      tags:
+        - project
+      summary: create view
+      parameters:
+        - name: view
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/ViewRequest"
+      responses:
+        201:
+          description: view created
+          schema:
+            $ref: "#/definitions/View"
+  /project/{project_id}/views/{view_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/view_id"
+    get:
+      tags:
+        - project
+      summary: Get view
+      responses:
+        200:
+          description: view object
+          schema:
+            $ref: "#/definitions/View"
+    put:
+      tags:
+        - project
+      summary: Updates view
+      parameters:
+        - name: view
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/ViewRequest"
+      responses:
+        204:
+          description: view updated
+    delete:
+      tags:
+        - project
+      summary: Removes view
+      responses:
+        204:
+          description: view removed
+
+
+  # tasks
+  /project/{project_id}/tasks:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - task
+      summary: Get Tasks related to current project
+      responses:
+        200:
+          description: Array of tasks in chronological order
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Task'
+    post:
+      tags:
+        - task
+      summary: Starts a job
+      parameters:
+        - name: task
+          in: body
+          required: true
+          description: >
+            Either template_id or template_name must be given. When both are
+            given, template_id is used.
+          schema:
+            type: object
+            properties:
+              template_id:
+                type: integer
+              template_name:
+                type: string
+                example: Build website
+              debug:
+                type: boolean
+              dry_run:
+                type: boolean
+              diff:
+                type: boolean
+              playbook:
+                type: string
+              environment:
+                type: string
+              limit:
+                type: string
+              git_branch:
+                type: string
+              message:
+                type: string
+              arguments:
+                type: string
+              inventory_id:
+                type: integer
+      responses:
+        201:
+          description: Task queued
+          schema:
+            $ref: "#/definitions/Task"
+
+
+  /project/{project_id}/tasks/last:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - task
+      summary: Get last 200 Tasks related to current project
+      responses:
+        200:
+          description: Array of tasks in chronological order
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Task'
+
+
+  /project/{project_id}/tasks/{task_id}/stop:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: '#/parameters/task_id'
+    post:
+      tags:
+        - task
+      summary: Stop a job
+      parameters:
+        - name: body
+          in: body
+          required: false
+          schema:
+            type: object
+            properties:
+              force:
+                type: boolean
+                description: Force stop (kill) the task immediately
+      responses:
+        204:
+          description: Task queued
+
+  /project/{project_id}/tasks/{task_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/task_id"
+    get:
+      tags:
+        - task
+      summary: Get a single task
+      responses:
+        200:
+          description: Task
+          schema:
+            $ref: "#/definitions/Task"
+        404:
+          description: no such task, or the member may not read it
+    delete:
+      tags:
+        - task
+      summary: Deletes task (including output)
+      responses:
+        204:
+          description: task deleted
+
+  /project/{project_id}/tasks/{task_id}/output:
+    parameters:
+      - $ref: '#/parameters/project_id'
+      - $ref: '#/parameters/task_id'
+    get:
+      tags:
+        - task
+      summary: Get task output
+      responses:
+        200:
+          description: output
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/TaskOutput"
+
+  /project/{project_id}/tasks/{task_id}/raw_output:
+    parameters:
+      - $ref: '#/parameters/project_id'
+      - $ref: '#/parameters/task_id'
+    get:
+      tags:
+        - task
+      summary: Get task raw output
+      responses:
+        200:
+          description: output
+          headers:
+            content-type:
+              type: string
+              x-example: text/plain; charset=utf-8
+  /apps:
+    get:
+      summary: Get apps
+      responses:
+        200:
+          description: Apps
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/App"
+
+  /project/{project_id}/notifications/test:
+    post:
+      tags:
+        - project
+      summary: Send test notification
+      description: Sends a test notification to all enabled messengers for the project
+      parameters:
+        - $ref: "#/parameters/project_id"
+      responses:
+        409:
+          description: Alerts not enabled for the project
+#        204:
+#          description: Test notification dispatched (or alerts disabled)
+
+  # project runners
+  /project/{project_id}/runners:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - runner
+      summary: Get project runners
+      description: Returns runners owned by the project together with global runners that have tags.
+      responses:
+        200:
+          description: Runners
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Runner"
+    post:
+      tags:
+        - runner
+      summary: Add project runner
+      parameters:
+        - name: Runner
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/RunnerRequest"
+      responses:
+        201:
+          description: Runner created
+          schema:
+            $ref: "#/definitions/RunnerWithToken"
+        400:
+          description: Invalid request body or mismatched project ID
+        403:
+          description: Plan does not allow adding more runners
+
+  /project/{project_id}/runner_tags:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags:
+        - runner
+      summary: Get project runner tags
+      responses:
+        200:
+          description: Runner tags
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/RunnerTag"
+
+  /project/{project_id}/runners/{runner_id}:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/runner_id"
+    get:
+      tags:
+        - runner
+      summary: Get project runner
+      responses:
+        200:
+          description: Runner
+          schema:
+            $ref: "#/definitions/Runner"
+        404:
+          description: Runner not found
+    put:
+      tags:
+        - runner
+      summary: Update project runner
+      parameters:
+        - name: Runner
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/RunnerRequest"
+      responses:
+        204:
+          description: Runner updated
+        400:
+          description: Invalid request body or mismatched project ID
+    delete:
+      tags:
+        - runner
+      summary: Delete project runner
+      responses:
+        204:
+          description: Runner deleted
+
+  /project/{project_id}/runners/{runner_id}/active:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/runner_id"
+    post:
+      tags:
+        - runner
+      summary: Set project runner active state
+      parameters:
+        - name: Active
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/RunnerActive"
+      responses:
+        204:
+          description: Runner active state updated
+        400:
+          description: Invalid request body
+
+  /project/{project_id}/runners/{runner_id}/registration-token:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/runner_id"
+    post:
+      tags:
+        - runner
+      summary: Regenerate the one-time registration token of an unregistered project runner
+      responses:
+        200:
+          description: New registration token
+          schema:
+            $ref: "#/definitions/RunnerRegistrationToken"
+        400:
+          description: Runner is already registered
+
+  /project/{project_id}/runners/{runner_id}/cache:
+    parameters:
+      - $ref: "#/parameters/project_id"
+      - $ref: "#/parameters/runner_id"
+    delete:
+      tags:
+        - runner
+      summary: Clear project runner cache
+      responses:
+        204:
+          description: Runner cache cleared
+
+  # global runners (admin)
+  /runners:
+    get:
+      tags:
+        - runner
+      summary: Get all global runners
+      responses:
+        200:
+          description: Runners
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Runner"
+    post:
+      tags:
+        - runner
+      summary: Add global runner
+      parameters:
+        - name: Runner
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/RunnerRequest"
+      responses:
+        201:
+          description: Runner created
+          schema:
+            $ref: "#/definitions/RunnerWithToken"
+        400:
+          description: Runner not created
+
+  /runner_tags:
+    get:
+      tags:
+        - runner
+      summary: Get global runner tags
+      responses:
+        200:
+          description: Runner tags
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/RunnerTag"
+
+  /runners/{runner_id}:
+    parameters:
+      - $ref: "#/parameters/global_runner_id"
+    get:
+      tags:
+        - runner
+      summary: Get global runner
+      responses:
+        200:
+          description: Runner
+          schema:
+            $ref: "#/definitions/Runner"
+        404:
+          description: Runner not found
+    put:
+      tags:
+        - runner
+      summary: Update global runner
+      parameters:
+        - name: Runner
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/RunnerRequest"
+      responses:
+        204:
+          description: Runner updated
+        400:
+          description: Runner not updated
+    delete:
+      tags:
+        - runner
+      summary: Delete global runner
+      responses:
+        204:
+          description: Runner deleted
+
+  /runners/{runner_id}/active:
+    parameters:
+      - $ref: "#/parameters/global_runner_id"
+    post:
+      tags:
+        - runner
+      summary: Set global runner active state
+      parameters:
+        - name: Active
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/RunnerActive"
+      responses:
+        204:
+          description: Runner active state updated
+        400:
+          description: Invalid request body
+
+  /runners/{runner_id}/registration-token:
+    parameters:
+      - $ref: "#/parameters/global_runner_id"
+    post:
+      tags:
+        - runner
+      summary: Regenerate the one-time registration token of an unregistered global runner
+      responses:
+        200:
+          description: New registration token
+          schema:
+            $ref: "#/definitions/RunnerRegistrationToken"
+        400:
+          description: Runner is already registered
+
+  /runners/{runner_id}/cache:
+    parameters:
+      - $ref: "#/parameters/global_runner_id"
+    delete:
+      tags:
+        - runner
+      summary: Clear global runner cache
+      responses:
+        204:
+          description: Runner cache cleared

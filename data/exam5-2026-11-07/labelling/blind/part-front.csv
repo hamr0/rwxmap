@@ -1,0 +1,866 @@
+row_id,provider,method,path,operationId,summary,description
+ex5-0001,frontapp.com,GET,/accounts,list-accounts,List Accounts,"List the accounts of the company.
+
+Required scope: `accounts:read`"
+ex5-0002,frontapp.com,POST,/accounts,create-account,Create account,"Create a new account.
+
+Required scope: `accounts:write`"
+ex5-0003,frontapp.com,GET,/accounts/custom_fields,list-account-custom-fields,List Account's custom fields,"Lists the custom fields that can be attached to an Account.
+
+Required scope: `custom_fields:read`"
+ex5-0004,frontapp.com,DELETE,/accounts/{account_id},delete-an-account,Delete an account,"Deletes an account
+
+Required scope: `accounts:delete`"
+ex5-0005,frontapp.com,GET,/accounts/{account_id},fetch-an-account,Fetch an account,"Fetches an account
+
+Required scope: `accounts:read`"
+ex5-0006,frontapp.com,PATCH,/accounts/{account_id},update-account,Update account,"Updates an account.
+
+Required scope: `accounts:write`"
+ex5-0007,frontapp.com,DELETE,/accounts/{account_id}/contacts,remove-contact-from-account,Remove contact from Account,"Removes a list of contacts from an Account
+
+Required scope: `accounts:write`"
+ex5-0008,frontapp.com,GET,/accounts/{account_id}/contacts,list-account-contacts,List account contacts,"Lists the contacts associated with an Account
+
+Required scope: `contacts:read`"
+ex5-0009,frontapp.com,POST,/accounts/{account_id}/contacts,add-contact-to-account,Add contact to Account,"Adds a list of contacts to an Account
+
+Required scope: `accounts:write`"
+ex5-0010,frontapp.com,POST,/analytics/exports,create-analytics-export,Create a new analytics export,"Create a new analytics export of messages or events (activities) over a specific time span.
+The export will be executed asynchronously. The response will include a link that can be used to retrieve the export status & result. Refer to the [Analytics](https://dev.frontapp.com/reference/analytics) topic for details about specific metrics.
+
+
+Required scope: `analytics:read`"
+ex5-0011,frontapp.com,GET,/analytics/exports/{export_id},get-analytics-export,Fetch an analytics export,"Fetch an analytics exports. Refer to the [Analytics](https://dev.frontapp.com/reference/analytics) topic for details about specific metrics.
+
+Required scope: `analytics:read`"
+ex5-0012,frontapp.com,POST,/analytics/reports,create-analytics-report,Create a new analytics report,"Create a new analytics report for a set of metrics over a specific time span. Different filters (e.g. Inbox v Tag v Teammates) will be joined with AND logic, but the IDs within a filter will be joined with OR logic (e.g. Inbox A or Inbox B, Tag A or Tag B).
+The report will be executed asynchronously. The response will include a link that can be used to retrieve the
+report status & result. Refer to the [Analytics](https://dev.frontapp.com/reference/analytics) topic for details about specific metrics.
+
+
+Required scope: `analytics:read`"
+ex5-0013,frontapp.com,GET,/analytics/reports/{report_uid},get-analytics-report,Fetch an analytics report,"Fetch an analytics report. Refer to the [Analytics](https://dev.frontapp.com/reference/analytics) topic for details about specific metrics.
+
+Required scope: `analytics:read`"
+ex5-0014,frontapp.com,POST,/applications/{application_uid}/events,trigger-app-event,Trigger application event,"Triggers an event on behalf of an application. These events can trigger Front workflows, like rules.
+For more information, see the [developer docs](https://dev.frontapp.com/docs/application-triggers#/).
+
+
+Required scope: `feature:app_trigger`"
+ex5-0015,frontapp.com,GET,/channels,list-channels,List channels,"List the channels of the company.
+
+Required scope: `channels:read`"
+ex5-0016,frontapp.com,GET,/channels/{channel_id},get-channel,Get channel,"Fetch a channel.
+
+Required scope: `channels:read`"
+ex5-0017,frontapp.com,PATCH,/channels/{channel_id},update-channel,Update Channel,"Update a channel.
+
+Required scope: `channels:write`"
+ex5-0018,frontapp.com,POST,/channels/{channel_id}/drafts,create-draft,Create draft,"Create a draft message which is the first message of a new [conversation](https://dev.frontapp.com/reference/conversations).
+
+Required scope: `drafts:write`"
+ex5-0019,frontapp.com,POST,/channels/{channel_id}/incoming_messages,receive-custom-messages,Receive custom messages,"Receive a custom message in Front. This endpoint is available for custom channels **ONLY**.
+
+Required scope: `messages:write`"
+ex5-0020,frontapp.com,POST,/channels/{channel_id}/messages,create-message,Create message,"Send a new message from a channel. This is one of the ways to create a new [conversation](https://dev.frontapp.com/reference/conversations#creating-a-new-conversation). The new conversation will support both messages and comments (discussions).
+
+Required scope: `messages:send`"
+ex5-0021,frontapp.com,POST,/channels/{channel_id}/validate,validate-channel,Validate channel,"Asynchronously validate an SMTP channel (this endpoint is irrelevant to other channel types). When you create an SMTP channel via the API, [create a channel](https://dev.frontapp.com/reference/post_inboxes-inbox-id-channels) with type smtp and the send_as set to the needed email address. You then [configure the email provider](https://help.front.com/en/articles/2081), after which you use this endpoint to asynchronously validate the SMTP settings.
+
+Required scope: `channels:write`"
+ex5-0022,frontapp.com,GET,/comments/{comment_id},get-comment,Get comment,"Fetches a comment.
+
+Required scope: `comments:read`"
+ex5-0023,frontapp.com,PATCH,/comments/{comment_id},update-comment,Update comment,"Update a comment in a [conversation](https://dev.frontapp.com/reference/conversations).
+
+Required scope: `comments:write`"
+ex5-0024,frontapp.com,GET,/comments/{comment_id}/download/{attachment_link_id},download-attachment-for-a-comment,Download attachment for a comment,"Download an attachment file for a given comment ID
+
+Required scope: `attachments:read`"
+ex5-0025,frontapp.com,GET,/comments/{comment_id}/mentions,list-comment-mentions,List comment mentions,"List the teammates mentioned in a comment.
+
+Required scope: `teammates:read`"
+ex5-0026,frontapp.com,POST,/comments/{comment_id}/replies,add-comment-reply,Add comment reply,"Add a reply to a comment on a [conversation](https://dev.frontapp.com/reference/conversations). Comment replies visually indicate which comment is being responded to, helping users follow the conversation.
+
+Required scope: `comments:write`"
+ex5-0027,frontapp.com,GET,/company/rules,list-all-company-rules,List all company rules,"List the company rules.
+
+Required scope: `rules:read`"
+ex5-0028,frontapp.com,GET,/company/statuses,list-company-ticket-statuses,List company ticket statuses,"List the ticket statuses available for your company.
+
+Required scope: `statuses:read`"
+ex5-0029,frontapp.com,GET,/company/statuses/{status_id},get-ticket-status-by-id,Get ticket status,"Fetch a ticket status.
+
+Required scope: `statuses:read`"
+ex5-0030,frontapp.com,GET,/company/tags,list-company-tags,List company tags,"List the company tags.
+
+Required scope: `tags:read`"
+ex5-0031,frontapp.com,POST,/company/tags,create-company-tag,Create company tag,"Create a company tag.
+
+Required scope: `tags:write`"
+ex5-0032,frontapp.com,GET,/contact_groups,list-groups,List groups,"List the contact groups.
+
+> ⚠️ Deprecated endpoint
+>
+> This endpoint has been deprecated. Please use the compatible contact list endpoints instead.
+> - `GET /contact_lists`.
+
+
+Required scope: `contacts:read`"
+ex5-0033,frontapp.com,POST,/contact_groups,create-group,Create group,"Create a new contact group in the default team (workspace).
+
+> ⚠️ Deprecated endpoint
+>
+> This endpoint has been deprecated. Please use the compatible contact list endpoints instead.
+> - `POST /contact_lists`.
+
+
+Required scope: `contacts:write`"
+ex5-0034,frontapp.com,DELETE,/contact_groups/{contact_group_id},delete-group,Delete group,"Delete a contact group.
+
+> ⚠️ Deprecated endpoint
+>
+> This endpoint has been deprecated. Please use the compatible contact list endpoints instead.
+> - `DELETE /contact_lists/{contact_list_id}`.
+
+
+Required scope: `contacts:delete`"
+ex5-0035,frontapp.com,DELETE,/contact_groups/{contact_group_id}/contacts,remove-contacts-from-group,Remove contacts from group,"Remove contacts from the requested group.
+
+> ⚠️ Deprecated endpoint
+>
+> This endpoint has been deprecated. Please use the compatible contact list endpoints instead.
+> - `DELETE /contact_lists/{contact_list_id}/contacts`.
+
+
+Required scope: `contacts:write`"
+ex5-0036,frontapp.com,GET,/contact_groups/{contact_group_id}/contacts,list-contacts-in-group,List contacts in group,"List the contacts belonging to the requested group.
+
+> ⚠️ Deprecated endpoint
+>
+> This endpoint has been deprecated. Please use the compatible contact list endpoints instead.
+> - `GET /contact_lists/{contact_list_id}/contacts`.
+
+
+Required scope: `contacts:read`"
+ex5-0037,frontapp.com,POST,/contact_groups/{contact_group_id}/contacts,add-contacts-to-group,Add contacts to group,"Add contacts to the requested group.
+
+> ⚠️ Deprecated endpoint
+>
+> This endpoint has been deprecated. Please use the compatible contact list endpoints instead.
+> - `POST /contact_lists/{contact_list_id}/contacts`.
+
+
+Required scope: `contacts:write`"
+ex5-0038,frontapp.com,GET,/contact_lists,list-contact-lists,List contact lists,"List contact lists.
+
+Required scope: `contacts:read`"
+ex5-0039,frontapp.com,POST,/contact_lists,create-contact-list,Create contact list,"Create a new contact list in the oldest active workspace that the token has access to. If you need to specify the workspace, we recommend using the [Create team contact list](https://dev.frontapp.com/reference/create-team-contact-list) endpoint instead.
+
+Required scope: `contacts:write`"
+ex5-0040,frontapp.com,DELETE,/contact_lists/{contact_list_id},delete-contact-list,Delete contact list,"Delete a contact lists.
+
+Required scope: `contacts:delete`"
+ex5-0041,frontapp.com,DELETE,/contact_lists/{contact_list_id}/contacts,remove-contacts-from-contact-list,Remove contacts from contact list,"Remove contacts from the requested contact list.
+
+Required scope: `contacts:write`"
+ex5-0042,frontapp.com,GET,/contact_lists/{contact_list_id}/contacts,list-contacts-in-contact-list,List contacts in contact list,"List the contacts belonging to the requested contact list.
+
+Required scope: `contacts:read`"
+ex5-0043,frontapp.com,POST,/contact_lists/{contact_list_id}/contacts,add-contacts-to-contact-list,Add contacts to contact list,"Add contacts to the requested contact list.
+
+Required scope: `contacts:write`"
+ex5-0044,frontapp.com,GET,/contacts,list-contacts,List contacts,"List the contacts of the company.
+
+Required scope: `contacts:read`"
+ex5-0045,frontapp.com,POST,/contacts,create-contact,Create contact,"Create a new contact at the company level.
+
+Required scope: `contacts:write`"
+ex5-0046,frontapp.com,GET,/contacts/custom_fields,list-contact-custom-fields,List Contact's custom fields,"Lists the custom fields that can be attached to a Contact.
+
+Required scope: `custom_fields:read`"
+ex5-0047,frontapp.com,POST,/contacts/merge,merge-contacts,Merge contacts,"Merges the contacts specified into a single contact, deleting the merged-in contacts.
+If a target contact ID is supplied, the other contacts will be merged into that one.
+Otherwise, some contact in the contact ID list will be treated as the target contact.
+Merge conflicts will be resolved in the following ways:
+  * name will prioritize manually-updated and non-private contact names
+  * descriptions will be concatenated and separated by newlines in order from
+    oldest to newest with the (optional) target contact's description first
+  * all handles, groups, links, and notes will be preserved
+  * other conflicts will use the most recently updated contact's value
+
+
+Required scope: `contacts:write`"
+ex5-0048,frontapp.com,DELETE,/contacts/{contact_id},delete-a-contact,Delete a contact,"Delete a contact.
+
+Required scope: `contacts:delete`"
+ex5-0049,frontapp.com,GET,/contacts/{contact_id},get-contact,Get contact,"Fetch a contact.
+
+Required scope: `contacts:read`"
+ex5-0050,frontapp.com,PATCH,/contacts/{contact_id},update-a-contact,Update a contact,"Updates a contact.
+
+Required scope: `contacts:write`"
+ex5-0051,frontapp.com,GET,/contacts/{contact_id}/conversations,list-contact-conversations,List contact conversations,"List the conversations for a contact in reverse chronological order (newest first). For more advanced filtering, see the [search endpoint](https://dev.frontapp.com/reference/conversations#search-conversations).
+
+
+Required scope: `conversations:read`"
+ex5-0052,frontapp.com,DELETE,/contacts/{contact_id}/handles,delete-contact-handle,Delete contact handle,"Remove a handle from a contact.
+
+Required scope: `contacts:write`"
+ex5-0053,frontapp.com,POST,/contacts/{contact_id}/handles,add-contact-handle,Add contact handle,"Adds a new handle to a contact.
+
+Required scope: `contacts:write`"
+ex5-0054,frontapp.com,GET,/contacts/{contact_id}/notes,list-notes,List notes,"List the notes added to a contact.
+
+Required scope: `contacts:read`"
+ex5-0055,frontapp.com,POST,/contacts/{contact_id}/notes,add-note,Add note,"Create a new note on a contact.
+
+Required scope: `contacts:write`"
+ex5-0056,frontapp.com,GET,/conversations,list-conversations,List conversations,"List the conversations in the company in reverse chronological order (most recently updated first). The order will respect your company's [bump settings](https://help.front.com/t/y729th/customize-when-conversations-bump-up), which determine when conversations bump to the top. For more advanced filtering, see the [search endpoint](https://dev.frontapp.com/reference/conversations#search-conversations).
+
+
+Required scope: `conversations:read`"
+ex5-0057,frontapp.com,POST,/conversations,create-conversation,Create discussion/task conversation,"Create a new [conversation](https://dev.frontapp.com/reference/conversations#creating-a-new-conversation) of type discussion or task. Both types only support comments. If you want to create a conversation that supports messages, use the [Create message](https://dev.frontapp.com/reference/post_channels-channel-id-messages) endpoint. If you want to add a comment to an existing conversation, use the [Add comment](https://dev.frontapp.com/reference/post_conversations-conversation-id-comments) endpoint.
+
+Required scope: `conversations:write`"
+ex5-0058,frontapp.com,GET,/conversations/custom_fields,list-conversation-custom-fields,List Conversation's custom fields,"Lists customer-managed custom fields that can be attached to a Conversation.
+Front-managed system fields are excluded.
+
+
+Required scope: `custom_fields:read`"
+ex5-0059,frontapp.com,GET,/conversations/search/{query},search-conversations,Search conversations,"Search for conversations. Response will include a count of total matches and an array of conversations in descending order by last activity.
+See the [search syntax documentation](https://dev.frontapp.com/docs/search-1) for usage examples.
+**Note:** This endpoint is subject to [proportional rate limiting](https://dev.frontapp.com/docs/rate-limiting#additional-proportional-limiting) at 40% of your company's rate limit.
+
+
+Required scope: `conversations:read`"
+ex5-0060,frontapp.com,DELETE,/conversations/{conversation_id},delete-conversation,Delete conversation,"Permanently delete a conversation. The conversation must have status ""trashed""
+(in the trash) before it can be permanently deleted. This action cannot be undone.
+
+
+Required scope: `conversations:delete`"
+ex5-0061,frontapp.com,GET,/conversations/{conversation_id},get-conversation-by-id,Get conversation,"Fetch a conversation.
+
+
+Required scope: `conversations:read`"
+ex5-0062,frontapp.com,PATCH,/conversations/{conversation_id},update-conversation,Update conversation,"Update a conversation.
+
+Required scope: `conversations:write`"
+ex5-0063,frontapp.com,PUT,/conversations/{conversation_id}/assignee,update-conversation-assignee,Update conversation assignee,"Assign or unassign a conversation.
+
+Required scope: `conversations:write`"
+ex5-0064,frontapp.com,GET,/conversations/{conversation_id}/comments,list-conversation-comments,List conversation comments,"List the comments in a conversation in reverse chronological order (newest first).
+
+Required scope: `comments:read`"
+ex5-0065,frontapp.com,POST,/conversations/{conversation_id}/comments,add-comment,Add comment,"Add a comment to a [conversation](https://dev.frontapp.com/reference/conversations). If you want to create a new comment-only conversation, use the [Create discussion conversation](https://dev.frontapp.com/reference/create-conversation) endpoint.
+
+Required scope: `comments:write`"
+ex5-0066,frontapp.com,GET,/conversations/{conversation_id}/drafts,list-conversation-drafts,List conversation drafts,"List the drafts in a conversation.
+
+Required scope: `drafts:read`"
+ex5-0067,frontapp.com,POST,/conversations/{conversation_id}/drafts,create-draft-reply,Create draft reply,"Create a new draft as a reply to the last message in the conversation.
+
+Required scope: `drafts:write`"
+ex5-0068,frontapp.com,GET,/conversations/{conversation_id}/events,list-conversation-events,List conversation events,"List the events that occured for a conversation in reverse chronological order (newest first). The order will respect your company's [bump settings](https://help.front.com/t/y729th/customize-when-conversations-bump-up), which determine when conversations bump to the top.
+
+Required scope: `events:*:read`"
+ex5-0069,frontapp.com,DELETE,/conversations/{conversation_id}/followers,delete-conversation-followers,Delete conversation followers,"Removes teammates from the list of followers of a conversation.
+
+Required scope: `conversations:write`"
+ex5-0070,frontapp.com,GET,/conversations/{conversation_id}/followers,list-conversation-followers,List conversation followers,"List the teammates following a conversation.
+
+Required scope: `teammates:read`"
+ex5-0071,frontapp.com,POST,/conversations/{conversation_id}/followers,add-conversation-followers,Add conversation followers,"Adds teammates to the list of followers of a conversation.
+
+Required scope: `conversations:write`"
+ex5-0072,frontapp.com,GET,/conversations/{conversation_id}/inboxes,list-conversation-inboxes,List conversation inboxes,"List the inboxes in which a conversation is listed.
+
+Required scope: `inboxes:read`"
+ex5-0073,frontapp.com,GET,/conversations/{conversation_id}/linked_conversations,list-linked-conversations,List linked conversations,"List the conversations linked to the original conversation in the path. Conversations the requester cannot access are omitted,
+so a page can hold fewer results than requested while more remain.
+
+
+Required scope: `conversations:read`"
+ex5-0074,frontapp.com,POST,/conversations/{conversation_id}/linked_conversations,create-linked-conversations,Link conversations,"Adds conversations to the link group of the conversation in the path, which becomes the original conversation of the group.
+If it belongs to no group yet, a new one is formed. A conversation belongs to at most one group, and a conversation that
+was linked to another one cannot become an original conversation.
+
+
+Required scope: `conversations:write`"
+ex5-0075,frontapp.com,DELETE,/conversations/{conversation_id}/links,remove-conversation-links,Remove conversation links,"Removes one or more links to a conversation.
+For more information on links, see the [Links](https://dev.frontapp.com/reference/links) topic.
+
+
+Required scope: `conversations:write`"
+ex5-0076,frontapp.com,POST,/conversations/{conversation_id}/links,add-conversation-link,Add conversation link,"Adds one or more links to a conversation
+For more information on links, see the [Links](https://dev.frontapp.com/reference/links) topic.
+
+
+Required scope: `conversations:write`"
+ex5-0077,frontapp.com,GET,/conversations/{conversation_id}/messages,list-conversation-messages,List conversation messages,"List the messages in a conversation in reverse chronological order (newest first).
+
+Required scope: `messages:read`"
+ex5-0078,frontapp.com,POST,/conversations/{conversation_id}/messages,create-message-reply,Create message reply,"Reply to a conversation by sending a message and appending it to the conversation.
+
+Required scope: `messages:send`"
+ex5-0079,frontapp.com,PATCH,/conversations/{conversation_id}/reminders,update-conversation-reminders,Update conversation reminders,"Snooze or unsnooze a conversation for the provided user.
+For private conversations, reminders can only be created and edited through the API for teammates that own the conversation.
+For shared conversations, reminders created and edited through the API are shared for all teammates within the shared inbox(es) that the conversation belongs to.
+
+
+Required scope: `conversations:write`"
+ex5-0080,frontapp.com,DELETE,/conversations/{conversation_id}/tags,remove-conversation-tag,Remove conversation tag,"Removes one or more tags to a conversation
+
+Required scope: `conversations:write`"
+ex5-0081,frontapp.com,POST,/conversations/{conversation_id}/tags,add-conversation-tag,Add conversation tag,"Adds one or more tags to a conversation
+
+Required scope: `conversations:write`"
+ex5-0082,frontapp.com,GET,/custom_fields,list-custom-fields,List Contact's custom fields,"Lists the custom fields that can be attached to a Contact.
+
+> ⚠️ Deprecated endpoint
+>
+> This endpoint has been deprecated. Please use the fully compatible `GET /contacts/custom_fields` endpoint instead.
+
+
+Required scope: `custom_fields:read`"
+ex5-0083,frontapp.com,GET,/download/{attachment_link_id},download-attachment,Download attachment,"Download an attachment file.
+
+Required scope: `attachments:read`"
+ex5-0084,frontapp.com,DELETE,/drafts/{draft_id},delete-draft,Delete draft,"Delete a draft message.
+
+Required scope: `drafts:delete`"
+ex5-0085,frontapp.com,PATCH,/drafts/{message_id},edit-draft,Edit draft,"Edit a draft message.
+
+Required scope: `drafts:write`"
+ex5-0086,frontapp.com,GET,/events,list-events,List events,"Lists all the detailed events which occurred in the inboxes of the company ordered in reverse chronological order (newest first).
+Refer to the [Events](https://dev.frontapp.com/reference/events) topic for more information, including sorting and filtering.
+
+
+Required scope: `events:*:read`"
+ex5-0087,frontapp.com,GET,/events/{event_id},get-event,Get event,"Fetch an event.
+Refer to the [Events](https://dev.frontapp.com/reference/events) topic for more information, including sorting and filtering.
+
+
+Required scope: `events:*:read`"
+ex5-0088,frontapp.com,GET,/inboxes,list-inboxes,List inboxes,"List the inboxes of the company.
+
+Required scope: `inboxes:read`"
+ex5-0089,frontapp.com,POST,/inboxes,create-inbox,Create inbox,"Create an inbox in the oldest active workspace that the token has access to. If you need to specify the workspace, we recommend using the [Create team inbox](https://dev.frontapp.com/reference/create-team-inbox) endpoint instead.
+
+Required scope: `inboxes:write`"
+ex5-0090,frontapp.com,GET,/inboxes/custom_fields,list-inbox-custom-fields,List Inbox's custom fields,"Lists the custom fields that can be attached to an Inbox.
+
+Required scope: `custom_fields:read`"
+ex5-0091,frontapp.com,GET,/inboxes/{inbox_id},get-inbox,Get inbox,"Fetch an inbox.
+
+Required scope: `inboxes:read`"
+ex5-0092,frontapp.com,GET,/inboxes/{inbox_id}/channels,list-inbox-channels,List inbox channels,"List the channels in an inbox.
+
+Required scope: `channels:read`"
+ex5-0093,frontapp.com,POST,/inboxes/{inbox_id}/channels,create-a-channel,Create a channel,"Create a channel in an inbox.
+
+Required scope: `channels:write`"
+ex5-0094,frontapp.com,GET,/inboxes/{inbox_id}/conversations,list-inbox-conversations,List inbox conversations,"List the conversations in an inbox. For more advanced filtering, see the [search endpoint](https://dev.frontapp.com/reference/conversations#search-conversations).
+
+
+Required scope: `conversations:read`"
+ex5-0095,frontapp.com,POST,/inboxes/{inbox_id}/imported_messages,import-inbox-message,Import message,"Use this endpoint to import conversations into Front without sending data through a channel. Typical use cases include importing historical conversations or creating new conversations from non-standard sources, such as web form submissions that can't use the default Form channel (for example, forms that don't have static URLs or form providers that send email notifications after submission). Avoid using this endpoint for conversations that can be handled by a dedicated Front channel—instead, use the [Create message](https://dev.frontapp.com/reference/create-message) endpoint to send (rather than import) a new message.
+
+Required scope: `messages:write`"
+ex5-0096,frontapp.com,DELETE,/inboxes/{inbox_id}/teammates,removes-inbox-access,Removes inbox access,"Remove access of one or more teammates from an inbox.
+
+Required scope: `inboxes:write`"
+ex5-0097,frontapp.com,GET,/inboxes/{inbox_id}/teammates,list-inbox-access,List inbox access,"List the teammates with access to an inbox.
+
+Required scope: `teammates:read`"
+ex5-0098,frontapp.com,POST,/inboxes/{inbox_id}/teammates,add-inbox-access,Add inbox access,"Give access to one or more teammates to an inbox.
+
+Required scope: `inboxes:write`"
+ex5-0099,frontapp.com,DELETE,/knowledge_base_articles/{article_id},delete-an-article,Delete an article,"Deletes an article and all its content and translations.
+
+Required scope: `knowledge_bases:delete`"
+ex5-0100,frontapp.com,GET,/knowledge_base_articles/{article_id},get-a-knowledge-base-article,Get a knowledge base article,"Fetches a knowledge base article.
+
+Required scope: `knowledge_bases:read`"
+ex5-0101,frontapp.com,GET,/knowledge_base_articles/{article_id}/content,get-knowledge-base-article-with-content-in-default-locale,Get knowledge base article with content in default locale,"Fetches a knowledge base article with content in the default locale.
+
+Required scope: `knowledge_bases:read`"
+ex5-0102,frontapp.com,PATCH,/knowledge_base_articles/{article_id}/content,update-article-content-in-default-locale,Update article content in default locale.,"Updates an article's content in the default locale
+
+Required scope: `knowledge_bases:write`"
+ex5-0103,frontapp.com,GET,/knowledge_base_articles/{article_id}/download/{attachment_id},download-attachment-from-an-article,Download attachment from an article,"Downloads the attachment from an article.
+
+Required scope: `knowledge_bases:read`"
+ex5-0104,frontapp.com,GET,/knowledge_base_articles/{article_id}/locales/{locale}/content,get-knowledge-base-article-with-content-in-specified-locale,Get knowledge base article with content in specified locale,"Fetches a knowledge base article with content for a given locale.
+
+Required scope: `knowledge_bases:read`"
+ex5-0105,frontapp.com,PATCH,/knowledge_base_articles/{article_id}/locales/{locale}/content,update-article-content-in-specified-locale,Update article content in specified locale,"Updates an article's content for a given locale.
+
+Required scope: `knowledge_bases:write`"
+ex5-0106,frontapp.com,DELETE,/knowledge_base_categories/{category_id},delete-a-knowledge-base-category,Delete a knowledge base category,"Deletes a knowledge base category.
+
+> ⚠️ Warning
+>
+> When a category is deleted, all articles in the category are also deleted.
+
+
+Required scope: `knowledge_bases:delete`"
+ex5-0107,frontapp.com,GET,/knowledge_base_categories/{category_id},get-a-knowledge-base-category,Get a knowledge base category,"Fetches a knowledge base category.
+
+Required scope: `knowledge_bases:read`"
+ex5-0108,frontapp.com,GET,/knowledge_base_categories/{category_id}/articles,list-articles-in-a-category,List articles in a category,"List articles in a category.
+
+Required scope: `knowledge_bases:read`"
+ex5-0109,frontapp.com,GET,/knowledge_base_categories/{category_id}/content,get-knowledge-base-category-content-in-default-locale,Get knowledge base category content in default locale,"Fetches a knowledge base category with content in the default locale.
+
+Required scope: `knowledge_bases:read`"
+ex5-0110,frontapp.com,PATCH,/knowledge_base_categories/{category_id}/content,update-knowledge-base-category-in-default-locale,Update knowledge base category in default locale,"Updates a knowledge base category in the default locale. Will republish the knowledge base if the knowledge base is currently published.
+
+Required scope: `knowledge_bases:write`"
+ex5-0111,frontapp.com,GET,/knowledge_base_categories/{category_id}/locales/{locale}/content,get-knowledge-base-category-with-content-in-specified-locale,Get knowledge base category with content in specified locale,"Fetches a knowledge base category with content for a given locale.
+
+Required scope: `knowledge_bases:read`"
+ex5-0112,frontapp.com,PATCH,/knowledge_base_categories/{category_id}/locales/{locale}/content,update-knowledge-base-category-in-specified-locale,Update knowledge base category in specified locale,"Updates a knowledge base category for a given locale. Will republish the knowledge base if the knowledge base is currently published.
+
+Required scope: `knowledge_bases:write`"
+ex5-0113,frontapp.com,GET,/knowledge_bases,list-knowledge-bases,List knowledge bases,"List the knowledge bases of the company.
+
+Required scope: `knowledge_bases:read`"
+ex5-0114,frontapp.com,POST,/knowledge_bases,create-a-knowledge-base,Create a knowledge base,"Creates a knowledge base.
+
+Required scope: `knowledge_bases:write`"
+ex5-0115,frontapp.com,GET,/knowledge_bases/{knowledge_base_id},get-a-knowledge-base,Get a knowledge base,"Fetches a knowledge base.
+
+Required scope: `knowledge_bases:read`"
+ex5-0116,frontapp.com,GET,/knowledge_bases/{knowledge_base_id}/articles,list-articles-in-a-knowledge-base,List articles in a knowledge base,"List articles in a knowledge base
+
+Required scope: `knowledge_bases:read`"
+ex5-0117,frontapp.com,POST,/knowledge_bases/{knowledge_base_id}/articles,create-article-in-a-knowledge-base-in-default-locale,Create article in a knowledge base in default locale,"Creates an article in a knowledge base in the default locale.
+
+Required scope: `knowledge_bases:write`"
+ex5-0118,frontapp.com,GET,/knowledge_bases/{knowledge_base_id}/categories,list-categories-in-a-knowledge-base,List categories in a knowledge base,"List categories in a knowledge base.
+
+Required scope: `knowledge_bases:read`"
+ex5-0119,frontapp.com,POST,/knowledge_bases/{knowledge_base_id}/categories,create-knowledge-base-category-in-default-locale,Create knowledge base category in default locale,"Creates a knowledge base category in the default locale.
+
+Required scope: `knowledge_bases:write`"
+ex5-0120,frontapp.com,GET,/knowledge_bases/{knowledge_base_id}/content,get-a-knowledge-base-with-content-in-default-locale,Get a knowledge base with content in default locale,"Fetches a knowledge base with its content in the default locale.
+
+Required scope: `knowledge_bases:read`"
+ex5-0121,frontapp.com,PATCH,/knowledge_bases/{knowledge_base_id}/content,update-knowledge-base-in-default-locale,Update knowledge base in default locale,"Updates a knowledge base in the default locale. Will republish the knowledge base if the knowledge base is currently published.
+
+Required scope: `knowledge_bases:write`"
+ex5-0122,frontapp.com,POST,/knowledge_bases/{knowledge_base_id}/locales/{locale}/articles,create-article-in-a-knowledge-base-in-specified-locale,Create article in a knowledge base in specified locale,"Create an article for a given locale in a knowledge base.
+
+Required scope: `knowledge_bases:write`"
+ex5-0123,frontapp.com,POST,/knowledge_bases/{knowledge_base_id}/locales/{locale}/categories,create-knowledge-base-category-in-specified-locale,Create knowledge base category in specified locale,"Creates a knowledge base category for a given locale.
+
+Required scope: `knowledge_bases:write`"
+ex5-0124,frontapp.com,GET,/knowledge_bases/{knowledge_base_id}/locales/{locale}/content,get-a-knowledge-base-with-content-in-specified-locale,Get a knowledge base with content in specified locale,"Fetches a knowledge base with its content for a given locale.
+
+Required scope: `knowledge_bases:read`"
+ex5-0125,frontapp.com,PATCH,/knowledge_bases/{knowledge_base_id}/locales/{locale}/content,update-knowledge-base-in-specified-locale,Update knowledge base in specified locale,"Updates a knowledge base for a given locale. Will republish the knowledge base if the knowledge base is currently published.
+
+Required scope: `knowledge_bases:write`"
+ex5-0126,frontapp.com,GET,/links,list-links,List links,"List the links of the company paginated by id. Allows filtering by link type via the q.types param.
+These links include application objects; for more details, see the [Links](https://dev.frontapp.com/reference/links) topic.
+
+
+Required scope: `links:read`"
+ex5-0127,frontapp.com,POST,/links,create-link,Create link,"Create a link. You must supply either `pattern` or `external_url` in the request, but not both (`pattern` is for application objects while `external_url` is for standard links). If `pattern` is provided, the API call updates the application objects matching the exact pattern. Keep in mind this endpoint only creates or updates an existing link from an application object. It does not create new application objects. If the link is resolved to an installed links integration, any name retrieved from the integration will override the provided name in the request.
+
+Required scope: `links:write`"
+ex5-0128,frontapp.com,GET,/links/custom_fields,list-link-custom-fields,List Link's custom fields,"Lists the custom fields that can be attached to a Link.
+For more information on links, see the [Links](https://dev.frontapp.com/reference/links) topic.
+
+
+Required scope: `custom_fields:read`"
+ex5-0129,frontapp.com,GET,/links/{link_id},get-link,Get link,"Fetch a link.
+For more information on links, see the [Links](https://dev.frontapp.com/reference/links) topic.
+
+
+Required scope: `links:read`"
+ex5-0130,frontapp.com,PATCH,/links/{link_id},update-a-link,Update a link,"Update a link.
+For more information on links, see the [Links](https://dev.frontapp.com/reference/links) topic.
+
+
+Required scope: `links:write`"
+ex5-0131,frontapp.com,GET,/links/{link_id}/conversations,list-link-conversations,List link conversations,"List the conversations linked to a specific link. For more advanced filtering, see the [search endpoint](https://dev.frontapp.com/reference/conversations#search-conversations).
+For more information on links, see the [Links](https://dev.frontapp.com/reference/links) topic.
+
+
+Required scope: `conversations:read`"
+ex5-0132,frontapp.com,GET,/me,api-token-details,API Token details,Fetch the details of the API token.
+ex5-0133,frontapp.com,GET,/message_template_folders,list-folders,List folders,"List the message template folders.
+
+Required scope: `message_templates:read`"
+ex5-0134,frontapp.com,POST,/message_template_folders,create-folder,Create folder,"Create a new message template folder in the oldest active workspace that the token has access to. If you need to specify the workspace, we recommend using the [Create team folder](https://dev.frontapp.com/reference/create-team-folder) endpoint instead.
+
+Required scope: `message_templates:write`"
+ex5-0135,frontapp.com,DELETE,/message_template_folders/{message_template_folder_id},delete-folder,Delete folder,"Delete a message template folder and child folders/templates
+
+Required scope: `message_templates:delete`"
+ex5-0136,frontapp.com,GET,/message_template_folders/{message_template_folder_id},get-folder,Get folder,"Fetch a message template folder.
+
+Required scope: `message_templates:read`"
+ex5-0137,frontapp.com,PATCH,/message_template_folders/{message_template_folder_id},update-folder,Update folder,"Update message template folder
+
+Required scope: `message_templates:write`"
+ex5-0138,frontapp.com,GET,/message_template_folders/{message_template_folder_id}/message_template_folders,get-child-folders,Get child folders,"Fetch the child message templates folders of a message template folder.
+
+Required scope: `message_templates:read`"
+ex5-0139,frontapp.com,POST,/message_template_folders/{message_template_folder_id}/message_template_folders,create-child-folder,Create child folder,"Create a new message template folder as a child of the given folder
+
+Required scope: `message_templates:write`"
+ex5-0140,frontapp.com,GET,/message_template_folders/{message_template_folder_id}/message_templates,get-child-templates,Get child templates,"Fetch the child message templates of a message template folder.
+
+Required scope: `message_templates:read`"
+ex5-0141,frontapp.com,POST,/message_template_folders/{message_template_folder_id}/message_templates,create-child-template,Create child template,"Create a new message template as a child of the given folder
+
+Required scope: `message_templates:write`"
+ex5-0142,frontapp.com,GET,/message_templates,list-message-templates,List message templates,"List the message templates.
+
+Required scope: `message_templates:read`"
+ex5-0143,frontapp.com,POST,/message_templates,create-message-template,Create message template,"Create a new message template in the oldest active workspace that the token has access to. If you need to specify the workspace, we recommend using the [Create team message template](https://dev.frontapp.com/reference/create-team-message-template) endpoint instead.
+
+Required scope: `message_templates:write`"
+ex5-0144,frontapp.com,DELETE,/message_templates/{message_template_id},delete-message-template,Delete message template,"Delete a message template
+
+Required scope: `message_templates:delete`"
+ex5-0145,frontapp.com,GET,/message_templates/{message_template_id},get-message-template,Get message template,"Fetch a message template.
+
+Required scope: `message_templates:read`"
+ex5-0146,frontapp.com,PATCH,/message_templates/{message_template_id},update-message-template,Update message template,"Update a message template.
+
+Required scope: `message_templates:write`"
+ex5-0147,frontapp.com,GET,/message_templates/{message_template_id}/download/{attachment_link_id},download-attachment-for-a-message-template,Download attachment for a message template,"Download an attachment file for a given message template ID
+
+Required scope: `attachments:read`"
+ex5-0148,frontapp.com,GET,/messages/{message_id},get-message,Get message,"Fetch a message.
+
+> ℹ️ The HTTP Header `Accept` can be used to request the message in a different format.
+> By default, Front will return the documented JSON response. By requesting `message/rfc822`, the response will contain the message in the EML format (for email messages only).
+
+
+Required scope: `messages:read`"
+ex5-0149,frontapp.com,GET,/messages/{message_id}/download/{attachment_link_id},download-attachment-for-a-message,Download attachment for a message,"Download an attachment file for a given message id. Should be used by partner channels.
+
+Required scope: `attachments:read`"
+ex5-0150,frontapp.com,GET,/messages/{message_id}/seen,get-message-seen-status,Get message seen status,"Get the seen receipts for the given message. If no seen-by information is available, there will be a single entry for the first time the message was seen by any recipient. If seen-by information is available, there will be an entry for each recipient who has seen the message.
+
+Required scope: `messages:read`"
+ex5-0151,frontapp.com,POST,/messages/{message_id}/seen,mark-message-seen,Mark message seen,"Mark an outbound message from Front as seen. Note, the message seen route should only be called in response to an actual end-user's message-seen action. In accordance with this behavior, the route is rate limited to 10 requests per message per hour.
+
+Required scope: `messages:write`"
+ex5-0152,frontapp.com,GET,/rules,list-rules,List rules,"List the rules of the company.
+
+Required scope: `rules:read`"
+ex5-0153,frontapp.com,GET,/rules/{rule_id},get-rule,Get rule,"Fetch a rule.
+
+Required scope: `rules:read`"
+ex5-0154,frontapp.com,GET,/shifts,list-shifts,List Shifts,"List the shifts.
+
+Required scope: `shifts:read`"
+ex5-0155,frontapp.com,POST,/shifts,create-shift,Create shift,"Create a shift in the oldest active workspace that the token has access to. If you need to specify the workspace, we recommend using the [Create team shift](https://dev.frontapp.com/reference/create-team-shift) endpoint instead.
+
+Required scope: `shifts:write`"
+ex5-0156,frontapp.com,GET,/shifts/{shift_id},get-shift,Get shift,"Fetch a shift.
+
+Required scope: `shifts:read`"
+ex5-0157,frontapp.com,PATCH,/shifts/{shift_id},update-shift,Update shift,"Update a shift.
+
+Required scope: `shifts:write`"
+ex5-0158,frontapp.com,DELETE,/shifts/{shift_id}/teammates,remove-teammates-from-shift,Remove teammates from shift,"Remove teammates from a shift.
+
+Required scope: `shifts:write`"
+ex5-0159,frontapp.com,GET,/shifts/{shift_id}/teammates,list-shifts-teammates,List shift's teammates,"List the teammates assigned to a shift.
+
+Required scope: `teammates:read`"
+ex5-0160,frontapp.com,POST,/shifts/{shift_id}/teammates,add-teammates-to-shift,Add teammates to shift,"Add teammates to a shift. The selected teammates must be in the team that owns the shift.
+
+Required scope: `shifts:write`"
+ex5-0161,frontapp.com,DELETE,/signatures/{signature_id},delete-signature,Delete signature,"Delete signature
+
+Required scope: `signatures:delete`"
+ex5-0162,frontapp.com,GET,/signatures/{signature_id},get-signatures,Get signatures,"Get the given signature.
+
+Required scope: `signatures:read`"
+ex5-0163,frontapp.com,PATCH,/signatures/{signature_id},update-signature,Update signature,"Update signature
+
+Required scope: `signatures:write`"
+ex5-0164,frontapp.com,GET,/tags,list-tags,List tags,"List all the tags of the company that the API token has access to, whether they be company tags, team tags, or teammate tags.
+
+Required scope: `tags:read`"
+ex5-0165,frontapp.com,POST,/tags,create-tag,Create tag,"Create a tag in the oldest team (workspace). This is a legacy endpoint. Use the Create company tag, Create team tag, or Create teammate tag endpoints instead.
+
+Required scope: `tags:write`"
+ex5-0166,frontapp.com,DELETE,/tags/{tag_id},delete-tag,Delete tag,"Delete a tag.
+
+Required scope: `tags:delete`"
+ex5-0167,frontapp.com,GET,/tags/{tag_id},get-tag,Get tag,"Fetch a tag.
+
+Required scope: `tags:read`"
+ex5-0168,frontapp.com,PATCH,/tags/{tag_id},update-a-tag,Update a tag,"Update a tag.
+
+Required scope: `tags:write`"
+ex5-0169,frontapp.com,GET,/tags/{tag_id}/children,list-tag-children,List tag children,"List the children of a specific tag.
+
+Required scope: `tags:read`"
+ex5-0170,frontapp.com,POST,/tags/{tag_id}/children,create-child-tag,Create child tag,"Creates a child tag.
+
+Required scope: `tags:write`"
+ex5-0171,frontapp.com,GET,/tags/{tag_id}/conversations,list-tagged-conversations,List tagged conversations,"List the conversations tagged with a tag. For more advanced filtering, see the [search endpoint](https://dev.frontapp.com/reference/conversations#search-conversations).
+
+
+Required scope: `conversations:read`"
+ex5-0172,frontapp.com,GET,/teammate_groups,list-company-teammate-groups,List teammate groups,"List the teammate groups in the company.
+
+Required scope: `teammate_groups:read`"
+ex5-0173,frontapp.com,POST,/teammate_groups,create-company-teammate-group,Create teammate group,"Create a new teammate group.
+
+Required scope: `teammate_groups:write`"
+ex5-0174,frontapp.com,DELETE,/teammate_groups/{teammate_group_id},delete-company-teammate-group,Delete teammate group,"Deletes a teammate group. Note - You cannot delete a teammate group that is managed by SCIM.
+
+Required scope: `teammate_groups:delete`"
+ex5-0175,frontapp.com,GET,/teammate_groups/{teammate_group_id},get-company-teammate-group,Get teammate group,"Fetch a teammate group.
+
+Required scope: `teammate_groups:read`"
+ex5-0176,frontapp.com,PATCH,/teammate_groups/{teammate_group_id},update-a-company-teammate-group,Update a teammate group,"Updates a teammate group. Note - You cannot modify a teammate group that is managed by SCIM.
+
+Required scope: `teammate_groups:write`"
+ex5-0177,frontapp.com,DELETE,/teammate_groups/{teammate_group_id}/inboxes,remove-company-teammate-group-team-inboxes,Remove teammate group team inboxes,"Unlinks non-public inboxes from the teammate group.
+
+Required scope: `teammate_groups:write`"
+ex5-0178,frontapp.com,GET,/teammate_groups/{teammate_group_id}/inboxes,list-company-teammate-group-team-inboxes,List teammate group team inboxes,"List inboxes that the teammate group has access to via its associated teams.
+
+Required scope: `inboxes:read`"
+ex5-0179,frontapp.com,POST,/teammate_groups/{teammate_group_id}/inboxes,add-company-teammate-group-team-inboxes,Add teammate group team inboxes,"Links non-public inboxes to the teammate group. The inbox must be part of a team that has been added to the teammate group.
+
+Required scope: `teammate_groups:write`"
+ex5-0180,frontapp.com,DELETE,/teammate_groups/{teammate_group_id}/teammates,remove-company-teammate-group-teammates,Remove teammate group teammates,"Remove teammate group teammates. Note - You cannot modify a teammate group that is managed by SCIM.
+
+Required scope: `teammate_groups:write`"
+ex5-0181,frontapp.com,GET,/teammate_groups/{teammate_group_id}/teammates,list-company-teammate-group-teammates,List teammate group teammates,"List teammate group teammates.
+
+Required scope: `teammates:read`"
+ex5-0182,frontapp.com,POST,/teammate_groups/{teammate_group_id}/teammates,add-company-teammate-group-teammates,Add teammate group teammates,"Add teammate group teammates. Note - You cannot modify a teammate group that is managed by SCIM.
+
+Required scope: `teammate_groups:write`"
+ex5-0183,frontapp.com,DELETE,/teammate_groups/{teammate_group_id}/teams,remove-company-teammate-group-teams,Remove teammate group teams,"Remove teams from the teammate group. Unlinks to any associated team inboxes.
+
+Required scope: `teammate_groups:write`"
+ex5-0184,frontapp.com,GET,/teammate_groups/{teammate_group_id}/teams,list-company-teammate-group-teams,List teammate group teams,"List teams added to the teammate group. Any teams added to the teammate group will automatically link public inboxes.
+
+Required scope: `teams:read`"
+ex5-0185,frontapp.com,POST,/teammate_groups/{teammate_group_id}/teams,add-company-teammate-group-teams,Add teammate group teams,"Adds teams to the teammate group. Any teams added to the teammate group will automatically link public inboxes. Non-public inboxes can be added to the teammate group separately.
+
+Required scope: `teammate_groups:write`"
+ex5-0186,frontapp.com,GET,/teammates,list-teammates,List teammates,"List the teammates in the company.
+
+Required scope: `teammates:read`"
+ex5-0187,frontapp.com,GET,/teammates/custom_fields,list-teammate-custom-fields,List Teammate's custom fields,"Lists the custom fields that can be attached to a Teammate.
+
+Required scope: `custom_fields:read`"
+ex5-0188,frontapp.com,GET,/teammates/{teammate_id},get-teammate,Get teammate,"Fetch a teammate.
+
+Required scope: `teammates:read`"
+ex5-0189,frontapp.com,PATCH,/teammates/{teammate_id},update-teammate,Update teammate,"Update a teammate.
+
+Required scope: `teammates:write`"
+ex5-0190,frontapp.com,GET,/teammates/{teammate_id}/channels,list-teammate-channels,List teammate channels,"List the channels of a teammate.
+
+Required scope: `channels:read`"
+ex5-0191,frontapp.com,GET,/teammates/{teammate_id}/contact_groups,list-teammate-groups,List teammate groups,"List the contact groups belonging to the requested teammate.
+
+> ⚠️ Deprecated endpoint
+>
+> This endpoint has been deprecated. Please use the compatible contact list endpoints instead.
+> - `GET /teammates/{teammate_id}/contact_lists`.
+
+
+Required scope: `contacts:read`"
+ex5-0192,frontapp.com,POST,/teammates/{teammate_id}/contact_groups,create-teammate-group,Create teammate group,"Create a new contact group for the requested teammate.
+
+> ⚠️ Deprecated endpoint
+>
+> This endpoint has been deprecated. Please use the compatible contact list endpoints instead.
+> - `POST /teammates/{teammate_id}/contact_lists`.
+
+
+Required scope: `contacts:write`"
+ex5-0193,frontapp.com,GET,/teammates/{teammate_id}/contact_lists,list-teammate-contact-lists,List teammate contact lists,"List the contact lists belonging to the requested teammate.
+
+Required scope: `contacts:read`"
+ex5-0194,frontapp.com,POST,/teammates/{teammate_id}/contact_lists,create-teammate-contact-list,Create teammate contact list,"Create a new contact list for the requested teammate.
+
+Required scope: `contacts:write`"
+ex5-0195,frontapp.com,GET,/teammates/{teammate_id}/contacts,list-teammate-contacts,List teammate contacts,"List the contacts of a teammate.
+
+Required scope: `contacts:read`"
+ex5-0196,frontapp.com,POST,/teammates/{teammate_id}/contacts,create-teammate-contact,Create teammate contact,"Create a contact for a teammate.
+
+Required scope: `contacts:write`"
+ex5-0197,frontapp.com,GET,/teammates/{teammate_id}/conversations,list-assigned-conversations,List assigned conversations,"List the conversations assigned to a teammate in reverse chronological order (most recently updated first). For more advanced filtering, see the [search endpoint](https://dev.frontapp.com/reference/conversations#search-conversations).
+
+
+Required scope: `conversations:read`"
+ex5-0198,frontapp.com,GET,/teammates/{teammate_id}/inboxes,list-teammate-inboxes,List teammate inboxes,"Returns list of inboxes the teammate has access to.
+
+Required scope: `inboxes:read`"
+ex5-0199,frontapp.com,GET,/teammates/{teammate_id}/message_template_folders,list-teammate-folders,List teammate folders,"List the message template folders belonging to the requested teammate.
+
+Required scope: `message_templates:read`"
+ex5-0200,frontapp.com,POST,/teammates/{teammate_id}/message_template_folders,create-teammate-folder,Create teammate folder,"Create a new message template folder belonging to the requested teammate.
+
+Required scope: `message_templates:write`"
+ex5-0201,frontapp.com,GET,/teammates/{teammate_id}/message_templates,list-teammate-message-templates,List teammate message templates,"List the message templates belonging to the requested teammate.
+
+Required scope: `message_templates:read`"
+ex5-0202,frontapp.com,POST,/teammates/{teammate_id}/message_templates,create-teammate-message-template,Create teammate message template,"Create a new message template for the given teammate
+
+Required scope: `message_templates:write`"
+ex5-0203,frontapp.com,GET,/teammates/{teammate_id}/private_inboxes,list-teammate-private-inboxes,List teammate private inboxes,"List the private inboxes of a teammate.
+
+Required scope: `inboxes:read`"
+ex5-0204,frontapp.com,POST,/teammates/{teammate_id}/private_inboxes,create-teammate-private-inbox,Create teammate private inbox,"Create a private inbox for a teammate.
+
+Required scope: `inboxes:write`"
+ex5-0205,frontapp.com,GET,/teammates/{teammate_id}/rules,list-teammate-rules,List teammate rules,"List the rules of a teammate.
+
+Required scope: `rules:read`"
+ex5-0206,frontapp.com,GET,/teammates/{teammate_id}/shifts,list-teammate-shifts,List Teammate Shifts,"Lists all the shifts for the teammate.
+
+Required scope: `shifts:read`"
+ex5-0207,frontapp.com,GET,/teammates/{teammate_id}/signatures,list-teammate-signatures,List teammate signatures,"List the signatures belonging to the given teammate.
+
+Required scope: `signatures:read`"
+ex5-0208,frontapp.com,POST,/teammates/{teammate_id}/signatures,create-teammate-signature,Create teammate signature,"Create a new signature for the given teammate
+
+Required scope: `signatures:write`"
+ex5-0209,frontapp.com,GET,/teammates/{teammate_id}/tags,list-teammate-tags,List teammate tags,"List the tags for a teammate.
+
+Required scope: `tags:read`"
+ex5-0210,frontapp.com,POST,/teammates/{teammate_id}/tags,create-teammate-tag,Create teammate tag,"Create a tag for a teammate.
+
+Required scope: `tags:write`"
+ex5-0211,frontapp.com,GET,/teammates/{teammate_id}/time_offs,list-teammate-time-offs,List teammate time offs,"List the time offs of a teammate.
+
+Required scope: `time_off:read`"
+ex5-0212,frontapp.com,POST,/teammates/{teammate_id}/time_offs,create-time-off,Create time off,"Create a time off for a teammate.
+
+Required scope: `time_off:write`"
+ex5-0213,frontapp.com,GET,/teams,list-teams,List teams,"List the teams (workspaces) in the company.
+
+Required scope: `teams:read`"
+ex5-0214,frontapp.com,GET,/teams/{team_id},get-team,Get team,"Fetch a team (workspace).
+
+Required scope: `teams:read`"
+ex5-0215,frontapp.com,GET,/teams/{team_id}/channels,list-team-channels,List team channels,"List the channels of a team (workspace).
+
+Required scope: `channels:read`"
+ex5-0216,frontapp.com,GET,/teams/{team_id}/contact_groups,list-team-groups,List team groups,"List contact groups belonging to the requested team (workspace).
+
+> ⚠️ Deprecated endpoint
+>
+> This endpoint has been deprecated. Please use the compatible contact list endpoints instead.
+> - `GET /teams/{team_id}/contact_lists`.
+
+
+Required scope: `contacts:read`"
+ex5-0217,frontapp.com,POST,/teams/{team_id}/contact_groups,create-team-group,Create team group,"Create a new contact group for the requested team (workspace).
+
+> ⚠️ Deprecated endpoint
+>
+> This endpoint has been deprecated. Please use the compatible contact list endpoints instead.
+> - `POST /teams/{team_id}/contact_lists`.
+
+
+Required scope: `contacts:write`"
+ex5-0218,frontapp.com,GET,/teams/{team_id}/contact_lists,list-team-contact-lists,List team contact lists,"List contact lists belonging to the requested team (workspace).
+
+Required scope: `contacts:read`"
+ex5-0219,frontapp.com,POST,/teams/{team_id}/contact_lists,create-team-contact-list,Create team contact list,"Create a new contact list for the requested team (workspace).
+
+Required scope: `contacts:write`"
+ex5-0220,frontapp.com,GET,/teams/{team_id}/contacts,list-team-contacts,List team contacts,"List the contacts of a team (workspace).
+
+Required scope: `contacts:read`"
+ex5-0221,frontapp.com,POST,/teams/{team_id}/contacts,create-team-contact,Create team contact,"Create a contact for a team (workspace).
+
+Required scope: `contacts:write`"
+ex5-0222,frontapp.com,GET,/teams/{team_id}/inboxes,list-team-inboxes,List team inboxes,"List the inboxes belonging to a team (workspace).
+
+Required scope: `inboxes:read`"
+ex5-0223,frontapp.com,POST,/teams/{team_id}/inboxes,create-team-inbox,Create team inbox,"Create an inbox for a team (workspace).
+
+Required scope: `inboxes:write`"
+ex5-0224,frontapp.com,GET,/teams/{team_id}/message_template_folders,list-team-folders,List team folders,"List the message template folders belonging to the requested team (workspace).
+
+Required scope: `message_templates:read`"
+ex5-0225,frontapp.com,POST,/teams/{team_id}/message_template_folders,create-team-folder,Create team folder,"Create a new message template folder belonging to the requested team (workspace).
+
+Required scope: `message_templates:write`"
+ex5-0226,frontapp.com,GET,/teams/{team_id}/message_templates,list-team-message-templates,List team message templates,"List the message templates belonging to the requested team (workspace).
+
+Required scope: `message_templates:read`"
+ex5-0227,frontapp.com,POST,/teams/{team_id}/message_templates,create-team-message-template,Create team message template,"Create a new message template for the given team (workspace).
+
+Required scope: `message_templates:write`"
+ex5-0228,frontapp.com,GET,/teams/{team_id}/rules,list-team-rules,List team rules,"List the rules of a team (workspace).
+
+Required scope: `rules:read`"
+ex5-0229,frontapp.com,GET,/teams/{team_id}/shifts,list-team-shifts,List team Shifts,"List the shifts for a team (workspace).
+
+Required scope: `shifts:read`"
+ex5-0230,frontapp.com,POST,/teams/{team_id}/shifts,create-team-shift,Create team shift,"Create a shift for a team (workspace).
+
+Required scope: `shifts:write`"
+ex5-0231,frontapp.com,GET,/teams/{team_id}/signatures,list-team-signatures,List team signatures,"List the signatures belonging to the given team (workspace).
+
+Required scope: `signatures:read`"
+ex5-0232,frontapp.com,POST,/teams/{team_id}/signatures,create-team-signature,Create team signature,"Create a new signature for the given team (workspace).
+
+Required scope: `signatures:write`"
+ex5-0233,frontapp.com,GET,/teams/{team_id}/tags,list-team-tags,List team tags,"List the tags for a team (workspace).
+
+Required scope: `tags:read`"
+ex5-0234,frontapp.com,POST,/teams/{team_id}/tags,create-team-tag,Create team tag,"Create a tag for a team (workspace).
+
+Required scope: `tags:write`"
+ex5-0235,frontapp.com,DELETE,/teams/{team_id}/teammates,remove-teammates-from-team,Remove teammates from team,"Remove one or more teammates from a team (workspace).
+
+Required scope: `teams:write`"
+ex5-0236,frontapp.com,POST,/teams/{team_id}/teammates,add-teammates-to-team,Add teammates to team,"Add one or more teammates to a team (workspace).
+
+Required scope: `teams:write`"
+ex5-0237,frontapp.com,GET,/teams/{team_id}/time_offs,list-team-time-offs,List team time offs,"List the time offs of all teammates in a team.
+
+Required scope: `time_off:read`"
+ex5-0238,frontapp.com,GET,/teams/{team_id}/views,list-team-views,List team views,"List the views of a team.
+
+Required scope: `views:read`"
+ex5-0239,frontapp.com,POST,/teams/{team_id}/views,create-team-view,Create team view,"Create a new view for a team.
+
+Required scope: `views:write`"
+ex5-0240,frontapp.com,DELETE,/time_offs/{time_off_id},delete-time-off,Delete time off,"Delete a time off.
+
+Required scope: `time_off:delete`"
+ex5-0241,frontapp.com,GET,/time_offs/{time_off_id},get-time-off,Get time off,"Fetch a time off.
+
+Required scope: `time_off:read`"
+ex5-0242,frontapp.com,PATCH,/time_offs/{time_off_id},update-time-off,Update time off,"Update a time off.
+
+Required scope: `time_off:write`"
+ex5-0243,frontapp.com,GET,/views,list-views,List views,"List the views accessible to the authenticated token.
+
+Required scope: `views:read`"
+ex5-0244,frontapp.com,GET,/views/{view_id},get-view,Get view,"Fetch a view.
+
+Required scope: `views:read`"
+ex5-0245,frontapp.com,PATCH,/views/{view_id},update-view,Update view,"Update a view.
+
+Required scope: `views:write`"
+ex5-0246,frontapp.com,POST,/views/{view_id}/teammates,add-view-teammates,Add view to teammate sidebars,"Makes this view visible in specified teammates' sidebar navigation.
+
+Required scope: `views:write`"

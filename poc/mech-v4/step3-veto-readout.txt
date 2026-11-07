@@ -1,0 +1,90 @@
+== a) veto words, fitted on the B-matched floor pile (NOT quotable) ==
+  B-matched eligible floor rows: 425
+  word         vetoed   r    w    x   vendors-with-x  top-vendor(share of x)   LOVO-folds-admitted (of 56)
+  url               5   0    0    5        2          digitalocean 4/5 (80.0%)   56
+  presigned         4   0    0    4        1          digitalocean 4/4 (100.0%)   55
+  job               9   0    2    7        1          klaviyo 7/7 (100.0%)   55
+  transaction       4   0    0    4        1          stripe 4/4 (100.0%)   55
+  refund            1   0    0    1        1          stripe 1/1 (100.0%)   55
+  reversal          1   0    0    1        1          stripe 1/1 (100.0%)   55
+  capture           1   0    0    1        1          stripe 1/1 (100.0%)   55
+  credit            2   0    0    2        2          stripe 1/2 (50.0%)   56
+
+== b) B per word with veto, fitted (veto words admitted on the full pile: url presigned job transaction refund reversal capture credit; NOT quotable) ==
+  word          fires  r    w    x   vendors  passes-bar(w>10x)  LOVO-folds-admitted   (* = word of interest)
+  tag              28    0   28    0      15   yes                  56   
+  project          28    0   23    5      17   no                    0   
+  label            14    0   14    0       8   yes                  56   
+  file             17    0   17    0      10   yes                  56   *
+  upload           35    0   32    3      17   yes                  50   *
+  domain           25    3   21    1      15   yes                  56   
+  template         24    1   22    1      14   yes                  56   
+  config           18    0   16    2       6   no                    1   
+  asset            15    1   14    0       8   yes                  56   
+  comment           8    0    8    0       6   yes                  56   
+  contact          12    0   10    2       8   no                    0   
+  custom_field      9    0    9    0       5   yes                  56   
+  repo              9    0    9    0       5   yes                  56   
+  card              9    0    9    0       5   yes                  56   
+  item             15    0   14    1       9   yes                  55   
+  flow              9    0    8    1       6   no                    1   
+  segment           8    0    7    1       5   no                    1   
+  alert             8    0    8    0       5   yes                  56   
+  location          6    0    6    0       6   yes                  56   
+  image            11    0    9    2       8   no                    0   
+  attachment        5    0    5    0       4   yes                  56   
+  note              6    0    6    0       4   yes                  56   *
+  ticket           12    0   11    1       4   yes                  53   
+  environment       8    0    7    1       6   no                    1   
+  create           45    1   38    6      13   no                    1   *
+  copy             14    0   13    1      10   yes                  55   
+  restart          10    0   10    0       4   yes                  56   
+  lock              5    0    5    0       3   yes                  56   
+
+== c) B LOVO totals: with veto vs without ==
+  without veto (rows lowered 209): right (truth w)=191  new leaks (truth x)=14  truth r one step closer=4  ratio=13.64  -> GO vs >10
+  with veto    (rows lowered 253): right (truth w)=233  new leaks (truth x)=15  truth r one step closer=5  ratio=15.53  -> GO vs >10
+
+== d) Joint: v4 current / v4+A+B(LOVO, no veto) / v4+A+B(LOVO, veto) ==
+  -- all rows (n=16486)
+    v4 current       exact=13742 (83.4%) loose-1=483 loose-2=13 too-tight=2248
+    v4+A+B no veto   exact=13972 (84.8%) loose-1=419 loose-2=13 too-tight=2082
+    v4+A+B veto      exact=14013 (85.0%) loose-1=420 loose-2=13 too-tight=2040
+  -- POST rows (n=4653)
+    v4 current       exact=2405 (51.7%) loose-1=163 loose-2=4 too-tight=2081
+    v4+A+B no veto   exact=2635 (56.6%) loose-1=99 loose-2=4 too-tight=1915
+    v4+A+B veto      exact=2676 (57.5%) loose-1=100 loose-2=4 too-tight=1873
+
+== e) B LOVO leaks (truth x) under --veto ==
+  [combined] pc-r1470 | paypal | /v1/customer/disputes/{id}/acknowledge-return-item | disputes.acknowledge-return-item | Acknowledge returned item | word=item (last-segment)
+  [combined] pc-r3469 | asana | /projects/{project_gid}/saveAsTemplate | projectSaveAsTemplate | Create a project template from a project | word=template (last-segment)
+  [combined] x20-e0209 | auth0 | /self-service-profiles/{id}/sso-ticket | post_sso-ticket | Create an access ticket to initiate the Self-Service Enterprise Configuration fl | word=ticket (last-segment)
+  [combined] x20-e0916 | zendesk | /api/v2/users/create_many | CreateManyUsers | Create Many Users | word=create (last-segment)
+  [combined] x20-e0917 | zendesk | /api/v2/users/create_or_update | CreateOrUpdateUser | Create Or Update User | word=create (last-segment)
+  [combined] x20-e0918 | zendesk | /api/v2/users/create_or_update_many | CreateOrUpdateManyUsers | Create Or Update Many Users | word=create (last-segment)
+  [buildset] b0956 | keycloak | /{realm}/identity-provider/import-config |  | Import identity provider from uploaded JSON file | word=config (last-segment)
+  [buildset] b1557 | box | /shield_information_barrier_segment_restrictions | post_shield_information_barrier_segment_restrictions | Create shield information barrier segment restriction | word=segment (last-segment)
+  [exam22] x22-0012 | cloudflare | /accounts/{accountId}/v2/images/direct_upload | post_DirectUploadLink | Create authenticated direct upload URL | word=upload (last-segment)
+  [exam22] x22-2171 | cloudflare | /accounts/{account_id}/stream/direct_upload | stream-videos-upload-videos-via-direct-upload-ur-ls | Upload videos via direct upload URLs | word=upload (last-segment)
+  [exam3] ex3-0069 | clerk.com | /instance/change_domain | ChangeProductionInstanceDomain | Update production instance domain | word=domain (last-segment)
+  [exam3] ex3-0923 | novu.co | /v1/environments | EnvironmentsControllerV1_createEnvironment | Create an environment | word=environment (last-segment)
+  [exam3] ex3-1088 | ory.sh | /admin/test-login-flows | createTestLoginFlow | Create a test OIDC login flow | word=flow (last-segment)
+  [exam4] ex4-0372 | immich.app | /admin/database-backups/upload | uploadDatabaseBackup | Upload database backup | word=upload (last-segment)
+  [exam4] ex4-0813 | permit.io | /v2/projects/{proj_id}/envs/{env_id}/copy | copy_environment | Copy Environment | word=copy (last-segment)
+  (15 leaks)
+  -- leaks in the no-veto run that the veto run removed
+  [combined] pc-r2318 | digitalocean | /v2/gen-ai/evaluation_datasets/file_upload_presigned_urls | genai_create_evaluation_dataset_file_upload_presigned_urls | Create Presigned URLs for Evaluation Dataset File Upload | word=file (last-segment) | vetoed-by=url,presigned
+  [combined] pc-r2342 | digitalocean | /v2/gen-ai/knowledge_bases/data_sources/file_upload_presigned_urls | genai_create_data_source_file_upload_presigned_urls | Create Presigned URLs for Data Source File Upload | word=file (last-segment) | vetoed-by=url,presigned
+  [combined] pc-r2351 | digitalocean | /v2/gen-ai/model_evaluation/datasets/file_upload_presigned_urls | genai_create_model_eval_dataset_upload_presigned_urls | Create Presigned URLs for Model Evaluation Dataset File Upload | word=file (last-segment) | vetoed-by=url,presigned
+  [combined] pc-r2392 | digitalocean | /v2/gen-ai/scenario_sets/file_upload_presigned_urls | genai_create_scenario_set_upload_presigned_urls | Create Presigned URLs for Scenario Set File Upload | word=file (last-segment) | vetoed-by=url,presigned
+  [combined] pc-r4070 | canva | /v1/url-asset-uploads | createUrlAssetUploadJob |  | word=asset (last-segment) | vetoed-by=url
+  (5 removed)
+  -- leaks new in the veto run (not leaks in the no-veto run)
+  [combined] x20-e0916 | zendesk | /api/v2/users/create_many | CreateManyUsers | Create Many Users | word=create (last-segment)
+  [combined] x20-e0917 | zendesk | /api/v2/users/create_or_update | CreateOrUpdateUser | Create Or Update User | word=create (last-segment)
+  [combined] x20-e0918 | zendesk | /api/v2/users/create_or_update_many | CreateOrUpdateManyUsers | Create Or Update Many Users | word=create (last-segment)
+  [exam22] x22-0012 | cloudflare | /accounts/{accountId}/v2/images/direct_upload | post_DirectUploadLink | Create authenticated direct upload URL | word=upload (last-segment)
+  [exam22] x22-2171 | cloudflare | /accounts/{account_id}/stream/direct_upload | stream-videos-upload-videos-via-direct-upload-ur-ls | Upload videos via direct upload URLs | word=upload (last-segment)
+  [exam4] ex4-0372 | immich.app | /admin/database-backups/upload | uploadDatabaseBackup | Upload database backup | word=upload (last-segment)
+  (6 new)
+  right lowerings (truth w) lost to veto: 4; gained (word newly admitted once pile is cleaned): 46

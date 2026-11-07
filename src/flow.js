@@ -6,7 +6,9 @@
 //
 // Precedence (D87): method DELETE beats every word — step 2 claims it
 // first, unconditionally, and nothing downstream ever runs for a DELETE
-// row. Below that, a word beats a floor: step 2 tries its CANT_UNDO word
+// row. Below that, a word beats a floor, on read methods too: a word on a
+// GET/HEAD/OPTIONS/QUERY row (step 2's get-action) can raise it before the
+// read floor (floorRead, step 1's) is reached. For the other rows: step 2 tries its CANT_UNDO word
 // rule, then step 3 tries its KEEP_W word rule, before either floor is
 // reached. CANT_UNDO and KEEP_W are disjoint by construction (asserted in
 // step2.test.js / step3.test.js — every member of one fails
@@ -15,8 +17,9 @@
 // 3 — the run order alone decides which word rule gets first look, and
 // because they never both fire, that order never actually matters to the
 // outcome. Unclaimed rows fall to step 2's floor (floorPost), the tighter
-// class for an unknown.
-import { step1 } from './step1.js';
+// class for an unknown; read-method rows that no word claims fall to the
+// read floor (r).
+import { step1, floorRead, READ_METHODS } from './step1.js';
 import { step2, floorPost } from './step2.js';
 import { step3 } from './step3.js';
 
@@ -33,14 +36,16 @@ import { step3 } from './step3.js';
  * jev.js's applyJev and secondpass.js recompute it through THIS function
  * whenever they move a verdict. Nothing else may decide a hint.
  *
- *   'tight'   "x, possibly tighter than needed": class x on a POST, or any
- *             row the second pass could not decide (D133). Review to
- *             loosen; safe to review, no leak has been observed in the
- *             x-on-POST bucket.
- *   'loose'   "mechanical lowered it" (D133): class w on a PUT/PATCH decided
- *             by the method floor, or a POST that a word list lowered below
- *             the POST floor of x (class w or r, source 'list').
- *   'settled' nothing lowered it and nobody was unsure.
+ * Which way a row could be wrong. 'settled' means the class equals the
+ * method's default. After the three secondPass branches below, which win:
+ *   PUT, PATCH, POST: class x -> 'tight' (may be tighter than needed, review
+ *     to loosen); class w or r -> 'loose' (may be looser than needed).
+ *   GET, HEAD, OPTIONS, QUERY: class r -> 'settled'; x -> 'tight'; w -> 'loose'.
+ *   DELETE: class x -> 'settled'; w or r -> 'loose'.
+ *   Any other method: 'settled'.
+ * The second pass overrides: undecided ->
+ * tight; raised -> tight if the final class is x, else loose; lowered ->
+ * loose.
  *
  * @param {string|undefined} method the row's HTTP method, read
  *   case-insensitively like every other method check in this library.
@@ -57,9 +62,9 @@ export function reviewHint(method, cls, source, secondPass) {
   if (secondPass === 'raised') return cls === 'x' ? 'tight' : 'loose';
   if (secondPass === 'lowered') return 'loose';
   const m = (method || '').toUpperCase();
-  if (cls === 'x' && m === 'POST') return 'tight';
-  if (cls === 'w' && (m === 'PUT' || m === 'PATCH') && source === 'floor') return 'loose';
-  if ((cls === 'w' || cls === 'r') && m === 'POST' && source === 'list') return 'loose';
+  if (m === 'PUT' || m === 'PATCH' || m === 'POST') return cls === 'x' ? 'tight' : 'loose';
+  if (READ_METHODS.has(m)) return cls === 'r' ? 'settled' : cls === 'x' ? 'tight' : 'loose';
+  if (m === 'DELETE') return cls === 'x' ? 'settled' : 'loose';
   return 'settled';
 }
 
@@ -76,7 +81,7 @@ export function classifyRow(row, words = {}) {
   const verdict = step1(row, words)
     || step2(row, words)
     || step3(row, words)
-    || floorPost();
+    || (READ_METHODS.has((row.method || '').toUpperCase()) ? floorRead() : floorPost());
 
   return { ...verdict, review: reviewHint(row.method, verdict.class, verdict.source) };
 }

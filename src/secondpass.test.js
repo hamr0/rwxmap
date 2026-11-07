@@ -125,11 +125,11 @@ test('keep: L == M leaves the verdict exactly as mechanical had it', async () =>
   assert.equal(summary.kept, 4);
 });
 
-test('lower: accepted only at p >= 0.97; below it the row is x, undecided, tight', async () => {
-  assert.equal(LOWER_MIN_P, 0.97);
-  const { engine } = engineOf({ 2: ans('w', 0.9), 3: ans('w', 0.6), 4: ans('w', 0.97), 5: ans('r', 0.96) });
+test('lower: accepted only at p >= 0.90 (D139); below it the row is x, undecided, tight', async () => {
+  assert.equal(LOWER_MIN_P, 0.90);
+  const { engine } = engineOf({ 2: ans('w', 0.9), 3: ans('w', 0.6), 4: ans('w', 0.93), 5: ans('r', 0.96) });
   const { verdicts, summary } = await secondPass(OPS, mech(), engine, { model: MODEL });
-  // idx4 POST x -> w at p 0.97: accepted, loose.
+  // idx4 POST x -> w at p 0.93: accepted, loose.
   assert.equal(verdicts[4].class, 'w');
   assert.equal(verdicts[4].review, 'loose');
   assert.equal(verdicts[4].source, 'rwxlite');
@@ -142,8 +142,8 @@ test('lower: accepted only at p >= 0.97; below it the row is x, undecided, tight
   assert.equal(summary.lowered, 1);
 });
 
-test('lower below the cut-off: a w row the engine thinks is r at 0.96 goes to x tight; at 0.97 it goes to r loose', async () => {
-  const { engine: weak } = engineOf({ 2: ans('r', 0.96), 3: ans('r', 0.97) });
+test('lower below the cut-off: a w row the engine thinks is r at 0.89 goes to x tight; at 0.93 it goes to r loose (D139)', async () => {
+  const { engine: weak } = engineOf({ 2: ans('r', 0.89), 3: ans('r', 0.93) });
   const { verdicts } = await secondPass(OPS, mech(), weak, { model: MODEL });
   assert.equal(verdicts[2].class, 'x');
   assert.equal(verdicts[2].review, 'tight');
@@ -236,7 +236,7 @@ test('mode b: every row is sent, settled ones too, and the summary records pass 
 
 test('mode b: accepted only at p >= confidence/100, raise, keep and lower alike; a lowering needs no more than the confidence', async () => {
   const byIndex = {
-    0: ans('w', 0.96), // DELETE x -> w at 0.96 >= 0.95: lowered (mode a would need 0.97)
+    0: ans('w', 0.96), // DELETE x -> w at 0.96 >= 0.95: lowered
     1: ans('r', 0.95), // GET r kept, exactly at the confidence
     2: ans('x', 0.99), // POST w -> x raised
     3: ans('w', 0.94), // just under: undecided -> x tight

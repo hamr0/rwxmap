@@ -118,15 +118,28 @@ reading:
   expiring, rotating or resetting a credential, key, token, secret,
   certificate, session or password, and changing or setting a password,
   is x (D130; BRIEF-v3 clause b).
+  **The test (D137):** after this call, a later call cannot put things
+  back the way they were, including everything anyone could have done
+  in between. That happens two ways: *gone* (delete, purge, a job
+  stopped with its work lost) or *out of your hands* (sent, published,
+  charged, run, or a secret or a right handed to someone).
+  **Access example (D137):** an operation that grants or widens who can
+  do what to which resource is x: IAM, resource, bucket and key
+  policies; role or permission assignments and bindings; ACLs; share and
+  invite grants; deploy keys; setIamPolicy-style calls. Narrowing access
+  (admin to viewer) stays w: nobody gains anything in between. A set or
+  replace whose text does not say whether it widens or narrows is x by
+  the doubt rule. A "policy" that does not control access (autoscaling,
+  lifecycle, retention, routing) stays w unless x for another reason.
+  D130, BRIEF-v3 clauses (c) and (f) are examples of this one test;
+  D136 (restart and stop are w) is consistent with it.
 - Unsure → **x**.
 
 "Whose thing is it" is not a class test: it cannot be read reliably
 from a spec, because the words for "whose" mean different things per
 vendor (D81). Only "what does the call do" is asked.
 
-The labelling brief every truth label is made under is
-`data/relabel-2026-09-22/BRIEF-v3.md` (amended by D98).
-Restart and stopping a server or service are w; stopping a running job whose work is lost stays x by clause (f) (D136); to be written into BRIEF-v4 before exam #5.
+Truth today is BRIEF-v4 (D137, `data/relabel-v4-2026-11-05/BRIEF-v4.md`). Every row whose v3 or rwxlite truth was w was relabelled in one pass. D137 only turns w into x, so r and x rows keep their labels. The result is `data/pass-v4-2026-11-05/truth-v4-pass-gap.csv` (33,321 operations: 7,406 x, 25,915 w); every row has had a second look, the 18,576 Jev-only w rows included (236 of them became x, 1.3%). The training export for rwxlite is `data/export-v4-gap-2026-11-06/export-v4.csv` (36,578 source ids: w 28,219, x 8,354, r 5); it supersedes `export-v4-2026-11-06` and was sent to rwxlite. Plan and history: `docs/wiki/truth-v4-plan.md`.
 
 ## The core (frozen)
 
@@ -145,47 +158,93 @@ move a row's letter or marker, it is core.
 
 ### The ladder
 
-Three standalone steps, named by run order, each owning one letter and
-its own word lists, then step 2's floor. `src/flow.js` decides only the
-order: step 1, step 2, step 3, floor. The first step that claims a row
-decides it.
+The shape is mechanical v4 (D138, user override 2026-11-07), in `src/`.
+Three standalone steps (1 owns r, 2 owns x, 3 owns w), each with its own
+word lists. `flow.js` decides only the order: step 1, step 2, step 3,
+then the floor (`floorRead` for read methods, `floorPost` otherwise).
+The first step that claims a row decides it. Read as steps per method:
+where the floor starts, then each rule that can move it, in the order
+the code runs.
 
-| order | step | claims | rule | evidence |
-|---|---|---|---|---|
-| 1 | step 1, r | GET, HEAD, OPTIONS, QUERY | `method` | floor |
-| 1 | step 1, r | POST whose lead verb is in `READ_VERBS` | `read-verb` | list |
-| 1 | step 1, r | POST with a `SAFE_VERBS` word at any position | `read-verb-anywhere` | list |
-| 2 | step 2, x | DELETE, always, `destructive: true` | `method-delete` | floor |
-| 2 | step 2, x | POST, PUT or PATCH whose verb is in `CANT_UNDO` | `cant-undo-verb`, `cant-undo-verb-summary` | list |
-| 2 | step 2, x | PUT or PATCH that sets a password, passcode or pin (D131) | `credential-set` | list |
-| 3 | step 3, w | PUT, PATCH | `method-floor` | floor |
-| 3 | step 3, w | POST whose verb is in `KEEP_W` | `modify-verb`, `modify-verb-summary` | list |
-| last | step 2's floor, x | anything unclaimed: a POST with no word, or any other method | `floor-post` | floor |
+| method | floor | rules in order | moves to |
+|---|---|---|---|
+| GET, HEAD, OPTIONS, QUERY | r | step 2 `get-action` | x |
+| DELETE | x, `destructive: true` | step 2 `method-delete` (no rule moves it) | stays x |
+| PUT, PATCH | w | step 2 `cant-undo-verb`; step 2 `credential-set`; step 2 `path-x-word` | x |
+| POST | x | step 1 `read-verb`; step 1 `read-verb-anywhere`; step 2 `cant-undo-verb`; step 2 `path-x-word`; step 3 `modify-verb`; step 3 `content-noun` | r, r, x, x, w, w |
 
-**Why each floor sits where it does.** Truth per method under the D87
-definition, and which step decides the rows. Tuning set first (6557
-rows, `data/combined-2026-09-21/labelled.csv`), then the burned M3 exam
-(4279 rows, `data/exam-2026-09-22/labelled.csv`); re-derived 2026-11-03
-with the current `classifyRow`.
+- GET, HEAD, OPTIONS, QUERY: floor r (step 1 `floorRead`, rule
+  `method`, evidence floor). `get-action` (`GET_ACTION`, 3 words:
+  logout, revoke, close) raises to x; otherwise r.
+- DELETE: always x, `destructive: true`, rule `method-delete`, settled.
+  Nothing downstream runs for it.
+- PUT, PATCH: floor w (step 3 `method-floor`). Three step 2 rules raise
+  to x, in this order. `cant-undo-verb`: the lead verb is in
+  `CANT_UNDO` (29 words: delete, purge, revoke, send, publish, run,
+  charge, refund, cancel, merge, rotate, reset, start). `credential-set`
+  (D131): password, passcode or pin set, or change, regenerate or regen
+  of one (`CREDENTIAL_SET` 3, `CREDENTIAL_CHANGE_VERBS` 3).
+  `path-x-word`: a `PATH_X_WORDS` word (36: role, member, permission,
+  scope, invite, grant, secret, token, key, webhook, integration,
+  destination) anywhere in the path, by stem or substring.
+- POST: floor x (step 2 `floor-post`). `read-verb`: the lead verb is in
+  `READ_VERBS` (23: list, get, search, fetch, count, validate, parse,
+  suggest) lowers to r, with the plural-noun guard (D99).
+  `read-verb-anywhere`: a `SAFE_VERBS` word (10: validate, evaluate,
+  analyze, parse, calculate, introspect, suggest, sanitize) at any
+  position lowers to r. `cant-undo-verb` and `path-x-word` keep x (the
+  same lists as above; POST has no `credential-set`). `modify-verb`: the
+  lead verb is in `KEEP_W` (14: update, remove, add, attach, assign,
+  activate, move, restore, pause, enable, suspend) lowers to w.
+  `content-noun`: a `CONTENT_W` word (20: tag, label, domain, template,
+  file, note, ticket, comment, restart, lock) lowers to w, unless a
+  `CONTENT_VETO` word (url, credit) is in the path. Otherwise x.
 
-| method | set | n | truth r | truth w | truth x | floor | decided by (rows) |
-|---|---|---|---|---|---|---|---|
-| GET | tuning | 2543 | 2541 (100%) | 2 (0%) | 0 | r | method floor 2543 |
-| GET | M3 exam | 2099 | 2094 (100%) | 5 (0%) | 0 | r | method floor 2099 |
-| POST | tuning | 1994 | 169 (8%) | 1333 (67%) | 492 (25%) | x | no word → floor x 1336; step 3 `KEEP_W` → w 378; step 2 `CANT_UNDO` → x 178; step 1 read verb → r 102 |
-| POST | M3 exam | 892 | 128 (14%) | 636 (71%) | 128 (14%) | x | no word → floor x 808; step 2 `CANT_UNDO` → x 27; step 1 read verb → r 36; step 3 `KEEP_W` → w 21 |
-| DELETE | tuning | 951 | 1 (0%) | 26 (3%) | 924 (97%) | x | method floor 951 |
-| DELETE | M3 exam | 558 | 3 (1%) | 7 (1%) | 548 (98%) | x | method floor 558 |
-| PUT | tuning | 766 | 1 (0%) | 718 (94%) | 47 (6%) | w | method floor 751; step 2 `CANT_UNDO` → x 13; step 2 `credential-set` → x 2 |
-| PUT | M3 exam | 460 | 2 (0%) | 441 (96%) | 17 (4%) | w | method floor 456; step 2 `CANT_UNDO` → x 4 |
-| PATCH | tuning | 303 | 0 | 299 (99%) | 4 (1%) | w | method floor 301; step 2 `CANT_UNDO` → x 2 |
-| PATCH | M3 exam | 270 | 0 | 258 (96%) | 12 (4%) | w | method floor 268; step 2 `CANT_UNDO` → x 2 |
+A row's `…-summary` rule names (`cant-undo-verb-summary`,
+`modify-verb-summary`) mean the verb came from the summary because the
+operationId's lead token was a bare HTTP method word.
+
+**Why each floor sits where it does.** Two measurements. (a) Truth per
+method on the six tuning sets (16,486 ops, v4 truth, fitted; from
+`docs/wiki/mechanical-v4-plan.md`):
+
+| method | truth r | truth w | truth x |
+|---|---|---|---|
+| GET | 99.8% | 0.0% | 0.1% |
+| POST | 9.3% | 48.0% | 42.7% |
+| DELETE | 0.2% | 1.4% | 98.5% |
+| PUT | 0.2% | 73.4% | 26.5% |
+| PATCH | 0% | 79.6% | 20.4% |
+
+So the floors: r is GET (99.8%; QUERY is treated as GET). w is PATCH
+(80%), PUT (73%), POST (48%), DELETE (1.4%). x is DELETE (98%), POST
+(42%), PUT (27%), PATCH (20%).
+
+(b) Exam #5, the clean figure (1443 unseen ops across frontapp,
+fusionauth, hookdeck, paddle, planetscale, semaphoreui, weaviate; v4
+truth), v4 output against truth, r / w / x per method, then v4's
+error rates:
+
+| method | rows | v4 output r / w / x | truth r / w / x | v4 exact | too loose | too tight |
+|---|---|---|---|---|---|---|
+| GET | 623 | 100 / 0 / 0 | 99.5 / 0.2 / 0.3 | 620 (99.5%) | 3 (0.5%) | 0 (0.0%) |
+| POST | 415 | 8.2 / 12.5 / 79.3 | 10.8 / 43.6 / 45.5 | 242 (58.3%) | 17 (4.1%) | 156 (37.6%) |
+| PUT | 122 | 0 / 76.2 / 23.8 | 0.8 / 69.7 / 29.5 | 82 (67.2%) | 23 (18.9%) | 17 (13.9%) |
+| PATCH | 110 | 0 / 87.3 / 12.7 | 0.9 / 78.2 / 20.9 | 86 (78.2%) | 16 (14.5%) | 8 (7.3%) |
+| DELETE | 170 | 0 / 0 / 100 | 0.6 / 0.6 / 98.8 | 168 (98.8%) | 0 (0.0%) | 2 (1.2%) |
 
 Every floor follows its method's majority except POST: most POSTs are
-truly w, but a POST with no verb word cannot be told from a create
-(x), so the invariant takes the tighter class. Those floor rows (1336
-of 1994 on tuning) carry most of the too-tight cost and are the pile
-`jev-lower` lowers.
+truly w (43.6% on exam #5, 48.0% on tuning), but a POST with no word
+cannot be told from a create (x), so the invariant takes the tighter
+class. On exam #5 the POST `floor-post` rows make 128 of POST's 156
+too-tight rows.
+
+**Review marker.** Every PUT, PATCH and POST gets a marker by
+direction: class x is `tight`, class w or r is `loose`. For GET, HEAD,
+OPTIONS and QUERY, r is `settled`, x `tight`, w `loose`; for DELETE, x
+is `settled`, w or r `loose`. Settled means the class equals the
+method's default (`reviewHint` in `flow.js`, the one writer of the
+field; the second pass can override it).
 
 **The method floor, as the code has it.** QUERY (RFC 10008, June 2026,
 Proposed Standard: safe and idempotent like GET, with a request body) is
@@ -197,13 +256,7 @@ entry keyed QUERY (any case). In modes a and b a QUERY row is sent with
 method `QUERY` as-is; rwxlite shows it to its model as GET (from rwxlite's
 next release; on its 383 GET exam rows relabelled QUERY, 1 top letter changed).
 
-| method | floor | what can move it |
-|---|---|---|
-| GET, HEAD, OPTIONS, QUERY | r | nothing in the mechanical core |
-| DELETE | x, `destructive: true` | nothing — DELETE beats every word |
-| PUT, PATCH | w | a `CANT_UNDO` verb or `credential-set` raises it to x |
-| POST | none — decided by its verb | `READ_VERBS`/`SAFE_VERBS` → r; `CANT_UNDO` → x; `KEEP_W` → w; no word → x |
-| any other method, or none | x | nothing |
+Any other method, or none, falls to `floorPost` (x).
 
 The labelling brief lets a DELETE be w when its text names a trash or
 restore; the core does not read description text, so it cannot see
@@ -222,11 +275,15 @@ operationId, a literal path segment or the summary (D131).
 
 | list | owner | size | matched where | moves the row to |
 |---|---|---|---|---|
-| `READ_VERBS` | step 1 | — | lead token only, after `LEAD_MODIFIERS` (bulk, batch, deprecated, beta, async); the plural-noun guard withholds a match reached only through `-s`/`-es`/`-ies` (D99) | r |
+| `READ_VERBS` | step 1 | 23 | lead token only, after `LEAD_MODIFIERS` (bulk, batch, deprecated, beta, async); the plural-noun guard withholds a match reached only through `-s`/`-es`/`-ies` (D99) | r |
 | `SAFE_VERBS` | step 1 | 10 | any token position — only words that are never nouns | r |
 | `CANT_UNDO` | step 2 | 29 | the row's verb | x |
 | `REMOVES` ⊂ `CANT_UNDO` | step 2 | 6 (delete purge revoke expire void redact) | the row's verb | sets `destructive: true` |
 | `KEEP_W` | step 3 | 14 | the row's verb | w |
+| `PATH_X_WORDS` | step 2 | 36 | anywhere in the path, stem or substring (PUT, PATCH, POST) | x |
+| `GET_ACTION` | step 2 | 3 | read methods | x |
+| `CREDENTIAL_SET` + `CREDENTIAL_CHANGE_VERBS` | step 2 | 3 + 3 | PUT, PATCH (D131) | x |
+| `CONTENT_W` (veto `CONTENT_VETO`, 2) | step 3 | 20 | POST path or operation words | w |
 
 "The row's verb" (`verbForRow` in `src/tokens.js`) is the lead token of
 the operationId, or of the path's last segment when there is no
@@ -265,16 +322,15 @@ for debugging and are never published (D28/D76/D77).
   from method + class + evidence and nothing else; its one writer is
   `reviewHint` in `src/flow.js`, and `applyJev` recomputes it through
   the same function when a tier moves a row.
-  - `tight` — x, possibly tighter than needed (D133, built in commit
-    aea12f1). It covers class x on a POST and any row the second pass
-    could not decide and pushed to x, a PUT/PATCH included.
-  - `loose` — mechanical lowered it (D133, built in commit aea12f1):
-    class w on a PUT or PATCH decided by the method floor, plus any POST
-    row a word list lowered below the POST floor of x (class w or r,
-    evidence `list`). Where most of the too-loose rows live.
-    `settled` means nothing lowered the row, mostly GET r and DELETE x
-    floor rows.
-  - `settled` — neither of the other two. It is NOT signed or
+  - `tight` — x, possibly tighter than needed. Under D138 it is every
+    PUT, PATCH or POST at class x (a path word, a floor-post), a GET at
+    x, and any row the second pass could not decide and pushed to x.
+  - `loose` — possibly looser than needed. Under D138 it is every PUT,
+    PATCH or POST at class w or r, a GET at w, and a DELETE below x.
+    Where most of the too-loose rows live. See "Review marker" above for
+    the exact rule.
+  - `settled` — the class equals the method's default (GET r, DELETE x).
+    It is NOT signed or
     confirmed by anyone. A signed state would be a fourth value only a
     human writes after the export; rwxmap never emits it.
 
@@ -313,9 +369,9 @@ outside service, and the adopter must say so.
 | file | owns |
 |---|---|
 | `src/tokens.js` | splitter, tokenizer, verb stemmer, `verbForRow`, `LEAD_MODIFIERS`, `METHOD_WORDS` — readers only |
-| `src/step1.js` | step 1, r: `READ_VERBS`, `SAFE_VERBS`, the plural-noun guard (D74, D99) |
-| `src/step2.js` | step 2, x: `method-delete`, `cant-undo-verb(-summary)`, `credential-set`, `floor-post`; `CANT_UNDO` (29), `REMOVES` (6), `CREDENTIAL_SET` (3), `CREDENTIAL_CHANGE_VERBS` (3) |
-| `src/step3.js` | step 3, w: `method-floor`, `modify-verb(-summary)`; `KEEP_W` (14) |
+| `src/step1.js` | step 1, r: rules `method`, `read-verb`, `read-verb-anywhere`; `READ_METHODS` (4), `READ_VERBS` (23), `SAFE_VERBS` (10), the plural-noun guard (D74, D99); `floorRead` is the read floor |
+| `src/step2.js` | step 2, x: rules `method-delete`, `cant-undo-verb(-summary)`, `credential-set`, `path-x-word`, `get-action`, `floor-post`; `CANT_UNDO` (29), `REMOVES` (6), `CREDENTIAL_SET` (3), `CREDENTIAL_CHANGE_VERBS` (3), `PATH_X_WORDS` (36), `GET_ACTION` (3) |
+| `src/step3.js` | step 3, w: rules `method-floor`, `modify-verb(-summary)`, `content-noun`; `KEEP_W` (14), `CONTENT_W` (20), `CONTENT_VETO` (2) |
 | `src/flow.js` | `classifyRow` (the order, written once) and `reviewHint` (the one writer of `review`) |
 | `src/jev.js` | the three Jev tiers, thresholds, `applyJev`, `needsJev`, `jevState`, `jevQuestions` |
 | `src/exporter.js` | the bareguard exporter: `operationsFrom`, `exportGate`, `exportSidecar` |
@@ -327,17 +383,19 @@ outside service, and the adopter must say so.
 | `tools/corpus.js`, `tools/csv.js` | corpus loading and CSV reading, dev only, never shipped |
 | `src/load.js` | `loadSpec` (file or URL, JSON or YAML, 64 MB caps, binary refusal, no `$ref` resolution, D106), shipped as `rwxmap/load` (D107), and the only file that imports `yaml` |
 
-`poc/d87/` is the reference `src/` is proved against: `node
-poc/d87/proof-src.mjs` compares both over all 6557 rows of the combined
-set, must print 0 unexpected differences and exactly the 2 allowed
-D131 rows (pc-r1389, x20-e0999: the credential-set rule moves them;
-user ruling 2026-11-03), checked to fail when broken, and
-replays the recorded Jev answers through `applyJev` (804 lowered).
-`tools/proof-step1.js` still passes after D99 but is blind to the
-plural-noun guard, so it does not pin step 1's full behaviour (D99).
+`src/` is mechanical v4 (D138). `node poc/mech-v4/proof-copy.mjs` proves it:
+it compares `src/` against the frozen `poc/mech-v4` copy over 16,486 rows of
+the six tuning sets and must print `differences == 0`, `skipped == 0`, and
+the pinned scores (v3 truth 13096 / 119 / 3271, v4 truth 14048 / 421 / 2017,
+exact / too loose / too tight). Checked to fail when broken: a one-line
+change in a scratch copy gave 2,556 differences, exit 1.
 
-Run: `npm test`, `npm run typecheck`, `node poc/d87/proof-src.mjs`,
-`node tools/proof-step1.js`.
+The v3-era proofs (`proof-src.mjs` from `poc/d87`, `tools/proof-step1.js`)
+are archived in `poc/archive/v3-proofs/` and fail against v4 by design.
+
+Run: `npm test` (617 pass), `npm run typecheck`,
+`node poc/mech-v4/proof-copy.mjs`, and conformance
+`(cd poc/conformance && node run.mjs)` (6/6).
 
 ## Measured results
 
@@ -500,8 +558,9 @@ saves none while costing 51 (D101).
   change state leaks through that floor (5 of 2099 GET rows on the M3
   exam). `jev-raise-get` is the only thing that can catch them.
 - **The review rule is fitted.** D101's `tight`/`loose`/`settled`
-  rule was read off the M3 exam; it reproduces on the tuning pool and
-  needs a fresh exam.
+  rule was read off the M3 exam; it reproduced on the tuning pool and
+  needed a fresh exam. D138 replaced it with a rule by direction (see
+  "Review marker"); the table below measures the older D101/D133 rule.
 - **The tuning pool is a tuning set, not an exam** (D24). Its lists were
   written and priced on it.
 - **An unknown method floors at x, and `jev-lower` can lower it.** A
@@ -915,8 +974,8 @@ Status: spec in progress on branch `feat/d133-rwxlite-engines`. Pass 1
 `rwxlite`, the `rwxlite` JSON block, the cache check), pass 2a (model
 download from rwxlite's GitHub releases, `--model small`, the rwxlite
 adapter) and pass 2b (mode b, mode c's undecided rule, the 2a fixes) are
-built on the branch, unreleased. rwxlite 0.2.0 is published, so the default
-run uses it when the `rwxlite@0.2` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
+built on the branch, unreleased. rwxlite 0.3.1 is published and pinned (D139), so the default
+run uses it when the `rwxlite@0.3` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
 decided; everything marked "proposal" or "open" is not decided.
 
 ### Decided (user rulings, 2026-11-03 and 2026-11-04)
@@ -931,7 +990,7 @@ decided; everything marked "proposal" or "open" is not decided.
     stay exactly as today. Mode c uses the same scope. On a `loose`
     row rwxlite is asked whether it is really x (raise or keep). On a `tight` row rwxlite is asked
     whether it can be lowered; a lowering is accepted only at max p >=
-    0.97 (rwxlite's measured cut-off). If rwxlite cannot decide, the row
+    0.90 (D139). If rwxlite cannot decide, the row
     is x and marked for review. Raised, lowered and undecided rows all
     get the review mark.
   - **b: rwxlite alone (built, pass 2b).** rwxlite judges every row,
@@ -984,17 +1043,13 @@ decided; everything marked "proposal" or "open" is not decided.
   review marker. No new per-row field; the two additions below (a
   fourth `evidence` value and a top-level `rwxlite` block) are the only
   output changes.
-- **The `tight` marker is wider (built, commit aea12f1).** It means "x,
-  possibly tighter than needed, review". It covers x-on-POST rows and
-  rows the second pass could not decide, including an undecided
-  PUT/PATCH pushed to x. The change is in `reviewHint` in
-  `src/flow.js` (core-adjacent, its one writer). Output format is
-  unchanged.
-- **The `loose` marker is wider (built, commit aea12f1).** It means
-  "mechanical lowered it". It covers PUT/PATCH rows left at w by the
-  method floor plus any POST row a word list lowered below the POST
-  floor of x (class w or r, evidence `list`). `settled` is rows
-  nothing lowered. Output format is unchanged. It applies in every mode,
+- **The `tight` and `loose` markers are by direction (built in D133,
+  commit aea12f1; widened to every PUT, PATCH, POST, GET and DELETE row
+  by D138).** `tight` means "x, possibly tighter than needed, review",
+  `loose` means "w or r, possibly looser than needed", `settled` means
+  the class equals the method default; the rule is in "Review marker"
+  above. The change is in `reviewHint` in `src/flow.js` (its one
+  writer). Output format is unchanged. It applies in every mode,
   `--engine mechanical` included.
 - **A moved row's evidence is `rwxlite` (user ruling, 2026-11-04).** A
   row the second pass moved (raised, lowered, or undecided and moved to
@@ -1034,15 +1089,14 @@ decided; everything marked "proposal" or "open" is not decided.
 - **Distribution.** Ships on npm. The model is downloaded on first use
   and is pinned to one rwxlite release tag in each rwxmap release (D135;
   `RWXLITE_TAG` in `src/modeldownload.js`). The rwxlite npm package that
-  runs it must be in the same minor line (>=0.2.0 <0.3.0, derived from the
+  runs it must be in the same minor line (>=0.3.0 <0.4.0, derived from the
   tag, read from the package's own package.json); any other version, a
   pre-release or an unreadable version turns rwxlite off, mechanical
   alone, with the reason printed (D135). The package is checked before
   the model is fetched, so a missing or wrong-version package costs no
-  download. A newer model replaces it only
-  after a no-regression result on a fresh clean exam (exam #4,
-  2026-11-05: rwxlite r11 failed it, 0.2.0 stays). Every run records
-  the model string.
+  download. Current pin (D139, user override 2026-11-07, built
+  5e6b9cb, unreleased): rwxlite 0.3.1 (R13), tag v0.3.1, cache fallback
+  0.3.1, accepted range 0.3.x. Every run records the model string.
 - **Model cache and integrity.** The downloaded model is cached in a
   per-user folder, `~/.cache/rwxmap/` (or `$XDG_CACHE_HOME/rwxmap`),
   one directory per model: `rwxlite-<semver>+<sha8>/` holding
@@ -1069,7 +1123,7 @@ decided; everything marked "proposal" or "open" is not decided.
   session, 2026-11-04).** GitHub releases on `hamr0/rwxlite`. Assets per
   release: `manifest.json` (int8 per-channel), `manifest-exact.json`
   (fp32), `model-int8-pc.onnx`, `model-fp32.onnx`, `vocab.txt`. Pinned
-  tag (D135): `https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest-exact.json`
+  tag (D135): `https://github.com/hamr0/rwxlite/releases/download/v0.3.1/manifest-exact.json`
   (rwxmap default) and `.../manifest.json` (`--model small`). Not live
   yet. On download rwxmap stores the chosen manifest as `manifest.json`
   inside the model's own folder `rwxlite-<semver>+<sha8>/` (the cache
@@ -1086,12 +1140,12 @@ decided; everything marked "proposal" or "open" is not decided.
   rule (`src/secondpass.js`): send `loose` and `tight` rows; the
   engine's letter is the largest of x = isX, w = changes - isX, r = 1 -
   changes; a raise is accepted; a lowering is accepted only at p >=
-  0.97; otherwise the row is x plus review `tight`; `settled` rows are
+  0.90 (D139); otherwise the row is x plus review `tight`; `settled` rows are
   never sent. rwxlite's tier rule is NOT adopted (it moves only Jev's
   three tiers, with per-tier cuts and then asks a lowering under 0.97).
   A `credential-set` verdict (D131) is never lowered by the second pass,
   in any mode (user ruling 2026-11-04).
-  Kept at 0.97 after a measured 0.95/0.93/0.90 what-if (D136).
+  Cut-off 0.90 with rwxlite R13 (D139, built; was 0.97 under D136 for 0.2.0).
   Evidence: "Rule comparison" under Evidence so far. Caveat:
   secondPass has only that one tuning measurement; the D133 exam is its
   test.
@@ -1215,8 +1269,45 @@ None.
 
 ## What is next
 
-0.9.0 is released (PR #18, merge e9b697c, npm 0.9.0, 2026-11-03). Next:
-the D133 release, which ships rwxlite 0.2.0, pinned to tag v0.2.0 (D135).
+0.10.0 is released (D133/D135, PR #19, npm 0.10.0, rwxlite 0.2.1 on
+npm). The truth-v4 relabel (D137) is done and handed to rwxlite
+(2026-11-06; plan `docs/wiki/truth-v4-plan.md`, steps 0-5).
+
+Next:
+
+Mechanical v4 ships by D138 (2026-11-07). Exam #5 (1443 ops, v4 truth)
+gate was NO-GO on too tight, 183 vs 178 for v3, and the user overrode it
+because too loose fell from 77 to 59. Mode a as scored then (rwxlite 0.2.0) was
+looser than mechanical alone on v4 truth (94 vs 59 too loose on exam #5):
+it was trained before D137 widened x.
+
+Built (D139, user override 2026-11-07, commit 5e6b9cb, unreleased): src/
+ships rwxlite R13 (rwxlite 0.3.1) with the lowering cut-off LOWER_MIN_P at
+0.90, overriding D135 (R13 failed its exact bar) and D136 (cut-off 0.97),
+for the same reason as D138: fewer leaks matter more than more review asks.
+Pin: RWXLITE_TAG v0.3.1, cache fallback 0.3.1, accepted package range 0.3.x
+(0.2.x and 0.4.0 refused); 617 tests, guards for tag/fallback agreement,
+range, cut and credential-set never lowered, each broken by hand once.
+Verified 2026-11-07: GitHub release v0.3.1 assets and npm rwxlite@0.3.1
+sha256/integrity match rwxlite's list and the exam #5 addendum; the
+published package differs from the exam #5 tarball only in comments and
+README/CHANGELOG/package.json metadata. Real install on exam #5 (npm
+0.3.1, model downloaded into an empty cache, current src/), mode a, 1443
+ops, exact / too loose / too tight: 1269 / 40 (38 loose-1, 2 loose-2) /
+134; 78 lowered, 63 undecided; equal to the replay at 0.90. Against the
+scored 0.2.0 at 0.97 (1272 / 94 / 77) too loose falls from 94 to 40 and too
+tight rises from 77 to 134. The 0.90 cut is tuned on burned exam #5 and
+rwxlite's val set, not proven on unseen vendors.
+
+Next, in order:
+
+1. Release: README "what x covers" section and headline numbers
+   updated to exam #5 (v4 mechanical 83.2% exact / 4.1% too loose /
+   12.7% too tight of 1443), then `docs/product/release-checklist.md`
+   item by item.
+2. A new exam #6 for any change (exam #5 is burned; bunny.net is spent;
+   unused shortlist vendors: grafana, nocodb, radarr).
+
 Parked items and known limits below.
 
 ### Parked
@@ -1331,7 +1422,8 @@ no Jev, through a symlink to `src/cli.js` the way npm's bin link and
 npx run it (a direct `node src/cli.js` run cannot see a symlink bug). A FAIL exits 1; drift on the small sites prints CHANGED and
 does not fail. It is not in `npm test` or CI because it hits the
 network. The list was recorded 2026-09-29 in `scripts/live-check.mjs`
-(commit 001be9a).
+(commit 001be9a); intercom and ibanforge were re-recorded 2026-11-07
+under mechanical v4 (commit 9040a4c).
 
 
 ## Open questions

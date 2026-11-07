@@ -32,7 +32,7 @@ import { cacheDir, findModel, parseModelString, verifyModelDir } from './modelca
 export const VARIANT_MODEL_FILE = { exact: 'model-fp32.onnx', small: 'model-int8-pc.onnx' };
 
 /** The one rwxlite release rwxmap ships with (D135). */
-export const RWXLITE_TAG = 'v0.2.0';
+export const RWXLITE_TAG = 'v0.3.1';
 /** The model version that tag carries, derived so there is one literal. */
 export const RWXLITE_VERSION = RWXLITE_TAG.slice(1);
 const RELEASE_BASE = `https://github.com/hamr0/rwxlite/releases/download/${RWXLITE_TAG}/`;

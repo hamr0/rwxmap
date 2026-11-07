@@ -50,18 +50,21 @@ import { parseArgs } from 'node:util';
 const root = path.resolve(import.meta.dirname, '..');
 const TIMEOUT_MS = 120_000;
 
-// Recorded 2026-09-29 with the committed CLI, no Jev.
+// Recorded 2026-09-29 with the committed CLI, no Jev, under mechanical v3.
+// Re-recorded 2026-11-07 under mechanical v4 (D138) for intercom and ibanforge:
+//   intercom: 5 POST creates x->w by content-noun, 1 PUT /ip_allowlist w->x by path-x-word.
+//   ibanforge: provider spec grew by one op (a GET, r); 0 letter differences v3 vs v4.
 const HOSTS = [
   {
     address: 'https://api.intercom.io',
     spec: 'https://developers.intercom.com/_bundle/docs/references/@2.15/rest-api/api.intercom.io.yaml',
-    ops: 166, r: 84, w: 23, x: 59,
+    ops: 166, r: 84, w: 27, x: 55,
     why: 'big, all three letters, YAML, found via a Link header to the docs host (version segment may move)',
   },
   {
     address: 'https://api.ibanforge.com',
     spec: 'https://api.ibanforge.com/openapi.json',
-    ops: 41, r: 26, w: 0, x: 15,
+    ops: 42, r: 27, w: 0, x: 15,
     why: 'POSTs rated by lead verb',
   },
   {

@@ -1,0 +1,520 @@
+# Pending groups: verb / noun profile
+
+## G01 (904 rows)
+
+### Top 40 verbs
+
+- update: 254
+- create: 186
+- post: 32
+- realm: 29
+- get: 23
+- patch: 18
+- model: 16
+- tenancy: 14
+- add: 11
+- authorization: 10
+- put: 9
+- teams: 9
+- account: 8
+- insert: 8
+- ipam: 8
+- replace: 8
+- zero: 8
+- change: 7
+- restore: 7
+- users: 7
+- group: 6
+- groups: 6
+- repos: 6
+- unarchive: 6
+- access: 5
+- api: 5
+- clone: 5
+- policy: 5
+- set: 5
+- setup: 5
+- token: 5
+- assign: 4
+- distribution: 4
+- enable: 4
+- enterprise: 4
+- move: 4
+- resource: 4
+- unblock: 4
+- zone: 4
+- activate: 3
+
+### Top 60 nouns
+
+- group: 85
+- role: 63
+- update: 56
+- create: 43
+- scope: 34
+- resource: 28
+- id: 25
+- team: 23
+- member: 19
+- profile: 16
+- setting: 15
+- user: 15
+- policy: 14
+- definition: 13
+- policie: 13
+- package: 10
+- entity: 9
+- org: 9
+- patch: 9
+- insert: 8
+- list: 8
+- model: 8
+- rule: 8
+- action: 7
+- post: 7
+- project: 7
+- provider: 7
+- put: 7
+- restore: 7
+- unarchive: 7
+- account: 6
+- assignment: 6
+- authorizer: 6
+- catalog: 6
+- channel: 6
+- client: 6
+- filter: 6
+- name: 6
+- question: 6
+- clone: 5
+- domain: 5
+- level: 5
+- organization: 5
+- acl: 4
+- config: 4
+- configuration: 4
+- flow: 4
+- key: 4
+- set: 4
+- token: 4
+- 31: 3
+- access: 3
+- alia: 3
+- attribute: 3
+- block: 3
+- certificate: 3
+- claim: 3
+- conversation: 3
+- endpoint: 3
+- handler: 3
+
+### Top 60 verb+noun pairs
+
+- create group: 32
+- update resource: 24
+- update scope: 22
+- create role: 16
+- model role: 16
+- update member: 15
+- update group: 12
+- post group: 11
+- tenancy update: 11
+- create create: 10
+- update role: 10
+- create definition: 9
+- create team: 9
+- update setting: 9
+- update team: 9
+- create policie: 8
+- insert insert: 8
+- patch patch: 8
+- update policy: 8
+- create package: 7
+- create profile: 7
+- get group: 7
+- realm model: 7
+- restore restore: 7
+- create scope: 6
+- ipam update: 6
+- realm id: 6
+- unarchive unarchive: 6
+- update profile: 6
+- add group: 5
+- clone clone: 5
+- patch id: 5
+- update policie: 5
+- update update: 5
+- account update: 4
+- authorization create: 4
+- create channel: 4
+- realm name: 4
+- realm role: 4
+- resource entity: 4
+- update client: 4
+- update org: 4
+- account create: 3
+- api id: 3
+- authorization update: 3
+- create authorizer: 3
+- create filter: 3
+- create flow: 3
+- create project: 3
+- create question: 3
+- fully role: 3
+- group update: 3
+- management level: 3
+- move catalog: 3
+- private update: 3
+- put id: 3
+- teams create: 3
+- tenancy create: 3
+- update action: 3
+- update authorizer: 3
+
+Top 60 pairs cover 423 of 904 rows (46.8%).
+
+## G04 (518 rows)
+
+### Top 40 verbs
+
+- create: 213
+- update: 35
+- post: 34
+- add: 15
+- patch: 11
+- accounts: 8
+- api: 8
+- put: 8
+- secrets: 8
+- json: 6
+- users: 6
+- organizations: 5
+- user: 5
+- get: 4
+- upload: 4
+- upsert: 4
+- activate: 3
+- cloudflare: 3
+- data: 3
+- genai: 3
+- reactivate: 3
+- replace: 3
+- restore: 3
+- secret: 3
+- server: 3
+- setup: 3
+- workspace: 3
+- batch: 2
+- client: 2
+- credential: 2
+- custom: 2
+- dependabot: 2
+- edit: 2
+- insert: 2
+- managed: 2
+- mesh: 2
+- namespace: 2
+- private: 2
+- protocol: 2
+- realm: 2
+
+### Top 60 nouns
+
+- session: 114
+- create: 45
+- update: 31
+- account: 25
+- key: 22
+- user: 21
+- secret: 17
+- id: 15
+- organization: 12
+- credential: 10
+- add: 9
+- group: 7
+- upload: 7
+- file: 6
+- json: 6
+- channel: 5
+- contact: 5
+- org: 5
+- token: 5
+- entity: 4
+- member: 4
+- post: 4
+- auth: 3
+- employee: 3
+- person: 3
+- profile: 3
+- switch: 3
+- activate: 2
+- application: 2
+- aw: 2
+- bulk: 2
+- cardholder: 2
+- certificate: 2
+- client: 2
+- csr: 2
+- custodian: 2
+- customer: 2
+- disk: 2
+- get: 2
+- holder: 2
+- installation: 2
+- integration: 2
+- new: 2
+- organisation: 2
+- patch: 2
+- people: 2
+- project: 2
+- set: 2
+- stream: 2
+- tenant: 2
+- undelete: 2
+- worker: 2
+- 1: 1
+- 2: 1
+- 31: 1
+- activitie: 1
+- admin: 1
+- affiliation: 1
+- app: 1
+- attr: 1
+
+### Top 60 verb+noun pairs
+
+- create session: 104
+- create create: 16
+- create account: 13
+- update key: 10
+- create organization: 9
+- json json: 6
+- post session: 6
+- create channel: 5
+- create user: 5
+- secrets update: 5
+- accounts update: 4
+- api id: 4
+- create contact: 4
+- create secret: 4
+- update credential: 4
+- accounts create: 3
+- genai key: 3
+- patch id: 3
+- post id: 3
+- reactivate user: 3
+- server update: 3
+- update switch: 3
+- update user: 3
+- user create: 3
+- activate activate: 2
+- add file: 2
+- add group: 2
+- create custodian: 2
+- create employee: 2
+- create get: 2
+- create post: 2
+- create project: 2
+- create token: 2
+- create upload: 2
+- create worker: 2
+- credential update: 2
+- custom csr: 2
+- data integration: 2
+- dependabot secret: 2
+- organizations create: 2
+- organizations update: 2
+- patch patch: 2
+- patch secret: 2
+- post account: 2
+- post cardholder: 2
+- post holder: 2
+- post key: 2
+- post people: 2
+- post person: 2
+- private add: 2
+- put id: 2
+- put session: 2
+- replace user: 2
+- secret create: 2
+- secrets create: 2
+- start upload: 2
+- storage update: 2
+- tenancy create: 2
+- undelete undelete: 2
+- unsuspend user: 2
+
+Top 60 pairs cover 298 of 518 rows (57.5%).
+
+## G06 (375 rows)
+
+### Top 40 verbs
+
+- update: 78
+- create: 66
+- put: 25
+- post: 23
+- get: 16
+- patch: 12
+- add: 11
+- protocol: 9
+- api: 8
+- targets: 8
+- insert: 6
+- web: 6
+- configure: 5
+- dlp: 5
+- enable: 5
+- set: 5
+- contact: 4
+- sites: 4
+- company: 3
+- notification: 3
+- upsert: 3
+- action: 2
+- activate: 2
+- agent: 2
+- device: 2
+- domains: 2
+- extended: 2
+- integrations: 2
+- json: 2
+- register: 2
+- server: 2
+- service: 2
+- subscriptions: 2
+- ticket: 2
+- users: 2
+- aig: 1
+- apps: 1
+- baskets: 1
+- c2c: 1
+- channel: 1
+
+### Top 60 nouns
+
+- extension: 26
+- integration: 23
+- update: 14
+- configuration: 13
+- connection: 12
+- entity: 12
+- create: 11
+- channel: 10
+- config: 10
+- target: 10
+- notification: 8
+- option: 8
+- hook: 7
+- post: 7
+- setting: 7
+- attribute: 6
+- insert: 6
+- server: 6
+- subscription: 6
+- enabled: 5
+- id: 5
+- provider: 5
+- rule: 5
+- slot: 5
+- cloud: 4
+- put: 4
+- action: 3
+- application: 3
+- connector: 3
+- device: 3
+- endpoint: 3
+- instance: 3
+- link: 3
+- output: 3
+- service: 3
+- webhook: 3
+- alert: 2
+- collection: 2
+- command: 2
+- communication: 2
+- definition: 2
+- email: 2
+- entry: 2
+- fcm: 2
+- forwarder: 2
+- json: 2
+- log: 2
+- mapping: 2
+- monitoring: 2
+- name: 2
+- orchestration: 2
+- order: 2
+- response: 2
+- route: 2
+- sn: 2
+- token: 2
+- vendor: 2
+- 31: 1
+- account: 1
+- add: 1
+
+### Top 60 verb+noun pairs
+
+- create extension: 23
+- update integration: 14
+- update channel: 7
+- insert insert: 6
+- update config: 6
+- update notification: 6
+- api post: 5
+- contact entity: 4
+- create create: 4
+- put configuration: 4
+- targets cloud: 4
+- targets server: 4
+- update hook: 4
+- company entity: 3
+- create connection: 3
+- create integration: 3
+- create rule: 3
+- get option: 3
+- get subscription: 3
+- post enabled: 3
+- post option: 3
+- update extension: 3
+- update setting: 3
+- update webhook: 3
+- web slot: 3
+- add option: 2
+- add output: 2
+- add token: 2
+- agent integration: 2
+- api put: 2
+- configure log: 2
+- create communication: 2
+- create target: 2
+- device integration: 2
+- dlp entry: 2
+- extended update: 2
+- get attribute: 2
+- get enabled: 2
+- json json: 2
+- notification update: 2
+- patch id: 2
+- post attribute: 2
+- post subscription: 2
+- put attribute: 2
+- put command: 2
+- put email: 2
+- put id: 2
+- register device: 2
+- server update: 2
+- set target: 2
+- sites connection: 2
+- sites slot: 2
+- subscriptions entity: 2
+- ticket entity: 2
+- update configuration: 2
+- update connection: 2
+- upsert connection: 2
+- web connection: 2
+- action receiver: 1
+- action update: 1
+
+Top 60 pairs cover 195 of 375 rows (52.0%).

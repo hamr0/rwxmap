@@ -8644,3 +8644,268 @@ exact >= +5 points): +9.0 and +9.5 points.
   - (4) The remaining leaks are confident wrong lowerings at p about 0.96-0.975, and no cut-off separates them: chatwoot ex4-0152 (inbox contacts), clerk ex3-0031 (billing price), workos fx-0936 (waitlist), permit.io ex4-0813 (env copy), googleapis gate4 (messages), elmah.io r9-1129.
 - Decision: none for rwxmap. 0.97 stays (D136). rwxlite keeps 0.2.0 at T 0.844 / 0.97 and will not spend a fresh exam on calibration. Their next model work waits for more real human-labelled dangerous POST/PUT examples.
 - Lesson: when a model's letter never changes across T, temperature and the cut-off are one lever. Its remaining leaks are confident errors, so only new training data can fix them, not calibration. This refines the round 12 lesson: T moved 7 rows there because it moves the same rows the line does.
+
+## 2026-11-05 — D137: x widened to 'including everything anyone could do in between'; truth v4 for every set
+
+- Ruling (user, D137): x = after this call, a later call cannot put things back the way they were, including everything anyone could have done in between. Gone (delete, purge, job stopped with work lost) or out of your hands (sent, published, charged, run, a secret or a right handed over). Granting or widening access (IAM/resource/bucket/key policies, role bindings, ACLs, share grants, deploy keys, setIamPolicy-style) is x; narrowing stays w; unclear set/replace is x by the doubt rule. D130, BRIEF-v3 (c) and (f) become examples of this one test.
+- Why: rwxlite's vendor-label check found Jev said w on 165 of 221 AWS "Permissions management" endpoints and 0.2.0 learned it. Our second pass lowered 38 of them from x to w at p 0.97-0.99 (PutRolePolicy, PutKeyPolicy, PutResourcePolicy, create-deploy-key, and more). Same family as the credential-set leaks.
+- Plan: `docs/wiki/truth-v4-plan.md`. Every set either project labelled is relabelled under BRIEF-v4; originals stay; rwxmap code waits for its own D-number and exam #5.
+- Lesson: adding one clause per finding makes pockets; one test with examples keeps the definition whole.
+
+## 2026-11-05 — v4 pilot: Jev misses the doubt rule (64.3% x recall); pass labelled locally
+
+- Goal: pilot the v4 labelling on 200 w rows (100 access-pattern, 100 random) with two blind labellers and Jev; bar set before running: Jev catches at least 95% of the truth x rows.
+- Numbers: labellers A and B (both Sonnet) agreed on 197 of 200; 3 disputes ruled x by the user (p164 zulip, p169 pagerduty, p186 gitlab). Truth 31 x, 169 w. Jev (jev-1.14.0, about 559k input tokens) on the 197 agreed rows: 18 of 28 x caught (64.3%), false x 0 of 169. FAIL. 7 of 10 misses are "widening direction not stated, x by doubt". Cut-off 0.3 gives 22/28 with 4 false x; 0.05 gives 27/28 with 81 false x. No cut-off is chosen after the fact.
+- Lesson: a model that never applies "unsure -> x" can't label a widening whose cases are mostly "direction not stated". Both labellers being Sonnet measures consistency, not independent opinion.
+- Decision: the pass is labelled locally by two Sonnet labellers (user ruling). Flips are reported as D137 vs other (p116, p188 flip for other reasons).
+- Where: data/pilot-v4-2026-11-05/ (README Result section, truth-v4.csv, rulings.csv), poc/v4-pilot/.
+
+## 2026-11-06 — v4 pilot 2: ask Jev facts, apply the rule in code; 96.4% x recall
+
+- Goal: rerun the v4 pilot on 200 fresh w rows (100 access-pattern, 100 random); Jev gets five factual questions per row and our code applies the rule. Bar set before running: catch at least 95% of agreed-x rows.
+- Numbers: labellers agree on 197 of 200; user ruled the 3 disputes x (q045, q075, q129) and corrected 5 both-r rows to r (fixes). Truth x 31, w 164, r 5. Jev rule label catches 27 of 28 agreed x (96.4%), PASS; false x 23 of 169; the miss is q026 adyen (otherX p 0.22). About 621k input and 21.8k output tokens, 0 errors.
+- Cost: 5 requests per row came to slightly more tokens than pilot 1's single long question (about 621k vs 559k input).
+- Lesson: Ask a model facts and apply the decision rule (including "unsure means x") in code; a doubt rule inside a probability question reads as "probably not".
+- Decision (user): full pass labelled by Jev; Sonnet re-labels suspect rows only (all Jev-x, Jev-w with any p in [0.2, 0.5), seeded 5% of the rest); disagreements go to the user by pattern.
+- Where: data/pilot2-v4-2026-11-06/ (README Result, truth-v4.csv, rulings.csv), poc/v4-pilot2/.
+
+## 2026-11-06 — v4 full pass: Jev on all rows, Sonnet on suspects, user ruled the disagreements by pattern
+
+- Goal: label the 33,321-row w-only v4 pass under BRIEF-v4 by the plan fixed in pilot 2: Jev labels every row; one blind Sonnet labels the suspects; disagreements go to the user grouped by pattern.
+- Numbers: suspects 14,735 (8,283 Jev-x, 5,474 near misses, 978 random 5% sample of the Jev-w rest). Sonnet disagreed with Jev on 4,688 (incl. 1 "?"): 3,952 Jev-x vs Sonnet w, 106 Jev-x vs Sonnet r, 629 Jev-w vs Sonnet x. In the random sample, Sonnet found x on 21 of 978 Jev-w rows (2.1%), which suggests about 400 x hide among the roughly 19,600 unchecked Jev-w rows.
+- Grouping: 34 groups by direction, Jev's highest question (access change, hands over, outside, other x) and Sonnet confidence. User rulings: 20 groups follow Sonnet; 5 groups x (Jev right: role/access edits with low Sonnet confidence, credentials, webhooks and integrations, logins/tokens); 5 Sonnet-r groups stay w (not lowered to r on one labeller); s05133 x. Three groups (1,803 rows) were mixed about 50/50 and were split further.
+- Mixed groups: concept families (upload, credential, access, membership, outside, session, container, rest) settled 973 rows; 16 azure LUIS `Model_*EntityRole` rows are w (language-model labels, not access). The remaining 824 were read row by row by the orchestrator against one test: "after this call, can someone (a person, an agent or an outside service) get, do or receive something they couldn't before?" Yes is x. Five user rulings resolved what the test left open: (1) a create that can add members or permissions is x; (2) creating an unattached allow list or firewall object is w, updating or attaching one is x; (3) x when the text names sharing or public, otherwise w; (4) sending to another service of the same provider counts as outside, so x; (5) creating a resource that carries an IAM role is w, and changing the role is x.
+- Result: all 4,688 disagreements labelled, 2,938 x and 1,750 w, 0 r (disagree/disagree-final.csv). 6 row rulings from the rule-3 spot-check are all x.
+- Detour: after the Sonnet pass the orchestrator proposed a settlement rule (Sonnet x -> x; Sonnet w low vs Jev x -> x; Sonnet w high vs Jev x -> w; Sonnet r alone -> w) instead of the plan's "user rules by pattern". A 30-row spot-check of the "Sonnet w high wins" rule found 6 real x (20%): okta createPolicy, keycloak mappers, twilio composition hook, netbird setup key, two microsoft sign-in/access rows. A second blind Sonnet on the 201 Sonnet-r rows agreed r on 182, but the token, session and link rows among those were plainly not r. Neither result became a rule. The plan was restored.
+- Lessons: (1) Follow the pre-registered plan; rules invented after seeing results pile up exceptions, and the user had to pull the work back. (2) High Sonnet confidence is not a safe tie-break against Jev x: it called sign-in, token and webhook changes "plain create". (3) Two Sonnets agreeing measures consistency, not truth. (4) Word families settle only clear concept groups; for the mixed rest, one stated test applied per row avoids a pile of carve-outs. (5) A group ruling on a ~50/50 group is wrong on hundreds of rows either way; split it first.
+- Next: AWS/GitHub vendor cross-check; the unchecked Jev-w rows stay a known gap. The suspects README still says "a second blind Sonnet looks" (a worker's line, not the plan); it gets fixed when everything is settled.
+- Where: data/pass-v4-2026-11-05/suspects/ (labels, disagree/, rcheck/), poc/v4-pass/ (suspects, disagree, settle, families, settle-c, rcheck).
+
+## 2026-11-06 — v4 pass: AWS/GitHub vendor cross-check, 8 of 45 rows raised to x
+
+- Goal: ruling (a) of the truth-v4 plan. Vendor labels are a cross-check, not truth. Any pass row v4 calls w where AWS (Permissions management) or GitHub (admin, secrets, keys, roles write) says x gets looked at.
+- Join: 7,472 of rwxlite's 21,536 vendor rows matched a pass row (4,672 by rwxlite id, 2,800 by merge key). Most vendor x rows are already x in v3, so they never entered this w-only pass.
+- Result: 45 candidates. The user ruled 8 x: aws Organizations DetachPolicy (removing a service control policy widens access), CodeStar UpdateUserProfile (SSH key), CodeStar CreateProject (roles and team), License Manager UpdateServiceSettings (cross-account discovery); github OIDC subject-claim template, create deployment branch policy, update repository (visibility), update Pages site (public). 37 stay w: AWS detach/remove/revoke calls that only narrow access, unattached CreateWebACL, and GitHub admin-only settings.
+- Lesson: a vendor "admin" or "Permissions management" level says who may call it, not whether the change can be undone. Most hits were narrowing, which stays w under D137. The real catches were the guardrail-removal and credential/visibility rows.
+- Where: data/pass-v4-2026-11-05/vendor/, truth-v4-pass.csv; poc/v4-pass/vendor-check.mjs, final-labels.mjs.
+
+## 2026-11-06 — v4 export for rwxlite (plan step 5): 36,578 ids, every rwxlite w id covered
+
+- What: one row per source id with its v4 label, BRIEF-v4, a flag (rwxlite / tuning / burned / diagnostic) and the label's source. It merges the pass labels, the 104 v3-x conflict keys (x) and both pilots. The tighter label wins, except pilot 2's five user-ruled r fixes. Totals: 28,466 w, 8,107 x, 5 r; rwxlite ids 28,757 (w 22,934, x 5,822, r 1). 570 surface variants are listed to take their seed's label. Sent to rwxlite 2026-11-06.
+- Found while checking: 101 rwxlite w ids were missing. The merge dropped whole keys already labelled in pilot 1, so the rwxlite id sharing each key never got a label. They were added by normalised key (85 w, 16 x), and the export now fails if any rwxlite w id is uncovered. Pilot 2 had been drawn from pass rows, so 231 ids carry two labels; they disagree on 20, and x is kept.
+- Lesson: when a merge excludes keys that are labelled elsewhere, the hand-off must carry those labels to every id that shares the key. Check coverage against the receiver's own id list, not against our own outputs.
+
+## 2026-11-06 — v4 pass: the Jev-only gap closed, 236 of 18,576 w rows became x
+
+- Goal: give the 18,576 Jev-only w rows (source jev-unchecked in truth-v4-pass.csv) the second look they never had.
+- Numbers: one blind Sonnet per row under BRIEF-v4, 93 batches of 200 (last 176), seed 20261109 (poc/v4-pass/rest.mjs). Sonnet: w 17,844 (kept w), r 496 (kept w, ruling D), x 236. x rate 236/18,576 = 1.3%, against 2.1% (21/978) predicted by the 5% sample; 11 of the 236 were high confidence.
+- Groups: the 236 fell into six groups by Jev's top question and Sonnet confidence: otherX/low 151, accessChange/low 31, handsOver/low 25, outside/low 18, otherX/high 9, accessChange/high 2. The user ruled all six Sonnet's label (x), the same as every Jev-w/Sonnet-x group in the first pass. Spread: 84 providers (microsoft.com 32, amazonaws.com 19, googleapis.com 18, azure.com 14); POST 160, PUT 49, PATCH 20, GET 6, DELETE 1. No new rule; same one D137 test.
+- Result: data/pass-v4-2026-11-05/truth-v4-pass-gap.csv, 33,321 rows (7,406 x, 25,915 w). Export data/export-v4-gap-2026-11-06/: 36,578 rows (w 28,219, x 8,354, r 5), 247 rows w to x against export-v4-2026-11-06, none added or removed; rwxlite ids w 22,727, x 6,029, r 1. It supersedes the first export for training and was sent to rwxlite. export.mjs takes optional truth and out args; its default run is byte-identical to the first export.
+- Effect on current mechanical (classifyRow) on those 236: 141 x (POST floor, no evidence, marker tight): too tight before, exact now. 89 w (69 PUT/PATCH method floor, 20 POST w-list), all marked loose: exact before, too loose now. 6 r (AWS GET_ action rows such as GET_ModifyVpnTunnelCertificate, marked settled): too loose before and after; this is the parked GET-twin question.
+- Lessons: (1) The 5% sample overstated the miss rate (2.1% predicted, 1.3% found), so the gap was smaller than estimated. (2) A stricter truth moves mechanical errors both ways: 141 too tight became exact and 89 exact became too loose, so too tight and too loose are reported separately. (3) The 89 new too-loose rows are the first targets for mechanical alignment. (4) Most labellers wrote their file in one write although asked for 50-row chunks; harmless here, but a kill mid-run would have lost a whole batch.
+- Next: mechanical alignment (PRD "What is next" item 1). Open idea from the user, not a rule: "maybe later we mark x>w", possibly marking or handling x-to-w lowering; it belongs to the planned second pass (raise w to x, lower x to w).
+- Where: data/pass-v4-2026-11-05/rest/ (batches, gap-x-groups.csv, group-rulings.csv), poc/v4-pass/rest.mjs and rest-final.mjs, data/export-v4-gap-2026-11-06/.
+
+## 2026-11-06 — Mechanical vs v4 truth: baseline before alignment (PRD What is next item 1)
+
+- Goal: measure how well current mechanical (src/flow.js classifyRow) matches v4 truth before changing anything, too loose and too tight counted separately.
+- Numbers: six complete rwxmap sets (combined-2026-09-21, relabel-buildset, exam-2026-09-22, exam3, exam4, rwxlite-fresh) = 16,486 ops. v4 truth = each set's v3 truth with the export-v4-gap-2026-11-06 label applied by set+id.
+- Totals: v3 truth exact 13,339 (80.9%), too loose 156 (0.9%), too tight 2,991 (18.1%). v4 truth exact 13,484 (81.8%), too loose 861 (5.2%), too tight 2,141 (13.0%). 710 of the 861 leaks are rows v3 called w and v4 calls x.
+- Per set under v4 (exact/loose/tight): combined 6,557: 83.3/4.5/12.2%; buildset 1,819: 69.8/10.8/19.4%; exam22 4,279: 83.4/3.6/13.0%; exam3 1,377: 83.7/6.6/9.7%; exam4 1,505: 84.3/5.6/10.0%; fresh 949: 80.2/4.1/15.7%.
+- Leak distance under v4: x>w 844, w>r 4, x>r 13 (one step 848, two steps 13). Under v3: x>w 139, w>r 9, x>r 8.
+- Leaks by method and deciding source: PUT floor x>w 475; PATCH floor x>w 207; POST list x>w 162; GET floor x>r 9 (AWS GET_ action twins); POST list x>r 4; GET floor w>r 3; POST list w>r 1. 849 of 861 carry the loose marker; the 12 unflagged are GET floor rows marked settled.
+- Too tight under v4: 2,048 are POST floor x (marker tight); 33 x/list/tight; 18 x/list/settled; 39 DELETE floor x settled; 3 other.
+- Method leanings (truth share r/w/x), v3 -> v4: PUT 1,956: 0.2/93.7/6.1% -> 0.2/73.4/26.5%; PATCH 1,036: 0.0/97.6/2.4% -> 0.0/79.6/20.4%; POST 4,653: 9.3/68.7/22.0% -> 9.3/48.0/42.7%; GET 6,283: 99.8/0.1/0.1% -> 99.8/0.0/0.1%; DELETE 2,556: 0.2/1.6/98.2% -> 0.2/1.4/98.5%. Floor-decided rows only (v4): PUT 1,902: x 25.0%; PATCH 1,025: x 20.2%; POST 3,586: r 7.1 / w 50.1 / x 42.9%.
+- Vendor spread of PUT x share (v4, vendors with >=20 PUT rows): from permit.io 73%, github 64%, keycloak 58%, workos 50%, okta 46%, gitlab 44% down to xero 6%, intercom 4%, netbox 4%; cloudflare 22% of 350. PATCH: neon 36%, appcenter 32%, permit.io 29%, auth0 24% down to klaviyo 6%, netbox 3%. Identity/access vendors lean x; this matches the earlier finding that write-method leak rate tracks vendor domain.
+- Lead verbs on leaking rows are mostly generic: PUT update 116, PATCH update 60, POST add 56, PUT put 55, PATCH patch 31, POST update 30, PUT replace 30, PUT/POST assign 35, POST activate 12, PUT set 13. Truth spread for some (v4, all rows): PUT update x 117 / w 488; PATCH update x 61 / w 227; POST create x 379 / w 590 / r 12; PUT set x 13 / w 55; POST add x 56 / w 89. The x-ness is mostly in the noun, not the verb.
+- Lessons: (1) D137 moved the method leanings a lot (PUT x 6% -> 27%, PATCH 2% -> 20%, POST 22% -> 43%), so mechanical numbers quoted against v3 truth (README, PRD headline) no longer describe v4 truth. (2) Almost every leak (844 of 861) is one step, x read as w; only 13 are two steps (x read as r). (3) 79% of leaks (682 of 861) are PUT/PATCH rows decided by the method floor with no evidence.
+- User proposals under discussion (2026-11-06, not decided): grade too loose into loose-1 (one step: x>w, w>r) and loose-2 (two steps: x>r), since a w grant is less common than r and the two should not be equated; work big methods first, starting with the floor-decided rows; build a new per-method leanings table under v4; if all fails, keep mechanical as is and let rwxlite correct the gap, provided the marker is right. Ruled 2026-11-06: see Rulings below.
+- Where: measured from a scratch script, not committed; the numbers can be rebuilt from the six sets' truth files plus data/export-v4-gap-2026-11-06/export-v4.csv.
+- Per-method view, current code, six complete sets (16,486 ops). HEAD (2 rows, r, exact) omitted.
+
+v3 truth:
+
+| method | n | truth r | truth w | truth x | floor | exact | too loose | too tight |
+|---|---|---|---|---|---|---|---|---|
+| GET | 6283 | 6271 (99.8%) | 8 (0.1%) | 4 (0.1%) | r | 6271 (99.8%) | 12 (0.2%) | 0 |
+| POST | 4653 | 431 (9.3%) | 3197 (68.7%) | 1025 (22.0%) | x | 1703 (36.6%) | 36 (0.8%) | 2914 (62.6%) |
+| DELETE | 2556 | 4 (0.2%) | 42 (1.6%) | 2510 (98.2%) | x | 2510 (98.2%) | 0 | 46 (1.8%) |
+| PUT | 1956 | 3 (0.2%) | 1833 (93.7%) | 120 (6.1%) | w | 1847 (94.4%) | 86 (4.4%) | 23 (1.2%) |
+| PATCH | 1036 | 0 | 1011 (97.6%) | 25 (2.4%) | w | 1006 (97.1%) | 22 (2.1%) | 8 (0.8%) |
+
+v4 truth:
+
+| method | n | truth r | truth w | truth x | floor | exact | too loose | too tight |
+|---|---|---|---|---|---|---|---|---|
+| GET | 6283 | 6271 (99.8%) | 3 (0.0%) | 9 (0.1%) | r | 6271 (99.8%) | 12 (0.2%) | 0 |
+| POST | 4653 | 431 (9.3%) | 2233 (48.0%) | 1989 (42.7%) | x | 2405 (51.7%) | 167 (3.6%) | 2081 (44.7%) |
+| DELETE | 2556 | 4 (0.2%) | 35 (1.4%) | 2517 (98.5%) | x | 2517 (98.5%) | 0 | 39 (1.5%) |
+| PUT | 1956 | 3 (0.2%) | 1435 (73.4%) | 518 (26.5%) | w | 1467 (75.0%) | 475 (24.3%) | 14 (0.7%) |
+| PATCH | 1036 | 0 | 825 (79.6%) | 211 (20.4%) | w | 822 (79.3%) | 207 (20.0%) | 7 (0.7%) |
+
+- POST by deciding source under v4 (truth r/w/x): no-word floor x 3,586 rows: 253 / 1,795 / 1,538; KEEP_W list w 570: 0 / 408 / 162; CANT_UNDO list x 318: 4 / 29 / 285; read-verb list r 179: 174 / 1 / 4. On the 3,586 no-word POST rows, floor x gives 1,538 exact, 2,048 too tight, 0 too loose; floor w would give 1,795 exact, 1,538 too loose (x read as w), 253 too tight.
+- User proposal 2026-11-06 (under discussion, not decided): keep v3 code intact in src/ and build a parallel v4 copy of the same code, changing only what is inside, until it is clean against v4 truth; then archive v3. Run the three steps from the method floor, then a per-method extraction pass: r floor GET/QUERY, extract x then w from it; w floor PATCH, PUT, POST, then extract r and x from POST; x floor DELETE, then extract x from PUT. Ruled 2026-11-06: see Rulings below.
+- Rulings (user 2026-11-06): the parallel-v4 proposal is adopted (v3 intact in src/, v4 copy in poc/, floor first then one extraction pass per method); POST floor stays x (a w floor would add 1,538 leaks on the 3,586 no-word POST rows); loose-1/loose-2 kept in the ledger only; bar: candidates adopt only if under leave-one-vendor-out they fire on truth x more than truth w (lowering passes: D100 loosening rule), a pass is GO if it closes at least 1 point of its method's leaks with too tight rising less than the leaks closed. Plan: docs/wiki/mechanical-v4-plan.md.
+
+## 2026-11-06 — Mechanical v4 step 1: parallel copy proven identical (plan step 1)
+
+- Goal: start the parallel v4 core (docs/wiki/mechanical-v4-plan.md step 1) and prove it gives the same output as v3 before anything changes.
+- Built: poc/mech-v4/ holds byte-identical copies of src/ tokens.js, step1.js, step2.js, step3.js, flow.js, types.js and their five tests (cmp clean on all 11). No copy imports from src/. sets.mjs loads the six sets with v3 and v4 truth (ported from the uncommitted baseline script, now committed). proof-copy.mjs runs src/flow.js and the copy on every row and compares JSON.stringify of each verdict.
+- Numbers: 16,486 rows compared, 0 skipped for missing truth, 0 differences. Copy tests 102/102 pass. Pinned baselines reproduced: v3 truth 13,339 / 156 / 2,991 and v4 truth 13,484 / 861 / 2,141 (exact / too loose / too tight); per-method v4 table matches the plan doc.
+- Break test: a scratch copy with "update" dropped from KEEP_W gave 206 differences and exit 1; the clean copy exits 0. The proof prints the full difference count, with a sample of 10 rows.
+- Lessons: (1) The baseline numbers had lived only in a scratch script; the loader is now in the repo, so every later step scores on the same rows. (2) The proof takes a flow.js path, so it can be broken in scratch without touching the repo copy.
+- Next: plan step 2, PUT/PATCH x-extraction (682 leaks). Candidates are fixed before measuring.
+- Where: poc/mech-v4/ (README.md, sets.mjs, proof-copy.mjs).
+
+## 2026-11-06 — Mechanical v4 step 2: PUT/PATCH x-extraction adopted (plan step 2)
+
+- Goal: pull the x rows out of the PUT/PATCH w floor (682 of 2,927 floor rows are truth x under v4) without a new leak elsewhere.
+- Candidates (fixed before measuring, from reading all 682 x rows): four families of path words. F1 who can get in (role, member, permission, access, share, oauth, scim, ...), F2 credentials (key, token, secret, credential, api_key, signing, ...), F3 sends data out (webhook, hook, integration, destination, log streams, ...), F4 one-way action at the path end (stop, cancel, abort, finalize, ...).
+- Match modes (poc/mech-v4/step2-score.mjs): A whole word, B stem, C stem or anywhere inside a token (user's idea: scan registrycredentials for credential). Under leave-one-vendor-out on the 2,927 floor rows: A closed 111 / 47 new too tight; B 345 / 120; C 360 / 120. C adds 15 fixes at no cost (memberships, permissionscheme, oauth2, registrycredentials). Its false substring fires were sso inside association (1 x vs 16 w) and pass inside password; both words fail the bar anyway. Jaccard was not used.
+- F4 closed 0 under LOVO: every F4 word appears at one vendor only. Words failing the bar (x fires <= w fires): policy, protection, subscription, connection, channel, certificate, sso, idp, identity_provider, password, pass, and F4's stop, verify, complete, roll.
+- Variant tried and rejected: match only the last static path segment. LOVO 255 closed / 56 new too tight against 360 / 120: it lost 105 real fixes (okta /roles/{id}/targets/..., cloudflare /access/groups/{id}, trello /webhooks/{id}/callbackURL) to remove 66 false fires (mostly trello /members/{id}/bio and cloudflare /access/apps/{id}/settings) and added 2.
+- Adopted (user 2026-11-06): rule path-x-word in poc/mech-v4/step2.js, 36 words (PATH_X_WORDS), PUT/PATCH rows not claimed by cant-undo or credential-set, mode C, path only. Marker rule changed in poc/mech-v4/flow.js: PUT/PATCH/POST x is tight, w or r is loose; other methods settled.
+- Numbers on the six sets, 16,486 ops, v4 truth (fitted, the words were picked on these rows; the quotable figure is LOVO 360 / 120): v3 exact 13,484 (81.8%), loose-1 848, loose-2 13, too tight 2,141; v4 exact 13,742 (83.4%), loose-1 483, loose-2 13, too tight 2,248. PUT too loose 475 -> 230 and too tight 14 -> 92 (of 1,956); PATCH 207 -> 87 and 7 -> 36 (of 1,036). No other method changed class (asserted). 472 rows changed class (PUT 323, PATCH 149, all w -> x); 537 PUT/PATCH rows are now tight. Marked errors: 484 of 496 leaks and 2,209 of 2,248 too-tight rows carry a marker; the unmarked are 12 GET leaks (step 4) and 39 DELETE too tight (step 5).
+- Lessons: (1) Under v4 the x is in the noun, and access, credential and delivery nouns transfer across vendors where earlier "whose data" nouns did not. (2) A word that names the container (trello /members/{id}/bio) is the main false-fire shape, but cutting it by position costs more real fixes than it saves. (3) The old marker left word-raised PUT/PATCH x rows settled, so their errors would have been invisible to rwxlite; a marker by direction for every write method fixes that for 65 extra marked rows. (4) The orchestrator wrongly said the new too-tight rows would be marked before checking reviewHint; check the marker code before claiming coverage.
+- Next: plan step 3, POST w/r-extraction and KEEP_W re-tune (162 leaks, 2,081 too tight).
+- Where: poc/mech-v4/ (step2.js, flow.js, step2-score.mjs, step2-readout.txt, step2-target-readout.txt, score-v4.mjs, score-v4-readout.txt, score-v4-changes.tsv).
+
+## 2026-11-06 — Mechanical v4 step 3: POST, keep x by path word and lower content nouns to w (plan step 3)
+
+- Goal: POST under v4 truth is r 9.3 / w 48.0 / x 42.7% of 4,653. The floor stays x (ruling). Fix KEEP_W's 162 leaks and pull clear w rows out of the x floor (1,795 truth w stuck at x).
+- KEEP_W under v4 fails the D100 lowering bar as a whole (408 right / 162 leaks); per verb add 126 w / 71 x, assign 4 w / 18 x. Not dropped (no word dropped without approval); fixed by A instead.
+- A: the step 2 path words (PATH_X_WORDS, picked on PUT/PATCH only) also apply to POST, so KEEP_W cannot lower a row whose path names a role, member, key, webhook etc. Scored once on unseen rows: fires on 103 of the 570 KEEP_W rows, 78 truth x (leaks closed) across 25 vendors, 25 truth w (new too tight). It must not apply to read-verb rows (fires on 28 truth r there); step 1 runs first, so it does not.
+- B (w scan): the lead verb says little on the floor (create 685 w / 444 x), the target noun does. Candidates from the floor pile: last static path segment nouns for everyday content (tag, label, file, comment, ...) plus copy, restart, lock. Under LOVO with the D100 bar: 191 right / 14 leaks (13.6:1, GO); 17 words held up, 11 failed (project, file, upload, config, contact, flow, segment, image, note, environment, create).
+- Second word (user idea): the failed words' x rows mostly carry a second word: url/presigned (9 of 9 x), money words (6 of 6 x), job (7 x / 2 w); bulk, many, link, direct and user were not markers (mixed or w). Veto LOVO (two layers): 233 right / 15 leaks (15.5:1, GO). Only url and credit have x rows at two vendors; the other six veto words came from one vendor each and never acted under LOVO, so they were dropped. The veto rescued upload, file and note; create still failed (admitted in 1 of 56 folds).
+- Adopted (user 2026-11-06): A in poc/mech-v4/step2.js; B as rule content-noun in poc/mech-v4/step3.js with CONTENT_W (20 words) and CONTENT_VETO (url, credit), POST only, after KEEP_W, last static segment, stem match, no substring (it loosens); restart and lock as lead verb.
+- Numbers, six sets, 16,486 ops, v4 truth (fitted; quotable: A 78/25 on unseen rows, B LOVO 233/15): v3 exact 13,484 (81.8%), loose-1 848, loose-2 13, too tight 2,141; v4 after step 3 exact 14,044 (85.2%), loose-1 413, loose-2 13, too tight 2,016. POST: exact 2,405 -> 2,707, loose-1 163 -> 93, loose-2 4 -> 4, too tight 2,081 -> 1,849. Class changes against step 2: POST 103 w->x (path-x-word), 270 x->w (content-noun: 257 truth w, 8 x, 5 r); 655 floor POST rows relabelled path-x-word (still x). Markers: 414 of 426 leaks and 1,977 of 2,016 too-tight rows marked.
+- The 8 content-noun leaks: cloudflare direct_upload x2, immich database-backups upload, clerk change_domain, auth0 sso-ticket, permit.io env copy, paypal acknowledge-return-item, asana saveAsTemplate; about half are access in disguise (an upload link, a ticket, a domain change).
+- Lessons: (1) On POST the noun decides, not the verb, in both directions: access nouns keep x, content nouns lower to w. (2) A word that fails alone can pass with a veto word, but a veto word must be seen at two vendors to do anything under LOVO. (3) Measuring in a scorer before building, then diffing the build against a snapshot of the previous verdicts, caught nothing wrong here: the build moved exactly the 103 + 270 rows measured.
+- Next: plan step 4, GET (12 unflagged leaks, 9 of them two steps).
+- Where: poc/mech-v4/ (step2.js, step3.js, step3-score.mjs, step3-readout.txt, step3-veto-readout.txt, score-v4.mjs, score-v4-readout.txt).
+
+## 2026-11-06 — Mechanical v4 step 4: GET action words raise to x (plan step 4)
+
+- Goal: the 12 GET leaks under v4 truth (9 x read as r, two steps; 3 w read as r), all settled, so no model saw them.
+- The step 2 rules do not transfer to GET: on the 6,283 GET rows the 36 path words fire on 860 truth r and 3 truth x, the can't-undo verbs on 17 r and 1 x. On a GET the noun is what is read (GET /apps/secrets, /credit_grants/{id}), and refund or capture are nouns there.
+- Candidates (fixed, from reading the 12 leaks): logout, close, connect, create, acquire, revoke, activate; lead verb or last static path segment, stem match, no substring (poc/mech-v4/step4-score.mjs). LOVO (more x than r on other vendors): logout, close, revoke admitted; connect and create failed (docusign Connect_* reads, connected_accounts, created_rate); acquire never fired; activate fired on 1 w row only. RAISE LOVO: 4 two-step leaks closed (workos /sso/logout, workos /user_management/sessions/logout, ory /self-service/logout, ory /oauth2/sessions/logout), 1 truth-r row raised (ory getOAuth2LogoutRequest); fitted 5 / 1. FLAG with all 7 words: 39 rows flagged, 31 of them reads (20.5% real), rejected as noise.
+- Raise chosen over flag (user 2026-11-06): a flag leaves the class r, so with no model (mechanical mode) the leak ships; a raise follows the invariant and the one wrong row is tight, so rwxlite can lower it. A read-verb veto (lead verb get) would remove the one wrong row but rests on one row at one vendor; not added.
+- Built in poc/mech-v4/: the read-method r floor moved out of step 1 into floorRead() at the end of the ladder (like floorPost), so a word gets the first look; rule get-action in step2.js (GET_ACTION: logout, revoke, close) for GET, HEAD, OPTIONS, QUERY; reviewHint: settled only when the class equals the method default. Diff against a snapshot of the step 3 verdicts: exactly 6 rows changed (GET r/method/settled -> x/get-action/tight), the other 16,480 byte-identical.
+- Numbers, six sets, v4 truth: GET loose-2 9 -> 4, loose-1 3 -> 3, too tight 0 -> 1. All rows (fitted): exact 14,048 (85.2%), loose-1 413, loose-2 8, too tight 2,017 (v3: 13,484 / 848 / 13 / 2,141). Marked: 414 of 421 leaks, 1,978 of 2,017 too-tight rows. The 7 unmarked leaks are GETs with no action word (datadog /graph/snapshot, intercom /contacts/{id}/banners, cloudflare devtools browser acquire and /subscribe/token, and 3 others) and stay settled.
+- Lessons: (1) A word means different things by method: the same noun that proves x on a write is just the object of a read. Each method needs its own list. (2) A flag is not a fix when the model may be absent; raise when the word is evidence, mark so the model can lower.
+- Next: plan step 5, DELETE w-extraction (39 too tight, trash/restore).
+- Where: poc/mech-v4/ (step1.js, step2.js, flow.js, step4-score.mjs, step4-readout.txt, score-v4-readout.txt).
+
+## 2026-11-06 — Mechanical v4 step 5: DELETE stays x (plan step 5, closed by ruling)
+
+- Goal: the 39 DELETE rows that v4 truth calls w (35) or r (4), all x and settled.
+- What they share: 18 say archive (hubspot crm "Archive a company" x15, intercom "Delete (archive) a conversation attribute", appcenter archiveTestRun); 17 are plain "Delete X" that the vendor docs call soft (asana deleteTask, canva deleteFolder, miro delete-board), with no word in the text; 4 r rows are cloudflare predefined DLP entries and a docusign view-URL revoke.
+- The only word (archive, trash or soft in operationId, summary or path) fires on 17 truth w and 16 truth x across all 2,556 DELETE rows: hubspot puts _archive in the operationId of real deletes, box /trash endpoints permanently remove, zulip archive-stream and mailchimp "Archive list member" are x. 1:1, far below the >10:1 lowering bar, and against D87 (every DELETE is x).
+- A flag-only option (keep x, mark tight so rwxlite could lower) was offered and declined.
+- Ruling (user 2026-11-06): DELETE is DELETE. It stays at the x floor, settled, no rule, no flag; a provider using DELETE for something reversible has misdescribed its API.
+- Lesson: when the method itself is the provider's statement of intent, rwxmap takes it at its word; truth labels that read past the method are noted, not chased.
+- Next: plan step 6, D-number, fresh exam #5 for both projects (rwxlite waits for it), archive v3.
+
+## 2026-11-07 — Exam #5 scored: mechanical v4 gate NO-GO on too tight, shipped by user override (D138)
+
+- Goal: score the frozen exam #5 (frontapp, fusionauth, hookdeck, paddle, planetscale, semaphoreui, weaviate; 1443 ops, v4 truth) once at rwxmap 36fb827, mechanical v4 against v3, plus rwxlite 0.2.0 and R13 through the real CLI.
+- Gate (mechanical alone, of 1443): too loose v4 59 vs v3 77 (-18) OK; loose-2 2 vs 2 OK; too tight 183 vs 178 (+5) FAIL. NO-GO as pre-registered.
+- Five configs (exact / too loose / too tight, of 1443): mech-v3 1188 / 77 / 178; mech-v4 1201 / 59 / 183; a-020-v3 1274 / 100 / 69; a-020-v4 1272 / 94 / 77; a-r13-v4 1220 / 37 / 186. All parity and copy guards passed; rwxlite's replica matches our CLI on all 1443 rows. Exam #5 is burned for both sides.
+- Override (user, 2026-11-07, D138): ship v4 anyway. Fewer leaks (-18, 23% fewer) outweigh 5 more too-tight rows (+0.3 points), each marked tight for review. The gate result stays as recorded; the override is a decision after the result, not a pass.
+- Finding (b): shipped mode a (0.2.0) is looser than mechanical alone on v4 truth, 100 vs 77 on v3 and 94 vs 59 on v4. It was trained before D137 widened x, so its 148 confident lowerings land on rows that are now x. Mode a bar fails for all three mode a configs.
+- Finding (c): R13 halves too loose against 0.2.0 (37 vs 94) and is the safest config, but lowers only 23 rows against 148, so 186 rows stay too tight. It fails rwxlite's bar on exact (1220 vs 1272); 0.2.0 stays, nothing released.
+- Lessons: (1) A word that is right on one vendor's PUT/PATCH (role, permission) is wrong on another's: fusionauth, hookdeck and semaphore truth-w edits were tightened to x. Same lesson as the mined lists. (2) Substring matching catches "key" inside "keyspaces" (3 planetscale rows). (3) A model trained before a truth change lowers onto the new x rows. (4) A written bar can fail on a usability margin the user weighs as minor; record the override separately and never rewrite the gate.
+- Where: docs/wiki/exam-prereg-exam5.md (results section), data/exam5-2026-11-07/score/, decision D138 in docs/wiki/decisions-log.md.
+
+## 2026-11-07 — PRD ladder moved to mechanical v4 (D138)
+
+The PRD's "The ladder" section now carries mechanical v4 (steps per method, v4 per-method tables from the tuning sets and exam #5). What follows is the v3/D87 shape it replaced, verbatim, plus the old "What is next" mechanical-v4 item.
+
+### Old ladder table (v3/D87)
+
+Three standalone steps, named by run order, each owning one letter and
+its own word lists, then step 2's floor. `src/flow.js` decides only the
+order: step 1, step 2, step 3, floor. The first step that claims a row
+decides it.
+
+| order | step | claims | rule | evidence |
+|---|---|---|---|---|
+| 1 | step 1, r | GET, HEAD, OPTIONS, QUERY | `method` | floor |
+| 1 | step 1, r | POST whose lead verb is in `READ_VERBS` | `read-verb` | list |
+| 1 | step 1, r | POST with a `SAFE_VERBS` word at any position | `read-verb-anywhere` | list |
+| 2 | step 2, x | DELETE, always, `destructive: true` | `method-delete` | floor |
+| 2 | step 2, x | POST, PUT or PATCH whose verb is in `CANT_UNDO` | `cant-undo-verb`, `cant-undo-verb-summary` | list |
+| 2 | step 2, x | PUT or PATCH that sets a password, passcode or pin (D131) | `credential-set` | list |
+| 3 | step 3, w | PUT, PATCH | `method-floor` | floor |
+| 3 | step 3, w | POST whose verb is in `KEEP_W` | `modify-verb`, `modify-verb-summary` | list |
+| last | step 2's floor, x | anything unclaimed: a POST with no word, or any other method | `floor-post` | floor |
+
+### Old "Why each floor sits where it does" (v3/D87, 2026-11-03)
+
+**Why each floor sits where it does.** Truth per method under the D87
+definition, and which step decides the rows. Tuning set first (6557
+rows, `data/combined-2026-09-21/labelled.csv`), then the burned M3 exam
+(4279 rows, `data/exam-2026-09-22/labelled.csv`); re-derived 2026-11-03
+with the current `classifyRow`.
+
+| method | set | n | truth r | truth w | truth x | floor | decided by (rows) |
+|---|---|---|---|---|---|---|---|
+| GET | tuning | 2543 | 2541 (100%) | 2 (0%) | 0 | r | method floor 2543 |
+| GET | M3 exam | 2099 | 2094 (100%) | 5 (0%) | 0 | r | method floor 2099 |
+| POST | tuning | 1994 | 169 (8%) | 1333 (67%) | 492 (25%) | x | no word → floor x 1336; step 3 `KEEP_W` → w 378; step 2 `CANT_UNDO` → x 178; step 1 read verb → r 102 |
+| POST | M3 exam | 892 | 128 (14%) | 636 (71%) | 128 (14%) | x | no word → floor x 808; step 2 `CANT_UNDO` → x 27; step 1 read verb → r 36; step 3 `KEEP_W` → w 21 |
+| DELETE | tuning | 951 | 1 (0%) | 26 (3%) | 924 (97%) | x | method floor 951 |
+| DELETE | M3 exam | 558 | 3 (1%) | 7 (1%) | 548 (98%) | x | method floor 558 |
+| PUT | tuning | 766 | 1 (0%) | 718 (94%) | 47 (6%) | w | method floor 751; step 2 `CANT_UNDO` → x 13; step 2 `credential-set` → x 2 |
+| PUT | M3 exam | 460 | 2 (0%) | 441 (96%) | 17 (4%) | w | method floor 456; step 2 `CANT_UNDO` → x 4 |
+| PATCH | tuning | 303 | 0 | 299 (99%) | 4 (1%) | w | method floor 301; step 2 `CANT_UNDO` → x 2 |
+| PATCH | M3 exam | 270 | 0 | 258 (96%) | 12 (4%) | w | method floor 268; step 2 `CANT_UNDO` → x 2 |
+
+Every floor follows its method's majority except POST: most POSTs are
+truly w, but a POST with no verb word cannot be told from a create
+(x), so the invariant takes the tighter class. Those floor rows (1336
+of 1994 on tuning) carry most of the too-tight cost and are the pile
+`jev-lower` lowers.
+
+### Old "method floor" table (v3)
+
+| method | floor | what can move it |
+|---|---|---|
+| GET, HEAD, OPTIONS, QUERY | r | nothing in the mechanical core |
+| DELETE | x, `destructive: true` | nothing — DELETE beats every word |
+| PUT, PATCH | w | a `CANT_UNDO` verb or `credential-set` raises it to x |
+| POST | none — decided by its verb | `READ_VERBS`/`SAFE_VERBS` → r; `CANT_UNDO` → x; `KEEP_W` → w; no word → x |
+| any other method, or none | x | nothing |
+
+### Old "What is next" mechanical-v4 item (2026-11-06 status, replaced)
+
+1. Mechanical alignment with D137 (baseline 2026-11-06, 16,486 ops, six complete sets: against v4 truth mechanical v3 81.8% exact / 5.2% too loose / 13.0% too tight; 682 of the 861 leaks PUT/PATCH method-floor rows). Steps 1-4 done in poc/mech-v4/ (PUT/PATCH path-word x rule, LOVO 360 of 682 floor leaks closed for 120 new too tight; POST path words keep x, content nouns lower to w, LOVO 233 right / 15 leaks; GET action words raise to x). v4 on the six sets: 85.2% exact / 2.6% too loose (loose-2 8) / 12.2% too tight (fitted) vs v3 81.8 / 5.2 (loose-2 13) / 13.0. Step 5 closed (DELETE stays x). Exam #5 vendors picked 2026-11-06: front, planetscale, paddle, hookdeck, fusionauth, semaphore, langfuse (1,437 ops).
+2. The second pass under D137: possibly raising w to x, or lowering x to w, after item 1 is measured; never lower an access-widening x.
+3. Fresh exam #5, pre-registered, scored once for both projects.
+4. README "what x covers" section, exam #5 numbers, release.
+
+### Code notes from the PRD pass
+
+- Checked against poc/mech-v4: READ_VERBS 23, SAFE_VERBS 10, CANT_UNDO 29, REMOVES 6, PATH_X_WORDS 36, GET_ACTION 3, CREDENTIAL_SET 3, CREDENTIAL_CHANGE_VERBS 3, KEEP_W 14, CONTENT_W 20, CONTENT_VETO 2. Rule order matches the brief. Only difference: in step 2, `credential-set` runs only when `cant-undo-verb` did not fire, and `path-x-word` only after both; the PRD table lists them in that order.
+- Exam #5 POST: 156 too-tight rows, 128 of them floor-post (checked on data/exam5-2026-11-07/score/rows-mech-v4.csv).
+
+## 2026-11-07 — Exam #5 word candidates measured across seven sets: none adopted
+
+- What: 16 path-word additions (A1-A16) and 7 removals or changes (B1-B7), picked by reading exam #5's leaks and over-tight rows. Each was measured alone against shipped v4 (D138) on 17,929 rows (the six tuning sets plus exam #5, now burned and tuning; 64 vendors), with per-vendor net and a six-older-sets-only line ("exam5 excluded", 57 vendors). Baseline: 15,249 exact, 470 loose-1, 10 loose-2, 2,200 too tight. Scorer: poc/exam5-words/score-words.mjs.
+- Result: only 7 candidates had zero cost: two_factor, messenger, perms, cidr, unpause, expiration and the PUT/PATCH toggle veto (B7). Together they close 9 leaks and fix 4 too-tight rows, but every fire comes from one exam #5 vendor (fusionauth x2, semaphoreui, planetscale, hookdeck x2, weaviate) and none fires on the 16,486 older rows (six-set net 0 each).
+- Every multi-vendor candidate is net worse (right / wrong rows, six-set net): add assign 8 / 13, -6; add activate 7 / 18, -13; add sso 5 / 19, -17; remove domain from CONTENT_W 4 / 21, -20; remove role from PATH_X_WORDS 5 / 50, -47; remove permission 3 / 22, -21; remove key 12 / 19, -10. JOINT A1-A16 gives 55 right / 74 wrong, six-set net -47 (all-seven-set net -19; 12 vendors better, 22 worse).
+- Ruling (user, 2026-11-07): no changes adopted. The candidate rows were handed to rwxlite as training hints, not rules (files in .claude/scratchpad/exam5-words/).
+- Lesson: the same as the mined lists. A word like assign or activate is an access grant at one vendor and an ordinary edit at another, and dropping a broad word (role, permission, key) reopens leaks at other vendors. Words picked from one exam's leaks are single-vendor by construction, so the "exam5 excluded" line is the honest number.
+
+## 2026-11-07 — rwxlite R13 at lower cut-offs: ship R13 at 0.90 (D139)
+
+- What: replayed rwxlite R13 (0.3.1) and 0.2.0 through mode a at cut-offs 0.99 to 0.80 on exam #5 (burned, 1443 ops, mechanical v4) and rwxlite's val set (4180 rows). Parity first: at 0.97 the replay matched the scored exam #5 rows exactly (0 differ of 1443) for both models, and val counts matched rwxlite's. Script and readout: poc/cutoff-r13/. Then one unseen vendor, bunny.net (113 ops, not labelled), through the real CLI at 0.97 and 0.90.
+- Result: exam #5, exact / too loose / too tight. R13: 0.97 1220 / 37 / 186; 0.95 1239 / 38 / 166; 0.93 1250 / 40 / 153; 0.90 1269 / 40 / 134 (3 leaks added, 52 too-tight fixed, 17.3 per leak); 0.85 1280 / 46 / 117; 0.80 1279 / 50 / 114. 0.2.0: 0.97 1272 / 94 / 77; 0.90 adds 26 leaks for 43 fixed (1.65 per leak). Val: R13 0.97 3815 / 76 / 289, 0.90 3938 / 87 / 155 (11 leaks added, 134 fixed, 12.2 per leak); rwxlite says val flatters R13 because it shares vendors with training. bunny.net letters r / w / x: mechanical 42 / 10 / 61; R13 at 0.97 42 / 12 / 59; at 0.90 45 / 25 / 43, with 20 rows differing from mechanical (3 POST x to r, 16 POST x to w, 1 w to x). Unlabelled read: no visible leak.
+- Ruling (user, 2026-11-07): D139. Ship R13 (rwxlite 0.3.1) with LOWER_MIN_P 0.90, overriding D135 and D136, for the same reason as D138. The cut is tuned on burned data, not proven on unseen vendors. Shipping waits on rwxlite publishing 0.3.1.
+- Lesson: R13's p is better calibrated where it lowers (about 12 to 17 fixed per leak at 0.90, against 1.7 for 0.2.0), so a lower cut that was wrong for 0.2.0 pays for R13. A model's cut-off belongs to that model.
+
+## 2026-11-07 — D139 pin pass: rwxlite 0.3.1 at cut-off 0.90 built
+
+- What: pinned rwxlite 0.3.1 (commit 5e6b9cb): RWXLITE_TAG v0.3.1, cache fallback 0.3.1, accepted package range 0.3.x, LOWER_MIN_P 0.90; 617 tests, new guards for tag/fallback agreement, range (0.2.x and 0.4.0 refused), the cut, and credential-set never lowered, each broken by hand once. Before pinning, checked the published bytes: GitHub release v0.3.1 five assets sha256 matched rwxlite's list and the exam #5 addendum; npm rwxlite@0.3.1 sha256/shasum/sha512 integrity matched, tagged latest; the published package differs from the exam #5 tarball (698c0191...) only in comments (src/answerer.js, types/answerer.d.ts) and README/CHANGELOG/package.json metadata. Then ran exam #5 through the real install (npm 0.3.1, model downloaded from GitHub into an empty cache, model rwxlite-0.3.1+bbe1997d, current src/).
+- Result: 1269 exact / 40 too loose (38 loose-1, 2 loose-2) / 134 too tight of 1443; 78 lowered, 63 undecided; equal to the replay at 0.90. Against the scored 0.97 rows it adds exactly ex5-0293, ex5-0297, ex5-0341 (fusionauth POST x to w) and removes none. bunny.net smoke via the real download: r 45 / w 25 / x 43; the second run came from the cache.
+- Lesson: verify the published bytes against what was scored before pinning (the code diff was comments only and the model byte-identical), and prove the pin through the real install on the scored exam, not only through a replay. The 0.90 cut is still tuned on burned exam #5 and rwxlite val, not proven on unseen vendors.

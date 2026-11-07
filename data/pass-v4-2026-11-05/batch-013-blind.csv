@@ -1,0 +1,388 @@
+row_id,provider,method,path,operationId,summary,description
+v29713,smart-me.com,POST,/api/MeterFolderInformation,MeterFolderInformation_Post,Sets the Name of a Meter or a Folder,Sets the Name of a Meter or a Folder
+v9046,bitbucket.org,POST,/repositories/{workspace}/{repo_slug}/issues,,Create an issue,Creates a new issue. This call requires authentication. Private repositories or private issue trackers require the caller to authenticate with an account that has appropriate authorization. The authenticated user is used for the issue's `reporter` field.
+v1247,amazonaws.com,GET,/#Action=RebootCacheCluster,GET_RebootCacheCluster,,"Reboots some, or all, of the cache nodes within a provisioned cluster. This operation applies any modified cache parameter groups to the cluster. The reboot operation takes place as soon as possible, and results in a momentary outage to the cluster. During the reboot, the cluster status is set to REBOOTING. The reboot causes the contents of the cache (for each cache node being rebooted) to be lost"
+v8805,beanstream.com,DELETE,/profiles/{profileId}/cards/{cardId},,Delete card,Delete a card on the profile.
+v31507,vercel,GET,/v1/vcr/repository/{idOrName}/tags/{tag},getRepositoryTag,Get a repository tag,"Fetch a single tag from a repository, including the backing image's metadata and VHS-readiness status."
+v30038,stripe.com,POST,/v1/accounts/{account}/capabilities/{capability},PostAccountsAccountCapabilitiesCapability,,Updates an existing Account Capability.
+v18846,meraki.com,PUT,/networks/{networkId}/clients/{clientId}/splashAuthorizationStatus,updateNetworkClientSplashAuthorizationStatus,Update a client's splash authorization,Update a client's splash authorization. Clients can be identified by a client key or either the MAC or IP depending on whether the network uses Track-by-IP.
+v32861,zendesk,PUT,/api/v2/brands/{brand_id},UpdateBrand,Update a Brand,"Returns an updated brand.
+
+#### Allowed for
+* Admins
+
+#### Updating a Brand's Image
+Use `PUT /api/v2/brands/{brand_id}/logo` to set or replace the brand logo,
+and `DELETE /api/v2/brands/{brand_id}/logo` to remove it."
+v28202,paypal,POST,/v1/payment-experience/web-profiles,web-profile.create,Create web experience profile,"Creates a web experience profile. In the JSON request body, specify the profile name and details."
+v3104,amazonaws.com,POST,/#X-Amz-Target=DirectoryService_20150416.UpdateTrust,UpdateTrust,,Updates the trust that has been set up between your Managed Microsoft AD directory and an self-managed Active Directory.
+v18027,linode,GET,/{apiVersion}/managed/credentials/{credentialId},get-managed-credential,Get a managed credential,Returns a single Managed Credential. This operation can only be accessed by the unrestricted users of an account. > --- - __CLI__. ``` linode-cli managed credential-view 9991 ``` [Learn more...](https://techdocs.akamai.com/cloud-computing/docs/getting-started-with-the-linode-cli) - __OAuth scopes__. ``` account:read_write ``` [Learn more...](https://techdocs.akamai.com/linode-api/reference/get-started#oauth)
+v13180,gambitcomm.local,PUT,/mimic/agent/{agentNum}/save,save,Save agent MIB values.,Save agent MIB values.
+v24198,microsoft.com,POST,/policies/featureRolloutPolicies,policies.CreateFeatureRolloutPolicies,Create featureRolloutPolicy,Create a new featureRolloutPolicy object.
+v6432,auth0,PUT,/guardian/factors/push-notification/providers/fcm,put_fcm,Overwrite FCM configuration,Overwrite all configuration details of the multi-factor authentication FCM provider associated with your tenant.
+v30629,traccar.org,POST,/commands,,Create a Saved Command,
+v13834,github,PUT,/repos/{owner}/{repo}/import,migrations/start-import,Start an import,"Start a source import to a GitHub repository using GitHub Importer. Importing into a GitHub repository with GitHub Actions enabled is not supported and will return a status `422 Unprocessable Entity` response. > [!WARNING] > **Endpoint closing down notice:** Due to very low levels of usage and available alternatives, this endpoint is closing down and will no longer be available from 00:00 UTC on April 12, 2024. For more details and alternatives, see the [changelog](https://gh.io/source-imports-api-deprecation)."
+v7874,azure.com,PUT,/apps/{appId}/versions/{versionId}/intents/{intentId}/features,Model_ReplaceIntentFeatures,,Updates the information of the features used by the intent in a version of the application.
+v12270,docusign,PUT,/v2.1/accounts/{accountId}/signing_groups/{signingGroupId}/users,SigningGroups_PutSigningGroupUsers,Adds members to a signing group.,Adds one or more new members to a signing group. A signing group can have a maximum of 50 members.
+v1354,amazonaws.com,GET,/#Action=SetIdentityMailFromDomain,GET_SetIdentityMailFromDomain,,"Enables or disables the custom MAIL FROM domain setup for a verified identity (an email address or a domain). To send emails using the specified MAIL FROM domain, you must add an MX record to your MAIL FROM domain's DNS settings. If you want your emails to pass Sender Policy Framework (SPF) checks, you must also add or update an SPF record. For more information, see the Amazon SES Developer G"
+v6984,azure.com,PATCH,/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName},BillingProfiles_Update,,The operation to update a billing profile.
+v14794,googleapis.com,POST,/projects/{project}/zones/{zone}/reservations/{reservation}/resize,compute.reservations.resize,,"Resizes the reservation (applicable to standalone reservations only). For more information, read Modifying reservations."
+v17129,jira,POST,/rest/api/2/issue/{issueIdOrKey}/attachments,addAttachment,Add attachment,"Adds one or more attachments to an issue. Attachments are posted as multipart/form-data ([RFC 1867](https://www.ietf.org/rfc/rfc1867.txt)).
+
+Note that:
+
+ *  The request must have a `X-Atlassian-Token: no-check` header, if not it is blocked. See [Special headers](#special-request-headers) for more information.
+ *  The name of the multipart/form-data parameter that contains the attachments must be `file`.
+
+The following examples upload a file called *myfile.txt* to the issue *TEST-123*:
+
+#### curl ####
+
+    curl --location --request POST 'https://your-domain.atlassian.net/rest/api/2/issue/TEST-123/attachments'
+     -u 'email@example.com:<api_token>'
+     -H 'X-Atlassian-Token: no-check'
+     --form 'file=@""myfile.txt""'
+
+#### Node.js ####
+
+    // This code sample uses the 'node-fetch' and 'form-data' libraries:
+     // https://www.npmjs.com/package/node-fetch
+     // https://www.npmjs.com/package/form-data
+     const fetch = require('node-fetch');
+     const FormData = require('form-data');
+     const fs = require('fs');
+    
+     const filePath = 'myfile.txt';
+     const form = new FormData();
+     const stats = fs.statSync(filePath);
+     const fileSizeInBytes = stats.size;
+     const fileStream = fs.createReadStream(filePath);
+    
+     form.append('file', fileStream, {knownLength: fileSizeInBytes});
+    
+     fetch('https://your-domain.atlassian.net/rest/api/2/issue/TEST-123/attachments', {
+         method: 'POST',
+         body: form,
+         headers: {
+             'Authorization': `Basic ${Buffer.from(
+                 'email@example.com:'
+             ).toString('base64')}`,
+             'Accept': 'application/json',
+             'X-Atlassian-Token': 'no-check'
+         }
+     })
+         .then(response => {
+             console.log(
+                 `Response: ${response.status} ${response.statusText}`
+             );
+             return response.text();
+         })
+         .then(text => console.log(text))
+         .catch(err => console.error(err));
+
+#### Java ####
+
+    // This code sample uses the  'Unirest' library:
+     // http://unirest.io/java.html
+     HttpResponse response = Unirest.post(""https://your-domain.atlassian.net/rest/api/2/issue/{issueIdOrKey}/attachments"")
+             .basicAuth(""email@example.com"", """")
+             .header(""Accept"", ""application/json"")
+             .header(""X-Atlassian-Token"", ""no-check"")
+             .field(""file"", new File(""myfile.txt""))
+             .asJson();
+    
+             System.out.println(response.getBody());
+
+#### Python ####
+
+    # This code sample uses the 'requests' library:
+     # http://docs.python-requests.org
+     import requests
+     from requests.auth import HTTPBasicAuth
+     import json
+    
+     url = ""https://your-domain.atlassian.net/rest/api/2/issue/{issueIdOrKey}/attachments""
+    
+     auth = HTTPBasicAuth(""email@example.com"", """")
+    
+     headers = {
+        ""Accept"": ""application/json"",
+        ""X-Atlassian-Token"": ""no-check""
+     }
+    
+     response = requests.request(
+        ""POST"",
+        url,
+        headers = headers,
+        auth = auth,
+        files = {
+             ""file"": (""myfile.txt"", open(""myfile.txt"",""rb""), ""application-type"")
+        }
+     )
+    
+     print(json.dumps(json.loads(response.text), sort_keys=True, indent=4, separators=("","", "": "")))
+
+#### PHP ####
+
+    // This code sample uses the 'Unirest' library:
+     // http://unirest.io/php.html
+     Unirest\Request::auth('email@example.com', '');
+    
+     $headers = array(
+       'Accept' => 'application/json',
+       'X-Atlassian-Token' => 'no-check'
+     );
+    
+     $parameters = array(
+       'file' => File::add('myfile.txt')
+     );
+    
+     $response = Unirest\Request::post(
+       'https://your-domain.atlassian.net/rest/api/2/issue/{issueIdOrKey}/attachments',
+       $headers,
+       $parameters
+     );
+    
+     var_dump($response)
+
+#### Forge ####
+
+    // This sample uses Atlassian Forge and the `form-data` library.
+     // https://developer.atlassian.com/platform/forge/
+     // https://www.npmjs.com/package/form-data
+     import api from ""@forge/api"";
+     import FormData from ""form-data"";
+    
+     const form = new FormData();
+     form.append('file', fileStream, {knownLength: fileSizeInBytes});
+    
+     const response = await api.asApp().requestJira('/rest/api/2/issue/{issueIdOrKey}/attachments', {
+         method: 'POST',
+         body: form,
+         headers: {
+             'Accept': 'application/json',
+             'X-Atlassian-Token': 'no-check'
+         }
+     });
+    
+     console.log(`Response: ${response.status} ${response.statusText}`);
+     console.log(await response.json());
+
+Tip: Use a client library. Many client libraries have classes for handling multipart POST operations. For example, in Java, the Apache HTTP Components library provides a [MultiPartEntity](http://hc.apache.org/httpcomponents-client-ga/httpmime/apidocs/org/apache/http/entity/mime/MultipartEntity.html) class for multipart POST operations.
+
+This operation can be accessed anonymously.
+
+**[Permissions](#permissions) required:** 
+
+ *  *Browse Projects* and *Create attachments* [ project permission](https://confluence.atlassian.com/x/yodKLg) for the project that the issue is in.
+ *  If [issue-level security](https://confluence.atlassian.com/x/J4lKLg) is configured, issue-level security permission to view the issue."
+v29551,slack,GET,/migration.exchange,migration_exchange,,"For Enterprise Grid workspaces, map local user IDs to global user IDs"
+v0695,amazonaws.com,GET,/#Action=CreateInstanceExportTask,GET_CreateInstanceExportTask,,"Exports a running or stopped instance to an Amazon S3 bucket. For information about the supported operating systems, image formats, and known limitations for the types of instances you can export, see Exporting an instance as a VM Using VM Import/Export in the VM Import/Export User Guide ."
+v23859,microsoft.com,POST,/me/events/{event-id}/exceptionOccurrences/{event-id1}/instances/{event-id2}/attachments/microsoft.graph.createUploadSession,me.events.event.exceptionOccurrences.event.instances.event.attachments.createUploadSession,Invoke action createUploadSession,"Create an upload session that allows an app to iteratively upload ranges of a file, so as to attach the file to an Outlook item. The item can be a message or event. Use this approach to attach a file if the file size is between 3 MB and 150 MB. To attach a file that's smaller than 3 MB, do a `POST` operation on the **attachments** navigation property of the Outlook item; see how to do this for a m"
+v32448,wowza.com,POST,/transcoders/{transcoder_id}/outputs/{id}/add_stream_target,addStreamTargetToTranscoderOutput,Deprecated operation,The operation POST /transcoders/{transcoder_id}/outputs/{id}/add_stream_target is deprecated. Use POST /transcoders/{transcoder_id}/outputs/{output_id}/output_stream_targets to add an existing stream target to an output.
+v11186,cloudflare,PUT,/zones/{zone_id}/schema_validation/settings/operations/{operation_id},schema-validation-update-per-operation-setting,Update per-operation schema validation setting,Fully updates schema validation settings for a specific API operation.
+v30039,stripe,POST,/v1/accounts/{account}/capabilities/{capability},PostAccountsAccountCapabilitiesCapability,Update an Account Capability,<p>Updates an existing Account Capability. Request or remove a capability by updating its <code>requested</code> parameter.</p>
+v13128,gambitcomm.local,PUT,/mimic/agent/{agentNum}/protocol/msg/netflow/flow/change/tfs_interval/{interval},protocol_netflow_change_tfs,Change NETFLOW template export interval,Interval in msec .
+v23257,microsoft.com,POST,/groups/{group-id}/threads/{conversationThread-id}/posts/{post-id}/inReplyTo/attachments/microsoft.graph.createUploadSession,groups.group.threads.conversationThread.posts.post.inReplyTo.attachments.createUploadSession,Invoke action createUploadSession,"Create an upload session that allows an app to iteratively upload ranges of a file, so as to attach the file to the specified Outlook item. The item can be a message or event. Use this approach to attach a file if the file size is between 3 MB and 150 MB. To attach a file that's smaller than 3 MB, do a `POST` operation on the **attachments** navigation property of the Outlook item; see how to do t"
+v20470,microsoft.com,PATCH,/me/calendarGroups/{calendarGroup-id}/calendars/{calendar-id}/events/{event-id}/exceptionOccurrences/{event-id1}/multiValueExtendedProperties/{multiValueLegacyExtendedProperty-id},me.calendarGroups.calendars.events.exceptionOccurrences.UpdateMultiValueExtendedProperties,Update the navigation property multiValueExtendedProperties in me,
+v22202,microsoft.com,POST,/deviceAppManagement/windowsInformationProtectionDeviceRegistrations,deviceAppManagement.CreateWindowsInformationProtectionDeviceRegistrations,Create new navigation property to windowsInformationProtectionDeviceRegistrations for deviceAppManagement,
+v13450,gitea,PATCH,/repos/{owner}/{repo}/issues/{index}/assets/{attachment_id},issueEditIssueAttachment,Edit an issue attachment,
+v10980,cloudflare,PUT,/accounts/{account_id}/email-security/settings/trusted_domains/{trusted_domain_id},email_security_replace_trusted_domain,Replace a trusted email domain,"Replaces an existing trusted domain in full. Unlike PATCH, every field is taken from the request body, so optional fields that are omitted are reset rather than left untouched. Use this when managing trusted domains declaratively."
+v7699,azure.com,POST,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/streamingEndpoints/{streamingEndpointName}/start,StreamingEndpoints_Start,Start StreamingEndpoint,Starts an existing StreamingEndpoint.
+v26895,netbox.dev,PUT,/ipam/vlans/,ipam_vlans_bulk_update,,
+v30933,twilio,DELETE,/2010-04-01/Accounts/{AccountSid}/SigningKeys/{Sid}.json,DeleteSigningKey,,
+v17359,just-eat.co.uk,POST,/orders/{tenant}/{orderId}/consumerqueries/lateordercompensation/restaurantresponse,,Update late order compensation request with Restaurant response,"If a customer has requested compensation for a late order, a restaurant response is given by calling this endpoint."
+v25408,microsoft.com,POST,/users/{user-id}/onenote/sectionGroups,users.onenote.CreateSectionGroups,Create new navigation property to sectionGroups for users,
+v11336,conjur.local,POST,/roles/{account}/{kind}/{identifier},addMemberToRole,Update or modify an existing role membership,"Updates or modifies an existing role membership. If a role A is granted to a role B, then role A is said to have role B as a member. These relationships are described in the “members” portion of the returned JSON. When the `members` query parameter is provided, you will get the members of a role. When the `members` and `member` query parameters are provided, the role specfified by `member` will be"
+v30529,telnyx.com,POST,/calls/{call_control_id}/actions/enqueue,callEnqueue,Enqueue call,Put the call in a queue.
+v1495,amazonaws.com,GET,/{AccountNumber}/{QueueName}/#Action=SetQueueAttributes,GET_SetQueueAttributes,,"Sets the value of one or more queue attributes. When you change a queue's attributes, the change can take up to 60 seconds for most of the attributes to propagate throughout the Amazon SQS system. Changes made to the MessageRetentionPeriod attribute can take up to 15 minutes. In the future, new attributes might be added. If you write code that calls this action, we recommend that you structure you"
+v4906,amazonaws.com,PUT,/bots/{botId}/botversions/{botVersion}/botlocales/,CreateBotLocale,,Creates a locale in the bot. The locale contains the intents and slot types that the bot uses in conversations with users in the specified language and locale. You must add a locale to a bot before you can add intents and slot types to the bot.
+v18357,loket.nl,PUT,/providers/employers/leavePolicies/agebasedleave/{ageBasedLeaveId},PutAgeBasedLeaveByAgeBasedLeaveId,Edit the details of an age based leave,__Activity name :__ PutAgeBasedLeaveByAgeBasedLeaveId Edit the details of an age based leave record
+v12945,files.com,POST,/file_actions/copy/{path},FileActionCopy,Copy file/folder,Copy file/folder
+v9982,clickmeter.com,PUT,/tags/{tagId}/datapoints/patch,Tags_PatchDataPoint,Associate/Deassociate a tag with a datapoint,
+v8223,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/gremlinDatabases/{databaseName}/graphs/{graphName},GremlinResources_CreateUpdateGremlinGraph,,Create or update an Azure Cosmos DB Gremlin graph
+v9665,circuitsandbox.net,POST,/spaces/{id}/participant,addParticipantsToSpace,Add Participant to Space,"Add a participant to a space OauthScopes: WRITE_SPACE, MANAGE_SPACE"
+v32908,zendesk,PUT,/api/v2/user_fields/reorder,ReorderUserField,Reorder User Field,"#### Allowed For
+
+* Admins"
+v15980,gov.bc.ca,POST,/geomarks/new,,Create a new geomark,Create a new geomark from the geometries read from the 'body' parameter or file.
+v28499,polar.sh,PATCH,/v1/customers/{id}/members/{member_id},customers:members:update,Update Member,"Update a member of a customer.
+
+Only name, email and role can be updated.
+
+**Scopes**: `members:write`"
+v22775,microsoft.com,POST,/external/connections,external.CreateConnections,Create externalConnection,Create a new externalConnection object.
+v30451,taggun.io,POST,/api/account/v1/feedback,postApiAccountV1Feedback,Add manually verified receipt data to a given receipt for feedback and training purposes,
+v8472,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabricMesh/secrets/{secretResourceName}/values/{secretValueResourceName},SecretValue_Create,Adds the specified value as a new version of the specified secret resource.,Creates a new value of the specified secret resource. The name of the value is typically the version identifier. Once created the value cannot be changed.
+v23778,microsoft.com,POST,/me/calendars/{calendar-id}/events/{event-id}/instances/{event-id1}/exceptionOccurrences/{event-id2}/extensions,me.calendars.events.instances.exceptionOccurrences.CreateExtensions,Create openTypeExtension,"Create an open extension (openTypeExtension object) and add custom properties in a new or existing instance of a resource. You can create an open extension in a resource instance and store custom data to it all in the same operation, except for specific resources. See known limitations of open extensions for more information. The table in the Permissions section lists the resources that support op"
+v7990,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/api-version-sets/{versionSetId},ApiVersionSet_CreateOrUpdate,,Creates or Updates a Api Version Set.
+v22435,microsoft.com,POST,/deviceManagement/reusablePolicySettings/{deviceManagementReusablePolicySetting-id}/referencingConfigurationPolicies/{deviceManagementConfigurationPolicy-id}/microsoft.graph.assign,deviceManagement.reusablePolicySettings.deviceManagementReusablePolicySetting.referencingConfigurationPolicies.deviceManagementConfigurationPolicy.assign,Invoke action assign,
+v29640,slack,POST,/conversations.kick,conversations_kick,,Removes a user from a conversation.
+v20394,microsoft.com,PATCH,/informationProtection/sensitivityLabels/{sensitivityLabel-id},informationProtection.UpdateSensitivityLabels,Update the navigation property sensitivityLabels in informationProtection,
+v3264,amazonaws.com,POST,/#X-Amz-Target=KinesisAnalytics_20150814.AddApplicationOutput,AddApplicationOutput,,"This documentation is for version 1 of the Amazon Kinesis Data Analytics API, which only supports SQL applications. Version 2 of the API supports SQL and Java applications. For more information about version 2, see Amazon Kinesis Data Analytics API V2 Documentation . Adds an external destination to your Amazon Kinesis Analytics application. If you want Amazon Kinesis Analytics to deliver data from"
+v32671,xtrf.eu,PUT,/v2/projects/{projectId}/sourceLanguage,updateSourceLanguage,Updates source language for a project.,Updates source language for a project.
+v23454,microsoft.com,POST,/identityGovernance/lifecycleWorkflows/workflows/{workflow-id}/runs/{run-id}/userProcessingResults/{userProcessingResult-id}/taskProcessingResults/{taskProcessingResult-id}/microsoft.graph.identityGovernance.resume,identityGovernance.lifecycleWorkflows.workflows.workflow.runs.run.userProcessingResults.userProcessingResult.taskProcessingResults.taskProcessingResult.resume,Invoke action resume,Resume a task processing result that's `inProgress`. An Azure Logic Apps system-assigned managed identity calls this API.
+v1829,amazonaws.com,POST,/#Action=CreateScheduledAction,POST_CreateScheduledAction,,"Creates a scheduled action. A scheduled action contains a schedule and an Amazon Redshift API action. For example, you can create a schedule of when to run the ResizeCluster API operation."
+v33043,zoom.us,PUT,/phone/call_queues/{callQueueId}/manager,changeCallQueueManager,Change call queue manager,"A call queue manager has the privileges to maanage the call queue's voicemail inbox and recordings, change all call queue settings and call queue policy settings. Use this API to to set another phone user as the [call queue manager](https://support.zoom.us/hc/en-us/articles/360021524831-Managing-Call-Queues#h_db06854b-e6a3-4afe-ba15-baf58f31f90c). **Prerequisites:** * Pro or higher account plan. *"
+v23527,microsoft.com,POST,/me/calendar/calendarView/{event-id}/instances/{event-id1}/attachments/microsoft.graph.createUploadSession,me.calendar.calendarView.event.instances.event.attachments.createUploadSession,Invoke action createUploadSession,"Create an upload session that allows an app to iteratively upload ranges of a file, so as to attach the file to the specified Outlook item. The item can be a message or event. Use this approach to attach a file if the file size is between 3 MB and 150 MB. To attach a file that's smaller than 3 MB, do a `POST` operation on the **attachments** navigation property of the Outlook item; see how to do t"
+v24231,microsoft.com,POST,/print/reports/dailyPrintUsage,print.reports.CreateDailyPrintUsage,Create new navigation property to dailyPrintUsage for print,
+v15081,googleapis.com,POST,/v1/{parent}/debugTokens,firebaseappcheck.projects.apps.debugTokens.create,,"Creates a new DebugToken for the specified app. For security reasons, after the creation operation completes, the `token` field cannot be updated or retrieved, but you can revoke the debug token using DeleteDebugToken. Each app can have a maximum of 20 debug tokens."
+v18102,linode.com,POST,/profile/tokens,createPersonalAccessToken,Personal Access Token Create,"Creates a Personal Access Token for your User. The raw token will be returned in the response, but will never be returned again afterward so be sure to take note of it. You may create a token with _at most_ the scopes of your current token. The created token will be able to access your Account until the given expiry, or until it is revoked."
+v13791,github,PUT,/orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id},actions/add-selected-repo-to-org-secret,Add selected repository to an organization secret,"Adds a repository to an organization secret when the `visibility` for repository access is set to `selected`. For more information about setting the visibility, see [Create or update an organization secret](https://docs.github.com/rest/actions/secrets#create-or-update-an-organization-secret). Authenticated users must have collaborator access to a repository to create, update, or read secrets. OAuth tokens and personal access tokens (classic) need the `admin:org` scope to use this endpoint. If the repository is private, OAuth tokens and personal access tokens (classic) need the `repo` scope to "
+v2836,amazonaws.com,POST,/#X-Amz-Target=AmazonForecast.CreateWhatIfForecast,CreateWhatIfForecast,,A what-if forecast is a forecast that is created from a modified version of the baseline forecast. Each what-if forecast incorporates either a replacement dataset or a set of transformations to the original dataset.
+v17645,klaviyo,POST,/api/template-universal-content,create_universal_content,Create Universal Content,"Create universal content. Currently supported block types are: `button`, `drop_shadow`, `horizontal_rule`, `html`, `image`, `spacer`, and `text`.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`templates:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/create_universal_content.json)"
+v28330,pendo.io,POST,/hooks/unsubscribe,,Unsubscribe from webhooks,Use this endpoint to unsubscribe from a webhook
+v8673,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/slots/{slot}/virtualNetworkConnections/{vnetName},WebApps_CreateOrUpdateVnetConnectionSlot,Adds a Virtual Network connection to an app or slot (PUT) or updates the connection properties (PATCH).,Adds a Virtual Network connection to an app or slot (PUT) or updates the connection properties (PATCH).
+v8445,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/jitNetworkAccessPolicies/{jitNetworkAccessPolicyName},JitNetworkAccessPolicies_CreateOrUpdate,,Create a policy for protecting resources using Just-in-Time access control
+v24755,microsoft.com,POST,/teamwork/teamTemplates/{teamTemplate-id}/definitions/{teamTemplateDefinition-id}/teamDefinition/schedule/schedulingGroups,teamwork.teamTemplates.definitions.teamDefinition.schedule.CreateSchedulingGroups,Create schedulingGroup,Create a new schedulingGroup.
+v4206,amazonaws.com,POST,/channels/{channelArn}/bans,CreateChannelBan,,"Permanently bans a member from a channel. Moderators can't add banned members to a channel. To undo a ban, you first have to DeleteChannelBan , and then CreateChannelMembership . Bans are cleaned up when you delete users or channels. If you ban a user who is already part of a channel, that user is automatically kicked from the channel. The x-amz-chime-bearer request header is mandatory. Use the Ap"
+v22121,microsoft.com,POST,/compliance/ediscovery/cases/{case-id}/reviewSets,compliance.ediscovery.cases.CreateReviewSets,Create reviewSet,"Create a new reviewSet object. The request body contains the display name of the review set, which is the only writable property."
+v7211,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MixedReality/spatialAnchorsAccounts/{spatialAnchorsAccountName},SpatialAnchorsAccounts_Update,,Updating a Spatial Anchors Account
+v3962,amazonaws.com,POST,/2015-03-31/functions/{FunctionName}/policy,AddPermission,,"Grants an Amazon Web Service, Amazon Web Services account, or Amazon Web Services organization permission to use a function. You can apply the policy at the function level, or specify a qualifier to restrict access to a single version or alias. If you use a qualifier, the invoker must use the full Amazon Resource Name (ARN) of that version or alias to invoke the function. Note: Lambda does not sup"
+v27399,okta,PUT,/api/v1/org/settings/clientPrivilegesSetting,assignClientPrivilegesSetting,Assign the default public client app role setting,Assigns the [Super Admin role](https://help.okta.com/okta_help.htm?type=oie&id=ext_superadmin) as the default role for new public client apps
+v6972,azure.com,PATCH,/modelmanagement/v1.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.MachineLearningServices/workspaces/{workspace}/assets/{id},Assets_Patch,Update an Asset.,Patch a specific Asset.
+v9421,bunq.com,POST,/user/{userID}/notification-filter-email,CREATE_NotificationFilterEmail_for_User,,Manage the email notification filters for a user.
+v9724,clearblade,POST,/admin/user/{systemKey}/roles,AddRole,DEVELOPER - Add new role,Adds a new role to the system.
+v28360,permit.io,PATCH,/v2/schema/{proj_id}/{env_id}/users/attributes/{attribute_id},update_user_attribute,Update User Attribute,"Partially updates the attribute defined on the User resource.
+Fields that will be provided will be completely overwritten."
+v9619,chatwoot.com,POST,/api/v1/accounts/{account_id}/portals/{portal_slug}/articles,add-new-article-to-account,Add a new article,Add a new article to portal
+v16829,intercom,PUT,/conversations/{conversation_id},updateConversation,Update a conversation,"You can update an existing conversation.
+
+{% admonition type=""info"" name=""Replying and other actions"" %}
+If you want to reply to a coveration or take an action such as assign, unassign, open, close or snooze, take a look at the reply and manage endpoints.
+{% /admonition %}
+
+{% admonition type=""info"" %}
+  This endpoint handles both **conversation updates** and **custom object associations**.
+
+  See _`update a conversation with an association to a custom object instance`_ in the request/response examples to see the custom object association format.
+{% /admonition %}
+
+{% admonition type=""danger"" name=""Breaking change: duplicate custom attribute names"" %}
+The `PUT /conversations/{id}` endpoint now returns a `400 INVALID_PARAMETER` error when the request includes `custom_attributes` and your workspace contains multiple non-archived conversation custom attributes with the same name. Previously, the update would silently apply to a non-deterministic attribute. To resolve, rename or archive the duplicate attribute in your workspace settings, then retry the request.
+{% /admonition %}"
+v25873,mist.com,POST,/api/v1/sites/{site_id}/mxedges,createSiteMxEdge,createSiteMxEdge,Create Site Mist Edge
+v26098,naviplancentral.com,POST,/api/Incomes,Incomes_PostByModel,,Description: The operation creates an Income. Purpose: Allows for creation of Incomes on a Fact Finder.
+v15259,googleapis.com,POST,/v1beta/accessPolicies,accesscontextmanager.accessPolicies.create,,Create an `AccessPolicy`. Fails if this organization already has a `AccessPolicy`. The longrunning Operation will have a successful status once the `AccessPolicy` has propagated to long-lasting storage. Syntactic and basic semantic errors will be returned in `metadata` as a BadRequest proto.
+v9877,clever-cloud.com,POST,/organisations/{id}/addonproviders/{providerId}/features,postOrganisationsIdAddonprovidersProviderIdFeatures,,
+v26999,nexmo.com,POST,/account/register-sender,registerSender,Register an email sender,Register an email sender with an API Key for using email with Verify V2.
+v17662,kubernetes.io,PATCH,/api/v1/namespaces/{namespace}/configmaps/{name},patchCoreV1NamespacedConfigMap,,partially update the specified ConfigMap
+v19919,microsoft.com,PATCH,/groups/{group-id}/calendarView/{event-id}/instances/{event-id1}/singleValueExtendedProperties/{singleValueLegacyExtendedProperty-id},groups.calendarView.instances.UpdateSingleValueExtendedProperties,Update the navigation property singleValueExtendedProperties in groups,
+v32635,xtrf.eu,PUT,/projects/{projectId}/dates,updateDates_1,Updates dates of a given project.,Updates dates of a given project.
+v5070,amazonaws.com,PUT,/target-policies/{policyName},AttachPolicy,,Attaches the specified policy to the specified principal (certificate or other credential). Requires permission to access the AttachPolicy action.
+v26724,netbox.dev,POST,/ipam/ip-addresses/,ipam_ip-addresses_create,,
+v8329,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/streamingPolicies/{streamingPolicyName},StreamingPolicies_Create,Create a Streaming Policy,Create a Streaming Policy in the Media Services account
+v28368,permit.io,POST,/v2/facts/{proj_id}/{env_id}/access_requests/{elements_config_id}/user/{user_id}/tenant/{tenant_id},create_access_request,Create Access Request,
+v32191,watchful.li,POST,/extensions/{id}/update,updateExtension,Update the extension on the remote site,Update the extension on the remote site
+v1517,amazonaws.com,PATCH,/associations,BatchUpdateStandardsControlAssociations,,"For a batch of security controls and standards, this operation updates the enablement status of a control in a standard."
+v24281,microsoft.com,POST,/projects/{projectId}/images/urls,CreateImagesFromUrls,Add the provided images urls to the set of training images.,"This API accepts a batch of urls, and optionally tags, to create images. There is a limit of 64 images and 20 tags."
+v17702,kubernetes.io,PATCH,/apis/apps/v1/namespaces/{namespace}/daemonsets/{name}/status,patchAppsV1NamespacedDaemonSetStatus,,partially update status of the specified DaemonSet
+v12241,docusign,PUT,/v2.1/accounts/{accountId}/envelopes/{envelopeId}/notification,Notification_PutEnvelopesEnvelopeIdNotification,Sets envelope notifications for an existing envelope.,"This method sets the notifications (reminders and expirations) for an existing envelope. The request body sends a structure containing reminders and expirations settings. It also specifies whether to use the settings specified in the request, or the account default notification settings for the envelope.
+
+Note that this request only specifies when notifications are sent; it does not initiate sending of email messages."
+v21178,microsoft.com,PATCH,/sites/{site-id}/lists/{list-id}/items/{listItem-id},sites.lists.UpdateItems,Update the navigation property items in sites,
+v6768,autotask.net,PUT,/V1.0/BillingItems,BillingItems_UpdateEntity,,
+v24612,microsoft.com,POST,/teamTemplateDefinition/{teamTemplateDefinition-id}/teamDefinition/microsoft.graph.archive,teamTemplateDefinition.teamTemplateDefinition.teamDefinition.archive,Invoke action archive,"Archive the specified team. When a team is archived, users can no longer send or like messages on any channel in the team, edit the team's name, description, or other settings, or in general make most changes to the team. Membership changes to the team continue to be allowed. Archiving is an async operation. A team is archived once the async operation completes successfully, which may occur subseq"
+v7300,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/virtualClusters/{virtualClusterName},VirtualClusters_Update,,Updates a virtual cluster.
+v6791,autotask.net,PUT,/V1.0/ConfigurationItems/{parentId}/BillingProductAssociations,ConfigurationItemBillingProductAssociationsChild_UpdateEntity,,
+v29967,statsocial.com,GET,/reports/custom/insert/,,Step 2 of executing custom report,Inserting twitter ids or handles into a custom report. This is used for custom reports only
+v19541,microsoft.com,PATCH,/directory/customSecurityAttributeDefinitions/{customSecurityAttributeDefinition-id},directory.UpdateCustomSecurityAttributeDefinitions,Update the navigation property customSecurityAttributeDefinitions in directory,
+v14499,googleapis.com,POST,/channels/stop,calendar.channels.stop,,Stop watching resources through this channel
+v0191,agco-ats.com,POST,/api/v2/ContentSubmissions,ContentSubmissions_PostContentSubmission,Create a ContentSubmission,"Creates a ContentSubmission. The body of the POST is the ContentSubmission to create. The ContentSubmissionID will be assigned on creation of the Job. When successful, the response is the ContentSubmissionID. If unsuccessful, an appropriate ApiError is returned."
+v10076,cloudflare,GET,/accounts/{account_id}/alerting/v3/destinations/pagerduty/connect/{token_id},notification-destinations-with-pager-duty-connect-pager-duty-token,Connect PagerDuty,Links PagerDuty with the account using the integration token.
+v16385,hubspot,PUT,/crm/lists/2026-09/{listId}/memberships/add,put-/crm/lists/2026-09/{listId}/memberships/add,Add memberships,"Add memberships to a specified list in your HubSpot account. This endpoint allows you to add multiple memberships to a list identified by the listId. It is useful for managing list memberships in bulk, ensuring that the specified records are included in the list."
+v4729,amazonaws.com,POST,/workspaces/{workspaceId}/alertmanager/definition,CreateAlertManagerDefinition,,Create an alert manager definition.
+v20559,microsoft.com,PATCH,/me/contactFolders/{contactFolder-id}/contacts/{contact-id}/multiValueExtendedProperties/{multiValueLegacyExtendedProperty-id},me.contactFolders.contacts.UpdateMultiValueExtendedProperties,Update the navigation property multiValueExtendedProperties in me,
+v16295,hubspot,PATCH,/crm/task-series/2026-09/{taskId},patch-/crm/task-series/2026-09/{taskId},Update task series,Update the details of a specific task series in your HubSpot account. This endpoint allows you to modify properties and series configurations for the task identified by the taskId. Use this to adjust task scheduling or update task-related information.
+v27992,pagerduty,GET,/status_pages/{id}/posts/{post_id}/postmortem,getPostmortem,Get a Post Postmortem,Get a Postmortem for a Post by Post ID. Scoped OAuth requires: `status_pages.read`
+v28347,permit.io,PATCH,/v2/facts/{proj_id}/{env_id}/user_invites/{user_invite_id},update_user_invite,Update User Invite,
+v29428,sinao.app,POST,/apps/{appId}/bankdetails/{id},app.documents.sales.bankdetails.update,Update a BankDetails,
+v0028,adafruit.com,PATCH,/{username}/dashboards/{dashboard_id}/blocks/{id},updateBlock,Update properties of an existing Block,
+v25367,microsoft.com,POST,/users/{user-id}/messages/{message-id}/microsoft.graph.copy,users.user.messages.message.copy,Invoke action copy,Copy a message to a folder within the user's mailbox.
+v20944,microsoft.com,PATCH,/privilegedAccess/{privilegedAccess-id}/roleAssignmentRequests/{governanceRoleAssignmentRequest-id}/subject,privilegedAccess.roleAssignmentRequests.UpdateSubject,Update the navigation property subject in privilegedAccess,
+v29247,sentry,GET,/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/preprod/size-analysis/status-check-rules/,getProjectPreprodSizeAnalysisStatusCheckRules,Retrieve Size Analysis status check rules for a project,"Retrieve the current Size Analysis status check rules configured for a project. Use this endpoint after receiving a `size_analysis.completed` webhook when you want external CI to evaluate the same Size Analysis status check thresholds that Sentry uses. The endpoint returns the current project configuration, not a historical snapshot from when the webhook was emitted. The response includes whether status check enforcement is enabled and the normalized rule list Sentry uses when evaluating Size Analysis thresholds. This endpoint requires a bearer token with `project:read` access. Project distribution tokens are not supported. Response notes: - `enabled: false` means status-check enforcement i…"
+v20708,microsoft.com,PATCH,/me/outlook/taskFolders/{outlookTaskFolder-id},me.outlook.UpdateTaskFolders,Update the navigation property taskFolders in me,
+v10317,cloudflare,PATCH,/zones/{zone_id}/keyless_certificates/{keyless_certificate_id},keyless-ssl-for-a-zone-edit-keyless-ssl-configuration,Edit Keyless SSL Configuration,"This will update attributes of a Keyless SSL. Consists of one or more of the following:  host,name,port."
+v15155,googleapis.com,POST,/v1/{parent}/specs,apigeeregistry.projects.locations.apis.versions.specs.create,,Creates a specified spec.
+v5956,apple.com,POST,/v1/betaAppReviewSubmissions,betaAppReviewSubmissions-create_instance,,
+v26419,netboxdemo.com,POST,/secrets/secrets/,secrets_secrets_create,,
+v32279,wikipathways.org,POST,/createPathway,,,"createPathwayCreate a new pathway on the wiki with the given GPML code. Note: To create/modify pathways via the web service, you need to have an account with web service write permissions. Please contact us to request write access for the web service."
+v5770,appcenter.ms,POST,/v0.1/apps/{owner_name}/{app_name}/deployments/{deployment_name}/releases,codePushDeploymentReleases_create,,Create a new CodePush release for the specified deployment
+v4924,amazonaws.com,PUT,/channels,AddNotificationChannel,,"Adds a notification channel to DevOps Guru. A notification channel is used to notify you about important DevOps Guru events, such as when an insight is generated. If you use an Amazon SNS topic in another account, you must attach a policy to it that grants DevOps Guru permission to it notifications. DevOps Guru adds the required policy on your behalf to send notifications using Amazon SNS in your "
+v3040,amazonaws.com,POST,/#X-Amz-Target=Comprehend_20171127.CreateFlywheel,CreateFlywheel,,"A flywheel is an Amazon Web Services resource that orchestrates the ongoing training of a model for custom classification or custom entity recognition. You can create a flywheel to start with an existing trained model, or Comprehend can create and train a new model. When you create the flywheel, Comprehend creates a data lake in your account. The data lake holds the training data and test data for"
+v32719,x,GET,/2/lists/{id},getListsById,Get Lists by ID,
+v29060,salesforce.local,POST,/v2/language/feedback,provideFeedback,Create a Feedback Example,Adds a feedback example to the dataset associated with the specified model.
+v25627,microsoft.com,PUT,/organization/{organization-id}/branding/bannerLogo,organization.UpdateBrandingBannerLogo,Update bannerLogo for the navigation property branding in organization,A banner version of your company logo that appears on the sign-in page. The allowed types are PNG or JPEG no larger than 36 × 245 pixels. We recommend using a transparent image with no padding around the logo.
+v26313,netboxdemo.com,PATCH,/circuits/providers/{id}/,circuits_providers_partial_update,,
+v4350,amazonaws.com,POST,/greengrass/definition/resources/{ResourceDefinitionId}/versions,CreateResourceDefinitionVersion,,Creates a version of a resource definition that has already been defined.
+v4964,amazonaws.com,PUT,/fuota-tasks/{Id}/wireless-device,AssociateWirelessDeviceWithFuotaTask,,Associate a wireless device with a FUOTA task.
+v13377,getlago.com,POST,/webhook_endpoints,createWebhookEndpoint,Create a webhook endpoint,This endpoint is used to create a webhook endpoint.
+v30547,telnyx.com,POST,/fqdn_connections,createFqdnConnection,Create an FQDN connection,Creates a FQDN connection.
+v0682,amazonaws.com,GET,/#Action=CreateEndpointAccess,GET_CreateEndpointAccess,,Creates a Redshift-managed VPC endpoint.
+v20451,microsoft.com,PATCH,/me/calendarGroups/{calendarGroup-id}/calendars/{calendar-id}/calendarView/{event-id}/exceptionOccurrences/{event-id1}/extensions/{extension-id},me.calendarGroups.calendars.calendarView.exceptionOccurrences.UpdateExtensions,Update the navigation property extensions in me,
+v30636,traccar.org,POST,/session,,Create a new Session,
+v3786,amazonaws.com,POST,/#X-Amz-Target=TransferService.CreateAccess,CreateAccess,,"Used by administrators to choose which groups in the directory should have access to upload and download files over the enabled protocols using Transfer Family. For example, a Microsoft Active Directory might contain 50,000 users, but only a small fraction might need the ability to transfer files to the server. An administrator can use CreateAccess to limit the access to the correct set of users w"
+v26378,netboxdemo.com,POST,/dcim/device-bay-templates/,dcim_device-bay-templates_create,,
+v10311,cloudflare,PATCH,/zones/{zone_id}/firewall/rules,firewall-rules-update-priority-of-firewall-rules,Update priority of firewall rules,"**This endpoint has been deprecated and returns 410 Gone. Please use the [Rulesets API](https://developers.cloudflare.com/ruleset-engine/) instead.**
+
+Updates the priority of existing firewall rules."
+v21516,microsoft.com,PATCH,/users/{user-id}/authentication/phoneMethods/{phoneAuthenticationMethod-id},users.authentication.UpdatePhoneMethods,Update the navigation property phoneMethods in users,
+v24927,microsoft.com,POST,/users/{user-id}/calendar/events/{event-id}/exceptionOccurrences/{event-id1}/microsoft.graph.snoozeReminder,users.user.calendar.events.event.exceptionOccurrences.event.snoozeReminder,Invoke action snoozeReminder,Postpone a reminder for an event in a user calendar until a new time.
+v20040,microsoft,PATCH,/groups/{group-id}/sites/{site-id}/termStore/groups/{group-id1}/sets/{set-id}/terms/{term-id}/children/{term-id1},groups.sites.termStore.groups.sets.terms.UpdateChildren,Update the navigation property children in groups,
+v8113,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CustomProviders/resourceProviders/{resourceProviderName},CustomResourceProvider_CreateOrUpdate,,Creates or updates the custom resource provider.
+v31669,vimeo.com,POST,/videos/{video_id}/pictures,create_video_thumbnail,Add a video thumbnail,
+v13292,gerermesaffaires.com,POST,/menus/{menuId}/documents,,,add a document to the target menuId
+v13081,gambitcomm.local,POST,/mimic/agent/{agentNum}/protocol/msg/snmpv3/group/add/{groupName}/{securityModel}/{securityName},protocol_snmpv3_group_add,Adds a new group entry with the specified parameters.,Adds a new group entry with the specified parameters.
+v19525,microsoft.com,PATCH,/deviceManagement/windowsQualityUpdateProfiles/{windowsQualityUpdateProfile-id}/assignments/{windowsQualityUpdateProfileAssignment-id},deviceManagement.windowsQualityUpdateProfiles.UpdateAssignments,Update the navigation property assignments in deviceManagement,
+v4303,amazonaws.com,POST,/detectors,BatchUpdateDetector,,"Updates the state, variable values, and timer settings of one or more detectors (instances) of a specified detector model."
+v3932,amazonaws.com,POST,/2013-04-01/hostedzone,CreateHostedZone,,"Creates a new public or private hosted zone. You create records in a public hosted zone to define how you want to route traffic on the internet for a domain, such as example.com, and its subdomains (apex.example.com, acme.example.com). You create records in a private hosted zone to define how you want to route traffic for a domain and its subdomains within one or more Amazon Virtual Private Clouds"
+v10168,cloudflare,PATCH,/accounts/{account_id}/devices/settings,zero-trust-accounts-patch-device-settings-for-the-zero-trust-account,Patch device settings for a Zero Trust account,Patches the current device settings for a Zero Trust account.
+v28331,pendo.io,POST,/hooks,,Subscribe to webhooks,Use this endpoint to subscribe to webhooks.
+v21341,microsoft.com,PATCH,/teams/{team-id}/photo,teams.UpdatePhoto,Update the navigation property photo in teams,
+v20471,microsoft,PATCH,/me/calendarGroups/{calendarGroup-id}/calendars/{calendar-id}/events/{event-id}/exceptionOccurrences/{event-id1}/singleValueExtendedProperties/{singleValueLegacyExtendedProperty-id},me.calendarGroups.calendars.events.exceptionOccurrences.UpdateSingleValueExtendedProperties,Update the navigation property singleValueExtendedProperties in me,
+v5041,amazonaws.com,PUT,/restapis/{restapi_id}/resources/{resource_id}/methods/{http_method}/integration/responses/{status_code},PutIntegrationResponse,,Represents a put integration.
+v5679,apideck.com,POST,/accounting/ledger-accounts,ledgerAccountsAdd,Create Ledger Account,Create Ledger Account
+v23279,microsoft.com,POST,/identity/b2xUserFlows/{b2xIdentityUserFlow-id}/languages/{userFlowLanguageConfiguration-id}/overridesPages,identity.b2xUserFlows.languages.CreateOverridesPages,Create new navigation property to overridesPages for identity,
+v23841,microsoft.com,POST,/me/contacts/{contact-id}/singleValueExtendedProperties,me.contacts.CreateSingleValueExtendedProperties,Create new navigation property to singleValueExtendedProperties for me,
+v23837,microsoft.com,POST,/me/contactFolders/{contactFolder-id}/singleValueExtendedProperties,me.contactFolders.CreateSingleValueExtendedProperties,Create new navigation property to singleValueExtendedProperties for me,
+v7663,azure.com,POST,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/scaleUnitNodes/{scaleUnitNode}/PowerOn,ScaleUnitNodes_PowerOn,,Power on a scale unit node.
+v28512,polar.sh,POST,/v1/benefits/,benefits:create,Create Benefit,"Create a benefit, for example license keys, file downloads or Discord access.
+
+**Scopes**: `benefits:write`"
+v9245,box,PUT,/files/{file_id}#update_shared_link,put_files_id#update_shared_link,Update shared link on file,Updates a shared link on a file.
+v5929,apple.com,PATCH,/v1/builds/{id},builds-update_instance,,
+v15653,googleapis.com,POST,/v2beta1/accounts/{accountId}/proposals/{proposalId}:resume,adexchangebuyer2.accounts.proposals.resume,,"Update the given proposal to resume serving. This method will set the `DealServingMetadata.DealPauseStatus.has_buyer_paused` bit to false for all deals in the proposal. Note that if the `has_seller_paused` bit is also set, serving will not resume until the seller also resumes. It is a no-op to resume an already-running proposal. It is an error to call ResumeProposal for a proposal that is not fina"
+v8360,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ddosProtectionPlans/{ddosProtectionPlanName},DdosProtectionPlans_CreateOrUpdate,,Creates or updates a DDoS protection plan.
+v12205,docusign,POST,/v2.1/accounts/{accountId}/templates/{templateId}/workflow/steps,TemplateWorkflowStep_PostTemplateWorkflowStepDefinition,Adds a new step to a template's workflow.,Adds a new step to a template's workflow.
+v23037,microsoft.com,POST,/groups/{group-id}/onenote/notebooks/{notebook-id}/sections,groups.onenote.notebooks.CreateSections,Create section,Create a new onenoteSection in the specified notebook.
+v28591,presalytics.io,PUT,/Groups/OpenOfficeXml/{id},slides_groups_openofficexml_put_id,Slides: Modify Underlying Xml,"Directly eidt the underlying xml of a Slide object within an OpenOpenXml (e.g. Excel, Powerpoint) document. This endpoint will validatate the submitted xml against the [Ecma-376 standard](http://www.ecma-international.org/publications/standards/Ecma-376.htm) prior to saving modification. Invalid xml will rejected by this endpoint and a (hopefully) helpful error message will be returned. Use this e"
+v3006,amazonaws.com,POST,/#X-Amz-Target=CodeDeploy_20141006.AddTagsToOnPremisesInstances,AddTagsToOnPremisesInstances,,Adds tags to on-premises instances.
+v30624,tokenjay.app,GET,/mosaik/boxconsolidation/consolidate/{p2pkaddress},epConsolidate,,
+v25375,microsoft.com,POST,/users/{user-id}/microsoft.graph.assignLicense,users.user.assignLicense,Invoke action assignLicense,
+v23985,microsoft,POST,/me/managedDevices/{managedDevice-id}/microsoft.graph.disableLostMode,me.managedDevices.managedDevice.disableLostMode,Invoke action disableLostMode,Disable lost mode
+v24069,microsoft.com,POST,/me/outlook/taskGroups/{outlookTaskGroup-id}/taskFolders/{outlookTaskFolder-id}/tasks/{outlookTask-id}/attachments,me.outlook.taskGroups.taskFolders.tasks.CreateAttachments,Create attachment (deprecated),Use this API to add an attachment to an outlookTask. The attachment can be a file (of fileAttachment type) or Outlook item (itemAttachment type).
+v25797,mist.com,POST,/api/v1/orgs/{org_id}/deviceprofiles/{deviceprofile_id}/assign,assignOrgDeviceProfileToDevices,assignOrgDeviceProfileToDevices,Assign Org Device Profile to Devices
+v22776,microsoft.com,POST,/filterOperators,filterOperators.filterOperatorSchema.CreateFilterOperatorSchema,Add new entity to filterOperators,
+v0659,amazonaws.com,GET,/#Action=CreateConfigurationSetTrackingOptions,GET_CreateConfigurationSetTrackingOptions,,"Creates an association between a configuration set and a custom domain for open and click event tracking. By default, images and links used for tracking open and click events are hosted on domains operated by Amazon SES. You can configure a subdomain of your own to handle these events. For information about using custom domains, see the Amazon SES Developer Guide ."
+v32529,xero,PUT,/Contacts/{ContactID}/History,createContactHistory,Creates a new history record for a specific contact,
+v30062,stripe,POST,/v1/apps/secrets,PostAppsSecrets,Set a Secret,<p>Create or replace a secret in the secret store.</p>
+v11637,data2crm.com,POST,/application/entity/campaign,createCampaignEntity,POST for campaign,Add campaign into the system
+v23248,microsoft.com,POST,/groups/{group-id}/team/schedule/timeCards,groups.team.schedule.CreateTimeCards,Create new navigation property to timeCards for groups,
+v31495,vercel,GET,/v1/installations/{integrationConfigurationId}/account,get-account-info,Get Account Information,Fetches the best account or user’s contact info
+v27893,osisoft.com,POST,/elements/{webId}/analyses,Element_CreateAnalysis,Create an Analysis.,
+v2792,amazonaws.com,POST,/#X-Amz-Target=AmazonDMSv20160101.RemoveTagsFromResource,RemoveTagsFromResource,,"Removes metadata tags from an DMS resource, including replication instance, endpoint, subnet group, and migration task. For more information, see Tag data type description."
+v7264,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBIDedicated/capacities/{dedicatedCapacityName},Capacities_Update,,Updates the current state of the specified Dedicated capacity.
+v29588,slack,POST,/admin.conversations.create,admin_conversations_create,,Create a public or private channel-based conversation.
+v30602,threatjammer.com,PUT,/v1/denylist/private/{denylist_id}/origin,change_status_of_the_origin_denylist_v1_denylist_private__denylist_id__origin_put,Toogle the status of the origin in a deny list.,"### What Change the status of the origin of a deny list to ``ACTIVE``, ``INACTIVE`` or ``DELETED``. An ``ACTIVE`` origin will apply the deny list to the protocol and domain of the origin. An origin can be created and activated simply toogling the ``ACTIVE`` status. As an optional parameter it can be provided an ``ttl`` or Time To Live parameter of the origin in the list in seconds. After the TTL e"
+v6310,auth0,PATCH,/attack-protection/captcha,patch_captcha,Partial Update for CAPTCHA Configuration,Update existing CAPTCHA configuration for your client.
+v7353,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/sourcecontrols/web,Sites_UpdateSiteSourceControl,Update the source control configuration of web app,
+v5495,apacta.com,PUT,/materials/{material_id},,Edit material,
+v19947,microsoft.com,PATCH,/groups/{group-id}/extensions/{extension-id},groups.UpdateExtensions,Update the navigation property extensions in groups,
+v33056,zoomconnect.com,GET,/api/rest/v1/groups/{groupId}/addContact/{contactId},,addContact,Add a contact to a group
+v31191,twilio.com,POST,/v1/Rooms/{RoomSid}/Participants/{Sid}/Anonymize,UpdateRoomParticipantAnonymize,,
+v23807,microsoft.com,POST,/me/chats/{chat-id}/messages/{chatMessage-id}/replies/{chatMessage-id1}/hostedContents,me.chats.messages.replies.CreateHostedContents,Create new navigation property to hostedContents for me,

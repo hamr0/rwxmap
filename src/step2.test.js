@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { step2, floorPost, CANT_UNDO, REMOVES, CREDENTIAL_SET, CREDENTIAL_CHANGE_VERBS } from './step2.js';
-import { KEEP_W } from './step3.js';
+import { step2, step2 as step2Full, floorPost, CANT_UNDO, REMOVES, CREDENTIAL_SET, CREDENTIAL_CHANGE_VERBS, PATH_X_WORDS } from './step2.js';
+import { KEEP_W, CONTENT_W } from './step3.js';
 import { stemMatches } from './tokens.js';
 
 test('method-delete rule: DELETE always floors to x, destructive true, empty matched', () => {
@@ -143,6 +143,9 @@ test('credential-set change form: PATCH changePin, and a summary "Change PIN"', 
 });
 
 test('credential-set does not fire: plurals, trailing non-credential token, api keys, non-change lead', () => {
+  // path-x-word is switched off here (empty list) so only credential-set is under test;
+  // /api_keys/{id} would otherwise be claimed by path-x-word.
+  const step2 = (row) => step2Full(row, { pathXWords: new Set() });
   assert.equal(step2({ method: 'PUT', path: '/users/{id}/passwords', operationId: 'putUserPasswords' }), null);
   assert.equal(step2({ method: 'PUT', path: '/boards/{id}/pins', operationId: 'putBoardPins' }), null);
   assert.equal(step2({ method: 'PUT', path: '/settings/password_rules', operationId: 'putPasswordRules' }), null);
@@ -163,9 +166,11 @@ test('credential-set: a CANT_UNDO lead verb keeps its own rule', () => {
 });
 
 test('credential-set words injection overrides CREDENTIAL_SET and CREDENTIAL_CHANGE_VERBS', () => {
+  // path-x-word is switched off (empty list) so only credential-set is under test.
+  const off = { pathXWords: new Set() };
   const row = { method: 'PUT', path: '/users/{id}/secret', operationId: 'swapSecret' };
-  assert.equal(step2(row), null);
-  assert.deepEqual(step2(row, { credentialSet: new Set(['secret']) }), {
+  assert.equal(step2(row, off), null);
+  assert.deepEqual(step2(row, { ...off, credentialSet: new Set(['secret']) }), {
     class: 'x', step: 2, rule: 'credential-set', source: 'list', matched: ['secret'],
   });
   const change = { method: 'PATCH', path: '/cards/{id}', operationId: 'swapPin' };
@@ -180,4 +185,105 @@ test('credential-set words injection overrides CREDENTIAL_SET and CREDENTIAL_CHA
 test('CREDENTIAL_SET and CREDENTIAL_CHANGE_VERBS hold exactly the D131 members', () => {
   assert.deepEqual([...CREDENTIAL_SET].sort(), ['passcode', 'password', 'pin']);
   assert.deepEqual([...CREDENTIAL_CHANGE_VERBS].sort(), ['change', 'regen', 'regenerate']);
+});
+
+// ---- path-x-word rule (PUT/PATCH path words raise the method floor to x)
+
+const pw = (method, path) => step2({ method, operationId: 'putThing', path });
+
+test('path-x-word: fires on PUT/PATCH path words, class x, not destructive', () => {
+  assert.deepEqual(pw('PUT', '/orgs/{org}/memberships/{u}'), {
+    class: 'x', step: 2, rule: 'path-x-word', source: 'list', matched: ['member', 'membership'],
+  });
+  assert.deepEqual(pw('PATCH', '/webhooks/{id}'), {
+    class: 'x', step: 2, rule: 'path-x-word', source: 'list', matched: ['hook', 'webhook'],
+  });
+});
+
+test('path-x-word: glued match inside one token, and multi-word entries', () => {
+  assert.deepEqual(pw('PUT', '/registrycredentials/{id}')?.matched, ['credential']);
+  assert.ok(pw('PUT', '/files/{id}#add_shared_link')?.matched.includes('shared_link'));
+  assert.ok(pw('PUT', '/a/{id}/apikeys')?.matched.includes('api_key'));
+  assert.ok(pw('PUT', '/a/event-streams/{id}')?.matched.includes('event_stream'));
+});
+
+test('path-x-word: does not fire on other paths, a POST with no path word, or DELETE', () => {
+  assert.equal(pw('PUT', '/boards/{id}/name'), null);
+  assert.equal(pw('PUT', '/{role}/name'), null);
+  assert.equal(pw('POST', '/boards'), null);
+  const del = pw('DELETE', '/webhooks/{id}');
+  assert.equal(del?.rule, 'method-delete');
+});
+
+test('path-x-word: fires on POST too (after cant-undo; POST has no credential-set rule)', () => {
+  assert.deepEqual(
+    step2({ method: 'POST', operationId: 'assignRole', path: '/users/{id}/roles' }),
+    { class: 'x', step: 2, rule: 'path-x-word', source: 'list', matched: ['role'] },
+  );
+  assert.equal(pw('POST', '/webhooks')?.rule, 'path-x-word');
+  // cant-undo still runs first
+  assert.equal(step2({ method: 'POST', operationId: 'revokeToken', path: '/tokens/{id}' })?.rule, 'cant-undo-verb');
+  // no credential-set on POST: a changePin POST with no path word is not claimed
+  assert.equal(step2({ method: 'POST', operationId: 'changePin', path: '/cards/{id}/pin' }), null);
+});
+
+test('path-x-word: sso and policy are not in the list; 36 words', () => {
+  assert.equal(PATH_X_WORDS.size, 36);
+  assert.ok(!PATH_X_WORDS.has('sso'));
+  assert.ok(!PATH_X_WORDS.has('policy'));
+  assert.equal(pw('PUT', '/sso/{id}'), null);
+  assert.equal(pw('PUT', '/policies/{id}/policy'), null);
+});
+
+test('path-x-word: an earlier step-2 rule keeps the row', () => {
+  assert.equal(step2({ method: 'PUT', operationId: 'revokeToken', path: '/tokens/{id}' })?.rule, 'cant-undo-verb');
+});
+
+test('CONTENT_W is disjoint from CANT_UNDO and KEEP_W under stem matching', () => {
+  for (const c of CONTENT_W) {
+    for (const other of [...CANT_UNDO, ...KEEP_W]) {
+      assert.ok(!stemMatches(c, other) && !stemMatches(other, c), `${c} vs ${other} unexpectedly stem-match`);
+    }
+  }
+});
+
+// ---- get-action (read methods) ---------------------------------------------
+
+import { GET_ACTION } from './step2.js';
+
+test('GET_ACTION is exactly logout, revoke, close', () => {
+  assert.deepEqual([...GET_ACTION].sort(), ['close', 'logout', 'revoke']);
+});
+
+test('GET_ACTION is disjoint from KEEP_W and CONTENT_W under stem matching', () => {
+  for (const a of GET_ACTION) {
+    for (const b of [...KEEP_W, ...CONTENT_W]) {
+      assert.ok(!stemMatches(a, b) && !stemMatches(b, a), `${a} vs ${b} unexpectedly stem-match`);
+    }
+  }
+});
+
+test('get-action fires on the last static segment, the lead verb, and every read method', () => {
+  const v = step2({ method: 'GET', operationId: 'x', path: '/sso/logout' });
+  assert.deepEqual(v, { class: 'x', step: 2, rule: 'get-action', source: 'list', matched: ['logout'] });
+  assert.deepEqual(step2({ method: 'GET', operationId: 'revokeOidcSession', path: '/oauth2/sessions/logout' })?.matched, ['logout', 'revoke']);
+  assert.equal(step2({ method: 'GET', operationId: 'x', path: '/devtools/json/close/{id}' })?.matched[0], 'close');
+  for (const method of ['HEAD', 'OPTIONS', 'QUERY']) assert.equal(step2({ method, operationId: 'x', path: '/a/logout' })?.rule, 'get-action', method);
+});
+
+test('get-action does not fire on nouns, mid-path words, or CANT_UNDO/path words on a GET', () => {
+  assert.equal(step2({ method: 'GET', operationId: 'getSecrets', path: '/apps/secrets' }), null);
+  assert.equal(step2({ method: 'GET', operationId: 'getRefund', path: '/payments/refunds/{id}' }), null);
+  assert.equal(step2({ method: 'GET', operationId: 'listConnectedAccounts', path: '/connected_accounts' }), null);
+  assert.equal(step2({ method: 'GET', operationId: 'getThing', path: '/logout/things' }), null);
+  assert.equal(step2({ method: 'GET', operationId: 'sendThing', path: '/things' }), null);
+});
+
+test('get-action does not apply to POST: POST /logout keeps its existing verdict', () => {
+  const v = step2({ method: 'POST', operationId: 'logout', path: '/logout' });
+  assert.notEqual(v?.rule, 'get-action');
+});
+
+test('get-action words injection overrides GET_ACTION', () => {
+  assert.equal(step2({ method: 'GET', operationId: 'x', path: '/a/logout' }, { getAction: new Set(['zzz']) }), null);
 });

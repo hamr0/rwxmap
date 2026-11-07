@@ -28,7 +28,7 @@ function run(argv, env) {
 // A package check that passes (the rwxlite package is not installed in this repo):
 // the default run checks the package before it looks for a model, so a test about
 // the model needs this to get that far. The fake package is never asked to load.
-const PKG_OK = { rwxliteImporter: async () => ({}), rwxliteVersionReader: () => '0.2.0' };
+const PKG_OK = { rwxliteImporter: async () => ({}), rwxliteVersionReader: () => '0.3.1' };
 
 // One operation of each class, by method-floor evidence alone (no word
 // list needs to fire): GET -> r, PUT -> w (floor, review "loose"), DELETE
@@ -1943,7 +1943,7 @@ test('run: tenant-templated servers land in serverTemplates (and only those); ot
 // rwxlite second pass (injected engine) and the model cache check.
 // ---------------------------------------------------------------------
 
-const D133_MODEL = 'rwxlite-0.2.0+0123abcd';
+const D133_MODEL = 'rwxlite-0.3.1+0123abcd';
 
 /** Run the CLI on SPEC_JEV_DOC; returns {code, stdout, stderr, outDir}. */
 async function runD133(extraArgs, extraEnv = {}) {
@@ -2177,13 +2177,13 @@ test('run (D133): --engine jev with a key behaves as before and prints no rwxlit
 /** A cached model directory in rwxlite's layout; `dirSha8` overrides the sha8 in the directory name. */
 function writeModelDir(xdg, bytes, dirSha8) {
   const sha = (b) => createHash('sha256').update(b).digest('hex');
-  const model = `rwxlite-0.2.0+${dirSha8 ?? sha(bytes).slice(0, 8)}`;
+  const model = `rwxlite-0.3.1+${dirSha8 ?? sha(bytes).slice(0, 8)}`;
   const dir = path.join(xdg, 'rwxmap', model);
   fs.mkdirSync(dir, { recursive: true });
   const vocab = Buffer.from('vocab');
   fs.writeFileSync(path.join(dir, 'model.bin'), bytes);
   fs.writeFileSync(path.join(dir, 'vocab.txt'), vocab);
-  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ version: '0.2.0', modelFile: 'model.bin', model, files: { 'model.bin': sha(bytes), 'vocab.txt': sha(vocab) } }));
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ version: '0.3.1', modelFile: 'model.bin', model, files: { 'model.bin': sha(bytes), 'vocab.txt': sha(vocab) } }));
   return dir;
 }
 
@@ -2192,7 +2192,7 @@ test('run (D133): a cached model whose hash does not match its name is NOT used:
   writeModelDir(xdg, Buffer.from('weights'), 'deadbeef');
   const r = await runD133([], { xdgCacheHome: xdg, ...PKG_OK });
   assert.equal(r.code, 0, r.stderr);
-  assert.match(r.stderr, /WARNING: rwxlite model rejected \(hash mismatch.*rwxlite-0\.2\.0\+deadbeef was NOT used/);
+  assert.match(r.stderr, /WARNING: rwxlite model rejected \(hash mismatch.*rwxlite-0\.3\.1\+deadbeef was NOT used/);
   assert.match(r.stdout, /rwxlite: off \(mechanical\) — could not get the model \(offline \(test\)\); the cached model was rejected/);
   assert.equal(d133Rows(r.outDir)['POST /mystery'], 'x/tight');
 });
@@ -2215,9 +2215,9 @@ test('run (D133): offline with a verified cached model -> "using cached ...", th
   const bytes = Buffer.from('weights');
   const sha8 = createHash('sha256').update(bytes).digest('hex').slice(0, 8);
   const dir = writeModelDir(xdg, bytes);
-  const model = `rwxlite-0.2.0+${sha8}`;
+  const model = `rwxlite-0.3.1+${sha8}`;
   const seen = [];
-  const r = await runD133([], { xdgCacheHome: xdg, rwxliteImporter: fakeRwxlite(model, { isX: 0.99, changes: 0.99 }, seen), rwxliteVersionReader: () => '0.2.0' });
+  const r = await runD133([], { xdgCacheHome: xdg, rwxliteImporter: fakeRwxlite(model, { isX: 0.99, changes: 0.99 }, seen), rwxliteVersionReader: () => '0.3.1' });
   assert.equal(r.code, 0, r.stderr);
   assert.match(r.stderr, new RegExp(`^rwxmap: using cached ${model.replace(/[+.]/g, '\\$&')}( \\(no cached exact model, so the small one\\))?, could not reach the release`, 'm'));
   assert.equal(seen.length, 1);
@@ -2232,7 +2232,7 @@ test('run (D133): a verified model but no rwxlite package -> mechanical alone, s
   const importer = async () => { throw Object.assign(new Error("Cannot find package 'rwxlite' imported from /x/src/rwxliteengine.js"), { code: 'ERR_MODULE_NOT_FOUND' }); };
   const r = await runD133([], { xdgCacheHome: xdg, rwxliteImporter: importer });
   assert.equal(r.code, 0, r.stderr);
-  assert.match(r.stdout, /^rwxmap: rwxlite: off \(mechanical\) — the rwxlite package is not installed \(npm install rwxlite@0\.2\)$/m);
+  assert.match(r.stdout, /^rwxmap: rwxlite: off \(mechanical\) — the rwxlite package is not installed \(npm install rwxlite@0\.3\)$/m);
   assert.equal(readJson(path.join(r.outDir, 'example.rwxmap.json')).rwxlite.mode, 'off');
 });
 
@@ -2243,7 +2243,7 @@ test('run (D133): no rwxlite package -> nothing is fetched, mechanical alone, sa
     const r = await runD133(args, { rwxliteImporter: importer, modelFetch: async () => { calls += 1; throw new Error('must not be called'); } });
     assert.equal(r.code, 0, r.stderr);
     assert.equal(calls, 0, args.join(' '));
-    assert.match(r.stdout, /^rwxmap: rwxlite: off \(mechanical\) — the rwxlite package is not installed \(npm install rwxlite@0\.2\)$/m);
+    assert.match(r.stdout, /^rwxmap: rwxlite: off \(mechanical\) — the rwxlite package is not installed \(npm install rwxlite@0\.3\)$/m);
     assert.equal(d133Rows(r.outDir)['POST /mystery'], 'x/tight');
     assert.equal(readJson(path.join(r.outDir, 'example.rwxmap.json')).rwxlite.mode, 'off');
   }
@@ -2251,10 +2251,10 @@ test('run (D133): no rwxlite package -> nothing is fetched, mechanical alone, sa
 
 test('run (D133): rwxlite package out of range -> nothing is fetched, mechanical alone with the version reason', async () => {
   let calls = 0;
-  const r = await runD133([], { rwxliteImporter: async () => ({}), rwxliteVersionReader: () => '0.3.0', modelFetch: async () => { calls += 1; throw new Error('must not be called'); } });
+  const r = await runD133([], { rwxliteImporter: async () => ({}), rwxliteVersionReader: () => '0.2.0', modelFetch: async () => { calls += 1; throw new Error('must not be called'); } });
   assert.equal(r.code, 0, r.stderr);
   assert.equal(calls, 0);
-  assert.match(r.stdout, /^rwxmap: rwxlite: off \(mechanical\) — the rwxlite package is 0\.3\.0; this rwxmap accepts 0\.2\.x \(D135\); npm install rwxlite@0\.2$/m);
+  assert.match(r.stdout, /^rwxmap: rwxlite: off \(mechanical\) — the rwxlite package is 0\.2\.0; this rwxmap accepts 0\.3\.x \(D135\); npm install rwxlite@0\.3$/m);
   assert.equal(d133Rows(r.outDir)['POST /mystery'], 'x/tight');
 });
 
@@ -2262,7 +2262,7 @@ test('run (D133): rwxlite package fine -> the model is fetched as before', async
   const urls = [];
   const r = await runD133([], { ...PKG_OK, modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
   assert.equal(r.code, 0, r.stderr);
-  assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest-exact.json']);
+  assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/download/v0.3.1/manifest-exact.json']);
   assert.match(r.stdout, /rwxlite: off \(mechanical\) — could not get the model/);
 });
 
@@ -2271,12 +2271,12 @@ test('run (D133): --model small is accepted in the default run and --engine rwxl
     const urls = [];
     const r = await runD133(args, { ...PKG_OK, modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
     assert.equal(r.code, 0, r.stderr);
-    assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest.json'], args.join(' '));
+    assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/download/v0.3.1/manifest.json'], args.join(' '));
   }
   const urls = [];
   const r = await runD133([], { ...PKG_OK, modelFetch: async (u) => { urls.push(String(u)); throw new Error('offline (test)'); } });
   assert.equal(r.code, 0, r.stderr);
-  assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/download/v0.2.0/manifest-exact.json']);
+  assert.deepEqual(urls, ['https://github.com/hamr0/rwxlite/releases/download/v0.3.1/manifest-exact.json']);
 });
 
 test('run (D133): --model fails loudly with any other value, and with --engine jev or mechanical; nothing is fetched or written', async () => {

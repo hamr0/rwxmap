@@ -1,0 +1,298 @@
+row_id,provider,method,path,operationId,summary,description
+v32976,zoom.us,PATCH,/users/{userId},userUpdate,Update a user,Update information on a user's Zoom [profile](https://support.zoom.us/hc/en-us/articles/201363203-My-Profile). **Scopes:** `user:write:admin` `user:write` **[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `Light`
+v31462,velopayments.com,POST,/v1/webhooks/{webhookId},updateWebhookV1,Update Webhook,Update Webhook
+v27203,okta,POST,/api/v1/authorizationServers/{authServerId}/lifecycle/deactivate,deactivateAuthorizationServer,Deactivate an authorization server,Deactivates an authorization server
+v32738,x,GET,/2/users/{id}/muting,getUsersMuting,Get Users Muting,
+v27777,ory.sh,POST,/self-service/login,updateLoginFlow,Submit a Login Flow,"Use this endpoint to complete a login flow. This endpoint
+behaves differently for API and browser flows.
+
+API flows expect `application/json` to be sent in the body and responds with
+- HTTP 200 and a application/json body with the session token on success;
+- HTTP 410 if the original flow expired with the appropriate error messages set and optionally a `use_flow_id` parameter in the body;
+- HTTP 400 on form validation errors.
+
+Browser flows expect a Content-Type of `application/x-www-form-urlencoded` or `application/json` to be sent in the body and respond with
+- a HTTP 303 redirect to the post/after login URL or the `return_to` value if it was set and if the login succeeded;
+- a HTTP 303 redirect to the login UI URL with the flow ID containing the validation errors otherwise.
+
+Browser flows with an accept header of `application/json` will not redirect but instead respond with
+- HTTP 200 and a application/json body with the signed in identity and a `Set-Cookie` header on success;
+- HTTP 303 redirect to a fresh login flow if the original flow expired with the appropriate error messages set;
+- HTTP 400 on form validation errors.
+
+If this endpoint is called with `Accept: application/json` in the header, the response contains the flow without a redirect. In the
+case of an error, the `error.id` of the JSON response body can be one of:
+
+- `session_already_available`: The user is already signed in.
+- `security_csrf_violation`: Unable to fetch the flow because a CSRF violation occurred.
+- `security_identity_mismatch`: The requested `?return_to` address is not allowed to be used. Adjust this in the configuration!
+- `browser_location_change_required`: Usually sent when an AJAX request indicates that the browser needs to open a specific URL.
+Most likely used in Social Sign In flows.
+
+More information can be found at [Ory Kratos User Login](https://www.ory.com/docs/kratos/self-service/flows/user-login) and [User Registration Documentation](https://www.ory.com/docs/kratos/self-service/flows/user-registration)."
+v24424,microsoft.com,POST,/servicePrincipals,servicePrincipals.servicePrincipal.CreateServicePrincipal,Create servicePrincipal,Create a new servicePrincipal object.
+v18352,loket.nl,PUT,/providers/employers/employees/notes/{noteId},PutEmployeeNoteByNoteId,Edit an employee note record,__Activity name :__ PutEmployeeNoteByNoteId __Metadata :__ Possible options for fields of the type 'metadata' can be acquired (GET) by adding ` / metadata ` to the PUT URL.
+v8215,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName},IotDpsResource_CreateOrUpdate,Create or update the metadata of the provisioning service.,"Create or update the metadata of the provisioning service. The usual pattern to modify a property is to retrieve the provisioning service metadata and security metadata, and then combine them with the modified values in a new body to update the provisioning service."
+v24033,microsoft.com,POST,/me/onenote/pages/{onenotePage-id}/microsoft.graph.copyToSection,me.onenote.pages.onenotePage.copyToSection,Invoke action copyToSection,"Copy a page to a specific section. For copy operations, you follow an asynchronous calling pattern: First call the Copy action, and then poll the operation endpoint for the result."
+v8954,bigredcloud.com,DELETE,/v1/salesInvoices/{id},SalesInvoices_Delete,Removes an existing Sales Invoice.,
+v32934,zoom.us,PATCH,/chat/channels/{channelId},updateUserLevelChannel,Update a channel,"Zoom chat channels allow users to communicate via chat in private or public channels. Use this API to update the name of a specific channel that you created. **Scope:** `chat_channel:write` **[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `Medium` Note: This API only supports user-managed <a href=""https://marketplace.zoom.us/docs/guides/getting-starte"
+v1599,amazonaws.com,PATCH,/security-profiles/{securityProfileName},UpdateSecurityProfile,,Updates a Device Defender security profile. Requires permission to access the UpdateSecurityProfile action.
+v17578,klaviyo,PATCH,/api/catalog-items/{id},update_catalog_item,Update Catalog Item,"Update a catalog item with the given item ID.<br><br>*Rate limits*:<br>Burst: `75/s`<br>Steady: `750/m`
+
+**Scopes:**
+`catalogs:write`
+
+[OpenAPI Spec](https://raw.githubusercontent.com/klaviyo/openapi/main/openapi/stable/apis/update_catalog_item.json)"
+v22043,microsoft.com,POST,/bookingBusinesses/{bookingBusiness-id}/microsoft.graph.unpublish,bookingBusinesses.bookingBusiness.unpublish,Invoke action unpublish,"Make the scheduling page of this business not available to external customers. Set the **isPublished** property to false, and **publicUrl** property to null."
+v5754,appcenter.ms,PATCH,/v0.1/apps/{owner_name}/{app_name}/users/{user_email},apps_updateUserPermissions,,Update user permission for the app
+v4163,amazonaws.com,POST,/asset-models,CreateAssetModel,,"Creates an asset model from specified property and hierarchy definitions. You create assets from asset models. With asset models, you can easily create assets of the same type that have standardized definitions. Each asset created from a model inherits the asset model's property and hierarchy definitions. For more information, see Defining asset models in the IoT SiteWise User Guide ."
+v11836,digitallinguistics.io,POST,/lexemes,addLexeme,Add a new Lexeme,"Add a new Lexeme. A `languageID` must be provided either as a query parameter, or as an attribute on the Lexeme body."
+v15978,google.com,POST,/v3/{parent}/brands,travelpartner.accounts.brands.create,,"Creates a new brand. Because Google detects brands from your existing properties, you only need this operation when you want to configure a brand before you send its properties to Google. Note that it might take a couple of days after your listing feed first provides a brand for the brand to appear."
+v26782,netbox.dev,PUT,/dcim/device-roles/,dcim_device-roles_bulk_update,,
+v30873,truora.com,PUT,/v1/continuous-checks/{continuous_check_id},UpdateContinuousCheck,,Updates a continuous check
+v27315,okta,POST,/api/v1/ssf/stream,createSsfStream,Create an SSF stream,"Creates an SSF stream for an event receiver to start receiving security events in the form of Security Event Tokens (SETs) from Okta.
+
+An SSF stream is associated with the client ID of the OAuth 2.0 access token used to create the stream. The client ID is provided by Okta for an [OAuth 2.0 app integration](https://help.okta.com/okta_help.htm?id=ext_Apps_App_Integration_Wizard-oidc). One SSF stream is allowed for each client ID, hence, one SSF stream is allowed for each app integration in Okta.
+
+You can create a maximum of 10 SSF stream configurations for one org."
+v31308,twilio.com,POST,/v1/a2p/BrandRegistrations,CreateBrandRegistrations,,
+v5029,amazonaws.com,PUT,/projects/{projectName}/placements/{placementName}/devices/{deviceTemplateName},AssociateDeviceWithPlacement,,Associates a physical device with a placement.
+v7081,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName},GalleryImageVersions_Update,,Update a gallery Image Version.
+v31670,vimeo.com,POST,/videos/{video_id}/texttracks,create_text_track,Add a text track to a video,"For additional information, see our [text track upload guide](https://developer.vimeo.com/api/upload/texttracks)."
+v16421,hubspot,PUT,/public/api/versioning/test/2026-09/widgets/{widgetId},put-/public/api/versioning/test/2026-09/widgets/{widgetId},,
+v2495,amazonaws.com,POST,/#X-Amz-Target=AWSKendraFrontendService.CreateDataSource,CreateDataSource,,"Creates a data source connector that you want to use with an Amazon Kendra index. You specify a name, data source connector type and description for your data source. You also specify configuration information for the data source connector. CreateDataSource is a synchronous operation. The operation returns 200 if the data source was successfully created. Otherwise, an exception is raised. For an e"
+v6258,atlassian.com,PUT,/rest/api/3/user/columns,setUserColumns,Set user default columns,"Sets the default [ issue table columns](https://confluence.atlassian.com/x/XYdKLg) for the user. If an account ID is not passed, the calling user's default columns are set. If no column details are sent, then all default columns are removed. The parameters for this resource are expressed as HTML form data. For example, in curl: `curl -X PUT -d columns=summary -d columns=description https://your-do"
+v7465,azure.com,POST,/apps/{appId}/versions/{versionId}/entities/{entityId}/children,Model_AddEntityChild,,Creates a single child in an existing entity model hierarchy in a version of the application.
+v30612,tl-api.azurewebsites.net,POST,/api/Article,Article_Post,Add new article,
+v10028,clicksend.com,PUT,/reseller/transfer-credit,Transfer Credit,Transfer Credit,
+v24992,microsoft.com,POST,/users/{user-id}/calendarGroups/{calendarGroup-id}/calendars/{calendar-id}/calendarView/{event-id}/microsoft.graph.accept,users.user.calendarGroups.calendarGroup.calendars.calendar.calendarView.event.accept,Invoke action accept,Accept the specified event in a user calendar.
+v5901,appcenter,PUT,/v0.1/apps/{owner_name}/{app_name}/branches/{branch}/config,branchConfigurations_update,,Reconfigures the branch for build
+v30633,traccar.org,POST,/groups,,Create a Group,
+v30725,trello,POST,/cards/{idCard}/attachments,addCardsAttachmentsByIdCard,addCardsAttachmentsByIdCard(),
+v30052,stripe.com,POST,/v1/accounts/{account}/persons,PostAccountsAccountPersons,,Creates a new person.
+v11842,digitallocker.gov.in,POST,/oauth2/1/pull/pulldocument,Pull Document id,Pull Document,This API allows a client application to search a document/certificate from issuer’s repository using the parameters provided by a user. The searched document is saved in user’s issued document section of DigiLocker if the search is successful.
+v31225,twilio.com,POST,/v1/Services/{ServiceSid}/Environments/{EnvironmentSid}/Variables/{Sid},UpdateVariable,,Update a specific Variable.
+v3154,amazonaws.com,POST,/#X-Amz-Target=Firehose_20150804.CreateDeliveryStream,CreateDeliveryStream,,"Creates a Kinesis Data Firehose delivery stream. By default, you can create up to 50 delivery streams per Amazon Web Services Region. This is an asynchronous operation that immediately returns. The initial status of the delivery stream is CREATING . After the delivery stream is created, its status is ACTIVE and it now accepts data. If the delivery stream creation fails, the status transitions to C"
+v16779,intercom,POST,/audiences,createAudience,Create an audience,You can create a new audience by making a POST request to `https://api.intercom.io/audiences`.
+v29051,sakari.io,POST,/v1/accounts/{accountId}/campaigns,campaigns.create,Create campaign,
+v9948,clever-cloud.com,PUT,/self/payments/methods/default,,,
+v23900,microsoft.com,POST,/me/informationProtection/threatAssessmentRequests,me.informationProtection.CreateThreatAssessmentRequests,Create threatAssessmentRequest,Create a new threat assessment request. A threat assessment request can be one of the following types:
+v19410,microsoft.com,PATCH,/deviceManagement/reports/cachedReportConfigurations/{deviceManagementCachedReportConfiguration-id},deviceManagement.reports.UpdateCachedReportConfigurations,Update the navigation property cachedReportConfigurations in deviceManagement,
+v7161,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HybridCompute/machines/{name}/extensions/{extensionName},MachineExtensions_Update,,The operation to create or update the extension.
+v15233,googleapis.com,POST,/v1alpha1/{parent}/devices:createSigned,prod_tt_sasportal.nodes.nodes.devices.createSigned,,Creates a signed device under a node or customer.
+v7416,azure.com,POST,/Applications/{applicationId}/$/ResumeBackup,ResumeApplicationBackup,Resumes periodic backup of a Service Fabric application which was previously suspended.,The previously suspended Service Fabric application resumes taking periodic backup as per the backup policy currently configured for the same.
+v9565,cenit.io,POST,/setup/namespace/,,Create or update a namespace,Creates or updates the specified namespace. Any parameters not provided will be left unchanged.
+v0030,adafruit.com,PATCH,/{username}/feeds/{feed_key}/data/{id},updateData,Update properties of existing Data,
+v14498,googleapis.com,POST,/changes/watch,drive.changes.watch,,"Subscribes to changes for a user. To use this method, you must include the pageToken query parameter."
+v24676,microsoft.com,POST,/teams/{team-id}/primaryChannel/messages/{chatMessage-id}/replies/{chatMessage-id1}/hostedContents,teams.primaryChannel.messages.replies.CreateHostedContents,Create new navigation property to hostedContents for teams,
+v16695,influxdata.com,POST,/dashboards/{dashboardID}/owners,PostDashboardsIDOwners,Add an owner to a dashboard,
+v20491,microsoft.com,PATCH,/me/calendarView/{event-id}/exceptionOccurrences/{event-id1}/singleValueExtendedProperties/{singleValueLegacyExtendedProperty-id},me.calendarView.exceptionOccurrences.UpdateSingleValueExtendedProperties,Update the navigation property singleValueExtendedProperties in me,
+v30092,stripe,POST,/v1/coupons,PostCoupons,Create a coupon,"<p>You can create coupons easily via the <a href=""https://dashboard.stripe.com/coupons"">coupon management</a> page of the Stripe dashboard. Coupon creation is also accessible via the API if you need to create coupons on the fly.</p>
+
+<p>A coupon has either a <code>percent_off</code> or an <code>amount_off</code> and <code>currency</code>. If you set an <code>amount_off</code>, that amount will be subtracted from any invoice’s subtotal. For example, an invoice with a subtotal of <currency>100</currency> will have a final total of <currency>0</currency> if a coupon with an <code>amount_off</code> of <amount>200</amount> is applied to it and an invoice with a subtotal of <currency>300</currency> will have a final total of <currency>100</currency> if a coupon with an <code>amount_off</code> of <amount>200</amount> is applied to it.</p>"
+v30729,trello,POST,/cards/{idCard}/idLabels,addCardsIdLabelsByIdCard,addCardsIdLabelsByIdCard(),
+v22125,microsoft.com,POST,/compliance/ediscovery/cases/{case-id}/tags,compliance.ediscovery.cases.CreateTags,Create tag,Create a new tag for the specified case. The tags are used in review sets while reviewing content.
+v8561,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorSimple/managers/{managerName}/storageAccountCredentials/{storageAccountCredentialName},StorageAccountCredentials_CreateOrUpdate,,Creates or updates the storage account credential.
+v2335,amazonaws.com,POST,/#X-Amz-Target=AWSCognitoIdentityProviderService.UntagResource,UntagResource,,"Removes the specified tags from an Amazon Cognito user pool. You can use this action up to 5 times per second, per account."
+v3284,amazonaws.com,POST,/#X-Amz-Target=KinesisAnalytics_20180523.UntagResource,UntagResource,,"Removes one or more tags from a Kinesis Data Analytics application. For more information, see Using Tagging ."
+v20619,microsoft.com,PATCH,/me/joinedTeams/{team-id}/members/{conversationMember-id},me.joinedTeams.UpdateMembers,Update the navigation property members in me,
+v16700,influxdata.com,POST,/labels,PostLabels,Create a label,
+v28652,prss.org,POST,/api/v2/spotinsertions,,Creates a new spot insertion.,
+v23310,microsoft.com,POST,/identityGovernance/accessReviews/definitions/{accessReviewScheduleDefinition-id}/instances/{accessReviewInstance-id}/contactedReviewers,identityGovernance.accessReviews.definitions.instances.CreateContactedReviewers,Create new navigation property to contactedReviewers for identityGovernance,
+v9828,clerk.com,POST,/oauth_applications,CreateOAuthApplication,Create an OAuth application,"Creates a new OAuth application with the given name and callback URL for an instance.
+The callback URL must be a valid URL.
+All URL schemes are allowed such as `http://`, `https://`, `myapp://`, etc..."
+v19664,microsoft.com,PATCH,/drives/{drive-id}/list/items/{listItem-id},drives.list.UpdateItems,Update the navigation property items in drives,
+v25402,microsoft.com,POST,/users/{user-id}/onenote/sectionGroups/{sectionGroup-id}/sections/{onenoteSection-id}/microsoft.graph.copyToNotebook,users.user.onenote.sectionGroups.sectionGroup.sections.onenoteSection.copyToNotebook,Invoke action copyToNotebook,"For Copy operations, you follow an asynchronous calling pattern: First call the Copy action, and then poll the operation endpoint for the result."
+v8896,biapi.pro,POST,/users/{id_user}/connections/{id_connection}/accounts/{id_account}/transactionsclusters,,Create clustered transaction,Form params : - next_date (date) required: Date of transaction - mean_amount (decimal) required: Mean Amount - wording (string) required: name of transaction - id_account (id) required: related account
+v13190,gambitcomm.local,PUT,/mimic/agent/{agentNum}/set/pdusize/{pdusize},set_pdusize,maximum PDU size,The limit for this configurable is 65536
+v18081,linode.com,POST,/networking/firewalls/{firewallId}/devices,createFirewallDevice,Firewall Device Create,"Creates a Firewall Device, which assigns a Firewall to a service (referred to as the Device's `entity`) and applies the Firewall's Rules to the device. * Currently, only Devices with an entity of type `linode` are accepted. * A Firewall can be assigned to multiple Linode instances at a time. * A Linode instance can have one active, assigned Firewall at a time. Additional disabled Firewalls can be "
+v26204,neon.com,POST,/projects/{project_id}/branches/{branch_id}/finalize_restore,finalizeRestoreBranch,Finalize branch restore from snapshot,"Finalize the restore operation for a branch created from a snapshot.
+This operation updates the branch so it functions as the original branch it replaced.
+This includes:
+  - Reassigning any computes from the original branch to the restored branch (this will restart the computes)
+  - Renaming the restored branch to the original branch's name
+  - Renaming the original branch so it no longer uses the original name
+
+This operation only applies to branches created using the `restoreSnapshot` endpoint with `finalize_restore: false`.
+"
+v28898,resend.com,POST,/inboxes/{inbox_id}/threads/{thread_id}/labels,inboxes/add-thread-labels,Add labels to an inbox thread,"Applies one or more labels to the thread. Labels already on the thread stay on it. The response lists every label on the thread after the change. A label ID that is not a label of the inbox returns a 404 `Label not found.`, and nothing changes. A thread that does not exist in the inbox returns a 404 `Thread not found.`. To replace the labels of the thread, use the set thread labels endpoint."
+v25349,microsoft.com,POST,/users/{user-id}/managedDevices/{managedDevice-id}/managedDeviceMobileAppConfigurationStates,users.managedDevices.CreateManagedDeviceMobileAppConfigurationStates,Create new navigation property to managedDeviceMobileAppConfigurationStates for users,
+v32695,x,DELETE,/2/broadcasts/scheduled/{id},deleteScheduledBroadcast,Delete a scheduled broadcast,Deletes a scheduled broadcast by its alphanumeric UBS broadcast id.
+v1975,amazonaws.com,POST,/#Action=ModifyClusterSnapshotSchedule,POST_ModifyClusterSnapshotSchedule,,Modifies a snapshot schedule for a cluster.
+v25536,microsoft.com,PUT,/drives/{drive-id}/items/{driveItem-id}/children/{driveItem-id1}/content,drives.items.UpdateChildrenContent,Update content for the navigation property children in drives,"The content stream, if the item represents a file."
+v7974,azure.com,PUT,/subscriptions/{subscriptionId}/providers/Microsoft.Security/workspaceSettings/{workspaceSettingName},WorkspaceSettings_Create,,creating settings about where we should store your security data and logs
+v11730,data2crm.com,PUT,/application/entity/project/{project_id},updateProjectEntity,PUT for project,Update project information
+v28275,payrun.io,POST,/Transforms,PostTransformDefinition,Create a new transform definition,Creates a new transform defintion object
+v24340,microsoft.com,POST,/roleManagement/entitlementManagement/roleEligibilityScheduleRequests,roleManagement.entitlementManagement.CreateRoleEligibilityScheduleRequests,Create roleEligibilityScheduleRequest,"In PIM, request for a role eligibility for a principal through the unifiedRoleEligibilityScheduleRequest object. This operation allows both admins and eligible users to add, revoke, or extend eligible assignments."
+v29626,slack,POST,/calls.update,calls_update,,Updates information about a Call.
+v15281,googleapis.com,POST,/v1beta/{parent}/conversionEvents,analyticsadmin.properties.conversionEvents.create,,Creates a conversion event with the specified attributes.
+v17805,kubernetes.io,POST,/apis/networking.k8s.io/v1alpha1/clustercidrs,createNetworkingV1alpha1ClusterCIDR,,create a ClusterCIDR
+v24822,microsoft.com,POST,/termStore/groups/{group-id}/sets/{set-id}/terms,termStore.groups.sets.CreateTerms,Create new navigation property to terms for termStore,
+v0014,ably.net,PATCH,/apps/{id},,Updates an app,Updates the application with the specified application ID.
+v6317,auth0,PATCH,/client-grants/{id},patch_client-grants_by_id,Update client grant,Update a client grant.
+v8305,azure.com,PUT,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/schemas/{schemaName},IntegrationAccountSchemas_CreateOrUpdate,,Creates or updates an integration account schema.
+v9845,clerk.com,POST,/sessions/{session_id}/refresh,RefreshSession,Refresh a session,"Refreshes a session by creating a new session token. A 401 is returned when there
+are validation errors, which signals the SDKs to fall back to the handshake flow."
+v18777,mastodon.local,POST,/api/v1/statuses/{id}/unpin,,,Unfeature a status from the top of your profile.
+v20858,microsoft.com,PATCH,/planner/tasks/{plannerTask-id}/bucketTaskBoardFormat,planner.tasks.UpdateBucketTaskBoardFormat,Update the navigation property bucketTaskBoardFormat in planner,
+v26130,naviplancentral.com,PUT,/api/RealEstateAssets/{id},RealEstateAssets_PutByIdModel,,Description: The operation updates a Real Estate Asset.<br />               Purpose: Allows for complete replacement of a Real Estate Asset on a Fact Finder.
+v31856,vocadb.net,POST,/api/artists/{id}/comments,,,
+v27729,orthanc-server.com,POST,/tools/create-media-extended,,Create DICOMDIR media,"Create a DICOMDIR media containing the DICOM resources (patients, studies, series, or instances) whose Orthanc identifiers are provided in the body"
+v12480,dracoon,PUT,/v4/nodes/rooms/{room_id}/webhooks,handleRoomWebhookAssignments,Assign or unassign webhooks to room,<h3 style='padding: 5px; background-color: #F6F7F8; border: 1px solid #AAA; border-radius: 5px; display: table-cell;'>&#128640; Since v4.19.0</h3> ### Description:   Handle room webhook assignments. ### Precondition: User needs to be a <span style='padding: 3px; background-color: #F6F7F8; border: 1px solid #000; border-radius: 5px; display: inline;'>&#128100; Room Administrator</span>. ### Postcondition: List of webhooks is returned. ### Further Information: None. ### Available event types: <det
+v25879,mist.com,POST,/api/v1/sites/{site_id}/setting/whitelist,createSiteClientsAllowlist,createSiteClientsAllowlist,This endpoint is to provide list of client macs for annotation as whitelist. Retrieve the current clients list from `whitelist_url` under Site:Setting
+v7893,azure.com,PUT,/configurations/policy,Policy_Update,Update Policy.,Update the Learning settings that the Personalizer service will use to train models.
+v24883,microsoft.com,POST,/users/{user-id}/calendar/calendarView/{event-id}/exceptionOccurrences/{event-id1}/instances/{event-id2}/microsoft.graph.snoozeReminder,users.user.calendar.calendarView.event.exceptionOccurrences.event.instances.event.snoozeReminder,Invoke action snoozeReminder,Postpone a reminder for an event in a user calendar until a new time.
+v0396,alertersystem.com,POST,/api/transport-gotify,api_transport-gotify_post,Creates a TransportGotify resource.,Creates a TransportGotify resource.
+v12549,drchrono.com,PATCH,/api/tasks/{id},tasks_partial_update,,Update an existing task
+v27663,opensuse.org,PUT,/attribute/{namespace}/{attribute_name}/_meta,,Change attribute data. Create an attribute if it doesn't exist.,"This endpoint can be used for both, creating an attribute and updating it: * If the attribute passed as parameter doesn't exist, it will create the attribute. * If the attribute passed as parameter already exists, it will update the attribute. This operation is the same as the one defined with [POST](#/Attributes/post_attribute__namespace___attribute_name___meta)."
+v9891,clever-cloud.com,POST,/self/applications/{appId}/addons,postSelfApplicationsAppIdAddons,,
+v12558,drchrono.com,POST,/api/consent_forms/{id}/apply_to_appointment,consent_forms_apply_to_appointment,,Assign (apply) a consent form to appointment
+v15721,googleapis.com,POST,/youtube/v3/liveChat/moderators,youtube.liveChatModerators.insert,,Inserts a new resource into this collection.
+v13203,gambitcomm.local,PUT,/mimic/agent/{agentNum}/value/mset,mset_value,Set multiple variables in the Value Space.,"This is a performance optimization of the mimic value set command, to be used when many variables are to be set."
+v31041,twilio,POST,/2010-04-01/Accounts/{AccountSid}/Usage/Triggers/{Sid}.json,UpdateUsageTrigger,Update an instance of a usage trigger,Update an instance of a usage trigger
+v19290,microsoft.com,PATCH,/deviceManagement/deviceComplianceScripts/{deviceComplianceScript-id}/runSummary,deviceManagement.deviceComplianceScripts.UpdateRunSummary,Update the navigation property runSummary in deviceManagement,
+v22488,microsoft.com,POST,/deviceManagement/userExperienceAnalyticsCategories/{userExperienceAnalyticsCategory-id}/metricValues,deviceManagement.userExperienceAnalyticsCategories.CreateMetricValues,Create new navigation property to metricValues for deviceManagement,
+v20837,microsoft.com,PATCH,/planner/buckets/{plannerBucket-id}/tasks/{plannerTask-id}/bucketTaskBoardFormat,planner.buckets.tasks.UpdateBucketTaskBoardFormat,Update the navigation property bucketTaskBoardFormat in planner,
+v32881,zendesk,PUT,/api/v2/organizations/update_many,UpdateManyOrganizations,Update Many Organizations,"Bulk or batch updates up to 100 organizations.
+
+#### Bulk update
+
+To make the same change to multiple organizations, use the following endpoint and data format:
+
+`https://{subdomain}.zendesk.com/api/v2/organizations/update_many?ids=1,2,3`
+
+```js
+{
+  ""organization"": {
+    ""notes"": ""Priority""
+  }
+}
+```
+
+#### Batch update
+
+To make different changes to multiple organizations, use the following endpoint and data format:
+
+`https://{subdomain}.zendesk.com/api/v2/organizations/update_many`
+
+```js
+{
+  ""organizations"": [
+    { ""id"": 1, ""notes"": ""Priority"" },
+    { ""id"": 2, ""notes"": ""Normal"" }
+  ]
+}
+```
+
+#### Response
+
+This endpoint returns a `job_status` [JSON object](/api-reference/ticketing/ticket-management/job_statuses/#json-format) and queues a background job to do the work. Use the [Show Job Status](/api-reference/ticketing/ticket-management/job_statuses/#show-job-status) endpoint to check for the job's completion. Only a certain number of jobs can be queued or running at the same time. See [Job limit](/api-reference/introduction/rate-limits/#job-limit) for more information.
+
+#### Allowed For
+
+* Admins
+* Agents
+
+Agents with no permissions restrictions can only update ""notes"" on organizations."
+v4520,amazonaws.com,POST,/tagResource,TagResource,,Associates a set of provided tags with a notification rule.
+v14247,googleapis.com,PATCH,/v1/{name},certificatemanager.projects.locations.trustConfigs.patch,,Updates a TrustConfig.
+v9909,clever-cloud.com,PUT,/organisations/{id}/addonproviders/{providerId},putOrganisationsIdAddonprovidersProviderId,,
+v28038,pagerduty,POST,/incident_workflows/triggers,createIncidentWorkflowTrigger,Create a Trigger,"Create new Incident Workflow Trigger
+
+Scoped OAuth requires: `incident_workflows.write`"
+v6713,autotask.net,POST,/V1.0/Quotes,Quotes_CreateEntity,,
+v0212,agco-ats.com,POST,/api/v2/TranslationSets/{ID}/Attributes,TranslationSets_PostTranslationSetAttribute,Create a TranslationSetAttribute object,No Documentation Found.
+v25869,mist.com,POST,/api/v1/sites/{site_id}/maps/{map_id}/revert_auto_orient,revertSiteApAutoOrient,revertSiteApAutoOrient,This API is used to revert the orientations of a map or subset of APs on a map to the state before auto orientation.
+v21761,microsoft.com,PATCH,/users/{user-id}/managedDevices/{managedDevice-id}/assignmentFilterEvaluationStatusDetails/{assignmentFilterEvaluationStatusDetails-id},users.managedDevices.UpdateAssignmentFilterEvaluationStatusDetails,Update the navigation property assignmentFilterEvaluationStatusDetails in users,
+v21308,microsoft.com,PATCH,/teamTemplateDefinition/{teamTemplateDefinition-id}/teamDefinition/primaryChannel/messages/{chatMessage-id}/hostedContents/{chatMessageHostedContent-id},teamTemplateDefinition.teamDefinition.primaryChannel.messages.UpdateHostedContents,Update the navigation property hostedContents in teamTemplateDefinition,
+v1423,amazonaws.com,GET,/#Action=UntagRole,GET_UntagRole,,"Removes the specified tags from the role. For more information about tagging, see Tagging IAM resources in the IAM User Guide ."
+v7293,azure.com,PATCH,/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/syncGroups/{syncGroupName}/syncMembers/{syncMemberName},SyncMembers_Update,,Updates an existing sync member.
+v13541,github,DELETE,/orgs/{org}/projectsV2/{project_number}/items/{item_id},projects/delete-item-for-org,Delete project item for organization,Delete a specific item from an organization-owned project.
+v29585,slack,POST,/admin.apps.restrict,admin_apps_restrict,,Restrict an app for installation on a workspace.
+v3527,amazonaws.com,POST,/#X-Amz-Target=RekognitionService.UpdateStreamProcessor,UpdateStreamProcessor,,Allows you to update a stream processor. You can change some settings and regions of interest and delete certain parameters.
+v27606,openbankingproject.ch,PUT,/v1/consents/{consentId}/authorisations/{authorisationId},updateConsentsPsuData,Update PSU Data for consents,"This method update PSU data on the consents resource if needed. It may authorise a consent within the Embedded SCA Approach where needed. Independently from the SCA Approach it supports e.g. the selection of the authentication method and a non-SCA PSU authentication. There are several possible update PSU data requests in the context of a consent request if needed, which depends on the SCA approach"
+v15488,googleapis.com,POST,/v1beta1/{resource}:setIamPolicy,automl.projects.locations.models.setIamPolicy,,"Sets the access control policy on the specified resource. Replaces any existing policy. Can return `NOT_FOUND`, `INVALID_ARGUMENT`, and `PERMISSION_DENIED` errors."
+v14034,goharbor.io,PUT,/registries/{id},updateRegistry,Update the registry,Update the registry
+v21480,microsoft.com,PATCH,/termStore/sets/{set-id}/parentGroup/sets/{set-id1}/relations/{relation-id},termStore.sets.parentGroup.sets.UpdateRelations,Update the navigation property relations in termStore,
+v3597,amazonaws.com,POST,/#X-Amz-Target=SWBExternalService.PutInlinePolicyToPermissionSet,PutInlinePolicyToPermissionSet,,"Attaches an inline policy to a permission set. If the permission set is already referenced by one or more account assignments, you will need to call ProvisionPermissionSet after this action to apply the corresponding IAM policy updates to all assigned accounts."
+v29037,rumble.run,PUT,/org/sites,createSite,Create a new site,
+v0297,airbyte.local,POST,/v1/destinations/clone,cloneDestination,Clone destination,
+v31859,vocadb.net,POST,/api/discussions/comments/{commentId},,,
+v31605,victorops.com,POST,/api-public/v1/team/{team}/members,,Add a team member,Add a team member to your team. This API may be called a maximum of 60 times per minute.
+v29229,sentry,GET,/api/0/organizations/{organization_id_or_slug}/profiling/chunks/,listOrganizationProfilingChunks,Retrieve Profile Chunks for an Organization,Retrieve continuous profiling data for a profiler over a time range. Exactly one project must be specified via the `project` query parameter. Requires continuous profiling to be enabled for the organization.
+v23877,microsoft.com,POST,/me/events/{event-id}/instances/{event-id1}/exceptionOccurrences/{event-id2}/microsoft.graph.snoozeReminder,me.events.event.instances.event.exceptionOccurrences.event.snoozeReminder,Invoke action snoozeReminder,Postpone a reminder for an event in a user calendar until a new time.
+v3091,amazonaws.com,POST,/#X-Amz-Target=DirectoryService_20150416.RegisterCertificate,RegisterCertificate,,Registers a certificate for a secure LDAP or client certificate authentication.
+v21865,microsoft.com,PATCH,/users/{user-id}/profile/emails/{itemEmail-id},users.profile.UpdateEmails,Update the navigation property emails in users,
+v31943,vtex.local,POST,/api/catalog_system/pvt/sku/associateattachments,AssociateattachmentstoSKU,Associate attachments to an SKU,"Associates attachments to an SKU based on a given SKU ID and attachment names. This request removes existing SKU attachment associations and recreates the associations with the attachments being sent. ## Request body example ```json { ""SkuId"": 1, ""AttachmentNames"": [ ""T-Shirt Customization"" ] } ```"
+v22812,microsoft.com,POST,/financials/companies/{company-id}/shipmentMethods,financials.companies.CreateShipmentMethods,Create new navigation property to shipmentMethods for financials,
+v19480,microsoft.com,PATCH,/deviceManagement/userExperienceAnalyticsMetricHistory/{userExperienceAnalyticsMetricHistory-id},deviceManagement.UpdateUserExperienceAnalyticsMetricHistory,Update the navigation property userExperienceAnalyticsMetricHistory in deviceManagement,
+v3007,amazonaws.com,POST,/#X-Amz-Target=CodeDeploy_20141006.CreateApplication,CreateApplication,,Creates an application.
+v3232,amazonaws.com,POST,/#X-Amz-Target=GlobalAccelerator_V20180706.UpdateCustomRoutingListener,UpdateCustomRoutingListener,,Update a listener for a custom routing accelerator.
+v20544,microsoft.com,PATCH,/me/chats/{chat-id}/operations/{teamsAsyncOperation-id},me.chats.UpdateOperations,Update the navigation property operations in me,
+v5802,appcenter.ms,POST,/v0.1/orgs/{org_name}/distribution_groups/{distribution_group_name}/members,distributionGroups_addUsersForOrg,,Accepts an array of user email addresses to get added to the specified group
+v14120,googleapis.com,PATCH,/gmail/v1/users/{userId}/settings/cse/identities/{emailAddress},gmail.users.settings.cse.identities.patch,,Associates a different key pair with an existing client-side encryption identity. The updated key pair must validate against Google's [S/MIME certificate profiles](https://support.google.com/a/answer/7300887).
+v10228,cloudflare,PATCH,/accounts/{account_id}/one/integrations/{id},update_integration_v2,Update integration,"Updates an integration's name, permissions, DLP profiles, use cases, or credentials."
+v13735,github.com,POST,/setup/api/start,enterprise-admin/create-enterprise-server-license,Create a GitHub license,"When you boot a GitHub instance for the first time, you can use the following endpoint to upload a license. Note that you need to `POST` to [`/setup/api/configure`](https://docs.github.com/enterprise-server@2.18/rest/reference/enterprise-admin#start-a-configuration-process) to start the actual configuration process. When using this endpoint, your GitHub instance must have a password set. This can "
+v16834,intercom,PUT,/office_hours_schedules/{id},updateOfficeHoursSchedule,Update an office hours schedule,You can update an existing office hours schedule.
+v2918,amazonaws.com,POST,/#X-Amz-Target=AppRunner.UntagResource,UntagResource,,Remove tags from an App Runner resource.
+v25769,mist.com,GET,/api/v1/orgs/{org_id}/sdkinvites/{sdkinvite_id}/qrcode,getSdkInviteQrCode,getSdkInviteQrCode,Revoke SDK Invite
+v26510,netbox.dev,PATCH,/dcim/device-bay-templates/,dcim_device-bay-templates_bulk_partial_update,,
+v33224,zuora.com,POST,/v1/object/product,Object_POSTProduct,CRUD: Create a product,
+v9201,box,POST,/folders/{folder_id}/copy,post_folders_id_copy,Copy folder,Creates a copy of a folder within a destination folder. The original folder will not be changed.
+v24103,microsoft.com,POST,/me/presence/microsoft.graph.setUserPreferredPresence,me.presence.setUserPreferredPresence,Invoke action setUserPreferredPresence,"Set the preferred availability and activity status for a user. If the preferred presence of a user is set, the user's presence shows as the preferred status. Preferred presence takes effect only when at least one presence session exists for the user. Otherwise, the user's presence shows as `Offline`. A presence session is created as a result of a successful setPresence operation, or if the user is"
+v24429,microsoft.com,POST,/shares/{sharedDriveItem-id}/list/contentTypes/{contentType-id}/columnLinks,shares.list.contentTypes.CreateColumnLinks,Create new navigation property to columnLinks for shares,
+v6435,auth0,PUT,/guardian/factors/sms/selected-provider,put_sms_providers,Update SMS configuration,"This endpoint has been deprecated. To complete this action, use the <a href=""https://auth0.com/docs/api/management/v2/guardian/put-phone-providers"">Update phone configuration</a> endpoint instead.
+
+    <b>Previous functionality</b>: Update the multi-factor authentication SMS provider configuration in your tenant."
+v27659,opensuse.org,POST,/person/{login}/token,,Create a new authentication token for a person.,"Create a new authentication token for a person. The token may be limited to a specific package. In this case the query parameters `project` and `package` should be provided. With an empty request body, a token of the default kind 'runservice' is created."
+v19246,microsoft.com,PATCH,/deviceManagement/comanagedDevices/{managedDevice-id}/securityBaselineStates/{securityBaselineState-id},deviceManagement.comanagedDevices.UpdateSecurityBaselineStates,Update the navigation property securityBaselineStates in deviceManagement,
+v32878,zendesk,PUT,/api/v2/oauth/clients/{oauth_client_id},UpdateClient,Update Client,"#### Allowed for
+ * Admins
+ * Agents with the [Manage APIs](https://support.zendesk.com/hc/en-us/articles/4408882153882) permission"
+v20607,microsoft.com,PATCH,/me/insights/trending/{trending-id},me.insights.UpdateTrending,Update the navigation property trending in me,
+v27206,okta,POST,/api/v1/authorizationServers/{authServerId}/policies/{policyId}/rules/{ruleId}/lifecycle/activate,activateAuthorizationServerPolicyRule,Activate a policy rule,Activates an authorization server policy rule
+v12385,dracoon.team,PUT,/v4/provisioning/customers/{customer_id},updateCustomer,Update customer,### Description: Change selected attributes of a customer. ### Precondition: Authentication with `X-Sds-Service-Token` required. ### Postcondition: Selected attributes of customer are updated. ### Further Information: None.
+v21790,microsoft.com,PATCH,/users/{user-id}/onenote/sectionGroups/{sectionGroup-id}/sections/{onenoteSection-id},users.onenote.sectionGroups.UpdateSections,Update the navigation property sections in users,
+v28476,pocketsmith.com,POST,/users/{id}/attachments,,Create attachment in user,Creates an attachment belonging to the user by their ID.
+v18379,lumenbase.io,POST,/assets/covariance/matrix/store,covarianceMatrixStore,Compute covariance matrix and store it as a saved asset.,
+v2162,amazonaws.com,POST,/#Action=SetLoadBalancerPoliciesOfListener,POST_SetLoadBalancerPoliciesOfListener,,"Replaces the current set of policies for the specified load balancer port with the specified set of policies. To enable back-end server authentication, use SetLoadBalancerPoliciesForBackendServer . For more information about setting policies, see Update the SSL Negotiation Configuration , <a href=""https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/elb-sticky-ses"
+v9803,clerk.com,PATCH,/saml_connections/{saml_connection_id},UpdateSAMLConnection,Update a SAML Connection,"Updates the SAML Connection whose ID matches the provided `id` in the path.
+Deprecated: Use the Enterprise Connections API instead. This endpoint will be removed in future versions."
+v30841,trello,PUT,/organizations/{idOrg}/members/{idMember},updateOrganizationsMembersByIdOrgByIdMember,updateOrganizationsMembersByIdOrgByIdMember(),
+v21408,microsoft.com,PATCH,/teamwork/teamTemplates/{teamTemplate-id}/definitions/{teamTemplateDefinition-id}/teamDefinition/schedule/timesOff/{timeOff-id},teamwork.teamTemplates.definitions.teamDefinition.schedule.UpdateTimesOff,Update the navigation property timesOff in teamwork,
+v13996,gitlab,PUT,/v3/projects/{id}/snippets/{snippet_id},putV3ProjectsIdSnippetsSnippetId,Update an existing project snippet,Update an existing project snippet
+v18576,maif.local,POST,/api/data-exporter-configs/_bulk,createBulkDataExporterConfigs,Create a new data exporter configs,Create a new data exporter configs
+v12930,files.com,PATCH,/sftp_host_keys/{id},PatchSftpHostKeysId,Update Sftp Host Key,Update Sftp Host Key
+v24642,microsoft.com,POST,/teamTemplateDefinition/{teamTemplateDefinition-id}/teamDefinition/schedule/timeOffRequests,teamTemplateDefinition.teamDefinition.schedule.CreateTimeOffRequests,Create new navigation property to timeOffRequests for teamTemplateDefinition,
+v4916,amazonaws.com,PUT,/channel/{ChannelName}/stop,StopChannel,,"Stops a channel. For information about MediaTailor channels, see Working with channels in the MediaTailor User Guide ."
+v21785,microsoft.com,PATCH,/users/{user-id}/onenote/notebooks/{notebook-id},users.onenote.UpdateNotebooks,Update the navigation property notebooks in users,
+v27452,onsched.com,POST,/setup/v1/resources/{id}/uploadimage,,Upload Resource Image,Use this endpoint to Upload a resource image to the resource. A valid resource id is required. You must convert the image to a base64 encoded string and pass that string as input along with your filename .
+v24029,microsoft.com,POST,/me/onenote/notebooks/{notebook-id}/sections/{onenoteSection-id}/pages,me.onenote.notebooks.sections.CreatePages,Create new navigation property to pages for me,
+v31594,victorops.com,DELETE,/api-public/v1/user/{user}/contact-methods/devices/{contactId},,Delete a contact device for a user,Delete a contact device for a user This API may be called a maximum of 60 times per minute.
+v13624,github.com,PATCH,/scim/v2/Groups/{scim_group_id},enterprise-admin/update-attribute-for-enterprise-group,Update an attribute for a SCIM enterprise group,"**Note:** The SCIM API endpoints for enterprise accounts are currently in *private* beta and are subject to change. Update a provisioned group’s individual attributes. To change a group’s values, you must provide a specific Operations JSON format that contains at least one of the add, remove, or replace operations. For examples and more information on the SCIM operations format, see the [SCIM spec"
+v24594,microsoft.com,POST,/subscribedSkus,subscribedSkus.subscribedSku.CreateSubscribedSku,Add new entity to subscribedSkus,
+v23092,microsoft.com,POST,/groups/{group-id}/sites/{site-id}/lists/{list-id}/items/{listItem-id}/microsoft.graph.createLink,groups.group.sites.site.lists.list.items.listItem.createLink,Invoke action createLink,"Create a sharing link for a listItem. The **createLink** action creates a new sharing link if the specified link type doesn't already exist for the calling application. If a sharing link of the specified type already exists for the app, this action will return the existing sharing link. **listItem** resources inherit sharing permissions from the list the item resides in."
+v12932,files.com,PATCH,/styles/{path},PatchStylesPath,Update Style,Update Style
+v3896,amazonaws.com,POST,/#X-Amz-Target=com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.RegisterOrganizationDelegatedAdmin,RegisterOrganizationDelegatedAdmin,,Registers an organization’s member account as the CloudTrail delegated administrator.
+v18427,magento.com,POST,/V1/guest-carts/{cartId}/billing-address,quoteGuestBillingAddressManagementV1AssignPost,guest-carts/{cartId}/billing-address,Assign a specified billing address to a specified cart.
+v24217,microsoft.com,POST,/print/operations,print.CreateOperations,Create new navigation property to operations for print,
+v28488,polar.sh,PATCH,/v1/benefits/{id},benefits:update,Update Benefit,"Update a benefit.
+
+**Scopes**: `benefits:write`"
+v29253,sentry,GET,/api/0/sentry-apps/{sentry_app_id_or_slug}/,getSentryApp,Retrieve a custom integration by ID or slug.,Retrieve a custom integration.
+v24230,microsoft.com,POST,/print/reports/dailyPrintUsageSummariesByUser,print.reports.CreateDailyPrintUsageSummariesByUser,Create new navigation property to dailyPrintUsageSummariesByUser for print,
+v0633,amazonaws.com,GET,/#Action=CreateAccessKey,GET_CreateAccessKey,,"Creates a new Amazon Web Services secret access key and corresponding Amazon Web Services access key ID for the specified user. The default status for new keys is Active . If you do not specify a user name, IAM determines the user name implicitly based on the Amazon Web Services access key ID signing the request. This operation works for access keys under the Amazon Web Services account. Consequen"
+v27055,notion,GET,/v1/pages/{page_id}/markdown,retrieve-page-markdown,Retrieve a page as Markdown,Retrieve the full content of a Notion page rendered as enhanced Markdown. Designed for agentic and developer tools that work natively with Markdown instead of the block JSON returned by Retrieve block children.
+v16577,immich.app,POST,/auth/session/lock,lockAuthSession,Lock auth session,Remove elevated access to locked assets from the current session.
+v6524,autotask.net,PATCH,/V1.0/KnowledgeBaseCategories/{parentId}/KnowledgeBaseArticles,KnowledgeBaseArticlesChild_PatchEntity,,
+v4536,amazonaws.com,POST,/things/{thingName}/shadow,UpdateThingShadow,,"Updates the shadow for the specified thing. Requires permission to access the UpdateThingShadow action. For more information, see UpdateThingShadow in the IoT Developer Guide."
+v23425,microsoft.com,POST,/identityGovernance/entitlementManagement/accessPackages/{accessPackage-id}/microsoft.graph.moveToCatalog,identityGovernance.entitlementManagement.accessPackages.accessPackage.moveToCatalog,Invoke action moveToCatalog,"In Azure AD entitlement management, this action moves the accessPackage to a specified target accessPackageCatalog. The resources in the access package must be present in the target catalog."
+v26109,naviplancentral.com,POST,/api/auth/ResumeSession,Auth_ResumeSession,Validate and extend the duration of a session,
+v10798,cloudflare,POST,/zones/{zone_identifier}/custom_pages/assets,custom-assets-for-a-zone-create-a-custom-asset,Create a custom asset,Creates a new custom asset at the zone level.
+v21331,microsoft.com,PATCH,/teams/{team-id}/channels/{channel-id}/messages/{chatMessage-id}/replies/{chatMessage-id1}/hostedContents/{chatMessageHostedContent-id},teams.channels.messages.replies.UpdateHostedContents,Update the navigation property hostedContents in teams,
+v25748,miro,POST,/v2/boards/{board_id}/texts,create-text-item,Create text item,"Adds a text item to a board.<br/><h3>Required scope</h3> <a target=_blank href=https://developers.miro.com/reference/scopes>boards:write</a> <br/><h3>Rate limiting</h3> <a target=_blank href=""/reference/rate-limiting#rate-limit-tiers"">Level 2</a><br/>"
+v23088,microsoft.com,POST,/groups/{group-id}/sites/{site-id}/lists/{list-id}/contentTypes,groups.sites.lists.CreateContentTypes,Create new navigation property to contentTypes for groups,
+v12921,files.com,PATCH,/group_users/{id},PatchGroupUsersId,Update Group User,Update Group User
+v23753,microsoft.com,POST,/me/calendars/{calendar-id}/calendarView/{event-id}/microsoft.graph.tentativelyAccept,me.calendars.calendar.calendarView.event.tentativelyAccept,Invoke action tentativelyAccept,"Tentatively accept the specified event in a user calendar. If the event allows proposals for new times, on responding tentative to the event, an invitee can choose to suggest an alternative time by including the **proposedNewTime** parameter. For more information on how to propose a time, and how to receive and accept a new time proposal, see Propose new meeting times."
+v13583,github.com,PATCH,/orgs/{org}/actions/runner-groups/{runner_group_id},actions/update-self-hosted-runner-group-for-org,Update a self-hosted runner group for an organization,Updates the `name` and `visibility` of a self-hosted runner group in an organization. You must authenticate using an access token with the `admin:org` scope to use this endpoint.
