@@ -12,6 +12,8 @@ a release is not cut with any item unrun. Each line: what, command, pass.
 3. Proofs. `node tools/proof-load.js`, `node tools/proof-match.js`,
    `node tools/proof-cli.js`: each exits 0 with "All pins hold".
    proof-cli lists its load errors; those are expected.
+   Also `node poc/mech-v4/proof-copy.mjs`: exits 0, every line PASS, with
+   "differences == 0" (it pins src/ equal to poc/mech-v4 on v4).
 4. Conformance. `(cd poc/conformance && node run.mjs)` exits 0. For the
    browser check, add `CHROME=/path/to/chrome-156-or-later` (Chrome for
    Testing); with it set the browser check runs and passes, without it it is skipped (6/6).

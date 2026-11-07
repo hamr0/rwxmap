@@ -78,7 +78,7 @@ Exam #5: 1443 operations, 7 complete official APIs (frontapp, planetscale, paddl
 
 - Too loose (looser than the truth label) is the safety cost. Too tight (stricter) is a usability cost. They are kept apart.
 - On this exam mode a leaks less than mechanical alone (40 against 59 too loose) and has fewer too-tight rows (134 against 183).
-- The 0.90 cut was tuned on this exam and on rwxlite's validation set, so it is not yet proven on unseen vendors (D139).
+- The mode a row is rwxlite 0.3.1 at the 0.90 cut, run through the real install after the exam was scored. The exam itself scored it at the 0.97 cut as 1220 exact, 37 too loose, 186 too tight. The 0.90 cut was tuned on this exam and on rwxlite's validation set, so it is not yet proven on unseen vendors (D139).
 - Mechanical v4 shipped by choice although it failed its own too-tight gate: 183 too tight against 178 for the older rules. It has 59 too-loose rows against 77, and every added too-tight row is marked for review.
 - The exam was scored once and is used up. Any rule or model change needs a new exam.
 - Modes b and c were not scored on this exam.

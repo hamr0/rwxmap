@@ -1,5 +1,5 @@
 // Pre-registration of the frozen ladder's predictions on the clean exam —
-// run with: node tools/predict-exam.js
+// run with: node poc/archive/v3-tools/predict-exam.js
 // Runs src/'s ladder over all 1383 UNLABELLED rows of
 // data/exam-2026-09-17 and writes run-proof/exam-2026-09-17-predictions.csv,
 // one line per operation. Test/dev tooling only — never part of the
@@ -18,11 +18,11 @@ import { gunzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { parseCsv, toCsv } from './csv.js';
-import { classifyRow } from '../src/flow.js';
+import { parseCsv, toCsv } from '../../../tools/csv.js';
+import { classifyRow } from '../../../src/flow.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(__dirname, '..');
+const REPO_ROOT = path.resolve(__dirname, '../../..');
 const EXAM_DIR = path.join(REPO_ROOT, 'data/exam-2026-09-17');
 const OPS_GZ = path.join(EXAM_DIR, 'ops.csv.gz');
 const OUT_CSV = path.join(REPO_ROOT, 'run-proof/exam-2026-09-17-predictions.csv');

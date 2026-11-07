@@ -1,4 +1,4 @@
-// Debugging readout for the whole flow — run with: node tools/readout.js
+// Debugging readout for the whole flow — run with: node poc/archive/v3-tools/readout.js
 // Runs src/'s ladder over all 4171 corpus rows and writes the 13-column
 // sheet run-proof/readout.csv, one line per operation, so a human can read
 // what the classifier did row by row. Prints a per-step-per-source ledger
@@ -10,12 +10,12 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { loadRows } from './corpus.js';
-import { toCsv } from './csv.js';
-import { classifyRow } from '../src/flow.js';
+import { loadRows } from '../../../tools/corpus.js';
+import { toCsv } from '../../../tools/csv.js';
+import { classifyRow } from '../../../src/flow.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(__dirname, '..');
+const REPO_ROOT = path.resolve(__dirname, '../../..');
 const OUT_CSV = path.join(REPO_ROOT, 'run-proof/readout.csv');
 
 const HEADER = ['provider', 'method', 'path', 'operationId', 'summary', 'truth',
