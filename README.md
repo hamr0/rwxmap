@@ -69,28 +69,20 @@ What leaves your machine: mechanical, nothing. Modes a and b, only the model dow
 
 ## How good it is
 
-Exam #5: 1443 operations, 7 complete official APIs (frontapp, planetscale, paddle, hookdeck, fusionauth, semaphoreui, weaviate), labelled blind, scored once on 2026-11-07. Counts are of those 1443 operations.
+Each exam was scored once, through the real CLI, on complete official APIs the rules and the model had never seen. Counts are of that exam's operations.
 
-| mode | exact | too loose | too tight |
-|---|---|---|---|
-| mechanical (v4) | 1201 (83.2%) | 59 (4.1%) | 183 (12.7%) |
-| a (default, rwxlite 0.3.1, lowering cut 0.90) | 1269 (87.9%) | 40 (2.8%) | 134 (9.3%) |
+| mode | exam | exact | too loose | too tight |
+|---|---|---|---|---|
+| **a** (default) | #6, 1588 ops | 1434 (90.3%) | 35 (2.2%) | 119 (7.5%) |
+| b (`--confidence 85`) | #6, 1588 ops | 1424 (89.7%) | 19 (1.2%) | 145 (9.1%) |
+| c (Jev, one run) | #3, 1377 ops | 1250 (90.8%) | 16 (1.2%) | 111 (8.1%) |
+| mechanical | #6, 1588 ops | 1305 (82.2%) | 43 (2.7%) | 240 (15.1%) |
 
-- Too loose (looser than the truth label) is the safety cost. Too tight (stricter) is a usability cost. They are kept apart.
-- On this exam mode a leaks less than mechanical alone (40 against 59 too loose) and has fewer too-tight rows (134 against 183).
-- The mode a row is rwxlite 0.3.1 at the 0.90 cut, run through the real install after the exam was scored. The exam itself scored it at the 0.97 cut as 1220 exact, 37 too loose, 186 too tight. The 0.90 cut was tuned on this exam and on rwxlite's validation set, so it is not yet proven on unseen vendors (D139).
-- Mechanical v4 shipped by choice although it failed its own too-tight gate: 183 too tight against 178 for the older rules. It has 59 too-loose rows against 77, and every added too-tight row is marked for review.
-- The exam was scored once and is used up. Any rule or model change needs a new exam.
-- Modes b and c were not scored on this exam.
-
-Older numbers for modes b and c, from exam #3 (1377 operations, 7 other APIs, scored 2026-11-04, older truth, older rules). Not comparable with the table above.
-
-| mode | exact | too loose | too tight |
-|---|---|---|---|
-| b at 95 | 1181 (85.8%) | 14 (1.0%) | 182 (13.2%) |
-| c (Jev, one run) | 1250 (90.8%) | 16 (1.2%) | 111 (8.1%) |
-
-- Jev is one run of a model that can answer differently next time.
+- Too loose (looser than the truth label) is the safety cost; too tight is a usability cost. They are never merged into one number.
+- Exam #6 (2026-11-08): grafana, nocodb, radarr, cloudsmith, invoiceninja, run from the npm install. Two Sonnet labellers labelled blind and agreed on 1564 rows; a person ruled the other 24. Same-model agreement shows consistency, not truth. Radarr's spec has no operation names, so its rows rest on method and path.
+- Mode c comes from exam #3 (2026-11-04, 7 other APIs, older truth and rules), so it does not compare directly, and Jev can answer differently on the next run.
+- The 0.90 cut was tuned on exam #5 (mode a 1269 / 40 / 134 of 1443) and held on exam #6. An exam is used up once scored.
+- Mode b's `--confidence` was swept on exams #5 and #6 (3031 rows, 12 vendors) and 85 picked: at 90 and 85 no vendor leaked more than mechanical, at 70 four did. On exam #6, exact / too loose / too tight: 95 (today's default) 1288 / 13 / 287; 90 1388 / 17 / 183; 85 1424 / 19 / 145; 70 1441 / 29 / 118. Pass `--confidence 85`; the default moves to 85 in a later release.
 
 ## Ways to use it
 

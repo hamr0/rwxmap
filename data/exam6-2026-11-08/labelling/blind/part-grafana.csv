@@ -1,0 +1,508 @@
+row_id,provider,method,path,operationId,summary,description
+ex6-0377,grafana.com,GET,/access-control/roles,listRoles,Get all roles.,"Gets all existing roles. The response contains all global and organization local roles, for the organization which user is signed in.
+
+You need to have a permission with action `roles:read` and scope `roles:*`.
+
+The `delegatable` flag reduces the set of roles to only those for which the signed-in user has permissions to assign."
+ex6-0378,grafana.com,POST,/access-control/roles,createRole,Create a new custom role.,"Creates a new custom role and maps given permissions to that role. Note that roles with the same prefix as Fixed Roles can’t be created.
+
+You need to have a permission with action `roles:write` and scope `permissions:type:delegate`. `permissions:type:delegate` scope ensures that users can only create custom roles with the same, or a subset of permissions which the user has.
+For example, if a user does not have required permissions for creating users, they won’t be able to create a custom role which allows to do that. This is done to prevent escalation of privileges."
+ex6-0379,grafana.com,DELETE,/access-control/roles/{roleUID},deleteRole,Delete a custom role.,"Delete a role with the given UID, and it’s permissions. If the role is assigned to a built-in role, the deletion operation will fail, unless force query param is set to true, and in that case all assignments will also be deleted.
+
+You need to have a permission with action `roles:delete` and scope `permissions:type:delegate`."
+ex6-0380,grafana.com,GET,/access-control/roles/{roleUID},getRole,Get a role.,"Get a role for the given UID.
+
+You need to have a permission with action `roles:read` and scope `roles:*`."
+ex6-0381,grafana.com,PUT,/access-control/roles/{roleUID},updateRole,Update a custom role.,You need to have a permission with action `roles:write` and scope `permissions:type:delegate`. `permissions:type:delegate` scope ensures that users can only update custom roles with permissions which the user has.
+ex6-0382,grafana.com,GET,/access-control/roles/{roleUID}/assignments,getRoleAssignments,Get role assignments.,"Get role assignments for the role with the given UID.
+Does not include role assignments mapped through group attribute sync.
+
+You need to have a permission with action `teams.roles:list` and scope `teams:id:*` and `users.roles:list` and scope `users:id:*`."
+ex6-0383,grafana.com,PUT,/access-control/roles/{roleUID}/assignments,setRoleAssignments,Set role assignments.,"Set role assignments for the role with the given UID.
+
+You need to have a permission with action `teams.roles:add` and `teams.roles:remove` and scope `permissions:type:delegate`, and `users.roles:add` and `users.roles:remove` and scope `permissions:type:delegate`."
+ex6-0384,grafana.com,GET,/access-control/status,getAccessControlStatus,Get status.,"Returns an indicator to check if fine-grained access control is enabled or not.
+
+You need to have a permission with action `status:accesscontrol` and scope `services:accesscontrol`."
+ex6-0385,grafana.com,POST,/access-control/teams/roles/search,listTeamsRoles,List roles assigned to multiple teams.,"Lists the roles that have been directly assigned to the given teams.
+
+You need to have a permission with action `teams.roles:read` and scope `teams:id:*`."
+ex6-0386,grafana.com,GET,/access-control/teams/{teamId}/roles,listTeamRoles,Get team roles.,You need to have a permission with action `teams.roles:read` and scope `teams:id:<team ID>`.
+ex6-0387,grafana.com,POST,/access-control/teams/{teamId}/roles,addTeamRole,Add team role.,You need to have a permission with action `teams.roles:add` and scope `permissions:type:delegate`.
+ex6-0388,grafana.com,PUT,/access-control/teams/{teamId}/roles,setTeamRoles,Update team role.,You need to have a permission with action `teams.roles:add` and `teams.roles:remove` and scope `permissions:type:delegate` for each. The delegate scope is required for permissions on roles being added.
+ex6-0389,grafana.com,DELETE,/access-control/teams/{teamId}/roles/{roleUID},removeTeamRole,Remove team role.,You need to have a permission with action `teams.roles:remove` and scope `permissions:type:delegate`.
+ex6-0390,grafana.com,POST,/access-control/users/roles/search,listUsersRoles,List roles assigned to multiple users.,"Lists the roles that have been directly assigned to the given users. The list does not include built-in roles (Viewer, Editor, Admin or Grafana Admin), and it does not include roles that have been inherited from a team.
+
+You need to have a permission with action `users.roles:read` and scope `users:id:*`."
+ex6-0391,grafana.com,GET,/access-control/users/{userId}/roles,listUserRoles,List roles assigned to a user.,"Lists the roles that have been directly assigned to a given user. The list does not include built-in roles (Viewer, Editor, Admin or Grafana Admin), and it does not include roles that have been inherited from a team.
+
+You need to have a permission with action `users.roles:read` and scope `users:id:<user ID>`."
+ex6-0392,grafana.com,POST,/access-control/users/{userId}/roles,addUserRole,Add a user role assignment.,"Assign a role to a specific user. For bulk updates consider Set user role assignments.
+
+You need to have a permission with action `users.roles:add` and scope `permissions:type:delegate`. `permissions:type:delegate` scope ensures that users can only assign roles which have same, or a subset of permissions which the user has. For example, if a user does not have required permissions for creating users, they won’t be able to assign a role which will allow to do that. This is done to prevent escalation of privileges."
+ex6-0393,grafana.com,PUT,/access-control/users/{userId}/roles,setUserRoles,Set user role assignments.,"Update the user’s role assignments to match the provided set of UIDs. This will remove any assigned roles that aren’t in the request and add roles that are in the set but are not already assigned to the user.
+Roles mapped through group attribute sync are not impacted.
+If you want to add or remove a single role, consider using Add a user role assignment or Remove a user role assignment instead.
+
+You need to have a permission with action `users.roles:add` and `users.roles:remove` and scope `permissions:type:delegate` for each. The delegate scope is required for permissions on roles being added."
+ex6-0394,grafana.com,DELETE,/access-control/users/{userId}/roles/{roleUID},removeUserRole,Remove a user role assignment.,"Revoke a role from a user. For bulk updates consider Set user role assignments.
+
+You need to have a permission with action `users.roles:remove` and scope `permissions:type:delegate`."
+ex6-0395,grafana.com,GET,/access-control/{resource}/description,getResourceDescription,Get a description of a resource's access control properties.,
+ex6-0396,grafana.com,GET,/access-control/{resource}/{resourceID},getResourcePermissions,Get permissions for a resource.,
+ex6-0397,grafana.com,POST,/access-control/{resource}/{resourceID},setResourcePermissions,Set resource permissions.,"Assigns permissions for a resource by a given type (`:resource`) and `:resourceID` to one or many
+assignment types. Allowed resources are `datasources`, `teams`, `dashboards`, `folders`, and `serviceaccounts`.
+Refer to the `/access-control/{resource}/description` endpoint for allowed Permissions."
+ex6-0398,grafana.com,POST,/access-control/{resource}/{resourceID}/builtInRoles/{builtInRole},setResourcePermissionsForBuiltInRole,Set resource permissions for a built-in role.,"Assigns permissions for a resource by a given type (`:resource`) and `:resourceID` to a built-in role.
+Allowed resources are `datasources`, `teams`, `dashboards`, `folders`, and `serviceaccounts`.
+Refer to the `/access-control/{resource}/description` endpoint for allowed Permissions."
+ex6-0399,grafana.com,POST,/access-control/{resource}/{resourceID}/teams/{teamID},setResourcePermissionsForTeam,Set resource permissions for a team.,"Assigns permissions for a resource by a given type (`:resource`) and `:resourceID` to a team.
+Allowed resources are `datasources`, `teams`, `dashboards`, `folders`, and `serviceaccounts`.
+Refer to the `/access-control/{resource}/description` endpoint for allowed Permissions."
+ex6-0400,grafana.com,POST,/access-control/{resource}/{resourceID}/users/{userID},setResourcePermissionsForUser,Set resource permissions for a user.,"Assigns permissions for a resource by a given type (`:resource`) and `:resourceID` to a user or a service account.
+Allowed resources are `datasources`, `teams`, `dashboards`, `folders`, and `serviceaccounts`.
+Refer to the `/access-control/{resource}/description` endpoint for allowed Permissions."
+ex6-0401,grafana.com,GET,/admin/ldap-sync-status,getSyncStatus,Returns the current state of the LDAP background sync integration.,You need to have a permission with action `ldap.status:read`.
+ex6-0402,grafana.com,POST,/admin/ldap/reload,reloadLDAPCfg,Reloads the LDAP configuration.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `ldap.config:reload`."
+ex6-0403,grafana.com,GET,/admin/ldap/status,getLDAPStatus,Attempts to connect to all the configured LDAP servers and returns information on whenever they're available or not.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `ldap.status:read`."
+ex6-0404,grafana.com,POST,/admin/ldap/sync/{user_id},postSyncUserWithLDAP,Enables a single Grafana user to be synchronized against LDAP.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `ldap.user:sync`."
+ex6-0405,grafana.com,GET,/admin/ldap/{user_name},getUserFromLDAP,Finds an user based on a username in LDAP. This helps illustrate how would the particular user be mapped in Grafana when synced.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `ldap.user:read`."
+ex6-0406,grafana.com,POST,/admin/provisioning/access-control/reload,adminProvisioningReloadAccessControl,You need to have a permission with action `provisioning:reload` with scope `provisioners:accesscontrol`.,
+ex6-0407,grafana.com,POST,/admin/provisioning/dashboards/reload,adminProvisioningReloadDashboards,Reload dashboard provisioning configurations.,"Reloads the provisioning config files for dashboards again. It won’t return until the new provisioned entities are already stored in the database. In case of dashboards, it will stop polling for changes in dashboard files and then restart it with new configurations after returning.
+If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `provisioning:reload` and scope `provisioners:dashboards`."
+ex6-0408,grafana.com,POST,/admin/provisioning/datasources/reload,adminProvisioningReloadDatasources,Reload datasource provisioning configurations.,"Reloads the provisioning config files for datasources again. It won’t return until the new provisioned entities are already stored in the database. In case of dashboards, it will stop polling for changes in dashboard files and then restart it with new configurations after returning.
+If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `provisioning:reload` and scope `provisioners:datasources`."
+ex6-0409,grafana.com,POST,/admin/provisioning/plugins/reload,adminProvisioningReloadPlugins,Reload plugin provisioning configurations.,"Reloads the provisioning config files for plugins again. It won’t return until the new provisioned entities are already stored in the database. In case of dashboards, it will stop polling for changes in dashboard files and then restart it with new configurations after returning.
+If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `provisioning:reload` and scope `provisioners:plugin`."
+ex6-0410,grafana.com,GET,/admin/settings,adminGetSettings,Fetch settings.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `settings:read` and scopes: `settings:*`, `settings:auth.saml:` and `settings:auth.saml:enabled` (property level)."
+ex6-0411,grafana.com,GET,/admin/stats,adminGetStats,Fetch Grafana Stats.,"Only works with Basic Authentication (username and password). See introduction for an explanation.
+If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `server:stats:read`."
+ex6-0412,grafana.com,POST,/admin/users,adminCreateUser,Create new user.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `users:create`.
+Note that OrgId is an optional parameter that can be used to assign a new user to a different organization when `auto_assign_org` is set to `true`."
+ex6-0413,grafana.com,DELETE,/admin/users/{user_id},adminDeleteUser,Delete global User.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `users:delete` and scope `global.users:*`."
+ex6-0414,grafana.com,GET,/admin/users/{user_id}/auth-tokens,adminGetUserAuthTokens,Return a list of all auth tokens (devices) that the user currently have logged in from.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `users.authtoken:list` and scope `global.users:*`."
+ex6-0415,grafana.com,POST,/admin/users/{user_id}/disable,adminDisableUser,Disable user.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `users:disable` and scope `global.users:1` (userIDScope)."
+ex6-0416,grafana.com,POST,/admin/users/{user_id}/enable,adminEnableUser,Enable user.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `users:enable` and scope `global.users:1` (userIDScope)."
+ex6-0417,grafana.com,POST,/admin/users/{user_id}/logout,adminLogoutUser,Logout user revokes all auth tokens (devices) for the user. User of issued auth tokens (devices) will no longer be logged in and will be required to authenticate again upon next activity.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `users.logout` and scope `global.users:*`."
+ex6-0418,grafana.com,PUT,/admin/users/{user_id}/password,adminUpdateUserPassword,Set password for user.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `users.password:update` and scope `global.users:*`."
+ex6-0419,grafana.com,PUT,/admin/users/{user_id}/permissions,adminUpdateUserPermissions,Set permissions for user.,"Only works with Basic Authentication (username and password). See introduction for an explanation.
+If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `users.permissions:update` and scope `global.users:*`."
+ex6-0420,grafana.com,GET,/admin/users/{user_id}/quotas,getUserQuota,Fetch user quota.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `users.quotas:list` and scope `global.users:1` (userIDScope)."
+ex6-0421,grafana.com,PUT,/admin/users/{user_id}/quotas/{quota_target},updateUserQuota,Update user quota.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `users.quotas:update` and scope `global.users:1` (userIDScope)."
+ex6-0422,grafana.com,POST,/admin/users/{user_id}/revoke-auth-token,adminRevokeUserAuthToken,Revoke auth token for user.,"Revokes the given auth token (device) for the user. User of issued auth token (device) will no longer be logged in and will be required to authenticate again upon next activity.
+If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `users.authtoken:update` and scope `global.users:*`."
+ex6-0423,grafana.com,GET,/annotations,getAnnotations,Find Annotations.,Starting in Grafana v6.4 regions annotations are now returned in one entity that now includes the timeEnd property.
+ex6-0424,grafana.com,POST,/annotations,postAnnotation,Create Annotation.,"Creates an annotation in the Grafana database. The dashboardId and panelId fields are optional. If they are not specified then an organization annotation is created and can be queried in any dashboard that adds the Grafana annotations data source. When creating a region annotation include the timeEnd property.
+The format for `time` and `timeEnd` should be epoch numbers in millisecond resolution.
+The response for this HTTP request is slightly different in versions prior to v6.4. In prior versions you would also get an endId if you where creating a region. But in 6.4 regions are represented using a single event with time and timeEnd properties."
+ex6-0425,grafana.com,POST,/annotations/graphite,postGraphiteAnnotation,Create Annotation in Graphite format.,Creates an annotation by using Graphite-compatible event format. The `when` and `data` fields are optional. If `when` is not specified then the current time will be used as annotation’s timestamp. The `tags` field can also be in prior to Graphite `0.10.0` format (string with multiple tags being separated by a space).
+ex6-0426,grafana.com,POST,/annotations/mass-delete,massDeleteAnnotations,Delete multiple annotations.,
+ex6-0427,grafana.com,GET,/annotations/tags,getAnnotationTags,Find Annotations Tags.,Find all the event tags created in the annotations.
+ex6-0428,grafana.com,DELETE,/annotations/{annotation_id},deleteAnnotationByID,Delete Annotation By ID.,Deletes the annotation that matches the specified ID.
+ex6-0429,grafana.com,GET,/annotations/{annotation_id},getAnnotationByID,Get Annotation by ID.,
+ex6-0430,grafana.com,PATCH,/annotations/{annotation_id},patchAnnotation,Patch Annotation.,"Updates one or more properties of an annotation that matches the specified ID.
+This operation currently supports updating of the `text`, `tags`, `time` and `timeEnd` properties.
+This is available in Grafana 6.0.0-beta2 and above."
+ex6-0431,grafana.com,PUT,/annotations/{annotation_id},updateAnnotation,Update Annotation.,"Updates all properties of an annotation that matches the specified id. To only update certain property, consider using the Patch Annotation operation."
+ex6-0432,grafana.com,GET,/anonymous/devices,listDevices,Lists all devices within the last 30 days,
+ex6-0433,grafana.com,GET,/anonymous/search,SearchDevices,Lists all devices within the last 30 days,
+ex6-0434,grafana.com,GET,/cloudmigration/migration,getSessionList,Get a list of all cloud migration sessions that have been created.,
+ex6-0435,grafana.com,POST,/cloudmigration/migration,createSession,Create a migration session.,
+ex6-0436,grafana.com,DELETE,/cloudmigration/migration/{uid},deleteSession,Delete a migration session by its uid.,
+ex6-0437,grafana.com,GET,/cloudmigration/migration/{uid},getSession,Get a cloud migration session by its uid.,
+ex6-0438,grafana.com,POST,/cloudmigration/migration/{uid}/snapshot,createSnapshot,Trigger the creation of an instance snapshot associated with the provided session.,"If the snapshot initialization is successful, the snapshot uid is returned."
+ex6-0439,grafana.com,GET,/cloudmigration/migration/{uid}/snapshot/{snapshotUid},getSnapshot,"Get metadata about a snapshot, including where it is in its processing and final results.",
+ex6-0440,grafana.com,POST,/cloudmigration/migration/{uid}/snapshot/{snapshotUid}/cancel,cancelSnapshot,"Cancel a snapshot, wherever it is in its processing chain.",TODO: Implement
+ex6-0441,grafana.com,POST,/cloudmigration/migration/{uid}/snapshot/{snapshotUid}/upload,uploadSnapshot,Upload a snapshot to the Grafana Migration Service for processing.,
+ex6-0442,grafana.com,GET,/cloudmigration/migration/{uid}/snapshots,getShapshotList,Get a list of snapshots for a session.,
+ex6-0443,grafana.com,GET,/cloudmigration/resources/dependencies,getResourceDependencies,Get the resource dependencies graph for the current set of migratable resources.,
+ex6-0444,grafana.com,GET,/cloudmigration/token,getCloudMigrationToken,Fetch the cloud migration token if it exists.,
+ex6-0445,grafana.com,POST,/cloudmigration/token,createCloudMigrationToken,Create gcom access token.,
+ex6-0446,grafana.com,DELETE,/cloudmigration/token/{uid},deleteCloudMigrationToken,Deletes a cloud migration token.,
+ex6-0447,grafana.com,GET,/convert/api/prom/rules,RouteConvertPrometheusCortexGetRules,"Gets all Grafana-managed alert rules that were imported from Prometheus-compatible sources, grouped by namespace.",
+ex6-0448,grafana.com,POST,/convert/api/prom/rules,RouteConvertPrometheusCortexPostRuleGroups,Converts the submitted rule groups into Grafana-Managed Rules.,
+ex6-0449,grafana.com,DELETE,/convert/api/prom/rules/{NamespaceTitle},RouteConvertPrometheusCortexDeleteNamespace,Deletes all rule groups that were imported from Prometheus-compatible sources within the specified namespace.,
+ex6-0450,grafana.com,GET,/convert/api/prom/rules/{NamespaceTitle},RouteConvertPrometheusCortexGetNamespace,Gets Grafana-managed alert rules that were imported from Prometheus-compatible sources for a specified namespace (folder).,
+ex6-0451,grafana.com,POST,/convert/api/prom/rules/{NamespaceTitle},RouteConvertPrometheusCortexPostRuleGroup,Converts a Prometheus rule group into a Grafana rule group and creates or updates it within the specified namespace.,"If the group already exists and was not imported from a Prometheus-compatible source initially,
+it will not be replaced and an error will be returned."
+ex6-0452,grafana.com,DELETE,/convert/api/prom/rules/{NamespaceTitle}/{Group},RouteConvertPrometheusCortexDeleteRuleGroup,Deletes a specific rule group if it was imported from a Prometheus-compatible source.,
+ex6-0453,grafana.com,GET,/convert/api/prom/rules/{NamespaceTitle}/{Group},RouteConvertPrometheusCortexGetRuleGroup,Gets a single rule group in Prometheus-compatible format if it was imported from a Prometheus-compatible source.,
+ex6-0454,grafana.com,GET,/convert/prometheus/config/v1/rules,RouteConvertPrometheusGetRules,"Gets all Grafana-managed alert rules that were imported from Prometheus-compatible sources, grouped by namespace.",
+ex6-0455,grafana.com,POST,/convert/prometheus/config/v1/rules,RouteConvertPrometheusPostRuleGroups,Converts the submitted rule groups into Grafana-Managed Rules.,
+ex6-0456,grafana.com,DELETE,/convert/prometheus/config/v1/rules/{NamespaceTitle},RouteConvertPrometheusDeleteNamespace,Deletes all rule groups that were imported from Prometheus-compatible sources within the specified namespace.,
+ex6-0457,grafana.com,GET,/convert/prometheus/config/v1/rules/{NamespaceTitle},RouteConvertPrometheusGetNamespace,Gets Grafana-managed alert rules that were imported from Prometheus-compatible sources for a specified namespace (folder).,
+ex6-0458,grafana.com,POST,/convert/prometheus/config/v1/rules/{NamespaceTitle},RouteConvertPrometheusPostRuleGroup,Converts a Prometheus rule group into a Grafana rule group and creates or updates it within the specified namespace.,"If the group already exists and was not imported from a Prometheus-compatible source initially,
+it will not be replaced and an error will be returned."
+ex6-0459,grafana.com,DELETE,/convert/prometheus/config/v1/rules/{NamespaceTitle}/{Group},RouteConvertPrometheusDeleteRuleGroup,Deletes a specific rule group if it was imported from a Prometheus-compatible source.,
+ex6-0460,grafana.com,GET,/convert/prometheus/config/v1/rules/{NamespaceTitle}/{Group},RouteConvertPrometheusGetRuleGroup,Gets a single rule group in Prometheus-compatible format if it was imported from a Prometheus-compatible source.,
+ex6-0461,grafana.com,GET,/dashboard/snapshots,searchDashboardSnapshots,List snapshots.,
+ex6-0462,grafana.com,POST,/dashboards/db,postDashboard,Create / Update dashboard,"Creates a new dashboard or updates an existing dashboard.
+Note: This endpoint is not intended for creating folders, use `POST /api/folders` for that.
+
+Use: /apis/dashboard.grafana.app/v1/namespaces/{ns}/dashboards"
+ex6-0463,grafana.com,GET,/dashboards/home,getHomeDashboard,,NOTE: the home dashboard is configured in preferences.  This API will be removed in G13
+ex6-0464,grafana.com,POST,/dashboards/import,importDashboard,Import dashboard.,
+ex6-0465,grafana.com,POST,/dashboards/interpolate,interpolateDashboard,Interpolate dashboard. This is an experimental endpoint under dashboardLibrary or suggestedDashboards feature flags and is subject to change.,
+ex6-0466,grafana.com,GET,/dashboards/public-dashboards,listPublicDashboards,,Get list of public dashboards
+ex6-0467,grafana.com,GET,/dashboards/tags,getDashboardTags,Get all dashboards tags of an organization.,
+ex6-0468,grafana.com,GET,/dashboards/uid/{dashboardUid}/public-dashboards,getPublicDashboard,,Get public dashboard by dashboardUid
+ex6-0469,grafana.com,POST,/dashboards/uid/{dashboardUid}/public-dashboards,createPublicDashboard,,Create public dashboard for a dashboard
+ex6-0470,grafana.com,DELETE,/dashboards/uid/{dashboardUid}/public-dashboards/{uid},deletePublicDashboard,,Delete public dashboard for a dashboard
+ex6-0471,grafana.com,PATCH,/dashboards/uid/{dashboardUid}/public-dashboards/{uid},updatePublicDashboard,,Update public dashboard for a dashboard
+ex6-0472,grafana.com,DELETE,/dashboards/uid/{uid},deleteDashboardByUID,Delete dashboard by uid.,"Will delete the dashboard given the specified unique identifier (uid).
+
+Use: /apis/dashboard.grafana.app/v1/namespaces/{ns}/dashboards/{uid}"
+ex6-0473,grafana.com,GET,/dashboards/uid/{uid},getDashboardByUID,Get dashboard by uid.,"Optional query parameter `apiVersion` selects the Kubernetes API version used to load the dashboard first
+(for example `v1beta1`). If that request fails, the default version is used instead. When omitted, only the default is used.
+
+Will return the dashboard given the dashboard unique identifier (uid).
+
+Use: /apis/dashboard.grafana.app/v1/namespaces/{ns}/dashboards/{uid}"
+ex6-0474,grafana.com,GET,/dashboards/uid/{uid}/permissions,getDashboardPermissionsListByUID,Gets all existing permissions for the given dashboard.,Use: /apis/dashboard.grafana.app/v1/namespaces/{ns}/dashboards/{uid}/access
+ex6-0475,grafana.com,POST,/dashboards/uid/{uid}/permissions,updateDashboardPermissionsByUID,Updates permissions for a dashboard.,This operation will remove existing permissions if they’re not included in the request.
+ex6-0476,grafana.com,POST,/dashboards/uid/{uid}/restore,restoreDashboardVersionByUID,Restore a dashboard to a given dashboard version using UID.,"This API will be removed when /apis/dashboard.grafana.app/v1 is released.
+You can restore a dashboard by reading it from history, then creating it again."
+ex6-0477,grafana.com,GET,/dashboards/uid/{uid}/versions,getDashboardVersionsByUID,Gets all existing versions for the dashboard using UID.,
+ex6-0478,grafana.com,GET,/dashboards/uid/{uid}/versions/{DashboardVersionID},getDashboardVersionByUID,Get a specific dashboard version using UID.,
+ex6-0479,grafana.com,GET,/datasources,getDataSources,Get all data sources.,"If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `datasources:read` and scope: `datasources:*`."
+ex6-0480,grafana.com,POST,/datasources,addDataSource,Create a data source.,"By defining `password` and `basicAuthPassword` under secureJsonData property
+Grafana encrypts them securely as an encrypted blob in the database.
+The response then lists the encrypted fields under secureJsonFields.
+
+If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `datasources:create`"
+ex6-0481,grafana.com,GET,/datasources/correlations,getCorrelations,Gets all correlations.,
+ex6-0482,grafana.com,GET,/datasources/id/{name},getDataSourceIdByName,Get data source Id by Name. This function will be removed in the future.,"If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `datasources:read` and scopes: `datasources:*`, `datasources:name:*` and `datasources:name:test_datasource` (single data source)."
+ex6-0483,grafana.com,DELETE,/datasources/name/{name},deleteDataSourceByName,Delete an existing data source by name. This function will be removed in the future.,"If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `datasources:delete` and scopes: `datasources:*`, `datasources:name:*` and `datasources:name:test_datasource` (single data source)."
+ex6-0484,grafana.com,GET,/datasources/name/{name},getDataSourceByName,Get a single data source by Name.  This function will be removed in the future.,"If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `datasources:read` and scopes: `datasources:*`, `datasources:name:*` and `datasources:name:test_datasource` (single data source)."
+ex6-0485,grafana.com,DELETE,/datasources/proxy/uid/{uid}/{datasource_proxy_route},datasourceProxyDELETEByUIDcalls,Data source proxy DELETE calls.,Proxies all calls to the actual data source.
+ex6-0486,grafana.com,GET,/datasources/proxy/uid/{uid}/{datasource_proxy_route},datasourceProxyGETByUIDcalls,Data source proxy GET calls.,Proxies all calls to the actual data source.
+ex6-0487,grafana.com,POST,/datasources/proxy/uid/{uid}/{datasource_proxy_route},datasourceProxyPOSTByUIDcalls,Data source proxy POST calls.,Proxies all calls to the actual data source. The data source should support POST methods for the specific path and role as defined
+ex6-0488,grafana.com,GET,/datasources/uid/{sourceUID}/correlations,getCorrelationsBySourceUID,Gets all correlations originating from the given data source.,
+ex6-0489,grafana.com,POST,/datasources/uid/{sourceUID}/correlations,createCorrelation,Add correlation.,
+ex6-0490,grafana.com,GET,/datasources/uid/{sourceUID}/correlations/{correlationUID},getCorrelation,Gets a correlation.,
+ex6-0491,grafana.com,PATCH,/datasources/uid/{sourceUID}/correlations/{correlationUID},updateCorrelation,Updates a correlation.,
+ex6-0492,grafana.com,DELETE,/datasources/uid/{uid},deleteDataSourceByUID,Delete an existing data source by UID.,"If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `datasources:delete` and scopes: `datasources:*`, `datasources:uid:*` and `datasources:uid:kLtEtcRGk` (single data source)."
+ex6-0493,grafana.com,GET,/datasources/uid/{uid},getDataSourceByUID,Get a single data source by UID.,"If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `datasources:read` and scopes: `datasources:*`, `datasources:uid:*` and `datasources:uid:kLtEtcRGk` (single data source)."
+ex6-0494,grafana.com,PUT,/datasources/uid/{uid},updateDataSourceByUID,Update an existing data source.,"Similar to creating a data source, `password` and `basicAuthPassword` should be defined under
+secureJsonData in order to be stored securely as an encrypted blob in the database. Then, the
+encrypted fields are listed under secureJsonFields section in the response.
+
+If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `datasources:write` and scopes: `datasources:*`, `datasources:uid:*` and `datasources:uid:1` (single data source)."
+ex6-0495,grafana.com,DELETE,/datasources/uid/{uid}/correlations/{correlationUID},deleteCorrelation,Delete a correlation.,
+ex6-0496,grafana.com,GET,/datasources/uid/{uid}/health,checkDatasourceHealthWithUID,Sends a health check request to the plugin datasource identified by the UID.,
+ex6-0497,grafana.com,GET,/datasources/uid/{uid}/lbac/teams,getTeamLBACRulesApi,Retrieves LBAC rules for a team.,
+ex6-0498,grafana.com,PUT,/datasources/uid/{uid}/lbac/teams,updateTeamLBACRulesApi,Updates LBAC rules for a team.,
+ex6-0499,grafana.com,GET,/datasources/uid/{uid}/resources/{datasource_proxy_route},callDatasourceResourceWithUID,Fetch data source resources.,
+ex6-0500,grafana.com,GET,/datasources/{dataSourceUID}/cache,getDataSourceCacheConfig,,get cache config for a single data source
+ex6-0501,grafana.com,POST,/datasources/{dataSourceUID}/cache,setDataSourceCacheConfig,,set cache config for a single data source
+ex6-0502,grafana.com,POST,/datasources/{dataSourceUID}/cache/clean,cleanDataSourceCache,,clean cache for a single data source
+ex6-0503,grafana.com,POST,/datasources/{dataSourceUID}/cache/disable,disableDataSourceCache,,disable cache for a single data source
+ex6-0504,grafana.com,POST,/datasources/{dataSourceUID}/cache/enable,enableDataSourceCache,,enable cache for a single data source
+ex6-0505,grafana.com,POST,/ds/query,queryMetricsWithExpressions,DataSource query metrics with expressions.,"If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `datasources:query`."
+ex6-0506,grafana.com,GET,/folders,getFolders,Get all folders.,"It returns all folders that the authenticated user has permission to view.
+If nested folders are enabled, it expects an additional query parameter with the parent folder UID
+and returns the immediate subfolders that the authenticated user has permission to view.
+If the parameter is not supplied then it returns immediate subfolders under the root
+that the authenticated user has permission to view.
+
+Use: /apis/folder.grafana.app/v1/namespaces/{ns}/folders"
+ex6-0507,grafana.com,POST,/folders,createFolder,Create folder.,"If nested folders are enabled then it additionally expects the parent folder UID.
+
+Use: /apis/folder.grafana.app/v1/namespaces/{ns}/folders/{folder_uid}"
+ex6-0508,grafana.com,DELETE,/folders/{folder_uid},deleteFolder,Delete folder.,"Deletes an existing folder identified by UID along with all dashboards (and their alerts) stored in the folder. This operation cannot be reverted.
+If nested folders are enabled then it also deletes all the subfolders.
+
+Use: /apis/folder.grafana.app/v1/namespaces/{ns}/folders/{folder_uid}"
+ex6-0509,grafana.com,GET,/folders/{folder_uid},getFolderByUID,Get folder by uid.,Use: /apis/folder.grafana.app/v1/namespaces/{ns}/folders/{folder_uid}
+ex6-0510,grafana.com,PUT,/folders/{folder_uid},updateFolder,Update folder.,Use: /apis/folder.grafana.app/v1/namespaces/{ns}/folders/{folder_uid}
+ex6-0511,grafana.com,GET,/folders/{folder_uid}/counts,getFolderDescendantCounts,Gets the count of each descendant of a folder by kind. The folder is identified by UID.,Use: /apis/folder.grafana.app/v1/namespaces/{ns}/folders/{folder_uid}
+ex6-0512,grafana.com,POST,/folders/{folder_uid}/move,moveFolder,Move folder.,"Use: /apis/folder.grafana.app/v1/namespaces/{ns}/folders/{folder_uid},
+Changing the parent folder annotation"
+ex6-0513,grafana.com,GET,/folders/{folder_uid}/permissions,getFolderPermissionList,Gets all existing permissions for the folder with the given `uid`.,
+ex6-0514,grafana.com,POST,/folders/{folder_uid}/permissions,updateFolderPermissions,Updates permissions for a folder. This operation will remove existing permissions if they’re not included in the request.,
+ex6-0515,grafana.com,GET,/health,getHealth,,"apiHealthHandler will return ok if Grafana's web server is running and it
+can access the database. If the database cannot be accessed it will return
+http status code 503."
+ex6-0516,grafana.com,GET,/library-elements,getLibraryElements,Get all library elements.,"Returns a list of all library elements the authenticated user has permission to view.
+Use the `perPage` query parameter to control the maximum number of library elements returned; the default limit is `100`.
+You can also use the `page` query parameter to fetch library elements from any page other than the first one."
+ex6-0517,grafana.com,POST,/library-elements,createLibraryElement,Create library element.,Creates a new library element.
+ex6-0518,grafana.com,GET,/library-elements/name/{library_element_name},getLibraryElementByName,Get library element by name.,Returns a library element with the given name.
+ex6-0519,grafana.com,DELETE,/library-elements/{library_element_uid},deleteLibraryElementByUID,Delete library element.,"Deletes an existing library element as specified by the UID. This operation cannot be reverted.
+You cannot delete a library element that is connected. This operation cannot be reverted."
+ex6-0520,grafana.com,GET,/library-elements/{library_element_uid},getLibraryElementByUID,Get library element by UID.,Returns a library element with the given UID.
+ex6-0521,grafana.com,PATCH,/library-elements/{library_element_uid},updateLibraryElement,Update library element.,Updates an existing library element identified by uid.
+ex6-0522,grafana.com,GET,/library-elements/{library_element_uid}/connections/,getLibraryElementConnections,Get library element connections.,Returns a list of connections for a library element based on the UID specified.
+ex6-0523,grafana.com,GET,/licensing/check,getStatus,Check license availability.,
+ex6-0524,grafana.com,GET,/licensing/custom-permissions,getCustomPermissionsReport,Get custom permissions report.,"You need to have a permission with action `licensing.reports:read`.
+
+Deprecated. There is currently no replacement for this endpoint. Please reach out to Grafana support if you rely on this endpoint."
+ex6-0525,grafana.com,GET,/licensing/custom-permissions-csv,getCustomPermissionsCSV,Get custom permissions report in CSV format.,"You need to have a permission with action `licensing.reports:read`.
+
+Deprecated. There is currently no replacement for this endpoint. Please reach out to Grafana support if you rely on this endpoint."
+ex6-0526,grafana.com,GET,/licensing/refresh-stats,refreshLicenseStats,Refresh license stats.,You need to have a permission with action `licensing:read`.
+ex6-0527,grafana.com,DELETE,/licensing/token,deleteLicenseToken,Remove license from database.,"Removes the license stored in the Grafana database. Available in Grafana Enterprise v7.4+.
+
+You need to have a permission with action `licensing:delete`."
+ex6-0528,grafana.com,GET,/licensing/token,getLicenseToken,Get license token.,You need to have a permission with action `licensing:read`.
+ex6-0529,grafana.com,POST,/licensing/token,postLicenseToken,Create license token.,You need to have a permission with action `licensing:write`.
+ex6-0530,grafana.com,POST,/licensing/token/renew,postRenewLicenseToken,Manually force license refresh.,"Manually ask license issuer for a new token. Available in Grafana Enterprise v7.4+.
+
+You need to have a permission with action `licensing:write`."
+ex6-0531,grafana.com,GET,/logout/saml,getSAMLLogout,GetLogout initiates single logout process.,
+ex6-0532,grafana.com,GET,/org,getCurrentOrg,Get current Organization.,
+ex6-0533,grafana.com,PUT,/org,updateCurrentOrg,Update current Organization.,
+ex6-0534,grafana.com,PUT,/org/address,updateCurrentOrgAddress,Update current Organization's address.,
+ex6-0535,grafana.com,GET,/org/invites,getPendingOrgInvites,Get pending invites.,
+ex6-0536,grafana.com,POST,/org/invites,addOrgInvite,Add invite.,
+ex6-0537,grafana.com,DELETE,/org/invites/{invitation_code}/revoke,revokeInvite,Revoke invite.,
+ex6-0538,grafana.com,GET,/org/preferences,getOrgPreferences,Get Current Org Prefs.,Use /apis/preferences.grafana.app/v1/namespaces/{namespace}/preferences/namespace
+ex6-0539,grafana.com,PATCH,/org/preferences,patchOrgPreferences,Patch Current Org Prefs.,Use /apis/preferences.grafana.app/v1/namespaces/{namespace}/preferences/namespace
+ex6-0540,grafana.com,PUT,/org/preferences,updateOrgPreferences,Update Current Org Prefs.,Use /apis/preferences.grafana.app/v1/namespaces/{namespace}/preferences/namespace
+ex6-0541,grafana.com,GET,/org/quotas,getCurrentOrgQuota,Fetch Organization quota.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `orgs.quotas:read` and scope `org:id:1` (orgIDScope)."
+ex6-0542,grafana.com,GET,/org/users,getOrgUsersForCurrentOrg,Get all users within the current organization.,"Returns all org users within the current organization. Accessible to users with org admin role.
+If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `org.users:read` with scope `users:*`."
+ex6-0543,grafana.com,POST,/org/users,addOrgUserToCurrentOrg,Add a new user to the current organization.,"Adds a global user to the current organization.
+
+If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `org.users:add` with scope `users:*`."
+ex6-0544,grafana.com,GET,/org/users/lookup,getOrgUsersForCurrentOrgLookup,Get all users within the current organization (lookup),"Returns all org users within the current organization, but with less detailed information.
+Accessible to users with org admin role, admin in any folder or admin of any team.
+Mainly used by Grafana UI for providing list of users when adding team members and when editing folder/dashboard permissions."
+ex6-0545,grafana.com,DELETE,/org/users/{user_id},removeOrgUserForCurrentOrg,Delete user in current organization.,"If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `org.users:remove` with scope `users:*`."
+ex6-0546,grafana.com,PATCH,/org/users/{user_id},updateOrgUserForCurrentOrg,Updates the given user.,"If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `org.users.role:update` with scope `users:*`."
+ex6-0547,grafana.com,GET,/orgs,searchOrgs,Search all Organizations.,
+ex6-0548,grafana.com,POST,/orgs,createOrg,Create Organization.,Only works if [users.allow_org_create](https://grafana.com/docs/grafana/latest/administration/configuration/#allow_org_create) is set.
+ex6-0549,grafana.com,GET,/orgs/name/{org_name},getOrgByName,Get Organization by Name.,
+ex6-0550,grafana.com,DELETE,/orgs/{org_id},deleteOrgByID,Delete Organization.,
+ex6-0551,grafana.com,GET,/orgs/{org_id},getOrgByID,Get Organization by ID.,
+ex6-0552,grafana.com,PUT,/orgs/{org_id},updateOrg,Update Organization.,
+ex6-0553,grafana.com,PUT,/orgs/{org_id}/address,updateOrgAddress,Update Organization's address.,
+ex6-0554,grafana.com,GET,/orgs/{org_id}/quotas,getOrgQuota,Fetch Organization quota.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `orgs.quotas:read` and scope `org:id:1` (orgIDScope)."
+ex6-0555,grafana.com,PUT,/orgs/{org_id}/quotas/{quota_target},updateOrgQuota,Update user quota.,"If you are running Grafana Enterprise and have Fine-grained access control enabled, you need to have a permission with action `orgs.quotas:write` and scope `org:id:1` (orgIDScope)."
+ex6-0556,grafana.com,GET,/orgs/{org_id}/users,getOrgUsers,Get Users in Organization.,"If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `org.users:read` with scope `users:*`."
+ex6-0557,grafana.com,POST,/orgs/{org_id}/users,addOrgUser,Add a new user to the current organization.,"Adds a global user to the current organization.
+
+If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `org.users:add` with scope `users:*`."
+ex6-0558,grafana.com,GET,/orgs/{org_id}/users/search,searchOrgUsers,Search Users in Organization.,"If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `org.users:read` with scope `users:*`."
+ex6-0559,grafana.com,DELETE,/orgs/{org_id}/users/{user_id},removeOrgUser,Delete user in current organization.,"If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `org.users:remove` with scope `users:*`."
+ex6-0560,grafana.com,PATCH,/orgs/{org_id}/users/{user_id},updateOrgUser,Update Users in Organization.,"If you are running Grafana Enterprise and have Fine-grained access control enabled
+you need to have a permission with action: `org.users.role:update` with scope `users:*`."
+ex6-0561,grafana.com,GET,/playlists,searchPlaylists,Get playlists.,Please refer to [new API](?api=playlist.grafana.app-v1).
+ex6-0562,grafana.com,POST,/playlists,createPlaylist,Create playlist.,Please refer to [new API](?api=playlist.grafana.app-v1).
+ex6-0563,grafana.com,DELETE,/playlists/{uid},deletePlaylist,Delete playlist.,Please refer to [new API](?api=playlist.grafana.app-v1).
+ex6-0564,grafana.com,GET,/playlists/{uid},getPlaylist,Get playlist.,Please refer to [new API](?api=playlist.grafana.app-v1).
+ex6-0565,grafana.com,PUT,/playlists/{uid},updatePlaylist,Update playlist.,Please refer to [new API](?api=playlist.grafana.app-v1).
+ex6-0566,grafana.com,GET,/playlists/{uid}/items,getPlaylistItems,Get playlist items.,Please refer to [new API](?api=playlist.grafana.app-v1) instead (items are included in the playlist spec).
+ex6-0567,grafana.com,GET,/public/dashboards/{accessToken},viewPublicDashboard,,Get public dashboard for view
+ex6-0568,grafana.com,GET,/public/dashboards/{accessToken}/annotations,getPublicAnnotations,,Get annotations for a public dashboard
+ex6-0569,grafana.com,POST,/public/dashboards/{accessToken}/panels/{panelId}/query,queryPublicDashboard,,Get results for a given panel on a public dashboard
+ex6-0570,grafana.com,GET,/query-history,searchQueries,Query history search.,"Returns a list of queries in the query history that matches the search criteria.
+Query history search supports pagination. Use the `limit` parameter to control the maximum number of queries returned; the default limit is 100.
+You can also use the `page` query parameter to fetch queries from any page other than the first one."
+ex6-0571,grafana.com,POST,/query-history,createQuery,Add query to query history.,Adds new query to query history.
+ex6-0572,grafana.com,DELETE,/query-history/star/{query_history_uid},unstarQuery,Remove star to query in query history.,Removes star from query in query history as specified by the UID.
+ex6-0573,grafana.com,POST,/query-history/star/{query_history_uid},starQuery,Add star to query in query history.,Adds star to query in query history as specified by the UID.
+ex6-0574,grafana.com,DELETE,/query-history/{query_history_uid},deleteQuery,Delete query in query history.,Deletes an existing query in query history as specified by the UID. This operation cannot be reverted.
+ex6-0575,grafana.com,PATCH,/query-history/{query_history_uid},patchQueryComment,Update comment for query in query history.,Updates comment for query in query history as specified by the UID.
+ex6-0576,grafana.com,GET,/recording-rules,listRecordingRules,Lists all rules in the database: active or deleted.,
+ex6-0577,grafana.com,POST,/recording-rules,createRecordingRule,Create a recording rule that is then registered and started.,
+ex6-0578,grafana.com,PUT,/recording-rules,updateRecordingRule,Update the active status of a rule.,
+ex6-0579,grafana.com,POST,/recording-rules/test,testCreateRecordingRule,Test a recording rule.,
+ex6-0580,grafana.com,DELETE,/recording-rules/writer,deleteRecordingRuleWriteTarget,Delete the remote write target.,
+ex6-0581,grafana.com,GET,/recording-rules/writer,getRecordingRuleWriteTarget,Return the prometheus remote write target.,
+ex6-0582,grafana.com,POST,/recording-rules/writer,createRecordingRuleWriteTarget,Create a remote write target.,It returns a 422 if there is not an existing prometheus data source configured.
+ex6-0583,grafana.com,DELETE,/recording-rules/{recordingRuleID},deleteRecordingRule,Delete removes the rule from the registry and stops it.,
+ex6-0584,grafana.com,GET,/reports,getReports,List reports.,"Available to org admins only and with a valid or expired license.
+
+You need to have a permission with action `reports:read` with scope `reports:*`."
+ex6-0585,grafana.com,POST,/reports,createReport,Create a report.,"Available to org admins only and with a valid license.
+
+You need to have a permission with action `reports.admin:create`."
+ex6-0586,grafana.com,GET,/reports/dashboards/{uid},getReportsByDashboardUID,List reports by dashboard uid.,"Available to org admins only and with a valid or expired license.
+
+You need to have a permission with action `reports:read` with scope `reports:*`."
+ex6-0587,grafana.com,POST,/reports/email,sendReport,Send a report.,"Generate and send a report. This API waits for the report to be generated before returning. We recommend that you set the client’s timeout to at least 60 seconds. Available to org admins only and with a valid license.
+
+Only available in Grafana Enterprise v7.0+.
+This API endpoint is experimental and may be deprecated in a future release. On deprecation, a migration strategy will be provided and the endpoint will remain functional until the next major release of Grafana.
+
+You need to have a permission with action `reports:send`."
+ex6-0588,grafana.com,GET,/reports/images/:image,getSettingsImage,Get custom branding report image.,"Available to org admins only and with a valid or expired license.
+
+You need to have a permission with action `reports.settings:read`."
+ex6-0589,grafana.com,GET,/reports/render/csvs,renderReportCSVs,Download a CSV report.,Available to all users and with a valid license.
+ex6-0590,grafana.com,GET,/reports/render/pdfs,renderReportPDFs,Render report for multiple dashboards.,Available to all users and with a valid license.
+ex6-0591,grafana.com,GET,/reports/settings,getReportSettings,Get report settings.,"Available to org admins only and with a valid or expired license.
+
+You need to have a permission with action `reports.settings:read`x."
+ex6-0592,grafana.com,POST,/reports/settings,saveReportSettings,Save settings.,"Available to org admins only and with a valid or expired license.
+
+You need to have a permission with action `reports.settings:write`xx."
+ex6-0593,grafana.com,POST,/reports/test-email,sendTestEmail,Send test report via email.,"Available to org admins only and with a valid license.
+
+You need to have a permission with action `reports:send`."
+ex6-0594,grafana.com,DELETE,/reports/{id},deleteReport,Delete a report.,"Available to org admins only and with a valid or expired license.
+
+You need to have a permission with action `reports.delete` with scope `reports:id:<report ID>`.
+
+Requesting reports using the internal id will stop workgin in the future
+Use the reporting apiserver to manage reports.  See: /apis/reporting.grafana.app/"
+ex6-0595,grafana.com,GET,/reports/{id},getReport,Get a report.,"Available to org admins only and with a valid or expired license.
+
+You need to have a permission with action `reports:read` with scope `reports:id:<report ID>`.
+
+Requesting reports using the internal id will stop workgin in the future
+Use the reporting apiserver to manage reports.  See: /apis/reporting.grafana.app/"
+ex6-0596,grafana.com,PUT,/reports/{id},updateReport,Update a report.,"Available to org admins only and with a valid or expired license.
+
+You need to have a permission with action `reports.admin:write` with scope `reports:id:<report ID>`.
+
+Requesting reports using the internal id will stop workgin in the future
+Use the reporting apiserver to manage reports.  See: /apis/reporting.grafana.app/"
+ex6-0597,grafana.com,POST,/saml/acs,postACS,It performs Assertion Consumer Service (ACS).,
+ex6-0598,grafana.com,GET,/saml/metadata,getMetadata,It exposes the SP (Grafana's) metadata for the IdP's consumption.,
+ex6-0599,grafana.com,GET,/saml/slo,getSLO,It performs Single Logout (SLO) callback.,"There might be two possible requests:
+1. Logout response (callback) when Grafana initiates single logout and IdP returns response to logout request.
+2. Logout request when another SP initiates single logout and IdP sends logout request to the Grafana,
+or in case of IdP-initiated logout."
+ex6-0600,grafana.com,POST,/saml/slo,postSLO,It performs Single Logout (SLO) callback.,"There might be two possible requests:
+1. Logout response (callback) when Grafana initiates single logout and IdP returns response to logout request.
+2. Logout request when another SP initiates single logout and IdP sends logout request to the Grafana,
+or in case of IdP-initiated logout."
+ex6-0601,grafana.com,GET,/search,search,,
+ex6-0602,grafana.com,GET,/search/sorting,listSortOptions,List search sorting options.,
+ex6-0603,grafana.com,POST,/serviceaccounts,createServiceAccount,Create service account,"Required permissions (See note in the [introduction](https://grafana.com/docs/grafana/latest/developers/http_api/serviceaccount/#service-account-api) for an explanation):
+action: `serviceaccounts:write` scope: `serviceaccounts:*`
+
+Requires basic authentication and that the authenticated user is a Grafana Admin."
+ex6-0604,grafana.com,GET,/serviceaccounts/search,searchOrgServiceAccountsWithPaging,Search service accounts with paging,"Required permissions (See note in the [introduction](https://grafana.com/docs/grafana/latest/developers/http_api/serviceaccount/#service-account-api) for an explanation):
+action: `serviceaccounts:read` scope: `serviceaccounts:*`"
+ex6-0605,grafana.com,DELETE,/serviceaccounts/{serviceAccountId},deleteServiceAccount,Delete service account,"Required permissions (See note in the [introduction](https://grafana.com/docs/grafana/latest/developers/http_api/serviceaccount/#service-account-api) for an explanation):
+action: `serviceaccounts:delete` scope: `serviceaccounts:id:1` (single service account)"
+ex6-0606,grafana.com,GET,/serviceaccounts/{serviceAccountId},retrieveServiceAccount,Get single serviceaccount by Id,"Required permissions (See note in the [introduction](https://grafana.com/docs/grafana/latest/developers/http_api/serviceaccount/#service-account-api) for an explanation):
+action: `serviceaccounts:read` scope: `serviceaccounts:id:1` (single service account)"
+ex6-0607,grafana.com,PATCH,/serviceaccounts/{serviceAccountId},updateServiceAccount,Update service account,"Required permissions (See note in the [introduction](https://grafana.com/docs/grafana/latest/developers/http_api/serviceaccount/#service-account-api) for an explanation):
+action: `serviceaccounts:write` scope: `serviceaccounts:id:1` (single service account)"
+ex6-0608,grafana.com,GET,/serviceaccounts/{serviceAccountId}/tokens,listTokens,Get service account tokens,"Required permissions (See note in the [introduction](https://grafana.com/docs/grafana/latest/developers/http_api/serviceaccount/#service-account-api) for an explanation):
+action: `serviceaccounts:read` scope: `global:serviceaccounts:id:1` (single service account)
+
+Requires basic authentication and that the authenticated user is a Grafana Admin."
+ex6-0609,grafana.com,POST,/serviceaccounts/{serviceAccountId}/tokens,createToken,CreateNewToken adds a token to a service account,"Required permissions (See note in the [introduction](https://grafana.com/docs/grafana/latest/developers/http_api/serviceaccount/#service-account-api) for an explanation):
+action: `serviceaccounts:write` scope: `serviceaccounts:id:1` (single service account)"
+ex6-0610,grafana.com,DELETE,/serviceaccounts/{serviceAccountId}/tokens/{tokenId},deleteToken,DeleteToken deletes service account tokens,"Required permissions (See note in the [introduction](https://grafana.com/docs/grafana/latest/developers/http_api/serviceaccount/#service-account-api) for an explanation):
+action: `serviceaccounts:write` scope: `serviceaccounts:id:1` (single service account)
+
+Requires basic authentication and that the authenticated user is a Grafana Admin."
+ex6-0611,grafana.com,GET,/signing-keys/keys,retrieveJWKS,Get JSON Web Key Set (JWKS) with all the keys that can be used to verify tokens (public keys),"Required permissions
+None"
+ex6-0612,grafana.com,GET,/snapshot/shared-options,getSharingOptions,Get snapshot sharing settings.,
+ex6-0613,grafana.com,POST,/snapshots,createDashboardSnapshot,"When creating a snapshot using the API, you have to provide the full dashboard payload including the snapshot data. This endpoint is designed for the Grafana UI.",Snapshot public mode should be enabled or authentication is required.
+ex6-0614,grafana.com,GET,/snapshots-delete/{deleteKey},deleteDashboardSnapshotByDeleteKey,Delete Snapshot by deleteKey.,Snapshot public mode should be enabled or authentication is required.
+ex6-0615,grafana.com,DELETE,/snapshots/{key},deleteDashboardSnapshot,Delete Snapshot by Key.,
+ex6-0616,grafana.com,GET,/snapshots/{key},getDashboardSnapshot,Get Snapshot by Key.,
+ex6-0617,grafana.com,POST,/teams,createTeam,Add Team.,
+ex6-0618,grafana.com,GET,/teams/search,searchTeams,Team Search With Paging.,
+ex6-0619,grafana.com,DELETE,/teams/{teamId}/groups,removeTeamGroupApiQuery,Remove External Group.,
+ex6-0620,grafana.com,GET,/teams/{teamId}/groups,getTeamGroupsApi,Get External Groups.,
+ex6-0621,grafana.com,POST,/teams/{teamId}/groups,addTeamGroupApi,Add External Group.,
+ex6-0622,grafana.com,GET,/teams/{teamId}/groups/search,searchTeamGroups,Search for team groups with optional filtering and pagination.,
+ex6-0623,grafana.com,DELETE,/teams/{team_id},deleteTeamByID,Delete Team By ID.,
+ex6-0624,grafana.com,GET,/teams/{team_id},getTeamByID,Get Team By ID.,
+ex6-0625,grafana.com,PUT,/teams/{team_id},updateTeam,Update Team.,
+ex6-0626,grafana.com,GET,/teams/{team_id}/members,getTeamMembers,Get Team Members.,
+ex6-0627,grafana.com,POST,/teams/{team_id}/members,addTeamMember,Add Team Member.,
+ex6-0628,grafana.com,PUT,/teams/{team_id}/members,setTeamMemberships,Set team memberships.,"Takes user emails, and updates team members and admins to the provided lists of users.
+Any current team members and admins not in the provided lists will be removed."
+ex6-0629,grafana.com,DELETE,/teams/{team_id}/members/{user_id},removeTeamMember,Remove Member From Team.,
+ex6-0630,grafana.com,PUT,/teams/{team_id}/members/{user_id},updateTeamMember,Update Team Member.,
+ex6-0631,grafana.com,GET,/teams/{team_id}/preferences,getTeamPreferences,Get Team Preferences.,
+ex6-0632,grafana.com,PUT,/teams/{team_id}/preferences,updateTeamPreferences,Update Team Preferences.,
+ex6-0633,grafana.com,GET,/user,getSignedInUser,,Get (current authenticated user)
+ex6-0634,grafana.com,PUT,/user,updateSignedInUser,Update signed in User.,
+ex6-0635,grafana.com,GET,/user/auth-tokens,getUserAuthTokens,Auth tokens of the actual User.,Return a list of all auth tokens (devices) that the actual user currently have logged in from.
+ex6-0636,grafana.com,GET,/user/email/update,updateUserEmail,Update user email.,Update the email of user given a verification code.
+ex6-0637,grafana.com,GET,/user/orgs,getSignedInUserOrgList,Organizations of the actual User.,Return a list of all organizations of the current user.
+ex6-0638,grafana.com,PUT,/user/password,changeUserPassword,Change Password.,Changes the password for the user.
+ex6-0639,grafana.com,GET,/user/preferences,getUserPreferences,Get user preferences.,Use /apis/preferences.grafana.app/v1/namespaces/{namespace}/preferences/user-{uid}
+ex6-0640,grafana.com,PATCH,/user/preferences,patchUserPreferences,Patch user preferences.,Use /apis/preferences.grafana.app/v1/namespaces/{namespace}/preferences/user-{uid}
+ex6-0641,grafana.com,PUT,/user/preferences,updateUserPreferences,Update user preferences.,"Use /apis/preferences.grafana.app/v1/namespaces/{namespace}/preferences/user-{uid}
+
+
+Omitting a key (`theme`, `homeDashboardUID`, `timezone`) will cause the current value to be replaced with the system default value."
+ex6-0642,grafana.com,GET,/user/quotas,getUserQuotas,Fetch user quota.,
+ex6-0643,grafana.com,POST,/user/revoke-auth-token,revokeUserAuthToken,Revoke an auth token of the actual User.,Revokes the given auth token (device) for the actual user. User of issued auth token (device) will no longer be logged in and will be required to authenticate again upon next activity.
+ex6-0644,grafana.com,DELETE,/user/stars/dashboard/uid/{dashboard_uid},unstarDashboardByUID,Unstar a dashboard.,"Deletes the starring of the given Dashboard for the actual user.
+
+Use: DELETE /apis/collections.grafana.app/v1alpha1/namespaces/{namespace}/stars/{name}/update/{group}/{kind}/{id}"
+ex6-0645,grafana.com,POST,/user/stars/dashboard/uid/{dashboard_uid},starDashboardByUID,Star a dashboard.,"Stars the given Dashboard for the actual user.
+
+Use: PUT /apis/collections.grafana.app/v1alpha1/namespaces/{namespace}/stars/{name}/update/{group}/{kind}/{id}"
+ex6-0646,grafana.com,GET,/user/teams,getSignedInUserTeamList,Teams that the actual User is member of.,Return a list of all teams that the current user is member of.
+ex6-0647,grafana.com,POST,/user/using/{org_id},userSetUsingOrg,Switch user context for signed in user.,Switch user context to the given organization.
+ex6-0648,grafana.com,GET,/users,searchUsers,Get users.,"Returns all users that the authenticated user has permission to view, admin permission required."
+ex6-0649,grafana.com,GET,/users/lookup,getUserByLoginOrEmail,Get user by login or email.,
+ex6-0650,grafana.com,GET,/users/search,searchUsersWithPaging,Get users with paging.,
+ex6-0651,grafana.com,GET,/users/{user_id},getUserByID,Get user by id.,
+ex6-0652,grafana.com,PUT,/users/{user_id},updateUser,Update user.,Update the user identified by id.
+ex6-0653,grafana.com,GET,/users/{user_id}/orgs,getUserOrgList,Get organizations for user.,Get organizations for user identified by id.
+ex6-0654,grafana.com,GET,/users/{user_id}/teams,getUserTeams,Get teams for user.,Get teams for user identified by id.
+ex6-0655,grafana.com,GET,/v1/provisioning/alert-rules,RouteGetAlertRules,Get all the alert rules.,
+ex6-0656,grafana.com,POST,/v1/provisioning/alert-rules,RoutePostAlertRule,Create a new alert rule.,
+ex6-0657,grafana.com,GET,/v1/provisioning/alert-rules/export,RouteGetAlertRulesExport,Export all alert rules in provisioning file format.,
+ex6-0658,grafana.com,DELETE,/v1/provisioning/alert-rules/{UID},RouteDeleteAlertRule,Delete a specific alert rule by UID.,
+ex6-0659,grafana.com,GET,/v1/provisioning/alert-rules/{UID},RouteGetAlertRule,Get a specific alert rule by UID.,
+ex6-0660,grafana.com,PUT,/v1/provisioning/alert-rules/{UID},RoutePutAlertRule,Update an existing alert rule.,
+ex6-0661,grafana.com,GET,/v1/provisioning/alert-rules/{UID}/export,RouteGetAlertRuleExport,Export an alert rule in provisioning file format.,
+ex6-0662,grafana.com,GET,/v1/provisioning/contact-points,RouteGetContactpoints,Get all the contact points.,
+ex6-0663,grafana.com,POST,/v1/provisioning/contact-points,RoutePostContactpoints,Create a contact point.,
+ex6-0664,grafana.com,GET,/v1/provisioning/contact-points/export,RouteGetContactpointsExport,Export all contact points in provisioning file format.,
+ex6-0665,grafana.com,DELETE,/v1/provisioning/contact-points/{UID},RouteDeleteContactpoints,Delete a contact point.,
+ex6-0666,grafana.com,PUT,/v1/provisioning/contact-points/{UID},RoutePutContactpoint,Update an existing contact point.,
+ex6-0667,grafana.com,DELETE,/v1/provisioning/folder/{FolderUID}/rule-groups/{Group},RouteDeleteAlertRuleGroup,,Delete rule group
+ex6-0668,grafana.com,GET,/v1/provisioning/folder/{FolderUID}/rule-groups/{Group},RouteGetAlertRuleGroup,Get a rule group.,
+ex6-0669,grafana.com,PUT,/v1/provisioning/folder/{FolderUID}/rule-groups/{Group},RoutePutAlertRuleGroup,Create or update alert rule group.,
+ex6-0670,grafana.com,GET,/v1/provisioning/folder/{FolderUID}/rule-groups/{Group}/export,RouteGetAlertRuleGroupExport,Export an alert rule group in provisioning file format.,
+ex6-0671,grafana.com,GET,/v1/provisioning/mute-timings,RouteGetMuteTimings,Get all the mute timings.,
+ex6-0672,grafana.com,POST,/v1/provisioning/mute-timings,RoutePostMuteTiming,Create a new mute timing.,
+ex6-0673,grafana.com,GET,/v1/provisioning/mute-timings/export,RouteExportMuteTimings,Export all mute timings in provisioning format.,
+ex6-0674,grafana.com,DELETE,/v1/provisioning/mute-timings/{name},RouteDeleteMuteTiming,Delete a mute timing.,
+ex6-0675,grafana.com,GET,/v1/provisioning/mute-timings/{name},RouteGetMuteTiming,Get a mute timing.,
+ex6-0676,grafana.com,PUT,/v1/provisioning/mute-timings/{name},RoutePutMuteTiming,Replace an existing mute timing.,
+ex6-0677,grafana.com,GET,/v1/provisioning/mute-timings/{name}/export,RouteExportMuteTiming,Export a mute timing in provisioning format.,
+ex6-0678,grafana.com,DELETE,/v1/provisioning/policies,RouteResetPolicyTree,Clears the notification policy tree.,
+ex6-0679,grafana.com,GET,/v1/provisioning/policies,RouteGetPolicyTree,Get the notification policy tree.,
+ex6-0680,grafana.com,PUT,/v1/provisioning/policies,RoutePutPolicyTree,Sets the notification policy tree.,
+ex6-0681,grafana.com,GET,/v1/provisioning/policies/export,RouteGetPolicyTreeExport,Export the notification policy tree in provisioning file format.,
+ex6-0682,grafana.com,GET,/v1/provisioning/templates,RouteGetTemplates,Get all notification template groups.,
+ex6-0683,grafana.com,DELETE,/v1/provisioning/templates/{name},RouteDeleteTemplate,Delete a notification template group.,
+ex6-0684,grafana.com,GET,/v1/provisioning/templates/{name},RouteGetTemplate,Get a notification template group.,
+ex6-0685,grafana.com,PUT,/v1/provisioning/templates/{name},RoutePutTemplate,Updates an existing notification template group.,
+ex6-0686,grafana.com,GET,/v1/sso-settings,listAllProvidersSettings,List all SSO Settings entries,You need to have a permission with action `settings:read` with scope `settings:auth.<provider>:*`.
+ex6-0687,grafana.com,DELETE,/v1/sso-settings/{key},removeProviderSettings,Remove SSO Settings,"Removes the SSO Settings for a provider.
+
+You need to have a permission with action `settings:write` and scope `settings:auth.<provider>:*`."
+ex6-0688,grafana.com,GET,/v1/sso-settings/{key},getProviderSettings,Get an SSO Settings entry by Key,You need to have a permission with action `settings:read` with scope `settings:auth.<provider>:*`.
+ex6-0689,grafana.com,PATCH,/v1/sso-settings/{key},patchProviderSettings,Patch SSO Settings,"Partially updates the SSO Settings for a provider. Only provided fields are updated.
+
+You need to have a permission with action `settings:write` and scope `settings:auth.<provider>:*`."
+ex6-0690,grafana.com,PUT,/v1/sso-settings/{key},updateProviderSettings,Update SSO Settings,"Inserts or updates the SSO Settings for a provider.
+
+You need to have a permission with action `settings:write` and scope `settings:auth.<provider>:*`."

@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.1] - 2026-11-09
+
+### Changed
+
+- **Docs only: no code change.** The published package differs from 0.11.0 only in `README.md`, `CHANGELOG.md` and `package.json`.
+- **README "How good it is" is one table for all modes and quotes exam #6** (1588 operations: grafana, nocodb, radarr, cloudsmith, invoiceninja; scored once on 2026-11-08 through the npm install of 0.11.0). Mode a: 1434 exact (90.3%), 35 too loose (2.2%), 119 too tight (7.5%); mechanical: 1305 / 43 / 240. The 0.90 cut, tuned on exam #5, held.
+- **Mode b's row is at `--confidence 85`:** 1424 / 19 / 145 on exam #6. 85 was picked by a sweep on exams #5 and #6 (3031 rows, 12 vendors; at 90 and 85 no vendor leaked more than mechanical). The default stays 95 in 0.11.1; pass `--confidence 85` (D140, candidate).
+- **Dev only:** the exam #6 record (`data/exam6-2026-11-08/`, `docs/wiki/exam-prereg-exam6.md`), the shortlist check (`poc/exam6-shortlist/`) and the mode b sweep (`poc/mode-b-r13/`). GET stays as is (user ruling 2026-11-08). The D139 docs no longer say "unreleased". Exam #6's grafana and invoiceninja specs are stored gzipped (GitHub push protection flagged placeholder example values); their uncompressed bytes are unchanged.
+
 ## [0.11.0] - 2026-11-07
 
 ### Changed
