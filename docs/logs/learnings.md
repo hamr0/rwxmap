@@ -8917,3 +8917,37 @@ of 1994 on tuning) carry most of the too-tight cost and are the pile
 - Ruling (user, 2026-11-08): GET stays as is, r floor plus the raise-only get-action rule. Across all labelled sets (7,572 GET rows) the rule fired 7 times, caught 6 real x rows and made 1 r row too tight. 24 GET leaks remain unmatched across 11 vendors (invoiceninja 8, cloudflare 4, grafana 4 are 16 of them). "GET is always r" would add 6 leaks and remove 1 too-tight row, so it is fail-open and rejected.
 - Lesson: (a) The 0.90 cut was tuned on exam #5 and held on unseen vendors: mode a 90.3 / 2.2 / 7.5 here against 87.9 / 2.8 / 9.3 on its tuning exam (1269 / 40 / 134 of 1443). The cut is no longer only a tuned figure. (b) Mode a's worst leaks (x read as r) are all mechanical's, mostly GET rows settled by the method floor that the model never sees (14 of the 35). (c) GET leaks are vendor-concentrated: invoiceninja's `/{id}/{action}` rows are 6 of its 8. A vendor-specific word would fail leave-one-vendor-out, which is why no rule was added. (d) Radarr has no operationIds or summaries and mode a gave the same counts as mech there (211 exact, 26 too tight of 240). (e) Same-model labellers (both Sonnet) show consistency, not truth.
 - Where: docs/wiki/exam-prereg-exam6.md (results section), data/exam6-2026-11-08/score/ (score.txt, rows-mech.csv, rows-a.csv, rows-b95.csv), data/exam6-2026-11-08/truth.csv.
+
+## 2026-11-09 — Mode b confidence sweep (rwxlite 0.3.1): 85 is the exam #7 candidate (D140)
+
+- What: swept rwxmap 0.11.0 mode b (`--engine rwxlite --confidence C`, rwxlite 0.3.1 fp32, model rwxlite-0.3.1+bbe1997d) over C = 99, 97, 95, 93, 90, 85, 80, 75, 70 on exams #5 and #6 (both burned, so tuning; N 3031, 12 vendors). Parity first: exam6 mode b 95 matched rows-b95.csv 1588/1588 (letters and markers), exam6 mech matched rows-mech.csv 1588/1588, exam5 mech matched rows-mech-v4.csv 1443/1443. Joins were 1:1 with 0 unmatched and 0 duplicates. Truth sha256 verified. Script and readout: poc/mode-b-r13/ (readout.txt).
+- Pooled exam5+exam6 (N 3031), as printed in the readout:
+
+```
+cut     | exact          | loose-1      | loose-2      | too loose    | too tight      | undecided      | lowered        | raised
+mech    | 2506  82.7% |   82   2.7% |   20   0.7% |  102   3.4% |  423  14.0% |       -       |       -       |       -
+b 99    | 1891  62.4% |    3   0.1% |    4   0.1% |    7   0.2% | 1133  37.4% | 1495  49.3% |    0   0.0% |   13   0.4%
+b 97    | 2325  76.7% |   12   0.4% |    5   0.2% |   17   0.6% |  689  22.7% |  966  31.9% |   53   1.7% |   20   0.7%
+b 95    | 2496  82.3% |   23   0.8% |    6   0.2% |   29   1.0% |  506  16.7% |  735  24.2% |  119   3.9% |   28   0.9%
+b 93    | 2573  84.9% |   28   0.9% |    6   0.2% |   34   1.1% |  424  14.0% |  616  20.3% |  166   5.5% |   35   1.2%
+b 90    | 2645  87.3% |   32   1.1% |    6   0.2% |   38   1.3% |  348  11.5% |  497  16.4% |  211   7.0% |   42   1.4%
+b 85    | 2693  88.8% |   46   1.5% |    6   0.2% |   52   1.7% |  286   9.4% |  377  12.4% |  252   8.3% |   50   1.6%
+b 80    | 2704  89.2% |   53   1.7% |    6   0.2% |   59   1.9% |  268   8.8% |  315  10.4% |  264   8.7% |   59   1.9%
+b 75    | 2717  89.6% |   63   2.1% |    6   0.2% |   69   2.3% |  245   8.1% |  250   8.2% |  283   9.3% |   62   2.0%
+b 70    | 2718  89.7% |   71   2.3% |    8   0.3% |   79   2.6% |  234   7.7% |  200   6.6% |  291   9.6% |   66   2.2%
+```
+
+- Three settings (pooled, of 3031 rows; undecided = asks, scored as x; vendors made worse = vendors whose too-loose count is above mechanical's, of 12):
+
+| setting | exact | too loose | too tight | undecided (asks) | vendors worse |
+|---|---|---|---|---|---|
+| 90 (cautious) | 2645 (87.3%) | 38 (1.3%) | 348 (11.5%) | 497 (16.4%) | 0 |
+| 85 (balanced, default candidate) | 2693 (88.8%) | 52 (1.7%) | 286 (9.4%) | 377 (12.4%) | 0 |
+| 70 (fewest asks) | 2718 (89.7%) | 79 (2.6%) | 234 (7.7%) | 200 (6.6%) | 4 |
+| mech | 2506 (82.7%) | 102 (3.4%) | 423 (14.0%) | none | n/a |
+
+- Going lower: 95 to 85 adds 197 exact (2496 to 2693) and nearly halves the asks (735 to 377) for 23 more leaks (29 to 52), and no vendor is worse than mechanical. 85 to 75 adds 24 exact (2693 to 2717) for 17 more leaks (52 to 69), and vendors start to get worse: hookdeck at 80 (3 vs 2 too loose), cloudsmith and paddle at 75 (5 vs 4, 6 vs 5), semaphoreui at 70 (6 vs 4). At 70 exact plateaus (2717 at 75, 2718 at 70) while leaks rise by 10 (69 to 79) and loose-2 rises from 6 to 8. Below 70 was not measured.
+- Finding: mode b judges every row, including the settled GETs that mode a never sends. On exam #6 at 85 its loose-2 is 6 of 1588, against 18 for mode a and 18 for mech. Exam #6 at 85 is 1424 exact (89.7%) / 19 too loose (1.2%) / 145 too tight (9.1%), against mode a 1434 exact (90.3%) / 35 too loose (2.2%) / 119 too tight (7.5%). Mode b at 85 gives up 10 exact and halves the leaks (19 vs 35). Fitted: both exams are burned tuning data.
+- Ruling (user, 2026-11-09): the pre-registered rule (pooled too loose and loose-2 no higher than mech) passed every cut from 99 to 70 and picked 70. The user ruled 85 instead: the lowest cut with 0 of 12 vendors made worse than mech. The rule lacked a per-vendor test. Future pick rules must include one. D140 (candidate, not built): mode b default moves from 95 to 85; ships only after exam #7 scores it.
+- Lesson: (a) A pooled pick rule is blind to vendor spread: the rule passed at 70 while 4 vendors leaked more than mech. Write the per-vendor test into the rule before the run. (b) A pre-set rule that passes at every cut picks nothing; it picked the loosest end. (c) Exact plateaus before leaks stop rising (2717 at 75, 2718 at 70), so the last cuts buy asks, not accuracy. (d) Mode b sees settled rows, which is why its loose-2 is lower than mode a's.
+- Where: poc/mode-b-r13/ (readout.txt).

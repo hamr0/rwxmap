@@ -1014,6 +1014,14 @@ decided; everything marked "proposal" or "open" is not decided.
     (0.6%), 207 too tight (21.8%). Too loose and too tight are never
     folded into one number. The default fp32 model will shift these
     slightly (rwxlite: 7 rows differ); re-measure on the next exam.
+
+    Candidate (D140, user ruling 2026-11-09, not built): default 85 for
+    rwxlite 0.3.1. Swept on exams #5 and #6 (burned, tuning; 3031 rows,
+    12 vendors), 85 gives 2693 exact (88.8%), 52 too loose (1.7%), 286
+    too tight (9.4%) and 377 asks (12.4%), against 95's 2496 / 29 / 506
+    and 735 asks; no vendor leaks more than mechanical. 90 (cautious)
+    and 70 (fewest asks) stay documented. 95 stays the shipped default
+    until exam #7.
   - **c: mechanical -> Jev (paid, BYOK).** Same flow and scope as mode
     a, with Jev deciding instead of rwxlite. Undecided means x plus
     review. Jev's cut-offs stay as measured (tiers, separate questions,
@@ -1309,6 +1317,8 @@ Next, in order:
    item by item.
 2. A new exam #7 for any change (exams #5 and #6 are burned; bunny.net is
    spent).
+3. Exam #7 scores the D140 build (mode b default 85) alongside anything
+   else that changes.
 
 Parked items and known limits below.
 
