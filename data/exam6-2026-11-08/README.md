@@ -7,8 +7,8 @@ commit SHAs and sha256 of the original bytes).
 
 Rule (D132): each spec is the vendor's OWN official OpenAPI, from the vendor's
 domain or the vendor's official GitHub org. Not APIs.guru, no mirrors, no
-GraphQL/IDL. Files in `specs/` are the original bytes, untouched; none is over
-5 MB, so none is gzipped. GitHub-hosted specs are fetched from
+GraphQL/IDL. Files in `specs/` are the original bytes, untouched, except grafana and
+invoiceninja, which are gzipped (see below). GitHub-hosted specs are fetched from
 raw.githubusercontent.com at the commit SHA (immutable); the branch it came from
 is recorded beside the SHA. cloudsmith is fetched from its vendor API host
 (`api.cloudsmith.io`), a live URL with no commit, so its sha256 is the only pin.
@@ -37,6 +37,17 @@ raw path); nothing is deduped by collapsing `{param}`.
 - The shortlist counted 1,587 deduped ops. This build keeps raw ops, so the total
   is 1,588: nocodb has one pair of paths that differ only in a parameter name
   (279 raw, 278 deduped). Both rows are kept, as exam #5 did.
+- grafana and invoiceninja are stored as `specs/grafana.json.gz` and
+  `specs/invoiceninja.yaml.gz` (`gzip -n -9` of the original; the plain files
+  were removed). GitHub push protection flagged placeholder example values in
+  them: grafana's `glsa_iNValIdinValiD...` key example and invoiceninja's
+  `hooks.slack.com/services/T00000000/...` example. The uncompressed bytes are
+  unchanged. In `sources.json` `sha256` and `bytes` are of the UNCOMPRESSED
+  original; `sha256_gz` and `bytes_gz` describe the file on disk: grafana
+  `3989d3925b7be3b277d9a83a3dc043eb5cfea432b6e3914357a371c0d3da3dcb` (71,021),
+  invoiceninja `4b5970486784c602beb0e3e9e704d16dcf56fa48bb3538b50cb0af7294ef8418`
+  (94,904). `build-ops.mjs` compares against `sha256_gz` when present, and
+  `loadSpec` reads the gzip directly.
 - Provider values are the vendor's registrable domain. grafana.com is the spec's
   contact (`hello@grafana.com`; its servers are relative `/api`). nocodb.com is
   the server `app.nocodb.com`. cloudsmith.io is the swagger host
