@@ -82,6 +82,7 @@ Each exam was scored once, through the real CLI, on complete official APIs the r
 - Exam #6 (2026-11-08): grafana, nocodb, radarr, cloudsmith, invoiceninja, run from the npm install. Two Sonnet labellers labelled blind and agreed on 1564 rows; a person ruled the other 24. Same-model agreement shows consistency, not truth. Radarr's spec has no operation names, so its rows rest on method and path.
 - Mode c comes from exam #3 (2026-11-04, 7 other APIs, older truth and rules), so it does not compare directly, and Jev can answer differently on the next run.
 - The 0.90 cut was tuned on exam #5 (mode a 1269 / 40 / 134 of 1443) and held on exam #6. An exam is used up once scored.
+- For mode b, `--confidence` sets the trade-off. On 3031 tuning rows across 12 vendors, at 90 and at 85 no vendor leaked more than mechanical, and 85 sent 12% of rows back for review against 24% at the default 95; 70 asks least (7%) but four vendors leaked more. Tuning numbers, not an exam.
 
 ## Ways to use it
 
