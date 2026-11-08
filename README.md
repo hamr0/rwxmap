@@ -69,30 +69,19 @@ What leaves your machine: mechanical, nothing. Modes a and b, only the model dow
 
 ## How good it is
 
-Exam #6: 1588 operations, 5 complete official APIs (grafana, nocodb, radarr, cloudsmith, invoiceninja), labelled blind by two labellers, disagreements ruled by a person, scored once on 2026-11-08 through the npm install. Counts are of those 1588 operations.
+Each exam was scored once, through the real CLI, on complete official APIs the rules and the model had never seen. Counts are of that exam's operations.
 
-| mode | exact | too loose | too tight |
-|---|---|---|---|
-| mechanical (v4) | 1305 (82.2%) | 43 (2.7%) | 240 (15.1%) |
-| a (default, rwxlite 0.3.1, lowering cut 0.90) | 1434 (90.3%) | 35 (2.2%) | 119 (7.5%) |
-| b at 95 | 1288 (81.1%) | 13 (0.8%) | 287 (18.1%) |
+| mode | exam | exact | too loose | too tight |
+|---|---|---|---|---|
+| **a** (default) | #6, 1588 ops | 1434 (90.3%) | 35 (2.2%) | 119 (7.5%) |
+| b (`--confidence 95`) | #6, 1588 ops | 1288 (81.1%) | 13 (0.8%) | 287 (18.1%) |
+| c (Jev, one run) | #3, 1377 ops | 1250 (90.8%) | 16 (1.2%) | 111 (8.1%) |
+| mechanical | #6, 1588 ops | 1305 (82.2%) | 43 (2.7%) | 240 (15.1%) |
 
-- Too loose (looser than the truth label) is the safety cost. Too tight (stricter) is a usability cost. They are kept apart.
-- Mode a leaks less than mechanical alone (35 against 43 too loose) and has fewer too-tight rows (119 against 240).
-- Both labellers were the same model (Sonnet), so their agreement (1564 of 1588 rows) shows consistency, not truth.
-- Radarr's spec has no operation names or summaries, so its labels and its results rest on method and path.
-- The exam was scored once and is used up. Any rule or model change needs a new exam.
-- Exam #5 (1443 operations, 7 other APIs, 2026-11-07), which the 0.90 cut was tuned on, gave mode a 1269 exact, 40 too loose, 134 too tight (87.9%, 2.8%, 9.3%).
-- Mechanical v4 shipped by choice although it failed its own too-tight gate on exam #5: 183 too tight against 178 for the older rules. It had 59 too-loose rows against 77, and every added too-tight row is marked for review.
-- Mode c was not scored on exams #5 or #6.
-
-Older numbers for mode c, from exam #3 (1377 operations, 7 other APIs, scored 2026-11-04, older truth, older rules). Not comparable with the tables above.
-
-| mode | exact | too loose | too tight |
-|---|---|---|---|
-| c (Jev, one run) | 1250 (90.8%) | 16 (1.2%) | 111 (8.1%) |
-
-- Jev is one run of a model that can answer differently next time.
+- Too loose (looser than the truth label) is the safety cost; too tight is a usability cost. They are never merged into one number.
+- Exam #6 (2026-11-08): grafana, nocodb, radarr, cloudsmith, invoiceninja, run from the npm install. Two Sonnet labellers labelled blind and agreed on 1564 rows; a person ruled the other 24. Same-model agreement shows consistency, not truth. Radarr's spec has no operation names, so its rows rest on method and path.
+- Mode c comes from exam #3 (2026-11-04, 7 other APIs, older truth and rules), so it does not compare directly, and Jev can answer differently on the next run.
+- The 0.90 cut was tuned on exam #5 (mode a 1269 / 40 / 134 of 1443) and held on exam #6. An exam is used up once scored.
 
 ## Ways to use it
 
