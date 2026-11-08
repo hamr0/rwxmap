@@ -69,25 +69,27 @@ What leaves your machine: mechanical, nothing. Modes a and b, only the model dow
 
 ## How good it is
 
-Exam #5: 1443 operations, 7 complete official APIs (frontapp, planetscale, paddle, hookdeck, fusionauth, semaphoreui, weaviate), labelled blind, scored once on 2026-11-07. Counts are of those 1443 operations.
+Exam #6: 1588 operations, 5 complete official APIs (grafana, nocodb, radarr, cloudsmith, invoiceninja), labelled blind by two labellers, disagreements ruled by a person, scored once on 2026-11-08 through the npm install. Counts are of those 1588 operations.
 
 | mode | exact | too loose | too tight |
 |---|---|---|---|
-| mechanical (v4) | 1201 (83.2%) | 59 (4.1%) | 183 (12.7%) |
-| a (default, rwxlite 0.3.1, lowering cut 0.90) | 1269 (87.9%) | 40 (2.8%) | 134 (9.3%) |
+| mechanical (v4) | 1305 (82.2%) | 43 (2.7%) | 240 (15.1%) |
+| a (default, rwxlite 0.3.1, lowering cut 0.90) | 1434 (90.3%) | 35 (2.2%) | 119 (7.5%) |
+| b at 95 | 1288 (81.1%) | 13 (0.8%) | 287 (18.1%) |
 
 - Too loose (looser than the truth label) is the safety cost. Too tight (stricter) is a usability cost. They are kept apart.
-- On this exam mode a leaks less than mechanical alone (40 against 59 too loose) and has fewer too-tight rows (134 against 183).
-- The mode a row is rwxlite 0.3.1 at the 0.90 cut, run through the real install after the exam was scored. The exam itself scored it at the 0.97 cut as 1220 exact, 37 too loose, 186 too tight. The 0.90 cut was tuned on this exam and on rwxlite's validation set, so it is not yet proven on unseen vendors (D139).
-- Mechanical v4 shipped by choice although it failed its own too-tight gate: 183 too tight against 178 for the older rules. It has 59 too-loose rows against 77, and every added too-tight row is marked for review.
+- Mode a leaks less than mechanical alone (35 against 43 too loose) and has fewer too-tight rows (119 against 240).
+- Both labellers were the same model (Sonnet), so their agreement (1564 of 1588 rows) shows consistency, not truth.
+- Radarr's spec has no operation names or summaries, so its labels and its results rest on method and path.
 - The exam was scored once and is used up. Any rule or model change needs a new exam.
-- Modes b and c were not scored on this exam.
+- Exam #5 (1443 operations, 7 other APIs, 2026-11-07), which the 0.90 cut was tuned on, gave mode a 1269 exact, 40 too loose, 134 too tight (87.9%, 2.8%, 9.3%).
+- Mechanical v4 shipped by choice although it failed its own too-tight gate on exam #5: 183 too tight against 178 for the older rules. It had 59 too-loose rows against 77, and every added too-tight row is marked for review.
+- Mode c was not scored on exams #5 or #6.
 
-Older numbers for modes b and c, from exam #3 (1377 operations, 7 other APIs, scored 2026-11-04, older truth, older rules). Not comparable with the table above.
+Older numbers for mode c, from exam #3 (1377 operations, 7 other APIs, scored 2026-11-04, older truth, older rules). Not comparable with the tables above.
 
 | mode | exact | too loose | too tight |
 |---|---|---|---|
-| b at 95 | 1181 (85.8%) | 14 (1.0%) | 182 (13.2%) |
 | c (Jev, one run) | 1250 (90.8%) | 16 (1.2%) | 111 (8.1%) |
 
 - Jev is one run of a model that can answer differently next time.

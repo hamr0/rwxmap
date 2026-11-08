@@ -1296,17 +1296,25 @@ README/CHANGELOG/package.json metadata. Real install on exam #5 (npm
 ops, exact / too loose / too tight: 1269 / 40 (38 loose-1, 2 loose-2) /
 134; 78 lowered, 63 undecided; equal to the replay at 0.90. Against the
 scored 0.2.0 at 0.97 (1272 / 94 / 77) too loose falls from 94 to 40 and too
-tight rises from 77 to 134. The 0.90 cut is tuned on burned exam #5 and
-rwxlite's val set, not proven on unseen vendors.
+tight rises from 77 to 134 (exam #5, where the 0.90 cut was tuned).
+
+Current number (exam #6, scored once 2026-11-08 through the npm install,
+rwxmap 0.11.0 + rwxlite 0.3.1, 1588 ops, 5 unseen APIs: grafana, nocodb,
+radarr, cloudsmith, invoiceninja; two Sonnet labellers agreed on 1564 rows,
+the user ruled 24): mode a 1434 exact (90.3%) / 35 too loose (2.2%) / 119
+too tight (7.5%); mechanical 1305 (82.2%) / 43 (2.7%) / 240 (15.1%); mode b
+at 95 1288 (81.1%) / 13 (0.8%) / 287 (18.1%). The D133 mode a bar passes
+both halves (35 <= 43; 1434 >= 1385). The 0.90 cut held on unseen vendors.
+GET stays as is (user ruling 2026-11-08), see learnings.
 
 Next, in order:
 
 1. Release: README "what x covers" section and headline numbers
-   updated to exam #5 (v4 mechanical 83.2% exact / 4.1% too loose /
-   12.7% too tight of 1443), then `docs/product/release-checklist.md`
+   updated to exam #6 (mode a 1434 exact / 35 too loose / 119 too
+   tight of 1588), then `docs/product/release-checklist.md`
    item by item.
-2. A new exam #6 for any change (exam #5 is burned; bunny.net is spent;
-   unused shortlist vendors: grafana, nocodb, radarr).
+2. A new exam #7 for any change (exams #5 and #6 are burned; bunny.net is
+   spent).
 
 Parked items and known limits below.
 

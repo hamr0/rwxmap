@@ -1,0 +1,159 @@
+exam #6 scorer · run 2026-11-08T20:19:30.438Z
+scratch npm: rwxmap 0.11.0 (sha512-7PtWeh4kUAa0uocxkCL+DAuo+RA/fTzM4TzkzAUAzMp2xszk8nZikCsdXICBbkfaZj28ZgGcmb/SE+r9g8pLRQ==) · rwxlite 0.3.1 (sha512-+tuCAYS0WgxC3bDd2AawJnsgVM9V6R3hkWPv1c6EdQG+MhhfQXlpfL4tcL6/nzcVQELzNRbOUXHFHFsE0+rlZw==)
+model string seen: rwxlite-0.3.1+bbe1997d
+truth.csv sha256 cc4c22c5130c118a46a144b6650f8d7ee123363a74aa35c01b170fd83c48a183 (verified) · N 1588
+
+== mech ==  model(s): (none)
+join: matched 1588 · unmatched ops 0 · unmatched output 0 · duplicate keys 0 · skipped 0
+overall            n 1588 · exact 1305 (82.2%) · loose-1 25 (1.6%) · loose-2 18 (1.1%) · TOO LOOSE 43 (2.7%) · TOO TIGHT 240 (15.1%)
+markers on the 43 too-loose rows: tight 0 · loose 29 · settled 14
+by vendor:
+  cloudsmith.io      n  376 · exact 300 (79.8%) · loose-1 3 (0.8%) · loose-2 1 (0.3%) · TOO LOOSE 4 (1.1%) · TOO TIGHT 72 (19.1%)
+  grafana.com        n  314 · exact 267 (85.0%) · loose-1 12 (3.8%) · loose-2 3 (1.0%) · TOO LOOSE 15 (4.8%) · TOO TIGHT 32 (10.2%)
+  invoiceninja.com   n  379 · exact 318 (83.9%) · loose-1 3 (0.8%) · loose-2 13 (3.4%) · TOO LOOSE 16 (4.2%) · TOO TIGHT 45 (11.9%)
+  nocodb.com         n  279 · exact 209 (74.9%) · loose-1 4 (1.4%) · loose-2 1 (0.4%) · TOO LOOSE 5 (1.8%) · TOO TIGHT 65 (23.3%)
+  radarr.video       n  240 · exact 211 (87.9%) · loose-1 3 (1.3%) · loose-2 0 (0.0%) · TOO LOOSE 3 (1.3%) · TOO TIGHT 26 (10.8%)
+by method:
+  DELETE             n  177 · exact 174 (98.3%) · loose-1 0 (0.0%) · loose-2 0 (0.0%) · TOO LOOSE 0 (0.0%) · TOO TIGHT 3 (1.7%)
+  GET                n  666 · exact 652 (97.9%) · loose-1 1 (0.2%) · loose-2 13 (2.0%) · TOO LOOSE 14 (2.1%) · TOO TIGHT 0 (0.0%)
+  HEAD               n    1 · exact 1 (100.0%) · loose-1 0 (0.0%) · loose-2 0 (0.0%) · TOO LOOSE 0 (0.0%) · TOO TIGHT 0 (0.0%)
+  PATCH              n   90 · exact 75 (83.3%) · loose-1 7 (7.8%) · loose-2 0 (0.0%) · TOO LOOSE 7 (7.8%) · TOO TIGHT 8 (8.9%)
+  POST               n  519 · exact 280 (53.9%) · loose-1 9 (1.7%) · loose-2 5 (1.0%) · TOO LOOSE 14 (2.7%) · TOO TIGHT 225 (43.4%)
+  PUT                n  135 · exact 123 (91.1%) · loose-1 8 (5.9%) · loose-2 0 (0.0%) · TOO LOOSE 8 (5.9%) · TOO TIGHT 4 (3.0%)
+every too-loose row (43): id | vendor | method | path | truth | predicted | marker
+  ex6-0069 | cloudsmith.io | GET | /orgs/{org}/members/{member}/remove/ | x | r | settled
+  ex6-0214 | cloudsmith.io | PUT | /repos/{owner}/{identifier}/geoip | x | w | loose
+  ex6-0223 | cloudsmith.io | PATCH | /repos/{owner}/{identifier}/privileges | x | w | loose
+  ex6-0224 | cloudsmith.io | PUT | /repos/{owner}/{identifier}/privileges | x | w | loose
+  ex6-0404 | grafana.com | POST | /admin/ldap/sync/{user_id} | x | w | loose
+  ex6-0441 | grafana.com | POST | /cloudmigration/migration/{uid}/snapshot/{snapshotUid}/upload | x | w | loose
+  ex6-0498 | grafana.com | PUT | /datasources/uid/{uid}/lbac/teams | x | w | loose
+  ex6-0531 | grafana.com | GET | /logout/saml | x | r | settled
+  ex6-0543 | grafana.com | POST | /org/users | x | w | loose
+  ex6-0546 | grafana.com | PATCH | /org/users/{user_id} | x | w | loose
+  ex6-0557 | grafana.com | POST | /orgs/{org_id}/users | x | w | loose
+  ex6-0560 | grafana.com | PATCH | /orgs/{org_id}/users/{user_id} | x | w | loose
+  ex6-0599 | grafana.com | GET | /saml/slo | x | r | settled
+  ex6-0614 | grafana.com | GET | /snapshots-delete/{deleteKey} | x | r | settled
+  ex6-0621 | grafana.com | POST | /teams/{teamId}/groups | x | w | loose
+  ex6-0636 | grafana.com | GET | /user/email/update | w | r | settled
+  ex6-0666 | grafana.com | PUT | /v1/provisioning/contact-points/{UID} | x | w | loose
+  ex6-0689 | grafana.com | PATCH | /v1/sso-settings/{key} | x | w | loose
+  ex6-0690 | grafana.com | PUT | /v1/sso-settings/{key} | x | w | loose
+  ex6-0702 | invoiceninja.com | POST | /api/v1/bank_integrations/refresh_accounts | x | r | loose
+  ex6-0703 | invoiceninja.com | POST | /api/v1/bank_integrations/remove_account/account_id | x | r | loose
+  ex6-0720 | invoiceninja.com | POST | /api/v1/bank_transactions/match | w | r | loose
+  ex6-0729 | invoiceninja.com | GET | /api/v1/claim_license | x | r | settled
+  ex6-0808 | invoiceninja.com | POST | /api/v1/export | x | r | loose
+  ex6-0821 | invoiceninja.com | POST | /api/v1/import_json | x | r | loose
+  ex6-0829 | invoiceninja.com | PUT | /api/v1/invoices/{id} | x | w | loose
+  ex6-0833 | invoiceninja.com | GET | /api/v1/invoices/{id}/{action} | x | r | settled
+  ex6-0843 | invoiceninja.com | POST | /api/v1/logout | x | r | loose
+  ex6-0867 | invoiceninja.com | GET | /api/v1/payments/{id}/{action} | x | r | settled
+  ex6-0901 | invoiceninja.com | GET | /api/v1/purchase_orders/{id}/{action} | x | r | settled
+  ex6-0909 | invoiceninja.com | PUT | /api/v1/quotes/{id} | x | w | loose
+  ex6-0912 | invoiceninja.com | GET | /api/v1/quotes/{id}/{action} | x | r | settled
+  ex6-0933 | invoiceninja.com | GET | /api/v1/recurring_invoices/{id}/{action} | x | r | settled
+  ex6-0942 | invoiceninja.com | GET | /api/v1/recurring_quotes/{id}/{action} | x | r | settled
+  ex6-1060 | invoiceninja.com | GET | /api/v1/webcron | x | r | settled
+  ex6-1073 | nocodb.com | POST | /api/v1/auth/email/validate/{token} | w | r | loose
+  ex6-1196 | nocodb.com | PATCH | /api/v1/db/meta/projects/{baseId}/users/{userId} | x | w | loose
+  ex6-1274 | nocodb.com | PATCH | /api/v1/users/{userId} | x | w | loose
+  ex6-1291 | nocodb.com | PATCH | /api/v1/workspaces/{workspaceId}/users/{userId} | x | w | loose
+  ex6-1312 | nocodb.com | GET | /api/v2/internal/:workspaceId/:baseId | x | r | settled
+  ex6-1520 | radarr.video | PUT | /api/v3/notification/{id} | x | w | loose
+  ex6-1559 | radarr.video | POST | /api/v3/system/backup/restore/upload | x | w | loose
+  ex6-1560 | radarr.video | POST | /api/v3/system/backup/restore/{id} | x | w | loose
+
+== a ==  model(s): rwxlite-0.3.1+bbe1997d
+join: matched 1588 · unmatched ops 0 · unmatched output 0 · duplicate keys 0 · skipped 0
+overall            n 1588 · exact 1434 (90.3%) · loose-1 17 (1.1%) · loose-2 18 (1.1%) · TOO LOOSE 35 (2.2%) · TOO TIGHT 119 (7.5%)
+rwxlite: sent 745 · raised 21 · lowered 133 · kept 516 · undecided (asked, scored x) 75
+markers on the 35 too-loose rows: tight 0 · loose 21 · settled 14
+by vendor:
+  cloudsmith.io      n  376 · exact 345 (91.8%) · loose-1 3 (0.8%) · loose-2 1 (0.3%) · TOO LOOSE 4 (1.1%) · TOO TIGHT 27 (7.2%)
+  grafana.com        n  314 · exact 285 (90.8%) · loose-1 6 (1.9%) · loose-2 3 (1.0%) · TOO LOOSE 9 (2.9%) · TOO TIGHT 20 (6.4%)
+  invoiceninja.com   n  379 · exact 339 (89.4%) · loose-1 2 (0.5%) · loose-2 13 (3.4%) · TOO LOOSE 15 (4.0%) · TOO TIGHT 25 (6.6%)
+  nocodb.com         n  279 · exact 254 (91.0%) · loose-1 3 (1.1%) · loose-2 1 (0.4%) · TOO LOOSE 4 (1.4%) · TOO TIGHT 21 (7.5%)
+  radarr.video       n  240 · exact 211 (87.9%) · loose-1 3 (1.3%) · loose-2 0 (0.0%) · TOO LOOSE 3 (1.3%) · TOO TIGHT 26 (10.8%)
+by method:
+  DELETE             n  177 · exact 174 (98.3%) · loose-1 0 (0.0%) · loose-2 0 (0.0%) · TOO LOOSE 0 (0.0%) · TOO TIGHT 3 (1.7%)
+  GET                n  666 · exact 652 (97.9%) · loose-1 1 (0.2%) · loose-2 13 (2.0%) · TOO LOOSE 14 (2.1%) · TOO TIGHT 0 (0.0%)
+  HEAD               n    1 · exact 1 (100.0%) · loose-1 0 (0.0%) · loose-2 0 (0.0%) · TOO LOOSE 0 (0.0%) · TOO TIGHT 0 (0.0%)
+  PATCH              n   90 · exact 77 (85.6%) · loose-1 2 (2.2%) · loose-2 0 (0.0%) · TOO LOOSE 2 (2.2%) · TOO TIGHT 11 (12.2%)
+  POST               n  519 · exact 408 (78.6%) · loose-1 10 (1.9%) · loose-2 5 (1.0%) · TOO LOOSE 15 (2.9%) · TOO TIGHT 96 (18.5%)
+  PUT                n  135 · exact 122 (90.4%) · loose-1 4 (3.0%) · loose-2 0 (0.0%) · TOO LOOSE 4 (3.0%) · TOO TIGHT 9 (6.7%)
+every too-loose row (35): id | vendor | method | path | truth | predicted | marker
+  ex6-0069 | cloudsmith.io | GET | /orgs/{org}/members/{member}/remove/ | x | r | settled
+  ex6-0089 | cloudsmith.io | POST | /orgs/{org}/services/ | x | w | loose
+  ex6-0214 | cloudsmith.io | PUT | /repos/{owner}/{identifier}/geoip | x | w | loose
+  ex6-0215 | cloudsmith.io | POST | /repos/{owner}/{identifier}/geoip/disable/ | x | w | loose
+  ex6-0441 | grafana.com | POST | /cloudmigration/migration/{uid}/snapshot/{snapshotUid}/upload | x | w | loose
+  ex6-0531 | grafana.com | GET | /logout/saml | x | r | settled
+  ex6-0546 | grafana.com | PATCH | /org/users/{user_id} | x | w | loose
+  ex6-0599 | grafana.com | GET | /saml/slo | x | r | settled
+  ex6-0614 | grafana.com | GET | /snapshots-delete/{deleteKey} | x | r | settled
+  ex6-0621 | grafana.com | POST | /teams/{teamId}/groups | x | w | loose
+  ex6-0636 | grafana.com | GET | /user/email/update | w | r | settled
+  ex6-0663 | grafana.com | POST | /v1/provisioning/contact-points | x | w | loose
+  ex6-0666 | grafana.com | PUT | /v1/provisioning/contact-points/{UID} | x | w | loose
+  ex6-0702 | invoiceninja.com | POST | /api/v1/bank_integrations/refresh_accounts | x | r | loose
+  ex6-0703 | invoiceninja.com | POST | /api/v1/bank_integrations/remove_account/account_id | x | r | loose
+  ex6-0720 | invoiceninja.com | POST | /api/v1/bank_transactions/match | w | r | loose
+  ex6-0729 | invoiceninja.com | GET | /api/v1/claim_license | x | r | settled
+  ex6-0808 | invoiceninja.com | POST | /api/v1/export | x | r | loose
+  ex6-0821 | invoiceninja.com | POST | /api/v1/import_json | x | r | loose
+  ex6-0833 | invoiceninja.com | GET | /api/v1/invoices/{id}/{action} | x | r | settled
+  ex6-0843 | invoiceninja.com | POST | /api/v1/logout | x | r | loose
+  ex6-0867 | invoiceninja.com | GET | /api/v1/payments/{id}/{action} | x | r | settled
+  ex6-0901 | invoiceninja.com | GET | /api/v1/purchase_orders/{id}/{action} | x | r | settled
+  ex6-0909 | invoiceninja.com | PUT | /api/v1/quotes/{id} | x | w | loose
+  ex6-0912 | invoiceninja.com | GET | /api/v1/quotes/{id}/{action} | x | r | settled
+  ex6-0933 | invoiceninja.com | GET | /api/v1/recurring_invoices/{id}/{action} | x | r | settled
+  ex6-0942 | invoiceninja.com | GET | /api/v1/recurring_quotes/{id}/{action} | x | r | settled
+  ex6-1060 | invoiceninja.com | GET | /api/v1/webcron | x | r | settled
+  ex6-1073 | nocodb.com | POST | /api/v1/auth/email/validate/{token} | w | r | loose
+  ex6-1241 | nocodb.com | POST | /api/v1/db/meta/views/{viewId}/show-all | w | r | loose
+  ex6-1291 | nocodb.com | PATCH | /api/v1/workspaces/{workspaceId}/users/{userId} | x | w | loose
+  ex6-1312 | nocodb.com | GET | /api/v2/internal/:workspaceId/:baseId | x | r | settled
+  ex6-1520 | radarr.video | PUT | /api/v3/notification/{id} | x | w | loose
+  ex6-1559 | radarr.video | POST | /api/v3/system/backup/restore/upload | x | w | loose
+  ex6-1560 | radarr.video | POST | /api/v3/system/backup/restore/{id} | x | w | loose
+
+== b95 ==  model(s): rwxlite-0.3.1+bbe1997d
+join: matched 1588 · unmatched ops 0 · unmatched output 0 · duplicate keys 0 · skipped 0
+overall            n 1588 · exact 1288 (81.1%) · loose-1 7 (0.4%) · loose-2 6 (0.4%) · TOO LOOSE 13 (0.8%) · TOO TIGHT 287 (18.1%)
+rwxlite: sent 1588 · raised 6 · lowered 75 · kept 1090 · undecided (asked, scored x) 417
+markers on the 13 too-loose rows: tight 0 · loose 12 · settled 1
+by vendor:
+  cloudsmith.io      n  376 · exact 306 (81.4%) · loose-1 1 (0.3%) · loose-2 0 (0.0%) · TOO LOOSE 1 (0.3%) · TOO TIGHT 69 (18.4%)
+  grafana.com        n  314 · exact 270 (86.0%) · loose-1 3 (1.0%) · loose-2 0 (0.0%) · TOO LOOSE 3 (1.0%) · TOO TIGHT 41 (13.1%)
+  invoiceninja.com   n  379 · exact 266 (70.2%) · loose-1 1 (0.3%) · loose-2 6 (1.6%) · TOO LOOSE 7 (1.8%) · TOO TIGHT 106 (28.0%)
+  nocodb.com         n  279 · exact 247 (88.5%) · loose-1 2 (0.7%) · loose-2 0 (0.0%) · TOO LOOSE 2 (0.7%) · TOO TIGHT 30 (10.8%)
+  radarr.video       n  240 · exact 199 (82.9%) · loose-1 0 (0.0%) · loose-2 0 (0.0%) · TOO LOOSE 0 (0.0%) · TOO TIGHT 41 (17.1%)
+by method:
+  DELETE             n  177 · exact 174 (98.3%) · loose-1 0 (0.0%) · loose-2 0 (0.0%) · TOO LOOSE 0 (0.0%) · TOO TIGHT 3 (1.7%)
+  GET                n  666 · exact 610 (91.6%) · loose-1 0 (0.0%) · loose-2 1 (0.2%) · TOO LOOSE 1 (0.2%) · TOO TIGHT 55 (8.3%)
+  HEAD               n    1 · exact 0 (0.0%) · loose-1 0 (0.0%) · loose-2 0 (0.0%) · TOO LOOSE 0 (0.0%) · TOO TIGHT 1 (100.0%)
+  PATCH              n   90 · exact 70 (77.8%) · loose-1 0 (0.0%) · loose-2 0 (0.0%) · TOO LOOSE 0 (0.0%) · TOO TIGHT 20 (22.2%)
+  POST               n  519 · exact 336 (64.7%) · loose-1 6 (1.2%) · loose-2 5 (1.0%) · TOO LOOSE 11 (2.1%) · TOO TIGHT 172 (33.1%)
+  PUT                n  135 · exact 98 (72.6%) · loose-1 1 (0.7%) · loose-2 0 (0.0%) · TOO LOOSE 1 (0.7%) · TOO TIGHT 36 (26.7%)
+every too-loose row (13): id | vendor | method | path | truth | predicted | marker
+  ex6-0215 | cloudsmith.io | POST | /repos/{owner}/{identifier}/geoip/disable/ | x | w | loose
+  ex6-0441 | grafana.com | POST | /cloudmigration/migration/{uid}/snapshot/{snapshotUid}/upload | x | w | loose
+  ex6-0663 | grafana.com | POST | /v1/provisioning/contact-points | x | w | loose
+  ex6-0666 | grafana.com | PUT | /v1/provisioning/contact-points/{UID} | x | w | loose
+  ex6-0702 | invoiceninja.com | POST | /api/v1/bank_integrations/refresh_accounts | x | r | loose
+  ex6-0703 | invoiceninja.com | POST | /api/v1/bank_integrations/remove_account/account_id | x | r | loose
+  ex6-0720 | invoiceninja.com | POST | /api/v1/bank_transactions/match | w | r | loose
+  ex6-0729 | invoiceninja.com | GET | /api/v1/claim_license | x | r | settled
+  ex6-0808 | invoiceninja.com | POST | /api/v1/export | x | r | loose
+  ex6-0821 | invoiceninja.com | POST | /api/v1/import_json | x | r | loose
+  ex6-0843 | invoiceninja.com | POST | /api/v1/logout | x | r | loose
+  ex6-1073 | nocodb.com | POST | /api/v1/auth/email/validate/{token} | w | r | loose
+  ex6-1241 | nocodb.com | POST | /api/v1/db/meta/views/{viewId}/show-all | w | r | loose
+
+D133 mode a bar (reported only, no gate):
+  too loose: a 35 <= mech 43: PASS
+  exact: a 1434 >= mech 1305 + 80 (ceil(0.05 x 1588)) = 1385: PASS
+  both: PASS (reported only)

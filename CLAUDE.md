@@ -31,9 +31,12 @@ reads better than an unseen vendor would.
 `data/exam-2026-09-17/` is the clean exam — 1383 operations across
 okta, docusign and xero, three complete official APIs the rules never
 saw, labelled blind by seven labellers. It was scored once and is
-BURNED (D24): 85.3% exact, 12.4% leaks, 2.3% over-tight. That is the
-project's only honest generalization number and the one to quote. Any
-rule change from here needs a new exam, never a re-score of this one.
+BURNED (D24): 85.3% exact, 12.4% leaks, 2.3% over-tight. That was the
+project's first honest generalization number, now history. Any
+rule change from here needs a new exam, never a re-score of a burned one.
+The one to quote is `data/exam6-2026-11-08/`: 1588 operations across 5
+complete official APIs, scored once on 2026-11-08 through the npm install;
+mode a 90.3% exact, 2.2% too loose, 7.5% too tight.
 The ten vendors locked away for that next exam are named in
 `docs/logs/pre-registered-split-2026-09-18.md`; nobody reads or mines
 them.
