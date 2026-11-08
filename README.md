@@ -74,7 +74,7 @@ Each exam was scored once, through the real CLI, on complete official APIs the r
 | mode | exam | exact | too loose | too tight |
 |---|---|---|---|---|
 | **a** (default) | #6, 1588 ops | 1434 (90.3%) | 35 (2.2%) | 119 (7.5%) |
-| b (`--confidence 95`) | #6, 1588 ops | 1288 (81.1%) | 13 (0.8%) | 287 (18.1%) |
+| b (`--confidence 85`) | #6, 1588 ops | 1424 (89.7%) | 19 (1.2%) | 145 (9.1%) |
 | c (Jev, one run) | #3, 1377 ops | 1250 (90.8%) | 16 (1.2%) | 111 (8.1%) |
 | mechanical | #6, 1588 ops | 1305 (82.2%) | 43 (2.7%) | 240 (15.1%) |
 
@@ -82,7 +82,7 @@ Each exam was scored once, through the real CLI, on complete official APIs the r
 - Exam #6 (2026-11-08): grafana, nocodb, radarr, cloudsmith, invoiceninja, run from the npm install. Two Sonnet labellers labelled blind and agreed on 1564 rows; a person ruled the other 24. Same-model agreement shows consistency, not truth. Radarr's spec has no operation names, so its rows rest on method and path.
 - Mode c comes from exam #3 (2026-11-04, 7 other APIs, older truth and rules), so it does not compare directly, and Jev can answer differently on the next run.
 - The 0.90 cut was tuned on exam #5 (mode a 1269 / 40 / 134 of 1443) and held on exam #6. An exam is used up once scored.
-- For mode b, `--confidence` sets the trade-off. On 3031 tuning rows across 12 vendors, at 90 and at 85 no vendor leaked more than mechanical, and 85 sent 12% of rows back for review against 24% at the default 95; 70 asks least (7%) but four vendors leaked more. Tuning numbers, not an exam.
+- Mode b's `--confidence` was swept on exams #5 and #6 (3031 rows, 12 vendors) and 85 picked: at 90 and 85 no vendor leaked more than mechanical, at 70 four did. On exam #6, exact / too loose / too tight: 95 (today's default) 1288 / 13 / 287; 90 1388 / 17 / 183; 85 1424 / 19 / 145; 70 1441 / 29 / 118. Pass `--confidence 85`; the default moves to 85 in the next release.
 
 ## Ways to use it
 
