@@ -969,13 +969,7 @@ Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
 ## Module D133: rwxmap with rwxlite (three engines)
 
-Status: spec in progress on branch `feat/d133-rwxlite-engines`. Pass 1
-(second pass against a stub engine, wider `loose`, `--engine`, evidence
-`rwxlite`, the `rwxlite` JSON block, the cache check), pass 2a (model
-download from rwxlite's GitHub releases, `--model small`, the rwxlite
-adapter) and pass 2b (mode b, mode c's undecided rule, the 2a fixes) are
-built on the branch, unreleased. rwxlite 0.3.1 is published and pinned (D139), so the default
-run uses it when the `rwxlite@0.3` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
+Status: shipped. Passes 1, 2a and 2b shipped in 0.9.0; rwxlite 0.3.1 at the 0.90 cut (D139) shipped in 0.11.0 on 2026-11-07. The default run uses rwxlite when the `rwxlite@0.3` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
 decided; everything marked "proposal" or "open" is not decided.
 
 ### Decided (user rulings, 2026-11-03 and 2026-11-04)
@@ -1095,7 +1089,7 @@ decided; everything marked "proposal" or "open" is not decided.
   alone, with the reason printed (D135). The package is checked before
   the model is fetched, so a missing or wrong-version package costs no
   download. Current pin (D139, user override 2026-11-07, built
-  5e6b9cb, unreleased): rwxlite 0.3.1 (R13), tag v0.3.1, cache fallback
+  5e6b9cb, shipped in 0.11.0): rwxlite 0.3.1 (R13), tag v0.3.1, cache fallback
   0.3.1, accepted range 0.3.x. Every run records the model string.
 - **Model cache and integrity.** The downloaded model is cached in a
   per-user folder, `~/.cache/rwxmap/` (or `$XDG_CACHE_HOME/rwxmap`),
@@ -1281,7 +1275,7 @@ because too loose fell from 77 to 59. Mode a as scored then (rwxlite 0.2.0) was
 looser than mechanical alone on v4 truth (94 vs 59 too loose on exam #5):
 it was trained before D137 widened x.
 
-Built (D139, user override 2026-11-07, commit 5e6b9cb, unreleased): src/
+Shipped in 0.11.0 (D139, user override 2026-11-07, commit 5e6b9cb): src/
 ships rwxlite R13 (rwxlite 0.3.1) with the lowering cut-off LOWER_MIN_P at
 0.90, overriding D135 (R13 failed its exact bar) and D136 (cut-off 0.97),
 for the same reason as D138: fewer leaks matter more than more review asks.
