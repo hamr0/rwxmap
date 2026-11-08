@@ -1,7 +1,7 @@
 # Pre-registration (DRAFT): clean exam #6, rwxmap 0.11.0 as shipped
 
-**Status: DRAFT, written 2026-11-08. Not frozen.** Inputs are frozen (see Rows)
-and no labels exist yet. No classifier, rwxlite, Jev or CLI has been run on any
+**Status: DRAFT, written 2026-11-08. Truth built, sha256 committed. Not scored.**
+Inputs are frozen (see Rows). No classifier, rwxlite, Jev or CLI has been run on any
 exam #6 spec or row; no letter exists for these rows.
 
 ## The question
@@ -14,7 +14,7 @@ The result is published in the README whatever it is.
 
 ## Rows
 
-Frozen in commit: this pass (fill the hash after the commit).
+Frozen in commit b26c68d.
 `data/exam6-2026-11-08/ops.csv`, 1588 operations, sha256
 `4a4854fad8bd1a3fdc57ff23bb3e9c6eb7d0ab7dc8d5f1d7947c87b0b346233d`
 (`ops.csv.sha256`; two runs of `build-ops.mjs` gave the same bytes). Specs are
@@ -64,7 +64,21 @@ the op level.
 - Custody is as exam #5: `truth.csv` and `labelling/out/` stay out of git until
   both sides have scored, and only their sha256 are committed. Blind parts are in
   `labelling/blind/` (`split.mjs`).
-- `truth.csv` sha256: to be filled after truth is built.
+- `truth.csv` sha256: **cc4c22c5130c118a46a144b6650f8d7ee123363a74aa35c01b170fd83c48a183**
+  (`truth.csv.sha256`). Built by `labelling/build-truth.mjs` from the 10
+  labeller files and `labelling/rulings.csv`; two runs gave the same sha.
+- Measured facts: 10 labeller files (A and B, both Sonnet, for each of the 5
+  vendors), all validated directly. Distinct reasons per file: A grafana 258,
+  nocodb 217, radarr 99, cloudsmith 163, invoiceninja 86; B grafana 246, nocodb
+  158, radarr 38, cloudsmith 111, invoiceninja 83. Each labeller's transcript
+  showed it opened only the brief, its blind part and its own output. A and B
+  agree on 1564 of 1588 rows (98.5%). Disagreements per vendor: nocodb 8,
+  grafana 6, cloudsmith 5, invoiceninja 5, radarr 0. Radarr's A and B agreed on
+  all 240 rows; radarr has no operationId, summary or description, so its labels
+  rest on method and path. The user ruled all 24 on 2026-11-08, in pattern
+  groups (G1 to G5 plus five one-offs; `labelling/rulings.csv`, each row with
+  its A and B labels and a note). 21 were ruled x and 3 were ruled w: ex6-0358,
+  ex6-0402 and ex6-1256. Truth classes: r 757, w 425, x 406 (N = 1588).
 
 ## Code under test
 
