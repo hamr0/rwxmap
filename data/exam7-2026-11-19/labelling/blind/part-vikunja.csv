@@ -1,0 +1,173 @@
+row_id,provider,method,path,operationId,summary,description
+ex7-1408,vikunja.io,GET,/admin/overview,,Admin overview,"Returns per-instance counts (users, projects, shares) plus version and license info. Instance-admin only, gated by the admin_panel feature."
+ex7-1409,vikunja.io,GET,/admin/projects,,List projects (admin),"Paginated list of every project on the instance, regardless of ownership."
+ex7-1410,vikunja.io,PATCH,/admin/projects/{id}/owner,,Reassign project owner (admin),Reassign a project's owner. The existing update endpoint doesn't allow owner changes — this is the admin-only escape hatch.
+ex7-1411,vikunja.io,GET,/admin/users,,List users (admin),"Paginated list of all users on the instance. Supports search by username/email. Exposes fields hidden from the normal user API (is_admin, status)."
+ex7-1412,vikunja.io,POST,/admin/users,,Create a user (admin),Create a new local user account. Respects the admin-only fields `is_admin` and `skip_email_confirm`. The public registration toggle is bypassed.
+ex7-1413,vikunja.io,DELETE,/admin/users/{id},,Delete a user (admin),"Delete a user. With mode=now the user is removed immediately. With mode=scheduled (the default, matching the CLI) the user receives a confirmation email and is scheduled for deletion just like a self-initiated account deletion."
+ex7-1414,vikunja.io,PATCH,/admin/users/{id}/admin,,Promote or demote a user (admin),Toggle the instance-admin flag on a user. Demoting the last remaining admin is refused with 400.
+ex7-1415,vikunja.io,PATCH,/admin/users/{id}/status,,Set a user's status (admin),Change a user's status without requiring them to log in.
+ex7-1416,vikunja.io,POST,/auth/openid/{provider}/callback,get-token-openid,Authenticate a user with OpenID Connect,"After a redirect from the OpenID Connect provider to the frontend has been made with the authentication `code`, this endpoint can be used to obtain a jwt token for that user and thus log them in."
+ex7-1417,vikunja.io,GET,/backgrounds/unsplash/image/{image},,Get an unsplash image,Get an unsplash image. **Returns json on error.**
+ex7-1418,vikunja.io,GET,/backgrounds/unsplash/image/{image}/thumb,,Get an unsplash thumbnail image,Get an unsplash thumbnail image. The thumbnail is cropped to a max width of 200px. **Returns json on error.**
+ex7-1419,vikunja.io,GET,/backgrounds/unsplash/search,,Search for a background from unsplash,Search for a project background from unsplash
+ex7-1420,vikunja.io,PUT,/filters,,Creates a new saved filter,Creates a new saved filter
+ex7-1421,vikunja.io,DELETE,/filters/{id},,Removes a saved filter,Removes a saved filter by its ID.
+ex7-1422,vikunja.io,GET,/filters/{id},,Gets one saved filter,Returns a saved filter by its ID.
+ex7-1423,vikunja.io,POST,/filters/{id},,Updates a saved filter,Updates a saved filter by its ID.
+ex7-1424,vikunja.io,GET,/info,,Info,"Returns the version, frontendurl, motd and various settings of Vikunja"
+ex7-1425,vikunja.io,GET,/labels,,Get all labels a user has access to,Returns all labels which are either created by the user or associated with a task the user has at least read-access to.
+ex7-1426,vikunja.io,PUT,/labels,,Create a label,Creates a new label.
+ex7-1427,vikunja.io,DELETE,/labels/{id},,Delete a label,Delete an existing label. The user needs to be the creator of the label to be able to do this.
+ex7-1428,vikunja.io,GET,/labels/{id},,Gets one label,Returns one label by its ID.
+ex7-1429,vikunja.io,PUT,/labels/{id},,Update a label,Update an existing label. The user needs to be the creator of the label to be able to do this.
+ex7-1430,vikunja.io,POST,/login,,Login,Logs a user in. Returns a JWT-Token to authenticate further requests.
+ex7-1431,vikunja.io,PUT,/migration/csv/detect,,Detect CSV structure,"Analyzes a CSV file and returns auto-detected columns, delimiter, quote character, and date format with suggested column mappings."
+ex7-1432,vikunja.io,PUT,/migration/csv/migrate,,Import CSV file,Imports tasks from a CSV file into Vikunja with the provided configuration.
+ex7-1433,vikunja.io,PUT,/migration/csv/preview,,Preview CSV import,Generates a preview of the first 5 tasks that would be imported with the given configuration.
+ex7-1434,vikunja.io,GET,/migration/csv/status,,Get CSV migration status,Returns if the current user already did the CSV migration or not.
+ex7-1435,vikunja.io,GET,/migration/microsoft-todo/auth,,Get the auth url from Microsoft Todo,Returns the auth url where the user needs to get its auth code. This code can then be used to migrate everything from Microsoft Todo to Vikunja.
+ex7-1436,vikunja.io,POST,/migration/microsoft-todo/migrate,,"Migrate all projects, tasks etc. from Microsoft Todo","Migrates all tasklinsts, tasks, notes and reminders from Microsoft Todo to Vikunja."
+ex7-1437,vikunja.io,GET,/migration/microsoft-todo/status,,Get migration status,Returns if the current user already did the migation or not. This is useful to show a confirmation message in the frontend if the user is trying to do the same migration again.
+ex7-1438,vikunja.io,PUT,/migration/ticktick/migrate,,"Import all projects, tasks etc. from a TickTick backup export","Imports all projects, tasks, notes, reminders, subtasks and files from a TickTick backup export into Vikunja."
+ex7-1439,vikunja.io,GET,/migration/ticktick/status,,Get migration status,Returns if the current user already did the migation or not. This is useful to show a confirmation message in the frontend if the user is trying to do the same migration again.
+ex7-1440,vikunja.io,GET,/migration/todoist/auth,,Get the auth url from todoist,Returns the auth url where the user needs to get its auth code. This code can then be used to migrate everything from todoist to Vikunja.
+ex7-1441,vikunja.io,POST,/migration/todoist/migrate,,"Migrate all lists, tasks etc. from todoist","Migrates all projects, tasks, notes, reminders, subtasks and files from todoist to vikunja."
+ex7-1442,vikunja.io,GET,/migration/todoist/status,,Get migration status,Returns if the current user already did the migation or not. This is useful to show a confirmation message in the frontend if the user is trying to do the same migration again.
+ex7-1443,vikunja.io,GET,/migration/trello/auth,,Get the auth url from trello,Returns the auth url where the user needs to get its auth code. This code can then be used to migrate everything from trello to Vikunja.
+ex7-1444,vikunja.io,POST,/migration/trello/migrate,,"Migrate all projects, tasks etc. from trello","Migrates all projects, tasks, notes, reminders, subtasks and files from trello to vikunja."
+ex7-1445,vikunja.io,GET,/migration/trello/status,,Get migration status,Returns if the current user already did the migation or not. This is useful to show a confirmation message in the frontend if the user is trying to do the same migration again.
+ex7-1446,vikunja.io,POST,/migration/vikunja-file/migrate,,"Import all projects, tasks etc. from a Vikunja data export","Imports all projects, tasks, notes, reminders, subtasks and files from a Vikunjda data export into Vikunja."
+ex7-1447,vikunja.io,GET,/migration/vikunja-file/status,,Get migration status,Returns if the current user already did the migation or not. This is useful to show a confirmation message in the frontend if the user is trying to do the same migration again.
+ex7-1448,vikunja.io,PUT,/migration/wekan/migrate,,"Import all projects, tasks etc. from a WeKan board export","Imports all projects, tasks, labels, checklists, comments, and attachments from a WeKan board JSON export into Vikunja."
+ex7-1449,vikunja.io,GET,/migration/wekan/status,,Get migration status,Returns if the current user already did the migration or not. This is useful to show a confirmation message in the frontend if the user is trying to do the same migration again.
+ex7-1450,vikunja.io,DELETE,/notifications,,Delete all notifications of the current user,Deletes every notification belonging to the authenticated user. Only the caller's own notifications are affected.
+ex7-1451,vikunja.io,GET,/notifications,,Get all notifications for the current user,"Returns an array with all notifications for the current user. Notifications about a project the current user can no longer read are omitted; the filtering happens in the query, so paging and the `x-pagination-*` headers all describe the visible notifications only."
+ex7-1452,vikunja.io,POST,/notifications,,Mark all notifications of a user as read,
+ex7-1453,vikunja.io,POST,/notifications/{id},,Mark a notification as (un-)read,Marks a notification as either read or unread. A user can only mark their own notifications as read.
+ex7-1454,vikunja.io,POST,/oauth/authorize,,OAuth 2.0 authorize endpoint,Creates an authorization code for an OAuth 2.0 client on behalf of the authenticated user. PKCE is required. API tokens cannot be used to authorize a client.
+ex7-1455,vikunja.io,POST,/oauth/token,,OAuth 2.0 token endpoint,"Exchanges an authorization code for an access token, or a refresh token for a new one. Part of the OAuth 2.0 Authorization Code flow with PKCE. Needs no authentication: the grant itself is the credential."
+ex7-1456,vikunja.io,GET,/projects,,Get all projects a user has access to,Returns all projects a user has access to.
+ex7-1457,vikunja.io,PUT,/projects,,Creates a new project,Creates a new project. If a parent project is provided the user needs to have write access to that project.
+ex7-1458,vikunja.io,DELETE,/projects/{id},,Deletes a project,Moves a project and all its sub-projects to the trash. They are deleted permanently after 30 days.
+ex7-1459,vikunja.io,GET,/projects/{id},,Gets one project,Returns a project by its ID.
+ex7-1460,vikunja.io,POST,/projects/{id},,Updates a project,Updates a project. This does not include adding a task (see below).
+ex7-1461,vikunja.io,DELETE,/projects/{id}/background,,Remove a project background,"Removes a previously set project background, regardless of the project provider used to set the background. It does not throw an error if the project does not have a background."
+ex7-1462,vikunja.io,GET,/projects/{id}/background,,Get the project background,Get the project background of a specific project. **Returns json on error.**
+ex7-1463,vikunja.io,POST,/projects/{id}/backgrounds/unsplash,,Set an unsplash photo as project background,Sets a photo from unsplash as project background.
+ex7-1464,vikunja.io,PUT,/projects/{id}/backgrounds/upload,,Upload a project background,Upload a project background.
+ex7-1465,vikunja.io,GET,/projects/{id}/projectusers,,Get users,Lists all users (without emailadresses). Also possible to search for a specific user.
+ex7-1466,vikunja.io,PUT,/projects/{id}/tasks,,Create a task,Inserts a task into a project.
+ex7-1467,vikunja.io,GET,/projects/{id}/teams,,Get teams on a project,Returns a project with all teams which have access on a given project.
+ex7-1468,vikunja.io,PUT,/projects/{id}/teams,,Add a team to a project,Gives a team access to a project.
+ex7-1469,vikunja.io,GET,/projects/{id}/users,,Get users on a project,Returns a project with all users which have access on a given project.
+ex7-1470,vikunja.io,PUT,/projects/{id}/users,,Add a user to a project,Gives a user access to a project.
+ex7-1471,vikunja.io,GET,/projects/{id}/views/{view}/buckets,,Get all kanban buckets of a project,"Returns all kanban buckets which belong to that project. Buckets are always sorted by their `position` in ascending order. To get all buckets with their tasks, use the tasks endpoint with a kanban view."
+ex7-1472,vikunja.io,PUT,/projects/{id}/views/{view}/buckets,,Create a new bucket,Creates a new kanban bucket on a project.
+ex7-1473,vikunja.io,GET,/projects/{id}/views/{view}/tasks,,Get tasks in a project,"Returns all tasks for the selected project. When the requested view is a kanban view, a list of buckets containing the tasks will be returned. Otherwise, a list of tasks will be returned."
+ex7-1474,vikunja.io,GET,/projects/{id}/webhooks,,Get all api webhook targets for the specified project,Get all api webhook targets for the specified project.
+ex7-1475,vikunja.io,PUT,/projects/{id}/webhooks,,Create a webhook target,Create a webhook target which receives POST requests about specified events from a project.
+ex7-1476,vikunja.io,DELETE,/projects/{id}/webhooks/{webhookID},,Deletes an existing webhook target,Delete any of the project's webhook targets.
+ex7-1477,vikunja.io,POST,/projects/{id}/webhooks/{webhookID},,Change a webhook target's events.,Change a webhook target's events. You cannot change other values of a webhook.
+ex7-1478,vikunja.io,PUT,/projects/{projectID}/duplicate,,Duplicate an existing project,"Copies the project, tasks, files, kanban data, assignees, comments, attachments, labels, relations and backgrounds from one project to a new one. User/team permissions and link shares are only copied when duplicate_shares is set to true. The user needs read access in the project and write access in the parent of the new project."
+ex7-1479,vikunja.io,DELETE,/projects/{projectID}/teams/{teamID},,Delete a team from a project,Delets a team from a project. The team won't have access to the project anymore.
+ex7-1480,vikunja.io,POST,/projects/{projectID}/teams/{teamID},,Update a team <-> project relation,Update a team <-> project relation. Mostly used to update the permission that team has.
+ex7-1481,vikunja.io,DELETE,/projects/{projectID}/users/{userID},,Delete a user from a project,Delets a user from a project. The user won't have access to the project anymore.
+ex7-1482,vikunja.io,POST,/projects/{projectID}/users/{userID},,Update a user <-> project relation,Update a user <-> project relation. Mostly used to update the permission that user has.
+ex7-1483,vikunja.io,DELETE,/projects/{projectID}/views/{view}/buckets/{bucketID},,Deletes an existing bucket,Deletes an existing kanban bucket and dissociates all of its task. It does not delete any tasks. You cannot delete the last bucket on a project.
+ex7-1484,vikunja.io,POST,/projects/{projectID}/views/{view}/buckets/{bucketID},,Update an existing bucket,Updates an existing kanban bucket.
+ex7-1485,vikunja.io,GET,/projects/{project}/shares,,Get all link shares for a project,Returns all link shares which exist for a given project
+ex7-1486,vikunja.io,PUT,/projects/{project}/shares,,Share a project via link,Share a project via link. The user needs to be admin of the project to be able do this.
+ex7-1487,vikunja.io,DELETE,/projects/{project}/shares/{share},,Remove a link share,Remove a link share. The user needs to be admin of the project to be able do this.
+ex7-1488,vikunja.io,GET,/projects/{project}/shares/{share},,Get one link shares for a project,Returns one link share by its ID.
+ex7-1489,vikunja.io,GET,/projects/{project}/tasks/by-index/{index},,Get one task by its per-project index,"Returns a single task identified by its per-project index. Useful when resolving human-readable references like ""PROJ-42"" to a canonical task object. The `project` path parameter accepts either a numeric project id or the project's identifier (e.g. ""PROJ""); values consisting solely of digits are always interpreted as ids. Note that task indexes are reassigned when a task is moved between projects, so long-lived references should use the returned task id instead."
+ex7-1490,vikunja.io,GET,/projects/{project}/views,,Get all project views for a project,Returns all project views for a sepcific project
+ex7-1491,vikunja.io,PUT,/projects/{project}/views,,Create a project view,Create a project view in a specific project.
+ex7-1492,vikunja.io,DELETE,/projects/{project}/views/{id},,Delete a project view,Deletes a project view.
+ex7-1493,vikunja.io,GET,/projects/{project}/views/{id},,Get one project view,Returns a project view by its ID.
+ex7-1494,vikunja.io,POST,/projects/{project}/views/{id},,Updates a project view,Updates a project view.
+ex7-1495,vikunja.io,POST,/projects/{project}/views/{view}/buckets/{bucket}/tasks,,Update a task bucket,Updates a task in a bucket
+ex7-1496,vikunja.io,POST,/register,,Register,Creates a new user account.
+ex7-1497,vikunja.io,GET,/routes,,Get a list of all token api routes,"Returns a list of all API routes which are available to use with an api token, not a user login."
+ex7-1498,vikunja.io,POST,/shares/{share}/auth,,Get an auth token for a share,Get a jwt auth token for a shared project from a share hash.
+ex7-1499,vikunja.io,DELETE,/subscriptions/{entity}/{entityID},,Unsubscribe the current user from an entity.,"Unsubscribes the current user to an entity. If the subscription is inherited from a parent project, an opt-out is stored for this entity instead."
+ex7-1500,vikunja.io,PUT,/subscriptions/{entity}/{entityID},,Subscribes the current user to an entity.,Subscribes the current user to an entity.
+ex7-1501,vikunja.io,GET,/tasks,,Get tasks,Returns all tasks on any project the user has access to.
+ex7-1502,vikunja.io,POST,/tasks/bulk,,Update multiple tasks,Updates multiple tasks atomically. All provided tasks must be writable by the user.
+ex7-1503,vikunja.io,DELETE,/tasks/{id},,Delete a task,"Deletes a task from a project. This does not mean ""mark it done""."
+ex7-1504,vikunja.io,GET,/tasks/{id},,Get one task,Returns one task by its ID
+ex7-1505,vikunja.io,POST,/tasks/{id},,Update a task,"Updates a task. This includes marking it as done. Assignees you pass will be updated, see their individual endpoints for more details on how this is done. To update labels, see the description of the endpoint."
+ex7-1506,vikunja.io,GET,/tasks/{id}/attachments,,Get  all attachments for one task.,Get all task attachments for one task.
+ex7-1507,vikunja.io,PUT,/tasks/{id}/attachments,,Upload a task attachment,Upload a task attachment. You can pass multiple files with the files form param.
+ex7-1508,vikunja.io,DELETE,/tasks/{id}/attachments/{attachmentID},,Delete an attachment,Delete an attachment.
+ex7-1509,vikunja.io,GET,/tasks/{id}/attachments/{attachmentID},,Get one attachment.,Get one attachment for download. **Returns json on error.**
+ex7-1510,vikunja.io,POST,/tasks/{id}/position,,Updates a task position,Updates a task position.
+ex7-1511,vikunja.io,POST,/tasks/{projecttask}/read,,Mark a task as read,Marks a task as read for the current user by removing the unread status entry.
+ex7-1512,vikunja.io,GET,/tasks/{taskID}/assignees,,Get all assignees for a task,Returns an array with all assignees for this task.
+ex7-1513,vikunja.io,PUT,/tasks/{taskID}/assignees,,Add a new assignee to a task,"Adds a new assignee to a task. The assignee needs to have access to the project, the doer must be able to edit this task."
+ex7-1514,vikunja.io,POST,/tasks/{taskID}/assignees/bulk,,Add multiple new assignees to a task,"Adds multiple new assignees to a task. The assignee needs to have access to the project, the doer must be able to edit this task. Every user not in the project will be unassigned from the task, pass an empty array to unassign everyone."
+ex7-1515,vikunja.io,DELETE,/tasks/{taskID}/assignees/{userID},,Delete an assignee,Un-assign a user from a task.
+ex7-1516,vikunja.io,GET,/tasks/{taskID}/comments,,Get all task comments,Get all task comments. The user doing this need to have at least read access to the task.
+ex7-1517,vikunja.io,PUT,/tasks/{taskID}/comments,,Create a new task comment,Create a new task comment. The user doing this need to have at least write access to the task this comment should belong to.
+ex7-1518,vikunja.io,DELETE,/tasks/{taskID}/comments/{commentID},,Remove a task comment,Remove a task comment. The user doing this need to have at least write access to the task this comment belongs to.
+ex7-1519,vikunja.io,GET,/tasks/{taskID}/comments/{commentID},,Get a task comment,Get a task comment. The user doing this need to have at least read access to the task this comment belongs to.
+ex7-1520,vikunja.io,POST,/tasks/{taskID}/comments/{commentID},,Update an existing task comment,Update an existing task comment. The user doing this need to have at least write access to the task this comment belongs to.
+ex7-1521,vikunja.io,PUT,/tasks/{taskID}/duplicate,,Duplicate a task,"Copies a task with all its properties (labels, assignees, attachments, reminders) into the same project. Creates a ""copied from"" relation between the new and original task."
+ex7-1522,vikunja.io,POST,/tasks/{taskID}/labels/bulk,,Update all labels on a task.,Updates all labels on a task. Every label which is not passed but exists on the task will be deleted. Every label which does not exist on the task will be added. All labels which are passed and already exist on the task won't be touched.
+ex7-1523,vikunja.io,PUT,/tasks/{taskID}/relations,,Create a new relation between two tasks,Creates a new relation between two tasks. The user needs to have update permissions on the base task and at least read permissions on the other task. Both tasks do not need to be on the same project. Take a look at the docs for available task relation kinds.
+ex7-1524,vikunja.io,DELETE,/tasks/{taskID}/relations/{relationKind}/{otherTaskID},,Remove a task relation,
+ex7-1525,vikunja.io,GET,/tasks/{task}/labels,,Get all labels on a task,Returns all labels which are assicociated with a given task.
+ex7-1526,vikunja.io,PUT,/tasks/{task}/labels,,Add a label to a task,Add a label to a task. The user needs to have write-access to the project to be able do this.
+ex7-1527,vikunja.io,DELETE,/tasks/{task}/labels/{label},,Remove a label from a task,Remove a label from a task. The user needs to have write-access to the project to be able do this.
+ex7-1528,vikunja.io,GET,/teams,,Get teams,Returns all teams the current user is part of.
+ex7-1529,vikunja.io,PUT,/teams,,Creates a new team,Creates a new team.
+ex7-1530,vikunja.io,DELETE,/teams/{id},,Deletes a team,Delets a team. This will also remove the access for all users in that team.
+ex7-1531,vikunja.io,GET,/teams/{id},,Gets one team,Returns a team by its ID.
+ex7-1532,vikunja.io,POST,/teams/{id},,Updates a team,Updates a team.
+ex7-1533,vikunja.io,PUT,/teams/{id}/members,,Add a user to a team,Add a user to a team.
+ex7-1534,vikunja.io,POST,/teams/{id}/members/{userID}/admin,,Toggle a team member's admin status,"If a user is team admin, this will make them member and vise-versa."
+ex7-1535,vikunja.io,DELETE,/teams/{id}/members/{username},,Remove a user from a team,Remove a user from a team. This will also revoke any access this user might have via that team. A user can remove themselves from the team if they are not the last user in the team.
+ex7-1536,vikunja.io,DELETE,/test/all,,Truncate all tables,Removes all data from every Vikunja table. Used by e2e tests to ensure clean state before each test. Requires the testing token.
+ex7-1537,vikunja.io,PATCH,/test/{table},,Reset the db to a defined state,Fills the specified table with the content provided in the payload. You need to enable the testing endpoint before doing this and provide the `Authorization: <token>` secret when making requests to this endpoint. See docs for more details.
+ex7-1538,vikunja.io,GET,/tokens,,Get all api tokens of the current user,Returns all api tokens the current user has created.
+ex7-1539,vikunja.io,PUT,/tokens,,Create a new api token,Create a new api token to use on behalf of the user creating it.
+ex7-1540,vikunja.io,DELETE,/tokens/{tokenID},,Deletes an existing api token,Delete any of the user's api tokens.
+ex7-1541,vikunja.io,GET,/user,,Get user information,Returns the current user object with their settings.
+ex7-1542,vikunja.io,POST,/user/confirm,,Confirm the email of a new user,Confirms the email of a newly registered user.
+ex7-1543,vikunja.io,POST,/user/deletion/cancel,,Abort a user deletion request,Aborts an in-progress user deletion.
+ex7-1544,vikunja.io,POST,/user/deletion/confirm,,Confirm a user deletion request,Confirms the deletion request of a user sent via email.
+ex7-1545,vikunja.io,POST,/user/deletion/request,,Request the deletion of the user,Requests the deletion of the current user. It will trigger an email which has to be confirmed to start the deletion.
+ex7-1546,vikunja.io,GET,/user/export,,Get current user data export,
+ex7-1547,vikunja.io,POST,/user/export/download,,Download a user data export.,
+ex7-1548,vikunja.io,POST,/user/export/request,,Request a user data export.,
+ex7-1549,vikunja.io,POST,/user/logout,,Logout,Destroys the current session and clears the refresh token cookie. For OpenID Connect sessions the response includes an `oidc_logout_url` the client should redirect to so the provider session is ended too.
+ex7-1550,vikunja.io,POST,/user/password,,Change password,Lets the current user change its password.
+ex7-1551,vikunja.io,POST,/user/password/reset,,Resets a password,Resets a user email with a previously reset token.
+ex7-1552,vikunja.io,POST,/user/password/token,,Request password reset token,Requests a token to reset a users password. The token is sent via email.
+ex7-1553,vikunja.io,GET,/user/settings/avatar,,Return user avatar setting,Returns the current user's avatar setting.
+ex7-1554,vikunja.io,POST,/user/settings/avatar,,Set the user's avatar,"Changes the user avatar. Valid types are gravatar (uses the user email), upload, initials, marble, ldap (synced from LDAP server), openid (synced from OpenID provider), default."
+ex7-1555,vikunja.io,PUT,/user/settings/avatar/upload,,Upload a user avatar,"Upload a user avatar. This will also set the user's avatar provider to ""upload"""
+ex7-1556,vikunja.io,POST,/user/settings/email,,Update email address,Lets the current user change their email address.
+ex7-1557,vikunja.io,POST,/user/settings/general,,Change general user settings of the current user.,
+ex7-1558,vikunja.io,GET,/user/settings/token/caldav,,Returns the caldav tokens for the current user,Return the IDs and created dates of all caldav tokens for the current user.
+ex7-1559,vikunja.io,PUT,/user/settings/token/caldav,,Generate a caldav token,Generates a caldav token which can be used for the caldav api. It is not possible to see the token again after it was generated.
+ex7-1560,vikunja.io,DELETE,/user/settings/token/caldav/{id},,Delete a caldav token by id,
+ex7-1561,vikunja.io,GET,/user/settings/totp,,Totp setting for the current user,Returns the current user totp setting or an error if it is not enabled.
+ex7-1562,vikunja.io,POST,/user/settings/totp/disable,,Disable totp settings,Disables any totp settings for the current user. Requires the current password and a current totp passcode.
+ex7-1563,vikunja.io,POST,/user/settings/totp/enable,,Enable a previously enrolled totp setting.,Enables a previously enrolled totp setting by providing a totp passcode and the current password.
+ex7-1564,vikunja.io,POST,/user/settings/totp/enroll,,Enroll a user into totp,"Creates an initial setup for the user in the db. After this step, the user needs to verify they have a working totp setup with the ""enable totp"" endpoint. Requires the current password."
+ex7-1565,vikunja.io,GET,/user/settings/totp/qrcode,,Totp QR Code,Returns a qr code for easier setup at end user's devices.
+ex7-1566,vikunja.io,GET,/user/settings/webhooks,,Get all user-level webhook targets,Get all webhook targets configured for the current user (not project-specific).
+ex7-1567,vikunja.io,PUT,/user/settings/webhooks,,Create a user-level webhook target,Create a webhook target for the current user that receives events across all projects.
+ex7-1568,vikunja.io,GET,/user/settings/webhooks/events,,Get available user-directed webhook events,Get all webhook events that can be used with user-level webhook targets.
+ex7-1569,vikunja.io,DELETE,/user/settings/webhooks/{id},,Delete a user-level webhook target,Delete a user-level webhook target.
+ex7-1570,vikunja.io,POST,/user/settings/webhooks/{id},,Update a user-level webhook target,Update the events for a user-level webhook target.
+ex7-1571,vikunja.io,GET,/user/timezones,,Get all available time zones on this vikunja instance,"Because available time zones depend on the system Vikunja is running on, this endpoint returns a project of all valid time zones this particular Vikunja instance can handle. The project of time zones is not sorted, you should sort it on the client."
+ex7-1572,vikunja.io,POST,/user/token,,Renew link share token,Returns a new valid jwt link share token. Only works for link share tokens.
+ex7-1573,vikunja.io,POST,/user/token/refresh,,Refresh user token,Exchanges the refresh token cookie for a new short-lived JWT.
+ex7-1574,vikunja.io,GET,/users,,Get users,"Search for a user by its username, name or full email. Name (not username) or email require that the user has enabled this in their settings, unless both users share an external team (synced via OIDC/LDAP), in which case they can always find each other."
+ex7-1575,vikunja.io,GET,/webhooks/events,,Get all possible webhook events,Get all possible webhook events to use when creating or updating a webhook target.
+ex7-1576,vikunja.io,GET,/{kind}/{id}/reactions,,Get all reactions for an entity,Returns all reactions for an entity
+ex7-1577,vikunja.io,PUT,/{kind}/{id}/reactions,,Add a reaction to an entity,Add a reaction to an entity. Will do nothing if the reaction already exists.
+ex7-1578,vikunja.io,POST,/{kind}/{id}/reactions/delete,,Removes the user's reaction,Removes the reaction of that user on that entity.
+ex7-1579,vikunja.io,GET,/{username}/avatar,,User Avatar,Returns the user avatar as image.
