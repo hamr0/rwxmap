@@ -1325,28 +1325,31 @@ relabelled by it.
 
 Next, in order:
 
-1. D141 mechanical pass (not built): relabel matching rows in the tuning sets
-   under D141 as derived truth copies beside the originals (originals are
-   never edited), measure how many change, and re-export rwxlite's 102,668
-   training rows (export-v4-gap, labels commit 95104e3) the same way as
-   export-v4-d141, beside export-v4, with changed ids, old and new letters
-   and a sha256, using the same pattern net as rwxlite's own D141 relabel so
-   the two halves match; then a step 3 x word list for the
-   D141 families (login/sign-in/token refresh, verify/OTP/2FA,
-   callback/webhook/endpoint/push token/service key, member removal), matched
-   at lead position like existing verb lists. Bar, set before building:
-   tighten-only adoption per D100 (more right than wrong, and neither too
-   loose nor too tight gets worse), scored leave-one-vendor-out on the tuning
-   sets with loose-1 and loose-2 counted separately. It needs its own
-   D-number when built.
-2. Exam #7 vendors frozen 2026-11-18 (ringcentral, openziti, gitness,
+1. D140 build: mode b default --confidence moves from 95 to 85 (code and
+   tests only; the mechanical lean does not change).
+2. Freeze the exam #7 rwxmap ref (today's mechanical, identical to 1c25be1,
+   plus D140) and send the SHA to rwxlite, which trains round 15 on texts
+   with the lean at that ref and byte-compares lean.csv.
+3. Exam #7: vendors frozen 2026-11-18 (ringcentral, openziti, gitness,
    huggingface, pipedrive, vikunja; six more in reserve;
    poc/exam7-shortlist/picked.tsv), kept out of rwxlite round 15 (copy check
    poc/exam7-shortlist/r15-check, 319 specs dropped). Specs are fetched and
-   frozen at exam build. Labellers get BRIEF-v4 plus the D141 addendum.
-3. Exam #7 scores once, through the real CLI: the D140 build (mode b default
-   85), the D141 mechanical pass if it passes its bar, and rwxlite's round 15
-   candidate.
+   frozen at exam build. Two blind labellers (default Sonnet + Opus, the user
+   picks at build) get BRIEF-v4 plus the D141 addendum; the user rules every
+   disagreement. Scored once through the real CLI: the D140 build and
+   rwxlite's round 15 candidate.
+4. D141 in mechanical: deferred to exam #8 (user ruling 2026-11-19). A step 3
+   x word list for the D141 families, matched at lead position. Bar, set
+   before building: tighten-only adoption per D100 (more right than wrong,
+   and neither too loose nor too tight gets worse), scored
+   leave-one-vendor-out on the tuning sets with loose-1 and loose-2 counted
+   separately; its own D-number when built. Known limit until then:
+   login-token GETs (GET /api/login/refresh) stay r in mechanical and mode a,
+   because settled GET r rows never reach the second pass.
+
+Done (2026-11-19): export-v4-d141 (D141 relabel of rwxlite's round 13 train
+and val, tighten-only, lean at 1c25be1),
+data/export-v4-d141-2026-11-19/, see learnings.
 
 Parked items and known limits below.
 
