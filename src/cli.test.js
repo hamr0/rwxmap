@@ -2042,13 +2042,13 @@ function modeBEngine(byOp, sent = []) {
   };
 }
 
-test('run (D133): --engine rwxlite (mode b) judges every row at the default confidence 95', async () => {
+test('run (D133): --engine rwxlite (mode b) judges every row at the default confidence 85', async () => {
   const sent = [];
   const engine = modeBEngine({
-    deleteThingPermission: d133Ans('w', 0.96), // x -> w at 0.96 >= 0.95: lowered
+    deleteThingPermission: d133Ans('w', 0.96), // x -> w at 0.96 >= 0.85: lowered
     listThings: d133Ans('r', 0.98), // kept
     updateThingArchive: d133Ans('x', 0.99), // w -> x: raised
-    updateThing: d133Ans('w', 0.90), // under 0.95: undecided
+    updateThing: d133Ans('w', 0.80), // under 0.85: undecided
     // doMystery: no answer: undecided
   }, sent);
   const { code, stdout, stderr, outDir } = await runD133(['--engine', 'rwxlite'], { rwxliteEngine: { model: D133_MODEL, run: engine } });
@@ -2063,8 +2063,8 @@ test('run (D133): --engine rwxlite (mode b) judges every row at the default conf
     'POST /mystery': 'x/tight',
   });
   const combined = readJson(path.join(outDir, 'example.rwxmap.json'));
-  assert.deepEqual(combined.rwxlite, { mode: 'on', model: D133_MODEL, pass: 'b', confidence: 95, sent: 5, raised: 1, lowered: 1, kept: 1, undecided: 2 });
-  assert.match(stdout, /^rwxmap: rwxlite: on \(.*\) — mode b, confidence 95 — 5 sent · 1 raised · 1 lowered · 1 kept · 2 undecided/m);
+  assert.deepEqual(combined.rwxlite, { mode: 'on', model: D133_MODEL, pass: 'b', confidence: 85, sent: 5, raised: 1, lowered: 1, kept: 1, undecided: 2 });
+  assert.match(stdout, /^rwxmap: rwxlite: on \(.*\) — mode b, confidence 85 — 5 sent · 1 raised · 1 lowered · 1 kept · 2 undecided/m);
   const byKey = Object.fromEntries(readJson(path.join(outDir, 'example.rwxmap.review.json')).rows.map((r) => [`${r.method} ${r.path}`, r.evidence]));
   assert.equal(byKey['DELETE /things/{id}/permission'], 'rwxlite');
   assert.equal(byKey['GET /things'], 'floor');
@@ -2315,6 +2315,7 @@ test('run (D133): --help names the engines, --confidence, and that a key alone d
   assert.equal(code, 0);
   assert.match(stdout.text(), /--engine <e>/);
   assert.match(stdout.text(), /--confidence <0-99>/);
+  assert.match(stdout.text(), /\(default 85\)/);
   assert.match(stdout.text(), /A key alone does not turn Jev on/);
 });
 

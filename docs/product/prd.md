@@ -995,10 +995,11 @@ decided; everything marked "proposal" or "open" is not decided.
     confidence/100 the row gets the letter (a raise, a keep or a
     lowering, all at the same cut); otherwise the row is undecided: x,
     review `tight`. An errored or malformed answer is undecided too.
-    More confidence means more asks. **Default 95** (user ruling,
-    2026-11-04; replaces the earlier 70): it is the lowest setting whose
-    too-loose count (6 of 949) is no higher than mechanical alone's (6
-    of 949) on the tuning set below. Measured on rwxlite's fresh 949
+    More confidence means more asks. **Default 85** (D140, user ruling 2026-11-09, built 2026-11-19, ships with the exam #7 ref; was 95, user ruling
+    2026-11-04; replaces the earlier 70): picked from the sweep on
+    exams #5 and #6 (see the D140 paragraph below) as the lowest cut
+    where no vendor leaks more than mechanical alone. The table below
+    is the older measurement on rwxlite's fresh 949
     rows (coolify, workos, lago, resend; tuning data for rwxmap, int8
     p values, from `poc/d133-mode-b/readout.txt`; the code reproduces
     these counts in `src/secondpass.test.js`). Denominator 949 rows;
@@ -1007,7 +1008,7 @@ decided; everything marked "proposal" or "open" is not decided.
     | confidence | exact | too loose | too tight | asked |
     |---|---|---|---|---|
     | 70 | 870 (91.7%) | 18 (1.9%) | 61 (6.4%) | 52 (5.5%) |
-    | 95 (default) | 837 (88.2%) | 6 (0.6%) | 106 (11.2%) | 134 (14.1%) |
+    | 95 (old default) | 837 (88.2%) | 6 (0.6%) | 106 (11.2%) | 134 (14.1%) |
     | 97 | 811 (85.5%) | 3 (0.3%) | 135 (14.2%) | 173 (18.2%) |
 
     Mechanical alone on the same rows: 736 exact (77.6%), 6 too loose
@@ -1015,13 +1016,12 @@ decided; everything marked "proposal" or "open" is not decided.
     folded into one number. The default fp32 model will shift these
     slightly (rwxlite: 7 rows differ); re-measure on the next exam.
 
-    Candidate (D140, user ruling 2026-11-09, not built): default 85 for
+    Candidate (D140, user ruling 2026-11-09, built 2026-11-19): default 85 for
     rwxlite 0.3.1. Swept on exams #5 and #6 (burned, tuning; 3031 rows,
     12 vendors), 85 gives 2693 exact (88.8%), 52 too loose (1.7%), 286
     too tight (9.4%) and 377 asks (12.4%), against 95's 2496 / 29 / 506
     and 735 asks; no vendor leaks more than mechanical. 90 (cautious)
-    and 70 (fewest asks) stay documented. 95 stays the shipped default
-    until exam #7.
+    and 70 (fewest asks) stay documented. Exam #7 scores it.
   - **c: mechanical -> Jev (paid, BYOK).** Same flow and scope as mode
     a, with Jev deciding instead of rwxlite. Undecided means x plus
     review. Jev's cut-offs stay as measured (tiers, separate questions,
@@ -1325,7 +1325,7 @@ relabelled by it.
 
 Next, in order:
 
-1. D140 build: mode b default --confidence moves from 95 to 85 (code and
+1. D140 built 2026-11-19 (mode b default 85). Was: mode b default --confidence moves from 95 to 85 (code and
    tests only; the mechanical lean does not change).
 2. Freeze the exam #7 rwxmap ref (today's mechanical, identical to 1c25be1,
    plus D140) and send the SHA to rwxlite, which trains round 15 on texts

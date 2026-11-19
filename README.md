@@ -58,7 +58,7 @@ How it decides:
 | mode | command | what decides | cost / network | use when |
 |---|---|---|---|---|
 | **a** (default) | `rwxmap spec.json` | rules, then rwxlite on the loose and tight rows | free; one model download | the normal run |
-| **b** | `rwxmap spec.json --engine rwxlite [--confidence 0-99]` (default 95) | rwxlite alone judges every row; rwxmap only reads the input and writes the outputs; under the confidence a row is x + review | free; one model download | you want the model's view of every row |
+| **b** | `rwxmap spec.json --engine rwxlite [--confidence 0-99]` (default 85) | rwxlite alone judges every row; rwxmap only reads the input and writes the outputs; under the confidence a row is x + review | free; one model download | you want the model's view of every row |
 | **c** | `rwxmap spec.json --engine jev` | rules, then Jev (paid, your key) re-checks the rows the method alone decided: a POST at x can drop to w (or r), a PUT or PATCH at w can rise to x, a GET at r can rise to w | your key, your cost; each checked row goes to Jev | you already pay for Jev |
 | mechanical | `rwxmap spec.json --engine mechanical` | rules only | offline; nothing downloaded; same answer every run | no model at all |
 
@@ -82,7 +82,7 @@ Each exam was scored once, through the real CLI, on complete official APIs the r
 - Exam #6 (2026-11-08): grafana, nocodb, radarr, cloudsmith, invoiceninja, run from the npm install. Two Sonnet labellers labelled blind and agreed on 1564 rows; a person ruled the other 24. Same-model agreement shows consistency, not truth. Radarr's spec has no operation names, so its rows rest on method and path.
 - Mode c comes from exam #3 (2026-11-04, 7 other APIs, older truth and rules), so it does not compare directly, and Jev can answer differently on the next run.
 - The 0.90 cut was tuned on exam #5 (mode a 1269 / 40 / 134 of 1443) and held on exam #6. An exam is used up once scored.
-- Mode b's `--confidence` was swept on exams #5 and #6 (3031 rows, 12 vendors) and 85 picked: at 90 and 85 no vendor leaked more than mechanical, at 70 four did. On exam #6, exact / too loose / too tight: 95 (today's default) 1288 / 13 / 287; 90 1388 / 17 / 183; 85 1424 / 19 / 145; 70 1441 / 29 / 118. Pass `--confidence 85`; the default moves to 85 in a later release.
+- Mode b's `--confidence` was swept on exams #5 and #6 (3031 rows, 12 vendors) and 85 picked: at 90 and 85 no vendor leaked more than mechanical, at 70 four did. On exam #6, exact / too loose / too tight: 95 1288 / 13 / 287; 90 1388 / 17 / 183; 85 1424 / 19 / 145; 70 1441 / 29 / 118. 85 is the default from the next release (D140).
 
 ## Ways to use it
 
@@ -152,7 +152,7 @@ Exit 0 on success, 1 on any failure. An existing output file is not overwritten 
 <details><summary>Flags and errors</summary>
 
 - `--engine` picks who looks at the rows (see Modes).
-- `--confidence <0-99>` is valid only with `--engine rwxlite` (default 95). A row the model is less sure of is x + review.
+- `--confidence <0-99>` is valid only with `--engine rwxlite` (default 85). A row the model is less sure of is x + review.
 - `--model small` (modes a and b only) uses the int8 model instead of the exact default.
 - An unknown `--engine`, a bad `--confidence`, or a `--model` other than `small` (or used with `--engine jev` or `mechanical`) exits 1 with nothing written.
 - `evidence` is `floor` (the method alone decided), `list` (a word list fired), `jev` (Jev moved the row) or `rwxlite` (the second pass moved the row).

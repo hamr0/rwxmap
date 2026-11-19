@@ -867,8 +867,8 @@ function argError(err) {
 
 const ENGINES = ['rwxlite', 'jev', 'mechanical'];
 
-/** Mode b's confidence when --confidence is not given (user ruling, 2026-11-04). */
-const DEFAULT_CONFIDENCE = 95;
+/** Mode b's confidence when --confidence is not given (D140, user ruling 2026-11-09; was 95). */
+const DEFAULT_CONFIDENCE = 85;
 
 const USAGE = 'usage: rwxmap <spec URL | local file | bare API address> [-o <dir>] [--vendor <name>] [--engine rwxlite|jev|mechanical] [--confidence <0-99>] [--model small] [--force]';
 
@@ -883,7 +883,7 @@ Options:
   -o <dir>       write the output files here (default: the current folder)
   --vendor <n>   name for the output files and tool keys (default: the host)
   --engine <e>   rwxlite | jev | mechanical (default: mechanical, then rwxlite on the rows marked loose or tight)
-  --confidence <0-99>  only with --engine rwxlite: rwxlite alone judges every row; a row under this share is x, review tight (default 95)
+  --confidence <0-99>  only with --engine rwxlite: rwxlite alone judges every row; a row under this share is x, review tight (default 85)
   --model small  the smaller rwxlite model (23 MB instead of 91 MB); only where rwxlite runs
   --force        overwrite existing output files
   -h, --help     this help
@@ -1093,7 +1093,7 @@ export async function run(argv, env) {
   if (engineName !== 'jev' && engineName !== 'mechanical') {
     // Mode a (default): mechanical -> rwxlite on the loose and tight rows.
     // Mode b (--engine rwxlite): rwxlite alone on every row, accepted at
-    // --confidence (default 95). No model, no stop.
+    // --confidence (default 85). No model, no stop.
     const modeB = engineName === 'rwxlite';
     const confidence = modeB ? (values.confidence !== undefined ? Number(values.confidence) : DEFAULT_CONFIDENCE) : undefined;
     const toSend = modeB ? verdicts.length : verdicts.reduce((n, v) => (v.review === 'loose' || v.review === 'tight' ? n + 1 : n), 0);
