@@ -114,9 +114,11 @@ Leakage checks (does round 15 hold these vendors?).
 - Package rwxlite 0.3.1, tag v0.3.1, fp32 model. Model string
   `rwxlite-0.3.1+bbe1997d`; fp32 model sha256
   `bbe1997d43020724f9eab9e42e8f6337e9640fe46f764b6fceac1eb1d000a3cf`. No rwxmap
-  change (the shipped pin already is v0.3.1). The remaining file hashes
-  (manifest-exact.json, vocab.txt) are read from the v0.3.1 release and checked
-  by the scorer before any run; they are not repeated here.
+  change (the shipped pin already is v0.3.1). Package ref (rwxlite v0.3.1 tag
+  commit) `5069dfa1f242f451a2d8b38c7bf2bfb08710d03b`; manifest-exact.json sha256
+  `c6bac86970888049952305f72434abe5c9d8f854224a5537f14e5a428a977739`; vocab.txt
+  sha256 `07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3`. The
+  scorer checks all three files against these before any run.
 - Refusal rule: before scoring, a baseline run's output must show
   `rwxlite: on (rwxlite-0.3.1+bbe1997d)` on the engine line. Otherwise the scorer
   refuses and nothing is scored.
@@ -148,8 +150,10 @@ Only fp32 is scored (rwxmap's default model). The int8 per-channel model
 (`--model small`) is not part of this exam, for either the baseline or the candidate.
 
 How the candidate is scored: as it would ship (D135). Today's CLI accepts only
-rwxlite 0.3.x. A candidate packaged as 0.3.x runs through the unchanged CLI. If
-round 15 ships as 0.4.x, the CLI would show "rwxlite: off" for it, so the scorer
+rwxlite 0.3.x, and its offline cache fallback names the exact pinned version. The
+unchanged CLI is used only when the candidate's tag equals the shipped `v0.3.1`.
+For any other tag (0.3.2 included) the CLI would show "rwxlite: off", because the
+cache fallback names exactly v0.3.1, so the scorer
 makes a SECOND scratch copy of the same rwxmap commit and changes exactly one line
 in it: `RWXLITE_TAG` in `src/modeldownload.js` becomes the candidate's tag (the
 package range is derived from that constant, so nothing else moves). That change
@@ -196,18 +200,28 @@ Commands (`<T>` is the committed truth sha256). Baseline only, no verdict on the
 gate:
 
 ```
-node data/exam7-2026-11-19/score/score.mjs --truth-sha <T>
+node data/exam7-2026-11-19/score/score.mjs --rwxmap-ref <ref> --truth-sha <T>
 ```
 
 With the candidate (every value copied from the committed CANDIDATE ADDENDUM).
-`--rwxmap-ref` is passed explicitly and is the commit that holds the filled
-addendum; do not rely on a HEAD default. The scorer's exact flags are fixed when
-the scorer is written and committed with this prereg.
+`--rwxmap-ref` is required and is the commit that holds the filled addendum; there
+is no HEAD default.
+
+```
+node data/exam7-2026-11-19/score/score.mjs --rwxmap-ref <ref> --truth-sha <T> \
+  --cand-models <dir> --cand-version <ver> --cand-ref <rwxlite-commit> \
+  --cand-tag <tag> --cand-model <model-string> --cand-model-sha <sha256> \
+  --cand-manifest-sha <sha256> --cand-vocab-sha <sha256> \
+  --cand-prereg-commit <rwxlite-prereg-commit>
+```
+
+`--config` may name a subset of the configs only for a crash rerun.
 
 ## Output
 
 Per config: exact, loose-1, loose-2, too loose (loose-1 + loose-2) and too tight,
-each as a count and a share of 1579, per vendor and per method. Every too-loose
+each as a count and a share of 1579, per vendor and per method. Per-vendor and
+per-method lines show the share of the group's own rows and the share of 1579. Every too-loose
 row is listed with its marker (tight, loose or settled). rwxlite sent / raised /
 lowered / kept / undecided counts are printed for each rwxlite config. Rows where
 a-base and a-cand differ are listed with truth. Each run writes
@@ -274,8 +288,9 @@ needs a new exam.
   was measured with, so rwxlite's own scorer is not the gate.
 - Model files are copied into a scratch cache, not downloaded by the CLI; the
   production download path is not exercised.
-- The candidate is scored as it would ship under D135. If round 15 ships as 0.4.x
-  that needs the one-line `RWXLITE_TAG` change; the guard proves the diff is that
+- The candidate is scored as it would ship under D135. If its tag differs from
+  `v0.3.1` (0.3.2 included) that needs the one-line `RWXLITE_TAG` change, because
+  the CLI's offline cache fallback names the exact pinned version; the guard proves the diff is that
   line but cannot prove the real release would be built the same way.
 - Mode a and mode b share a model; their rows are not independent. Base and
   candidate are scored on the same rows, so the gate is a paired comparison on 1579
