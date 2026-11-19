@@ -1,0 +1,17 @@
+providers-r15.csv: rows=15167 ragged=0 header=vendor_key|vendor_key_source|servers_domains|contact_domains|logo_domains|spec_titles|title_norms|repo_owners|fork_parents|repo_urls|ops
+  columns searched: vendor_key, servers_domains, contact_domains, logo_domains, title_norms, repo_owners, fork_parents, repo_urls
+providers-r15-catalogues.csv: rows=790 ragged=0 header=vendor|keys_aliases|source|repo_url|ops
+  columns searched: vendor, keys_aliases, repo_url
+providers-r15-swaggerhub.csv: rows=9737 ragged=0 header=vendor_key|vendor_key_source|source|servers_domains|contact_domains|logo_domains|spec_titles|title_norms|repo_owners|repo_urls|ops
+  columns searched: vendor_key, servers_domains, contact_domains, logo_domains, title_norms, repo_owners, repo_urls
+providers-r15-cloud.csv: rows=461 ragged=0 header=vendor_key|vendor_key_source|source|servers_domains|contact_domains|logo_domains|spec_titles|title_norms|repo_owners|repo_urls|ops
+  columns searched: vendor_key, servers_domains, contact_domains, logo_domains, title_norms, repo_owners, repo_urls
+
+our_vendor	file	match_type	count (token hits; one per row x column x token x alias-match)
+gitbook	providers-r15.csv	substring-only	2
+gitness	providers-r15.csv	substring-only	9
+openziti	providers-r15-swaggerhub.csv	segment	1
+openziti	providers-r15-swaggerhub.csv	substring-only	3
+shortcut	providers-r15.csv	substring-only	5
+
+total hit rows written: 20
