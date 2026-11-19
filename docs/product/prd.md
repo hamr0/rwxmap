@@ -1309,16 +1309,44 @@ at 95 1288 (81.1%) / 13 (0.8%) / 287 (18.1%). The D133 mode a bar passes
 both halves (35 <= 43; 1434 >= 1385). The 0.90 cut held on unseen vendors.
 GET stays as is (user ruling 2026-11-08), see learnings.
 
+D141 (user ruling 2026-11-19, brief only, not built): five places where
+BRIEF-v4 was ambiguous, surfaced by rwxlite round 15 review. One letter per
+family, labeller text in data/relabel-v4-2026-11-05/BRIEF-v4-addendum-D141.md.
+(a) Login, sign-in or token refresh that returns a session, access or refresh
+token, including your own, is x. (b) Verifying an email, a one-time code (OTP,
+2FA/TOTP, SMS) or a verification token is x, pure checks included. (c)
+Updating a group whose text never mentions members, roles or permissions is w;
+adding members stays x. (d) Callback URL, webhook destination, LLM or other
+endpoint config, uploading a service account or signing key (FCM, APNs .p8),
+and registering a device push token are x. (e) Removing members on POST, PUT
+or PATCH is x, like DELETE; narrowing a role without removing a member stays w.
+It applies to exam #7 labelling and later; burned exam truth is never
+relabelled by it.
+
 Next, in order:
 
-1. Release: README "what x covers" section and headline numbers
-   updated to exam #6 (mode a 1434 exact / 35 too loose / 119 too
-   tight of 1588), then `docs/product/release-checklist.md`
-   item by item.
-2. A new exam #7 for any change (exams #5 and #6 are burned; bunny.net is
-   spent).
-3. Exam #7 scores the D140 build (mode b default 85) alongside anything
-   else that changes.
+1. D141 mechanical pass (not built): relabel matching rows in the tuning sets
+   under D141 as derived truth copies beside the originals (originals are
+   never edited), measure how many change, and re-export rwxlite's 102,668
+   training rows (export-v4-gap, labels commit 95104e3) the same way as
+   export-v4-d141, beside export-v4, with changed ids, old and new letters
+   and a sha256, using the same pattern net as rwxlite's own D141 relabel so
+   the two halves match; then a step 3 x word list for the
+   D141 families (login/sign-in/token refresh, verify/OTP/2FA,
+   callback/webhook/endpoint/push token/service key, member removal), matched
+   at lead position like existing verb lists. Bar, set before building:
+   tighten-only adoption per D100 (more right than wrong, and neither too
+   loose nor too tight gets worse), scored leave-one-vendor-out on the tuning
+   sets with loose-1 and loose-2 counted separately. It needs its own
+   D-number when built.
+2. Exam #7 vendors frozen 2026-11-18 (ringcentral, openziti, gitness,
+   huggingface, pipedrive, vikunja; six more in reserve;
+   poc/exam7-shortlist/picked.tsv), kept out of rwxlite round 15 (copy check
+   poc/exam7-shortlist/r15-check, 319 specs dropped). Specs are fetched and
+   frozen at exam build. Labellers get BRIEF-v4 plus the D141 addendum.
+3. Exam #7 scores once, through the real CLI: the D140 build (mode b default
+   85), the D141 mechanical pass if it passes its bar, and rwxlite's round 15
+   candidate.
 
 Parked items and known limits below.
 
