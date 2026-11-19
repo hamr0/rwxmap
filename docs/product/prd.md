@@ -1325,17 +1325,13 @@ relabelled by it.
 
 Next, in order:
 
-1. D140 built 2026-11-19 (mode b default 85). Was: mode b default --confidence moves from 95 to 85 (code and
-   tests only; the mechanical lean does not change).
-2. Freeze the exam #7 rwxmap ref (today's mechanical, identical to 1c25be1,
-   plus D140) and send the SHA to rwxlite, which trains round 15 on texts
-   with the lean at that ref and byte-compares lean.csv.
+1. D140 built 2026-11-19 (mode b default 85; commit 96ebb46; 617/617 tests, typecheck, conformance 6/6).
+2. Exam #7 rwxmap ref frozen 2026-11-19 at 96ebb46 (mechanical identical to 1c25be1, plus D140); nothing under src/ changes until exam #7 is scored. Sent to rwxlite, which trains round 15 on the lean at that ref (lean equals 1c25be1, 0 diffs on 106,848 ids).
 3. Exam #7: vendors frozen 2026-11-18 (ringcentral, openziti, gitness,
    huggingface, pipedrive, vikunja; six more in reserve;
    poc/exam7-shortlist/picked.tsv), kept out of rwxlite round 15 (copy check
    poc/exam7-shortlist/r15-check, 319 specs dropped). Specs are fetched and
-   frozen at exam build. Two blind labellers (default Sonnet + Opus, the user
-   picks at build) get BRIEF-v4 plus the D141 addendum; the user rules every
+   frozen at exam build. Inputs are being built in data/exam7-2026-11-19/ (from the shortlist bytes fetched 2026-11-18, sha256-checked). Two blind labellers, A = Sonnet and B = Opus (chosen 2026-11-19) get BRIEF-v4 plus the D141 addendum; the user rules every
    disagreement. Scored once through the real CLI: the D140 build and
    rwxlite's round 15 candidate.
 4. D141 in mechanical: deferred to exam #8 (user ruling 2026-11-19). A step 3
@@ -1349,7 +1345,7 @@ Next, in order:
 
 Done (2026-11-19): export-v4-d141 (D141 relabel of rwxlite's round 13 train
 and val, tighten-only, lean at 1c25be1),
-data/export-v4-d141-2026-11-19/, see learnings.
+data/export-v4-d141-2026-11-19/, see learnings. Merge rule for D141 training labels, agreed with rwxlite for both halves (R13 rows and r15): raises stay; a lower applies only where a D141 family directly orders it, which in practice is (c), an update of the group object itself (not creates, not sub-resources such as calendar or policies, and not SCIM Groups PATCH, which changes members) with no member/role/permission wording; every other lower reverts. R13: 2 lowers kept (ag-069342, ag-071594), 297 not applied; export commit f62e1c2. r15: 0 kept, 162 reverted.
 
 Parked items and known limits below.
 

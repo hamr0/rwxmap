@@ -8970,3 +8970,11 @@ b 70    | 2718  89.7% |   71   2.3% |    8   0.3% |   79   2.6% |  234   7.7% | 
 - Export: data/export-v4-d141-2026-11-19/export-v4-d141.csv sha256 eeb0770a24704caba55b09e356bab32df36d906894ab1fec81c3fcc206150c59, commit cddbe71.
 - Lesson: a relabel pass over user-ruled truth must be tighten-only; one labeller's sure answer is not a ruling, and a family regex net catches many off-topic rows whose old letters the pass has no mandate to change. A model input built from another tool's output (the lean) must be rebuilt whenever that tool's rules change.
 - Where: poc/d141-pass/, data/export-v4-d141-2026-11-19/.
+
+## 2026-11-19 — D140 built, exam #7 ref frozen, one merge rule for D141 labels
+
+- D140: DEFAULT_CONFIDENCE 95 → 85 in src/cli.js (help text, comment); the one pinned mode b test was updated (its "under the cut" example moved from 0.90 to 0.80, because 0.90 now clears 85); a help assertion was added. 617/617 tests, typecheck clean, conformance 6/6. Commit 96ebb46. `git diff 1c25be1 -- src/` touches only cli.js and cli.test.js, so the lean is unchanged.
+- Exam #7 ref frozen at 96ebb46. Labellers A = Sonnet, B = Opus (orchestrator's pick after the user delegated: different models make more independent errors).
+- Merge rule (agreed with rwxlite, its user asked for one base): raises stay; D141-ordered lowers apply only for (c) on updates of the group object itself; all other lowers revert. R13: 2 kept, 297 reverted (export f62e1c2). r15: the one row rwxlite kept (PATCH /scim/v2/Groups/{id}) was reverted at rwxmap's objection, because a SCIM PatchOp changes members; 162 reverted, 0 kept. rwxlite round 15 data: 302,211 rows; lean diff vs rwxmap's column 0; val gate right >= 3,896, too loose <= 104 (R13 fp32 b1 on the D141 val: 3,938 / 90). Training started 2026-11-19, ETA 20–25 h.
+- Lesson: a family regex net plus one labeller lowers far more than the ruling orders; every lower needs the ruling's own scope checked row by row (create vs update, the object vs its sub-resources, protocol semantics such as SCIM PatchOp).
+- Where: poc/d141-pass/c-lowers.txt, data/export-v4-d141-2026-11-19/, docs/product/prd.md.
