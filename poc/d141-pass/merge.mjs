@@ -32,6 +32,9 @@ for (let p = 1; p <= 13; p++) {
 const cand = parseCsv(readFileSync(join(here, 'candidates.csv'), 'utf8')).slice(1);
 if (cand.length !== lab.size) throw new Error(`candidates ${cand.length} != labelled ${lab.size}`);
 
+const cLowers = readFileSync(join(here, 'c-lowers.txt'), 'utf8').split('\n').map((s) => s.trim()).filter((s) => s && !s.startsWith('#'));
+if (new Set(cLowers).size !== cLowers.length) throw new Error('duplicate id in c-lowers.txt');
+const cSet = new Set(cLowers); let cApplied = 0;
 let csv = csvLine(['id', 'split', 'families', 'old_label', 'labeller_letter', 'confidence', 'new_label', 'changed', 'reason']);
 const cnt = { all: 0, move: {}, famMove: {}, split: {}, conf: {}, unsureKept: 0, lowerNA: 0, lowerFam: {} };
 const bump = (o, k) => { o[k] = (o[k] || 0) + 1; };
@@ -39,8 +42,11 @@ for (const c of cand) {
   const [id, split, fam, , , , , , old] = c;
   const l = lab.get(id); if (!l) throw new Error('no label for ' + id);
   const [, letter, conf, reason] = l;
-  const nw = RANK[old] >= RANK[letter] ? old : letter; // tighten-only
-  if (RANK[letter] < RANK[old]) { cnt.lowerNA++; for (const f of fam) bump(cnt.lowerFam, f + ' ' + old + '->' + letter); }
+  let nw = RANK[old] >= RANK[letter] ? old : letter; // tighten-only
+  if (cSet.has(id)) { // the one exception: agreed D141(c) lowers
+    if (letter !== 'w' || old !== 'x' || !fam.includes('c')) throw new Error(`c-lowers: ${id} must be x->w with family c, got ${old}->${letter} families ${fam}`);
+    nw = letter; cApplied++;
+  } else if (RANK[letter] < RANK[old]) { cnt.lowerNA++; for (const f of fam) bump(cnt.lowerFam, f + ' ' + old + '->' + letter); }
   const ch = nw !== old ? 1 : 0;
   csv += csvLine([id, split, fam, old, letter, conf, nw, ch, reason]);
   if (conf === 'unsure' && letter !== old) bump(cnt, 'unsureKept');
@@ -49,7 +55,9 @@ for (const c of cand) {
     for (const f of fam) bump(cnt.famMove, f + ' ' + mv);
   }
 }
+if (cApplied !== cLowers.length) throw new Error(`c lowers applied ${cApplied} != ${cLowers.length} listed`);
 writeFileSync(join(here, 'merged.csv'), csv);
+console.log('c lowers applied:', cApplied);
 console.log('candidates', cand.length, 'changed', cnt.all, 'unsure rows where labeller differed from old', cnt.unsureKept);
 console.log('moves', JSON.stringify(cnt.move, null, 1));
 console.log('family x move (a row in several families counts in each)', JSON.stringify(cnt.famMove, null, 1));

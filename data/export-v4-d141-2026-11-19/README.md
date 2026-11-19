@@ -13,8 +13,9 @@ This is an addition. No existing file was changed; round13 train.jsonl and val.j
 - *.sha256: sha256 of each of the three CSVs.
 
 ## Merge rule
-Tighten-only: label_d141 = the tighter (x > w > r) of label_v4 and the labeller letter, whatever the confidence. The pass may raise a label but never lowers one. Reason: export-v4 labels are user-ruled truth (D137), and a single blind labeller's opinion does not overrule it. Reading the 183 lowered rows of the earlier merge showed 103 that were not D141 cases (unban/unlock/enable user, soft deletes, GitHub Actions permission sets), and the group-family lowers were mostly calendar accept/decline calls under /groups. D141(c) "plain group update is w" applies to exam #7 labelling and later; it is not used to lower existing truth here. The labeller's letter stays visible in poc/d141-pass/merged.csv (column labeller_letter), so the rejected lowers can be read.
-Lowers not applied: 299 (candidate rows where the labeller letter is looser than label_v4; by family and move, a row in several families counts in each: a w->r 3; a x->r 4; a x->w 73; b x->r 1; b x->w 10; c w->r 1; c x->r 4; c x->w 105; d x->r 2; d x->w 86; e x->w 18). Non-candidates keep label_v4.
+Tighten-only, with one exception. label_d141 = the tighter (x > w > r) of label_v4 and the labeller letter, whatever the confidence. The pass may raise a label but lowers none except the 2 ids in poc/d141-pass/c-lowers.txt (ag-069342, ag-071594).
+The exception, D141(c) lowers agreed with rwxlite 2026-11-19: for an id in c-lowers.txt the labeller lowered x->w (sure/likely) citing a plain group edit; the op updates the group object itself (PATCH .../groups/{id}); the text has no member, role, permission, owner, admin, access, grant, policy or acl words. merge.mjs applies it only when the labeller letter is w, the old label is x and the families include c, otherwise it errors, and it fails unless the applied count equals the number of ids listed. Creates (POST /groups) are not (c) and stay as they were; sub-resources under /groups (calendar, policies) are not (c). Counts of this exception: 2 lowered x->w. Reason: export-v4 labels are user-ruled truth (D137), and a single blind labeller's opinion does not overrule it. Reading the 183 lowered rows of the earlier merge showed 103 that were not D141 cases (unban/unlock/enable user, soft deletes, GitHub Actions permission sets), and the group-family lowers were mostly calendar accept/decline calls under /groups. D141(c) "plain group update is w" applies to exam #7 labelling and later; apart from the exception above it is not used to lower existing truth here. The labeller's letter stays visible in poc/d141-pass/merged.csv (column labeller_letter), so the rejected lowers can be read.
+Lowers not applied: 297 (candidate rows where the labeller letter is looser than label_v4, excluding the 2 c-lowers; by family and move, a row in several families counts in each: a w->r 3; a x->r 4; a x->w 73; b x->r 1; b x->w 10; c w->r 1; c x->r 4; c x->w 103; d x->r 2; d x->w 86; e x->w 18). Non-candidates keep label_v4.
 
 ## Lean rule and sources
 lean_letter and lean_rule come from rwxmap's shipped `src/exporter.js` classifyOperations (src/ is identical to commit 1c25be1; `git diff 1c25be1 -- src/` is empty), on the original operation (method upper-cased, path, and operationId/summary/description when non-empty), exactly as rwxlite r15/label_mech.mjs builds them. lean_rule is the rule as it appears in the text prefix, so rule credential-set is written cant-undo-verb (rwxlite src/text.js alias). Computed by `poc/d141-pass/lean.mjs`.
@@ -23,9 +24,9 @@ Original operation sources: ag- ids from rwxlite data/m0/mechanical.jsonl.gz (m0
 
 ## Counts
 - rows: 106848 (train 102668, val 4180)
-- candidates: 4990 (train 4817, val 173); changed: 230 (train 224, val 6)
-- changed by family and move (a row in several families counts in each): a r->w 4; a r->x 85; a w->x 24; b r->w 2; b r->x 64; b w->x 23; c w->x 15; d r->x 11; d w->x 9; e w->x 25
-- moves: train r->w 6; train r->x 127; train w->x 91; val r->x 3; val w->x 3
+- candidates: 4990 (train 4817, val 173); changed: 232 (train 226, val 6)
+- changed by family and move (a row in several families counts in each): a r->w 4; a r->x 85; a w->x 24; b r->w 2; b r->x 64; b w->x 23; c w->x 15; c x->w 2; d r->x 11; d w->x 9; e w->x 25
+- moves: train r->w 6; train r->x 127; train w->x 91; train x->w 2; val r->x 3; val w->x 3
 - lean_source: m0 98759, m0q 4258, exam3 1377, exam4 1505, fresh 949, missing 0
 - computed lean differs from the stored round13 text prefix (letter or rule): train 6304, val 154 (letter differs: train 3535, val 104); stored prefix unparsable: train 0, val 0
 - most common differences (stored -> computed):
@@ -39,7 +40,7 @@ Original operation sources: ag- ids from rwxlite data/m0/mechanical.jsonl.gz (m0
 ## Input sha256
 - rwxlite/data/round13/train.jsonl: 8144e5056e0244e888ca6360ac312901762245d4c8874b0c304bcd897a788fef
 - rwxlite/data/round13/val.jsonl: 8c0fdcfb32ca107db4ba8e5a535cf5851da91a164903603c250fd4dfb0654983
-- poc/d141-pass/merged.csv: 6a17a2d6588b11caa59055e4361acb0d4e5034a35e6ea22212c68904a74ba93f
+- poc/d141-pass/merged.csv: 9948c6cb008344ee40fb76fc12d8a66f0fc58b8b1032a79080fda733e630a3b8
 - poc/d141-pass/candidates.csv: bf300de5c47e3176340b84f21e847a1d18104b001ff2faf9f9a81ce6f5dbd113
 - poc/d141-pass/out/part-01.csv: d14588ffe5fefafa5f0f404ce1ec9075a754a6dbc65399aa76b32953245bbdf4
 - poc/d141-pass/out/part-02.csv: 0aed34f0ae6fa8a807a85e67bfc4d0cc3da8f2e60d581c3967c40edb3cfb34fc
@@ -59,10 +60,11 @@ Original operation sources: ag- ids from rwxlite data/m0/mechanical.jsonl.gz (m0
 - data/exam4-2026-11-04/ops.csv: e9836ff2f9e8288e3721f97506ed666b871a3486f7b781c544b5234a0b5da0b4
 - data/rwxlite-fresh-2026-11-03/ops.csv.gz: ab155ac1e500f7ababe09872f683aba3869fbfe207d0e35570ee70af452de215
 - poc/d141-pass/LABEL-PROMPT.md: 6688192669b5e4ed9fad653b312be83f565d5bb4f06240d10ac9ebb37aabe524
+- poc/d141-pass/c-lowers.txt: 4aff6fa9fe5aae3a78d8d3d2f2dfe46179d9b4cd61ef93237b9b158aef238ec4
 
 ## Output sha256
-- export-v4-d141.csv: eeb0770a24704caba55b09e356bab32df36d906894ab1fec81c3fcc206150c59
-- changed-train.csv: 912dccf91934ff8616a0069611fab5d38d4cff8dd30a049f2f3f356934349759
+- export-v4-d141.csv: 8d802cf42d56fbcf050102fb854a958696bf59abdeca1a43fe6c88bcdc53034f
+- changed-train.csv: 11e048ff6acb00be10f3461cf9b01ea1266b3a2da7c5992dbf68b8e9356b0ee2
 - changed-val.csv: f567ea00f7bad0932570570b0811a3f920b25e03cabfd71950166d370b52acfb
 
 ## Rebuild

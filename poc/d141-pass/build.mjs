@@ -69,7 +69,7 @@ const srcCount = { m0: 0, m0q: 0, exam3: 0, exam4: 0, fresh: 0, missing: 0 };
 const q = { differ: 0 };
 const stale = { train: 0, val: 0 }, staleLetter = { train: 0, val: 0 }, nopre = { train: 0, val: 0 }; const staleEx = [], staleRules = {};
 let csv = csvLine(['id', 'split', 'label_v4', 'label_d141', 'changed', 'd141_families', 'd141_confidence', 'lean_letter', 'lean_rule', 'lean_source']);
-const RANK = { r: 0, w: 1, x: 2 }; const lowerNA = { n: 0, fam: {} };
+const RANK = { r: 0, w: 1, x: 2 }; let cLow = 0; const lowerNA = { n: 0, fam: {} };
 const chg = { train: [], val: [] }; const cnt = { cand: 0, candTrain: 0, candVal: 0, changed: 0 };
 rows.forEach((r, i) => {
   const m = merged.get(r.id);
@@ -77,8 +77,9 @@ rows.forEach((r, i) => {
     if (m.split !== r.split || m.old !== r.label) throw new Error(`merged mismatch for ${r.id}: ${m.split}/${m.old} vs ${r.split}/${r.label}`);
     cnt.cand++; cnt[r.split === 'train' ? 'candTrain' : 'candVal']++;
   }
-  if (m && RANK[m.letter] < RANK[m.old]) { lowerNA.n++; for (const f of m.fam) { const k = `${f} ${m.old}->${m.letter}`; lowerNA.fam[k] = (lowerNA.fam[k] || 0) + 1; } }
+  if (m && RANK[m.letter] < RANK[m.old] && m.nw === m.old) { lowerNA.n++; for (const f of m.fam) { const k = `${f} ${m.old}->${m.letter}`; lowerNA.fam[k] = (lowerNA.fam[k] || 0) + 1; } }
   const nw = m ? m.nw : r.label, ch = nw !== r.label ? 1 : 0;
+  if (m && RANK[m.nw] < RANK[m.old]) cLow++;
   if (ch) { cnt.changed++; chg[r.split].push({ id: r.id, a: r.label, b: nw, f: m.fam, reason: m.reason }); }
   const L = lean[i], s = isQ[i] ? 'm0q' : resolved[i] ? resolved[i].src : 'missing';
   srcCount[s]++;
@@ -106,6 +107,8 @@ for (const s of ['train', 'val']) {
 }
 
 const topRules = Object.entries(staleRules).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([k, v]) => `- ${k}: ${v}`).join('\n');
+const cIds = readFileSync(join(here, 'c-lowers.txt'), 'utf8').split('\n').filter((s) => s && !s.startsWith('#'));
+if (cLow !== cIds.length) throw new Error('c lowers in export ' + cLow + ' != ' + cIds.length);
 const moves = {}; for (const s of ['train', 'val']) for (const x of chg[s]) { const k = `${s} ${x.a}->${x.b}`; moves[k] = (moves[k] || 0) + 1; }
 const readme = `# export-v4-d141 (2026-11-19)
 
@@ -122,8 +125,9 @@ This is an addition. No existing file was changed; round13 train.jsonl and val.j
 - *.sha256: sha256 of each of the three CSVs.
 
 ## Merge rule
-Tighten-only: label_d141 = the tighter (x > w > r) of label_v4 and the labeller letter, whatever the confidence. The pass may raise a label but never lowers one. Reason: export-v4 labels are user-ruled truth (D137), and a single blind labeller's opinion does not overrule it. Reading the 183 lowered rows of the earlier merge showed 103 that were not D141 cases (unban/unlock/enable user, soft deletes, GitHub Actions permission sets), and the group-family lowers were mostly calendar accept/decline calls under /groups. D141(c) "plain group update is w" applies to exam #7 labelling and later; it is not used to lower existing truth here. The labeller's letter stays visible in poc/d141-pass/merged.csv (column labeller_letter), so the rejected lowers can be read.
-Lowers not applied: ${lowerNA.n} (candidate rows where the labeller letter is looser than label_v4; by family and move, a row in several families counts in each: ${Object.keys(lowerNA.fam).sort().map((k) => `${k} ${lowerNA.fam[k]}`).join('; ')}). Non-candidates keep label_v4.
+Tighten-only, with one exception. label_d141 = the tighter (x > w > r) of label_v4 and the labeller letter, whatever the confidence. The pass may raise a label but lowers none except the ${cIds.length} ids in poc/d141-pass/c-lowers.txt (${cIds.join(', ')}).
+The exception, D141(c) lowers agreed with rwxlite 2026-11-19: for an id in c-lowers.txt the labeller lowered x->w (sure/likely) citing a plain group edit; the op updates the group object itself (PATCH .../groups/{id}); the text has no member, role, permission, owner, admin, access, grant, policy or acl words. merge.mjs applies it only when the labeller letter is w, the old label is x and the families include c, otherwise it errors, and it fails unless the applied count equals the number of ids listed. Creates (POST /groups) are not (c) and stay as they were; sub-resources under /groups (calendar, policies) are not (c). Counts of this exception: ${cLow} lowered x->w. Reason: export-v4 labels are user-ruled truth (D137), and a single blind labeller's opinion does not overrule it. Reading the 183 lowered rows of the earlier merge showed 103 that were not D141 cases (unban/unlock/enable user, soft deletes, GitHub Actions permission sets), and the group-family lowers were mostly calendar accept/decline calls under /groups. D141(c) "plain group update is w" applies to exam #7 labelling and later; apart from the exception above it is not used to lower existing truth here. The labeller's letter stays visible in poc/d141-pass/merged.csv (column labeller_letter), so the rejected lowers can be read.
+Lowers not applied: ${lowerNA.n} (candidate rows where the labeller letter is looser than label_v4, excluding the ${cLow} c-lowers; by family and move, a row in several families counts in each: ${Object.keys(lowerNA.fam).sort().map((k) => `${k} ${lowerNA.fam[k]}`).join('; ')}). Non-candidates keep label_v4.
 
 ## Lean rule and sources
 lean_letter and lean_rule come from rwxmap's shipped \`src/exporter.js\` classifyOperations (src/ is identical to commit 1c25be1; \`git diff 1c25be1 -- src/\` is empty), on the original operation (method upper-cased, path, and operationId/summary/description when non-empty), exactly as rwxlite r15/label_mech.mjs builds them. lean_rule is the rule as it appears in the text prefix, so rule credential-set is written cant-undo-verb (rwxlite src/text.js alias). Computed by \`poc/d141-pass/lean.mjs\`.
@@ -143,6 +147,7 @@ ${topRules}
 ## Input sha256
 ${Object.entries(inputs).map(([k, v]) => `- ${k}: ${v}`).join('\n')}
 - poc/d141-pass/LABEL-PROMPT.md: ${promptSha}
+- poc/d141-pass/c-lowers.txt: ${sha(readFileSync(join(here, 'c-lowers.txt')))}
 
 ## Output sha256
 ${Object.entries(files).map(([k, v]) => `- ${k}: ${v}`).join('\n')}
