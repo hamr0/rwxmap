@@ -63,7 +63,7 @@ How it decides:
 | mechanical | `rwxmap spec.json --engine mechanical` | rules only | offline; nothing downloaded; same answer every run | no model at all |
 
 rwxlite is a small local model, a separate project: [github.com/hamr0/rwxlite](https://github.com/hamr0/rwxlite), npm package `rwxlite`.
-Install it with `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.3`. Without it, modes a and b run mechanically and say `rwxlite: off (mechanical)`.
+Install it with `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.4`. Without it, modes a and b run mechanically and say `rwxlite: off (mechanical)`.
 
 What leaves your machine: mechanical, nothing. Modes a and b, only the model download from GitHub. Mode c, each checked row's method, path, operationId, summary and description go to Jev.
 
@@ -173,15 +173,15 @@ Exit 0 on success, 1 on any failure. An existing output file is not overwritten 
 
 <details><summary>rwxlite model</summary>
 
-- A run that uses rwxlite fetches the manifest of the pinned rwxlite release, v0.3.1 (a small request), downloads the model if it is not cached, checks every sha256, and only then puts it in place.
+- A run that uses rwxlite fetches the manifest of the pinned rwxlite release, v0.4.0 (a small request), downloads the model if it is not cached, checks every sha256, and only then puts it in place.
 - Default: the exact fp32 model, about 91 MB, downloaded once. `--model small`: the int8 model, about 23 MB.
 - Cache: `$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`, one folder per model.
 - Downloads are https only, from github.com and its githubusercontent.com hosts, capped at 200 MB. A failed or tampered download installs nothing.
 - Offline (manifest unreachable): the run uses the verified cached model of the pinned version and says "using cached <model>, could not reach the release". With none cached it prints `rwxlite: off (mechanical) — <reason>` and runs mechanically. It never stops the run.
-- The model is pinned in each rwxmap release. A new model replaces it only by the maintainer's decision, on exam numbers published here (0.3.1 shipped that way, D139). The combined JSON records the model string.
-- The `rwxlite` package is optional; you install it. Use `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.3`: on Linux x64, `onnxruntime-node` otherwise downloads about 285 MB of GPU (CUDA/TensorRT) libraries.
-- Only rwxlite package versions 0.3.x are accepted (D135). Any other version turns the second pass off (mechanical alone, reason printed).
-- Without the package: `rwxlite: off (mechanical) — the rwxlite package is not installed (npm install rwxlite@0.3)`.
+- The model is pinned in each rwxmap release. A new model replaces it only by the maintainer's decision, on exam numbers published here (0.3.1 shipped that way, D139; 0.4.0, D142). The combined JSON records the model string.
+- The `rwxlite` package is optional; you install it. Use `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.4`: on Linux x64, `onnxruntime-node` otherwise downloads about 285 MB of GPU (CUDA/TensorRT) libraries.
+- Only rwxlite package versions 0.4.x are accepted (D135). Any other version turns the second pass off (mechanical alone, reason printed).
+- Without the package: `rwxlite: off (mechanical) — the rwxlite package is not installed (npm install rwxlite@0.4)`.
 
 </details>
 

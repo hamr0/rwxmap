@@ -965,11 +965,24 @@ above.
 - **The proxy matcher** — `rwxmap/match` (D126) released as
   `rwxmap@0.8.0` on 2026-10-29.
 
+Pin pass to rwxlite 0.4.0 (D142 GO, built and verified 2026-11-20, unreleased):
+RWXLITE_TAG v0.4.0 (cache fallback 0.4.0 and accepted range 0.4.x derive from
+it; 0.3.x, 0.5.0 and 0.2.x refused), LOWER_MIN_P stays 0.90 (exam #7 measured
+0.4.0 at that cut), 666 tests, guards broken by hand once. Verified: GitHub
+release v0.4.0 asset sha256 equal to the exam #7 addendum (model-fp32.onnx
+4608f470, manifest-exact.json 5b3e5b87, vocab.txt 07eced37); npm rwxlite@0.4.0
+integrity sha512 equals the registry's, tagged latest; its src/ and types/ and
+package.json are byte-identical to rwxlite commit 088bec1 (the exam #7
+candidate). Real install on exam #7 (rwxmap tarball plus npm rwxlite@0.4.0,
+empty cache, model downloaded from the release, model rwxlite-0.4.0+4608f470):
+1579 of 1579 operations joined, 0 rows differ from the committed a-cand and
+b85-cand rows (class and marker). Exam #7 numbers are unchanged.
+
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
 ## Module D133: rwxmap with rwxlite (three engines)
 
-Status: shipped. Passes 1, 2a and 2b shipped in 0.9.0; rwxlite 0.3.1 at the 0.90 cut (D139) shipped in 0.11.0 on 2026-11-07. The default run uses rwxlite when the `rwxlite@0.3` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
+Status: shipped. Passes 1, 2a and 2b shipped in 0.9.0; rwxlite 0.3.1 at the 0.90 cut (D139) shipped in 0.11.0 on 2026-11-07; the pin moved to rwxlite 0.4.0 at the same 0.90 cut (D142 GO, pin pass verified 2026-11-20, unreleased). The default run uses rwxlite when the `rwxlite@0.4` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
 decided; everything marked "proposal" or "open" is not decided.
 
 ### Decided (user rulings, 2026-11-03 and 2026-11-04)
@@ -1092,14 +1105,14 @@ decided; everything marked "proposal" or "open" is not decided.
 - **Distribution.** Ships on npm. The model is downloaded on first use
   and is pinned to one rwxlite release tag in each rwxmap release (D135;
   `RWXLITE_TAG` in `src/modeldownload.js`). The rwxlite npm package that
-  runs it must be in the same minor line (>=0.3.0 <0.4.0, derived from the
+  runs it must be in the same minor line (>=0.4.0 <0.5.0, derived from the
   tag, read from the package's own package.json); any other version, a
   pre-release or an unreadable version turns rwxlite off, mechanical
   alone, with the reason printed (D135). The package is checked before
   the model is fetched, so a missing or wrong-version package costs no
-  download. Current pin (D139, user override 2026-11-07, built
-  5e6b9cb, shipped in 0.11.0): rwxlite 0.3.1 (R13), tag v0.3.1, cache fallback
-  0.3.1, accepted range 0.3.x. Every run records the model string.
+  download. Current pin (D142, verified 2026-11-20, unreleased): rwxlite 0.4.0, tag v0.4.0,
+  cache fallback 0.4.0, accepted range 0.4.x (0.3.x and 0.5.0 refused), model
+  rwxlite-0.4.0+4608f470 (fp32), LOWER_MIN_P 0.90. Every run records the model string.
 - **Model cache and integrity.** The downloaded model is cached in a
   per-user folder, `~/.cache/rwxmap/` (or `$XDG_CACHE_HOME/rwxmap`),
   one directory per model: `rwxlite-<semver>+<sha8>/` holding
@@ -1126,7 +1139,7 @@ decided; everything marked "proposal" or "open" is not decided.
   session, 2026-11-04).** GitHub releases on `hamr0/rwxlite`. Assets per
   release: `manifest.json` (int8 per-channel), `manifest-exact.json`
   (fp32), `model-int8-pc.onnx`, `model-fp32.onnx`, `vocab.txt`. Pinned
-  tag (D135): `https://github.com/hamr0/rwxlite/releases/download/v0.3.1/manifest-exact.json`
+  tag (D135): `https://github.com/hamr0/rwxlite/releases/download/v0.4.0/manifest-exact.json`
   (rwxmap default) and `.../manifest.json` (`--model small`). Not live
   yet. On download rwxmap stores the chosen manifest as `manifest.json`
   inside the model's own folder `rwxlite-<semver>+<sha8>/` (the cache
