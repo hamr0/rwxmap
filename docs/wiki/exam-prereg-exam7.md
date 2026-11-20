@@ -91,8 +91,23 @@ Leakage checks (does round 15 hold these vendors?).
   committed, the CANDIDATE ADDENDUM is filled in and the truth sha256 is
   committed. Only then is it shared with rwxlite, whose scorer checks the same
   sha256.
-- `truth.csv` sha256: **PENDING**
-- Measured facts about the labelling: PENDING (written in after truth is built).
+- `truth.csv` sha256: **af0fe041ff0bc2a372d915b63f2937a9f44a0808d911d821a1a4ffde851783ec**
+  (`truth.csv.sha256`). Built by `labelling/build-truth.mjs` from the 12
+  labeller files and `labelling/rulings.csv`; three runs gave the same sha.
+  `labelling/out.sha256` is committed beside it.
+- Measured facts about the labelling: 12 labeller files (A Sonnet, B Opus, for
+  each of the 6 vendors), all validated directly; each labeller's transcript
+  showed it opened only the brief, the addendum, its blind part and its own
+  output. Distinct reasons A / B: gitness 233 / 250, huggingface 252 / 357,
+  openziti 197 / 200, pipedrive 213 / 213, ringcentral 315 / 343, vikunja
+  159 / 163. A and B agree on 1513 of 1579 (95.8%). Disagreements per vendor:
+  openziti 27, huggingface 11, gitness 9, pipedrive 9, ringcentral 6, vikunja 4.
+  64 were B x / A w and 2 were A x / B w. The user ruled all 66 on 2026-11-19 in
+  12 pattern groups (G1 to G12, `labelling/rulings.csv`, each row with its A and
+  B labels and a note): 45 ruled x, 21 ruled w. Truth classes: r 740, w 369,
+  x 470 (N = 1579). Order note: labelling ran before the candidate addendum was
+  filled (the addendum was committed in 428727f, before this truth sha256 was
+  committed or shared); labels do not depend on the candidate.
 
 ## Code under test
 
