@@ -323,7 +323,7 @@ needs a new exam.
 
 ## Results and findings (after scoring, 2026-11-20)
 
-Source: `data/exam7-2026-11-19/score/score.txt` and `rows-{mech,a-base,a-cand,b85-base,b85-cand}.csv`; run log `data/exam7-2026-11-19/score/score-run.log.gz`.
+Source: `data/exam7-2026-11-19/score/score.txt` and `rows-{mech,a-base,a-cand,b85-base,b85-cand}.csv`; run log `data/exam7-2026-11-19/score/score-run.log.gz`. The run log's scratch path (`.claude/scratchpad/exam7-run`) is not in the repo; the CLI outputs it held are committed as `data/exam7-2026-11-19/score/rows-*.csv` and `score.txt`.
 
 ### Run facts
 
