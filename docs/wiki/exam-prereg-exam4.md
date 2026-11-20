@@ -1,6 +1,6 @@
-# Pre-registration (DRAFT): shared clean exam #4, rwxmap side (D135 next-model gate)
+# Pre-registration (SCORED, burned): shared clean exam #4, rwxmap side (D135 next-model gate)
 
-**Status: DRAFT, written 2026-11-04. Not frozen.** It freezes when this file is
+**Status: SCORED and BURNED (2026-11-05). See "Results and findings" at the end.** The text below is the pre-registration as it stood before scoring. (Earlier status: DRAFT, written 2026-11-04. Not frozen.) It freezes when this file is
 committed with the scorer (`data/exam4-2026-11-04/score/`), the CANDIDATE
 ADDENDUM below is filled in and committed, the truth sha256 is filled in, and
 rwxlite has committed its side. No config below has been run on the real ops

@@ -1,4 +1,4 @@
-# Pre-registration (DRAFT): clean exam #6, rwxmap 0.11.0 as shipped
+# Pre-registration (SCORED, burned): clean exam #6, rwxmap 0.11.0 as shipped
 
 **Status: SCORED and BURNED (2026-11-08).** See "Results and findings" at the end.
 The text below is the pre-registration as it stood before scoring (written

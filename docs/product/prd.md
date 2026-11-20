@@ -965,11 +965,24 @@ above.
 - **The proxy matcher** — `rwxmap/match` (D126) released as
   `rwxmap@0.8.0` on 2026-10-29.
 
+Pin pass to rwxlite 0.4.0 (D142 GO, built and verified 2026-11-20, unreleased):
+RWXLITE_TAG v0.4.0 (cache fallback 0.4.0 and accepted range 0.4.x derive from
+it; 0.3.x, 0.5.0 and 0.2.x refused), LOWER_MIN_P stays 0.90 (exam #7 measured
+0.4.0 at that cut), 666 tests, guards broken by hand once. Verified: GitHub
+release v0.4.0 asset sha256 equal to the exam #7 addendum (model-fp32.onnx
+4608f470, manifest-exact.json 5b3e5b87, vocab.txt 07eced37); npm rwxlite@0.4.0
+integrity sha512 equals the registry's, tagged latest; its src/ and types/ and
+package.json are byte-identical to rwxlite commit 088bec1 (the exam #7
+candidate). Real install on exam #7 (rwxmap tarball plus npm rwxlite@0.4.0,
+empty cache, model downloaded from the release, model rwxlite-0.4.0+4608f470):
+1579 of 1579 operations joined, 0 rows differ from the committed a-cand and
+b85-cand rows (class and marker). Exam #7 numbers are unchanged.
+
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
 ## Module D133: rwxmap with rwxlite (three engines)
 
-Status: shipped. Passes 1, 2a and 2b shipped in 0.9.0; rwxlite 0.3.1 at the 0.90 cut (D139) shipped in 0.11.0 on 2026-11-07. The default run uses rwxlite when the `rwxlite@0.3` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
+Status: shipped. Passes 1, 2a and 2b shipped in 0.9.0; rwxlite 0.3.1 at the 0.90 cut (D139) shipped in 0.11.0 on 2026-11-07; the pin moved to rwxlite 0.4.0 at the same 0.90 cut (D142 GO, pin pass verified 2026-11-20, unreleased). The default run uses rwxlite when the `rwxlite@0.4` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
 decided; everything marked "proposal" or "open" is not decided.
 
 ### Decided (user rulings, 2026-11-03 and 2026-11-04)
@@ -995,10 +1008,11 @@ decided; everything marked "proposal" or "open" is not decided.
     confidence/100 the row gets the letter (a raise, a keep or a
     lowering, all at the same cut); otherwise the row is undecided: x,
     review `tight`. An errored or malformed answer is undecided too.
-    More confidence means more asks. **Default 95** (user ruling,
-    2026-11-04; replaces the earlier 70): it is the lowest setting whose
-    too-loose count (6 of 949) is no higher than mechanical alone's (6
-    of 949) on the tuning set below. Measured on rwxlite's fresh 949
+    More confidence means more asks. **Default 85** (D140, user ruling 2026-11-09, built 2026-11-19, ships with the exam #7 ref; was 95, user ruling
+    2026-11-04; replaces the earlier 70): picked from the sweep on
+    exams #5 and #6 (see the D140 paragraph below) as the lowest cut
+    where no vendor leaks more than mechanical alone. The table below
+    is the older measurement on rwxlite's fresh 949
     rows (coolify, workos, lago, resend; tuning data for rwxmap, int8
     p values, from `poc/d133-mode-b/readout.txt`; the code reproduces
     these counts in `src/secondpass.test.js`). Denominator 949 rows;
@@ -1007,7 +1021,7 @@ decided; everything marked "proposal" or "open" is not decided.
     | confidence | exact | too loose | too tight | asked |
     |---|---|---|---|---|
     | 70 | 870 (91.7%) | 18 (1.9%) | 61 (6.4%) | 52 (5.5%) |
-    | 95 (default) | 837 (88.2%) | 6 (0.6%) | 106 (11.2%) | 134 (14.1%) |
+    | 95 (old default) | 837 (88.2%) | 6 (0.6%) | 106 (11.2%) | 134 (14.1%) |
     | 97 | 811 (85.5%) | 3 (0.3%) | 135 (14.2%) | 173 (18.2%) |
 
     Mechanical alone on the same rows: 736 exact (77.6%), 6 too loose
@@ -1015,13 +1029,12 @@ decided; everything marked "proposal" or "open" is not decided.
     folded into one number. The default fp32 model will shift these
     slightly (rwxlite: 7 rows differ); re-measure on the next exam.
 
-    Candidate (D140, user ruling 2026-11-09, not built): default 85 for
+    Candidate (D140, user ruling 2026-11-09, built 2026-11-19): default 85 for
     rwxlite 0.3.1. Swept on exams #5 and #6 (burned, tuning; 3031 rows,
     12 vendors), 85 gives 2693 exact (88.8%), 52 too loose (1.7%), 286
     too tight (9.4%) and 377 asks (12.4%), against 95's 2496 / 29 / 506
     and 735 asks; no vendor leaks more than mechanical. 90 (cautious)
-    and 70 (fewest asks) stay documented. 95 stays the shipped default
-    until exam #7.
+    and 70 (fewest asks) stay documented. Exam #7 (2026-11-20) measured it with 0.3.1: b85-base 1447 exact / 54 too loose (46 loose-1, 8 loose-2) / 78 too tight, asked 178 of 1579; with 0.4.0, b85-cand 1449 / 39 (38 loose-1, 1 loose-2) / 91, asked 164. No bar; the 85 default stands.
   - **c: mechanical -> Jev (paid, BYOK).** Same flow and scope as mode
     a, with Jev deciding instead of rwxlite. Undecided means x plus
     review. Jev's cut-offs stay as measured (tiers, separate questions,
@@ -1084,21 +1097,22 @@ decided; everything marked "proposal" or "open" is not decided.
   fly, and emits WebMCP, MCP hints and the other carriers. rwxlite is
   only a classifier; it never reads a spec or an API and only returns p.
 - **CLI names.** `rwxmap spec.json` is mode a. `--engine rwxlite
-  --confidence <0-99>` is mode b (default 95). `--engine jev` is mode c
+  --confidence <0-99>` is mode b (default 85, D140, from 0.12.0; was 95 in 0.11.1 as
+  published). `--engine jev` is mode c
   and needs the key. `--engine mechanical` is no model.
   `--confidence` is valid only with `--engine rwxlite`; elsewhere it
   fails loudly.
 - **Distribution.** Ships on npm. The model is downloaded on first use
   and is pinned to one rwxlite release tag in each rwxmap release (D135;
   `RWXLITE_TAG` in `src/modeldownload.js`). The rwxlite npm package that
-  runs it must be in the same minor line (>=0.3.0 <0.4.0, derived from the
+  runs it must be in the same minor line (>=0.4.0 <0.5.0, derived from the
   tag, read from the package's own package.json); any other version, a
   pre-release or an unreadable version turns rwxlite off, mechanical
   alone, with the reason printed (D135). The package is checked before
   the model is fetched, so a missing or wrong-version package costs no
-  download. Current pin (D139, user override 2026-11-07, built
-  5e6b9cb, shipped in 0.11.0): rwxlite 0.3.1 (R13), tag v0.3.1, cache fallback
-  0.3.1, accepted range 0.3.x. Every run records the model string.
+  download. Current pin (D142, verified 2026-11-20, unreleased): rwxlite 0.4.0, tag v0.4.0,
+  cache fallback 0.4.0, accepted range 0.4.x (0.3.x and 0.5.0 refused), model
+  rwxlite-0.4.0+4608f470 (fp32), LOWER_MIN_P 0.90. Every run records the model string.
 - **Model cache and integrity.** The downloaded model is cached in a
   per-user folder, `~/.cache/rwxmap/` (or `$XDG_CACHE_HOME/rwxmap`),
   one directory per model: `rwxlite-<semver>+<sha8>/` holding
@@ -1125,7 +1139,7 @@ decided; everything marked "proposal" or "open" is not decided.
   session, 2026-11-04).** GitHub releases on `hamr0/rwxlite`. Assets per
   release: `manifest.json` (int8 per-channel), `manifest-exact.json`
   (fp32), `model-int8-pc.onnx`, `model-fp32.onnx`, `vocab.txt`. Pinned
-  tag (D135): `https://github.com/hamr0/rwxlite/releases/download/v0.3.1/manifest-exact.json`
+  tag (D135): `https://github.com/hamr0/rwxlite/releases/download/v0.4.0/manifest-exact.json`
   (rwxmap default) and `.../manifest.json` (`--model small`). Not live
   yet. On download rwxmap stores the chosen manifest as `manifest.json`
   inside the model's own folder `rwxlite-<semver>+<sha8>/` (the cache
@@ -1300,25 +1314,63 @@ ops, exact / too loose / too tight: 1269 / 40 (38 loose-1, 2 loose-2) /
 scored 0.2.0 at 0.97 (1272 / 94 / 77) too loose falls from 94 to 40 and too
 tight rises from 77 to 134 (exam #5, where the 0.90 cut was tuned).
 
-Current number (exam #6, scored once 2026-11-08 through the npm install,
-rwxmap 0.11.0 + rwxlite 0.3.1, 1588 ops, 5 unseen APIs: grafana, nocodb,
-radarr, cloudsmith, invoiceninja; two Sonnet labellers agreed on 1564 rows,
-the user ruled 24): mode a 1434 exact (90.3%) / 35 too loose (2.2%) / 119
-too tight (7.5%); mechanical 1305 (82.2%) / 43 (2.7%) / 240 (15.1%); mode b
-at 95 1288 (81.1%) / 13 (0.8%) / 287 (18.1%). The D133 mode a bar passes
-both halves (35 <= 43; 1434 >= 1385). The 0.90 cut held on unseen vendors.
-GET stays as is (user ruling 2026-11-08), see learnings.
+Current number (exam #7, scored once 2026-11-20 through the real CLI at
+rwxmap 7dce23e, 1579 ops, 6 unseen APIs: huggingface, openziti,
+pipedrive, ringcentral, vikunja, gitness; two labellers, Sonnet and Opus,
+agreed on 1513 rows, the user ruled 66): mode a with rwxlite 0.3.1 as
+shipped 1431 exact (90.6%) / 68 too loose (4.3%; 50 loose-1, 18 loose-2) /
+80 too tight (5.1%); mechanical 1333 (84.4%) / 72 (4.6%; 54 loose-1, 18
+loose-2) / 174 (11.0%). The D133 mode a bar passes both halves (68 <= 72;
+1431 >= 1412). 15 of the 18 loose-2 rows are settled GET rows the model
+never sees. Exam #6 (1588 ops, mode a 1434 / 35 / 119) and exam #5 are
+in learnings. GET stays as is (user ruling 2026-11-08), see learnings.
+
+D141 (user ruling 2026-11-19, brief only, not built): five places where
+BRIEF-v4 was ambiguous, surfaced by rwxlite round 15 review. One letter per
+family, labeller text in data/relabel-v4-2026-11-05/BRIEF-v4-addendum-D141.md.
+(a) Login, sign-in or token refresh that returns a session, access or refresh
+token, including your own, is x. (b) Verifying an email, a one-time code (OTP,
+2FA/TOTP, SMS) or a verification token is x, pure checks included. (c)
+Updating a group whose text never mentions members, roles or permissions is w;
+adding members stays x. (d) Callback URL, webhook destination, LLM or other
+endpoint config, uploading a service account or signing key (FCM, APNs .p8),
+and registering a device push token are x. (e) Removing members on POST, PUT
+or PATCH is x, like DELETE; narrowing a role without removing a member stays w.
+It applies to exam #7 labelling and later; burned exam truth is never
+relabelled by it.
+
+D142 (user ruling 2026-11-20, before the exam #7 truth sha256 was shared or
+any score seen; proposed by rwxlite's user, agreed by the rwxmap user): for
+exam #7 the ship gate is: a-cand exact >= a-base exact, and a-cand too loose
+<= a-base too loose + 1.0 percentage point (+15 rows of 1579,
+floor(0.01 x n)). It replaces D135's same-or-better gate for this exam; the
+D135 scoring method (real CLI, as it would ship) is unchanged. Reason: a more
+confident model relaxes more letters, mostly correctly; a small rise in too
+loose is accepted as a trade.
 
 Next, in order:
 
-1. Release: README "what x covers" section and headline numbers
-   updated to exam #6 (mode a 1434 exact / 35 too loose / 119 too
-   tight of 1588), then `docs/product/release-checklist.md`
-   item by item.
-2. A new exam #7 for any change (exams #5 and #6 are burned; bunny.net is
-   spent).
-3. Exam #7 scores the D140 build (mode b default 85) alongside anything
-   else that changes.
+1. D140 built 2026-11-19 (mode b default 85; commit 96ebb46; 617/617 tests, typecheck, conformance 6/6).
+2. Exam #7 rwxmap ref frozen 2026-11-19 at 96ebb46 (mechanical identical to 1c25be1, plus D140); nothing under src/ changed until exam #7 was scored (done 2026-11-20). Sent to rwxlite, which trains round 15 on the lean at that ref (lean equals 1c25be1, 0 diffs on 106,848 ids).
+3. Exam #7: vendors frozen 2026-11-18 (ringcentral, openziti, gitness,
+   huggingface, pipedrive, vikunja; six more in reserve;
+   poc/exam7-shortlist/picked.tsv), kept out of rwxlite round 15 (copy check
+   poc/exam7-shortlist/r15-check, 319 specs dropped). Specs are fetched and
+   frozen at exam build. Inputs are in data/exam7-2026-11-19/ (1579 operations, from the shortlist bytes fetched 2026-11-18, sha256-checked). Labelled blind (A = Sonnet, B = Opus; BRIEF-v4 plus the D141 addendum; 12 files validated). 66 of 1579 operations were disputed and the user ruled all 66 on 2026-11-19 (45 x, 21 w). Candidate: rwxlite 0.4.0 (round 15; rwxlite's user waived its val guards: teacher too loose 115 vs 104, student 120 vs 104, rwxlite's figures). Scored once 2026-11-20 through the real CLI at rwxmap 7dce23e: a-base (0.3.1 as shipped) 1431 exact / 68 too loose (50 loose-1, 18 loose-2) / 80 too tight; a-cand (0.4.0) 1432 / 66 (50 loose-1, 16 loose-2) / 81, all of 1579. D142 verdict GO (too loose 66 vs 68 with a limit of +15; exact 1432 vs 1431; too tight 81 vs 80, beside the gate); it would also pass D135 same-or-better. D133 bar passes for both models. Exam #7 is BURNED for both sides. Done 2026-11-20: rwxlite 0.4.0 released (GitHub release v0.4.0 at rwxlite db328e6; npm rwxlite@0.4.0 latest); the rwxmap pin pass to 0.4.0 is built and verified from a clean install (commit 2d622ea, unreleased; see the Pin pass paragraph above). Next: a release with docs/product/release-checklist.md run item by item. Pre-registration and results docs/wiki/exam-prereg-exam7.md; scorer and rows data/exam7-2026-11-19/score/.
+4. D141 in mechanical: deferred to exam #8 (user ruling 2026-11-19). A step 3
+   x word list for the D141 families, matched at lead position. Bar, set
+   before building: tighten-only adoption per D100 (more right than wrong,
+   and neither too loose nor too tight gets worse), scored
+   leave-one-vendor-out on the tuning sets with loose-1 and loose-2 counted
+   separately; its own D-number when built. Known limit until then:
+   login-token GETs (GET /api/login/refresh) stay r in mechanical and mode a,
+   because settled GET r rows never reach the second pass.
+
+Done (2026-11-19): export-v4-d141 (D141 relabel of rwxlite's round 13 train
+and val, tighten-only, lean at 1c25be1),
+data/export-v4-d141-2026-11-19/, see learnings. Merge rule for D141 training labels, agreed with rwxlite for both halves (R13 rows and r15): raises stay; a lower applies only where a D141 family directly orders it, which in practice is (c), an update of the group object itself (not creates, not sub-resources such as calendar or policies, and not SCIM Groups PATCH, which changes members) with no member/role/permission wording; every other lower reverts. R13: 2 lowers kept (ag-069342, ag-071594), 297 not applied; export commit f62e1c2. r15: 0 kept, 162 reverted.
+
+5. Exam #8: vendors frozen 2026-11-20 and sent to rwxlite as off-limits for its round 16: gitbook, baserow, looker, wekan, shortcut, bitrise (the six reserves, role=reserve, in poc/exam7-shortlist/picked.tsv). Re-checked against every rwxmap set: none appears as a labelled row (only as words inside other vendors' text: libsodium.gitbook.io links in github descriptions, vikunja's WeKan import endpoint, the English word "shortcut", hookdeck's integration list). rwxlite confirmed its r15 final training labels hold no real copies of the six. Process, as for exam #7: rwxlite sends its r16 provider/spec list and ops CSV paths after collection and before labelling or training; rwxmap runs the copy check by a pre-set rule and sends the drop list; then the exam #8 rwxmap ref and pre-registration. rwxlite's round 16 target is the openziti access-policy PUT and PATCH x read as w leaks from exam #7. D141 in mechanical (item 4) is scored on this exam.
 
 Parked items and known limits below.
 

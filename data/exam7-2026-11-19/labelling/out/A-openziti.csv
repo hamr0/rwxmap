@@ -1,0 +1,205 @@
+row_id,truth_class,confidence,reason
+ex7-0644,r,high,GET version info
+ex7-0645,r,high,GET CA cert store read
+ex7-0646,r,high,GET list API sessions
+ex7-0647,x,high,a deletes API session no restore
+ex7-0648,r,high,GET single API session
+ex7-0649,r,high,GET list auth policies
+ex7-0650,w,high,ii plain create of auth policy
+ex7-0651,x,high,a DELETE auth policy no restore
+ex7-0652,r,high,GET single auth policy
+ex7-0653,w,high,PATCH edits auth policy fields
+ex7-0654,w,high,PUT edits auth policy fields
+ex7-0655,x,high,D141a authenticate returns session token
+ex7-0656,x,high,D141b verifies TOTP code during login
+ex7-0657,r,high,GET list authenticators
+ex7-0658,x,low,g creates login credential for identity
+ex7-0659,x,high,a DELETE authenticator no restore
+ex7-0660,r,high,GET single authenticator
+ex7-0661,w,low,PATCH edits authenticator fields
+ex7-0662,w,low,PUT edits authenticator fields
+ex7-0663,x,high,a source authenticator deleted on re-enroll
+ex7-0664,w,high,flags authenticator for extension reversible setting
+ex7-0665,r,high,GET list CAs
+ex7-0666,w,high,ii creates CA in unverified state
+ex7-0667,x,high,a DELETE CA also deletes cert authenticators
+ex7-0668,r,high,GET single CA
+ex7-0669,w,high,PATCH edits CA fields
+ex7-0670,w,high,PUT edits CA fields
+ex7-0671,r,high,GET returns static enrollment JWT
+ex7-0672,x,low,g verifying CA lets it enroll and authenticate
+ex7-0673,r,high,GET list config types
+ex7-0674,w,high,ii plain create of config type
+ex7-0675,x,high,a DELETE config type no restore
+ex7-0676,r,high,GET single config type
+ex7-0677,w,high,PATCH edits config type
+ex7-0678,w,high,PUT edits config type
+ex7-0679,r,high,GET list configs of a type
+ex7-0680,r,high,GET list configs
+ex7-0681,w,high,ii plain create of config
+ex7-0682,x,high,a DELETE config no restore
+ex7-0683,r,high,GET single config
+ex7-0684,w,high,PATCH edits config
+ex7-0685,w,high,PUT edits config
+ex7-0686,r,high,GET services referencing config
+ex7-0687,r,high,GET list controller settings
+ex7-0688,w,high,ii creates controller setting object
+ex7-0689,r,high,GET single controller setting
+ex7-0690,x,high,a DELETE controller setting no restore
+ex7-0691,r,high,GET effective settings
+ex7-0692,w,high,PATCH edits controller setting
+ex7-0693,w,high,PUT edits controller setting
+ex7-0694,r,high,GET list controllers
+ex7-0695,x,high,b terminates current API session
+ex7-0696,r,high,GET current API session
+ex7-0697,x,low,D141 issues TOTP proof token like a credential
+ex7-0698,r,high,GET current identity
+ex7-0699,r,high,GET own authenticators list
+ex7-0700,r,high,GET own authenticator
+ex7-0701,w,low,PATCH edits own authenticator fields
+ex7-0702,w,low,PUT edits own authenticator fields
+ex7-0703,x,high,b issues new client certificate credential
+ex7-0704,x,high,D141b verifies receipt of new certificate
+ex7-0705,x,high,DELETE disables MFA no restore named
+ex7-0706,r,high,GET MFA enrollment status
+ex7-0707,w,low,initiates MFA enrollment reversible by disable
+ex7-0708,r,high,GET QR code image
+ex7-0709,r,low,GET views existing recovery codes
+ex7-0710,x,high,b regenerates recovery codes replacing all old
+ex7-0711,x,high,D141b verifies TOTP code completing enrollment
+ex7-0712,x,high,e starts data integrity scan job
+ex7-0713,r,high,GET integrity scan results
+ex7-0714,x,high,e runs scan and fixes issues
+ex7-0715,w,low,ii creates a database snapshot file
+ex7-0716,r,high,GET list edge router policies
+ex7-0717,x,low,g access policy binds identities to routers
+ex7-0718,x,high,a DELETE edge router policy no restore
+ex7-0719,r,high,GET single edge router policy
+ex7-0720,x,low,g edits access policy direction unstated
+ex7-0721,x,low,g replaces access policy direction unstated
+ex7-0722,r,high,GET routers a policy affects
+ex7-0723,r,high,GET identities a policy affects
+ex7-0724,r,high,GET role attribute usage
+ex7-0725,r,high,GET role attributes in use
+ex7-0726,r,high,GET list edge routers
+ex7-0727,x,low,g create router yields enrollment JWT secret
+ex7-0728,x,high,a DELETE edge router no restore
+ex7-0729,r,high,GET single edge router
+ex7-0730,w,high,PATCH edits edge router fields
+ex7-0731,w,high,PUT edits edge router fields
+ex7-0732,r,high,GET policies affecting router
+ex7-0733,r,high,GET identities of router
+ex7-0734,x,high,b removes router certs and disconnects it
+ex7-0735,r,high,GET service policies of router
+ex7-0736,r,high,GET services via router
+ex7-0737,r,high,GET list enrollments
+ex7-0738,x,low,g creates enrollment with JWT for identity
+ex7-0739,x,high,a DELETE enrollment no restore
+ex7-0740,r,high,GET single enrollment
+ex7-0741,x,high,b old enrollment JWT invalidated new generated
+ex7-0742,r,high,GET capabilities list
+ex7-0743,r,high,GET router capabilities list
+ex7-0744,r,high,GET list JWT signers
+ex7-0745,x,low,g trusts new external signer for authentication
+ex7-0746,x,high,a DELETE JWT signer no restore
+ex7-0747,r,high,GET single JWT signer
+ex7-0748,w,low,PATCH edits JWT signer fields
+ex7-0749,w,low,PUT edits JWT signer fields
+ex7-0750,r,high,GET list identities
+ex7-0751,x,high,g creates identity that can log in
+ex7-0752,x,high,a DELETE identity no restore
+ex7-0753,r,high,GET single identity
+ex7-0754,w,high,PATCH edits identity fields
+ex7-0755,w,low,PUT edits identity fields
+ex7-0756,r,high,GET identity authenticators
+ex7-0757,w,high,toggle disable has enable
+ex7-0758,r,high,GET edge router policies for identity
+ex7-0759,r,high,GET accessible edge routers
+ex7-0760,w,low,toggle enable undoes disable
+ex7-0761,r,high,GET identity enrollments
+ex7-0762,r,high,GET failed service requests
+ex7-0763,x,high,DELETE removes MFA enrollment no restore
+ex7-0764,r,high,GET policy advice analysis
+ex7-0765,r,high,GET posture data
+ex7-0766,x,high,DELETE method wins no trash named
+ex7-0767,r,high,GET identity service configs
+ex7-0768,w,high,associates service configs reversible
+ex7-0769,r,high,GET service policies for identity
+ex7-0770,r,high,GET accessible services
+ex7-0771,w,high,toggle tracing enable/disable
+ex7-0772,r,high,GET role attribute usage
+ex7-0773,r,high,GET identity role attributes
+ex7-0774,r,high,GET identity types
+ex7-0775,r,high,GET single identity type
+ex7-0776,r,high,GET network trust JWTs
+ex7-0777,r,high,GET posture role attribute usage
+ex7-0778,r,high,GET posture role attributes
+ex7-0779,r,high,GET posture check types
+ex7-0780,r,high,GET single posture check type
+ex7-0781,r,high,GET list posture checks
+ex7-0782,w,high,ii plain create of posture check
+ex7-0783,x,high,a DELETE posture check no restore
+ex7-0784,r,high,GET single posture check
+ex7-0785,w,high,PATCH edits posture check
+ex7-0786,w,high,PUT edits posture check
+ex7-0787,r,high,GET list revocations
+ex7-0788,x,high,b creates revocation invalidating token
+ex7-0789,r,high,GET single revocation
+ex7-0790,r,high,GET list routers
+ex7-0791,x,low,g create router yields enrollment JWT secret
+ex7-0792,x,high,a DELETE router no restore
+ex7-0793,r,high,GET single router
+ex7-0794,w,high,PATCH edits router fields
+ex7-0795,w,high,PUT edits router fields
+ex7-0796,r,high,GET list service edge router policies
+ex7-0797,x,low,g policy binds services to routers
+ex7-0798,x,high,a DELETE service edge policy no restore
+ex7-0799,r,high,GET single service edge policy
+ex7-0800,x,low,g edits access policy direction unstated
+ex7-0801,x,low,g replaces access policy direction unstated
+ex7-0802,r,high,GET routers a policy applies to
+ex7-0803,r,high,GET services a policy applies to
+ex7-0804,r,high,GET list service policies
+ex7-0805,x,high,g service policy grants dial or bind access
+ex7-0806,x,high,a DELETE service policy no restore
+ex7-0807,r,high,GET single service policy
+ex7-0808,x,low,g edits service policy direction unstated
+ex7-0809,x,low,g replaces service policy direction unstated
+ex7-0810,r,high,GET identities a policy affects
+ex7-0811,r,high,GET posture checks of policy
+ex7-0812,r,high,GET services a policy affects
+ex7-0813,r,high,GET service role attribute usage
+ex7-0814,r,high,GET service role attributes
+ex7-0815,r,high,GET list services
+ex7-0816,w,high,ii plain create of service
+ex7-0817,x,high,a DELETE service no restore
+ex7-0818,r,high,GET single service
+ex7-0819,w,high,PATCH edits service fields
+ex7-0820,w,high,PUT edits service fields
+ex7-0821,r,high,GET configs of service
+ex7-0822,r,high,GET edge routers for service
+ex7-0823,r,high,GET identities with access
+ex7-0824,r,high,GET service edge router policies
+ex7-0825,r,high,GET service policies of service
+ex7-0826,r,high,GET terminators of service
+ex7-0827,r,high,GET list sessions
+ex7-0828,x,high,a DELETE session no restore
+ex7-0829,r,high,GET single session
+ex7-0830,r,high,GET session route path
+ex7-0831,r,high,GET list API specs
+ex7-0832,r,high,GET single spec resource
+ex7-0833,r,high,GET spec file body
+ex7-0834,r,high,GET resource counts
+ex7-0835,r,high,GET list terminators
+ex7-0836,w,high,ii plain create of terminator
+ex7-0837,x,high,a DELETE terminator no restore
+ex7-0838,r,high,GET single terminator
+ex7-0839,w,high,PATCH edits terminator
+ex7-0840,w,high,PUT edits terminator
+ex7-0841,r,high,GET list transit routers
+ex7-0842,x,low,g create router yields enrollment JWT secret
+ex7-0843,x,high,a DELETE transit router no restore
+ex7-0844,r,high,GET single transit router
+ex7-0845,w,high,PATCH edits transit router
+ex7-0846,w,high,PUT edits transit router
+ex7-0847,r,high,GET version info

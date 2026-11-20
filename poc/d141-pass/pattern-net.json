@@ -1,0 +1,23 @@
+{
+ "version": "rwxlite-r15-d141-net-1",
+ "date": "2026-11-19",
+ "addendum": "rwxmap 54355e1 data/relabel-v4-2026-11-05/BRIEF-v4-addendum-D141.md",
+ "text_field": "lowercase(method + ' ' + path + ' ' + operationId + ' ' + summary + ' ' + description[:600]); missing fields as ''",
+ "match": "Python re.search on text_field; a row is a candidate if ANY family matches; anchors as written",
+ "families": {
+  "a": "(?:log ?in\\b|sign ?in|signin|sign-in|logon|refresh.?token|access.?token|oauth/token|/auth/token|/token\\b|session.?token)",
+  "b": "(?:verif(?:y|ication).{0,30}(?:email|code|otp|token|phone|sms|account)|\\botp\\b|2fa|totp|\\bmfa\\b|one.?time.?(?:code|password)|is.?registered|email.{0,20}exist|exist.{0,20}email|(?:validate|check).?token|token.?(?:valid|check))",
+  "c": "(?:^(?:put|patch|post) \\S*(?:/groups?\\b|usergroup|user.?group))",
+  "d": "(?:callback.?url|/callback|webhook|endpoint.?(?:url|config|setting)|llm.?endpoint|device.?token|push.?token|\\bfcm\\b|\\bapns\\b|\\.p8\\b|signing.?key)",
+  "e": "^(?:post|put|patch) .*(?:(?:remove|delete|kick|revoke|unassign).{0,40}(?:member|user|participant|personnel|collaborator|seat)|(?:member|participant|collaborator)s?.{0,30}(?:remove|delete|revoke))"
+ },
+ "methods": "all methods; families c and e are restricted to POST/PUT/PATCH by their ^ anchors",
+ "our_counts_on_199600": {
+  "candidates": 9740,
+  "a": 5519,
+  "b": 1355,
+  "c": 424,
+  "d": 2722,
+  "e": 239
+ }
+}

@@ -58,12 +58,12 @@ How it decides:
 | mode | command | what decides | cost / network | use when |
 |---|---|---|---|---|
 | **a** (default) | `rwxmap spec.json` | rules, then rwxlite on the loose and tight rows | free; one model download | the normal run |
-| **b** | `rwxmap spec.json --engine rwxlite [--confidence 0-99]` (default 95) | rwxlite alone judges every row; rwxmap only reads the input and writes the outputs; under the confidence a row is x + review | free; one model download | you want the model's view of every row |
+| **b** | `rwxmap spec.json --engine rwxlite [--confidence 0-99]` (default 85) | rwxlite alone judges every row; rwxmap only reads the input and writes the outputs; under the confidence a row is x + review | free; one model download | you want the model's view of every row |
 | **c** | `rwxmap spec.json --engine jev` | rules, then Jev (paid, your key) re-checks the rows the method alone decided: a POST at x can drop to w (or r), a PUT or PATCH at w can rise to x, a GET at r can rise to w | your key, your cost; each checked row goes to Jev | you already pay for Jev |
 | mechanical | `rwxmap spec.json --engine mechanical` | rules only | offline; nothing downloaded; same answer every run | no model at all |
 
 rwxlite is a small local model, a separate project: [github.com/hamr0/rwxlite](https://github.com/hamr0/rwxlite), npm package `rwxlite`.
-Install it with `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.3`. Without it, modes a and b run mechanically and say `rwxlite: off (mechanical)`.
+Install it with `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.4`. Without it, modes a and b run mechanically and say `rwxlite: off (mechanical)`.
 
 What leaves your machine: mechanical, nothing. Modes a and b, only the model download from GitHub. Mode c, each checked row's method, path, operationId, summary and description go to Jev.
 
@@ -73,16 +73,16 @@ Each exam was scored once, through the real CLI, on complete official APIs the r
 
 | mode | exam | exact | too loose | too tight |
 |---|---|---|---|---|
-| **a** (default) | #6, 1588 ops | 1434 (90.3%) | 35 (2.2%) | 119 (7.5%) |
-| b (`--confidence 85`) | #6, 1588 ops | 1424 (89.7%) | 19 (1.2%) | 145 (9.1%) |
+| **a** (default) | #7, 1579 ops | 1432 (90.7%) | 66 (4.2%) | 81 (5.1%) |
+| b (`--confidence 85`) | #7, 1579 ops | 1449 (91.8%) | 39 (2.5%) | 91 (5.8%) |
 | c (Jev, one run) | #3, 1377 ops | 1250 (90.8%) | 16 (1.2%) | 111 (8.1%) |
-| mechanical | #6, 1588 ops | 1305 (82.2%) | 43 (2.7%) | 240 (15.1%) |
+| mechanical | #7, 1579 ops | 1333 (84.4%) | 72 (4.6%) | 174 (11.0%) |
 
 - Too loose (looser than the truth label) is the safety cost; too tight is a usability cost. They are never merged into one number.
-- Exam #6 (2026-11-08): grafana, nocodb, radarr, cloudsmith, invoiceninja, run from the npm install. Two Sonnet labellers labelled blind and agreed on 1564 rows; a person ruled the other 24. Same-model agreement shows consistency, not truth. Radarr's spec has no operation names, so its rows rest on method and path.
+- Exam #7 (2026-11-20): ringcentral, openziti, gitness (harness.io), huggingface, pipedrive, vikunja. Scored once through the real CLI; the same rows came out of the npm install of rwxlite 0.4.0 with 0 differences. Two blind labellers on different models (Sonnet and Opus) agreed on 1513 rows; a person ruled the other 66. Agreement shows consistency, not truth. 15 of mode a's 66 too-loose rows are GET calls that hand out tokens or authorization (e.g. huggingface xet-read-token); a GET is settled r and never reaches the model.
 - Mode c comes from exam #3 (2026-11-04, 7 other APIs, older truth and rules), so it does not compare directly, and Jev can answer differently on the next run.
-- The 0.90 cut was tuned on exam #5 (mode a 1269 / 40 / 134 of 1443) and held on exam #6. An exam is used up once scored.
-- Mode b's `--confidence` was swept on exams #5 and #6 (3031 rows, 12 vendors) and 85 picked: at 90 and 85 no vendor leaked more than mechanical, at 70 four did. On exam #6, exact / too loose / too tight: 95 (today's default) 1288 / 13 / 287; 90 1388 / 17 / 183; 85 1424 / 19 / 145; 70 1441 / 29 / 118. Pass `--confidence 85`; the default moves to 85 in a later release.
+- The 0.90 cut was tuned on exam #5 (mode a 1269 / 40 / 134 of 1443) and held on exams #6 and #7 (exam #7 with rwxlite 0.4.0; on exam #6 mode a was 1434 / 35 / 119 of 1588 with 0.3.1). An exam is used up once scored.
+- Mode b's `--confidence` was swept on exams #5 and #6 (3031 rows, 12 vendors) and 85 picked: at 90 and 85 no vendor leaked more than mechanical, at 70 four did. On exam #6, exact / too loose / too tight: 95 1288 / 13 / 287; 90 1388 / 17 / 183; 85 1424 / 19 / 145; 70 1441 / 29 / 118. 85 is the default (D140, from 0.12.0).
 
 ## Ways to use it
 
@@ -152,7 +152,7 @@ Exit 0 on success, 1 on any failure. An existing output file is not overwritten 
 <details><summary>Flags and errors</summary>
 
 - `--engine` picks who looks at the rows (see Modes).
-- `--confidence <0-99>` is valid only with `--engine rwxlite` (default 95). A row the model is less sure of is x + review.
+- `--confidence <0-99>` is valid only with `--engine rwxlite` (default 85). A row the model is less sure of is x + review.
 - `--model small` (modes a and b only) uses the int8 model instead of the exact default.
 - An unknown `--engine`, a bad `--confidence`, or a `--model` other than `small` (or used with `--engine jev` or `mechanical`) exits 1 with nothing written.
 - `evidence` is `floor` (the method alone decided), `list` (a word list fired), `jev` (Jev moved the row) or `rwxlite` (the second pass moved the row).
@@ -173,15 +173,15 @@ Exit 0 on success, 1 on any failure. An existing output file is not overwritten 
 
 <details><summary>rwxlite model</summary>
 
-- A run that uses rwxlite fetches the manifest of the pinned rwxlite release, v0.3.1 (a small request), downloads the model if it is not cached, checks every sha256, and only then puts it in place.
+- A run that uses rwxlite fetches the manifest of the pinned rwxlite release, v0.4.0 (a small request), downloads the model if it is not cached, checks every sha256, and only then puts it in place.
 - Default: the exact fp32 model, about 91 MB, downloaded once. `--model small`: the int8 model, about 23 MB.
 - Cache: `$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`, one folder per model.
 - Downloads are https only, from github.com and its githubusercontent.com hosts, capped at 200 MB. A failed or tampered download installs nothing.
 - Offline (manifest unreachable): the run uses the verified cached model of the pinned version and says "using cached <model>, could not reach the release". With none cached it prints `rwxlite: off (mechanical) — <reason>` and runs mechanically. It never stops the run.
-- The model is pinned in each rwxmap release. A new model replaces it only by the maintainer's decision, on exam numbers published here (0.3.1 shipped that way, D139). The combined JSON records the model string.
-- The `rwxlite` package is optional; you install it. Use `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.3`: on Linux x64, `onnxruntime-node` otherwise downloads about 285 MB of GPU (CUDA/TensorRT) libraries.
-- Only rwxlite package versions 0.3.x are accepted (D135). Any other version turns the second pass off (mechanical alone, reason printed).
-- Without the package: `rwxlite: off (mechanical) — the rwxlite package is not installed (npm install rwxlite@0.3)`.
+- The model is pinned in each rwxmap release. A new model replaces it only by the maintainer's decision, on exam numbers published here (0.3.1 shipped that way, D139; 0.4.0, D142). The combined JSON records the model string.
+- The `rwxlite` package is optional; you install it. Use `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.4`: on Linux x64, `onnxruntime-node` otherwise downloads about 285 MB of GPU (CUDA/TensorRT) libraries.
+- Only rwxlite package versions 0.4.x are accepted (D135). Any other version turns the second pass off (mechanical alone, reason printed).
+- Without the package: `rwxlite: off (mechanical) — the rwxlite package is not installed (npm install rwxlite@0.4)`.
 
 </details>
 

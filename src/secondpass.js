@@ -49,7 +49,7 @@ import { parseModelString } from './modelcache.js';
 /** @typedef {import('./types.js').Verdict} Verdict */
 /** @typedef {import('./types.js').Operation} Operation */
 
-/** A lowering is accepted only at or above this share: 0.90 (D139), measured for rwxlite R13 (0.3.1). D136's 0.97 was for 0.2.0. */
+/** A lowering is accepted only at or above this share: 0.90 (D139), measured for rwxlite R13 (0.3.1); exam #7 (D142) measured 0.4.0 at the same 0.90. D136's 0.97 was for 0.2.0. */
 export const LOWER_MIN_P = 0.90;
 
 /** Rules whose verdict the second pass never lowers, in any mode. */

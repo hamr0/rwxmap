@@ -1,4 +1,4 @@
-# Pre-registration (DRAFT): clean exam #5, rwxmap side (mechanical v4 gate)
+# Pre-registration (SCORED, burned): clean exam #5, rwxmap side (mechanical v4 gate)
 
 **Status: SCORED and BURNED (2026-11-07). Gate result NO-GO as pre-registered;
 the user overrode it and shipped v4 (D138). See "Results and findings" at the

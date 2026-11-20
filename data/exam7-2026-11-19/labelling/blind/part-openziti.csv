@@ -1,0 +1,332 @@
+row_id,provider,method,path,operationId,summary,description
+ex7-0644,openziti.io,GET,/,listRoot,Returns version information,
+ex7-0645,openziti.io,GET,/.well-known/est/cacerts,listWellKnownCas,Get CA Cert Store,"This endpoint is used during enrollments to bootstrap trust between enrolling clients and the Ziti Edge API.
+This endpoint returns a base64 encoded PKCS7 store. The content can be base64 decoded and parsed by any library
+that supports parsing PKCS7 stores.
+"
+ex7-0646,openziti.io,GET,/api-sessions,listAPISessions,List active API sessions,"Returns a list of active API sessions. The resources can be sorted, filtered, and paginated. This endpoint
+requires admin access.
+"
+ex7-0647,openziti.io,DELETE,/api-sessions/{id},deleteAPISessions,Deletes an API Sessions,Deletes and API sesion by id. Requires admin access.
+ex7-0648,openziti.io,GET,/api-sessions/{id},detailAPISessions,Retrieves a single API Session,Retrieves a single API Session by id. Requires admin access.
+ex7-0649,openziti.io,GET,/auth-policies,listAuthPolicies,List Auth Policies,Retrieves a list of Auth Policies
+ex7-0650,openziti.io,POST,/auth-policies,createAuthPolicy,Creates an Auth Policy,Creates an Auth Policy. Requires admin access.
+ex7-0651,openziti.io,DELETE,/auth-policies/{id},deleteAuthPolicy,Delete an Auth Policy,"Delete an Auth Policy by id. Requires admin access.
+"
+ex7-0652,openziti.io,GET,/auth-policies/{id},detailAuthPolicy,Retrieves a single Auth Policy,Retrieves a single Auth Policy by id. Requires admin access.
+ex7-0653,openziti.io,PATCH,/auth-policies/{id},patchAuthPolicy,Update the supplied fields on an Auth Policy,Update only the supplied fields on an Auth Policy by id. Requires admin access.
+ex7-0654,openziti.io,PUT,/auth-policies/{id},updateAuthPolicy,Update all fields on an Auth Policy,Update all fields on an Auth Policy by id. Requires admin access.
+ex7-0655,openziti.io,POST,/authenticate,authenticate,Authenticate via a method supplied via a query string parameter,"Allowed authentication methods include ""password"", ""cert"", and ""ext-jwt""
+"
+ex7-0656,openziti.io,POST,/authenticate/mfa,authenticateMfa,Complete MFA authentication,Completes MFA authentication by submitting a MFA time based one time token or backup code.
+ex7-0657,openziti.io,GET,/authenticators,listAuthenticators,List authenticators,"Returns a list of authenticators associated to identities. The resources can be sorted, filtered, and paginated.
+This endpoint requires admin access.
+"
+ex7-0658,openziti.io,POST,/authenticators,createAuthenticator,Creates an authenticator,"Creates an authenticator for a specific identity. Requires admin access.
+"
+ex7-0659,openziti.io,DELETE,/authenticators/{id},deleteAuthenticator,Delete an Authenticator,"Delete an authenticator by id. Deleting all authenticators for an identity will make it impossible to log in.
+Requires admin access.
+"
+ex7-0660,openziti.io,GET,/authenticators/{id},detailAuthenticator,Retrieves a single authenticator,Retrieves a single authenticator by id. Requires admin access.
+ex7-0661,openziti.io,PATCH,/authenticators/{id},patchAuthenticator,Update the supplied fields on an authenticator,Update the supplied fields on an authenticator by id. Requires admin access.
+ex7-0662,openziti.io,PUT,/authenticators/{id},updateAuthenticator,Update all fields on an authenticator,Update all fields on an authenticator by id. Requires admin access.
+ex7-0663,openziti.io,POST,/authenticators/{id}/re-enroll,reEnrollAuthenticator,Reverts an authenticator to an enrollment,"Allows an authenticator to be reverted to an enrollment and allows re-enrollment to occur. On success the 
+created enrollment record response is provided and the source authenticator record will be deleted. The 
+enrollment created depends on the authenticator. UPDB authenticators result in UPDB enrollments, CERT
+authenticators result in OTT enrollments, CERT + CA authenticators result in OTTCA enrollments.
+"
+ex7-0664,openziti.io,POST,/authenticators/{id}/request-extend,requestExtendAuthenticator,Indicate a certificate authenticator should be extended and optionally key rolled on next authentication.,"Allows a certificate authenticator to be flagged for early extension and optionally private key rolling. 
+Connecting clients will receive flags in their API Session indicating that an early extension is request and
+a hint on whether private keys should be rolled. Clients that do not support extension or cannot roll keys
+may ignore one or both flags.
+
+If this request is made against a non-certificate based authenticator, it will return a 403-forbidden error.
+"
+ex7-0665,openziti.io,GET,/cas,listCas,List CAs,"Retrieves a list of CA resources; supports filtering, sorting, and pagination. Requires admin access."
+ex7-0666,openziti.io,POST,/cas,createCa,Creates a CA,Creates a CA in an unverified state. Requires admin access.
+ex7-0667,openziti.io,DELETE,/cas/{id},deleteCa,Delete a CA,"Delete a CA by id. Deleting a CA will delete its associated certificate authenticators. This can make it
+impossible for identities to authenticate if they no longer have any valid authenticators. Requires admin access.
+"
+ex7-0668,openziti.io,GET,/cas/{id},detailCa,Retrieves a single CA,Retrieves a single CA by id. Requires admin access.
+ex7-0669,openziti.io,PATCH,/cas/{id},patchCa,Update the supplied fields on a CA,Update only the supplied fields on a CA by id. Requires admin access.
+ex7-0670,openziti.io,PUT,/cas/{id},updateCa,Update all fields on a CA,Update all fields on a CA by id. Requires admin access.
+ex7-0671,openziti.io,GET,/cas/{id}/jwt,getCaJwt,Retrieve the enrollment JWT for a CA,"For CA auto enrollment, the enrollment JWT is static and provided on each CA resource. This endpoint provides
+the jwt as a text response.
+"
+ex7-0672,openziti.io,POST,/cas/{id}/verify,verifyCa,Verify a CA,"Allows a CA to become verified by submitting a certificate in PEM format that has been signed by the target CA.
+The common name on the certificate must match the verificationToken property of the CA. Unverfieid CAs can not
+be used for enrollment/authentication. Requires admin access.
+"
+ex7-0673,openziti.io,GET,/config-types,listConfigTypes,List config-types,"Retrieves a list of config-type resources; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0674,openziti.io,POST,/config-types,createConfigType,Create a config-type. Requires admin access.,
+ex7-0675,openziti.io,DELETE,/config-types/{id},deleteConfigType,Delete a config-type,Delete a config-type by id. Removing a configuration type that are in use will result in a 409 conflict HTTP status code and error. All configurations of a type must be removed first.
+ex7-0676,openziti.io,GET,/config-types/{id},detailConfigType,Retrieves a single config-type,Retrieves a single config-type by id. Requires admin access.
+ex7-0677,openziti.io,PATCH,/config-types/{id},patchConfigType,Update the supplied fields on a config-type,Update the supplied fields on a config-type. Requires admin access.
+ex7-0678,openziti.io,PUT,/config-types/{id},updateConfigType,Update all fields on a config-type,Update all fields on a config-type by id. Requires admin access.
+ex7-0679,openziti.io,GET,/config-types/{id}/configs,listConfigsForConfigType,Lists the configs of a specific config-type,Lists the configs associated to a config-type. Requires admin access.
+ex7-0680,openziti.io,GET,/configs,listConfigs,List configs,"Retrieves a list of config resources; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0681,openziti.io,POST,/configs,createConfig,Create a config resource,Create a config resource. Requires admin access.
+ex7-0682,openziti.io,DELETE,/configs/{id},deleteConfig,Delete a config,Delete a config by id. Requires admin access.
+ex7-0683,openziti.io,GET,/configs/{id},detailConfig,Retrieves a single config,Retrieves a single config by id. Requires admin access.
+ex7-0684,openziti.io,PATCH,/configs/{id},patchConfig,Update the supplied fields on a config,Update the supplied fields on a config. Requires admin access.
+ex7-0685,openziti.io,PUT,/configs/{id},updateConfig,Update all fields on a config,Update all fields on a config by id. Requires admin access.
+ex7-0686,openziti.io,GET,/configs/{id}/services,listConfigServices,List services referenced by a config,"Retrieves a list of service resources that reference a given config; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0687,openziti.io,GET,/controller-settings,listControllerSettings,List controller settings,"Retrieves a list controller settings including the base `global` settings object and any overriding controller specific settings.
+"
+ex7-0688,openziti.io,POST,/controller-settings,createControllerSetting,Create a controller specific setting,Create a new controller specific settings object. Requires admin access.
+ex7-0689,openziti.io,GET,/controller-settings/{id},detailControllerSetting,Retrieves a single controller setting object.,Retrieves a single controller setting object by id. Requires admin access.
+ex7-0690,openziti.io,DELETE,/controller-settings/{id}/effective,deleteControllerSetting,Delete a controller setting object,Delete a controller setting object by id. Requires admin access.
+ex7-0691,openziti.io,GET,/controller-settings/{id}/effective,detailControllerSettingEffective,Retrieves a single controller's effective calculated settings from the instance and global configuration.,Retrieves a single controller's effective setting object by id. Requires admin access.
+ex7-0692,openziti.io,PATCH,/controller-settings/{id}/effective,patchControllerSetting,Update the supplied fields on a controller setting object,Update the supplied fields on a controller setting object. Requires admin access.
+ex7-0693,openziti.io,PUT,/controller-settings/{id}/effective,updateControllerSetting,Update all fields on a controller setting object,Update all fields on a controller setting object by id. Requires admin access.
+ex7-0694,openziti.io,GET,/controllers,listControllers,List controllers,Retrieves a list of controllers
+ex7-0695,openziti.io,DELETE,/current-api-session,,Logout,Terminates the current API session
+ex7-0696,openziti.io,GET,/current-api-session,getCurrentAPISession,Return the current API session,Retrieves the API session that was used to issue the current request
+ex7-0697,openziti.io,POST,/current-api-session/totp-token,createTotpToken,Create an MFA TOTP token that proves TOTP code checking has passed as a specific time for posture checks.,"Creates a TOTP token that proves TOTP validation occurred at a specific time. Used in posture response for posture checks.
+"
+ex7-0698,openziti.io,GET,/current-identity,getCurrentIdentity,Return the current identity,Returns the identity associated with the API sessions used to issue the current request
+ex7-0699,openziti.io,GET,/current-identity/authenticators,listCurrentIdentityAuthenticators,List authenticators for the current identity,"Retrieves a list of authenticators assigned to the current API session's identity; supports filtering, sorting, and pagination."
+ex7-0700,openziti.io,GET,/current-identity/authenticators/{id},detailCurrentIdentityAuthenticator,Retrieve an authenticator for the current identity,Retrieves a single authenticator by id. Will only show authenticators assigned to the API session's identity.
+ex7-0701,openziti.io,PATCH,/current-identity/authenticators/{id},patchCurrentIdentityAuthenticator,Update the supplied fields on an authenticator of this identity,"Update the supplied fields on an authenticator by id. Will only update authenticators assigned to the API
+session's identity.
+"
+ex7-0702,openziti.io,PUT,/current-identity/authenticators/{id},updateCurrentIdentityAuthenticator,Update all fields on an authenticator of this identity,"Update all fields on an authenticator by id.  Will only update authenticators assigned to the API session's
+identity.
+"
+ex7-0703,openziti.io,POST,/current-identity/authenticators/{id}/extend,extendCurrentIdentityAuthenticator,Allows the current identity to recieve a new certificate associated with a certificate based authenticator,"This endpoint only functions for certificates issued by the controller. 3rd party certificates are not handled.
+Allows an identity to extend its certificate's expiration date by using its current and valid client certificate to submit a CSR. This CSR may be passed in using a new private key, thus allowing private key rotation.
+The response from this endpoint is a new client certificate which the client must  be verified via the /authenticators/{id}/extend-verify endpoint.
+After verification is completion any new connections must be made with new certificate. Prior to verification the old client certificate remains active."
+ex7-0704,openziti.io,POST,/current-identity/authenticators/{id}/extend-verify,extendVerifyCurrentIdentityAuthenticator,Allows the current identity to validate reciept of a new client certificate,"After submitting a CSR for a new client certificate the resulting public certificate must be re-submitted to this endpoint to verify receipt.
+After receipt, the new client certificate must be used for new authentication requests."
+ex7-0705,openziti.io,DELETE,/current-identity/mfa,deleteMfa,Disable MFA for the current identity,"Disable MFA for the current identity. Requires a current valid time based one time password if MFA enrollment has been completed. If not, code should be an empty string. If one time passwords are not available and admin account can be used to remove MFA from the identity via `DELETE /identities/<id>/mfa`.
+"
+ex7-0706,openziti.io,GET,/current-identity/mfa,detailMfa,Returns the current status of MFA enrollment,"Returns details about the current MFA enrollment. If enrollment has not been completed it will return the current MFA configuration details necessary to complete a `POST /current-identity/mfa/verify`.
+"
+ex7-0707,openziti.io,POST,/current-identity/mfa,enrollMfa,Initiate MFA enrollment,"Allows authenticator based MFA enrollment. If enrollment has already been completed, it must be disabled before attempting to re-enroll. Subsequent enrollment request is completed via `POST /current-identity/mfa/verify`
+"
+ex7-0708,openziti.io,GET,/current-identity/mfa/qr-code,detailMfaQrCode,Show a QR code for unverified MFA enrollments,"Shows an QR code image for unverified MFA enrollments. 404s if the MFA enrollment has been completed or not started.
+"
+ex7-0709,openziti.io,GET,/current-identity/mfa/recovery-codes,detailMfaRecoveryCodes,For a completed MFA enrollment view the current recovery codes,"Allows the viewing of recovery codes of an MFA enrollment. Requires a current valid time based one time password to interact with. Available after a completed MFA enrollment.
+"
+ex7-0710,openziti.io,POST,/current-identity/mfa/recovery-codes,createMfaRecoveryCodes,For a completed MFA enrollment regenerate the recovery codes,"Allows regeneration of recovery codes of an MFA enrollment. Requires a current valid time based one time password to interact with. Available after a completed MFA enrollment. This replaces all existing recovery codes.
+"
+ex7-0711,openziti.io,POST,/current-identity/mfa/verify,verifyMfa,Complete MFA enrollment by verifying a time based one time token,"Completes MFA enrollment by accepting a time based one time password as verification. Called after MFA enrollment has been initiated via `POST /current-identity/mfa`.
+"
+ex7-0712,openziti.io,POST,/database/check-data-integrity,checkDataIntegrity,Starts a data integrity scan on the datastore,"Starts a data integrity scan on the datastore. Requires admin access. Only once instance may run at a time, including runs of fixDataIntegrity."
+ex7-0713,openziti.io,GET,/database/data-integrity-results,dataIntegrityResults,Returns any results found from in-progress integrity checks,Returns any results found from in-progress integrity checks. Requires admin access.
+ex7-0714,openziti.io,POST,/database/fix-data-integrity,fixDataIntegrity,"Runs a data integrity scan on the datastore, attempts to fix any issues it can and returns any found issues","Runs a data integrity scan on the datastore, attempts to fix any issues it can, and returns any found issues. Requires admin access. Only once instance may run at a time, including runs of checkDataIntegrity."
+ex7-0715,openziti.io,POST,/database/snapshot,createDatabaseSnapshot,Create a new database snapshot,Create a new database snapshot. Requires admin access.
+ex7-0716,openziti.io,GET,/edge-router-policies,listEdgeRouterPolicies,List edge router policies,"Retrieves a list of edge router policy resources; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0717,openziti.io,POST,/edge-router-policies,createEdgeRouterPolicy,Create an edge router policy resource,Create an edge router policy resource. Requires admin access.
+ex7-0718,openziti.io,DELETE,/edge-router-policies/{id},deleteEdgeRouterPolicy,Delete an edge router policy,Delete an edge router policy by id. Requires admin access.
+ex7-0719,openziti.io,GET,/edge-router-policies/{id},detailEdgeRouterPolicy,Retrieves a single edge router policy,Retrieves a single edge router policy by id. Requires admin access.
+ex7-0720,openziti.io,PATCH,/edge-router-policies/{id},patchEdgeRouterPolicy,Update the supplied fields on an edge router policy,Update the supplied fields on an edge router policy. Requires admin access.
+ex7-0721,openziti.io,PUT,/edge-router-policies/{id},updateEdgeRouterPolicy,Update all fields on an edge router policy,Update all fields on an edge router policy by id. Requires admin access.
+ex7-0722,openziti.io,GET,/edge-router-policies/{id}/edge-routers,listEdgeRouterPolicyEdgeRouters,List edge routers a policy affects,"Retrieves a list of edge routers an edge router policy resources affects; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0723,openziti.io,GET,/edge-router-policies/{id}/identities,listEdgeRouterPolicyIdentities,List identities an edge router policy affects,"Retrieves a list of identities an edge router policy resources affects; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0724,openziti.io,GET,/edge-router-role-attribute-usage,listEdgeRouterRoleAttributeUsage,List edge router role attributes with usage breakdowns,"Retrieves edge router role attributes along with per-source usage counts.
+Each response item reports how many edge routers declare the attribute
+and how many edge-router policies or service-edge-router policies
+reference it. When `withIds=true`, the entity ids backing each count are
+also returned. Requires admin access.
+"
+ex7-0725,openziti.io,GET,/edge-router-role-attributes,listEdgeRouterRoleAttributes,List role attributes in use by edge routers,"Retrieves a list of role attributes in use by edge routers; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0726,openziti.io,GET,/edge-routers,listEdgeRouters,List edge routers,"Retrieves a list of edge router resources; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0727,openziti.io,POST,/edge-routers,createEdgeRouter,Create an edge router,Create a edge router resource. Requires admin access.
+ex7-0728,openziti.io,DELETE,/edge-routers/{id},deleteEdgeRouter,Delete an edge router,Delete an edge router by id. Requires admin access.
+ex7-0729,openziti.io,GET,/edge-routers/{id},detailEdgeRouter,Retrieves a single edge router,Retrieves a single edge router by id. Requires admin access.
+ex7-0730,openziti.io,PATCH,/edge-routers/{id},patchEdgeRouter,Update the supplied fields on an edge router,Update the supplied fields on an edge router. Requires admin access.
+ex7-0731,openziti.io,PUT,/edge-routers/{id},updateEdgeRouter,Update all fields on an edge router,Update all fields on an edge router by id. Requires admin access.
+ex7-0732,openziti.io,GET,/edge-routers/{id}/edge-router-policies,listEdgeRouterEdgeRouterPolicies,List the edge router policies that affect an edge router,Retrieves a list of edge router policies that apply to the specified edge router.
+ex7-0733,openziti.io,GET,/edge-routers/{id}/identities,listEdgeRouterIdentities,List associated identities,"Retrieves a list of identities that may access services via the given edge router. Supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0734,openziti.io,POST,/edge-routers/{id}/re-enroll,reEnrollEdgeRouter,Re-enroll an edge router,"Removes current certificate based authentication mechanisms and reverts the edge router into a state where enrollment must be performed.
+The router retains all other properties and associations. If the router is currently connected, it will be disconnected and any
+attemps to reconnect will fail until the enrollment process is completed with the newly generated JWT.
+
+If the edge router has an existing outstanding enrollment JWT it will be replaced. The previous JWT will no longer be usable to
+complete the enrollment process.
+"
+ex7-0735,openziti.io,GET,/edge-routers/{id}/service-edge-router-policies,listEdgeRouterServiceEdgeRouterPolicies,List the service policies that affect an edge router,Retrieves a list of service policies policies that apply to the specified edge router.
+ex7-0736,openziti.io,GET,/edge-routers/{id}/services,listEdgeRouterServices,List associated services,"Retrieves a list of services that may be accessed via the given edge router. Supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0737,openziti.io,GET,/enrollments,listEnrollments,List outstanding enrollments,"Retrieves a list of outstanding enrollments; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0738,openziti.io,POST,/enrollments,createEnrollment,Create an outstanding enrollment for an identity,"Creates a new OTT, OTTCA, or UPDB enrollment for a specific identity. If an enrollment of the same type is already outstanding the request will fail with a 409 conflict. If desired, an existing enrollment can be refreshed by `enrollments/:id/refresh` or deleted."
+ex7-0739,openziti.io,DELETE,/enrollments/{id},deleteEnrollment,Delete an outstanding enrollment,Delete an outstanding enrollment by id. Requires admin access.
+ex7-0740,openziti.io,GET,/enrollments/{id},detailEnrollment,Retrieves an outstanding enrollment,Retrieves a single outstanding enrollment by id. Requires admin access.
+ex7-0741,openziti.io,POST,/enrollments/{id}/refresh,refreshEnrollment,Refreshes an enrollment record's expiration window,"For expired or unexpired enrollments, reset the expiration window. A new JWT will be generated and must be used for the enrollment."
+ex7-0742,openziti.io,GET,/enumerated-capabilities,listEnumeratedCapabilities,"Returns all capabilities this version of the controller is aware of, enabled or not.",
+ex7-0743,openziti.io,GET,/enumerated-router-capabilities,listEnumeratedRouterCapabilities,Returns all router capabilities this version of the controller is aware of,
+ex7-0744,openziti.io,GET,/external-jwt-signers,listExternalJwtSigners,List External JWT Signers,Retrieves a list of external JWT signers for authentication
+ex7-0745,openziti.io,POST,/external-jwt-signers,createExternalJwtSigner,Creates an External JWT Signer,Creates an External JWT Signer. Requires admin access.
+ex7-0746,openziti.io,DELETE,/external-jwt-signers/{id},deleteExternalJwtSigner,Delete an External JWT Signer,"Delete an External JWT Signer by id. Requires admin access.
+"
+ex7-0747,openziti.io,GET,/external-jwt-signers/{id},detailExternalJwtSigner,Retrieves a single External JWT Signer,Retrieves a single External JWT Signer by id. Requires admin access.
+ex7-0748,openziti.io,PATCH,/external-jwt-signers/{id},patchExternalJwtSigner,Update the supplied fields on an External JWT Signer,Update only the supplied fields on an External JWT Signer by id. Requires admin access.
+ex7-0749,openziti.io,PUT,/external-jwt-signers/{id},updateExternalJwtSigner,Update all fields on an External JWT Signer,Update all fields on an External JWT Signer by id. Requires admin access.
+ex7-0750,openziti.io,GET,/identities,listIdentities,List identities,"Retrieves a list of identity resources; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0751,openziti.io,POST,/identities,createIdentity,Create an identity resource,Create an identity resource. Requires admin access.
+ex7-0752,openziti.io,DELETE,/identities/{id},deleteIdentity,Delete an identity,Delete an identity by id. Requires admin access.
+ex7-0753,openziti.io,GET,/identities/{id},detailIdentity,Retrieves a single identity,Retrieves a single identity by id. Requires admin access.
+ex7-0754,openziti.io,PATCH,/identities/{id},patchIdentity,Update the supplied fields on an identity,Update the supplied fields on an identity. Requires admin access.
+ex7-0755,openziti.io,PUT,/identities/{id},updateIdentity,Update all fields on an identity,Update all fields on an identity by id. Requires admin access.
+ex7-0756,openziti.io,GET,/identities/{id}/authenticators,getIdentityAuthenticators,Retrieve the current authenticators of a specific identity,"Returns a list of authenticators associated to the identity specified
+"
+ex7-0757,openziti.io,POST,/identities/{id}/disable,disableIdentity,Set an identity as disabled,"Reject an identity's API session requests for N minutes or indefinitely if 0.
+"
+ex7-0758,openziti.io,GET,/identities/{id}/edge-router-policies,listIdentitysEdgeRouterPolicies,List the edge router policies that affect an identity,Retrieves a list of edge router policies that apply to the specified identity.
+ex7-0759,openziti.io,GET,/identities/{id}/edge-routers,listIdentityEdgeRouters,List accessible edge-routers,"Retrieves a list of edge-routers that the given identity may use to access services. Supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0760,openziti.io,POST,/identities/{id}/enable,enableIdentity,Clears all disabled state from an identity,"Allows an admin to remove disabled statuses from an identity.
+"
+ex7-0761,openziti.io,GET,/identities/{id}/enrollments,getIdentityEnrollments,Retrieve the current enrollments of a specific identity,"Returns a list of enrollments associated to the identity specified
+"
+ex7-0762,openziti.io,GET,/identities/{id}/failed-service-requests,getIdentityFailedServiceRequests,Retrieve a list of the most recent service failure requests due to posture checks,"Returns a list of service session requests that failed due to posture checks. The entries will contain
+every policy that was verified against and every failed check in each policy. Each check will include
+the historical posture data and posture check configuration.
+"
+ex7-0763,openziti.io,DELETE,/identities/{id}/mfa,removeIdentityMfa,Remove MFA from an identitity,"Allows an admin to remove MFA enrollment from a specific identity. Requires admin.
+"
+ex7-0764,openziti.io,GET,/identities/{id}/policy-advice/{serviceId},getIdentityPolicyAdvice,Analyze policies relating the given identity and service,"Analyzes policies to see if the given identity should be able to dial or bind the given service. |
+Will check services policies to see if the identity can access the service. Will check edge router policies |
+to check if the identity and service have access to common edge routers so that a connnection can be made. |
+Will also check if at least one edge router is on-line. Requires admin access.
+"
+ex7-0765,openziti.io,GET,/identities/{id}/posture-data,getIdentityPostureData,Retrieve the curent posture data for a specific identity.,"Returns a nested map data represeting the posture data of the identity.
+This data should be considered volatile.
+"
+ex7-0766,openziti.io,DELETE,/identities/{id}/service-configs,disassociateIdentitysServiceConfigs,Remove associated service configs from a specific identity,Remove service configs from a specific identity
+ex7-0767,openziti.io,GET,/identities/{id}/service-configs,listIdentitysServiceConfigs,List the service configs associated a specific identity,Retrieves a list of service configs associated to a specific identity
+ex7-0768,openziti.io,POST,/identities/{id}/service-configs,associateIdentitysServiceConfigs,Associate service configs for a specific identity,Associate service configs to a specific identity
+ex7-0769,openziti.io,GET,/identities/{id}/service-policies,listIdentityServicePolicies,List the service policies that affect an identity,Retrieves a list of service policies that apply to the specified identity.
+ex7-0770,openziti.io,GET,/identities/{id}/services,listIdentityServices,List accessible services,"Retrieves a list of services that the given identity has access to. Supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0771,openziti.io,PUT,/identities/{id}/trace,updateIdentityTracing,Enable/disable data flow tracing for an identity,"Allows an admin to enable/disable data flow tracing for an identity
+"
+ex7-0772,openziti.io,GET,/identity-role-attribute-usage,listIdentityRoleAttributeUsage,List identity role attributes with usage breakdowns,"Retrieves identity role attributes along with per-source usage counts.
+Each response item reports how many identities declare the attribute and
+how many service policies or edge-router policies reference it. When
+`withIds=true`, the entity ids backing each count are also returned.
+Requires admin access.
+"
+ex7-0773,openziti.io,GET,/identity-role-attributes,listIdentityRoleAttributes,List role attributes in use by identities,"Retrieves a list of role attributes in use by identities; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0774,openziti.io,GET,/identity-types,listIdentityTypes,List available identity types,"Retrieves a list of identity types; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0775,openziti.io,GET,/identity-types/{id},detailIdentityType,Retrieves a identity type,Retrieves a single identity type by id. Requires admin access.
+ex7-0776,openziti.io,GET,/network-jwts,listNetworkJWTs,Returns a list of JWTs suitable for bootstrapping network trust.,Returns a list of JWTs for trusting a network
+ex7-0777,openziti.io,GET,/posture-check-role-attribute-usage,listPostureCheckRoleAttributeUsage,List posture check role attributes with usage breakdowns,"Retrieves posture check role attributes along with per-source usage
+counts. Each response item reports how many posture checks declare the
+attribute and how many service policies reference it. When
+`withIds=true`, the entity ids backing each count are also returned.
+Requires admin access.
+"
+ex7-0778,openziti.io,GET,/posture-check-role-attributes,listPostureCheckRoleAttributes,List role attributes in use by posture checks,"Retrieves a list of role attributes in use by posture checks; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0779,openziti.io,GET,/posture-check-types,listPostureCheckTypes,List a subset of posture check types,"Retrieves a list of posture check types
+"
+ex7-0780,openziti.io,GET,/posture-check-types/{id},detailPostureCheckType,Retrieves a single posture check type,Retrieves a single posture check type by id
+ex7-0781,openziti.io,GET,/posture-checks,listPostureChecks,List a subset of posture checks,"Retrieves a list of posture checks
+"
+ex7-0782,openziti.io,POST,/posture-checks,createPostureCheck,Creates a Posture Checks,Creates a Posture Checks
+ex7-0783,openziti.io,DELETE,/posture-checks/{id},deletePostureCheck,Deletes an Posture Checks,Deletes and Posture Checks by id
+ex7-0784,openziti.io,GET,/posture-checks/{id},detailPostureCheck,Retrieves a single Posture Checks,Retrieves a single Posture Checks by id
+ex7-0785,openziti.io,PATCH,/posture-checks/{id},patchPostureCheck,Update the supplied fields on a Posture Checks,Update only the supplied fields on a Posture Checks by id
+ex7-0786,openziti.io,PUT,/posture-checks/{id},updatePostureCheck,Update all fields on a Posture Checks,Update all fields on a Posture Checks by id
+ex7-0787,openziti.io,GET,/revocations,listRevocations,List Revocations,Retrieves a list of revocations
+ex7-0788,openziti.io,POST,/revocations,createRevocation,Create a Revocation,Creates a revocation entry. Requires admin access.
+ex7-0789,openziti.io,GET,/revocations/{id},detailRevocation,Retrieves a single Revocation,Retrieves a single revocation by id. Requires admin access.
+ex7-0790,openziti.io,GET,/routers,listRouters,List routers,"Retrieves a list of router resources; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0791,openziti.io,POST,/routers,createRouter,Create a router resource,Create a router resource. Requires admin access.
+ex7-0792,openziti.io,DELETE,/routers/{id},deleteRouter,Delete a router,Delete a router by id. Requires admin access.
+ex7-0793,openziti.io,GET,/routers/{id},detailRouter,Retrieves a single router,Retrieves a single router by id. Requires admin access.
+ex7-0794,openziti.io,PATCH,/routers/{id},patchRouter,Update the supplied fields on a router,Update the supplied fields on a router. Requires admin access.
+ex7-0795,openziti.io,PUT,/routers/{id},updateRouter,Update all fields on a router,Update all fields on a router by id. Requires admin access.
+ex7-0796,openziti.io,GET,/service-edge-router-policies,listServiceEdgeRouterPolicies,List service edge router policies,"Retrieves a list of service edge router policy resources; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0797,openziti.io,POST,/service-edge-router-policies,createServiceEdgeRouterPolicy,Create a service edge router policy resource,Create a service edge router policy resource. Requires admin access.
+ex7-0798,openziti.io,DELETE,/service-edge-router-policies/{id},deleteServiceEdgeRouterPolicy,Delete a service edge policy,Delete a service edge policy by id. Requires admin access.
+ex7-0799,openziti.io,GET,/service-edge-router-policies/{id},detailServiceEdgeRouterPolicy,Retrieves a single service edge policy,Retrieves a single service edge policy by id. Requires admin access.
+ex7-0800,openziti.io,PATCH,/service-edge-router-policies/{id},patchServiceEdgeRouterPolicy,Update the supplied fields on a service edge policy,Update the supplied fields on a service edge policy. Requires admin access.
+ex7-0801,openziti.io,PUT,/service-edge-router-policies/{id},updateServiceEdgeRouterPolicy,Update all fields on a service edge policy,Update all fields on a service edge policy by id. Requires admin access.
+ex7-0802,openziti.io,GET,/service-edge-router-policies/{id}/edge-routers,listServiceEdgeRouterPolicyEdgeRouters,List the edge routers that a service edge router policy applies to,List the edge routers that a service edge router policy applies to
+ex7-0803,openziti.io,GET,/service-edge-router-policies/{id}/services,listServiceEdgeRouterPolicyServices,List the services that a service edge router policy applies to,List the services that a service edge router policy applies to
+ex7-0804,openziti.io,GET,/service-policies,listServicePolicies,List service policies,"Retrieves a list of service policy resources; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0805,openziti.io,POST,/service-policies,createServicePolicy,Create a service policy resource,Create a service policy resource. Requires admin access.
+ex7-0806,openziti.io,DELETE,/service-policies/{id},deleteServicePolicy,Delete a service policy,Delete a service policy by id. Requires admin access.
+ex7-0807,openziti.io,GET,/service-policies/{id},detailServicePolicy,Retrieves a single service policy,Retrieves a single service policy by id. Requires admin access.
+ex7-0808,openziti.io,PATCH,/service-policies/{id},patchServicePolicy,Update the supplied fields on a service policy,Update the supplied fields on a service policy. Requires admin access.
+ex7-0809,openziti.io,PUT,/service-policies/{id},updateServicePolicy,Update all fields on a service policy,Update all fields on a service policy by id. Requires admin access.
+ex7-0810,openziti.io,GET,/service-policies/{id}/identities,listServicePolicyIdentities,List identities a service policy affects,"Retrieves a list of identity resources that are affected by a service policy; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0811,openziti.io,GET,/service-policies/{id}/posture-checks,listServicePolicyPostureChecks,List posture check a service policy includes,"Retrieves a list of posture check resources that are affected by a service policy; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0812,openziti.io,GET,/service-policies/{id}/services,listServicePolicyServices,List services a service policy affects,"Retrieves a list of service resources that are affected by a service policy; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0813,openziti.io,GET,/service-role-attribute-usage,listServiceRoleAttributeUsage,List service role attributes with usage breakdowns,"Retrieves service role attributes along with per-source usage counts.
+Each response item reports how many services declare the attribute and
+how many service policies or service-edge-router policies reference it.
+When `withIds=true`, the entity ids backing each count are also
+returned. Requires admin access.
+"
+ex7-0814,openziti.io,GET,/service-role-attributes,listServiceRoleAttributes,List role attributes in use by services,"Retrieves a list of role attributes in use by services; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0815,openziti.io,GET,/services,listServices,List services,"Retrieves a list of config resources; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0816,openziti.io,POST,/services,createService,Create a services resource,Create a services resource. Requires admin access.
+ex7-0817,openziti.io,DELETE,/services/{id},deleteService,Delete a service,Delete a service by id. Requires admin access.
+ex7-0818,openziti.io,GET,/services/{id},detailService,Retrieves a single service,Retrieves a single service by id. Requires admin access.
+ex7-0819,openziti.io,PATCH,/services/{id},patchService,Update the supplied fields on a service,Update the supplied fields on a service. Requires admin access.
+ex7-0820,openziti.io,PUT,/services/{id},updateService,Update all fields on a service,Update all fields on a service by id. Requires admin access.
+ex7-0821,openziti.io,GET,/services/{id}/configs,listServiceConfig,List configs associated to a specific service,"Retrieves a list of config resources associated to a specific service; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0822,openziti.io,GET,/services/{id}/edge-routers,listServiceEdgeRouters,List accessible edge-routers,"Retrieves a list of edge-routers that may be used to access the given service. Supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0823,openziti.io,GET,/services/{id}/identities,listServiceIdentities,List identities with access,"Retrieves a list of identities that have access to this service. Supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0824,openziti.io,GET,/services/{id}/service-edge-router-policies,listServiceServiceEdgeRouterPolicies,List service edge router policies that affect a specific service,"Retrieves a list of service edge router policy resources that affect a specific service; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0825,openziti.io,GET,/services/{id}/service-policies,listServiceServicePolicies,List service policies that affect a specific service,"Retrieves a list of service policy resources that affect specific service; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0826,openziti.io,GET,/services/{id}/terminators,listServiceTerminators,List of terminators assigned to a service,"Retrieves a list of terminator resources that are assigned specific service; supports filtering, sorting, and pagination.
+"
+ex7-0827,openziti.io,GET,/sessions,listSessions,List sessions,"Retrieves a list of active sessions resources; supports filtering, sorting, and pagination. Requires admin access.
+
+Sessions are tied to an API session and are moved when an API session times out or logs out. Active sessions
+(i.e. Ziti SDK connected to an edge router) will keep the session and API session marked as active.
+"
+ex7-0828,openziti.io,DELETE,/sessions/{id},deleteSession,Delete a session,Delete a session by id. Requires admin access.
+ex7-0829,openziti.io,GET,/sessions/{id},detailSession,Retrieves a single session,Retrieves a single session by id. Requires admin access.
+ex7-0830,openziti.io,GET,/sessions/{id}/route-path,detailSessionRoutePath,Retrieves a single session's router path,Retrieves a single session's route path by id. Requires admin access.
+ex7-0831,openziti.io,GET,/specs,listSpecs,Returns a list of API specs,Returns a list of spec files embedded within the controller for consumption/documentation/code geneartion
+ex7-0832,openziti.io,GET,/specs/{id},detailSpec,Return a single spec resource,Returns single spec resource embedded within the controller for consumption/documentation/code geneartion
+ex7-0833,openziti.io,GET,/specs/{id}/spec,detailSpecBody,Returns the spec's file,"Return the body of the specification (i.e. Swagger, OpenAPI 2.0, 3.0, etc)."
+ex7-0834,openziti.io,GET,/summary,listSummary,Returns a list of accessible resource counts,This endpoint is usefull for UIs that wish to display UI elements with counts.
+ex7-0835,openziti.io,GET,/terminators,listTerminators,List terminators,"Retrieves a list of terminator resources; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0836,openziti.io,POST,/terminators,createTerminator,Create a terminator resource,Create a terminator resource. Requires admin access.
+ex7-0837,openziti.io,DELETE,/terminators/{id},deleteTerminator,Delete a terminator,Delete a terminator by id. Requires admin access.
+ex7-0838,openziti.io,GET,/terminators/{id},detailTerminator,Retrieves a single terminator,Retrieves a single terminator by id. Requires admin access.
+ex7-0839,openziti.io,PATCH,/terminators/{id},patchTerminator,Update the supplied fields on a terminator,Update the supplied fields on a terminator. Requires admin access.
+ex7-0840,openziti.io,PUT,/terminators/{id},updateTerminator,Update all fields on a terminator,Update all fields on a terminator by id. Requires admin access.
+ex7-0841,openziti.io,GET,/transit-routers,listTransitRouters,List routers,"Retrieves a list of router resources; supports filtering, sorting, and pagination. Requires admin access.
+"
+ex7-0842,openziti.io,POST,/transit-routers,createTransitRouter,Create a router resource,Create a router resource. Requires admin access.
+ex7-0843,openziti.io,DELETE,/transit-routers/{id},deleteTransitRouter,Delete a router,Delete a router by id. Requires admin access.
+ex7-0844,openziti.io,GET,/transit-routers/{id},detailTransitRouter,Retrieves a single router,Retrieves a single router by id. Requires admin access.
+ex7-0845,openziti.io,PATCH,/transit-routers/{id},patchTransitRouter,Update the supplied fields on a router,Update the supplied fields on a router. Requires admin access.
+ex7-0846,openziti.io,PUT,/transit-routers/{id},updateTransitRouter,Update all fields on a router,Update all fields on a router by id. Requires admin access.
+ex7-0847,openziti.io,GET,/version,listVersion,Returns version information,

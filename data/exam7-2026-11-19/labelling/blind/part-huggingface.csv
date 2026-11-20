@@ -1,0 +1,660 @@
+row_id,provider,method,path,operationId,summary,description
+ex7-0258,huggingface.co,GET,/api/agent-harnesses,,Get agent harnesses,"Get the registry of AI agents / harnesses known to the Hub, along with the standard environment variables used to detect them. Clients use this registry to identify which agent they are running in when reporting Hub activity."
+ex7-0259,huggingface.co,GET,/api/avatars/{namespace},,Get avatar,Display the avatar for any user or organization. This endpoint redirects to the avatar URL for either a user or an organization
+ex7-0260,huggingface.co,GET,/api/blog/zh,,List blogs,
+ex7-0261,huggingface.co,POST,/api/blog/{namespace}/{slug}/comment,,Create comment,
+ex7-0262,huggingface.co,POST,/api/blog/{namespace}/{slug}/comment/{commentId}/edit,,Update a comment,
+ex7-0263,huggingface.co,POST,/api/blog/{namespace}/{slug}/comment/{commentId}/hide,,Hide comment,
+ex7-0264,huggingface.co,POST,/api/blog/{namespace}/{slug}/comment/{commentId}/reaction,,React to comment,
+ex7-0265,huggingface.co,POST,/api/blog/{namespace}/{slug}/comment/{commentId}/reply,,Create comment,
+ex7-0266,huggingface.co,GET,/api/blog/{namespace}/{slug}/resource-group,,Blog resource group,
+ex7-0267,huggingface.co,POST,/api/blog/{namespace}/{slug}/resource-group,,Blog resource group,"Assign, move, or unassign an organization-owned blog to a resource group. Pass null to unassign. User-owned blogs are not eligible."
+ex7-0268,huggingface.co,POST,/api/blog/{slug}/comment,,Create comment,
+ex7-0269,huggingface.co,POST,/api/blog/{slug}/comment/{commentId}/edit,,Update a comment,
+ex7-0270,huggingface.co,POST,/api/blog/{slug}/comment/{commentId}/hide,,Hide comment,
+ex7-0271,huggingface.co,POST,/api/blog/{slug}/comment/{commentId}/reaction,,React to comment,
+ex7-0272,huggingface.co,POST,/api/blog/{slug}/comment/{commentId}/reply,,Create comment,
+ex7-0273,huggingface.co,GET,/api/buckets/{namespace},,List namespace buckets,
+ex7-0274,huggingface.co,DELETE,/api/buckets/{namespace}/{repo},,Delete bucket,
+ex7-0275,huggingface.co,GET,/api/buckets/{namespace}/{repo},,Get bucket details,
+ex7-0276,huggingface.co,POST,/api/buckets/{namespace}/{repo},,Create bucket,
+ex7-0277,huggingface.co,POST,/api/buckets/{namespace}/{repo}/batch,,Batch file operations,"Accepts NDJSON (newline-delimited JSON) where each line is an addFile, copyFile, or deleteFile instruction.
+All add/copy operations must come before all delete operations.
+
+JSON-lines payload:
+```json
+	'{""type"":""addFile"",""path"":""..."",""xetHash"":""..."",""mtime"":...,""mtimeNanos"":...,""contentType"":""...""}' +
+	'{""type"":""copyFile"",""path"":""..."",""xetHash"":""..."",""sourceRepoType"":""..."",""sourceRepoId"":""..."",""mtime"":...,""mtimeNanos"":...,""contentType"":""...""}' +
+	'{""type"":""deleteFile"",""path"":""...""}'
+```"
+ex7-0278,huggingface.co,GET,/api/buckets/{namespace}/{repo}/events,,Follow changes,"Server-sent events (`Accept: text/event-stream`) of the bucket's file changes, so clients can stop polling `/tree`.
+
+Events:
+- `ready`: `{""cursor""}` — replay (if any) is done, live changes follow. `cursor` may be absent if the feed has seen no change yet.
+- `changes`: `{""cursor"", ""changes"": [{""path"", ""op"": ""add"" | ""update"" | ""delete"", ""size""?, ""xetHash""?, ""uploadedAt""?, ""mtime""?, ""mtimeNanos""?}]}` — a batch of changes coalesced over ~200ms. An `update` only carries the fields that changed (an identical re-upload has just `uploadedAt`); `mtime`/`mtimeNanos` are `null` when a re-upload cleared them. `xetHash` is omitted without content read access.
+- `reset`: `{""reason"": ""cursor_too_old""}` — the requested `cursor`/`since` is older than what the server buffers (about 15 minutes); the stream ends and the client must re-list. A `since` at or after the bucket's `updatedAt` never resets, however old.
+- `reconnect`: `{""cursor""}` — sent after 20 minutes or when the server shuts down (deploys), then the stream ends; reconnect with that cursor. Treat any other end of the stream the same way: reconnect with the last cursor you received.
+
+A `: ping` comment is sent every 30s. Resume with `?cursor=` (exclusive) or `?since=` (inclusive); without either, only live changes are sent."
+ex7-0279,huggingface.co,POST,/api/buckets/{namespace}/{repo}/lfs-files/duplicate,,Duplicate xet files,"Duplicate xet-stored files from this repo (source) into another repo (target) by xet hash, without re-uploading file bytes. The caller must then commit the files with their sha256/size as usual."
+ex7-0280,huggingface.co,POST,/api/buckets/{namespace}/{repo}/paths-info,,List paths info,
+ex7-0281,huggingface.co,GET,/api/buckets/{namespace}/{repo}/resource-group,,Get resource group,
+ex7-0282,huggingface.co,POST,/api/buckets/{namespace}/{repo}/resource-group,,Add resource group,Add the repository to a resource group
+ex7-0283,huggingface.co,PUT,/api/buckets/{namespace}/{repo}/settings,,Update bucket settings,
+ex7-0284,huggingface.co,GET,/api/buckets/{namespace}/{repo}/tree/{path},,List files,
+ex7-0285,huggingface.co,GET,/api/buckets/{namespace}/{repo}/xet-read-token,,Xet read token,Get a read short-lived access token for XET
+ex7-0286,huggingface.co,GET,/api/buckets/{namespace}/{repo}/xet-write-token,,Xet write token,Get a write short-lived access token for XET upload
+ex7-0287,huggingface.co,GET,/api/collections,,Get collections,
+ex7-0288,huggingface.co,POST,/api/collections,,Create a collection,
+ex7-0289,huggingface.co,DELETE,/api/collections/{namespace}/{slug},,Delete a collection,
+ex7-0290,huggingface.co,GET,/api/collections/{namespace}/{slug},,Get a collection,
+ex7-0291,huggingface.co,PATCH,/api/collections/{namespace}/{slug},,Update a collection,
+ex7-0292,huggingface.co,DELETE,/api/collections/{namespace}/{slug}-{id},,Delete a collection,
+ex7-0293,huggingface.co,GET,/api/collections/{namespace}/{slug}-{id},,Get a collection,
+ex7-0294,huggingface.co,PATCH,/api/collections/{namespace}/{slug}-{id},,Update a collection,
+ex7-0295,huggingface.co,POST,/api/collections/{namespace}/{slug}-{id}/items,,Add item,Add an item to a collection
+ex7-0296,huggingface.co,POST,/api/collections/{namespace}/{slug}-{id}/items/batch,,Batch update items,Batch update items in a collection
+ex7-0297,huggingface.co,DELETE,/api/collections/{namespace}/{slug}-{id}/items/{itemId},,Delete item,Delete an item from a collection
+ex7-0298,huggingface.co,PATCH,/api/collections/{namespace}/{slug}-{id}/items/{itemId},,Update item,Update an item in a collection
+ex7-0299,huggingface.co,GET,/api/collections/{namespace}/{slug}-{id}/resource-group,,Collection resource group,
+ex7-0300,huggingface.co,POST,/api/collections/{namespace}/{slug}-{id}/resource-group,,Collection resource group,"Assign, move, or unassign an organization-owned collection to a resource group. Pass null to unassign. User-owned collections are not eligible."
+ex7-0301,huggingface.co,POST,/api/collections/{namespace}/{slug}/items,,Add item,Add an item to a collection
+ex7-0302,huggingface.co,POST,/api/collections/{namespace}/{slug}/items/batch,,Batch update items,Batch update items in a collection
+ex7-0303,huggingface.co,DELETE,/api/collections/{namespace}/{slug}/items/{slug},,Delete item,Delete an item from a collection
+ex7-0304,huggingface.co,PATCH,/api/collections/{namespace}/{slug}/items/{slug},,Update item,Update an item in a collection
+ex7-0305,huggingface.co,GET,/api/collections/{namespace}/{slug}/resource-group,,Collection resource group,
+ex7-0306,huggingface.co,POST,/api/collections/{namespace}/{slug}/resource-group,,Collection resource group,"Assign, move, or unassign an organization-owned collection to a resource group. Pass null to unassign. User-owned collections are not eligible."
+ex7-0307,huggingface.co,GET,/api/containers/{namespace},,List namespace buckets,
+ex7-0308,huggingface.co,DELETE,/api/containers/{namespace}/{repo},,Delete bucket,
+ex7-0309,huggingface.co,GET,/api/containers/{namespace}/{repo},,Get bucket details,
+ex7-0310,huggingface.co,POST,/api/containers/{namespace}/{repo},,Create bucket,
+ex7-0311,huggingface.co,POST,/api/containers/{namespace}/{repo}/batch,,Batch file operations,"Accepts NDJSON (newline-delimited JSON) where each line is an addFile, copyFile, or deleteFile instruction.
+All add/copy operations must come before all delete operations.
+
+JSON-lines payload:
+```json
+	'{""type"":""addFile"",""path"":""..."",""xetHash"":""..."",""mtime"":...,""mtimeNanos"":...,""contentType"":""...""}' +
+	'{""type"":""copyFile"",""path"":""..."",""xetHash"":""..."",""sourceRepoType"":""..."",""sourceRepoId"":""..."",""mtime"":...,""mtimeNanos"":...,""contentType"":""...""}' +
+	'{""type"":""deleteFile"",""path"":""...""}'
+```"
+ex7-0312,huggingface.co,POST,/api/containers/{namespace}/{repo}/paths-info,,List paths info,
+ex7-0313,huggingface.co,GET,/api/containers/{namespace}/{repo}/resource-group,,Get resource group,
+ex7-0314,huggingface.co,POST,/api/containers/{namespace}/{repo}/resource-group,,Add resource group,Add the repository to a resource group
+ex7-0315,huggingface.co,PUT,/api/containers/{namespace}/{repo}/settings,,Update bucket settings,
+ex7-0316,huggingface.co,DELETE,/api/containers/{namespace}/{repo}/tags/{tag},,Delete tag,Deletes a single tag from a container image. The underlying image data is untouched.
+ex7-0317,huggingface.co,GET,/api/containers/{namespace}/{repo}/tree/{path},,List files,
+ex7-0318,huggingface.co,GET,/api/containers/{namespace}/{repo}/xet-read-token,,Xet read token,Get a read short-lived access token for XET
+ex7-0319,huggingface.co,GET,/api/containers/{namespace}/{repo}/xet-write-token,,Xet write token,Get a write short-lived access token for XET upload
+ex7-0320,huggingface.co,POST,/api/credentials/revoke,,Revoke leaked tokens,"Publicly invalidate leaked Hugging Face access tokens or S3 credentials. Possession of the raw token value, or of the S3 access key ID and secret, is the only proof required: no authentication is needed, and no rights over the owning account or org are necessary. Each raw token is fully invalidated. A leaked S3 credential is deleted and its paired token invalidated. The owning user is notified by email. Always returns 202, whether or not any of the provided tokens existed, so the response cannot be used to probe token validity."
+ex7-0321,huggingface.co,GET,/api/daily_papers,,Get Daily Papers,
+ex7-0322,huggingface.co,GET,/api/datasets-tags-by-type,,Get dataset tags,"Get all possible tags used for datasets, grouped by tag type. Optionally restrict to only one tag type"
+ex7-0323,huggingface.co,DELETE,/api/datasets/{namespace}/{repo}/branch/{rev},,Delete a branch,
+ex7-0324,huggingface.co,POST,/api/datasets/{namespace}/{repo}/branch/{rev},,Create branch,
+ex7-0325,huggingface.co,POST,/api/datasets/{namespace}/{repo}/commit/{rev},,Commit,"For legacy reason, we support both `application/json` and `application/x-ndjson` but we recommend using `application/x-ndjson` to create a commit.
+
+JSON-lines payload:
+```json
+{
+  ""key"": ""header"",
+  ""value"": {
+    ""summary"": ""string (REQUIRED)"",
+    ""description"": ""string (OPTIONAL - defaults to empty string)"",
+    ""parentCommit"": ""string (OPTIONAL - 40-character hex SHA)""
+  }
+}
+{
+  ""key"": ""file"",
+  ""value"": {
+    ""path"": ""string (REQUIRED)"",
+    ""content"": ""string (OPTIONAL - required if oldPath not set)"",
+    ""encoding"": ""utf-8 | base64 (OPTIONAL - defaults to utf-8)"",
+    ""oldPath"": ""string (OPTIONAL - for move/rename operations)""
+  }
+}
+{
+  ""key"": ""deletedEntry"",
+  ""value"": {
+    ""path"": ""string (REQUIRED)""
+  }
+}
+{
+  ""key"": ""lfsFile"",
+  ""value"": {
+    ""path"": ""string (REQUIRED - max 1000 chars)"",
+    ""oid"": ""string (OPTIONAL - required if oldPath not set, 64 hex chars)"",
+    ""algo"": ""sha256 (OPTIONAL - only sha256 supported)"",
+    ""size"": ""number (OPTIONAL - required if oldPath is set)"",
+    ""oldPath"": ""string (OPTIONAL - for move/rename operations)""
+  }
+}
+```
+
+JSON payload:
+```json
+{
+  ""summary"": ""string (REQUIRED)"",
+  ""description"": ""string (OPTIONAL - defaults to empty string)"",
+  ""parentCommit"": ""string (OPTIONAL - 40-character hex SHA)""
+  ""files"": [
+    {
+      ""path"": ""string (REQUIRED)"",
+      ""content"": ""string (OPTIONAL - required if oldPath not set)"",
+      ""encoding"": ""utf-8 | base64 (OPTIONAL - defaults to utf-8)"",
+      ""oldPath"": ""string (OPTIONAL - for move/rename operations)""
+    }
+  ],
+  ""deletedEntries"": [
+    {
+      ""path"": ""string (REQUIRED)""
+    }
+  ],
+  ""lfsFiles"": [
+    {
+      ""path"": ""string (REQUIRED - max 1000 chars)"",
+      ""oid"": ""string (OPTIONAL - required if oldPath not set, 64 hex chars)"",
+      ""algo"": ""sha256 (OPTIONAL - only sha256 supported)"",
+      ""size"": ""number (OPTIONAL - required if oldPath is set)"",
+      ""oldPath"": ""string (OPTIONAL - for move/rename operations)""
+    }
+  ]
+}
+```
+"
+ex7-0326,huggingface.co,GET,/api/datasets/{namespace}/{repo}/commits/{rev},,List commits,
+ex7-0327,huggingface.co,GET,/api/datasets/{namespace}/{repo}/compare/{compare},,Get compare rev,
+ex7-0328,huggingface.co,GET,/api/datasets/{namespace}/{repo}/jwt,,Generate JWT,"Generate a JWT token for accessing a repository. Supports optional write access for spaces in dev mode, custom expiration, and encryption."
+ex7-0329,huggingface.co,GET,/api/datasets/{namespace}/{repo}/leaderboard,,Get dataset leaderboard,Returns the evaluation results ranked by score for a dataset/task
+ex7-0330,huggingface.co,GET,/api/datasets/{namespace}/{repo}/lfs-files,,List Large files,List Xet/LFS files for a repo
+ex7-0331,huggingface.co,POST,/api/datasets/{namespace}/{repo}/lfs-files/batch,,Delete Large files,Delete Xet/LFS files in batch
+ex7-0332,huggingface.co,POST,/api/datasets/{namespace}/{repo}/lfs-files/duplicate,,Duplicate xet files,"Duplicate xet-stored files from this repo (source) into another repo (target) by xet hash, without re-uploading file bytes. The caller must then commit the files with their sha256/size as usual."
+ex7-0333,huggingface.co,DELETE,/api/datasets/{namespace}/{repo}/lfs-files/{sha},,Delete Large file,Delete a Xet/LFS file
+ex7-0334,huggingface.co,GET,/api/datasets/{namespace}/{repo}/likers,,List likers,
+ex7-0335,huggingface.co,GET,/api/datasets/{namespace}/{repo}/notebook/{rev}/{path},,Get notebook URL,Get a jupyter notebook URL for the requested file
+ex7-0336,huggingface.co,POST,/api/datasets/{namespace}/{repo}/paths-info/{rev},,List paths info,
+ex7-0337,huggingface.co,POST,/api/datasets/{namespace}/{repo}/preupload/{rev},,Check upload method,Check if a file should be uploaded through the Large File mechanism or directly.
+ex7-0338,huggingface.co,GET,/api/datasets/{namespace}/{repo}/refs,,List references,
+ex7-0339,huggingface.co,GET,/api/datasets/{namespace}/{repo}/resource-group,,Get resource group,
+ex7-0340,huggingface.co,POST,/api/datasets/{namespace}/{repo}/resource-group,,Add resource group,Add the repository to a resource group
+ex7-0341,huggingface.co,GET,/api/datasets/{namespace}/{repo}/scan,,Get security status,Get the security status of a repo
+ex7-0342,huggingface.co,PUT,/api/datasets/{namespace}/{repo}/settings,,Update repo settings,Update the settings of a repo
+ex7-0343,huggingface.co,POST,/api/datasets/{namespace}/{repo}/super-squash/{rev},,Squash ref,Squash all commits in the current ref into a single commit with the given message. Action is irreversible.
+ex7-0344,huggingface.co,DELETE,/api/datasets/{namespace}/{repo}/tag/{rev},,Delete a tag,
+ex7-0345,huggingface.co,POST,/api/datasets/{namespace}/{repo}/tag/{rev},,Create tag,
+ex7-0346,huggingface.co,GET,/api/datasets/{namespace}/{repo}/tree/{rev}/{path},,List folder content,"List the content of a repository tree, with pagination support."
+ex7-0347,huggingface.co,GET,/api/datasets/{namespace}/{repo}/treesize/{rev}/{path},,Get folder size,"Get the total size of a repository at a given revision, optionally under a specific subpath. Returns the total size in bytes of all files under the specified path (recursively). If a file is stored via Xet/LFS, the LFS file size is used."
+ex7-0348,huggingface.co,POST,/api/datasets/{namespace}/{repo}/user-access-request/batch,,Batch access requests,"Accept, reject, reset or set back to pending up to 100 access requests for a single gated repository in one call. The same `status` (and optional `rejectionReason` or `resetReason`) is applied to every request in the list."
+ex7-0349,huggingface.co,POST,/api/datasets/{namespace}/{repo}/user-access-request/cancel,,Cancel access request,Cancel the current user's access request to a gated repository
+ex7-0350,huggingface.co,POST,/api/datasets/{namespace}/{repo}/user-access-request/grant,,Grant access,Grant access to a user for a gated repository.
+ex7-0351,huggingface.co,POST,/api/datasets/{namespace}/{repo}/user-access-request/handle,,Handle access request,Handle a user's access request to a gated repository
+ex7-0352,huggingface.co,GET,/api/datasets/{namespace}/{repo}/user-access-request/{status},,List access requests,List access requests for a gated repository
+ex7-0353,huggingface.co,GET,/api/datasets/{namespace}/{repo}/xet-read-token/{rev},,Xet read token,Get a read short-lived access token for XET
+ex7-0354,huggingface.co,GET,/api/datasets/{namespace}/{repo}/xet-write-token/{rev},,Xet write token,Get a write short-lived access token for XET upload
+ex7-0355,huggingface.co,GET,/api/docs,,List docs,Get list of available documentation
+ex7-0356,huggingface.co,GET,/api/docs/search,,Search docs,Search any Hugging Face documentation
+ex7-0357,huggingface.co,GET,/api/docs/search/full-text,,Full-text search docs,Full-text search across Hugging Face documentation
+ex7-0358,huggingface.co,POST,/api/inference-endpoints/{namespace}/auth-check/{perms},,Check access,Check if the user has access to the inference endpoint
+ex7-0359,huggingface.co,POST,/api/inference-endpoints/{namespace}/{endpoint}/auth-check/{perms},,Check access,Check if the user has access to the inference endpoint
+ex7-0360,huggingface.co,GET,/api/jobs/hardware,,Get job hardware,Get available job hardware
+ex7-0361,huggingface.co,GET,/api/jobs/{namespace},,List jobs,List of jobs for an entity
+ex7-0362,huggingface.co,POST,/api/jobs/{namespace},,Start a job,
+ex7-0363,huggingface.co,POST,/api/jobs/{namespace}/auth-check/{perms},,Check access,Check if the user has access to jobs in the namespace
+ex7-0364,huggingface.co,GET,/api/jobs/{namespace}/count,,Count jobs,Count the number of jobs for an entity with optional status stage filter
+ex7-0365,huggingface.co,GET,/api/jobs/{namespace}/{jobId},,Get a job,
+ex7-0366,huggingface.co,POST,/api/jobs/{namespace}/{jobId}/auth-check/{perms},,Check access,Check if the user has access to jobs in the namespace
+ex7-0367,huggingface.co,POST,/api/jobs/{namespace}/{jobId}/cancel,,Cancel a job,
+ex7-0368,huggingface.co,POST,/api/jobs/{namespace}/{jobId}/duplicate,,Duplicate a job,"Duplicate an existing job, re-using its spec"
+ex7-0369,huggingface.co,GET,/api/jobs/{namespace}/{jobId}/events,,Stream job events,"Stream the events of a job, using SSE"
+ex7-0370,huggingface.co,PUT,/api/jobs/{namespace}/{jobId}/expose,,Job exposed ports,"Replace the exposed ports of a running job, applied live (no re-run). Ports listed in `portsPublic` are reachable without any authentication."
+ex7-0371,huggingface.co,PUT,/api/jobs/{namespace}/{jobId}/labels,,Update job labels,Replace user-provided labels on a job
+ex7-0372,huggingface.co,GET,/api/jobs/{namespace}/{jobId}/logs,,Stream job logs,"Stream the logs of a job, using SSE"
+ex7-0373,huggingface.co,GET,/api/jobs/{namespace}/{jobId}/metrics,,Stream job metrics,"Stream the metrics of a job, using SSE"
+ex7-0374,huggingface.co,GET,/api/kernels,,List kernels,"List kernels with optional filtering, sorting, and pagination"
+ex7-0375,huggingface.co,POST,/api/kernels/access-request/approve,,Approve kernel access,
+ex7-0376,huggingface.co,GET,/api/kernels/{namespace}/{repo},,Get kernel,
+ex7-0377,huggingface.co,POST,/api/kernels/{namespace}/{repo}/lfs-files/duplicate,,Duplicate xet files,"Duplicate xet-stored files from this repo (source) into another repo (target) by xet hash, without re-uploading file bytes. The caller must then commit the files with their sha256/size as usual."
+ex7-0378,huggingface.co,GET,/api/kernels/{namespace}/{repo}/likers,,List likers,
+ex7-0379,huggingface.co,GET,/api/kernels/{namespace}/{repo}/revision/{rev},,Get kernel,
+ex7-0380,huggingface.co,GET,/api/kernels/{namespace}/{repo}/scan,,Get security status,Get the security status of a repo
+ex7-0381,huggingface.co,GET,/api/models-tags-by-type,,Get model tags,"Get all possible tags used for models, grouped by tag type. Optionally restrict to only one tag type"
+ex7-0382,huggingface.co,DELETE,/api/models/{namespace}/{repo}/branch/{rev},,Delete a branch,
+ex7-0383,huggingface.co,POST,/api/models/{namespace}/{repo}/branch/{rev},,Create branch,
+ex7-0384,huggingface.co,POST,/api/models/{namespace}/{repo}/commit/{rev},,Commit,"For legacy reason, we support both `application/json` and `application/x-ndjson` but we recommend using `application/x-ndjson` to create a commit.
+
+JSON-lines payload:
+```json
+{
+  ""key"": ""header"",
+  ""value"": {
+    ""summary"": ""string (REQUIRED)"",
+    ""description"": ""string (OPTIONAL - defaults to empty string)"",
+    ""parentCommit"": ""string (OPTIONAL - 40-character hex SHA)""
+  }
+}
+{
+  ""key"": ""file"",
+  ""value"": {
+    ""path"": ""string (REQUIRED)"",
+    ""content"": ""string (OPTIONAL - required if oldPath not set)"",
+    ""encoding"": ""utf-8 | base64 (OPTIONAL - defaults to utf-8)"",
+    ""oldPath"": ""string (OPTIONAL - for move/rename operations)""
+  }
+}
+{
+  ""key"": ""deletedEntry"",
+  ""value"": {
+    ""path"": ""string (REQUIRED)""
+  }
+}
+{
+  ""key"": ""lfsFile"",
+  ""value"": {
+    ""path"": ""string (REQUIRED - max 1000 chars)"",
+    ""oid"": ""string (OPTIONAL - required if oldPath not set, 64 hex chars)"",
+    ""algo"": ""sha256 (OPTIONAL - only sha256 supported)"",
+    ""size"": ""number (OPTIONAL - required if oldPath is set)"",
+    ""oldPath"": ""string (OPTIONAL - for move/rename operations)""
+  }
+}
+```
+
+JSON payload:
+```json
+{
+  ""summary"": ""string (REQUIRED)"",
+  ""description"": ""string (OPTIONAL - defaults to empty string)"",
+  ""parentCommit"": ""string (OPTIONAL - 40-character hex SHA)""
+  ""files"": [
+    {
+      ""path"": ""string (REQUIRED)"",
+      ""content"": ""string (OPTIONAL - required if oldPath not set)"",
+      ""encoding"": ""utf-8 | base64 (OPTIONAL - defaults to utf-8)"",
+      ""oldPath"": ""string (OPTIONAL - for move/rename operations)""
+    }
+  ],
+  ""deletedEntries"": [
+    {
+      ""path"": ""string (REQUIRED)""
+    }
+  ],
+  ""lfsFiles"": [
+    {
+      ""path"": ""string (REQUIRED - max 1000 chars)"",
+      ""oid"": ""string (OPTIONAL - required if oldPath not set, 64 hex chars)"",
+      ""algo"": ""sha256 (OPTIONAL - only sha256 supported)"",
+      ""size"": ""number (OPTIONAL - required if oldPath is set)"",
+      ""oldPath"": ""string (OPTIONAL - for move/rename operations)""
+    }
+  ]
+}
+```
+"
+ex7-0385,huggingface.co,GET,/api/models/{namespace}/{repo}/commits/{rev},,List commits,
+ex7-0386,huggingface.co,GET,/api/models/{namespace}/{repo}/compare/{compare},,Get compare rev,
+ex7-0387,huggingface.co,GET,/api/models/{namespace}/{repo}/jwt,,Generate JWT,"Generate a JWT token for accessing a repository. Supports optional write access for spaces in dev mode, custom expiration, and encryption."
+ex7-0388,huggingface.co,GET,/api/models/{namespace}/{repo}/lfs-files,,List Large files,List Xet/LFS files for a repo
+ex7-0389,huggingface.co,POST,/api/models/{namespace}/{repo}/lfs-files/batch,,Delete Large files,Delete Xet/LFS files in batch
+ex7-0390,huggingface.co,POST,/api/models/{namespace}/{repo}/lfs-files/duplicate,,Duplicate xet files,"Duplicate xet-stored files from this repo (source) into another repo (target) by xet hash, without re-uploading file bytes. The caller must then commit the files with their sha256/size as usual."
+ex7-0391,huggingface.co,DELETE,/api/models/{namespace}/{repo}/lfs-files/{sha},,Delete Large file,Delete a Xet/LFS file
+ex7-0392,huggingface.co,GET,/api/models/{namespace}/{repo}/likers,,List likers,
+ex7-0393,huggingface.co,GET,/api/models/{namespace}/{repo}/notebook/{rev}/{path},,Get notebook URL,Get a jupyter notebook URL for the requested file
+ex7-0394,huggingface.co,POST,/api/models/{namespace}/{repo}/paths-info/{rev},,List paths info,
+ex7-0395,huggingface.co,POST,/api/models/{namespace}/{repo}/preupload/{rev},,Check upload method,Check if a file should be uploaded through the Large File mechanism or directly.
+ex7-0396,huggingface.co,GET,/api/models/{namespace}/{repo}/refs,,List references,
+ex7-0397,huggingface.co,GET,/api/models/{namespace}/{repo}/resource-group,,Get resource group,
+ex7-0398,huggingface.co,POST,/api/models/{namespace}/{repo}/resource-group,,Add resource group,Add the repository to a resource group
+ex7-0399,huggingface.co,GET,/api/models/{namespace}/{repo}/safetensors-metadata/{path},,Get safetensors metadata,"Get the parsed headers of all the shards of a sharded safetensors model in a single request, instead of reading the index and then the header of every shard.
+
+Only the `main` revision is served: the `ETag` is the commit sha of `main`, and requests with a matching `If-None-Match` get a 304. Returns 400 when the path isn't a `.safetensors.index.json` file and 422 when the files can't be parsed.
+
+The response is brotli-compressed when the client accepts it, otherwise gzip-compressed or plain JSON."
+ex7-0400,huggingface.co,GET,/api/models/{namespace}/{repo}/scan,,Get security status,Get the security status of a repo
+ex7-0401,huggingface.co,PUT,/api/models/{namespace}/{repo}/settings,,Update repo settings,Update the settings of a repo
+ex7-0402,huggingface.co,POST,/api/models/{namespace}/{repo}/super-squash/{rev},,Squash ref,Squash all commits in the current ref into a single commit with the given message. Action is irreversible.
+ex7-0403,huggingface.co,DELETE,/api/models/{namespace}/{repo}/tag/{rev},,Delete a tag,
+ex7-0404,huggingface.co,POST,/api/models/{namespace}/{repo}/tag/{rev},,Create tag,
+ex7-0405,huggingface.co,GET,/api/models/{namespace}/{repo}/tree/{rev}/{path},,List folder content,"List the content of a repository tree, with pagination support."
+ex7-0406,huggingface.co,GET,/api/models/{namespace}/{repo}/treesize/{rev}/{path},,Get folder size,"Get the total size of a repository at a given revision, optionally under a specific subpath. Returns the total size in bytes of all files under the specified path (recursively). If a file is stored via Xet/LFS, the LFS file size is used."
+ex7-0407,huggingface.co,POST,/api/models/{namespace}/{repo}/user-access-request/batch,,Batch access requests,"Accept, reject, reset or set back to pending up to 100 access requests for a single gated repository in one call. The same `status` (and optional `rejectionReason` or `resetReason`) is applied to every request in the list."
+ex7-0408,huggingface.co,POST,/api/models/{namespace}/{repo}/user-access-request/cancel,,Cancel access request,Cancel the current user's access request to a gated repository
+ex7-0409,huggingface.co,POST,/api/models/{namespace}/{repo}/user-access-request/grant,,Grant access,Grant access to a user for a gated repository.
+ex7-0410,huggingface.co,POST,/api/models/{namespace}/{repo}/user-access-request/handle,,Handle access request,Handle a user's access request to a gated repository
+ex7-0411,huggingface.co,GET,/api/models/{namespace}/{repo}/user-access-request/{status},,List access requests,List access requests for a gated repository
+ex7-0412,huggingface.co,GET,/api/models/{namespace}/{repo}/xet-read-token/{rev},,Xet read token,Get a read short-lived access token for XET
+ex7-0413,huggingface.co,GET,/api/models/{namespace}/{repo}/xet-write-token/{rev},,Xet write token,Get a write short-lived access token for XET upload
+ex7-0414,huggingface.co,DELETE,/api/notifications,,Delete notifications,"Delete notifications, either by specifying discussionIds or by applying to all notifications with search parameters"
+ex7-0415,huggingface.co,GET,/api/notifications,,List notifications,List notifications for the user
+ex7-0416,huggingface.co,POST,/api/notifications/mark-as-read,,Change read status,"Mark discussions as read or unread. If `applyToAll` is true, all notifications for the user matching the search parameters will be marked as read or unread."
+ex7-0417,huggingface.co,GET,/api/organizations/{name}/audit-log/export,,Export audit log,"Export the audit log events in JSON format for a Team or Enterprise organization. The export is limited to the last 100,000 events."
+ex7-0418,huggingface.co,GET,/api/organizations/{name}/avatar,,Get avatar,"Retrieve organization avatar. This endpoint returns a JSON with the avatar URL for the organization.
+
+If called with the `Sec-Fetch-Dest: image` header, it instead redirects to the avatar URL"
+ex7-0419,huggingface.co,GET,/api/organizations/{name}/billing/credits,,Get org credits,"Get the org's credits balance, with each purchased, granted and monthly included balance and its expiry date"
+ex7-0420,huggingface.co,POST,/api/organizations/{name}/billing/prepaid-credits/purchase-link,,Credits purchase link,"Get a link to the org billing page with a credits purchase prefilled, also sent to the requesting user by email. Nothing is charged until they confirm the purchase on that page."
+ex7-0421,huggingface.co,GET,/api/organizations/{name}/billing/usage-by-inference-session,,Session inference usage,"Get org inference-provider usage broken down per session id, as a time-series of monthly periods."
+ex7-0422,huggingface.co,GET,/api/organizations/{name}/billing/usage-by-resource-group,,Resource group usage,"Get org usage breakdown per resource group, returned as a time-series of monthly periods. Window is [startDate, endDate], defaults to the current month. Both dates must fall within the last 12 months. Storage values are the peak observed within each monthly period."
+ex7-0423,huggingface.co,GET,/api/organizations/{name}/billing/usage-v2,,Get org usage,Get org usage for a given period
+ex7-0424,huggingface.co,GET,/api/organizations/{name}/billing/usage/inference,,Inference usage,"Get org inference-provider usage per member, model and provider, returned as a time-series of daily periods. Window is [startDate, endDate], defaults to the current month. Both dates must fall within the last 12 months. Returns up to `limit` periods, follow the `Link` header for the next ones. Requests are included up to 2 hours after they are made."
+ex7-0425,huggingface.co,GET,/api/organizations/{name}/billing/usage/live,,Stream usage,Get live usage for org
+ex7-0426,huggingface.co,GET,/api/organizations/{name}/members,,Get organization members,Get a list of members for the organization with optional search and pagination.
+ex7-0427,huggingface.co,PUT,/api/organizations/{name}/members/{username}/account-type,,Change account type,"Convert a member into an external collaborator, who isn't required to sign in with SSO, or back into a member. Need a paid plan. Doesn't affect the role, which must be changed separately."
+ex7-0428,huggingface.co,PUT,/api/organizations/{name}/members/{username}/role,,Change member role,Change the role of a member in the organization. Need a paid plan.
+ex7-0429,huggingface.co,GET,/api/organizations/{name}/resource-groups,,Get resource groups,"Retrieve accessible resource groups. Get all resource groups the user has access to.
+
+Requires the org to have a Team plan or higher."
+ex7-0430,huggingface.co,POST,/api/organizations/{name}/resource-groups,,Create resource group,"Create a new resource group in the organization.
+
+Requires the org to have a Team plan or higher."
+ex7-0431,huggingface.co,GET,/api/organizations/{name}/resource-groups/settings,,Get resource group settings,"Retrieve the org-wide resource group settings: who may create resource groups, and whether resource group admins may invite users from outside the org.
+
+Requires the org to have a Team plan or higher."
+ex7-0432,huggingface.co,POST,/api/organizations/{name}/resource-groups/settings,,Update resource group settings,"Update the org-wide resource group settings. Omitted fields are left unchanged.
+
+Enabling `allowExternalInvites` lets resource group admins add members to the org, consuming billable seats.
+
+Requires the org to have a Team plan or higher."
+ex7-0433,huggingface.co,DELETE,/api/organizations/{name}/resource-groups/{resourceGroupId},,Delete resource group,"Delete a resource group from the organization.
+
+Requires the org to have a Team plan or higher."
+ex7-0434,huggingface.co,GET,/api/organizations/{name}/resource-groups/{resourceGroupId},,Get resource group,"Retrieve a single resource group by id.
+
+Requires the org to have a Team plan or higher."
+ex7-0435,huggingface.co,PATCH,/api/organizations/{name}/resource-groups/{resourceGroupId},,Update resource group,"Update the name, description and/or monthly spend limits (in cents, `null` to remove) of a resource group.
+
+`spendLimits.total` caps the group's combined spend across every product; the per-product limits cap each product on top of it.
+
+Requires the org to have a Team plan or higher."
+ex7-0436,huggingface.co,DELETE,/api/organizations/{name}/resource-groups/{resourceGroupId}/invitation/{id},,Revoke invitation,
+ex7-0437,huggingface.co,POST,/api/organizations/{name}/resource-groups/{resourceGroupId}/invitation/{id}/resend,,Resend invitation,
+ex7-0438,huggingface.co,GET,/api/organizations/{name}/resource-groups/{resourceGroupId}/invitations,,List pending invitations,
+ex7-0439,huggingface.co,POST,/api/organizations/{name}/resource-groups/{resourceGroupId}/invite,,Invite external user,"Invite a user who is not yet an organization member into a resource group. On accepting, they only get access to that resource group, with the requested read or write role.
+
+Requires external invites to be enabled in the organization's resource group settings, unless the caller is an organization admin."
+ex7-0440,huggingface.co,POST,/api/organizations/{name}/resource-groups/{resourceGroupId}/settings,,Configure auto-join,"Configure the auto-join settings of a resource group.
+
+Requires the org to have a Team plan or higher."
+ex7-0441,huggingface.co,POST,/api/organizations/{name}/resource-groups/{resourceGroupId}/users,,Add users,"Add one or more organization members to a resource group.
+
+Use the `inherit` role to give a member the same role they have in the organization, following it when it changes.
+
+Requires the org to have a Team plan or higher."
+ex7-0442,huggingface.co,DELETE,/api/organizations/{name}/resource-groups/{resourceGroupId}/users/{username},,Remove user,"Remove a user from a resource group, revoking the access granted through it.
+
+Requires the org to have a Team plan or higher."
+ex7-0443,huggingface.co,PATCH,/api/organizations/{name}/resource-groups/{resourceGroupId}/users/{username},,Change user role,"Change the role of a user in a resource group. In a SCIM-managed resource group, pass `resetToScimRole` to undo a manual role change and restore the role mapped from the user's SCIM groups.
+
+Use the `inherit` role to give the member the same role they have in the organization, following it when it changes.
+
+Requires the org to have a Team plan or higher."
+ex7-0444,huggingface.co,GET,/api/organizations/{name}/scim-provisioning/v2/Groups,,List SCIM groups,"Get a list of SCIM groups. Retrieves a paginated list of all organization groups. If you provide the filter parameter, the resources for all matching groups are returned."
+ex7-0445,huggingface.co,POST,/api/organizations/{name}/scim-provisioning/v2/Groups,,Create SCIM group,Creates a new group in the organization. The group name must be unique within the organization.
+ex7-0446,huggingface.co,DELETE,/api/organizations/{name}/scim-provisioning/v2/Groups/{groupId},,Delete SCIM group,
+ex7-0447,huggingface.co,GET,/api/organizations/{name}/scim-provisioning/v2/Groups/{groupId},,Get SCIM group,"Retrieves a group by its ID. If you provide the `excludedAttributes` parameter, the `members` attribute is not returned."
+ex7-0448,huggingface.co,PATCH,/api/organizations/{name}/scim-provisioning/v2/Groups/{groupId},,Update SCIM group,"Update attributes of a SCIM group. Updates individual attributes using Operations format. Just provide the changes you want to make using add, remove (only `members` is supported), or replace operations."
+ex7-0449,huggingface.co,PUT,/api/organizations/{name}/scim-provisioning/v2/Groups/{groupId},,Update SCIM group,Updates a group by its ID. The group name must be unique within the organization.
+ex7-0450,huggingface.co,GET,/api/organizations/{name}/scim-provisioning/v2/Users,,List SCIM-managed users,Retrieves a paginated list of organization members and pending invitations managed by SCIM for non-managed organizations.
+ex7-0451,huggingface.co,POST,/api/organizations/{name}/scim-provisioning/v2/Users,,Create SCIM invitation,Creates an invitation for a user to join the organization. The user must have an existing Hugging Face account.
+ex7-0452,huggingface.co,DELETE,/api/organizations/{name}/scim-provisioning/v2/Users/{userId},,Delete SCIM user,Removes a user from the organization and deletes any pending invitations for non-managed organizations.
+ex7-0453,huggingface.co,GET,/api/organizations/{name}/scim-provisioning/v2/Users/{userId},,SCIM provisioning user,Retrieves a SCIM user by their ID for non-managed organizations.
+ex7-0454,huggingface.co,PATCH,/api/organizations/{name}/scim-provisioning/v2/Users/{userId},,Update SCIM user,Modify individual attributes for non-managed organizations. Only the `active` field can be modified. User profile fields are not editable via SCIM.
+ex7-0455,huggingface.co,PUT,/api/organizations/{name}/scim-provisioning/v2/Users/{userId},,Update SCIM user,Updates a provisioned user's invitation for non-managed organizations. User profile fields are not editable via SCIM for non-managed organizations.
+ex7-0456,huggingface.co,GET,/api/organizations/{name}/scim/v2/Groups,,List SCIM groups,"Get a list of SCIM groups. Retrieves a paginated list of all organization groups. If you provide the filter parameter, the resources for all matching groups are returned."
+ex7-0457,huggingface.co,POST,/api/organizations/{name}/scim/v2/Groups,,Create SCIM group,Creates a new group in the organization. The group name must be unique within the organization.
+ex7-0458,huggingface.co,DELETE,/api/organizations/{name}/scim/v2/Groups/{groupId},,Delete SCIM group,
+ex7-0459,huggingface.co,GET,/api/organizations/{name}/scim/v2/Groups/{groupId},,Get SCIM group,"Retrieves a group by its ID. If you provide the `excludedAttributes` parameter, the `members` attribute is not returned."
+ex7-0460,huggingface.co,PATCH,/api/organizations/{name}/scim/v2/Groups/{groupId},,Update SCIM group,"Update attributes of a SCIM group. Updates individual attributes using Operations format. Just provide the changes you want to make using add, remove (only `members` is supported), or replace operations."
+ex7-0461,huggingface.co,PUT,/api/organizations/{name}/scim/v2/Groups/{groupId},,Update SCIM group,Updates a group by its ID. The group name must be unique within the organization.
+ex7-0462,huggingface.co,GET,/api/organizations/{name}/scim/v2/ResourceTypes,,SCIM resource types,Returns the list of SCIM 2.0 resource types supported by this server (User and Group).
+ex7-0463,huggingface.co,GET,/api/organizations/{name}/scim/v2/Schemas,,Get SCIM Schemas,Returns the SCIM 2.0 schema definitions for User and Group resources.
+ex7-0464,huggingface.co,GET,/api/organizations/{name}/scim/v2/Schemas/{schemaId},,Get SCIM schema,Returns a single SCIM 2.0 schema definition by its schema URI.
+ex7-0465,huggingface.co,GET,/api/organizations/{name}/scim/v2/ServiceProviderConfig,,Get SCIM Configuration,"Returns the SCIM 2.0 Service Provider configuration, describing the server's capabilities and supported authentication schemes."
+ex7-0466,huggingface.co,GET,/api/organizations/{name}/scim/v2/Users,,List SCIM users,"Retrieves a paginated list of all organization members who have been set up, including disabled users. If you provide the filter parameter, the resources for all matching members are returned."
+ex7-0467,huggingface.co,POST,/api/organizations/{name}/scim/v2/Users,,Create SCIM user,"Creates a new user in the organization. If the user already exists, only `active` field will be updated to provision the user."
+ex7-0468,huggingface.co,DELETE,/api/organizations/{name}/scim/v2/Users/{userId},,Delete SCIM user,
+ex7-0469,huggingface.co,GET,/api/organizations/{name}/scim/v2/Users/{userId},,Get SCIM user,Retrieves a SCIM user by their ID.
+ex7-0470,huggingface.co,PATCH,/api/organizations/{name}/scim/v2/Users/{userId},,Update SCIM user,"Update an attribute of a SCIM user. Modify individual attributes using Operations format. Just provide the changes you want to make using add, remove (only `externalId` is supported), or replace operations.
+ If you set `active` to `false`, the user will be deprovisioned from the organization. 
+Complicated SCIM `path` values are not supported like `emails[type eq 'work'].value`."
+ex7-0471,huggingface.co,PUT,/api/organizations/{name}/scim/v2/Users/{userId},,Update SCIM user,"Updates a provisioned user, you'll need to provide all their information fresh - just like setting them up for the first time. Any details you don't include will be automatically removed, so make sure to include everything they need to keep their account running smoothly. Setting `active` to `false` will deprovision the user from the organization."
+ex7-0472,huggingface.co,GET,/api/organizations/{name}/service-accounts,,List service accounts,List all service accounts for the organization.
+ex7-0473,huggingface.co,POST,/api/organizations/{name}/service-accounts,,Create service account,Create a new service account for the organization.
+ex7-0474,huggingface.co,DELETE,/api/organizations/{name}/service-accounts/{serviceAccountId},,Delete service account,Delete a service account and all its tokens. This action cannot be undone.
+ex7-0475,huggingface.co,GET,/api/organizations/{name}/service-accounts/{serviceAccountId},,Get service account,Retrieve a single service account and its access token metadata. Token secrets are never returned.
+ex7-0476,huggingface.co,POST,/api/organizations/{name}/service-accounts/{serviceAccountId}/tokens,,Create service-account token,Create a new access token for a service account. Store the token securely - it cannot be retrieved later.
+ex7-0477,huggingface.co,DELETE,/api/organizations/{name}/service-accounts/{serviceAccountId}/tokens/{tokenId},,Delete service-account token,Delete an access token from a service account. This action cannot be undone.
+ex7-0478,huggingface.co,PATCH,/api/organizations/{name}/service-accounts/{serviceAccountId}/tokens/{tokenId},,Update service-account token,Update the name and/or permissions of an existing service account token.
+ex7-0479,huggingface.co,POST,/api/organizations/{name}/service-accounts/{serviceAccountId}/tokens/{tokenId}/rotate,,Rotate service-account token,Invalidate an existing token and generate a new one with the same permissions. The old token will stop working immediately.
+ex7-0480,huggingface.co,GET,/api/organizations/{name}/service-accounts/{serviceAccountId}/trusted-publishers,,Trusted publishers,List the [trusted publishers](https://huggingface.co/docs/hub/trusted-publishers) of a service account.
+ex7-0481,huggingface.co,POST,/api/organizations/{name}/service-accounts/{serviceAccountId}/trusted-publishers,,Trusted publisher,"Let OIDC tokens matching the issuer and claims exchange for a short-lived token of the service account, with `resource` set to the service account name."
+ex7-0482,huggingface.co,DELETE,/api/organizations/{name}/service-accounts/{serviceAccountId}/trusted-publishers/{publisherId},,Trusted publisher,
+ex7-0483,huggingface.co,GET,/api/organizations/{name}/settings/network-security,,Network security settings,Get the network security settings for an organization.
+ex7-0484,huggingface.co,PATCH,/api/organizations/{name}/settings/network-security,,Update network security,Update the network security settings for an organization.
+ex7-0485,huggingface.co,GET,/api/organizations/{name}/settings/repositories,,List organization repositories,
+ex7-0486,huggingface.co,PUT,/api/organizations/{name}/settings/sso/credentials,,Rotate SSO credentials,"Update SSO credentials of the organization's SSO configuration. SSO stays enabled and does not need to be re-tested, so rotation causes no downtime. Requires a paid plan."
+ex7-0487,huggingface.co,GET,/api/organizations/{name}/settings/tokens,,Member access tokens,List the access tokens of the organization's members. Team or Enterprise only.
+ex7-0488,huggingface.co,POST,/api/organizations/{name}/settings/tokens/{tokenId}/revoke,,Revoke member token,"An org admin can revoke a token's access to the org. The token itself isn't deleted, it still works outside the org. The token id is the one displayed in the org token settings page or through the tokens listing API endpoint. Enterprise only."
+ex7-0489,huggingface.co,GET,/api/organizations/{name}/socials,,Get social handles,Get an organization's social media handles
+ex7-0490,huggingface.co,GET,/api/papers,,List papers,List arXiv papers sorted by published date
+ex7-0491,huggingface.co,POST,/api/papers/index,,Index a paper,"Index a paper from arXiv by its ID. If the paper is already indexed, only its authors can re-index it."
+ex7-0492,huggingface.co,GET,/api/papers/search,,Search papers,Perform a hybrid semantic / full-text-search on papers
+ex7-0493,huggingface.co,GET,/api/papers/{paperId},,Get a paper,
+ex7-0494,huggingface.co,POST,/api/papers/{paperId}/comment,,Create comment,
+ex7-0495,huggingface.co,POST,/api/papers/{paperId}/comment/{commentId}/edit,,Update a comment,
+ex7-0496,huggingface.co,POST,/api/papers/{paperId}/comment/{commentId}/hide,,Hide comment,
+ex7-0497,huggingface.co,POST,/api/papers/{paperId}/comment/{commentId}/reaction,,React to comment,
+ex7-0498,huggingface.co,POST,/api/papers/{paperId}/comment/{commentId}/reply,,Create comment,
+ex7-0499,huggingface.co,POST,/api/papers/{paperId}/links,,Update paper links,"Update the project page, GitHub repository, or submitting organization for a paper. Requires the requester to be the paper author, the Daily Papers submitter, or a papers admin."
+ex7-0500,huggingface.co,POST,/api/papers/{paperId}/media,,Update paper media,"Replace the media shown on a Daily Papers submission. Requires the requester to be the paper author, the Daily Papers submitter, or a papers admin."
+ex7-0501,huggingface.co,GET,/api/partners/{provider}/models,,List provider mappings,List the model mappings of an inference provider.
+ex7-0502,huggingface.co,POST,/api/partners/{provider}/models,,Create provider mapping,Register a model mapping for your inference provider. Requires a write token of the provider organization.
+ex7-0503,huggingface.co,PUT,/api/partners/{provider}/models/{mappingId}/status,,Update mapping status,Update the status of one of your inference provider's model mappings.
+ex7-0504,huggingface.co,DELETE,/api/posts/{username}/{postSlug},,Delete a discussion,
+ex7-0505,huggingface.co,POST,/api/posts/{username}/{postSlug}/comment,,Create comment,
+ex7-0506,huggingface.co,POST,/api/posts/{username}/{postSlug}/comment/{commentId}/edit,,Update a comment,
+ex7-0507,huggingface.co,POST,/api/posts/{username}/{postSlug}/comment/{commentId}/hide,,Hide comment,
+ex7-0508,huggingface.co,POST,/api/posts/{username}/{postSlug}/comment/{commentId}/reaction,,React to comment,
+ex7-0509,huggingface.co,POST,/api/posts/{username}/{postSlug}/comment/{commentId}/reply,,Create comment,
+ex7-0510,huggingface.co,GET,/api/quicksearch,,Quick search,"Quick search for models, datasets, spaces, orgs, users, papers, collections, and buckets"
+ex7-0511,huggingface.co,POST,/api/quicksearch,,Quick search,"Quick search for models, datasets, spaces, orgs, users, papers, collections, and buckets"
+ex7-0512,huggingface.co,GET,/api/registry/token,,Registry token,"Mints a short-lived EdDSA JWT for the HuggingFace container registry, verifiable via the JWK at `/api/keys/jwt`."
+ex7-0513,huggingface.co,POST,/api/repos/create,,Create repository,
+ex7-0514,huggingface.co,POST,/api/repos/move,,Move repo,Move or rename a repo
+ex7-0515,huggingface.co,GET,/api/resolve-cache/datasets/{namespace}/{repo}/{rev}/{path},,Resolve a file,This endpoint requires to follow redirection
+ex7-0516,huggingface.co,GET,/api/resolve-cache/models/{namespace}/{repo}/{rev}/{path},,Resolve a file,This endpoint requires to follow redirection
+ex7-0517,huggingface.co,GET,/api/resolve-cache/spaces/{namespace}/{repo}/{rev}/{path},,Resolve a file,This endpoint requires to follow redirection
+ex7-0518,huggingface.co,GET,/api/scheduled-jobs/{namespace},,List scheduled jobs,List scheduled jobs for an entity
+ex7-0519,huggingface.co,POST,/api/scheduled-jobs/{namespace},,Create scheduled job,
+ex7-0520,huggingface.co,DELETE,/api/scheduled-jobs/{namespace}/{jobId},,Delete scheduled job,
+ex7-0521,huggingface.co,GET,/api/scheduled-jobs/{namespace}/{jobId},,Get scheduled job,
+ex7-0522,huggingface.co,PUT,/api/scheduled-jobs/{namespace}/{jobId}/labels,,Scheduled job labels,Replace user-provided labels on a scheduled job
+ex7-0523,huggingface.co,POST,/api/scheduled-jobs/{namespace}/{jobId}/resume,,Resume scheduled job,
+ex7-0524,huggingface.co,POST,/api/scheduled-jobs/{namespace}/{jobId}/run,,Run job,Trigger a scheduled job run. Trigger a scheduled job to run immediately. Throws an error if an instance is already running and job spec does not allow concurrent runs.
+ex7-0525,huggingface.co,POST,/api/scheduled-jobs/{namespace}/{jobId}/schedule,,Update job schedule,
+ex7-0526,huggingface.co,POST,/api/scheduled-jobs/{namespace}/{jobId}/suspend,,Suspend scheduled job,
+ex7-0527,huggingface.co,GET,/api/search/full-text,,Full-text search,
+ex7-0528,huggingface.co,GET,/api/settings/billing/credits,,Get credits,"Get the user's credits balance, with each purchased, granted and monthly included balance and its expiry date"
+ex7-0529,huggingface.co,POST,/api/settings/billing/prepaid-credits/purchase-link,,Credits purchase link,"Get a link to the billing page with a credits purchase prefilled, also sent to the user by email. Nothing is charged until the user confirms the purchase on that page."
+ex7-0530,huggingface.co,GET,/api/settings/billing/usage-by-inference-session,,Session inference usage,Get user inference-provider usage broken down per session id
+ex7-0531,huggingface.co,GET,/api/settings/billing/usage-v2,,Get user usage,Get user usage for a given period
+ex7-0532,huggingface.co,GET,/api/settings/billing/usage/jobs,,Get jobs usage,Get user Jobs usage for current subscription period
+ex7-0533,huggingface.co,GET,/api/settings/billing/usage/live,,Stream usage,Get live usage for user
+ex7-0534,huggingface.co,POST,/api/settings/inference-providers,,Reorder inference providers,
+ex7-0535,huggingface.co,POST,/api/settings/inference-providers/api-key,,Set provider key,
+ex7-0536,huggingface.co,PUT,/api/settings/inference-providers/default-billing-entity,,Default billing entity,
+ex7-0537,huggingface.co,PUT,/api/settings/inference-providers/usage-limits,,Set spending limit,
+ex7-0538,huggingface.co,GET,/api/settings/mcp,,Get MCP tools,Get the MCP tools for the current user
+ex7-0539,huggingface.co,GET,/api/settings/metrics/live,,Stream metrics,"Get live usage and running jobs count for the logged-in user, over a single SSE connection"
+ex7-0540,huggingface.co,PATCH,/api/settings/notifications,,Update notification settings,Update notification settings for the user
+ex7-0541,huggingface.co,POST,/api/settings/papers/claim,,Claim paper authorship,
+ex7-0542,huggingface.co,GET,/api/settings/repositories,,List user repositories,
+ex7-0543,huggingface.co,PATCH,/api/settings/watch,,Update watch settings,Update watch settings for the user. Get notified when discussions happen on your watched items.
+ex7-0544,huggingface.co,GET,/api/settings/webhooks,,List webhooks,
+ex7-0545,huggingface.co,POST,/api/settings/webhooks,,Create webhook,
+ex7-0546,huggingface.co,DELETE,/api/settings/webhooks/{webhookId},,Delete webhook,
+ex7-0547,huggingface.co,GET,/api/settings/webhooks/{webhookId},,Get webhook,
+ex7-0548,huggingface.co,POST,/api/settings/webhooks/{webhookId},,Update webhook,
+ex7-0549,huggingface.co,POST,/api/settings/webhooks/{webhookId}/replay/{logId},,Replay webhook log,
+ex7-0550,huggingface.co,POST,/api/settings/webhooks/{webhookId}/{action},,Enable/disable webhook,
+ex7-0551,huggingface.co,GET,/api/spaces/featured,,Featured spaces,
+ex7-0552,huggingface.co,GET,/api/spaces/hardware,,List space hardware,Get available space hardware
+ex7-0553,huggingface.co,GET,/api/spaces/semantic-search,,Semantic search,
+ex7-0554,huggingface.co,GET,/api/spaces/templates,,List Space templates,Returns the catalog of official Space templates. The `repoId` of a template can be passed as `template` when creating a Space through the create-repo endpoint.
+ex7-0555,huggingface.co,GET,/api/spaces/zero-gpu/quota,,Get ZeroGPU quota,Get the authenticated user's current ZeroGPU quota usage and limits
+ex7-0556,huggingface.co,DELETE,/api/spaces/{namespace}/{repo}/branch/{rev},,Delete a branch,
+ex7-0557,huggingface.co,POST,/api/spaces/{namespace}/{repo}/branch/{rev},,Create branch,
+ex7-0558,huggingface.co,POST,/api/spaces/{namespace}/{repo}/commit/{rev},,Commit,"For legacy reason, we support both `application/json` and `application/x-ndjson` but we recommend using `application/x-ndjson` to create a commit.
+
+JSON-lines payload:
+```json
+{
+  ""key"": ""header"",
+  ""value"": {
+    ""summary"": ""string (REQUIRED)"",
+    ""description"": ""string (OPTIONAL - defaults to empty string)"",
+    ""parentCommit"": ""string (OPTIONAL - 40-character hex SHA)""
+  }
+}
+{
+  ""key"": ""file"",
+  ""value"": {
+    ""path"": ""string (REQUIRED)"",
+    ""content"": ""string (OPTIONAL - required if oldPath not set)"",
+    ""encoding"": ""utf-8 | base64 (OPTIONAL - defaults to utf-8)"",
+    ""oldPath"": ""string (OPTIONAL - for move/rename operations)""
+  }
+}
+{
+  ""key"": ""deletedEntry"",
+  ""value"": {
+    ""path"": ""string (REQUIRED)""
+  }
+}
+{
+  ""key"": ""lfsFile"",
+  ""value"": {
+    ""path"": ""string (REQUIRED - max 1000 chars)"",
+    ""oid"": ""string (OPTIONAL - required if oldPath not set, 64 hex chars)"",
+    ""algo"": ""sha256 (OPTIONAL - only sha256 supported)"",
+    ""size"": ""number (OPTIONAL - required if oldPath is set)"",
+    ""oldPath"": ""string (OPTIONAL - for move/rename operations)""
+  }
+}
+```
+
+JSON payload:
+```json
+{
+  ""summary"": ""string (REQUIRED)"",
+  ""description"": ""string (OPTIONAL - defaults to empty string)"",
+  ""parentCommit"": ""string (OPTIONAL - 40-character hex SHA)""
+  ""files"": [
+    {
+      ""path"": ""string (REQUIRED)"",
+      ""content"": ""string (OPTIONAL - required if oldPath not set)"",
+      ""encoding"": ""utf-8 | base64 (OPTIONAL - defaults to utf-8)"",
+      ""oldPath"": ""string (OPTIONAL - for move/rename operations)""
+    }
+  ],
+  ""deletedEntries"": [
+    {
+      ""path"": ""string (REQUIRED)""
+    }
+  ],
+  ""lfsFiles"": [
+    {
+      ""path"": ""string (REQUIRED - max 1000 chars)"",
+      ""oid"": ""string (OPTIONAL - required if oldPath not set, 64 hex chars)"",
+      ""algo"": ""sha256 (OPTIONAL - only sha256 supported)"",
+      ""size"": ""number (OPTIONAL - required if oldPath is set)"",
+      ""oldPath"": ""string (OPTIONAL - for move/rename operations)""
+    }
+  ]
+}
+```
+"
+ex7-0559,huggingface.co,GET,/api/spaces/{namespace}/{repo}/commits/{rev},,List commits,
+ex7-0560,huggingface.co,GET,/api/spaces/{namespace}/{repo}/compare/{compare},,Get compare rev,
+ex7-0561,huggingface.co,POST,/api/spaces/{namespace}/{repo}/custom-domain,,Set custom domain,
+ex7-0562,huggingface.co,POST,/api/spaces/{namespace}/{repo}/dev-mode,,Toggle dev mode,
+ex7-0563,huggingface.co,GET,/api/spaces/{namespace}/{repo}/events,,Stream events,"Get status updates for a specific Space in a streaming fashion, with SSE protocol"
+ex7-0564,huggingface.co,POST,/api/spaces/{namespace}/{repo}/hardware,,Update hardware flavor,
+ex7-0565,huggingface.co,GET,/api/spaces/{namespace}/{repo}/jwt,,Generate JWT,"Generate a JWT token for accessing a repository. Supports optional write access for spaces in dev mode, custom expiration, and encryption."
+ex7-0566,huggingface.co,GET,/api/spaces/{namespace}/{repo}/lfs-files,,List Large files,List Xet/LFS files for a repo
+ex7-0567,huggingface.co,POST,/api/spaces/{namespace}/{repo}/lfs-files/batch,,Delete Large files,Delete Xet/LFS files in batch
+ex7-0568,huggingface.co,POST,/api/spaces/{namespace}/{repo}/lfs-files/duplicate,,Duplicate xet files,"Duplicate xet-stored files from this repo (source) into another repo (target) by xet hash, without re-uploading file bytes. The caller must then commit the files with their sha256/size as usual."
+ex7-0569,huggingface.co,DELETE,/api/spaces/{namespace}/{repo}/lfs-files/{sha},,Delete Large file,Delete a Xet/LFS file
+ex7-0570,huggingface.co,GET,/api/spaces/{namespace}/{repo}/likers,,List likers,
+ex7-0571,huggingface.co,GET,/api/spaces/{namespace}/{repo}/logs/{logType},,Stream logs,"Get logs for a specific Space in a streaming fashion, with SSE protocol"
+ex7-0572,huggingface.co,GET,/api/spaces/{namespace}/{repo}/metrics,,Stream metrics,"Get live metrics for a specific Space in a streaming fashion, with SSE protocol, such as current Zero-GPU usage"
+ex7-0573,huggingface.co,GET,/api/spaces/{namespace}/{repo}/notebook/{rev}/{path},,Get notebook URL,Get a jupyter notebook URL for the requested file
+ex7-0574,huggingface.co,POST,/api/spaces/{namespace}/{repo}/paths-info/{rev},,List paths info,
+ex7-0575,huggingface.co,POST,/api/spaces/{namespace}/{repo}/preupload/{rev},,Check upload method,Check if a file should be uploaded through the Large File mechanism or directly.
+ex7-0576,huggingface.co,GET,/api/spaces/{namespace}/{repo}/refs,,List references,
+ex7-0577,huggingface.co,GET,/api/spaces/{namespace}/{repo}/resource-group,,Get resource group,
+ex7-0578,huggingface.co,POST,/api/spaces/{namespace}/{repo}/resource-group,,Add resource group,Add the repository to a resource group
+ex7-0579,huggingface.co,GET,/api/spaces/{namespace}/{repo}/scan,,Get security status,Get the security status of a repo
+ex7-0580,huggingface.co,DELETE,/api/spaces/{namespace}/{repo}/secrets,,Delete secret,Delete Spaces's secret
+ex7-0581,huggingface.co,GET,/api/spaces/{namespace}/{repo}/secrets,,List secrets,List a Space's secret keys. Values are never returned.
+ex7-0582,huggingface.co,POST,/api/spaces/{namespace}/{repo}/secrets,,Upsert secret,Upsert Spaces's secret
+ex7-0583,huggingface.co,PUT,/api/spaces/{namespace}/{repo}/settings,,Update repo settings,Update the settings of a repo
+ex7-0584,huggingface.co,POST,/api/spaces/{namespace}/{repo}/sleeptime,,Set sleep time,
+ex7-0585,huggingface.co,POST,/api/spaces/{namespace}/{repo}/super-squash/{rev},,Squash ref,Squash all commits in the current ref into a single commit with the given message. Action is irreversible.
+ex7-0586,huggingface.co,DELETE,/api/spaces/{namespace}/{repo}/tag/{rev},,Delete a tag,
+ex7-0587,huggingface.co,POST,/api/spaces/{namespace}/{repo}/tag/{rev},,Create tag,
+ex7-0588,huggingface.co,GET,/api/spaces/{namespace}/{repo}/tree/{rev}/{path},,List folder content,"List the content of a repository tree, with pagination support."
+ex7-0589,huggingface.co,GET,/api/spaces/{namespace}/{repo}/treesize/{rev}/{path},,Get folder size,"Get the total size of a repository at a given revision, optionally under a specific subpath. Returns the total size in bytes of all files under the specified path (recursively). If a file is stored via Xet/LFS, the LFS file size is used."
+ex7-0590,huggingface.co,DELETE,/api/spaces/{namespace}/{repo}/variables,,Delete variable,Delete Spaces's variable
+ex7-0591,huggingface.co,GET,/api/spaces/{namespace}/{repo}/variables,,List variables,List a Space's variables with their values.
+ex7-0592,huggingface.co,POST,/api/spaces/{namespace}/{repo}/variables,,Upsert variable,Upsert Spaces's variable
+ex7-0593,huggingface.co,DELETE,/api/spaces/{namespace}/{repo}/volumes,,Delete Space volumes,
+ex7-0594,huggingface.co,PUT,/api/spaces/{namespace}/{repo}/volumes,,Set Space volumes,
+ex7-0595,huggingface.co,GET,/api/spaces/{namespace}/{repo}/xet-read-token/{rev},,Xet read token,Get a read short-lived access token for XET
+ex7-0596,huggingface.co,GET,/api/spaces/{namespace}/{repo}/xet-write-token/{rev},,Xet write token,Get a write short-lived access token for XET upload
+ex7-0597,huggingface.co,GET,/api/trending,,Get trending,Get the trending repositories
+ex7-0598,huggingface.co,GET,/api/users/{username}/avatar,,Retrieve user avatar,"This endpoint returns a JSON with the avatar URL for the user.
+
+If called with the `Sec-Fetch-Dest: image` header, it instead redirects to the avatar URL"
+ex7-0599,huggingface.co,GET,/api/users/{username}/billing/usage/live,,Stream usage,Get live usage for user
+ex7-0600,huggingface.co,GET,/api/users/{username}/followers,,List user followers,
+ex7-0601,huggingface.co,GET,/api/users/{username}/following,,List followed users,
+ex7-0602,huggingface.co,GET,/api/users/{username}/following/orgs,,List followed organizations,
+ex7-0603,huggingface.co,GET,/api/users/{username}/likes,,List user likes,List public repos liked by a user
+ex7-0604,huggingface.co,GET,/api/users/{username}/overview,,User overview,
+ex7-0605,huggingface.co,GET,/api/users/{username}/socials,,Get social handles,Get a user's social media handles
+ex7-0606,huggingface.co,GET,/api/whoami-v2,,Get user info,Get information about the user and auth method used
+ex7-0607,huggingface.co,GET,/api/{repoType}/{namespace}/{repo}/discussions,,List discussions,Get discussions for a repo
+ex7-0608,huggingface.co,POST,/api/{repoType}/{namespace}/{repo}/discussions,,Create discussion,
+ex7-0609,huggingface.co,DELETE,/api/{repoType}/{namespace}/{repo}/discussions/{num},,Delete a discussion,
+ex7-0610,huggingface.co,GET,/api/{repoType}/{namespace}/{repo}/discussions/{num},,Get discussion details,
+ex7-0611,huggingface.co,POST,/api/{repoType}/{namespace}/{repo}/discussions/{num}/comment,,Create comment,
+ex7-0612,huggingface.co,POST,/api/{repoType}/{namespace}/{repo}/discussions/{num}/comment/{commentId}/edit,,Update a comment,
+ex7-0613,huggingface.co,POST,/api/{repoType}/{namespace}/{repo}/discussions/{num}/comment/{commentId}/hide,,Hide comment,
+ex7-0614,huggingface.co,POST,/api/{repoType}/{namespace}/{repo}/discussions/{num}/comment/{commentId}/reaction,,React to comment,
+ex7-0615,huggingface.co,POST,/api/{repoType}/{namespace}/{repo}/discussions/{num}/ignore,,Toggle ignore discussion,
+ex7-0616,huggingface.co,POST,/api/{repoType}/{namespace}/{repo}/discussions/{num}/merge,,Merge pull request,
+ex7-0617,huggingface.co,POST,/api/{repoType}/{namespace}/{repo}/discussions/{num}/pin,,Pin a discussion,
+ex7-0618,huggingface.co,DELETE,/api/{repoType}/{namespace}/{repo}/discussions/{num}/ref,,Delete PR ref,Deletes the git ref for a closed/merged pull request to free up storage. LFS files unique to this PR will be garbage collected. The PR page and diff will still be viewable using stored commit data.
+ex7-0619,huggingface.co,POST,/api/{repoType}/{namespace}/{repo}/discussions/{num}/status,,Change status,Change the status of a discussion
+ex7-0620,huggingface.co,GET,/api/{repoType}/{namespace}/{repo}/discussions/{num}/storage,,PR storage estimate,Estimates the LFS storage used by a PR that could be freed if the ref is deleted.
+ex7-0621,huggingface.co,POST,/api/{repoType}/{namespace}/{repo}/discussions/{num}/title,,Change title,Change the title of a discussion
+ex7-0622,huggingface.co,POST,/api/{repoType}/{namespace}/{repo}/duplicate,,Duplicate a repository,
+ex7-0623,huggingface.co,GET,/api/{repoType}/{namespace}/{repo}/duplicate/status,,Duplication status,
+ex7-0624,huggingface.co,GET,/api/{repoType}/{namespace}/{repo}/settings/trusted-publishers,,Repo trusted publishers,List the [trusted publishers](https://huggingface.co/docs/hub/trusted-publishers) of a repo.
+ex7-0625,huggingface.co,POST,/api/{repoType}/{namespace}/{repo}/settings/trusted-publishers,,Repo trusted publisher,Let OIDC tokens matching the issuer and claims exchange for a short-lived token on the repo. Requires write access to the repo.
+ex7-0626,huggingface.co,DELETE,/api/{repoType}/{namespace}/{repo}/settings/trusted-publishers/{publisherId},,Repo trusted publisher,
+ex7-0627,huggingface.co,POST,/api/{repoType}/{namespace}/{repo}/sql-console/embed,,Create embed,Create SQL Console embed
+ex7-0628,huggingface.co,DELETE,/api/{repoType}/{namespace}/{repo}/sql-console/embed/{id},,Delete embed,Delete SQL Console embed
+ex7-0629,huggingface.co,PATCH,/api/{repoType}/{namespace}/{repo}/sql-console/embed/{id},,Update embed,Update SQL Console embed
+ex7-0630,huggingface.co,POST,/api/{repoType}/{namespace}/{repo}/sql-console/embed/{id}/hide,,Hide embed,Hide a SQL Console embed from the dataset's community queries. Requires write access to the dataset.
+ex7-0631,huggingface.co,GET,/buckets/{namespace}/{repo}/resolve/{path},,Get file metadata,"Returns file metadata including size, hash, and links to XET authentication"
+ex7-0632,huggingface.co,GET,/containers/{namespace}/{repo}/resolve/{path},,Get file metadata,"Returns file metadata including size, hash, and links to XET authentication"
+ex7-0633,huggingface.co,POST,/datasets/{namespace}/{repo}/ask-access,,Request access,Request access to a gated repository. The fields requested by repository card metadata (https://huggingface.co/docs/hub/en/models-gated#customize-requested-information)
+ex7-0634,huggingface.co,GET,/datasets/{namespace}/{repo}/resolve/{rev}/{path},,Resolve a file,This endpoint requires to follow redirection
+ex7-0635,huggingface.co,GET,/datasets/{namespace}/{repo}/user-access-report,,Export access report,Export a report of all access requests for a gated repository
+ex7-0636,huggingface.co,POST,/oauth/device,,Initiate device authorization,
+ex7-0637,huggingface.co,POST,/oauth/register,,Register OAuth app,
+ex7-0638,huggingface.co,GET,/oauth/userinfo,,Get user info,Get information about the user. Only available through oauth access tokens. Information varies depending on the scope of the oauth app and what permissions the user granted to the oauth app.
+ex7-0639,huggingface.co,POST,/oauth/userinfo,,Get user info,Get information about the user. Only available through oauth access tokens. Information varies depending on the scope of the oauth app and what permissions the user granted to the oauth app.
+ex7-0640,huggingface.co,GET,/spaces/{namespace}/{repo}/resolve/{rev}/{path},,Resolve a file,This endpoint requires to follow redirection
+ex7-0641,huggingface.co,POST,/{namespace}/{repo}/ask-access,,Request access,Request access to a gated repository. The fields requested by repository card metadata (https://huggingface.co/docs/hub/en/models-gated#customize-requested-information)
+ex7-0642,huggingface.co,GET,/{namespace}/{repo}/resolve/{rev}/{path},,Resolve a file,This endpoint requires to follow redirection
+ex7-0643,huggingface.co,GET,/{namespace}/{repo}/user-access-report,,Export access report,Export a report of all access requests for a gated repository
