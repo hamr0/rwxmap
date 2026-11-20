@@ -965,7 +965,7 @@ above.
 - **The proxy matcher** — `rwxmap/match` (D126) released as
   `rwxmap@0.8.0` on 2026-10-29.
 
-Pin pass to rwxlite 0.4.0 (D142 GO, built and verified 2026-11-20, unreleased):
+Pin pass to rwxlite 0.4.0 (D142 GO, built and verified 2026-11-20, shipped in 0.12.0 on 2026-11-20):
 RWXLITE_TAG v0.4.0 (cache fallback 0.4.0 and accepted range 0.4.x derive from
 it; 0.3.x, 0.5.0 and 0.2.x refused), LOWER_MIN_P stays 0.90 (exam #7 measured
 0.4.0 at that cut), 666 tests, guards broken by hand once. Verified: GitHub
@@ -982,7 +982,7 @@ Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
 ## Module D133: rwxmap with rwxlite (three engines)
 
-Status: shipped. Passes 1, 2a and 2b shipped in 0.9.0; rwxlite 0.3.1 at the 0.90 cut (D139) shipped in 0.11.0 on 2026-11-07; the pin moved to rwxlite 0.4.0 at the same 0.90 cut (D142 GO, pin pass verified 2026-11-20, unreleased). The default run uses rwxlite when the `rwxlite@0.4` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
+Status: shipped. Passes 1, 2a and 2b shipped in 0.9.0; rwxlite 0.3.1 at the 0.90 cut (D139) shipped in 0.11.0 on 2026-11-07; the pin moved to rwxlite 0.4.0 at the same 0.90 cut (D142 GO, pin pass verified 2026-11-20, shipped in 0.12.0 on 2026-11-20). The default run uses rwxlite when the `rwxlite@0.4` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
 decided; everything marked "proposal" or "open" is not decided.
 
 ### Decided (user rulings, 2026-11-03 and 2026-11-04)
@@ -1008,7 +1008,7 @@ decided; everything marked "proposal" or "open" is not decided.
     confidence/100 the row gets the letter (a raise, a keep or a
     lowering, all at the same cut); otherwise the row is undecided: x,
     review `tight`. An errored or malformed answer is undecided too.
-    More confidence means more asks. **Default 85** (D140, user ruling 2026-11-09, built 2026-11-19, ships with the exam #7 ref; was 95, user ruling
+    More confidence means more asks. **Default 85** (D140, user ruling 2026-11-09, built 2026-11-19, shipped in 0.12.0 on 2026-11-20; was 95, user ruling
     2026-11-04; replaces the earlier 70): picked from the sweep on
     exams #5 and #6 (see the D140 paragraph below) as the lowest cut
     where no vendor leaks more than mechanical alone. The table below
@@ -1110,7 +1110,7 @@ decided; everything marked "proposal" or "open" is not decided.
   pre-release or an unreadable version turns rwxlite off, mechanical
   alone, with the reason printed (D135). The package is checked before
   the model is fetched, so a missing or wrong-version package costs no
-  download. Current pin (D142, verified 2026-11-20, unreleased): rwxlite 0.4.0, tag v0.4.0,
+  download. Current pin (D142, verified 2026-11-20, shipped in 0.12.0): rwxlite 0.4.0, tag v0.4.0,
   cache fallback 0.4.0, accepted range 0.4.x (0.3.x and 0.5.0 refused), model
   rwxlite-0.4.0+4608f470 (fp32), LOWER_MIN_P 0.90. Every run records the model string.
 - **Model cache and integrity.** The downloaded model is cached in a
@@ -1356,7 +1356,7 @@ Next, in order:
    huggingface, pipedrive, vikunja; six more in reserve;
    poc/exam7-shortlist/picked.tsv), kept out of rwxlite round 15 (copy check
    poc/exam7-shortlist/r15-check, 319 specs dropped). Specs are fetched and
-   frozen at exam build. Inputs are in data/exam7-2026-11-19/ (1579 operations, from the shortlist bytes fetched 2026-11-18, sha256-checked). Labelled blind (A = Sonnet, B = Opus; BRIEF-v4 plus the D141 addendum; 12 files validated). 66 of 1579 operations were disputed and the user ruled all 66 on 2026-11-19 (45 x, 21 w). Candidate: rwxlite 0.4.0 (round 15; rwxlite's user waived its val guards: teacher too loose 115 vs 104, student 120 vs 104, rwxlite's figures). Scored once 2026-11-20 through the real CLI at rwxmap 7dce23e: a-base (0.3.1 as shipped) 1431 exact / 68 too loose (50 loose-1, 18 loose-2) / 80 too tight; a-cand (0.4.0) 1432 / 66 (50 loose-1, 16 loose-2) / 81, all of 1579. D142 verdict GO (too loose 66 vs 68 with a limit of +15; exact 1432 vs 1431; too tight 81 vs 80, beside the gate); it would also pass D135 same-or-better. D133 bar passes for both models. Exam #7 is BURNED for both sides. Done 2026-11-20: rwxlite 0.4.0 released (GitHub release v0.4.0 at rwxlite db328e6; npm rwxlite@0.4.0 latest); the rwxmap pin pass to 0.4.0 is built and verified from a clean install (commit 2d622ea, unreleased; see the Pin pass paragraph above). Next: a release with docs/product/release-checklist.md run item by item. Pre-registration and results docs/wiki/exam-prereg-exam7.md; scorer and rows data/exam7-2026-11-19/score/.
+   frozen at exam build. Inputs are in data/exam7-2026-11-19/ (1579 operations, from the shortlist bytes fetched 2026-11-18, sha256-checked). Labelled blind (A = Sonnet, B = Opus; BRIEF-v4 plus the D141 addendum; 12 files validated). 66 of 1579 operations were disputed and the user ruled all 66 on 2026-11-19 (45 x, 21 w). Candidate: rwxlite 0.4.0 (round 15; rwxlite's user waived its val guards: teacher too loose 115 vs 104, student 120 vs 104, rwxlite's figures). Scored once 2026-11-20 through the real CLI at rwxmap 7dce23e: a-base (0.3.1 as shipped) 1431 exact / 68 too loose (50 loose-1, 18 loose-2) / 80 too tight; a-cand (0.4.0) 1432 / 66 (50 loose-1, 16 loose-2) / 81, all of 1579. D142 verdict GO (too loose 66 vs 68 with a limit of +15; exact 1432 vs 1431; too tight 81 vs 80, beside the gate); it would also pass D135 same-or-better. D133 bar passes for both models. Exam #7 is BURNED for both sides. Done 2026-11-20: rwxlite 0.4.0 released (GitHub release v0.4.0 at rwxlite db328e6; npm rwxlite@0.4.0 latest); the rwxmap pin pass to 0.4.0 is built and verified from a clean install (commit 2d622ea; see the Pin pass paragraph above). Released 2026-11-20: rwxmap 0.12.0 (D140 plus the 0.4.0 pin) published to npm after docs/product/release-checklist.md ran items 1-12; PR #25 merged as a281ad4, release commit 3888ef9, tag v0.12.0. Pre-registration and results docs/wiki/exam-prereg-exam7.md; scorer and rows data/exam7-2026-11-19/score/.
 4. D141 in mechanical: deferred to exam #8 (user ruling 2026-11-19). A step 3
    x word list for the D141 families, matched at lead position. Bar, set
    before building: tighten-only adoption per D100 (more right than wrong,
