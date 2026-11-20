@@ -9,7 +9,7 @@ import { gzipSync } from 'node:zlib';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import {
-  joinRows, parseTruth, modeABar, d135Gate, retag, checkOnlyTagChanged, candidateSpec, checkAddendum, preregTruthSha,
+  joinRows, parseTruth, modeABar, d142Gate, retag, checkOnlyTagChanged, candidateSpec, checkAddendum, preregTruthSha,
   ADDENDUM_FIELDS, BASE, checkRun, tally, classify, verifyModelSet, runConfig, sha256Buf, parseCsv, CONFIGS, VENDORS,
   prepareSpecs, prepareRwxmap, renderVerdicts, renderDiff, main, EXPECTED_N,
 } from './score.mjs';
@@ -97,19 +97,20 @@ test('classify and tally: exact, loose-1, loose-2, too tight are counted apart',
 
 // ---- bars
 const tl = (n, exact, loose, loose2 = 0) => ({ n, exact, loose1: loose - loose2, loose2, loose, tight: n - exact - loose });
-test('D135 gate: cand too loose <= base AND cand exact >= base, on integer counts; ties pass', () => {
+test('D142 gate: exact no fewer AND too loose at most +floor(1% of n) rows; allowance is 15 at 1579', () => {
   const base = tl(1579, 1300, 20);
-  const at = (exact, loose) => d135Gate(base, tl(1579, exact, loose));
-  assert.equal(at(1301, 19).pass, true); // better on both
-  assert.equal(at(1300, 20).pass, true); // tie on both passes
-  assert.equal(at(1300, 19).pass, true); // tie on exact, better on loose
-  assert.equal(at(1301, 20).pass, true); // tie on loose, better on exact
-  assert.equal(at(1400, 21).pass, false); // one more leak fails despite a big exact gain
-  assert.equal(at(1400, 21).exactOk, true);
-  assert.equal(at(1299, 10).pass, false); // one fewer exact fails despite fewer leaks
+  const at = (exact, loose) => d142Gate(base, tl(1579, exact, loose));
+  assert.equal(at(1300, 20).looseAllowance, 15);
+  assert.equal(at(1300, 35).pass, true); // exact tie, loose +15 passes
+  assert.equal(at(1300, 36).pass, false); // loose +16 fails
+  assert.equal(at(1300, 36).looseOk, false);
+  assert.equal(at(1299, 10).pass, false); // exact -1 fails even with loose lower
   assert.equal(at(1299, 10).looseOk, true);
+  assert.equal(at(1301, 19).pass, true); // loose lower and exact higher passes
+  assert.equal(at(1400, 36).pass, false); // big exact gain does not buy a 16th loose row
   assert.equal(at(1301, 19).tightDelta, (1579 - 1301 - 19) - (1579 - 1300 - 20)); // too tight reported, not gated
-  assert.throws(() => d135Gate(base, tl(1377, 1, 0)), /denominators/);
+  assert.equal(d142Gate(tl(1000, 1, 0), tl(1000, 1, 0)).looseAllowance, 10); // floor(0.01 * n)
+  assert.throws(() => d142Gate(base, tl(1377, 1, 0)), /denominators/);
 });
 test('D133 bar: 5.0 points of 1579 is 79 rows (ceil of 78.95); 78 fails, 79 passes', () => {
   const mech = tl(1579, 1000, 100);

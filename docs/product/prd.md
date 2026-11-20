@@ -1323,6 +1323,15 @@ or PATCH is x, like DELETE; narrowing a role without removing a member stays w.
 It applies to exam #7 labelling and later; burned exam truth is never
 relabelled by it.
 
+D142 (user ruling 2026-11-20, before the exam #7 truth sha256 was shared or
+any score seen; proposed by rwxlite's user, agreed by the rwxmap user): for
+exam #7 the ship gate is: a-cand exact >= a-base exact, and a-cand too loose
+<= a-base too loose + 1.0 percentage point (+15 rows of 1579,
+floor(0.01 x n)). It replaces D135's same-or-better gate for this exam; the
+D135 scoring method (real CLI, as it would ship) is unchanged. Reason: a more
+confident model relaxes more letters, mostly correctly; a small rise in too
+loose is accepted as a trade.
+
 Next, in order:
 
 1. D140 built 2026-11-19 (mode b default 85; commit 96ebb46; 617/617 tests, typecheck, conformance 6/6).
@@ -1331,9 +1340,7 @@ Next, in order:
    huggingface, pipedrive, vikunja; six more in reserve;
    poc/exam7-shortlist/picked.tsv), kept out of rwxlite round 15 (copy check
    poc/exam7-shortlist/r15-check, 319 specs dropped). Specs are fetched and
-   frozen at exam build. Inputs are being built in data/exam7-2026-11-19/ (from the shortlist bytes fetched 2026-11-18, sha256-checked). Two blind labellers, A = Sonnet and B = Opus (chosen 2026-11-19) get BRIEF-v4 plus the D141 addendum; the user rules every
-   disagreement. Scored once through the real CLI: the D140 build and
-   rwxlite's round 15 candidate.
+   frozen at exam build. Inputs are in data/exam7-2026-11-19/ (1579 operations, from the shortlist bytes fetched 2026-11-18, sha256-checked). Labelled blind (A = Sonnet, B = Opus; BRIEF-v4 plus the D141 addendum; 12 files validated). 66 of 1579 operations were disputed and the user ruled all 66 on 2026-11-19 (45 x, 21 w). Truth is built and held locally until the candidate addendum is committed. Candidate: rwxlite 0.4.0 (round 15 student from the new teacher; rwxlite's user waived its val guards: teacher too loose 115 vs 104, student 120 vs 104, rwxlite's figures). Gate: D142. Scored once through the real CLI: the D140 build (a-base) and the candidate (a-cand). Pre-registration docs/wiki/exam-prereg-exam7.md; scorer data/exam7-2026-11-19/score/.
 4. D141 in mechanical: deferred to exam #8 (user ruling 2026-11-19). A step 3
    x word list for the D141 families, matched at lead position. Bar, set
    before building: tighten-only adoption per D100 (more right than wrong,

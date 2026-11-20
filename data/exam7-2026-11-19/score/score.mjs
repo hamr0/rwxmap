@@ -1,6 +1,6 @@
-// Pre-registered scorer for shared clean exam #7 (D135 next-model gate, D140 mode b at 85), rwxmap side.
+// Pre-registered scorer for shared clean exam #7 (D142 next-model ship gate, D140 mode b at 85), rwxmap side.
 // Runs the REAL rwxmap CLI per spec per config, joins each operation to ops.csv 1:1, scores against
-// truth.csv (three sha256 checks), prints the D135 gate and the D133 bar. Two models are compared:
+// truth.csv (three sha256 checks), prints the D142 gate and the D133 bar. Two models are compared:
 // the BASELINE (rwxlite 0.3.1 as shipped) and a CANDIDATE whose every addendum field must be given
 // on the command line and match the prereg as committed at --rwxmap-ref. Too loose (loose-1 and
 // loose-2 counted separately) and too tight are never folded together. Vanilla node ESM, no deps.
@@ -327,15 +327,17 @@ export function modeABar(mech, a) {
   return { looseOk, exactOk, needRows, pass: looseOk && exactOk };
 }
 /**
- * D135 gate (user ruling 2026-11-19, "same or better"): the candidate replaces 0.3.1 only if, on the same
- * rows, a-cand's too loose <= a-base's too loose AND a-cand's exact >= a-base's exact. Integer counts; a tie
- * on either half passes that half. Too tight is reported beside the gate and is not part of it.
+ * D142 gate (user ruling 2026-11-20, replaces the D135 "same or better" gate for this exam): the candidate
+ * replaces 0.3.1 only if, on the same rows, a-cand's exact >= a-base's exact (a tie passes) AND a-cand's too
+ * loose share <= a-base's too loose share + 1.0 point. Integer form: cand.loose - base.loose <= floor(0.01 * n)
+ * (15 at n 1579). Too tight is reported beside the gate and is not part of it.
  */
-export function d135Gate(base, cand) {
-  if (base.n !== cand.n) die('d135Gate: different denominators');
-  const looseOk = cand.loose <= base.loose;
+export function d142Gate(base, cand) {
+  if (base.n !== cand.n) die('d142Gate: different denominators');
+  const looseAllowance = Math.floor(0.01 * base.n);
+  const looseOk = cand.loose - base.loose <= looseAllowance;
   const exactOk = cand.exact >= base.exact;
-  return { looseOk, exactOk, pass: looseOk && exactOk, looseDelta: cand.loose - base.loose, exactDelta: cand.exact - base.exact, tightDelta: cand.tight - base.tight };
+  return { looseOk, exactOk, looseAllowance, pass: looseOk && exactOk, looseDelta: cand.loose - base.loose, exactDelta: cand.exact - base.exact, tightDelta: cand.tight - base.tight };
 }
 
 // ---------------------------------------------------------------- the one-line tag change
@@ -572,16 +574,16 @@ export function writeRows(file, joined) {
 
 export function renderVerdicts(results, N) {
   const sg = (n) => `${n >= 0 ? '+' : ''}${n}`;
-  const out = ['== D135 gate (user ruling 2026-11-19: same or better; a tie passes) =='];
+  const out = ['== D142 gate (user ruling 2026-11-20: exact no fewer, too loose at most +1.0 point = +15 rows of 1579) =='];
   const base = results['a-base'] && tally(results['a-base'].joined);
   const cand = results['a-cand'] && tally(results['a-cand'].joined);
   if (!base || !cand) out.push('no verdict: needs a-base and a-cand in this run');
   else {
-    const g = d135Gate(base, cand);
-    out.push(`a-cand (GATE) vs a-base: too loose ${cand.loose} vs ${base.loose} (${sg(g.looseDelta)}) -> ${g.looseOk ? 'OK' : 'FAIL'} (need <=); exact ${cand.exact} vs ${base.exact} (${sg(g.exactDelta)}) -> ${g.exactOk ? 'OK' : 'FAIL'} (need >=)  => ${g.pass ? 'GO: round 15 may replace 0.3.1' : 'NO-GO: 0.3.1 stays'}`);
+    const g = d142Gate(base, cand);
+    out.push(`a-cand (GATE) vs a-base: too loose ${cand.loose} vs ${base.loose} (${sg(g.looseDelta)}) -> ${g.looseOk ? 'OK' : 'FAIL'} (need <= +${g.looseAllowance}); exact ${cand.exact} vs ${base.exact} (${sg(g.exactDelta)}) -> ${g.exactOk ? 'OK' : 'FAIL'} (need >=)  => ${g.pass ? 'GO: round 15 may replace 0.3.1' : 'NO-GO: 0.3.1 stays'}`);
     out.push(`  beside the gate, not part of it: too tight ${cand.tight} vs ${base.tight} (${sg(g.tightDelta)}), of ${N}`);
   }
-  out.push('', '== D133 mode a bar vs mech (reported only, for both models; it is not the D135 gate) ==');
+  out.push('', '== D133 mode a bar vs mech (reported only, for both models; it is not the D142 gate) ==');
   const mech = results.mech && tally(results.mech.joined);
   for (const name of ['a-base', 'a-cand']) {
     if (!results[name]) continue;
@@ -654,7 +656,7 @@ export async function main(argv, log = (s) => process.stdout.write(s + '\n')) {
     if (!CONFIGS[n]) die(`unknown config ${n}`);
     if (CONFIGS[n].model === 'cand' && !cand) die(`${n}: refusing, no candidate given (every --cand-* flag is required)`);
   }
-  if (!cand) log('candidate: none given; *-cand configs skipped (no D135 verdict possible)');
+  if (!cand) log('candidate: none given; *-cand configs skipped (no D142 verdict possible)');
 
   // Inputs.
   const opsPath = path.join(EXAM, 'ops.csv');

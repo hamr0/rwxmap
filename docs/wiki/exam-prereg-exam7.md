@@ -1,4 +1,4 @@
-# Pre-registration (DRAFT): shared clean exam #7, rwxmap side (D135 next-model gate, round 15)
+# Pre-registration (DRAFT): shared clean exam #7, rwxmap side (D142 next-model ship gate, round 15)
 
 **Status: DRAFT, written 2026-11-19. Not frozen. Not scored.** It freezes when
 this file is committed with the scorer (`data/exam7-2026-11-19/score/`, not yet
@@ -12,7 +12,7 @@ run has touched an exam #7 row. No truth exists yet.
 
 The exam answers two questions.
 
-1. (D135) May rwxlite round 15 replace the shipped model (0.3.1) as the model
+1. (D142, replacing the D135 gate for this exam) May rwxlite round 15 replace the shipped model (0.3.1) as the model
    rwxmap ships? It compares two models on the same rows. It is not a tuning
    round; nothing here is fitted to its own rows.
 2. (D140) What does mode b at its new default confidence of 85 score on rows it
@@ -126,7 +126,10 @@ Leakage checks (does round 15 hold these vendors?).
 ### CANDIDATE: the model rwxlite enters
 
 **CANDIDATE ADDENDUM: PENDING.** The candidate is rwxlite round 15 (r15),
-entered by rwxlite. Every value below is PENDING. This section is filled in, and
+entered by rwxlite. The candidate is the round 15 student distilled from the new
+teacher. On 2026-11-20 rwxlite's user waived its own val guards (teacher too loose
+115 vs 104, student 120 vs 104), recorded in rwxlite's prereg; these are rwxlite's
+figures, not measured here. Every value below is PENDING. This section is filled in, and
 committed, BEFORE the truth sha256 is shared with rwxlite and before any scoring.
 The scorer refuses to score any `*-cand` config unless every value below is given
 on its command line, and checks each against the files (a model string must equal
@@ -149,7 +152,7 @@ refuses if any field says PENDING or any value differs from the command line.
 Only fp32 is scored (rwxmap's default model). The int8 per-channel model
 (`--model small`) is not part of this exam, for either the baseline or the candidate.
 
-How the candidate is scored: as it would ship (D135). Today's CLI accepts only
+How the candidate is scored: as it would ship (D135 scoring method, unchanged). Today's CLI accepts only
 rwxlite 0.3.x, and its offline cache fallback names the exact pinned version. The
 unchanged CLI is used only when the candidate's tag equals the shipped `v0.3.1`.
 For any other tag (0.3.2 included) the CLI would show "rwxlite: off", because the
@@ -190,7 +193,7 @@ run).
 |---|---|---|---|
 | mech | `--engine mechanical` | none | reference |
 | a-base | (none: mode a) | shipped 0.3.1 fp32 `rwxlite-0.3.1+bbe1997d` | gate reference |
-| a-cand | (none: mode a) | candidate fp32 | **GATE** |
+| a-cand | (none: mode a) | candidate fp32 | **GATE (D142)** |
 | b85-base | `--engine rwxlite` (default confidence 85, D140) | 0.3.1 fp32 | reported |
 | b85-cand | `--engine rwxlite` (default confidence 85) | candidate fp32 | reported |
 
@@ -230,12 +233,18 @@ above truth) are never folded into one number.
 
 ## Bars (set before scoring)
 
-- **D135 GATE (user ruling 2026-11-19: D135 as written, "same or better").**
-  Round 15 replaces 0.3.1 only if, on the same 1579 rows, a-cand's too loose <=
-  a-base's too loose AND a-cand's exact >= a-base's exact. Integer counts. A tie on
-  either half passes that half. Anything else is NO-GO and 0.3.1 stays. The gate
-  is the CLI number, not rwxlite's own scorer. Too tight is reported beside the
-  gate and is not part of it.
+- **D142 GATE (user ruling 2026-11-20, made before the truth sha256 was shared
+  and before any score was seen; proposed by rwxlite's user, agreed by the rwxmap
+  user).** It replaces the D135 "same or better" gate (ruled 2026-11-19) for this
+  exam. Real CLI, fp32, mode a, same 1579 rows. Round 15 replaces 0.3.1 only if
+  BOTH: (1) a-cand exact >= a-base exact (a tie passes); (2) a-cand too-loose share
+  <= a-base too-loose share + 1.0 percentage point. Integer form: 1.0 point of 1579
+  is 15.79 rows, so cand.loose - base.loose <= floor(0.01 x n) = 15 (the scorer
+  prints the allowance used). Anything else is NO-GO and 0.3.1 stays. Too tight is
+  reported beside the gate and is not part of it. The gate is the CLI number, not
+  rwxlite's own scorer. Reason: a more confident model relaxes more letters, mostly
+  correctly, so exact rises and too tight falls; a small rise in too loose is
+  accepted as a trade.
 - **D133 mode a bar, reported only, for both a-base and a-cand against mech.** On
   the same 1579 rows: too loose <= mech's too loose AND exact >= mech's exact +
   5.0 percentage points. 5.0 points of 1579 is 78.95 rows, so at least 79 more
@@ -258,7 +267,7 @@ above truth) are never folded into one number.
    or text after any prediction exists. Anything a result suggests needs a new
    exam with new vendors.
 7. Results go to `docs/logs/learnings.md`, the README and the PRD (a result that
-   changes a feature or a decision, D135 and D140 included, goes to the PRD and
+   changes a feature or a decision, D142 and D140 included, goes to the PRD and
    the decisions log).
 
 ## Burn rule
@@ -288,12 +297,12 @@ needs a new exam.
   was measured with, so rwxlite's own scorer is not the gate.
 - Model files are copied into a scratch cache, not downloaded by the CLI; the
   production download path is not exercised.
-- The candidate is scored as it would ship under D135. If its tag differs from
+- The candidate is scored as it would ship (D135 scoring method). If its tag differs from
   `v0.3.1` (0.3.2 included) that needs the one-line `RWXLITE_TAG` change, because
   the CLI's offline cache fallback names the exact pinned version; the guard proves the diff is that
   line but cannot prove the real release would be built the same way.
 - Mode a and mode b share a model; their rows are not independent. Base and
   candidate are scored on the same rows, so the gate is a paired comparison on 1579
-  rows with integer counts. A one-row gap is decided by the written rule (a tie
-  passes), not by a significance test.
+  rows with integer counts. A one-row gap is decided by the written rule (an exact
+  tie passes; too loose may rise by at most 15 rows), not by a significance test.
 - The figures are for the one candidate named in the addendum only.
