@@ -1,0 +1,472 @@
+exam #7 scorer · run 2026-11-20T14:52:21.626Z
+rwxmap ref 7dce23e1648bb8a0f00605971e39d6fba7bd8237; N 1579; configs mech, a-base, a-cand, b85-base, b85-cand
+
+== mech ==  model(s): (none)
+join: matched 1579 · unmatched ops 0 · unmatched output 0 · duplicate keys 0
+(shares are: of the group's own rows | of all 1579 rows)
+overall          n 1579 · exact 1333 (84.4% | 84.4%) · loose-1 54 (3.4% | 3.4%) · loose-2 18 (1.1% | 1.1%) · TOO LOOSE 72 (4.6% | 4.6%) · TOO TIGHT 174 (11.0% | 11.0%)
+markers on the 72 too-loose rows: tight 0 · loose 57 · settled 15
+by vendor:
+  harness.io       n  257 · exact 224 (87.2% | 14.2%) · loose-1 8 (3.1% | 0.5%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 8 (3.1% | 0.5%) · TOO TIGHT 25 (9.7% | 1.6%)
+  huggingface.co   n  386 · exact 291 (75.4% | 18.4%) · loose-1 4 (1.0% | 0.3%) · loose-2 14 (3.6% | 0.9%) · TOO LOOSE 18 (4.7% | 1.1%) · TOO TIGHT 77 (19.9% | 4.9%)
+  openziti.io      n  204 · exact 173 (84.8% | 11.0%) · loose-1 20 (9.8% | 1.3%) · loose-2 1 (0.5% | 0.1%) · TOO LOOSE 21 (10.3% | 1.3%) · TOO TIGHT 10 (4.9% | 0.6%)
+  pipedrive.com    n  213 · exact 202 (94.8% | 12.8%) · loose-1 4 (1.9% | 0.3%) · loose-2 2 (0.9% | 0.1%) · TOO LOOSE 6 (2.8% | 0.4%) · TOO TIGHT 5 (2.3% | 0.3%)
+  ringcentral.com  n  347 · exact 303 (87.3% | 19.2%) · loose-1 10 (2.9% | 0.6%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 10 (2.9% | 0.6%) · TOO TIGHT 34 (9.8% | 2.2%)
+  vikunja.io       n  172 · exact 140 (81.4% | 8.9%) · loose-1 8 (4.7% | 0.5%) · loose-2 1 (0.6% | 0.1%) · TOO LOOSE 9 (5.2% | 0.6%) · TOO TIGHT 23 (13.4% | 1.5%)
+by method:
+  DELETE           n  189 · exact 188 (99.5% | 11.9%) · loose-1 0 (0.0% | 0.0%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 0 (0.0% | 0.0%) · TOO TIGHT 1 (0.5% | 0.1%)
+  GET              n  726 · exact 711 (97.9% | 45.0%) · loose-1 0 (0.0% | 0.0%) · loose-2 15 (2.1% | 0.9%) · TOO LOOSE 15 (2.1% | 0.9%) · TOO TIGHT 0 (0.0% | 0.0%)
+  PATCH            n   74 · exact 55 (74.3% | 3.5%) · loose-1 18 (24.3% | 1.1%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 18 (24.3% | 1.1%) · TOO TIGHT 1 (1.4% | 0.1%)
+  POST             n  446 · exact 258 (57.8% | 16.3%) · loose-1 18 (4.0% | 1.1%) · loose-2 3 (0.7% | 0.2%) · TOO LOOSE 21 (4.7% | 1.3%) · TOO TIGHT 167 (37.4% | 10.6%)
+  PUT              n  144 · exact 121 (84.0% | 7.7%) · loose-1 18 (12.5% | 1.1%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 18 (12.5% | 1.1%) · TOO TIGHT 5 (3.5% | 0.3%)
+every too-loose row (72): id | vendor | method | path | truth | predicted | marker
+  ex7-0006 | harness.io | PATCH | /admin/users/{user_uid}/admin | x | w | loose
+  ex7-0010 | harness.io | PATCH | /connectors/{connector_ref} | x | w | loose
+  ex7-0103 | harness.io | PUT | /repos/{repo_ref}/pullreq/{pullreq_number}/automerge | x | w | loose
+  ex7-0127 | harness.io | PUT | /repos/{repo_ref}/pullreq/{pullreq_number}/mergequeue | x | w | loose
+  ex7-0140 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/labels/batch | w | r | loose
+  ex7-0142 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/labels/{label_id}/apply | w | r | loose
+  ex7-0144 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/reviewers/batch | w | r | loose
+  ex7-0146 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/reviewers/{principal_id}/apply | w | r | loose
+  ex7-0285 | huggingface.co | GET | /api/buckets/{namespace}/{repo}/xet-read-token | x | r | settled
+  ex7-0286 | huggingface.co | GET | /api/buckets/{namespace}/{repo}/xet-write-token | x | r | settled
+  ex7-0318 | huggingface.co | GET | /api/containers/{namespace}/{repo}/xet-read-token | x | r | settled
+  ex7-0319 | huggingface.co | GET | /api/containers/{namespace}/{repo}/xet-write-token | x | r | settled
+  ex7-0328 | huggingface.co | GET | /api/datasets/{namespace}/{repo}/jwt | x | r | settled
+  ex7-0353 | huggingface.co | GET | /api/datasets/{namespace}/{repo}/xet-read-token/{rev} | x | r | settled
+  ex7-0354 | huggingface.co | GET | /api/datasets/{namespace}/{repo}/xet-write-token/{rev} | x | r | settled
+  ex7-0370 | huggingface.co | PUT | /api/jobs/{namespace}/{jobId}/expose | x | w | loose
+  ex7-0387 | huggingface.co | GET | /api/models/{namespace}/{repo}/jwt | x | r | settled
+  ex7-0412 | huggingface.co | GET | /api/models/{namespace}/{repo}/xet-read-token/{rev} | x | r | settled
+  ex7-0413 | huggingface.co | GET | /api/models/{namespace}/{repo}/xet-write-token/{rev} | x | r | settled
+  ex7-0443 | huggingface.co | PATCH | /api/organizations/{name}/resource-groups/{resourceGroupId}/users/{username} | x | w | loose
+  ex7-0484 | huggingface.co | PATCH | /api/organizations/{name}/settings/network-security | x | w | loose
+  ex7-0512 | huggingface.co | GET | /api/registry/token | x | r | settled
+  ex7-0561 | huggingface.co | POST | /api/spaces/{namespace}/{repo}/custom-domain | x | w | loose
+  ex7-0565 | huggingface.co | GET | /api/spaces/{namespace}/{repo}/jwt | x | r | settled
+  ex7-0595 | huggingface.co | GET | /api/spaces/{namespace}/{repo}/xet-read-token/{rev} | x | r | settled
+  ex7-0596 | huggingface.co | GET | /api/spaces/{namespace}/{repo}/xet-write-token/{rev} | x | r | settled
+  ex7-0653 | openziti.io | PATCH | /auth-policies/{id} | x | w | loose
+  ex7-0654 | openziti.io | PUT | /auth-policies/{id} | x | w | loose
+  ex7-0661 | openziti.io | PATCH | /authenticators/{id} | x | w | loose
+  ex7-0662 | openziti.io | PUT | /authenticators/{id} | x | w | loose
+  ex7-0669 | openziti.io | PATCH | /cas/{id} | x | w | loose
+  ex7-0670 | openziti.io | PUT | /cas/{id} | x | w | loose
+  ex7-0701 | openziti.io | PATCH | /current-identity/authenticators/{id} | x | w | loose
+  ex7-0702 | openziti.io | PUT | /current-identity/authenticators/{id} | x | w | loose
+  ex7-0712 | openziti.io | POST | /database/check-data-integrity | x | r | loose
+  ex7-0720 | openziti.io | PATCH | /edge-router-policies/{id} | x | w | loose
+  ex7-0721 | openziti.io | PUT | /edge-router-policies/{id} | x | w | loose
+  ex7-0748 | openziti.io | PATCH | /external-jwt-signers/{id} | x | w | loose
+  ex7-0749 | openziti.io | PUT | /external-jwt-signers/{id} | x | w | loose
+  ex7-0785 | openziti.io | PATCH | /posture-checks/{id} | x | w | loose
+  ex7-0786 | openziti.io | PUT | /posture-checks/{id} | x | w | loose
+  ex7-0800 | openziti.io | PATCH | /service-edge-router-policies/{id} | x | w | loose
+  ex7-0801 | openziti.io | PUT | /service-edge-router-policies/{id} | x | w | loose
+  ex7-0808 | openziti.io | PATCH | /service-policies/{id} | x | w | loose
+  ex7-0809 | openziti.io | PUT | /service-policies/{id} | x | w | loose
+  ex7-0839 | openziti.io | PATCH | /terminators/{id} | x | w | loose
+  ex7-0840 | openziti.io | PUT | /terminators/{id} | x | w | loose
+  ex7-0859 | pipedrive.com | POST | /channels | x | w | loose
+  ex7-0930 | pipedrive.com | POST | /legacyTeams/{id}/users | x | w | loose
+  ex7-0950 | pipedrive.com | GET | /oauth/authorize | x | r | settled
+  ex7-0951 | pipedrive.com | POST | /oauth/token | x | r | loose
+  ex7-1049 | pipedrive.com | POST | /users | x | w | loose
+  ex7-1053 | pipedrive.com | PUT | /users/{id} | x | w | loose
+  ex7-1087 | ringcentral.com | POST | /restapi/v1.0/account/{accountId}/call-monitoring-groups/{groupId}/bulk-assign | x | w | loose
+  ex7-1092 | ringcentral.com | POST | /restapi/v1.0/account/{accountId}/call-queues/{groupId}/bulk-assign | x | w | loose
+  ex7-1107 | ringcentral.com | POST | /restapi/v1.0/account/{accountId}/department/bulk-assign | x | w | loose
+  ex7-1175 | ringcentral.com | PUT | /restapi/v1.0/account/{accountId}/extension/{extensionId}/call-queues | x | w | loose
+  ex7-1262 | ringcentral.com | POST | /restapi/v1.0/account/{accountId}/paging-only-groups/{pagingOnlyGroupId}/bulk-assign | x | w | loose
+  ex7-1310 | ringcentral.com | POST | /restapi/v1.0/glip/cards | x | w | loose
+  ex7-1348 | ringcentral.com | POST | /restapi/v1.0/glip/groups/{groupId}/bulk-assign | x | w | loose
+  ex7-1376 | ringcentral.com | POST | /restapi/v1.0/glip/teams/{chatId}/add | x | w | loose
+  ex7-1380 | ringcentral.com | POST | /restapi/v1.0/glip/teams/{chatId}/remove | x | w | loose
+  ex7-1392 | ringcentral.com | PUT | /restapi/v1.0/subscription/{subscriptionId} | x | w | loose
+  ex7-1410 | vikunja.io | PATCH | /admin/projects/{id}/owner | x | w | loose
+  ex7-1414 | vikunja.io | PATCH | /admin/users/{id}/admin | x | w | loose
+  ex7-1415 | vikunja.io | PATCH | /admin/users/{id}/status | x | w | loose
+  ex7-1416 | vikunja.io | POST | /auth/openid/{provider}/callback | x | r | loose
+  ex7-1468 | vikunja.io | PUT | /projects/{id}/teams | x | w | loose
+  ex7-1470 | vikunja.io | PUT | /projects/{id}/users | x | w | loose
+  ex7-1511 | vikunja.io | POST | /tasks/{projecttask}/read | w | r | loose
+  ex7-1537 | vikunja.io | PATCH | /test/{table} | x | w | loose
+  ex7-1563 | vikunja.io | POST | /user/settings/totp/enable | x | w | loose
+
+== a-base ==  model(s): rwxlite-0.3.1+bbe1997d
+join: matched 1579 · unmatched ops 0 · unmatched output 0 · duplicate keys 0
+(shares are: of the group's own rows | of all 1579 rows)
+overall          n 1579 · exact 1431 (90.6% | 90.6%) · loose-1 50 (3.2% | 3.2%) · loose-2 18 (1.1% | 1.1%) · TOO LOOSE 68 (4.3% | 4.3%) · TOO TIGHT 80 (5.1% | 5.1%)
+rwxlite: sent 664 · raised 33 · lowered 123 · kept 435 · undecided (asked, scored x) 73
+markers on the 68 too-loose rows: tight 0 · loose 53 · settled 15
+by vendor:
+  harness.io       n  257 · exact 232 (90.3% | 14.7%) · loose-1 7 (2.7% | 0.4%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 7 (2.7% | 0.4%) · TOO TIGHT 18 (7.0% | 1.1%)
+  huggingface.co   n  386 · exact 341 (88.3% | 21.6%) · loose-1 8 (2.1% | 0.5%) · loose-2 14 (3.6% | 0.9%) · TOO LOOSE 22 (5.7% | 1.4%) · TOO TIGHT 23 (6.0% | 1.5%)
+  openziti.io      n  204 · exact 181 (88.7% | 11.5%) · loose-1 19 (9.3% | 1.2%) · loose-2 1 (0.5% | 0.1%) · TOO LOOSE 20 (9.8% | 1.3%) · TOO TIGHT 3 (1.5% | 0.2%)
+  pipedrive.com    n  213 · exact 201 (94.4% | 12.7%) · loose-1 2 (0.9% | 0.1%) · loose-2 2 (0.9% | 0.1%) · TOO LOOSE 4 (1.9% | 0.3%) · TOO TIGHT 8 (3.8% | 0.5%)
+  ringcentral.com  n  347 · exact 323 (93.1% | 20.5%) · loose-1 9 (2.6% | 0.6%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 9 (2.6% | 0.6%) · TOO TIGHT 15 (4.3% | 0.9%)
+  vikunja.io       n  172 · exact 153 (89.0% | 9.7%) · loose-1 5 (2.9% | 0.3%) · loose-2 1 (0.6% | 0.1%) · TOO LOOSE 6 (3.5% | 0.4%) · TOO TIGHT 13 (7.6% | 0.8%)
+by method:
+  DELETE           n  189 · exact 188 (99.5% | 11.9%) · loose-1 0 (0.0% | 0.0%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 0 (0.0% | 0.0%) · TOO TIGHT 1 (0.5% | 0.1%)
+  GET              n  726 · exact 711 (97.9% | 45.0%) · loose-1 0 (0.0% | 0.0%) · loose-2 15 (2.1% | 0.9%) · TOO LOOSE 15 (2.1% | 0.9%) · TOO TIGHT 0 (0.0% | 0.0%)
+  PATCH            n   74 · exact 59 (79.7% | 3.7%) · loose-1 15 (20.3% | 0.9%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 15 (20.3% | 0.9%) · TOO TIGHT 0 (0.0% | 0.0%)
+  POST             n  446 · exact 349 (78.3% | 22.1%) · loose-1 24 (5.4% | 1.5%) · loose-2 3 (0.7% | 0.2%) · TOO LOOSE 27 (6.1% | 1.7%) · TOO TIGHT 70 (15.7% | 4.4%)
+  PUT              n  144 · exact 124 (86.1% | 7.9%) · loose-1 11 (7.6% | 0.7%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 11 (7.6% | 0.7%) · TOO TIGHT 9 (6.3% | 0.6%)
+every too-loose row (68): id | vendor | method | path | truth | predicted | marker
+  ex7-0010 | harness.io | PATCH | /connectors/{connector_ref} | x | w | loose
+  ex7-0103 | harness.io | PUT | /repos/{repo_ref}/pullreq/{pullreq_number}/automerge | x | w | loose
+  ex7-0127 | harness.io | PUT | /repos/{repo_ref}/pullreq/{pullreq_number}/mergequeue | x | w | loose
+  ex7-0140 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/labels/batch | w | r | loose
+  ex7-0142 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/labels/{label_id}/apply | w | r | loose
+  ex7-0144 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/reviewers/batch | w | r | loose
+  ex7-0146 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/reviewers/{principal_id}/apply | w | r | loose
+  ex7-0282 | huggingface.co | POST | /api/buckets/{namespace}/{repo}/resource-group | x | w | loose
+  ex7-0285 | huggingface.co | GET | /api/buckets/{namespace}/{repo}/xet-read-token | x | r | settled
+  ex7-0286 | huggingface.co | GET | /api/buckets/{namespace}/{repo}/xet-write-token | x | r | settled
+  ex7-0314 | huggingface.co | POST | /api/containers/{namespace}/{repo}/resource-group | x | w | loose
+  ex7-0318 | huggingface.co | GET | /api/containers/{namespace}/{repo}/xet-read-token | x | r | settled
+  ex7-0319 | huggingface.co | GET | /api/containers/{namespace}/{repo}/xet-write-token | x | r | settled
+  ex7-0328 | huggingface.co | GET | /api/datasets/{namespace}/{repo}/jwt | x | r | settled
+  ex7-0353 | huggingface.co | GET | /api/datasets/{namespace}/{repo}/xet-read-token/{rev} | x | r | settled
+  ex7-0354 | huggingface.co | GET | /api/datasets/{namespace}/{repo}/xet-write-token/{rev} | x | r | settled
+  ex7-0387 | huggingface.co | GET | /api/models/{namespace}/{repo}/jwt | x | r | settled
+  ex7-0398 | huggingface.co | POST | /api/models/{namespace}/{repo}/resource-group | x | w | loose
+  ex7-0412 | huggingface.co | GET | /api/models/{namespace}/{repo}/xet-read-token/{rev} | x | r | settled
+  ex7-0413 | huggingface.co | GET | /api/models/{namespace}/{repo}/xet-write-token/{rev} | x | r | settled
+  ex7-0454 | huggingface.co | PATCH | /api/organizations/{name}/scim-provisioning/v2/Users/{userId} | x | w | loose
+  ex7-0470 | huggingface.co | PATCH | /api/organizations/{name}/scim/v2/Users/{userId} | x | w | loose
+  ex7-0484 | huggingface.co | PATCH | /api/organizations/{name}/settings/network-security | x | w | loose
+  ex7-0512 | huggingface.co | GET | /api/registry/token | x | r | settled
+  ex7-0561 | huggingface.co | POST | /api/spaces/{namespace}/{repo}/custom-domain | x | w | loose
+  ex7-0565 | huggingface.co | GET | /api/spaces/{namespace}/{repo}/jwt | x | r | settled
+  ex7-0578 | huggingface.co | POST | /api/spaces/{namespace}/{repo}/resource-group | x | w | loose
+  ex7-0595 | huggingface.co | GET | /api/spaces/{namespace}/{repo}/xet-read-token/{rev} | x | r | settled
+  ex7-0596 | huggingface.co | GET | /api/spaces/{namespace}/{repo}/xet-write-token/{rev} | x | r | settled
+  ex7-0661 | openziti.io | PATCH | /authenticators/{id} | x | w | loose
+  ex7-0662 | openziti.io | PUT | /authenticators/{id} | x | w | loose
+  ex7-0669 | openziti.io | PATCH | /cas/{id} | x | w | loose
+  ex7-0670 | openziti.io | PUT | /cas/{id} | x | w | loose
+  ex7-0701 | openziti.io | PATCH | /current-identity/authenticators/{id} | x | w | loose
+  ex7-0702 | openziti.io | PUT | /current-identity/authenticators/{id} | x | w | loose
+  ex7-0712 | openziti.io | POST | /database/check-data-integrity | x | r | loose
+  ex7-0720 | openziti.io | PATCH | /edge-router-policies/{id} | x | w | loose
+  ex7-0727 | openziti.io | POST | /edge-routers | x | w | loose
+  ex7-0748 | openziti.io | PATCH | /external-jwt-signers/{id} | x | w | loose
+  ex7-0749 | openziti.io | PUT | /external-jwt-signers/{id} | x | w | loose
+  ex7-0785 | openziti.io | PATCH | /posture-checks/{id} | x | w | loose
+  ex7-0786 | openziti.io | PUT | /posture-checks/{id} | x | w | loose
+  ex7-0791 | openziti.io | POST | /routers | x | w | loose
+  ex7-0800 | openziti.io | PATCH | /service-edge-router-policies/{id} | x | w | loose
+  ex7-0808 | openziti.io | PATCH | /service-policies/{id} | x | w | loose
+  ex7-0836 | openziti.io | POST | /terminators | x | w | loose
+  ex7-0839 | openziti.io | PATCH | /terminators/{id} | x | w | loose
+  ex7-0840 | openziti.io | PUT | /terminators/{id} | x | w | loose
+  ex7-0842 | openziti.io | POST | /transit-routers | x | w | loose
+  ex7-0859 | pipedrive.com | POST | /channels | x | w | loose
+  ex7-0950 | pipedrive.com | GET | /oauth/authorize | x | r | settled
+  ex7-0951 | pipedrive.com | POST | /oauth/token | x | r | loose
+  ex7-1053 | pipedrive.com | PUT | /users/{id} | x | w | loose
+  ex7-1087 | ringcentral.com | POST | /restapi/v1.0/account/{accountId}/call-monitoring-groups/{groupId}/bulk-assign | x | w | loose
+  ex7-1147 | ringcentral.com | POST | /restapi/v1.0/account/{accountId}/extension | x | w | loose
+  ex7-1175 | ringcentral.com | PUT | /restapi/v1.0/account/{accountId}/extension/{extensionId}/call-queues | x | w | loose
+  ex7-1310 | ringcentral.com | POST | /restapi/v1.0/glip/cards | x | w | loose
+  ex7-1320 | ringcentral.com | POST | /restapi/v1.0/glip/chats/{chatId}/posts | x | w | loose
+  ex7-1331 | ringcentral.com | POST | /restapi/v1.0/glip/conversations | x | w | loose
+  ex7-1352 | ringcentral.com | POST | /restapi/v1.0/glip/groups/{groupId}/posts | x | w | loose
+  ex7-1364 | ringcentral.com | POST | /restapi/v1.0/glip/posts | x | w | loose
+  ex7-1392 | ringcentral.com | PUT | /restapi/v1.0/subscription/{subscriptionId} | x | w | loose
+  ex7-1415 | vikunja.io | PATCH | /admin/users/{id}/status | x | w | loose
+  ex7-1416 | vikunja.io | POST | /auth/openid/{provider}/callback | x | r | loose
+  ex7-1511 | vikunja.io | POST | /tasks/{projecttask}/read | w | r | loose
+  ex7-1537 | vikunja.io | PATCH | /test/{table} | x | w | loose
+  ex7-1556 | vikunja.io | POST | /user/settings/email | x | w | loose
+  ex7-1562 | vikunja.io | POST | /user/settings/totp/disable | x | w | loose
+
+== a-cand ==  model(s): rwxlite-0.4.0+4608f470
+join: matched 1579 · unmatched ops 0 · unmatched output 0 · duplicate keys 0
+(shares are: of the group's own rows | of all 1579 rows)
+overall          n 1579 · exact 1432 (90.7% | 90.7%) · loose-1 50 (3.2% | 3.2%) · loose-2 16 (1.0% | 1.0%) · TOO LOOSE 66 (4.2% | 4.2%) · TOO TIGHT 81 (5.1% | 5.1%)
+rwxlite: sent 664 · raised 21 · lowered 108 · kept 464 · undecided (asked, scored x) 71
+markers on the 66 too-loose rows: tight 0 · loose 51 · settled 15
+by vendor:
+  harness.io       n  257 · exact 230 (89.5% | 14.6%) · loose-1 9 (3.5% | 0.6%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 9 (3.5% | 0.6%) · TOO TIGHT 18 (7.0% | 1.1%)
+  huggingface.co   n  386 · exact 341 (88.3% | 21.6%) · loose-1 3 (0.8% | 0.2%) · loose-2 14 (3.6% | 0.9%) · TOO LOOSE 17 (4.4% | 1.1%) · TOO TIGHT 28 (7.3% | 1.8%)
+  openziti.io      n  204 · exact 176 (86.3% | 11.1%) · loose-1 24 (11.8% | 1.5%) · loose-2 1 (0.5% | 0.1%) · TOO LOOSE 25 (12.3% | 1.6%) · TOO TIGHT 3 (1.5% | 0.2%)
+  pipedrive.com    n  213 · exact 205 (96.2% | 13.0%) · loose-1 2 (0.9% | 0.1%) · loose-2 1 (0.5% | 0.1%) · TOO LOOSE 3 (1.4% | 0.2%) · TOO TIGHT 5 (2.3% | 0.3%)
+  ringcentral.com  n  347 · exact 324 (93.4% | 20.5%) · loose-1 8 (2.3% | 0.5%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 8 (2.3% | 0.5%) · TOO TIGHT 15 (4.3% | 0.9%)
+  vikunja.io       n  172 · exact 156 (90.7% | 9.9%) · loose-1 4 (2.3% | 0.3%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 4 (2.3% | 0.3%) · TOO TIGHT 12 (7.0% | 0.8%)
+by method:
+  DELETE           n  189 · exact 188 (99.5% | 11.9%) · loose-1 0 (0.0% | 0.0%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 0 (0.0% | 0.0%) · TOO TIGHT 1 (0.5% | 0.1%)
+  GET              n  726 · exact 711 (97.9% | 45.0%) · loose-1 0 (0.0% | 0.0%) · loose-2 15 (2.1% | 0.9%) · TOO LOOSE 15 (2.1% | 0.9%) · TOO TIGHT 0 (0.0% | 0.0%)
+  PATCH            n   74 · exact 58 (78.4% | 3.7%) · loose-1 15 (20.3% | 0.9%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 15 (20.3% | 0.9%) · TOO TIGHT 1 (1.4% | 0.1%)
+  POST             n  446 · exact 355 (79.6% | 22.5%) · loose-1 19 (4.3% | 1.2%) · loose-2 1 (0.2% | 0.1%) · TOO LOOSE 20 (4.5% | 1.3%) · TOO TIGHT 71 (15.9% | 4.5%)
+  PUT              n  144 · exact 120 (83.3% | 7.6%) · loose-1 16 (11.1% | 1.0%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 16 (11.1% | 1.0%) · TOO TIGHT 8 (5.6% | 0.5%)
+every too-loose row (66): id | vendor | method | path | truth | predicted | marker
+  ex7-0006 | harness.io | PATCH | /admin/users/{user_uid}/admin | x | w | loose
+  ex7-0007 | harness.io | POST | /connectors | x | w | loose
+  ex7-0010 | harness.io | PATCH | /connectors/{connector_ref} | x | w | loose
+  ex7-0103 | harness.io | PUT | /repos/{repo_ref}/pullreq/{pullreq_number}/automerge | x | w | loose
+  ex7-0127 | harness.io | PUT | /repos/{repo_ref}/pullreq/{pullreq_number}/mergequeue | x | w | loose
+  ex7-0140 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/labels/batch | w | r | loose
+  ex7-0142 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/labels/{label_id}/apply | w | r | loose
+  ex7-0144 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/reviewers/batch | w | r | loose
+  ex7-0146 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/reviewers/{principal_id}/apply | w | r | loose
+  ex7-0285 | huggingface.co | GET | /api/buckets/{namespace}/{repo}/xet-read-token | x | r | settled
+  ex7-0286 | huggingface.co | GET | /api/buckets/{namespace}/{repo}/xet-write-token | x | r | settled
+  ex7-0318 | huggingface.co | GET | /api/containers/{namespace}/{repo}/xet-read-token | x | r | settled
+  ex7-0319 | huggingface.co | GET | /api/containers/{namespace}/{repo}/xet-write-token | x | r | settled
+  ex7-0328 | huggingface.co | GET | /api/datasets/{namespace}/{repo}/jwt | x | r | settled
+  ex7-0353 | huggingface.co | GET | /api/datasets/{namespace}/{repo}/xet-read-token/{rev} | x | r | settled
+  ex7-0354 | huggingface.co | GET | /api/datasets/{namespace}/{repo}/xet-write-token/{rev} | x | r | settled
+  ex7-0370 | huggingface.co | PUT | /api/jobs/{namespace}/{jobId}/expose | x | w | loose
+  ex7-0387 | huggingface.co | GET | /api/models/{namespace}/{repo}/jwt | x | r | settled
+  ex7-0412 | huggingface.co | GET | /api/models/{namespace}/{repo}/xet-read-token/{rev} | x | r | settled
+  ex7-0413 | huggingface.co | GET | /api/models/{namespace}/{repo}/xet-write-token/{rev} | x | r | settled
+  ex7-0484 | huggingface.co | PATCH | /api/organizations/{name}/settings/network-security | x | w | loose
+  ex7-0512 | huggingface.co | GET | /api/registry/token | x | r | settled
+  ex7-0561 | huggingface.co | POST | /api/spaces/{namespace}/{repo}/custom-domain | x | w | loose
+  ex7-0565 | huggingface.co | GET | /api/spaces/{namespace}/{repo}/jwt | x | r | settled
+  ex7-0595 | huggingface.co | GET | /api/spaces/{namespace}/{repo}/xet-read-token/{rev} | x | r | settled
+  ex7-0596 | huggingface.co | GET | /api/spaces/{namespace}/{repo}/xet-write-token/{rev} | x | r | settled
+  ex7-0653 | openziti.io | PATCH | /auth-policies/{id} | x | w | loose
+  ex7-0654 | openziti.io | PUT | /auth-policies/{id} | x | w | loose
+  ex7-0661 | openziti.io | PATCH | /authenticators/{id} | x | w | loose
+  ex7-0662 | openziti.io | PUT | /authenticators/{id} | x | w | loose
+  ex7-0669 | openziti.io | PATCH | /cas/{id} | x | w | loose
+  ex7-0670 | openziti.io | PUT | /cas/{id} | x | w | loose
+  ex7-0701 | openziti.io | PATCH | /current-identity/authenticators/{id} | x | w | loose
+  ex7-0702 | openziti.io | PUT | /current-identity/authenticators/{id} | x | w | loose
+  ex7-0712 | openziti.io | POST | /database/check-data-integrity | x | r | loose
+  ex7-0720 | openziti.io | PATCH | /edge-router-policies/{id} | x | w | loose
+  ex7-0721 | openziti.io | PUT | /edge-router-policies/{id} | x | w | loose
+  ex7-0727 | openziti.io | POST | /edge-routers | x | w | loose
+  ex7-0748 | openziti.io | PATCH | /external-jwt-signers/{id} | x | w | loose
+  ex7-0749 | openziti.io | PUT | /external-jwt-signers/{id} | x | w | loose
+  ex7-0785 | openziti.io | PATCH | /posture-checks/{id} | x | w | loose
+  ex7-0786 | openziti.io | PUT | /posture-checks/{id} | x | w | loose
+  ex7-0791 | openziti.io | POST | /routers | x | w | loose
+  ex7-0800 | openziti.io | PATCH | /service-edge-router-policies/{id} | x | w | loose
+  ex7-0801 | openziti.io | PUT | /service-edge-router-policies/{id} | x | w | loose
+  ex7-0808 | openziti.io | PATCH | /service-policies/{id} | x | w | loose
+  ex7-0809 | openziti.io | PUT | /service-policies/{id} | x | w | loose
+  ex7-0836 | openziti.io | POST | /terminators | x | w | loose
+  ex7-0839 | openziti.io | PATCH | /terminators/{id} | x | w | loose
+  ex7-0840 | openziti.io | PUT | /terminators/{id} | x | w | loose
+  ex7-0842 | openziti.io | POST | /transit-routers | x | w | loose
+  ex7-0859 | pipedrive.com | POST | /channels | x | w | loose
+  ex7-0950 | pipedrive.com | GET | /oauth/authorize | x | r | settled
+  ex7-1053 | pipedrive.com | PUT | /users/{id} | x | w | loose
+  ex7-1087 | ringcentral.com | POST | /restapi/v1.0/account/{accountId}/call-monitoring-groups/{groupId}/bulk-assign | x | w | loose
+  ex7-1147 | ringcentral.com | POST | /restapi/v1.0/account/{accountId}/extension | x | w | loose
+  ex7-1175 | ringcentral.com | PUT | /restapi/v1.0/account/{accountId}/extension/{extensionId}/call-queues | x | w | loose
+  ex7-1310 | ringcentral.com | POST | /restapi/v1.0/glip/cards | x | w | loose
+  ex7-1320 | ringcentral.com | POST | /restapi/v1.0/glip/chats/{chatId}/posts | x | w | loose
+  ex7-1352 | ringcentral.com | POST | /restapi/v1.0/glip/groups/{groupId}/posts | x | w | loose
+  ex7-1364 | ringcentral.com | POST | /restapi/v1.0/glip/posts | x | w | loose
+  ex7-1392 | ringcentral.com | PUT | /restapi/v1.0/subscription/{subscriptionId} | x | w | loose
+  ex7-1415 | vikunja.io | PATCH | /admin/users/{id}/status | x | w | loose
+  ex7-1511 | vikunja.io | POST | /tasks/{projecttask}/read | w | r | loose
+  ex7-1537 | vikunja.io | PATCH | /test/{table} | x | w | loose
+  ex7-1556 | vikunja.io | POST | /user/settings/email | x | w | loose
+
+== b85-base ==  model(s): rwxlite-0.3.1+bbe1997d
+join: matched 1579 · unmatched ops 0 · unmatched output 0 · duplicate keys 0
+(shares are: of the group's own rows | of all 1579 rows)
+overall          n 1579 · exact 1447 (91.6% | 91.6%) · loose-1 46 (2.9% | 2.9%) · loose-2 8 (0.5% | 0.5%) · TOO LOOSE 54 (3.4% | 3.4%) · TOO TIGHT 78 (4.9% | 4.9%)
+rwxlite: sent 1579 · raised 17 · lowered 143 · kept 1241 · undecided (asked, scored x) 178
+markers on the 54 too-loose rows: tight 0 · loose 49 · settled 5
+by vendor:
+  harness.io       n  257 · exact 228 (88.7% | 14.4%) · loose-1 7 (2.7% | 0.4%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 7 (2.7% | 0.4%) · TOO TIGHT 22 (8.6% | 1.4%)
+  huggingface.co   n  386 · exact 355 (92.0% | 22.5%) · loose-1 11 (2.8% | 0.7%) · loose-2 5 (1.3% | 0.3%) · TOO LOOSE 16 (4.1% | 1.0%) · TOO TIGHT 15 (3.9% | 0.9%)
+  openziti.io      n  204 · exact 185 (90.7% | 11.7%) · loose-1 15 (7.4% | 0.9%) · loose-2 1 (0.5% | 0.1%) · TOO LOOSE 16 (7.8% | 1.0%) · TOO TIGHT 3 (1.5% | 0.2%)
+  pipedrive.com    n  213 · exact 201 (94.4% | 12.7%) · loose-1 1 (0.5% | 0.1%) · loose-2 1 (0.5% | 0.1%) · TOO LOOSE 2 (0.9% | 0.1%) · TOO TIGHT 10 (4.7% | 0.6%)
+  ringcentral.com  n  347 · exact 324 (93.4% | 20.5%) · loose-1 8 (2.3% | 0.5%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 8 (2.3% | 0.5%) · TOO TIGHT 15 (4.3% | 0.9%)
+  vikunja.io       n  172 · exact 154 (89.5% | 9.8%) · loose-1 4 (2.3% | 0.3%) · loose-2 1 (0.6% | 0.1%) · TOO LOOSE 5 (2.9% | 0.3%) · TOO TIGHT 13 (7.6% | 0.8%)
+by method:
+  DELETE           n  189 · exact 188 (99.5% | 11.9%) · loose-1 0 (0.0% | 0.0%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 0 (0.0% | 0.0%) · TOO TIGHT 1 (0.5% | 0.1%)
+  GET              n  726 · exact 717 (98.8% | 45.4%) · loose-1 0 (0.0% | 0.0%) · loose-2 5 (0.7% | 0.3%) · TOO LOOSE 5 (0.7% | 0.3%) · TOO TIGHT 4 (0.6% | 0.3%)
+  PATCH            n   74 · exact 62 (83.8% | 3.9%) · loose-1 12 (16.2% | 0.8%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 12 (16.2% | 0.8%) · TOO TIGHT 0 (0.0% | 0.0%)
+  POST             n  446 · exact 357 (80.0% | 22.6%) · loose-1 27 (6.1% | 1.7%) · loose-2 3 (0.7% | 0.2%) · TOO LOOSE 30 (6.7% | 1.9%) · TOO TIGHT 59 (13.2% | 3.7%)
+  PUT              n  144 · exact 123 (85.4% | 7.8%) · loose-1 7 (4.9% | 0.4%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 7 (4.9% | 0.4%) · TOO TIGHT 14 (9.7% | 0.9%)
+every too-loose row (54): id | vendor | method | path | truth | predicted | marker
+  ex7-0007 | harness.io | POST | /connectors | x | w | loose
+  ex7-0010 | harness.io | PATCH | /connectors/{connector_ref} | x | w | loose
+  ex7-0103 | harness.io | PUT | /repos/{repo_ref}/pullreq/{pullreq_number}/automerge | x | w | loose
+  ex7-0140 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/labels/batch | w | r | loose
+  ex7-0142 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/labels/{label_id}/apply | w | r | loose
+  ex7-0144 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/reviewers/batch | w | r | loose
+  ex7-0146 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/reviewers/{principal_id}/apply | w | r | loose
+  ex7-0267 | huggingface.co | POST | /api/blog/{namespace}/{slug}/resource-group | x | w | loose
+  ex7-0282 | huggingface.co | POST | /api/buckets/{namespace}/{repo}/resource-group | x | w | loose
+  ex7-0285 | huggingface.co | GET | /api/buckets/{namespace}/{repo}/xet-read-token | x | r | settled
+  ex7-0306 | huggingface.co | POST | /api/collections/{namespace}/{slug}/resource-group | x | w | loose
+  ex7-0314 | huggingface.co | POST | /api/containers/{namespace}/{repo}/resource-group | x | w | loose
+  ex7-0318 | huggingface.co | GET | /api/containers/{namespace}/{repo}/xet-read-token | x | r | settled
+  ex7-0340 | huggingface.co | POST | /api/datasets/{namespace}/{repo}/resource-group | x | w | loose
+  ex7-0353 | huggingface.co | GET | /api/datasets/{namespace}/{repo}/xet-read-token/{rev} | x | r | settled
+  ex7-0398 | huggingface.co | POST | /api/models/{namespace}/{repo}/resource-group | x | w | loose
+  ex7-0412 | huggingface.co | GET | /api/models/{namespace}/{repo}/xet-read-token/{rev} | x | r | settled
+  ex7-0454 | huggingface.co | PATCH | /api/organizations/{name}/scim-provisioning/v2/Users/{userId} | x | w | loose
+  ex7-0470 | huggingface.co | PATCH | /api/organizations/{name}/scim/v2/Users/{userId} | x | w | loose
+  ex7-0484 | huggingface.co | PATCH | /api/organizations/{name}/settings/network-security | x | w | loose
+  ex7-0561 | huggingface.co | POST | /api/spaces/{namespace}/{repo}/custom-domain | x | w | loose
+  ex7-0578 | huggingface.co | POST | /api/spaces/{namespace}/{repo}/resource-group | x | w | loose
+  ex7-0595 | huggingface.co | GET | /api/spaces/{namespace}/{repo}/xet-read-token/{rev} | x | r | settled
+  ex7-0661 | openziti.io | PATCH | /authenticators/{id} | x | w | loose
+  ex7-0662 | openziti.io | PUT | /authenticators/{id} | x | w | loose
+  ex7-0669 | openziti.io | PATCH | /cas/{id} | x | w | loose
+  ex7-0670 | openziti.io | PUT | /cas/{id} | x | w | loose
+  ex7-0701 | openziti.io | PATCH | /current-identity/authenticators/{id} | x | w | loose
+  ex7-0712 | openziti.io | POST | /database/check-data-integrity | x | r | loose
+  ex7-0727 | openziti.io | POST | /edge-routers | x | w | loose
+  ex7-0748 | openziti.io | PATCH | /external-jwt-signers/{id} | x | w | loose
+  ex7-0785 | openziti.io | PATCH | /posture-checks/{id} | x | w | loose
+  ex7-0786 | openziti.io | PUT | /posture-checks/{id} | x | w | loose
+  ex7-0791 | openziti.io | POST | /routers | x | w | loose
+  ex7-0808 | openziti.io | PATCH | /service-policies/{id} | x | w | loose
+  ex7-0836 | openziti.io | POST | /terminators | x | w | loose
+  ex7-0839 | openziti.io | PATCH | /terminators/{id} | x | w | loose
+  ex7-0840 | openziti.io | PUT | /terminators/{id} | x | w | loose
+  ex7-0842 | openziti.io | POST | /transit-routers | x | w | loose
+  ex7-0951 | pipedrive.com | POST | /oauth/token | x | r | loose
+  ex7-1053 | pipedrive.com | PUT | /users/{id} | x | w | loose
+  ex7-1087 | ringcentral.com | POST | /restapi/v1.0/account/{accountId}/call-monitoring-groups/{groupId}/bulk-assign | x | w | loose
+  ex7-1147 | ringcentral.com | POST | /restapi/v1.0/account/{accountId}/extension | x | w | loose
+  ex7-1175 | ringcentral.com | PUT | /restapi/v1.0/account/{accountId}/extension/{extensionId}/call-queues | x | w | loose
+  ex7-1310 | ringcentral.com | POST | /restapi/v1.0/glip/cards | x | w | loose
+  ex7-1320 | ringcentral.com | POST | /restapi/v1.0/glip/chats/{chatId}/posts | x | w | loose
+  ex7-1331 | ringcentral.com | POST | /restapi/v1.0/glip/conversations | x | w | loose
+  ex7-1352 | ringcentral.com | POST | /restapi/v1.0/glip/groups/{groupId}/posts | x | w | loose
+  ex7-1364 | ringcentral.com | POST | /restapi/v1.0/glip/posts | x | w | loose
+  ex7-1415 | vikunja.io | PATCH | /admin/users/{id}/status | x | w | loose
+  ex7-1416 | vikunja.io | POST | /auth/openid/{provider}/callback | x | r | loose
+  ex7-1511 | vikunja.io | POST | /tasks/{projecttask}/read | w | r | loose
+  ex7-1556 | vikunja.io | POST | /user/settings/email | x | w | loose
+  ex7-1562 | vikunja.io | POST | /user/settings/totp/disable | x | w | loose
+
+== b85-cand ==  model(s): rwxlite-0.4.0+4608f470
+join: matched 1579 · unmatched ops 0 · unmatched output 0 · duplicate keys 0
+(shares are: of the group's own rows | of all 1579 rows)
+overall          n 1579 · exact 1449 (91.8% | 91.8%) · loose-1 38 (2.4% | 2.4%) · loose-2 1 (0.1% | 0.1%) · TOO LOOSE 39 (2.5% | 2.5%) · TOO TIGHT 91 (5.8% | 5.8%)
+rwxlite: sent 1579 · raised 17 · lowered 118 · kept 1280 · undecided (asked, scored x) 164
+markers on the 39 too-loose rows: tight 0 · loose 39 · settled 0
+by vendor:
+  harness.io       n  257 · exact 231 (89.9% | 14.6%) · loose-1 7 (2.7% | 0.4%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 7 (2.7% | 0.4%) · TOO TIGHT 19 (7.4% | 1.2%)
+  huggingface.co   n  386 · exact 358 (92.7% | 22.7%) · loose-1 2 (0.5% | 0.1%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 2 (0.5% | 0.1%) · TOO TIGHT 26 (6.7% | 1.6%)
+  openziti.io      n  204 · exact 179 (87.7% | 11.3%) · loose-1 21 (10.3% | 1.3%) · loose-2 1 (0.5% | 0.1%) · TOO LOOSE 22 (10.8% | 1.4%) · TOO TIGHT 3 (1.5% | 0.2%)
+  pipedrive.com    n  213 · exact 206 (96.7% | 13.0%) · loose-1 1 (0.5% | 0.1%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 1 (0.5% | 0.1%) · TOO TIGHT 6 (2.8% | 0.4%)
+  ringcentral.com  n  347 · exact 323 (93.1% | 20.5%) · loose-1 4 (1.2% | 0.3%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 4 (1.2% | 0.3%) · TOO TIGHT 20 (5.8% | 1.3%)
+  vikunja.io       n  172 · exact 152 (88.4% | 9.6%) · loose-1 3 (1.7% | 0.2%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 3 (1.7% | 0.2%) · TOO TIGHT 17 (9.9% | 1.1%)
+by method:
+  DELETE           n  189 · exact 188 (99.5% | 11.9%) · loose-1 0 (0.0% | 0.0%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 0 (0.0% | 0.0%) · TOO TIGHT 1 (0.5% | 0.1%)
+  GET              n  726 · exact 720 (99.2% | 45.6%) · loose-1 0 (0.0% | 0.0%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 0 (0.0% | 0.0%) · TOO TIGHT 6 (0.8% | 0.4%)
+  PATCH            n   74 · exact 59 (79.7% | 3.7%) · loose-1 13 (17.6% | 0.8%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 13 (17.6% | 0.8%) · TOO TIGHT 2 (2.7% | 0.1%)
+  POST             n  446 · exact 363 (81.4% | 23.0%) · loose-1 16 (3.6% | 1.0%) · loose-2 1 (0.2% | 0.1%) · TOO LOOSE 17 (3.8% | 1.1%) · TOO TIGHT 66 (14.8% | 4.2%)
+  PUT              n  144 · exact 119 (82.6% | 7.5%) · loose-1 9 (6.3% | 0.6%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 9 (6.3% | 0.6%) · TOO TIGHT 16 (11.1% | 1.0%)
+every too-loose row (39): id | vendor | method | path | truth | predicted | marker
+  ex7-0007 | harness.io | POST | /connectors | x | w | loose
+  ex7-0010 | harness.io | PATCH | /connectors/{connector_ref} | x | w | loose
+  ex7-0103 | harness.io | PUT | /repos/{repo_ref}/pullreq/{pullreq_number}/automerge | x | w | loose
+  ex7-0140 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/labels/batch | w | r | loose
+  ex7-0142 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/labels/{label_id}/apply | w | r | loose
+  ex7-0144 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/reviewers/batch | w | r | loose
+  ex7-0146 | harness.io | POST | /repos/{repo_ref}/pullreq/{pullreq_number}/suggestions/reviewers/{principal_id}/apply | w | r | loose
+  ex7-0368 | huggingface.co | POST | /api/jobs/{namespace}/{jobId}/duplicate | x | w | loose
+  ex7-0561 | huggingface.co | POST | /api/spaces/{namespace}/{repo}/custom-domain | x | w | loose
+  ex7-0653 | openziti.io | PATCH | /auth-policies/{id} | x | w | loose
+  ex7-0661 | openziti.io | PATCH | /authenticators/{id} | x | w | loose
+  ex7-0662 | openziti.io | PUT | /authenticators/{id} | x | w | loose
+  ex7-0669 | openziti.io | PATCH | /cas/{id} | x | w | loose
+  ex7-0670 | openziti.io | PUT | /cas/{id} | x | w | loose
+  ex7-0701 | openziti.io | PATCH | /current-identity/authenticators/{id} | x | w | loose
+  ex7-0702 | openziti.io | PUT | /current-identity/authenticators/{id} | x | w | loose
+  ex7-0712 | openziti.io | POST | /database/check-data-integrity | x | r | loose
+  ex7-0720 | openziti.io | PATCH | /edge-router-policies/{id} | x | w | loose
+  ex7-0727 | openziti.io | POST | /edge-routers | x | w | loose
+  ex7-0748 | openziti.io | PATCH | /external-jwt-signers/{id} | x | w | loose
+  ex7-0785 | openziti.io | PATCH | /posture-checks/{id} | x | w | loose
+  ex7-0786 | openziti.io | PUT | /posture-checks/{id} | x | w | loose
+  ex7-0791 | openziti.io | POST | /routers | x | w | loose
+  ex7-0800 | openziti.io | PATCH | /service-edge-router-policies/{id} | x | w | loose
+  ex7-0801 | openziti.io | PUT | /service-edge-router-policies/{id} | x | w | loose
+  ex7-0808 | openziti.io | PATCH | /service-policies/{id} | x | w | loose
+  ex7-0809 | openziti.io | PUT | /service-policies/{id} | x | w | loose
+  ex7-0836 | openziti.io | POST | /terminators | x | w | loose
+  ex7-0839 | openziti.io | PATCH | /terminators/{id} | x | w | loose
+  ex7-0840 | openziti.io | PUT | /terminators/{id} | x | w | loose
+  ex7-0842 | openziti.io | POST | /transit-routers | x | w | loose
+  ex7-1053 | pipedrive.com | PUT | /users/{id} | x | w | loose
+  ex7-1147 | ringcentral.com | POST | /restapi/v1.0/account/{accountId}/extension | x | w | loose
+  ex7-1320 | ringcentral.com | POST | /restapi/v1.0/glip/chats/{chatId}/posts | x | w | loose
+  ex7-1352 | ringcentral.com | POST | /restapi/v1.0/glip/groups/{groupId}/posts | x | w | loose
+  ex7-1364 | ringcentral.com | POST | /restapi/v1.0/glip/posts | x | w | loose
+  ex7-1415 | vikunja.io | PATCH | /admin/users/{id}/status | x | w | loose
+  ex7-1537 | vikunja.io | PATCH | /test/{table} | x | w | loose
+  ex7-1556 | vikunja.io | POST | /user/settings/email | x | w | loose
+
+== D142 gate (user ruling 2026-11-20: exact no fewer, too loose at most +1.0 point = +15 rows of 1579) ==
+a-cand (GATE) vs a-base: too loose 66 vs 68 (-2) -> OK (need <= +15); exact 1432 vs 1431 (+1) -> OK (need >=)  => GO: round 15 may replace 0.3.1
+  beside the gate, not part of it: too tight 81 vs 80 (+1), of 1579
+
+== D133 mode a bar vs mech (reported only, for both models; it is not the D142 gate) ==
+mode a a-base: too loose 68 vs mech 72 -> OK; exact 1431 (90.6%) vs mech 1333 (84.4%), need >= mech + 79 = 1412 -> OK  => PASS
+mode a a-cand: too loose 66 vs mech 72 -> OK; exact 1432 (90.7%) vs mech 1333 (84.4%), need >= mech + 79 = 1412 -> OK  => PASS
+
+== D140 mode b at confidence 85 (no bar, reported) ==
+mode b b85-base: exact 1447 (91.6%), too loose 54 (loose-1 46, loose-2 8; 3.4%), too tight 78 (4.9%), asked 178 (11.3%)
+mode b b85-cand: exact 1449 (91.8%), too loose 39 (loose-1 38, loose-2 1; 2.5%), too tight 91 (5.8%), asked 164 (10.4%)
+
+rows where a-base and a-cand differ (53): id | vendor | method | path | truth | base->cand | base result -> cand result
+  ex7-0006 | harness.io | PATCH | /admin/users/{user_uid}/admin | x | x->w | exact -> loose-1
+  ex7-0007 | harness.io | POST | /connectors | x | x->w | exact -> loose-1
+  ex7-0013 | harness.io | POST | /gitspaces/lookup-repo | r | r->x | exact -> tight
+  ex7-0205 | harness.io | POST | /spaces/{space_ref}/labels/{key}/values | w | x->w | tight -> exact
+  ex7-0264 | huggingface.co | POST | /api/blog/{namespace}/{slug}/comment/{commentId}/reaction | w | x->w | tight -> exact
+  ex7-0271 | huggingface.co | POST | /api/blog/{slug}/comment/{commentId}/reaction | w | x->w | tight -> exact
+  ex7-0282 | huggingface.co | POST | /api/buckets/{namespace}/{repo}/resource-group | x | w->x | loose-1 -> exact
+  ex7-0310 | huggingface.co | POST | /api/containers/{namespace}/{repo} | w | x->w | tight -> exact
+  ex7-0314 | huggingface.co | POST | /api/containers/{namespace}/{repo}/resource-group | x | w->x | loose-1 -> exact
+  ex7-0324 | huggingface.co | POST | /api/datasets/{namespace}/{repo}/branch/{rev} | w | x->w | tight -> exact
+  ex7-0337 | huggingface.co | POST | /api/datasets/{namespace}/{repo}/preupload/{rev} | r | r->x | exact -> tight
+  ex7-0358 | huggingface.co | POST | /api/inference-endpoints/{namespace}/auth-check/{perms} | r | r->x | exact -> tight
+  ex7-0359 | huggingface.co | POST | /api/inference-endpoints/{namespace}/{endpoint}/auth-check/{perms} | r | r->x | exact -> tight
+  ex7-0363 | huggingface.co | POST | /api/jobs/{namespace}/auth-check/{perms} | r | r->x | exact -> tight
+  ex7-0366 | huggingface.co | POST | /api/jobs/{namespace}/{jobId}/auth-check/{perms} | r | r->x | exact -> tight
+  ex7-0370 | huggingface.co | PUT | /api/jobs/{namespace}/{jobId}/expose | x | x->w | exact -> loose-1
+  ex7-0383 | huggingface.co | POST | /api/models/{namespace}/{repo}/branch/{rev} | w | x->w | tight -> exact
+  ex7-0395 | huggingface.co | POST | /api/models/{namespace}/{repo}/preupload/{rev} | r | r->x | exact -> tight
+  ex7-0398 | huggingface.co | POST | /api/models/{namespace}/{repo}/resource-group | x | w->x | loose-1 -> exact
+  ex7-0445 | huggingface.co | POST | /api/organizations/{name}/scim-provisioning/v2/Groups | w | w->x | exact -> tight
+  ex7-0449 | huggingface.co | PUT | /api/organizations/{name}/scim-provisioning/v2/Groups/{groupId} | w | w->x | exact -> tight
+  ex7-0454 | huggingface.co | PATCH | /api/organizations/{name}/scim-provisioning/v2/Users/{userId} | x | w->x | loose-1 -> exact
+  ex7-0457 | huggingface.co | POST | /api/organizations/{name}/scim/v2/Groups | w | w->x | exact -> tight
+  ex7-0461 | huggingface.co | PUT | /api/organizations/{name}/scim/v2/Groups/{groupId} | w | w->x | exact -> tight
+  ex7-0470 | huggingface.co | PATCH | /api/organizations/{name}/scim/v2/Users/{userId} | x | w->x | loose-1 -> exact
+  ex7-0497 | huggingface.co | POST | /api/papers/{paperId}/comment/{commentId}/reaction | w | x->w | tight -> exact
+  ex7-0575 | huggingface.co | POST | /api/spaces/{namespace}/{repo}/preupload/{rev} | r | r->x | exact -> tight
+  ex7-0578 | huggingface.co | POST | /api/spaces/{namespace}/{repo}/resource-group | x | w->x | loose-1 -> exact
+  ex7-0653 | openziti.io | PATCH | /auth-policies/{id} | x | x->w | exact -> loose-1
+  ex7-0654 | openziti.io | PUT | /auth-policies/{id} | x | x->w | exact -> loose-1
+  ex7-0666 | openziti.io | POST | /cas | w | w->x | exact -> tight
+  ex7-0721 | openziti.io | PUT | /edge-router-policies/{id} | x | x->w | exact -> loose-1
+  ex7-0760 | openziti.io | POST | /identities/{id}/enable | w | x->w | tight -> exact
+  ex7-0801 | openziti.io | PUT | /service-edge-router-policies/{id} | x | x->w | exact -> loose-1
+  ex7-0809 | openziti.io | PUT | /service-policies/{id} | x | x->w | exact -> loose-1
+  ex7-0880 | pipedrive.com | POST | /deals/{id}/followers | w | x->w | tight -> exact
+  ex7-0951 | pipedrive.com | POST | /oauth/token | x | r->x | loose-2 -> exact
+  ex7-0986 | pipedrive.com | POST | /persons/{id}/followers | w | x->w | tight -> exact
+  ex7-1006 | pipedrive.com | POST | /products/{id}/followers | w | x->w | tight -> exact
+  ex7-1084 | ringcentral.com | POST | /restapi/v1.0/account/{accountId}/call-monitoring-groups | w | w->x | exact -> tight
+  ex7-1118 | ringcentral.com | POST | /restapi/v1.0/account/{accountId}/emergency-address-auto-update/networks | w | x->w | tight -> exact
+  ex7-1140 | ringcentral.com | PUT | /restapi/v1.0/account/{accountId}/emergency-address-auto-update/wireless-points/{pointId} | w | x->w | tight -> exact
+  ex7-1293 | ringcentral.com | POST | /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/unhold | w | w->x | exact -> tight
+  ex7-1331 | ringcentral.com | POST | /restapi/v1.0/glip/conversations | x | w->x | loose-1 -> exact
+  ex7-1377 | ringcentral.com | POST | /restapi/v1.0/glip/teams/{chatId}/archive | w | x->w | tight -> exact
+  ex7-1405 | ringcentral.com | PATCH | /scim/v2/Users/{id} | w | w->x | exact -> tight
+  ex7-1416 | vikunja.io | POST | /auth/openid/{provider}/callback | x | r->x | loose-2 -> exact
+  ex7-1452 | vikunja.io | POST | /notifications | w | x->w | tight -> exact
+  ex7-1478 | vikunja.io | PUT | /projects/{projectID}/duplicate | w | x->w | tight -> exact
+  ex7-1500 | vikunja.io | PUT | /subscriptions/{entity}/{entityID} | w | x->w | tight -> exact
+  ex7-1514 | vikunja.io | POST | /tasks/{taskID}/assignees/bulk | w | w->x | exact -> tight
+  ex7-1554 | vikunja.io | POST | /user/settings/avatar | w | w->x | exact -> tight
+  ex7-1562 | vikunja.io | POST | /user/settings/totp/disable | x | w->x | loose-1 -> exact
