@@ -5,11 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.12.0] - 2026-11-20
 
 ### Changed
 
-- Mode b (`--engine rwxlite`) default `--confidence` is 85, was 95 (D140).
+- Mode b (`--engine rwxlite`) default `--confidence` is 85, was 95 (D140, user ruling 2026-11-09). `--help` says 85. On exam #6, mode b at 85 was 1424 exact / 19 too loose / 145 too tight (95: 1288 / 13 / 287).
+- **rwxlite is pinned to model release v0.4.0 (D142, GO on exam #7).** `RWXLITE_TAG` is `v0.4.0`; the offline cache fallback and the accepted `rwxlite` npm package range (now 0.4.x, install `rwxlite@0.4`) follow from it. A 0.3.x package is refused (rwxlite off, mechanical, with the reason printed). `LOWER_MIN_P` stays 0.90: exam #7 measured 0.4.0 at that cut. On exam #7 (1579 operations: ringcentral, openziti, gitness, huggingface, pipedrive, vikunja; scored once on 2026-11-20 through the real CLI, burned), exact / too loose / too tight: mode a with 0.4.0 1432 / 66 / 81 (0.3.1: 1431 / 68 / 80); mode b at 85 with 0.4.0 1449 / 39 / 91 (0.3.1: 1447 / 54 / 78); mechanical 1333 / 72 / 174. The D142 gate (exact no lower, too loose at most 15 rows more) passed. Run through the npm install of rwxlite 0.4.0 with an empty cache, the same 1579 rows came out with 0 differences from the scored rows. 15 of mode a's 66 too-loose rows are settled GET calls that hand out tokens or authorization (e.g. huggingface xet-read-token); a GET never reaches the model.
+- **README "How good it is" quotes exam #7** for modes a, b at 85 and mechanical, and notes the 15 settled GET token/authorization leaks. Mode c keeps its exam #3 numbers.
+- **Dev only:** `npm test` now also runs the exam #7 scorer and labelling tests (666 tests); the exam #7 record is in `data/exam7-2026-11-19/`, with the shortlist specs gzipped.
 
 ## [0.11.1] - 2026-11-09
 
