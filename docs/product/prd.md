@@ -1097,7 +1097,7 @@ decided; everything marked "proposal" or "open" is not decided.
   fly, and emits WebMCP, MCP hints and the other carriers. rwxlite is
   only a classifier; it never reads a spec or an API and only returns p.
 - **CLI names.** `rwxmap spec.json` is mode a. `--engine rwxlite
-  --confidence <0-99>` is mode b (default 85 from the next release, D140; 95 in 0.11.1 as
+  --confidence <0-99>` is mode b (default 85, D140, from 0.12.0; was 95 in 0.11.1 as
   published). `--engine jev` is mode c
   and needs the key. `--engine mechanical` is no model.
   `--confidence` is valid only with `--engine rwxlite`; elsewhere it
