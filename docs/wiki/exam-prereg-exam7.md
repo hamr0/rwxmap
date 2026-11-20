@@ -125,11 +125,11 @@ Leakage checks (does round 15 hold these vendors?).
 
 ### CANDIDATE: the model rwxlite enters
 
-**CANDIDATE ADDENDUM: PENDING.** The candidate is rwxlite round 15 (r15),
+**CANDIDATE ADDENDUM: filled 2026-11-20.** The candidate is rwxlite round 15 (r15),
 entered by rwxlite. The candidate is the round 15 student distilled from the new
 teacher. On 2026-11-20 rwxlite's user waived its own val guards (teacher too loose
 115 vs 104, student 120 vs 104), recorded in rwxlite's prereg; these are rwxlite's
-figures, not measured here. Every value below is PENDING. This section is filled in, and
+figures, not measured here. Values were sent by rwxlite on 2026-11-20 and checked by the orchestrator against the file bytes and the rwxlite commit before this commit. This section is filled in, and
 committed, BEFORE the truth sha256 is shared with rwxlite and before any scoring.
 The scorer refuses to score any `*-cand` config unless every value below is given
 on its command line, and checks each against the files (a model string must equal
@@ -140,14 +140,16 @@ refuses if any field says PENDING or any value differs from the command line.
 
 | field | value |
 |---|---|
-| rwxlite package version | PENDING |
-| rwxlite package ref (commit in the rwxlite repo) | PENDING |
-| rwxlite tag / version (the tag rwxmap would pin) | PENDING |
-| model string (fp32) | PENDING |
-| model-fp32.onnx sha256 | PENDING |
-| manifest-exact.json sha256 (fp32) | PENDING |
-| vocab.txt sha256 | PENDING |
-| rwxlite prereg commit (rwxlite repo) | PENDING |
+| rwxlite package version | 0.4.0 |
+| rwxlite package ref (commit in the rwxlite repo) | 088bec1d9c33efac58929806f8858f4d00f62909 |
+| rwxlite tag / version (the tag rwxmap would pin) | v0.4.0 |
+| model string (fp32) | rwxlite-0.4.0+4608f470 |
+| model-fp32.onnx sha256 | 4608f4705d652de65adde722dc14868ef2f0898d36f84d18c88524e07ab0bc19 |
+| manifest-exact.json sha256 (fp32) | 5b3e5b876ea0eda3416ae2115404cae13dd3e699bf4f446e07adb7540771d0f8 |
+| vocab.txt sha256 | 07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3 |
+| rwxlite prereg commit (rwxlite repo) | 088bec1d9c33efac58929806f8858f4d00f62909 |
+
+Model dir: /home/hamr/PycharmProjects/rwxlite/data/m1-r15 (manifest-exact.json, model-fp32.onnx, vocab.txt). The v0.4.0 tag and release do not exist; the scorer loads the package by git archive of the commit above and the model from this dir, with GitHub blocked.
 
 Only fp32 is scored (rwxmap's default model). The int8 per-channel model
 (`--model small`) is not part of this exam, for either the baseline or the candidate.
