@@ -1021,7 +1021,7 @@ decided; everything marked "proposal" or "open" is not decided.
     12 vendors), 85 gives 2693 exact (88.8%), 52 too loose (1.7%), 286
     too tight (9.4%) and 377 asks (12.4%), against 95's 2496 / 29 / 506
     and 735 asks; no vendor leaks more than mechanical. 90 (cautious)
-    and 70 (fewest asks) stay documented. Exam #7 scores it.
+    and 70 (fewest asks) stay documented. Exam #7 (2026-11-20) measured it with 0.3.1: b85-base 1447 exact / 54 too loose (46 loose-1, 8 loose-2) / 78 too tight, asked 178 of 1579; with 0.4.0, b85-cand 1449 / 39 (38 loose-1, 1 loose-2) / 91, asked 164. No bar; the 85 default stands.
   - **c: mechanical -> Jev (paid, BYOK).** Same flow and scope as mode
     a, with Jev deciding instead of rwxlite. Undecided means x plus
     review. Jev's cut-offs stay as measured (tiers, separate questions,
@@ -1300,14 +1300,16 @@ ops, exact / too loose / too tight: 1269 / 40 (38 loose-1, 2 loose-2) /
 scored 0.2.0 at 0.97 (1272 / 94 / 77) too loose falls from 94 to 40 and too
 tight rises from 77 to 134 (exam #5, where the 0.90 cut was tuned).
 
-Current number (exam #6, scored once 2026-11-08 through the npm install,
-rwxmap 0.11.0 + rwxlite 0.3.1, 1588 ops, 5 unseen APIs: grafana, nocodb,
-radarr, cloudsmith, invoiceninja; two Sonnet labellers agreed on 1564 rows,
-the user ruled 24): mode a 1434 exact (90.3%) / 35 too loose (2.2%) / 119
-too tight (7.5%); mechanical 1305 (82.2%) / 43 (2.7%) / 240 (15.1%); mode b
-at 95 1288 (81.1%) / 13 (0.8%) / 287 (18.1%). The D133 mode a bar passes
-both halves (35 <= 43; 1434 >= 1385). The 0.90 cut held on unseen vendors.
-GET stays as is (user ruling 2026-11-08), see learnings.
+Current number (exam #7, scored once 2026-11-20 through the real CLI at
+rwxmap 7dce23e, 1579 ops, 6 unseen APIs: huggingface, openziti,
+pipedrive, ringcentral, vikunja, gitness; two labellers, Sonnet and Opus,
+agreed on 1513 rows, the user ruled 66): mode a with rwxlite 0.3.1 as
+shipped 1431 exact (90.6%) / 68 too loose (4.3%; 50 loose-1, 18 loose-2) /
+80 too tight (5.1%); mechanical 1333 (84.4%) / 72 (4.6%; 54 loose-1, 18
+loose-2) / 174 (11.0%). The D133 mode a bar passes both halves (68 <= 72;
+1431 >= 1412). 15 of the 18 loose-2 rows are settled GET rows the model
+never sees. Exam #6 (1588 ops, mode a 1434 / 35 / 119) and exam #5 are
+in learnings. GET stays as is (user ruling 2026-11-08), see learnings.
 
 D141 (user ruling 2026-11-19, brief only, not built): five places where
 BRIEF-v4 was ambiguous, surfaced by rwxlite round 15 review. One letter per
@@ -1335,12 +1337,12 @@ loose is accepted as a trade.
 Next, in order:
 
 1. D140 built 2026-11-19 (mode b default 85; commit 96ebb46; 617/617 tests, typecheck, conformance 6/6).
-2. Exam #7 rwxmap ref frozen 2026-11-19 at 96ebb46 (mechanical identical to 1c25be1, plus D140); nothing under src/ changes until exam #7 is scored. Sent to rwxlite, which trains round 15 on the lean at that ref (lean equals 1c25be1, 0 diffs on 106,848 ids).
+2. Exam #7 rwxmap ref frozen 2026-11-19 at 96ebb46 (mechanical identical to 1c25be1, plus D140); nothing under src/ changed until exam #7 was scored (done 2026-11-20). Sent to rwxlite, which trains round 15 on the lean at that ref (lean equals 1c25be1, 0 diffs on 106,848 ids).
 3. Exam #7: vendors frozen 2026-11-18 (ringcentral, openziti, gitness,
    huggingface, pipedrive, vikunja; six more in reserve;
    poc/exam7-shortlist/picked.tsv), kept out of rwxlite round 15 (copy check
    poc/exam7-shortlist/r15-check, 319 specs dropped). Specs are fetched and
-   frozen at exam build. Inputs are in data/exam7-2026-11-19/ (1579 operations, from the shortlist bytes fetched 2026-11-18, sha256-checked). Labelled blind (A = Sonnet, B = Opus; BRIEF-v4 plus the D141 addendum; 12 files validated). 66 of 1579 operations were disputed and the user ruled all 66 on 2026-11-19 (45 x, 21 w). Truth is built and held locally until the candidate addendum is committed. Candidate: rwxlite 0.4.0 (round 15 student from the new teacher; rwxlite's user waived its val guards: teacher too loose 115 vs 104, student 120 vs 104, rwxlite's figures). Gate: D142. Scored once through the real CLI: the D140 build (a-base) and the candidate (a-cand). Pre-registration docs/wiki/exam-prereg-exam7.md; scorer data/exam7-2026-11-19/score/.
+   frozen at exam build. Inputs are in data/exam7-2026-11-19/ (1579 operations, from the shortlist bytes fetched 2026-11-18, sha256-checked). Labelled blind (A = Sonnet, B = Opus; BRIEF-v4 plus the D141 addendum; 12 files validated). 66 of 1579 operations were disputed and the user ruled all 66 on 2026-11-19 (45 x, 21 w). Candidate: rwxlite 0.4.0 (round 15; rwxlite's user waived its val guards: teacher too loose 115 vs 104, student 120 vs 104, rwxlite's figures). Scored once 2026-11-20 through the real CLI at rwxmap 7dce23e: a-base (0.3.1 as shipped) 1431 exact / 68 too loose (50 loose-1, 18 loose-2) / 80 too tight; a-cand (0.4.0) 1432 / 66 (50 loose-1, 16 loose-2) / 81, all of 1579. D142 verdict GO (too loose 66 vs 68 with a limit of +15; exact 1432 vs 1431; too tight 81 vs 80, beside the gate); it would also pass D135 same-or-better. D133 bar passes for both models. Exam #7 is BURNED for both sides. Next: (1) rwxlite releases 0.4.0 (its push, tag and publish wait for its user's approval); (2) an rwxmap pin pass to v0.4.0 (RWXLITE_TAG, cache fallback, accepted range 0.4.x), verified from a clean install; (3) a release with docs/product/release-checklist.md run item by item. Pre-registration and results docs/wiki/exam-prereg-exam7.md; scorer and rows data/exam7-2026-11-19/score/.
 4. D141 in mechanical: deferred to exam #8 (user ruling 2026-11-19). A step 3
    x word list for the D141 families, matched at lead position. Bar, set
    before building: tighten-only adoption per D100 (more right than wrong,

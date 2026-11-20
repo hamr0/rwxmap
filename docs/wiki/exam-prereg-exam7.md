@@ -1,9 +1,6 @@
-# Pre-registration (DRAFT): shared clean exam #7, rwxmap side (D142 next-model ship gate, round 15)
+# Pre-registration: shared clean exam #7, rwxmap side (D142 next-model ship gate, round 15)
 
-**Status: DRAFT, written 2026-11-19. Not frozen. Not scored.** It freezes when
-this file is committed with the scorer (`data/exam7-2026-11-19/score/`, not yet
-written), the CANDIDATE ADDENDUM below is filled in and committed, the truth
-sha256 is filled in, and rwxlite has committed its side.
+**Status: SCORED and BURNED (2026-11-20).** See "Results and findings" at the end.
 
 Inputs are frozen in commit a1c31bf. No classifier has been run on any exam #7
 row, with one exception: the mechanical lean (below), which is mechanical's own
@@ -323,3 +320,126 @@ needs a new exam.
   rows with integer counts. A one-row gap is decided by the written rule (an exact
   tie passes; too loose may rise by at most 15 rows), not by a significance test.
 - The figures are for the one candidate named in the addendum only.
+
+## Results and findings (after scoring, 2026-11-20)
+
+Source: `data/exam7-2026-11-19/score/score.txt` and `rows-{mech,a-base,a-cand,b85-base,b85-cand}.csv`; run log `.claude/scratchpad/exam7/score-run.log`.
+
+### Run facts
+
+- Scorer run 2026-11-20T14:52:21Z at `--rwxmap-ref 7dce23e`, exit 0.
+- truth.csv sha256 af0fe041...83ec verified against `--truth-sha`, `truth.csv.sha256` and this file. N 1579. ops.csv sha256 abe5e6cd...47ea.
+- Join for every config (mech, a-base, a-cand, b85-base, b85-cand): matched 1579, unmatched ops 0, unmatched output 0, duplicate keys 0.
+- The candidate addendum matched this file field by field. The retag diff between the base and candidate rwxmap copies was exactly the `RWXLITE_TAG` line (`v0.3.1` to `v0.4.0` in `src/modeldownload.js`).
+- Base models came from rwxlite `data/m1-r13`, three files verified against the pinned hashes (ref 5069dfa1, model string rwxlite-0.3.1+bbe1997d). Candidate came from rwxlite `data/m1-r15`, three files verified (ref 088bec1d, model string rwxlite-0.4.0+4608f470).
+- rwxlite committed its prediction hashes at rwxlite b5ee1cc before the truth was shared (rwxlite's record, not checked by this scorer).
+- Exam #7 is BURNED for both sides. It was scored once.
+
+### Main table (of 1579)
+
+| config | exact | loose-1 | loose-2 | too loose | too tight | rwxlite sent / raised / lowered / kept / undecided |
+|---|---|---|---|---|---|---|
+| mech | 1333 (84.4%) | 54 (3.4%) | 18 (1.1%) | 72 (4.6%) | 174 (11.0%) | none |
+| a-base (0.3.1) | 1431 (90.6%) | 50 (3.2%) | 18 (1.1%) | 68 (4.3%) | 80 (5.1%) | 664 / 33 / 123 / 435 / 73 |
+| a-cand (0.4.0) | 1432 (90.7%) | 50 (3.2%) | 16 (1.0%) | 66 (4.2%) | 81 (5.1%) | 664 / 21 / 108 / 464 / 71 |
+| b85-base | 1447 (91.6%) | 46 (2.9%) | 8 (0.5%) | 54 (3.4%) | 78 (4.9%) | 1579 / 17 / 143 / 1241 / 178 |
+| b85-cand | 1449 (91.8%) | 38 (2.4%) | 1 (0.1%) | 39 (2.5%) | 91 (5.8%) | 1579 / 17 / 118 / 1280 / 164 |
+
+Markers on the too-loose rows: mech 72 (tight 0, loose 57, settled 15); a-base 68 (tight 0, loose 53, settled 15); a-cand 66 (tight 0, loose 51, settled 15); b85-base 54 (tight 0, loose 49, settled 5); b85-cand 39 (tight 0, loose 39, settled 0).
+
+The headline for the shipped build is a-base: mode a with rwxlite 0.3.1, 1431 exact / 68 too loose (50 loose-1, 18 loose-2) / 80 too tight, of 1579. Vendors are huggingface, openziti, pipedrive, ringcentral, vikunja and gitness (the scorer prints gitness as harness.io).
+
+### By vendor (of the vendor's rows)
+
+mech:
+
+| vendor | rows | exact | loose-1 | loose-2 | too loose | too tight |
+|---|---|---|---|---|---|---|
+| harness.io | 257 | 224 (87.2%) | 8 | 0 | 8 (3.1%) | 25 (9.7%) |
+| huggingface.co | 386 | 291 (75.4%) | 4 | 14 | 18 (4.7%) | 77 (19.9%) |
+| openziti.io | 204 | 173 (84.8%) | 20 | 1 | 21 (10.3%) | 10 (4.9%) |
+| pipedrive.com | 213 | 202 (94.8%) | 4 | 2 | 6 (2.8%) | 5 (2.3%) |
+| ringcentral.com | 347 | 303 (87.3%) | 10 | 0 | 10 (2.9%) | 34 (9.8%) |
+| vikunja.io | 172 | 140 (81.4%) | 8 | 1 | 9 (5.2%) | 23 (13.4%) |
+
+a-base:
+
+| vendor | rows | exact | loose-1 | loose-2 | too loose | too tight |
+|---|---|---|---|---|---|---|
+| harness.io | 257 | 232 (90.3%) | 7 | 0 | 7 (2.7%) | 18 (7.0%) |
+| huggingface.co | 386 | 341 (88.3%) | 8 | 14 | 22 (5.7%) | 23 (6.0%) |
+| openziti.io | 204 | 181 (88.7%) | 19 | 1 | 20 (9.8%) | 3 (1.5%) |
+| pipedrive.com | 213 | 201 (94.4%) | 2 | 2 | 4 (1.9%) | 8 (3.8%) |
+| ringcentral.com | 347 | 323 (93.1%) | 9 | 0 | 9 (2.6%) | 15 (4.3%) |
+| vikunja.io | 172 | 153 (89.0%) | 5 | 1 | 6 (3.5%) | 13 (7.6%) |
+
+a-cand:
+
+| vendor | rows | exact | loose-1 | loose-2 | too loose | too tight |
+|---|---|---|---|---|---|---|
+| harness.io | 257 | 230 (89.5%) | 9 | 0 | 9 (3.5%) | 18 (7.0%) |
+| huggingface.co | 386 | 341 (88.3%) | 3 | 14 | 17 (4.4%) | 28 (7.3%) |
+| openziti.io | 204 | 176 (86.3%) | 24 | 1 | 25 (12.3%) | 3 (1.5%) |
+| pipedrive.com | 213 | 205 (96.2%) | 2 | 1 | 3 (1.4%) | 5 (2.3%) |
+| ringcentral.com | 347 | 324 (93.4%) | 8 | 0 | 8 (2.3%) | 15 (4.3%) |
+| vikunja.io | 172 | 156 (90.7%) | 4 | 0 | 4 (2.3%) | 12 (7.0%) |
+
+### By method (of the method's rows)
+
+mech:
+
+| method | rows | exact | loose-1 | loose-2 | too loose | too tight |
+|---|---|---|---|---|---|---|
+| DELETE | 189 | 188 (99.5%) | 0 | 0 | 0 | 1 (0.5%) |
+| GET | 726 | 711 (97.9%) | 0 | 15 | 15 (2.1%) | 0 |
+| PATCH | 74 | 55 (74.3%) | 18 | 0 | 18 (24.3%) | 1 (1.4%) |
+| POST | 446 | 258 (57.8%) | 18 | 3 | 21 (4.7%) | 167 (37.4%) |
+| PUT | 144 | 121 (84.0%) | 18 | 0 | 18 (12.5%) | 5 (3.5%) |
+
+a-base:
+
+| method | rows | exact | loose-1 | loose-2 | too loose | too tight |
+|---|---|---|---|---|---|---|
+| DELETE | 189 | 188 (99.5%) | 0 | 0 | 0 | 1 (0.5%) |
+| GET | 726 | 711 (97.9%) | 0 | 15 | 15 (2.1%) | 0 |
+| PATCH | 74 | 59 (79.7%) | 15 | 0 | 15 (20.3%) | 0 |
+| POST | 446 | 349 (78.3%) | 24 | 3 | 27 (6.1%) | 70 (15.7%) |
+| PUT | 144 | 124 (86.1%) | 11 | 0 | 11 (7.6%) | 9 (6.3%) |
+
+a-cand:
+
+| method | rows | exact | loose-1 | loose-2 | too loose | too tight |
+|---|---|---|---|---|---|---|
+| DELETE | 189 | 188 (99.5%) | 0 | 0 | 0 | 1 (0.5%) |
+| GET | 726 | 711 (97.9%) | 0 | 15 | 15 (2.1%) | 0 |
+| PATCH | 74 | 58 (78.4%) | 15 | 0 | 15 (20.3%) | 1 (1.4%) |
+| POST | 446 | 355 (79.6%) | 19 | 1 | 20 (4.5%) | 71 (15.9%) |
+| PUT | 144 | 120 (83.3%) | 16 | 0 | 16 (11.1%) | 8 (5.6%) |
+
+### D142 gate (the ship gate for this exam)
+
+- a-cand too loose 66 against a-base 68 (-2); the limit was +15 rows of 1579. OK.
+- a-cand exact 1432 against a-base 1431 (+1); the rule was no fewer. OK.
+- Verdict: GO. Round 15 (rwxlite 0.4.0) may replace 0.3.1.
+- Beside the gate, not part of it: too tight 81 against 80 (+1), of 1579.
+- The candidate would also pass D135's same-or-better gate (no more too loose, no fewer exact): 66 <= 68 and 1432 >= 1431.
+
+### D133 mode a bar (reported only, for both models; not the D142 gate)
+
+- a-base: too loose 68 against mech 72, PASS; exact 1431 against mech 1333 plus 79 = 1412, PASS.
+- a-cand: too loose 66 against mech 72, PASS; exact 1432 against 1412, PASS.
+
+### D140 mode b at confidence 85 (no bar, reported)
+
+- b85-base: exact 1447 (91.6%), too loose 54 (loose-1 46, loose-2 8; 3.4%), too tight 78 (4.9%), asked 178 (11.3%).
+- b85-cand: exact 1449 (91.8%), too loose 39 (loose-1 38, loose-2 1; 2.5%), too tight 91 (5.8%), asked 164 (10.4%).
+
+### Findings
+
+- (a) 53 rows differ between a-base and a-cand. 10 leaks closed (8 loose-1 to exact, 2 loose-2 to exact): huggingface resource-group POST x4 (ex7-0282, 0314, 0398, 0578), huggingface SCIM Users PATCH x2 (0454, 0470), ringcentral glip conversations POST (1331), pipedrive oauth/token POST, loose-2 (0951), vikunja openid callback POST, loose-2 (1416), vikunja totp disable POST (1562). 8 leaks opened, all truth x predicted w (exact to loose-1): gitness admin users PATCH (0006), gitness connectors POST (0007), huggingface jobs expose PUT (0370), openziti auth-policies PATCH (0653) and PUT (0654), edge-router-policies PUT (0721), service-edge-router-policies PUT (0801), service-policies PUT (0809). Net too loose 68 - 10 + 8 = 66. The other 35 differing rows move too tight only: 17 tight to exact and 18 exact to tight, net +1 (80 to 81).
+- (b) The 15 GET leaks (all loose-2, truth x read as r) are identical in mech, a-base and a-cand. They are settled GET rows (huggingface xet-read/write-token, jwt and registry/token; pipedrive oauth/authorize), which the second pass never sees. Mode a cannot move them.
+- (c) Mode b at 85 has fewer leaks than mode a for both models: base 54 against 68, candidate 39 against 66 (loose-2 1 against 16). The cost is too tight: 91 (candidate) against 81 in mode a, of 1579. Mode b at 85 sends all 1579 rows; mode a sends 664.
+- (d) The new leaks cluster in openziti: 5 of the 8 opened leaks are openziti PUT or PATCH on access-policy objects (auth-policies, edge-router-policies, service-edge-router-policies, service-policies). openziti too loose goes from 20 to 25 (of 204) in a-cand. Round 16 target.
+- (e) rwxlite's own information scorer reproduced mode a fp32 exactly: base 1431 / 68 / 80 and candidate 1432 / 66 / 81 (exact / too loose / too tight). rwxlite's figures, not measured here: standalone fp32 base 1453 / 91 / 35, candidate 1456 / 80 / 43, x read as r 16 to 3; int8 mode a base 1426 / 68 / 85, candidate 1431 / 66 / 82.
+
+Exam #7 is BURNED for both sides. Any rule or model change needs a new exam.
