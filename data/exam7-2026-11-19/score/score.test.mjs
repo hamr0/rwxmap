@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import {
   joinRows, parseTruth, modeABar, d142Gate, retag, checkOnlyTagChanged, candidateSpec, checkAddendum, preregTruthSha,
   ADDENDUM_FIELDS, BASE, checkRun, tally, classify, verifyModelSet, runConfig, sha256Buf, parseCsv, CONFIGS, VENDORS,
-  prepareSpecs, prepareRwxmap, renderVerdicts, renderDiff, main, EXPECTED_N,
+  prepareSpecs, prepareRwxmap, renderVerdicts, renderDiff, main, EXPECTED_N, fetchBaseModels, FILE_NAMES,
 } from './score.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -358,4 +358,29 @@ test('runConfig end to end: an on run joins 1:1 and sums the rwxlite counts; b85
   assert.equal(runConfig({ name: 'b85-base', cfg: CONFIGS['b85-base'], ctx: b.ctx, ops, vendors: VEND }).joined.length, 3);
   const bad = stubSetup(lineB, { ...on({ pass: 'b', confidence: 95 }), ...counts });
   assert.throws(() => runConfig({ name: 'b85-base', cfg: CONFIGS['b85-base'], ctx: bad.ctx, ops, vendors: VEND }), /confidence 95 != 85/);
+});
+
+// ---- fetchBaseModels (stub fetch, temp dir, no network)
+const stubFetch = (calls, status = 200) => async (url) => {
+  calls.push(url);
+  return { ok: status === 200, status, arrayBuffer: async () => Buffer.from(`bytes of ${url}`) };
+};
+test('fetchBaseModels: a file already present is not fetched', async () => {
+  const dir = tmp();
+  fs.writeFileSync(path.join(dir, FILE_NAMES[0]), 'local');
+  const calls = [];
+  await fetchBaseModels(dir, stubFetch(calls));
+  assert.ok(!calls.includes(BASE.releaseUrl + FILE_NAMES[0]));
+  assert.equal(calls.length, FILE_NAMES.length - 1);
+  assert.equal(fs.readFileSync(path.join(dir, FILE_NAMES[0]), 'utf8'), 'local');
+});
+test('fetchBaseModels: a missing file is fetched from the release URL and written with the response bytes', async () => {
+  const dir = path.join(tmp(), 'nested');
+  const calls = [];
+  await fetchBaseModels(dir, stubFetch(calls));
+  assert.deepEqual(calls, FILE_NAMES.map((f) => BASE.releaseUrl + f));
+  for (const f of FILE_NAMES) assert.equal(fs.readFileSync(path.join(dir, f), 'utf8'), `bytes of ${BASE.releaseUrl + f}`);
+});
+test('fetchBaseModels: a non-ok response throws naming the HTTP status', async () => {
+  await assert.rejects(fetchBaseModels(tmp(), stubFetch([], 404)), /HTTP 404/);
 });

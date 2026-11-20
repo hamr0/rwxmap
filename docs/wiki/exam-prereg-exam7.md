@@ -323,7 +323,7 @@ needs a new exam.
 
 ## Results and findings (after scoring, 2026-11-20)
 
-Source: `data/exam7-2026-11-19/score/score.txt` and `rows-{mech,a-base,a-cand,b85-base,b85-cand}.csv`; run log `.claude/scratchpad/exam7/score-run.log`.
+Source: `data/exam7-2026-11-19/score/score.txt` and `rows-{mech,a-base,a-cand,b85-base,b85-cand}.csv`; run log `data/exam7-2026-11-19/score/score-run.log.gz`.
 
 ### Run facts
 
