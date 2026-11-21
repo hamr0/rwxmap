@@ -9082,3 +9082,48 @@ b 70    | 2718  89.7% |   71   2.3% |    8   0.3% |   79   2.6% |  234   7.7% | 
 - Note: 2 ids (r15s-91134d69873e68ec, r15s-91fb6096d37b2a5e) sit in both r15 files (answers-r15.csv and answers-d143-r15.csv) and get r in both, so they are consistent.
 - Exam #7: the 147 exam #7 mistakes enter r16 training at x3 weight. Our user told rwxlite to do this (confirmed 2026-11-21). Exam #7 is burned, so it is used for training only.
 - What it taught: keyword candidate passes over-catch (searches, stock holds), so read every row and keep internal holds out of the booking rule.
+
+## 2026-11-21 — PRD status moved to learnings
+
+Removed verbatim from the PRD "What is next" section (the PRD keeps one current status). Some of these facts are also in earlier entries.
+
+0.10.0 is released (D133/D135, PR #19, npm 0.10.0, rwxlite 0.2.1 on
+npm). The truth-v4 relabel (D137) is done and handed to rwxlite
+(2026-11-06; plan `docs/wiki/truth-v4-plan.md`, steps 0-5).
+
+
+Mechanical v4 ships by D138 (2026-11-07). Exam #5 (1443 ops, v4 truth)
+gate was NO-GO on too tight, 183 vs 178 for v3, and the user overrode it
+because too loose fell from 77 to 59. Mode a as scored then (rwxlite 0.2.0) was
+looser than mechanical alone on v4 truth (94 vs 59 too loose on exam #5):
+it was trained before D137 widened x.
+
+
+Shipped in 0.11.0 (D139, user override 2026-11-07, commit 5e6b9cb): src/
+ships rwxlite R13 (rwxlite 0.3.1) with the lowering cut-off LOWER_MIN_P at
+0.90, overriding D135 (R13 failed its exact bar) and D136 (cut-off 0.97),
+for the same reason as D138: fewer leaks matter more than more review asks.
+Pin: RWXLITE_TAG v0.3.1, cache fallback 0.3.1, accepted package range 0.3.x
+(0.2.x and 0.4.0 refused); 617 tests, guards for tag/fallback agreement,
+range, cut and credential-set never lowered, each broken by hand once.
+Verified 2026-11-07: GitHub release v0.3.1 assets and npm rwxlite@0.3.1
+sha256/integrity match rwxlite's list and the exam #5 addendum; the
+published package differs from the exam #5 tarball only in comments and
+README/CHANGELOG/package.json metadata. Real install on exam #5 (npm
+0.3.1, model downloaded into an empty cache, current src/), mode a, 1443
+ops, exact / too loose / too tight: 1269 / 40 (38 loose-1, 2 loose-2) /
+134; 78 lowered, 63 undecided; equal to the replay at 0.90. Against the
+scored 0.2.0 at 0.97 (1272 / 94 / 77) too loose falls from 94 to 40 and too
+tight rises from 77 to 134 (exam #5, where the 0.90 cut was tuned).
+
+1. D140 built 2026-11-19 (mode b default 85; commit 96ebb46; 617/617 tests, typecheck, conformance 6/6).
+2. Exam #7 rwxmap ref frozen 2026-11-19 at 96ebb46 (mechanical identical to 1c25be1, plus D140); nothing under src/ changed until exam #7 was scored (done 2026-11-20). Sent to rwxlite, which trains round 15 on the lean at that ref (lean equals 1c25be1, 0 diffs on 106,848 ids).
+3. Exam #7: vendors frozen 2026-11-18 (ringcentral, openziti, gitness,
+   huggingface, pipedrive, vikunja; six more in reserve;
+   poc/exam7-shortlist/picked.tsv), kept out of rwxlite round 15 (copy check
+   poc/exam7-shortlist/r15-check, 319 specs dropped). Specs are fetched and
+   frozen at exam build. Inputs are in data/exam7-2026-11-19/ (1579 operations, from the shortlist bytes fetched 2026-11-18, sha256-checked). Labelled blind (A = Sonnet, B = Opus; BRIEF-v4 plus the D141 addendum; 12 files validated). 66 of 1579 operations were disputed and the user ruled all 66 on 2026-11-19 (45 x, 21 w). Candidate: rwxlite 0.4.0 (round 15; rwxlite's user waived its val guards: teacher too loose 115 vs 104, student 120 vs 104, rwxlite's figures). Scored once 2026-11-20 through the real CLI at rwxmap 7dce23e: a-base (0.3.1 as shipped) 1431 exact / 68 too loose (50 loose-1, 18 loose-2) / 80 too tight; a-cand (0.4.0) 1432 / 66 (50 loose-1, 16 loose-2) / 81, all of 1579. D142 verdict GO (too loose 66 vs 68 with a limit of +15; exact 1432 vs 1431; too tight 81 vs 80, beside the gate); it would also pass D135 same-or-better. D133 bar passes for both models. Exam #7 is BURNED for both sides. Done 2026-11-20: rwxlite 0.4.0 released (GitHub release v0.4.0 at rwxlite db328e6; npm rwxlite@0.4.0 latest); the rwxmap pin pass to 0.4.0 is built and verified from a clean install (commit 2d622ea; see the Pin pass paragraph above). Released 2026-11-20: rwxmap 0.12.0 (D140 plus the 0.4.0 pin) published to npm after docs/product/release-checklist.md ran items 1-12; PR #25 merged as a281ad4, release commit 3888ef9, tag v0.12.0. Pre-registration and results docs/wiki/exam-prereg-exam7.md; scorer and rows data/exam7-2026-11-19/score/.
+
+Done (2026-11-19): export-v4-d141 (D141 relabel of rwxlite's round 13 train
+and val, tighten-only, lean at 1c25be1),
+data/export-v4-d141-2026-11-19/, see learnings. Merge rule for D141 training labels, agreed with rwxlite for both halves (R13 rows and r15): raises stay; a lower applies only where a D141 family directly orders it, which in practice is (c), an update of the group object itself (not creates, not sub-resources such as calendar or policies, and not SCIM Groups PATCH, which changes members) with no member/role/permission wording; every other lower reverts. R13: 2 lowers kept (ag-069342, ag-071594), 297 not applied; export commit f62e1c2. r15: 0 kept, 162 reverted.
