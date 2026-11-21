@@ -9024,3 +9024,61 @@ b 70    | 2718  89.7% |   71   2.3% |    8   0.3% |   79   2.6% |  234   7.7% | 
 - Published bytes, clean registry install with no .env: `npm install rwxmap@0.12.0`, `npx rwxmap` on a paypal spec: exit 0, 3 files written, rwxmapVersion 0.12.0, "rwxlite: off (mechanical) ... (npm install rwxlite@0.4)". Then `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.4` (0.4.0) with an empty XDG cache: model downloaded from the v0.4.0 release, "rwxlite: on (rwxlite-0.4.0+4608f470)", exit 0.
 - Lessons: (1) Release checklist item 8 needs a placeholder rule: three README examples (./openapi.yaml, api.example.com) cannot run as written, and the user ruled them placeholders; the checklist should say so instead of leaving the runner to decide each time. (2) Wording like "from the next release" written on a branch goes stale at that branch's own release; it had to be fixed in a docs commit just before the release commit.
 - Where: CHANGELOG.md 0.12.0, docs/product/prd.md (Pin pass, What is next item 3), docs/wiki/decisions-log.md (D140, D142).
+
+## 2026-11-20 — Exam #8 copy check of rwxlite r16 GitHub collection
+
+- What: ran the exam #7 copy rule unchanged (poc/exam7-shortlist/r15-check) on rwxlite's r16 GitHub collection against the six frozen exam #8 reserve specs (gitbook, baserow, looker, wekan, shortcut, bitrise). Rule: op key is METHOD plus normalised path; flag at 5 or more shared ops and 25% or more of the r16 spec's ops; name match exact, label or segment on the six aliases. Commit dc3a0e0, folder poc/exam8-r16-check/.
+- Inputs: ops-r16-github.csv.gz (sha256 8aa27faa…, 807,949 rows, 35,810 specs) and vendors-r16-github.csv (sha256 7152fc05…, 32,725 vendor_keys).
+- Result: 260 specs flagged (looker 213, wekan 38, gitbook 5, baserow 5; shortcut 0, bitrise 0); name matches 0. Drop list is 260 specs and 4,680 of 807,949 ops (0.58%).
+- Flags are generic CRUD look-alikes (at most 18 of looker's 502 ops shared); no real copy found. They are dropped anyway, because the rule was set before the check.
+- Checks: the orchestrator's re-run gave a byte-identical drop list; the selftests pass, and they fail when the threshold is broken by hand.
+- What it taught: a pre-set rule is applied as written even when the flags look harmless; looker and wekan again carry most of the look-alikes, as they did for r15.
+- Where: poc/exam8-r16-check/drop-list.csv, drop-summary.txt, summary.txt.
+
+## 2026-11-21 — R13 teacher-disagreement review (359 rows)
+
+- What: rwxlite sent 359 R13 rows where its bge teacher disagreed with the R13 label (sha 941bed2f…). Ruled against BRIEF-v4, the D141 addendum and D136/D137 by reading every row. User ruling: follow the prior rulings, loosen or tighten as they say, and share what is unsure.
+- Output: poc/r16-r13-review/answers.csv, sha256 b3965c9c01a31107c4e75a1481c54772fa648de8cf624332ba6b0a034b743f35 (build.mjs). Sent as is; rwxlite applied it.
+- Numbers (of 359 rows): 97 changed, 262 kept. Changes: w->r 25, x->r 9, x->w 26, w->x 32, r->x 4, r->w 1. Certainty: sure 292, doubt 56, lean 11.
+- Finding sent to rwxlite: bge's floor-post x->w suggestions are only about half right.
+- What it taught: a peer's teacher-disagreement list is a review pile, not truth. About half of bge's floor-post x->w suggestions were real x by the brief.
+
+## 2026-11-21 — r15 Sonnet second-pass review (263 rows)
+
+- What: rwxlite sent 263 r15 rows where its Sonnet second pass disagreed with the r15 label (sha 163362eb…). Ruled by reading every row against the brief and the standing rulings.
+- Output: poc/r16-r13-review/answers-r15.csv, sha256 2f137bac12dc6aebbe2b7f60f5b4494a88ede3820aa3ef462a8a9ab6618483af (build-r15.mjs). Sent; rwxlite applied it.
+- Numbers (of 263 rows): 163 changed (r->w 37, w->r 29, x->w 31, x->r 23, r->x 22, w->x 21), 100 kept. Certainty: sure 167, doubt 88, lean 8.
+- Kept by standing rulings: an unattached security-policy create stays w; username availability and voucher-token checks stay x (D141 b).
+- The 17 public post, article, poll and banner rows stay x under clause c, tagged doubt. The user confirmed this on 2026-11-21.
+- What it taught: 88 of 263 rows are doubt, so a model's disagreement list is a pile to read row by row, not a list of errors.
+
+## 2026-11-21 — 400-row holdout answer key
+
+- What: rwxlite sent a 400-row holdout (sha 28365fcb…, Sonnet letters a4c6c3af…) for an answer key. By user ruling, Sonnet's letters were used as recommendations, not read blind. The key is therefore NOT independent: it is built from the letters of the labeller it grades.
+- Output: poc/r16-r13-review/answers-h400.csv, sha256 0a61e2e0c4835a42abeb9436b1e1ac1b75e9409194f5f9405c249a3a4ceb10c9 (build-h400.mjs).
+- Numbers (of 400 rows): 370 keep Sonnet's letter, 30 changed (w->x 27, r->x 1, r->w 2).
+- rwxlite readout, labelled not independent: Sonnet exact 370 of 400 (92.5%), too loose 30, too tight 0. By Sonnet confidence: sure 126 of 126; likely 192 of 211 (19 loose); unsure 52 of 63 (11 loose).
+- What it taught: an answer key built from the graded labeller's letters is not independent; say so in every readout. An ambiguous user reply ("key rows with sonnet as recs") got a one-line check before acting.
+
+## 2026-11-21 — D143 ruled: creating a booking or reservation is x
+
+- What: user ruling D143 (2026-11-21): creating a booking or reservation is x by BRIEF-v4 clause d (it could be an airline, hotel or restaurant commitment). Recorded in the decisions log, the PRD and data/relabel-v4-2026-11-05/BRIEF-v4-addendum-D143.md.
+- Scope: a booking or reservation held for a person (seat, room, table, slot, ticket, item, including holds and booking intents) is x. Internal holds stay w: inventory or stock, balance, credit, quota, IP, handle, runtime, upload capacity, package identity. Searches, quotes, previews and availability checks stay r.
+- The 2 cloud capacity reservations (AWS, GCP) stay w as internal holds; the user confirmed this on 2026-11-21.
+- User reasoning: less split on words is easier to rule; agent actions should lean x; a hotel booking with cancellation is still x (fees, venue notified, slot held).
+- Mechanical already says x (POST floor), so D143 aligns the model with mechanical.
+- Cost: before D143 the r15 training labels held about 224 w against 105 x booking creates (rough keyword count); rwxmap exams #3 to #7 hold almost none. Risk is x spreading onto plain creates; rwxlite will report the too-tight rate on POST creates in its English dev set before and after the relabel.
+- Exam #8 vendors likely have no booking APIs, so the exam will not show D143's effect.
+- What it taught: one letter per family is easier to rule than a text-dependent split.
+- Where: docs/wiki/decisions-log.md (D143), docs/product/prd.md, data/relabel-v4-2026-11-05/BRIEF-v4-addendum-D143.md.
+
+## 2026-11-21 — D143 relabel passes over rwxlite sets
+
+- What: rwxlite sent keyword candidate rows for the D143 rule (same columns each time). Each was read row by row and ruled against D143 and its scope. Files in poc/r16-r13-review/ with build scripts beside them.
+- r16, answers-d143.csv: 526 rows; 313 changed (w->x 294, r->x 3, r->w 15, w->r 1); sure 492, lean 19, doubt 15; sha256 prefix 9e30fb56. Sent; rwxlite applied it.
+- r15, answers-d143-r15.csv: 237 rows; 123 changed (w->x 116, r->x 4, r->w 1, w->r 2); sure 224, lean 7, doubt 6; sha256 prefix 663849b5. Sent.
+- R13, answers-d143-r13.csv: 13 rows; 4 changed (w->x); sure 9, lean 3, doubt 1; sha256 prefix 1d15573d.
+- dev, answers-d143-dev.csv: 9 rows; 7 changed (w->x); sure 4, doubt 4, lean 1; sha256 prefix 9364587d.
+- Note: 2 ids (r15s-91134d69873e68ec, r15s-91fb6096d37b2a5e) sit in both r15 files (answers-r15.csv and answers-d143-r15.csv) and get r in both, so they are consistent.
+- Exam #7: the 147 exam #7 mistakes enter r16 training at x3 weight. Our user told rwxlite to do this (confirmed 2026-11-21). Exam #7 is burned, so it is used for training only.
+- What it taught: keyword candidate passes over-catch (searches, stock holds), so read every row and keep internal holds out of the booking rule.

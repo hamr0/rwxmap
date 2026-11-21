@@ -1339,6 +1339,10 @@ or PATCH is x, like DELETE; narrowing a role without removing a member stays w.
 It applies to exam #7 labelling and later; burned exam truth is never
 relabelled by it.
 
+D143 (user ruling 2026-11-21, brief only, not built): creating a booking or
+reservation is x by clause d; labeller text in
+data/relabel-v4-2026-11-05/BRIEF-v4-addendum-D143.md.
+
 D142 (user ruling 2026-11-20, before the exam #7 truth sha256 was shared or
 any score seen; proposed by rwxlite's user, agreed by the rwxmap user): for
 exam #7 the ship gate is: a-cand exact >= a-base exact, and a-cand too loose
