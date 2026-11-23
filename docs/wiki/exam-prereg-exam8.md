@@ -53,8 +53,29 @@ prereg states no lean counts.
 
 Leakage checks (does round 16 hold these vendors?).
 
-- rwxlite's r16 train check against these six vendors: **PENDING rwxlite's
-  figures.** They are rwxlite's own record; this prereg does not state them.
+- rwxlite's r16 train check against these six vendors. These are rwxlite's
+  figures; its record is the source (rwxlite commit 2e7865a,
+  `docs/product/r16-exam8-leakage-check.md`).
+  - rwxlite read only id, provider, method, path, operationId and summary from
+    ops.csv (sha verified), no labels and no lean.
+  - Names: no r16-built file (teacher-train-v3, set A, set B, dev v3) has a row
+    whose vendor, provider, vendor_id or source names gitbook, baserow, looker,
+    wekan, shortcut, clubhouse or bitrise. The inherited r15 train holds 41 rows
+    from clubhouseapi.com (the Clubhouse social-audio app, a name match on
+    Shortcut's old name but a different product); its 5 rows in the r16 replay
+    were dropped anyway.
+  - Exact method+path+summary collisions (empty summary on both sides counts as
+    equal): teacher-train-v3 58 rows on 26 exam ops, 50 on generic routes (POST
+    /login, GET /api/users, POST /projects ...) and 8 vendor-flavoured (GET
+    /api/jobs/, /api/audit-log/, /api/applications/, /api/admin/users/ against
+    baserow; PATCH /collections/{collectionId} against gitbook; GET /builds
+    against bitrise; POST /agents against looker), every colliding train row from
+    an unrelated vendor; set A 4, set B 13, inherited r15 train 109 rows on 25
+    exam ops, dev v3 0. Method+path only: teacher-train-v3 3,304 rows on 111 exam
+    ops.
+  - r16 removed the exam #8 vendors at spec level (rwxmap's dc3a0e0 drop list
+    plus rwxlite's name hits, sha mirrors and near-duplicate specs), not by op
+    key.
 - rwxmap's copy check of rwxlite's r16 GitHub collection, `poc/exam8-r16-check/`
   (commit dc3a0e0), run with exam #7's rule unchanged: an op key is METHOD plus
   normalised path; a spec is flagged at 5 or more shared ops AND 25% or more of
@@ -74,6 +95,9 @@ Leakage checks (does round 16 hold these vendors?).
 - Both checks are on provider/vendor fields and path text, never free text. They
   cannot show that a vendor's text was never in rwxlite's training data under
   another name.
+
+As at exam #7, no exam #8 row is excluded from scoring for a collision; all 1821
+rows are scored.
 
 ## Labelling (truth)
 
@@ -341,6 +365,8 @@ this needs a new exam.
 - Selection was by row count and domain spread from a shortlist, not random.
 - The leakage checks are on provider/vendor fields and path text. They do not rule
   out that rwxlite's training text held these vendors under another name.
+- Some exam ops share exact method+path+summary with unrelated vendors' training
+  rows (generic routes mostly), so those rows are not fully unseen text.
 - Parity of rwxlite's per-row p's against the CLI is not checked by this scorer;
   rwxlite checks its own p files. A model's score belongs to the decision rule it
   was measured with, so rwxlite's own scorer is not the gate.
