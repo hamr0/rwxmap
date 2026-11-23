@@ -185,6 +185,8 @@ async function downloadModel(manifestUrl, o) {
     }
     fs.writeFileSync(path.join(stage, 'manifest.json'), manifest.raw);
     verifyModelDir(stage); // every sha256 and the sha8, before it gets its real name
+    // The stage verified; a folder still at finalDir failed the check above, so it is ours to replace.
+    rmrf(finalDir);
     try {
       fs.renameSync(stage, finalDir);
     } catch (err) {

@@ -17,7 +17,7 @@ LOVO rule: for vendor V, a word is adopted only if on all other vendors pooled i
 
 A run takes about a minute (set A is 102,590 rows).
 
-D144 note (2026-11-23): `score.mjs`'s parity guard pins the pre-D144 lean, that is the export's `lean_letter` (src at 1c25be1 plus D140). After D144 landed in `src/step2.js` it exits 2 by design (31 mismatches on set A, exactly the 31 raised rows). `out/score-cand-r1.txt` is the measurement D144 was decided on. `out/score-cand-none.txt` is the post-edit check: empty lists scored against the edited src, run with the guard bypassed in a throwaway copy; set A baseline too loose 3155 -> 3131 and too tight 13651 -> 13658, exam #7 unchanged at 72 / 174. `score.mjs` itself is unchanged.
+D144 note (2026-11-23): `score.mjs`'s parity guard pins the pre-D144 lean, that is the export's `lean_letter` (src at 1c25be1 plus D140). After D144 landed in `src/step2.js` it exits 2 by design (31 mismatches on set A, exactly the 31 raised rows). `out/score-cand-r1.txt` is the measurement D144 was decided on. `out/score-cand-none.txt` is the post-edit check: empty lists scored against the edited src, run with the guard bypassed in a throwaway copy; set A baseline too loose 3155 -> 3131 and too tight 13651 -> 13658, exam #7 unchanged at 72 / 174. `score.mjs`'s scoring is unchanged; since 2026-11-23 a parity stop prints the mismatches and exits 2 without writing `out/score-<name>.txt`, so a rerun cannot overwrite the committed outputs.
 
 ## lean-diff.mjs (2026-11-23): pre-D144 lean against today's lean
 

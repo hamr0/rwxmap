@@ -257,10 +257,21 @@ test('ensureModel: a cached model that is corrupt is re-downloaded when the netw
   const rel = release();
   await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: rel.fetchImpl });
   fs.writeFileSync(path.join(xdg, 'rwxmap', rel.model, 'vocab.txt'), 'corrupted');
-  fs.rmSync(path.join(xdg, 'rwxmap', rel.model), { recursive: true });
   const got = await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: release().fetchImpl });
   assert.equal(got.status, 'ready');
   assert.equal(fs.readFileSync(path.join(got.dir, 'vocab.txt'), 'utf8'), 'vocab-0.5.0');
+});
+
+test('ensureModel: a download that fails verification leaves the old cached folder untouched', async () => {
+  const xdg = scratch();
+  const rel = release();
+  await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: rel.fetchImpl });
+  const dir = path.join(xdg, 'rwxmap', rel.model);
+  fs.writeFileSync(path.join(dir, 'vocab.txt'), 'corrupted');
+  const got = await ensureModel({ environ: { XDG_CACHE_HOME: xdg }, fetchImpl: release({ tamper: { 'vocab.txt': Buffer.from('wrong') } }).fetchImpl });
+  assert.equal(got.status, 'off');
+  assert.equal(fs.readFileSync(path.join(dir, 'vocab.txt'), 'utf8'), 'corrupted');
+  assert.ok(fs.existsSync(path.join(dir, 'model-fp32.onnx')));
 });
 
 /** Put an already-valid model of a variant straight into the cache. */

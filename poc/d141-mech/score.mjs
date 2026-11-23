@@ -177,7 +177,7 @@ async function main() {
   let mism = 0; const bad = [];
   for (const r of a.rows) { const c = classifyRow(toOp(r)).class; if (c !== r.lean_letter) { mism++; if (bad.length < 10) bad.push(`${r.id} src=${c} lean=${r.lean_letter}`); } }
   P(`parity check, set A baseline letter vs export lean_letter: ${mism} mismatches of ${a.rows.length}`);
-  if (mism) { for (const l of bad) P('  ' + l); finish(file, out); console.error('STOP: src differs from the export lean'); process.exit(2); }
+  if (mism) { for (const l of bad) P('  ' + l); console.error('STOP: src differs from the export lean'); process.exit(2); }
   const ra = scoreSet(a.rows, cand); const rb = scoreSet(b.rows, cand);
   P(''); P(format('A', a.rows, ra)); P(''); P(format('B', b.rows, rb));
   P(''); P(`changes vs baseline (joint fitted): A ${ra.joint.fires}, B ${rb.joint.fires}`);
