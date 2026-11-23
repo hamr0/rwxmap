@@ -64,7 +64,7 @@ const HOSTS = [
   {
     address: 'https://api.ibanforge.com',
     spec: 'https://api.ibanforge.com/openapi.json',
-    ops: 42, r: 27, w: 0, x: 15,
+    ops: 40, r: 25, w: 0, x: 15,
     why: 'POSTs rated by lead verb',
   },
   {

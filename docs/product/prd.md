@@ -1332,7 +1332,7 @@ loose is accepted as a trade.
 Next, in order:
 
 1. rwxlite 0.5.0 pin (D145): built and verified 2026-11-23 from a clean install on exam #8 (0 rows differ); release next, quoting exam #8. Record: docs/logs/learnings.md 2026-11-23 pin pass, D145.
-2. D144, D141 in mechanical (user ruling 2026-11-23): built. GET_ACTION gains `refresh`; PATH_X_WORDS gains `verify`, `callback`, `login`; 4 words that passed the D100 tighten-only bar under leave-one-vendor-out (set A: 24 right, 7 wrong, 0 lowered). Scored on exam #8 (reported only, no bar): mech with D144 1556 exact / 73 too loose / 192 too tight of 1821. Known limit: login-token POSTs that step 1's read verbs send to r are out of reach of step 2 and stay r.
+2. D144, D141 in mechanical (user ruling 2026-11-23): built. GET_ACTION gains `refresh`; PATH_X_WORDS gains `verify`, `callback`, `login`; 4 words adopted by the user's ruling on leave-one-vendor-out evidence (set A: 24 right, 7 wrong, 0 lowered; too tight +7, 13651 -> 13658). Scored on exam #8 (reported only, no bar): mech with D144 1556 exact / 73 too loose / 192 too tight of 1821. Known limit: login-token POSTs that step 1's read verbs send to r are out of reach of step 2 and stay r.
 
 Merge rule for D141 training labels, agreed with rwxlite for both halves (R13 rows and r15): raises stay; a lower applies only where a D141 family directly orders it, which in practice is (c), an update of the group object itself (not creates, not sub-resources such as calendar or policies, and not SCIM Groups PATCH, which changes members) with no member/role/permission wording; every other lower reverts. R13: 2 lowers kept (ag-069342, ag-071594), 297 not applied; export commit f62e1c2. r15: 0 kept, 162 reverted.
 
