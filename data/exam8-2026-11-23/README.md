@@ -1,9 +1,8 @@
 # Shared clean exam #8 - frozen inputs
 
-Status: INPUTS FROZEN. LABELLED, truth built and held (sha256 committed later, in the
-prereg). Nothing here has been run through the CLI or rwxlite; the only classifier
-run on these rows is the mechanical lean (`lean/`), which is not shown to anyone
-with truth.
+Status: SCORED and BURNED (2026-11-23). Inputs frozen, labelled, scored once through the
+real CLI; the result is in `score/score.txt` and `docs/wiki/exam-prereg-exam8.md`
+(Results and findings). Truth, rulings, labeller files and the lean are committed now.
 Bytes fetched 2026-11-18 during shortlisting (`poc/exam7-shortlist/`, the six
 `role=reserve` vendors in its `picked.tsv`); frozen 2026-11-23.
 `sources.json` has the URLs, pins and sha256 of the original bytes. The
@@ -85,9 +84,9 @@ raw path); nothing is deduped by collapsing `{param}`.
 - The six exam #7 vendors (ringcentral, openziti, gitness, huggingface,
   pipedrive, vikunja) are not part of this exam. Exam #8 uses the six reserve
   vendors held back at exam #7.
-- Custody: no .gitignore for truth.csv or labelling/out/ (kept out by not
-  running `git add` until scoring finished). Same here: do not `git add`
-  truth.csv or labelling/out/ until both sides have scored.
+- Custody: there was no .gitignore for truth.csv or labelling/out/ (kept out by not
+  running `git add` until scoring finished). The same held here: they were not
+  `git add`ed until both sides had scored, and are committed now.
 
 ## Frozen ops
 

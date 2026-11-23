@@ -1,6 +1,6 @@
 # Pre-registration: shared clean exam #8, rwxmap side (D142 next-model ship gate, rwxlite round 16)
 
-**Status: PREREGISTERED. CANDIDATE ADDENDUM: filled 2026-11-23. Truth sha256 committed.** Not yet scored.
+**Status: SCORED and BURNED (2026-11-23).** See "Results and findings" at the end.
 
 Inputs are frozen in commit 70630cf (the wekan provider value was fixed in
 88d4171). No CLI run, no rwxlite run and no Jev run has touched an exam #8 row.
@@ -329,9 +329,9 @@ above truth) are never folded into one number.
 5. The CANDIDATE ADDENDUM is filled in and committed (rwxmap and rwxlite agree on
    the same ref, tag, hashes and model string), together with the truth sha256
    (written into this file). Done, in this commit.
-6. The truth sha256 is sent to rwxlite; `truth.csv` is opened only now.
-7. rwxlite commits its prediction hashes.
-8. Each side scores once, on the same rows. A rerun is allowed only for a crash or
+6. The truth sha256 is sent to rwxlite; `truth.csv` is opened only now. Done.
+7. rwxlite commits its prediction hashes. Done (rwxlite 37ac8c4).
+8. Each side scores once, on the same rows. Done (2026-11-23). A rerun is allowed only for a crash or
    a row-join bug, recorded with the reason. No change of model, code, config, cut
    or text after any prediction exists. Anything a result suggests needs a new
    exam with new vendors.
@@ -386,3 +386,135 @@ this needs a new exam.
   rows with integer counts. A one-row gap is decided by the written rule (an exact
   tie passes; too loose may rise by at most 18 rows), not by a significance test.
 - The figures are for the one candidate named in the addendum only.
+
+## Results and findings (after scoring, 2026-11-23)
+
+Source: `data/exam8-2026-11-23/score/score.txt` and `rows-{mech,a-base,a-cand,b85-base,b85-cand}.csv`; run log `data/exam8-2026-11-23/score/score-run.log.gz`. The run log's scratch path (`.claude/scratchpad/exam8-run`) is not in the repo; the CLI outputs it held are committed as `data/exam8-2026-11-23/score/rows-*.csv` and `score.txt`. `truth.csv`, `labelling/out/`, `labelling/rulings.csv` and `lean/lean.csv` are committed now that both sides have scored.
+
+### Run facts
+
+- Scorer run 2026-11-23 (score.txt header timestamp 2026-11-23T18:50:24Z) at `--rwxmap-ref 474ecb1`, exit 0.
+- truth.csv sha256 0dfc8b42...ac42 verified against `--truth-sha`, `truth.csv.sha256` and this file. N 1821. ops.csv sha256 7d2be1f3...428de.
+- Join for every config (mech, a-base, a-cand, b85-base, b85-cand): matched 1821, unmatched ops 0, unmatched output 0, duplicate keys 0.
+- The candidate addendum matched this file field by field. The retag diff between the base and candidate rwxmap copies was exactly the `RWXLITE_TAG` line (`v0.4.0` to `v0.5.0` in `src/modeldownload.js`).
+- Model sets verified (3 files each). Base from rwxlite `data/m1-r15` (ref db328e6f, model string rwxlite-0.4.0+4608f470). Candidate from rwxlite `data/m1-r16` (ref 67f732c2, model string rwxlite-0.5.0+82fa50c3).
+- rwxlite's record (its figures, not checked by this scorer): prediction hashes committed at rwxlite 37ac8c4 before the truth was read, result at rwxlite bb6f107. Its own scorer reproduced mode a and b85 exactly, and reproduced our `lean.csv` with 0 differences. Its standalone fp32 figures (exact / too loose / too tight, of 1821): base 1673 / 91 / 57, candidate 1683 / 86 / 52. Without the 26 collided exam ops (1,795 rows left), the candidate scores 1627 / 60 / 108 against base 1606 / 64 / 125.
+- Exam #8 is BURNED for both sides. It was scored once.
+
+### Main table (of 1821)
+
+| config | exact | loose-1 | loose-2 | too loose | too tight | rwxlite sent / raised / lowered / kept / undecided |
+|---|---|---|---|---|---|---|
+| mech (v4 + D144) | 1556 (85.4%) | 61 (3.3%) | 12 (0.7%) | 73 (4.0%) | 192 (10.5%) | none |
+| a-base (0.4.0) | 1631 (89.6%) | 53 (2.9%) | 12 (0.7%) | 65 (3.6%) | 125 (6.9%) | 773 / 20 / 77 / 576 / 100 |
+| a-cand (0.5.0) | 1653 (90.8%) | 48 (2.6%) | 12 (0.7%) | 60 (3.3%) | 108 (5.9%) | 773 / 20 / 89 / 575 / 89 |
+| b85-base | 1643 (90.2%) | 39 (2.1%) | 8 (0.4%) | 47 (2.6%) | 131 (7.2%) | 1821 / 6 / 100 / 1508 / 207 |
+| b85-cand | 1656 (90.9%) | 37 (2.0%) | 7 (0.4%) | 44 (2.4%) | 121 (6.6%) | 1821 / 5 / 116 / 1509 / 191 |
+
+Markers on the too-loose rows: mech 73 (tight 0, loose 61, settled 12); a-base 65 (tight 0, loose 53, settled 12); a-cand 60 (tight 0, loose 48, settled 12); b85-base 47 (tight 0, loose 41, settled 6); b85-cand 44 (tight 0, loose 38, settled 6).
+
+The headline for the shipped build is a-base: mode a with rwxlite 0.4.0, 1631 exact / 65 too loose (53 loose-1, 12 loose-2) / 125 too tight, of 1821. Vendors are gitbook, baserow, looker, wekan, shortcut and bitrise (the scorer prints them as gitbook.com, baserow.io, looker.com, wekan.github.io, shortcut.com, bitrise.io).
+
+### By vendor (of the vendor's rows)
+
+mech:
+
+| vendor | rows | exact | loose-1 | loose-2 | too loose | too tight |
+|---|---|---|---|---|---|---|
+| baserow.io | 488 | 397 (81.4%) | 12 | 6 | 18 (3.7%) | 73 (15.0%) |
+| bitrise.io | 128 | 120 (93.8%) | 4 | 0 | 4 (3.1%) | 4 (3.1%) |
+| gitbook.com | 403 | 356 (88.3%) | 15 | 3 | 18 (4.5%) | 29 (7.2%) |
+| looker.com | 502 | 426 (84.9%) | 22 | 3 | 25 (5.0%) | 51 (10.2%) |
+| shortcut.com | 143 | 126 (88.1%) | 1 | 0 | 1 (0.7%) | 16 (11.2%) |
+| wekan.github.io | 157 | 131 (83.4%) | 7 | 0 | 7 (4.5%) | 19 (12.1%) |
+
+a-base:
+
+| vendor | rows | exact | loose-1 | loose-2 | too loose | too tight |
+|---|---|---|---|---|---|---|
+| baserow.io | 488 | 419 (85.9%) | 12 | 6 | 18 (3.7%) | 51 (10.5%) |
+| bitrise.io | 128 | 124 (96.9%) | 2 | 0 | 2 (1.6%) | 2 (1.6%) |
+| gitbook.com | 403 | 366 (90.8%) | 10 | 3 | 13 (3.2%) | 24 (6.0%) |
+| looker.com | 502 | 445 (88.6%) | 22 | 3 | 25 (5.0%) | 32 (6.4%) |
+| shortcut.com | 143 | 141 (98.6%) | 1 | 0 | 1 (0.7%) | 1 (0.7%) |
+| wekan.github.io | 157 | 136 (86.6%) | 6 | 0 | 6 (3.8%) | 15 (9.6%) |
+
+a-cand:
+
+| vendor | rows | exact | loose-1 | loose-2 | too loose | too tight |
+|---|---|---|---|---|---|---|
+| baserow.io | 488 | 423 (86.7%) | 11 | 6 | 17 (3.5%) | 48 (9.8%) |
+| bitrise.io | 128 | 123 (96.1%) | 3 | 0 | 3 (2.3%) | 2 (1.6%) |
+| gitbook.com | 403 | 371 (92.1%) | 9 | 3 | 12 (3.0%) | 20 (5.0%) |
+| looker.com | 502 | 451 (89.8%) | 19 | 3 | 22 (4.4%) | 29 (5.8%) |
+| shortcut.com | 143 | 142 (99.3%) | 1 | 0 | 1 (0.7%) | 0 |
+| wekan.github.io | 157 | 143 (91.1%) | 5 | 0 | 5 (3.2%) | 9 (5.7%) |
+
+### By method (of the method's rows)
+
+mech:
+
+| method | rows | exact | loose-1 | loose-2 | too loose | too tight |
+|---|---|---|---|---|---|---|
+| DELETE | 227 | 224 (98.7%) | 0 | 0 | 0 | 3 (1.3%) |
+| GET | 821 | 809 (98.5%) | 0 | 12 | 12 (1.5%) | 0 |
+| PATCH | 188 | 146 (77.7%) | 38 | 0 | 38 (20.2%) | 4 (2.1%) |
+| POST | 481 | 296 (61.5%) | 8 | 0 | 8 (1.7%) | 177 (36.8%) |
+| PUT | 104 | 81 (77.9%) | 15 | 0 | 15 (14.4%) | 8 (7.7%) |
+
+a-base:
+
+| method | rows | exact | loose-1 | loose-2 | too loose | too tight |
+|---|---|---|---|---|---|---|
+| DELETE | 227 | 224 (98.7%) | 0 | 0 | 0 | 3 (1.3%) |
+| GET | 821 | 809 (98.5%) | 0 | 12 | 12 (1.5%) | 0 |
+| PATCH | 188 | 148 (78.7%) | 32 | 0 | 32 (17.0%) | 8 (4.3%) |
+| POST | 481 | 365 (75.9%) | 10 | 0 | 10 (2.1%) | 106 (22.0%) |
+| PUT | 104 | 85 (81.7%) | 11 | 0 | 11 (10.6%) | 8 (7.7%) |
+
+a-cand:
+
+| method | rows | exact | loose-1 | loose-2 | too loose | too tight |
+|---|---|---|---|---|---|---|
+| DELETE | 227 | 224 (98.7%) | 0 | 0 | 0 | 3 (1.3%) |
+| GET | 821 | 809 (98.5%) | 0 | 12 | 12 (1.5%) | 0 |
+| PATCH | 188 | 151 (80.3%) | 30 | 0 | 30 (16.0%) | 7 (3.7%) |
+| POST | 481 | 383 (79.6%) | 7 | 0 | 7 (1.5%) | 91 (18.9%) |
+| PUT | 104 | 86 (82.7%) | 11 | 0 | 11 (10.6%) | 7 (6.7%) |
+
+### D142 gate (the ship gate for this exam)
+
+- a-cand too loose 60 against a-base 65 (-5); the limit was +18 rows of 1821. OK.
+- a-cand exact 1653 against a-base 1631 (+22); the rule was no fewer. OK.
+- Verdict: GO. Round 16 (rwxlite 0.5.0) may replace 0.4.0.
+- Beside the gate, not part of it: too tight 108 against 125 (-17), of 1821.
+
+### D133 mode a bar (reported only, for both models; not the D142 gate)
+
+- a-base (0.4.0, the shipped model): too loose 65 against mech 73, PASS; exact 1631 against mech 1556 plus 92 = 1648, FAIL (17 short). On these six vendors the shipped build fails the D133 exact half.
+- a-cand (0.5.0): too loose 60 against mech 73, PASS; exact 1653 against 1648, PASS.
+
+### D140 mode b at confidence 85 (no bar, reported)
+
+- b85-base: exact 1643 (90.2%), too loose 47 (loose-1 39, loose-2 8; 2.6%), too tight 131 (7.2%), asked 207 (11.4%).
+- b85-cand: exact 1656 (90.9%), too loose 44 (loose-1 37, loose-2 7; 2.4%), too tight 121 (6.6%), asked 191 (10.5%).
+
+### D144 mechanical (reported only, no bar)
+
+- mech (mechanical v4 plus D144) on the six unseen vendors: 1556 exact (85.4%) / 61 loose-1 / 12 loose-2 (73 too loose, 4.0%) / 192 too tight (10.5%), of 1821. This is the first unseen-vendor number for D144. No bar was set, and no baseline without D144 was run, so the exam does not show what D144 alone changed. D144 never touched exam #8 rows before scoring.
+
+### Findings
+
+- (a) 31 rows differ between a-base and a-cand (every id in `rows-a-base.csv` against `rows-a-cand.csv`, checked by comparing the predicted letter row by row). Grouped:
+  - 7 leaks closed, all loose-1 to exact, all w read now as x: baserow user-files upload-via-url POST (ex8-0415), gitbook openapi spec PATCH (0739), gitbook context-connections POST (0792), looker connections POST (1075), looker ldap_config PATCH (1238), looker mobile device POST (1268), wekan board domains POST (1746).
+  - 2 leaks opened, both exact to loose-1, x read as w: bitrise provisioning-profiles `.../uploaded` POST (0560), gitbook storage/upload POST (0894).
+  - 19 tight to exact: baserow data-sync POST (0183), views group_by PATCH (0273), views group_bys POST (0302), user undo PATCH (0443); gitbook insights/events POST (0814), insights/events/aggregate POST (0815, truth r), translations POST (0908), comment replies POST (0931); looker golden_queries POST (1201), looks POST (1257), queries POST (1351), sql_queries POST (1413); shortcut key-results PUT (1590); wekan problems acknowledge POST (1676), checklists POST (1714), dependencies POST (1728), lists POST (1763), assignees POST (1776), list move POST (1786). 16 of the 19 are POST creates or POST actions that were x and are now w (or r for 0815).
+  - 2 exact to tight: baserow workspaces POST (0451), looker password_config PATCH (1295), both w read as x.
+  - 1 tight to tight: looker ldap_config/test_user_info PUT (1242), truth r, w to x.
+  - Checks: 7 - 2 = 5 fewer too loose (65 to 60); 19 - 2 = 17 fewer too tight (125 to 108); exact 1631 + 7 - 2 + 19 - 2 = 1653.
+- (b) The 12 GET leaks (all loose-2, truth x read as r) are identical in mech, a-base and a-cand: baserow builder preview exchange (ex8-0144), database tokens check (0236), licenses check (0338), sso oauth2 callback (0384), user-source openid_connect callback (0424), webhooks by uid (0446); gitbook publishing preview (0837), change-request pdf (0949), space pdf (0989); looker derived_table stop (1169), derived_table start (1170), embed sso validate (1178). They are settled GET rows, which the second pass never sees. Mode a cannot move them.
+- (c) Mode b at 85 has fewer leaks than mode a for both models: base 47 against 65, candidate 44 against 60. It also moves 6 of the 12 GET leaks (loose-2 8 and 7 against 12), which mode a cannot. Mode b sends all 1821 rows; mode a sends 773. In mode b the GET method gains 11 too-tight rows (0 in mode a) for both models.
+- (d) The opened leaks are two rows, so there is no cluster. Looker (22 too loose of 502) and baserow (17 of 488) stay the vendors that hold most of the remaining leaks, mostly x PATCH/PUT read as w: 30 PATCH and 11 PUT leaks in a-cand, of 60.
+- (e) rwxlite's own scorer reproduced mode a and b85 exactly (see Run facts). The 26 collided exam ops are the exact method+path+summary collisions named in the leakage checks above (mostly generic routes). With them removed the candidate still beats base on every count (1627 / 60 / 108 against 1606 / 64 / 125, of 1795), so the gain does not come from the collisions. These are rwxlite's figures, not measured here.
+
+Exam #8 is BURNED for both sides. Any rule or model change needs a new exam.
