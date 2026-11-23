@@ -1331,14 +1331,7 @@ Next, in order:
 
 1. rwxlite round 16. rwxmap ruled six review piles for rwxlite's r16 teacher set (R13 359 rows, r15 263, a 400-row holdout key that is not independent, and D143 passes over r16 526, r15 237 and R13 13 rows), plus 9 D143 rows in rwxlite's English dev set. The 147 exam #7 mistakes go into r16 training at x3 weight (user, 2026-11-21; exam #7 is burned, so training only). rwxlite reports the too-tight rate on POST creates in its English dev set before and after D143. Records: poc/r16-r13-review/, learnings 2026-11-21.
 2. Exam #8: vendors frozen 2026-11-20 and sent to rwxlite as off-limits for its round 16: gitbook, baserow, looker, wekan, shortcut, bitrise (the six reserves, role=reserve, in poc/exam7-shortlist/picked.tsv). Re-checked against every rwxmap set: none appears as a labelled row (only as words inside other vendors' text: libsodium.gitbook.io links in github descriptions, vikunja's WeKan import endpoint, the English word "shortcut", hookdeck's integration list). rwxlite confirmed its r15 final training labels hold no real copies of the six. Process, as for exam #7: rwxlite sends its r16 provider/spec list and ops CSV paths after collection and before labelling or training; rwxmap runs the copy check by a pre-set rule and sends the drop list; then the exam #8 rwxmap ref and pre-registration. rwxlite's round 16 target is the openziti access-policy PUT and PATCH x read as w leaks from exam #7. D141 in mechanical (item 3) is scored on this exam.
-3. D141 in mechanical: deferred to exam #8 (user ruling 2026-11-19). A step 3
-   x word list for the D141 families, matched at lead position. Bar, set
-   before building: tighten-only adoption per D100 (more right than wrong,
-   and neither too loose nor too tight gets worse), scored
-   leave-one-vendor-out on the tuning sets with loose-1 and loose-2 counted
-   separately; its own D-number when built. Known limit until then:
-   login-token GETs (GET /api/login/refresh) stay r in mechanical and mode a,
-   because settled GET r rows never reach the second pass.
+3. D144, D141 in mechanical (user ruling 2026-11-23): built. GET_ACTION gains `refresh`; PATH_X_WORDS gains `verify`, `callback`, `login`; 4 words that passed the D100 tighten-only bar under leave-one-vendor-out (set A: 24 right, 7 wrong, 0 lowered). Scored on exam #8. Known limit: login-token POSTs that step 1's read verbs send to r are out of reach of step 2 and stay r.
 
 Merge rule for D141 training labels, agreed with rwxlite for both halves (R13 rows and r15): raises stay; a lower applies only where a D141 family directly orders it, which in practice is (c), an update of the group object itself (not creates, not sub-resources such as calendar or policies, and not SCIM Groups PATCH, which changes members) with no member/role/permission wording; every other lower reverts. R13: 2 lowers kept (ag-069342, ag-071594), 297 not applied; export commit f62e1c2. r15: 0 kept, 162 reverted.
 

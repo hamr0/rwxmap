@@ -49,3 +49,5 @@
 ## [2026-11-20] index-flat | 53 row(s) (12 product, 40 logs, 1 archive)
 ## [2026-11-20] index-flat | 53 row(s) (12 product, 40 logs, 1 archive)
 ## [2026-11-21] index-flat | 53 row(s) (12 product, 40 logs, 1 archive)
+## [2026-11-23] D144 | 4 words added to GET_ACTION and PATH_X_WORDS; proof-copy pins 53 rows
+## [2026-11-23] index-flat | 53 row(s) (12 product, 40 logs, 1 archive)

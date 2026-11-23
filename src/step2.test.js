@@ -227,8 +227,8 @@ test('path-x-word: fires on POST too (after cant-undo; POST has no credential-se
   assert.equal(step2({ method: 'POST', operationId: 'changePin', path: '/cards/{id}/pin' }), null);
 });
 
-test('path-x-word: sso and policy are not in the list; 36 words', () => {
-  assert.equal(PATH_X_WORDS.size, 36);
+test('path-x-word: sso and policy are not in the list; 39 words', () => {
+  assert.equal(PATH_X_WORDS.size, 39);
   assert.ok(!PATH_X_WORDS.has('sso'));
   assert.ok(!PATH_X_WORDS.has('policy'));
   assert.equal(pw('PUT', '/sso/{id}'), null);
@@ -251,8 +251,8 @@ test('CONTENT_W is disjoint from CANT_UNDO and KEEP_W under stem matching', () =
 
 import { GET_ACTION } from './step2.js';
 
-test('GET_ACTION is exactly logout, revoke, close', () => {
-  assert.deepEqual([...GET_ACTION].sort(), ['close', 'logout', 'revoke']);
+test('GET_ACTION is exactly logout, revoke, close, refresh', () => {
+  assert.deepEqual([...GET_ACTION].sort(), ['close', 'logout', 'refresh', 'revoke']);
 });
 
 test('GET_ACTION is disjoint from KEEP_W and CONTENT_W under stem matching', () => {
@@ -287,3 +287,27 @@ test('get-action does not apply to POST: POST /logout keeps its existing verdict
 test('get-action words injection overrides GET_ACTION', () => {
   assert.equal(step2({ method: 'GET', operationId: 'x', path: '/a/logout' }, { getAction: new Set(['zzz']) }), null);
 });
+
+// ---- D144 words ------------------------------------------------------------
+
+test('D144: refresh raises a GET to x via get-action', () => {
+  const v = step2({ method: 'GET', operationId: 'x', path: '/refresh' });
+  assert.deepEqual(v, { class: 'x', step: 2, rule: 'get-action', source: 'list', matched: ['refresh'] });
+});
+
+test('D144: refresh does not fire on a PUT', () => {
+  assert.notEqual(step2({ method: 'PUT', operationId: 'x', path: '/refresh' })?.matched?.[0], 'refresh');
+  assert.equal(step2({ method: 'PUT', operationId: 'x', path: '/refresh' })?.rule === 'get-action', false);
+});
+
+for (const w of ['verify', 'callback', 'login']) {
+  test(`D144: ${w} raises a PUT to x via path-x-word`, () => {
+    const v = step2({ method: 'PUT', operationId: 'x', path: `/account/${w}` });
+    assert.equal(v?.rule, 'path-x-word');
+    assert.equal(v?.class, 'x');
+    assert.deepEqual(v?.matched, [w]);
+  });
+  test(`D144: ${w} does not fire path-x-word on a GET`, () => {
+    assert.notEqual(step2({ method: 'GET', operationId: 'x', path: `/account/${w}` })?.rule, 'path-x-word');
+  });
+}

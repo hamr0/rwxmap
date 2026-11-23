@@ -88,7 +88,7 @@ export const REMOVES = new Set(['delete', 'purge', 'revoke', 'expire', 'void', '
 export const CREDENTIAL_SET = new Set(['password', 'passcode', 'pin']);
 export const CREDENTIAL_CHANGE_VERBS = new Set(['change', 'regenerate', 'regen']);
 
-// PATH_X_WORDS (36) — the path-word rule (rule name 'path-x-word').
+// PATH_X_WORDS (39) — the path-word rule (rule name 'path-x-word').
 //
 // DIRECTION: claims x. Step 2 owns it (it only ever raises).
 // WHICH ROWS: PUT, PATCH and POST, and only rows no earlier step-2 rule
@@ -115,6 +115,13 @@ export const CREDENTIAL_CHANGE_VERBS = new Set(['change', 'regenerate', 'regen']
 // On POST it was scored once on unseen rows (the words were picked on
 // PUT/PATCH): of the 570 rows KEEP_W lowers, it fires on 103, 78 truth x
 // (leaks closed), 25 truth w (new too tight).
+//
+// PROVENANCE (D144): verify, callback and login added; measured in
+// poc/d141-mech/score.mjs on set A (D141 relabel, 102,590 non-QUERY rows, 691
+// vendors). Under leave-one-vendor-out: verify 12 right / 3 wrong over 7
+// vendors, callback 3 / 0 over 3, login 2 / 0 over 2; all raises w->x. Failed
+// the bar as path words: verification, endpoint, apns, push, fcm, oidc, saml,
+// ldap, idp, certificate, whitelist, admin, owner, auth, remove.
 export const PATH_X_WORDS = new Set([
   'role', 'member', 'access', 'permission', 'share', 'membership', 'oauth',
   'authorization', 'scope', 'scim', 'shared_link', 'acl', 'invite',
@@ -122,9 +129,10 @@ export const PATH_X_WORDS = new Set([
   'mfa', 'key', 'secret', 'token', 'credential', 'api_key', 'signing',
   'hook', 'webhook', 'integration', 'destination', 'logpush', 'event_stream',
   'log_stream', 'logsink', 'log_drain', 'forwarding',
+  'verify', 'callback', 'login',
 ]);
 
-// GET_ACTION (3) — the get-action rule (rule name 'get-action').
+// GET_ACTION (4) — the get-action rule (rule name 'get-action').
 //
 // DIRECTION: claims x. Step 2 owns it (it only ever raises a read).
 // WHICH ROWS: READ_METHODS rows only (GET, HEAD, OPTIONS, QUERY). A GET that
@@ -145,7 +153,13 @@ export const PATH_X_WORDS = new Set([
 // create, acquire and activate failed (mostly reads: docusign Connect_*,
 // connected_accounts, created_rate). Lists grow with evidence; rwxlite
 // corrects the rest.
-export const GET_ACTION = new Set(['logout', 'revoke', 'close']);
+//
+// PROVENANCE (D144): refresh added; measured in poc/d141-mech/score.mjs on set
+// A (D141 relabel, 102,590 non-QUERY rows, 691 vendors). Under leave-one-vendor-out
+// refresh 7 right / 4 wrong over 5 vendors; all raises r->x. Failed the bar on
+// GET: login, signin, logon, verify, validate, authenticate, authorize, otp,
+// callback, token, exchange, generate.
+export const GET_ACTION = new Set(['logout', 'revoke', 'close', 'refresh']);
 
 /**
  * The get-action rule's match, or [] when it does not fire.
