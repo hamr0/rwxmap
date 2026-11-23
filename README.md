@@ -49,7 +49,7 @@ rwxmap reads specs and writes every format. The deciding is rules, plus a model 
 
 How it decides:
 
-- Method floor: GET, HEAD, OPTIONS and QUERY are r, unless the name is a one-way action (logout, revoke, close), which raises it to x. DELETE is x. PUT and PATCH are w, raised to x by a path word (role, member, token, webhook and the like) or a credential-set verb. POST is x, lowered to w by a content noun (tag, file, comment and the like) or a short list of verbs, or to r by a read verb (list, get, search and the like).
+- Method floor: GET, HEAD, OPTIONS and QUERY are r, unless the name is a one-way action (logout, revoke, close, refresh), which raises it to x. DELETE is x. PUT and PATCH are w, raised to x by a path word (role, member, token, webhook and the like) or a credential-set verb. POST is x, lowered to w by a content noun (tag, file, comment and the like) or a short list of verbs, or to r by a read verb (list, get, search and the like).
 - Unsure rows get a marker. `loose`: a PUT, PATCH or POST left at w or r; a reviewer checks if it should be x (most too-loose rows live here). `tight`: an x that may be stricter than needed, including rows the second pass could not decide; too tight costs usability, not safety. `settled`: nothing lowered it, nothing is doubtful; not signed, not verified.
 - Still unsure: x plus review. Never a looser guess.
 
@@ -173,7 +173,7 @@ Exit 0 on success, 1 on any failure. An existing output file is not overwritten 
 
 <details><summary>rwxlite model</summary>
 
-- A run that uses rwxlite fetches the manifest of the pinned rwxlite release, v0.5.0 (a small request), downloads the model if it is not cached, checks every sha256, and only then puts it in place.
+- A run that uses rwxlite fetches the manifest of the pinned rwxlite release, v0.5.0 (a small request), downloads the model if it is not cached, checks every sha256, and only then puts it in place (a cached folder of that model that fails the check is replaced by the fresh download).
 - Default: the exact fp32 model, about 91 MB, downloaded once. `--model small`: the int8 model, about 23 MB.
 - Cache: `$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`, one folder per model.
 - Downloads are https only, from github.com and its githubusercontent.com hosts, capped at 200 MB. A failed or tampered download installs nothing.

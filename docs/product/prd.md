@@ -174,8 +174,8 @@ the code runs.
 | POST | x | step 1 `read-verb`; step 1 `read-verb-anywhere`; step 2 `cant-undo-verb`; step 2 `path-x-word`; step 3 `modify-verb`; step 3 `content-noun` | r, r, x, x, w, w |
 
 - GET, HEAD, OPTIONS, QUERY: floor r (step 1 `floorRead`, rule
-  `method`, evidence floor). `get-action` (`GET_ACTION`, 3 words:
-  logout, revoke, close) raises to x; otherwise r.
+  `method`, evidence floor). `get-action` (`GET_ACTION`, 4 words:
+  logout, revoke, close, refresh) raises to x; otherwise r.
 - DELETE: always x, `destructive: true`, rule `method-delete`, settled.
   Nothing downstream runs for it.
 - PUT, PATCH: floor w (step 3 `method-floor`). Three step 2 rules raise
@@ -184,7 +184,7 @@ the code runs.
   charge, refund, cancel, merge, rotate, reset, start). `credential-set`
   (D131): password, passcode or pin set, or change, regenerate or regen
   of one (`CREDENTIAL_SET` 3, `CREDENTIAL_CHANGE_VERBS` 3).
-  `path-x-word`: a `PATH_X_WORDS` word (36: role, member, permission,
+  `path-x-word`: a `PATH_X_WORDS` word (39, D144 added verify, callback, login: role, member, permission,
   scope, invite, grant, secret, token, key, webhook, integration,
   destination) anywhere in the path, by stem or substring.
 - POST: floor x (step 2 `floor-post`). `read-verb`: the lead verb is in
@@ -280,8 +280,8 @@ operationId, a literal path segment or the summary (D131).
 | `CANT_UNDO` | step 2 | 29 | the row's verb | x |
 | `REMOVES` ⊂ `CANT_UNDO` | step 2 | 6 (delete purge revoke expire void redact) | the row's verb | sets `destructive: true` |
 | `KEEP_W` | step 3 | 14 | the row's verb | w |
-| `PATH_X_WORDS` | step 2 | 36 | anywhere in the path, stem or substring (PUT, PATCH, POST) | x |
-| `GET_ACTION` | step 2 | 3 | read methods | x |
+| `PATH_X_WORDS` | step 2 | 39 | anywhere in the path, stem or substring (PUT, PATCH, POST) | x |
+| `GET_ACTION` | step 2 | 4 | read methods | x |
 | `CREDENTIAL_SET` + `CREDENTIAL_CHANGE_VERBS` | step 2 | 3 + 3 | PUT, PATCH (D131) | x |
 | `CONTENT_W` (veto `CONTENT_VETO`, 2) | step 3 | 20 | POST path or operation words | w |
 
@@ -370,7 +370,7 @@ outside service, and the adopter must say so.
 |---|---|
 | `src/tokens.js` | splitter, tokenizer, verb stemmer, `verbForRow`, `LEAD_MODIFIERS`, `METHOD_WORDS` — readers only |
 | `src/step1.js` | step 1, r: rules `method`, `read-verb`, `read-verb-anywhere`; `READ_METHODS` (4), `READ_VERBS` (23), `SAFE_VERBS` (10), the plural-noun guard (D74, D99); `floorRead` is the read floor |
-| `src/step2.js` | step 2, x: rules `method-delete`, `cant-undo-verb(-summary)`, `credential-set`, `path-x-word`, `get-action`, `floor-post`; `CANT_UNDO` (29), `REMOVES` (6), `CREDENTIAL_SET` (3), `CREDENTIAL_CHANGE_VERBS` (3), `PATH_X_WORDS` (36), `GET_ACTION` (3) |
+| `src/step2.js` | step 2, x: rules `method-delete`, `cant-undo-verb(-summary)`, `credential-set`, `path-x-word`, `get-action`, `floor-post`; `CANT_UNDO` (29), `REMOVES` (6), `CREDENTIAL_SET` (3), `CREDENTIAL_CHANGE_VERBS` (3), `PATH_X_WORDS` (39), `GET_ACTION` (4) |
 | `src/step3.js` | step 3, w: rules `method-floor`, `modify-verb(-summary)`, `content-noun`; `KEEP_W` (14), `CONTENT_W` (20), `CONTENT_VETO` (2) |
 | `src/flow.js` | `classifyRow` (the order, written once) and `reviewHint` (the one writer of `review`) |
 | `src/jev.js` | the three Jev tiers, thresholds, `applyJev`, `needsJev`, `jevState`, `jevQuestions` |
@@ -968,7 +968,7 @@ above.
 Pin pass to rwxlite 0.5.0 (D145 GO, built and verified 2026-11-23, unreleased):
 RWXLITE_TAG v0.5.0 (cache fallback 0.5.0 and accepted range 0.5.x derive from
 it; 0.4.x, 0.6.0 and 0.3.x refused), LOWER_MIN_P stays 0.90 (exam #8 measured
-0.5.0 at that cut), 674 tests, guards broken by hand once (tag back to v0.4.0:
+0.5.0 at that cut), 724 tests, guards broken by hand once (tag back to v0.4.0:
 35 of 134 red in the three pin test files). Verified: npm rwxlite@0.5.0 gitHead
 92ad8ae2 equals tag v0.5.0, and its src/ and package.json (minus gitHead) are
 byte-identical to rwxlite commit 67f732c (the exam #8 candidate); GitHub
@@ -1124,7 +1124,11 @@ decided; everything marked "proposal" or "open" is not decided.
   listed file exists inside the directory (no `/`, `\` or `..` in names)
   and matches its sha256. Any failure means the model is not used:
   mechanical runs alone and the run says so loudly. Among cached models
-  of the pinned version, an invalid one does not hide a valid one.
+  of the pinned version, an invalid one does not hide a valid one. When
+  the network works, a cached folder of the pinned model that fails this
+  check is replaced by the fresh download once that download verifies (4ce6e9d;
+  before, the rename hit ENOTEMPTY and every run stayed off); a download that
+  fails verification leaves the old folder as it was.
 - **Default model and `--model` (user ruling, 2026-11-04).** rwxmap's
   default model is rwxlite's fp32 "exact" model (91 MB, the un-quantised
   original, no quantisation drift; manifest `manifest-exact.json`). A
