@@ -1,6 +1,6 @@
 # Pre-registration: shared clean exam #8, rwxmap side (D142 next-model ship gate, rwxlite round 16)
 
-**Status: DRAFT. CANDIDATE ADDENDUM: PENDING. Truth sha256: PENDING.** Not yet scored.
+**Status: PREREGISTERED. CANDIDATE ADDENDUM: filled 2026-11-23. Truth sha256 committed.** Not yet scored.
 
 Inputs are frozen in commit 70630cf (the wekan provider value was fixed in
 88d4171). No CLI run, no rwxlite run and no Jev run has touched an exam #8 row.
@@ -126,9 +126,10 @@ rows are scored.
   committed, the CANDIDATE ADDENDUM is filled in and the truth sha256 is
   committed. Only then is it shared with rwxlite, whose scorer checks the same
   sha256.
-- `truth.csv` sha256: **PENDING** (committed at the addendum step, with the
-  candidate addendum, before any score). `truth.csv.sha256` and
-  `labelling/out.sha256` hold the same values in the working tree.
+- `truth.csv` sha256: **0dfc8b42bd85f336ab7897b902e228e0ec8cca2960f0ffc6b8887dee17e8ac42**
+  (`truth.csv.sha256`). Built by `labelling/build-truth.mjs` from the 12
+  labeller files and `labelling/rulings.csv`; three runs gave the same sha.
+  `labelling/out.sha256` is committed beside it.
 - Measured facts about the labelling (from the labelling record kept by the
   orchestrator; the labeller files themselves are not in git): 12 labeller files
   (A Sonnet, B Opus, for each of the 6 vendors), all validated directly; each
@@ -187,9 +188,14 @@ rows are scored.
 
 ### CANDIDATE: the model rwxlite enters
 
-**CANDIDATE ADDENDUM: PENDING.** The candidate is rwxlite round 16 (r16), entered
-by rwxlite. This section is filled in, and committed, BEFORE the truth sha256 is
-shared with rwxlite and before any scoring. The scorer refuses to score any
+**CANDIDATE ADDENDUM: filled 2026-11-23.** The candidate is rwxlite round 16 (r16),
+the r16 student, entered by rwxlite. Values were sent by rwxlite on 2026-11-23 and
+checked by the orchestrator against the file bytes and the rwxlite commits before
+this commit. rwxlite's dev figures, as rwxlite's and not measured here (dev-v3
+subset (b), 3,286 rows, mode a at 0.90, fp32): 0.5.0 3,093 exact / 41 too loose /
+152 too tight against 0.4.0's 3,064 / 42 / 180; at the ecee4f1 lean 3,093 / 38 /
+155. This section is filled in, and committed, BEFORE the truth sha256 is shared
+with rwxlite and before any scoring. The scorer refuses to score any
 `*-cand` config unless every value below is given on its command line, and checks
 each against the files (a model string must equal
 `rwxlite-<version>+<first 8 hex of its model file's sha256>`, and must differ from
@@ -199,17 +205,16 @@ refuses if any field says PENDING or any value differs from the command line.
 
 | field | value |
 |---|---|
-| rwxlite package version | PENDING |
-| rwxlite package ref (commit in the rwxlite repo) | PENDING |
-| rwxlite tag / version (the tag rwxmap would pin) | PENDING |
-| model string (fp32) | PENDING |
-| model-fp32.onnx sha256 | PENDING |
-| manifest-exact.json sha256 (fp32) | PENDING |
-| vocab.txt sha256 | PENDING |
-| rwxlite prereg commit (rwxlite repo) | PENDING |
+| rwxlite package version | 0.5.0 |
+| rwxlite package ref (commit in the rwxlite repo) | 67f732c241227cf7d682f0bf881130a0b8f6732a |
+| rwxlite tag / version (the tag rwxmap would pin) | v0.5.0 |
+| model string (fp32) | rwxlite-0.5.0+82fa50c3 |
+| model-fp32.onnx sha256 | 82fa50c394b1ef274e02ae9355bed56a6405fb001bd7694a6dd78acdc574065e |
+| manifest-exact.json sha256 (fp32) | b576eb72a442d074c669f4cfd92b178ddf571d295d067db0b5e7891b5e67fd8e |
+| vocab.txt sha256 | 07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3 |
+| rwxlite prereg commit (rwxlite repo) | 87f501d83d06e1f162866095197c8b9d21a4edfc |
 
-Model dir: PENDING (a folder holding manifest-exact.json, model-fp32.onnx and
-vocab.txt, given to the scorer as `--cand-models`).
+Model dir: /home/hamr/PycharmProjects/rwxlite/data/m1-r16 (manifest-exact.json, model-fp32.onnx, vocab.txt). The v0.5.0 tag and release do not exist; the scorer loads the package by git archive of the package ref and the model from this dir, with GitHub blocked. rwxlite's other commits: 0eb4230 (dev model and prediction sha256s, before its dev scoring), a9eb49a (dev result, PASS), 601e5f3 (addendum values doc only). The prereg commit field is 87f501d, section 16, the rule written before training.
 
 Only fp32 is scored (rwxmap's default model). The int8 per-channel model
 (`--model small`) is not part of this exam, for either the baseline or the candidate.
@@ -320,10 +325,10 @@ above truth) are never folded into one number.
    disagreement; truth built and held. Done, before this prereg (see the order
    note).
 3. Code ref ecee4f1 frozen; the lean built. Done.
-4. This prereg is committed.
+4. This prereg is committed. Done.
 5. The CANDIDATE ADDENDUM is filled in and committed (rwxmap and rwxlite agree on
    the same ref, tag, hashes and model string), together with the truth sha256
-   (written into this file).
+   (written into this file). Done, in this commit.
 6. The truth sha256 is sent to rwxlite; `truth.csv` is opened only now.
 7. rwxlite commits its prediction hashes.
 8. Each side scores once, on the same rows. A rerun is allowed only for a crash or
