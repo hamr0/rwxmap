@@ -8,7 +8,7 @@ import { loadSpec } from '../../src/load.js';
 
 const dir = dirname(fileURLToPath(import.meta.url));
 const VENDORS = [
-  ['gitbook', 'gitbook.com', 403], ['baserow', 'baserow.io', 488], ['looker', 'looker.com', 502], ['wekan', 'wekan.team', 157], ['shortcut', 'shortcut.com', 143], ['bitrise', 'bitrise.io', 128],
+  ['gitbook', 'gitbook.com', 403], ['baserow', 'baserow.io', 488], ['looker', 'looker.com', 502], ['wekan', 'wekan.github.io', 157], ['shortcut', 'shortcut.com', 143], ['bitrise', 'bitrise.io', 128],
 ];
 const METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'];
 const HEADER = 'id,provider,method,path,operationId,summary,description';
