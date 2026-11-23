@@ -1,15 +1,19 @@
 # Shared clean exam #8 - frozen inputs
 
-Status: INPUTS FROZEN. NOT LABELLED. Nothing here has been run through any
-rwxmap classifier, the CLI or rwxlite; no letters exist before truth is built.
+Status: INPUTS FROZEN. LABELLED, truth built and held (sha256 committed later, in the
+prereg). Nothing here has been run through the CLI or rwxlite; the only classifier
+run on these rows is the mechanical lean (`lean/`), which is not shown to anyone
+with truth.
 Bytes fetched 2026-11-18 during shortlisting (`poc/exam7-shortlist/`, the six
 `role=reserve` vendors in its `picked.tsv`); frozen 2026-11-23.
 `sources.json` has the URLs, pins and sha256 of the original bytes. The
 shortlist did not record fetch timestamps, so `retrieved_at` there says
 "unknown" and notes that the local file mtime was not preserved.
 
-exam #8 rwxmap code ref: TBD (set at prereg). Labellers: A = TBD (set at
-prereg), B = TBD (set at prereg), blind, on
+exam #8 rwxmap code ref: `ecee4f1` (frozen 2026-11-23: mechanical v4 plus D144, which
+adds refresh to GET_ACTION and verify, callback and login to PATH_X_WORDS; rwxlite
+pin v0.4.0, cut 0.90 and mode b default 85, as shipped in 0.12.0). Labellers: A = Sonnet,
+B = Opus, blind, on
 `data/relabel-v4-2026-11-05/BRIEF-v4.md` plus the D141 addendum
 (`data/relabel-v4-2026-11-05/BRIEF-v4-addendum-D141.md`) and the D143 addendum
 (bookings are x).
