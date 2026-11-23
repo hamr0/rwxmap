@@ -53,3 +53,5 @@
 ## [2026-11-23] index-flat | 53 row(s) (12 product, 40 logs, 1 archive)
 ## [2026-11-23] exam #8 | scored once, burned; rwxlite 0.5.0 D142 GO (D145); mode a 1653/60/108 vs 0.4.0 1631/65/125 of 1821
 ## [2026-11-23] index-flat | 54 row(s) (13 product, 40 logs, 1 archive)
+## [2026-11-23] pin pass | rwxlite 0.5.0 (D145) built and verified: tag v0.5.0, range 0.5.x, real install on exam #8 0 rows differ of 1821
+## [2026-11-23] index-flat | 54 row(s) (13 product, 40 logs, 1 archive)

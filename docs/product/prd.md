@@ -965,24 +965,25 @@ above.
 - **The proxy matcher** — `rwxmap/match` (D126) released as
   `rwxmap@0.8.0` on 2026-10-29.
 
-Pin pass to rwxlite 0.4.0 (D142 GO, built and verified 2026-11-20, shipped in 0.12.0 on 2026-11-20):
-RWXLITE_TAG v0.4.0 (cache fallback 0.4.0 and accepted range 0.4.x derive from
-it; 0.3.x, 0.5.0 and 0.2.x refused), LOWER_MIN_P stays 0.90 (exam #7 measured
-0.4.0 at that cut), 666 tests, guards broken by hand once. Verified: GitHub
-release v0.4.0 asset sha256 equal to the exam #7 addendum (model-fp32.onnx
-4608f470, manifest-exact.json 5b3e5b87, vocab.txt 07eced37); npm rwxlite@0.4.0
-integrity sha512 equals the registry's, tagged latest; its src/ and types/ and
-package.json are byte-identical to rwxlite commit 088bec1 (the exam #7
-candidate). Real install on exam #7 (rwxmap tarball plus npm rwxlite@0.4.0,
-empty cache, model downloaded from the release, model rwxlite-0.4.0+4608f470):
-1579 of 1579 operations joined, 0 rows differ from the committed a-cand and
-b85-cand rows (class and marker). Exam #7 numbers are unchanged.
+Pin pass to rwxlite 0.5.0 (D145 GO, built and verified 2026-11-23, unreleased):
+RWXLITE_TAG v0.5.0 (cache fallback 0.5.0 and accepted range 0.5.x derive from
+it; 0.4.x, 0.6.0 and 0.3.x refused), LOWER_MIN_P stays 0.90 (exam #8 measured
+0.5.0 at that cut), 674 tests, guards broken by hand once (tag back to v0.4.0:
+35 of 134 red in the three pin test files). Verified: npm rwxlite@0.5.0 gitHead
+92ad8ae2 equals tag v0.5.0, and its src/ and package.json (minus gitHead) are
+byte-identical to rwxlite commit 67f732c (the exam #8 candidate); GitHub
+release v0.5.0 assets: model-fp32.onnx 82fa50c3, manifest-exact.json b576eb72,
+vocab.txt 07eced37, model-int8-pc.onnx fac72395, manifest.json 9ecefd18. Real
+install on exam #8 (rwxmap tarball plus npm rwxlite@0.5.0, empty cache, model
+downloaded from the release, model rwxlite-0.5.0+82fa50c3): 1821 of 1821
+operations joined, 0 rows differ from the committed a-cand and b85-cand rows
+(class and marker). Exam #8 numbers are unchanged.
 
 Module definitions: [module ladder](../wiki/module-ladder-and-shape.md).
 
 ## Module D133: rwxmap with rwxlite (three engines)
 
-Status: shipped. Passes 1, 2a and 2b shipped in 0.9.0; rwxlite 0.3.1 at the 0.90 cut (D139) shipped in 0.11.0 on 2026-11-07; the pin moved to rwxlite 0.4.0 at the same 0.90 cut (D142 GO, pin pass verified 2026-11-20, shipped in 0.12.0 on 2026-11-20). The default run uses rwxlite when the `rwxlite@0.4` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
+Status: shipped. Passes 1, 2a and 2b shipped in 0.9.0; rwxlite 0.3.1 at the 0.90 cut (D139) shipped in 0.11.0 on 2026-11-07; rwxlite 0.4.0 at the same 0.90 cut (D142 GO) shipped in 0.12.0 on 2026-11-20; the pin moved to rwxlite 0.5.0 at the same cut (D145 GO, pin pass verified 2026-11-23, unreleased). The default run uses rwxlite when the `rwxlite@0.5` package is installed and is mechanical ("rwxlite: off") otherwise. User rulings 2026-11-03 and 2026-11-04 are below as
 decided; everything marked "proposal" or "open" is not decided.
 
 ### Decided (user rulings, 2026-11-03 and 2026-11-04)
@@ -1105,14 +1106,14 @@ decided; everything marked "proposal" or "open" is not decided.
 - **Distribution.** Ships on npm. The model is downloaded on first use
   and is pinned to one rwxlite release tag in each rwxmap release (D135;
   `RWXLITE_TAG` in `src/modeldownload.js`). The rwxlite npm package that
-  runs it must be in the same minor line (>=0.4.0 <0.5.0, derived from the
+  runs it must be in the same minor line (>=0.5.0 <0.6.0, derived from the
   tag, read from the package's own package.json); any other version, a
   pre-release or an unreadable version turns rwxlite off, mechanical
   alone, with the reason printed (D135). The package is checked before
   the model is fetched, so a missing or wrong-version package costs no
-  download. Current pin (D142, verified 2026-11-20, shipped in 0.12.0): rwxlite 0.4.0, tag v0.4.0,
-  cache fallback 0.4.0, accepted range 0.4.x (0.3.x and 0.5.0 refused), model
-  rwxlite-0.4.0+4608f470 (fp32), LOWER_MIN_P 0.90. Every run records the model string.
+  download. Current pin (D145, verified 2026-11-23, unreleased): rwxlite 0.5.0, tag v0.5.0,
+  cache fallback 0.5.0, accepted range 0.5.x (0.4.x and 0.6.0 refused), model
+  rwxlite-0.5.0+82fa50c3 (fp32), LOWER_MIN_P 0.90. Every run records the model string.
 - **Model cache and integrity.** The downloaded model is cached in a
   per-user folder, `~/.cache/rwxmap/` (or `$XDG_CACHE_HOME/rwxmap`),
   one directory per model: `rwxlite-<semver>+<sha8>/` holding
@@ -1139,7 +1140,7 @@ decided; everything marked "proposal" or "open" is not decided.
   session, 2026-11-04).** GitHub releases on `hamr0/rwxlite`. Assets per
   release: `manifest.json` (int8 per-channel), `manifest-exact.json`
   (fp32), `model-int8-pc.onnx`, `model-fp32.onnx`, `vocab.txt`. Pinned
-  tag (D135): `https://github.com/hamr0/rwxlite/releases/download/v0.4.0/manifest-exact.json`
+  tag (D135): `https://github.com/hamr0/rwxlite/releases/download/v0.5.0/manifest-exact.json`
   (rwxmap default) and `.../manifest.json` (`--model small`). Not live
   yet. On download rwxmap stores the chosen manifest as `manifest.json`
   inside the model's own folder `rwxlite-<semver>+<sha8>/` (the cache
@@ -1285,20 +1286,21 @@ None.
 
 ## What is next
 
-0.12.0 is on npm (2026-11-20): the rwxlite 0.4.0 pin (D142 GO on exam #7,
-pin pass verified from a clean install) and mode b default `--confidence 85`
-(D140).
+0.12.0 is on npm (2026-11-20): the rwxlite 0.4.0 pin (D142 GO on exam #7) and
+mode b default `--confidence 85` (D140). The rwxlite 0.5.0 pin (D145) is built
+and verified, unreleased.
 
-Current number (exam #7, scored once 2026-11-20 through the real CLI at
-rwxmap 7dce23e, 1579 ops, 6 unseen APIs: huggingface, openziti,
-pipedrive, ringcentral, vikunja, gitness; two labellers, Sonnet and Opus,
-agreed on 1513 rows, the user ruled 66): mode a with rwxlite 0.3.1 as
-shipped 1431 exact (90.6%) / 68 too loose (4.3%; 50 loose-1, 18 loose-2) /
-80 too tight (5.1%); mechanical 1333 (84.4%) / 72 (4.6%; 54 loose-1, 18
-loose-2) / 174 (11.0%). The D133 mode a bar passes both halves (68 <= 72;
-1431 >= 1412). 15 of the 18 loose-2 rows are settled GET rows the model
-never sees. Exam #6 (1588 ops, mode a 1434 / 35 / 119) and exam #5 are
-in learnings. GET stays as is (user ruling 2026-11-08), see learnings.
+Current number (exam #8, scored once 2026-11-23 through the real CLI at
+rwxmap 474ecb1, 1821 ops, 6 unseen APIs: gitbook, baserow, looker, wekan,
+shortcut, bitrise; two labellers, Sonnet and Opus, agreed on 1711 rows, the
+user ruled 110): mode a with rwxlite 0.5.0 1653 exact (90.8%) / 60 too loose
+(3.3%; 48 loose-1, 12 loose-2) / 108 too tight (5.9%); mode b at 85 1656
+(90.9%) / 44 (2.4%) / 121 (6.6%); mechanical 1556 (85.4%) / 73 (4.0%; 61
+loose-1, 12 loose-2) / 192 (10.5%). The shipped 0.4.0 on the same exam: mode a
+1631 / 65 / 125. The D133 mode a bar passes both halves with 0.5.0 (60 <= 73;
+1653 >= 1648). The 12 loose-2 rows are settled GET rows the model never sees.
+Exams #7 (1579 ops, mode a 0.4.0 1432 / 66 / 81) and #6 are in learnings. GET
+stays as is (user ruling 2026-11-08), see learnings.
 
 D141 (user ruling 2026-11-19, brief only, not built): five places where
 BRIEF-v4 was ambiguous, surfaced by rwxlite round 15 review. One letter per
@@ -1329,7 +1331,7 @@ loose is accepted as a trade.
 
 Next, in order:
 
-1. rwxlite round 16, exam #8 scored 2026-11-23 (D145, user ruling): GO. rwxlite 0.5.0 (rwxlite-0.5.0+82fa50c3) passed the D142 gate on exam #8 (1821 ops, six unseen vendors): mode a 1653 exact / 60 too loose / 108 too tight against 0.4.0's 1631 / 65 / 125, and 0.4.0 fails the D133 exact half on these vendors (1631 against the 1648 needed). 0.5.0 replaces 0.4.0 at the next release. The pin pass to 0.5.0 (RWXLITE_TAG v0.5.0, cache fallback, accepted range 0.5.x, verified from a clean install) waits for rwxlite's v0.5.0 release; then release, and that release quotes exam #8 as the current number. The shipped build is still 0.4.0 and the published numbers above change only at that release. Record: docs/wiki/exam-prereg-exam8.md (Results and findings), learnings 2026-11-23, D145.
+1. rwxlite 0.5.0 pin (D145): built and verified 2026-11-23 from a clean install on exam #8 (0 rows differ); release next, quoting exam #8. Record: docs/logs/learnings.md 2026-11-23 pin pass, D145.
 2. D144, D141 in mechanical (user ruling 2026-11-23): built. GET_ACTION gains `refresh`; PATH_X_WORDS gains `verify`, `callback`, `login`; 4 words that passed the D100 tighten-only bar under leave-one-vendor-out (set A: 24 right, 7 wrong, 0 lowered). Scored on exam #8 (reported only, no bar): mech with D144 1556 exact / 73 too loose / 192 too tight of 1821. Known limit: login-token POSTs that step 1's read verbs send to r are out of reach of step 2 and stay r.
 
 Merge rule for D141 training labels, agreed with rwxlite for both halves (R13 rows and r15): raises stay; a lower applies only where a D141 family directly orders it, which in practice is (c), an update of the group object itself (not creates, not sub-resources such as calendar or policies, and not SCIM Groups PATCH, which changes members) with no member/role/permission wording; every other lower reverts. R13: 2 lowers kept (ag-069342, ag-071594), 297 not applied; export commit f62e1c2. r15: 0 kept, 162 reverted.
