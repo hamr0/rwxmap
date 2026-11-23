@@ -1,0 +1,406 @@
+#1 r16-00c47a34986a9438 POST /v2/account/link/apple
+operationId: Mezon_LinkApple
+summary: Add an Apple ID to the social profiles on the current user's account.
+description: 
+sonnet: x — adds a new login method to account; tighter
+
+#2 r16-06e7b05696083af2 POST /api/v1/billing/register-customer/{customerID}
+operationId: RegisterCustomer
+summary: 
+description: 
+sonnet: x — no text; billing registration; tighter
+
+#3 r16-16d0dca1b2f620e4 POST /employees
+operationId: 
+summary: Create employee (Admin only)
+description: 
+sonnet: x — creates employee maybe login account; tighter
+
+#4 r16-20347464f26af947 POST /api/identity/verify
+operationId: 
+summary: Verify user identity
+description: 
+sonnet: x — identity verify; could be login family; tighter
+
+#5 r16-223a2f940fa09aae POST /api/imports/upload
+operationId: uploadImport
+summary: Start a PGN import from uploaded file bytes
+description: Accepts a `multipart/form-data` POST with a single field named `file`
+containing the PGN file bytes. Before import, the backend writes
+`motif_upload_<import_id>.pgn` inside the database bundle and syncs it,
+then runs the same pipeline as `POST /api/imports`. On POSIX the file
+and bundle directory are synced before import; Windows directory-entry
+durability across power loss is not guaranteed. A completed upload is
+removed after checkpoint removal is synced where supported. If an
+import is canceled or fails, its source is kept; a checkpoint naming it
+permits resume by calling `POST /api/imports` with that path. Retained
+files are not deleted by a later resume or upload and must be removed
+manually. If a checkpoint cannot be read or directory sync fails, the
+source is kept.
+
+Use this endpoint from browser frontends where the full filesystem path
+of a user-selected file is not accessible.
+sonnet: x — starts import pipeline run; tighter
+
+#6 r16-2ca9780bc040738d POST /api/v1/delivery/override-activity/{projectID}/{activityID}
+operationId: OverrideActivity
+summary: 
+description: 
+sonnet: x — override with no text; tighter
+
+#7 r16-2def320d2fc69901 POST /v1/checkout/quote
+operationId: createCheckoutQuote
+summary: Generate ephemeral checkout quote with 10-minute price-lock
+description: Section 5A Unified Cart & Quote: Computes item subtotals, packaging fees, platform fee, and GST taxes for items across multiple merchants. Evaluates merchant proximity (1.5 km threshold) to offer Mode A (SEPARATE) and Mode B (DELIVER_TOGETHER). Establishes soft inventory reservations with 10m TTL.
+sonnet: w — quote but makes soft reservations
+
+#8 r16-3409788c1a4714c5 POST /api/bookings
+operationId: 
+summary: Create a booking for the current user. Returns 409 if the property is not available for the selected dates.
+description: JWT: Required. Roles: Any authenticated user (Guest/Host/Admin).
+Request body must include property/date/guest/price details and `paymentMethod`.
+sonnet: x — booking with payment method may charge; tighter
+
+#9 r16-36c39d81e332f8f0 POST /ws/remove_friend
+operationId: 
+summary: Remove a friend over WebSocket
+description: Send `{"action":"remove_friend","payload":{"friend_id":"..."}}` after connecting to `/api/ws`. The server removes the friendship in either direction and replies with `remove_friend` and a confirmation message.
+sonnet: x — removes friendship; tighter
+
+#10 r16-40eb9eb2be88d683 POST /internal/reviews/{reviewId}/apply
+operationId: internalApplyStoredContextDecision
+summary: 
+description: Idempotent by stored final review/decision. Validates case/live/snapshot/evidence/policy/task/thread and actor. DEFER cannot apply.
+sonnet: x — applies decision; unclear; tighter
+
+#11 r16-456434501ba8d795 POST /pdps/groups/batch
+operationId: createOrUpdateGroups
+summary: Create or update PDP Groups
+description: Create or update one or more PDP Groups, returning optional error details
+sonnet: x — PDP groups may involve policy; tighter
+
+#12 r16-4fc9426cd00cc3b4 POST /api/streak/freeze
+operationId: 
+summary: Use streak freeze
+description: Uses one streak freeze to protect the current streak
+sonnet: x — consumes a streak freeze; tighter
+
+#13 r16-51bf5ea732289131 POST /v2/account/link/gamecenter
+operationId: Mezon_LinkGameCenter
+summary: Add Apple's GameCenter to the social profiles on the current user's account.
+description: 
+sonnet: x — adds a new login method; tighter
+
+#14 r16-5338157a35359af1 POST /staff/v1/ops/issuer-snapshots
+operationId: registerStaffIssuerSnapshot
+summary: Register a public JWKS issuer snapshot bound to an organisation's OIDC issuer
+description: Rejects private or symmetric JWK parameters (`d`, `p`, `q`, `dp`, `dq`, `qi`, `oth`, `k`), verifies the issuer matches the organisation's realm issuer and appends a `StaffAuditEntry`.
+sonnet: x — registers trusted issuer keys; tighter
+
+#15 r16-57a80d4d88443923 POST /interviews/{interviewId}/phase
+operationId: 
+summary: Advance the interview phase
+description: The same call exists at /sessions/{sessionId}/interviews/{interviewId}/phase.
+sonnet: x — advances phase maybe no step back; tighter
+
+#16 r16-5a38aebbdc70fdf8 POST /api/sms/add/
+operationId: 
+summary: This sends a SMS to the database.
+description: Sends sms to the bd
+sonnet: x — says sends SMS; ambiguous; tighter
+
+#17 r16-5acfec6d591020ff PATCH /mcp-proxy/{name}/stream/{path}
+operationId: 
+summary: Proxy streamable HTTP requests to MCP server
+description: Proxy streamable HTTP requests to a specific MCP server
+sonnet: x — proxy passthrough unknown effect; tighter
+
+#18 r16-63e019e65411007b POST /api/v1/delivery/set-project-run-state/{projectID}
+operationId: SetProjectRunState
+summary: 
+description: 
+sonnet: x — sets run state may start run; tighter
+
+#19 r16-64f83054d76cbc5c POST /api/schedule/optimize
+operationId: 
+summary: Optimize Schedule
+description: Optimize existing schedule using AI algorithms
+sonnet: w — optimize may read or change schedule
+
+#20 r16-659835f50b25f75c POST /servers
+operationId: serversPost
+summary: Create new server.
+description: Create (request) a new server for the account. Server DNS will be configured to access Google's public DNS at 8.8.8.8 . Note that the product availability API can be used prior to doing the provision request. Refer to https://developers.phoenixnap.com/docs/bmc-billing/1/routes/product-availability/get.
+sonnet: x — provisions paid server; tighter
+
+#21 r16-74a5646c407dd337 POST /api/v1/conversation/{conversationId}/stop
+operationId: 
+summary: Stop Conversation
+description: Stop a running conversation
+sonnet: x — stops running conversation; work maybe lost
+
+#22 r16-76e05eea863a6685 POST /packs/{id}/close
+operationId: 
+summary: Close a pack
+description: FR-044. A reason from the fixed set is required.
+sonnet: x — close pack may not reopen; tighter
+
+#23 r16-7c07240f1e4de250 PATCH /teams/{id}
+operationId: 
+summary: Update a team member (admin)
+description: 
+sonnet: x — admin updates team member maybe role; tighter
+
+#24 r16-8955e93ef1428184 POST /api/v1/photos
+operationId: uploadPhoto
+summary: Đăng tải ảnh khoảnh khắc mới
+description: Upload ảnh (JPEG/PNG/WEBP) kèm thông tin tài chính (số tiền, danh mục, loại giao dịch, ghi chú) và phạm vi bạn bè nhận ảnh (ALL_FRIENDS hoặc SELECTED_FRIENDS).
+sonnet: x — upload shared to friends; tighter
+
+#25 r16-8cd0a41ce4bd478b POST /api/engine/engines
+operationId: configureEngine
+summary: Register or overwrite a UCI engine configuration
+description: Registers a named UCI engine executable. If an engine with the same name
+already exists it is overwritten. The engine is not started until an
+analysis session is requested.
+sonnet: x — registers executable engine config; tighter
+
+#26 r16-9347aa91212d4399 POST /api/schedule/generate
+operationId: 
+summary: Generate Schedule
+description: Generate optimized schedule for date range using AI
+sonnet: w — generate may store schedule
+
+#27 r16-94b18437658c6a0c POST /api/employees
+operationId: 
+summary: Create Employee
+description: Create a new employee (manager only)
+sonnet: x — creates employee maybe login account; tighter
+
+#28 r16-99a887dbfa39c681 POST /v1/deposit-intents
+operationId: 
+summary: Create a deposit intent from an available quote
+description: 
+sonnet: w — deposit intent may commit money later
+
+#29 r16-a01d7337ed53fa5f POST /_q/placeSellOrder
+operationId: placeSellOrder
+summary: q=placeSellOrder: typeId;locationId;sourceId;price;qty;externalListingId;ingestionToken
+description: **Call:** `POST /api?q=placeSellOrder:{typeId};{locationId};{sourceId};{price};{qty};{listingId};{ingestionToken}`
+
+Upserts an **external** sell by `(sourceId, externalListingId)`, touches
+`updated_at`, then calls market maker.
+
+**Auth:** shared ingest secret (`NEGATIVEONE_INGEST_TOKEN` / `negativeone.ingest.token`).
+
+sonnet: x — upsert sell order to market maker; commit
+
+#30 r16-a4ebb429a5d48e24 POST /wopi/files/{fileID}
+operationId: WOPIHandler.FileOperation
+summary: FileOperation handles POST /wopi/files/{fileID} — dispatches on X-WOPI-Override.
+description: 
+sonnet: x — dispatches many file operations; tighter
+
+#31 r16-a8c4055c7f4dc049 POST /api/v1/auth/associate-profiles
+operationId: associateEidWithCitizenProfile
+summary: 
+description: 
+sonnet: x — auth associate profiles no text; tighter
+
+#32 r16-a9440472ec131a89 POST /api/settings/ip-notifications/test
+operationId: testIpNotifications
+summary: 
+description: 
+sonnet: x — test may send notification; tighter
+
+#33 r16-bc195158e4d5a2e7 POST /api/v1/uploads/presign
+operationId: 
+summary: Obtain presigned S3/GCS URL for incident media
+description: 
+sonnet: w — presign grants upload ability; read-like
+
+#34 r16-c07c31b718013b3c POST /private-address/{postcode}
+operationId: PrivateAddress_Post
+summary: 
+description: 
+sonnet: w — postcode lookup or create unclear
+
+#35 r16-c19ab79c5e046abe POST /api/assets/domains/verify
+operationId: postAssetsDomainsVerify
+summary: Look for a domain's proof now
+description: Needs the `write` scope and an owner or admin. 60 attempts a workspace per hour.
+sonnet: w — domain proof recheck; may mark verified
+
+#36 r16-c2af179a88f14035 POST /presentation/proof
+operationId: proofPresentation
+summary: PresentationProof signer
+description: PresentationProof adds a proof to a given Verifiable Presentation.
+sonnet: w — adds proof; maybe pure compute
+
+#37 r16-c514696aadf43116 POST /api/v1/app/installed/
+operationId: app_installed
+summary: 
+description: 
+sonnet: x — no text; app install ambiguous
+
+#38 r16-c61e17d981738019 POST /api/v1/agents/paper/quotes
+operationId: createPaperQuote
+summary: 
+description: 
+sonnet: w — no text; quote maybe stored
+
+#39 r16-c71a6bcf4b0aba84 POST /interviews/{interviewId}/improve
+operationId: 
+summary: Rewrite the latest reply
+description: The same call exists at /sessions/{sessionId}/interviews/{interviewId}/improve. A missing instruction becomes "Tighten this reply."
+sonnet: w — rewrite reply maybe stored
+
+#40 r16-ca851d17414ecb7e POST /smtp/
+operationId: createSendingProfile
+summary: Create sending profile
+description: Creates a new SMTP sending profile.
+sonnet: x — D141d sending profile endpoint credentials
+
+#41 r16-cacd80472b9cbb8c POST /room/{roomId}/ask/{identity}/{action}
+operationId: 
+summary: Ask participant action
+description: Ask a participant to unmute or enable camera. Action must be "unmute" or "camera". Moderator access required.
+sonnet: x — c sends request to participant
+
+#42 r16-cb0ec071fcbee9a2 PUT /v1/rides/{id}/requests/{requestId}
+operationId: updateRideRequest
+summary: Approve or reject a ride request (driver only)
+description: 
+sonnet: w — approve or reject; may grant ride
+
+#43 r16-cb86fc9c3f5084af POST /api/v1/organizations/{orgID}/clusters
+operationId: createCluster
+summary: Create a cluster
+description: Creates a cluster and begins asynchronous provisioning. Returns `202` with the cluster record in `provisioning` status.
+sonnet: w — create cluster; provisioning starts
+
+#44 r16-cf7b4ee61d5e42f4 POST /elevate/resume
+operationId: 
+summary: Resume elevation workflow (POST)
+description: Resume a paused elevation workflow with POST data
+sonnet: w — resume paused workflow toggle
+
+#45 r16-d10eac8c89b0bedd PATCH /api/collaborator/{id}/
+operationId: partialUpdateCollaborator
+summary: 
+description: This viewset automatically provides `list` actions.
+sonnet: x — no text; collaborator maybe access
+
+#46 r16-d1b52ee5be0b2111 GET /pay/{sessionId}/cancel
+operationId: CancelHostedCheckout
+summary: 
+description: 
+sonnet: w — GET cancel payment session
+
+#47 r16-d4b5b00b1a8413ce POST /api/integration/v1/downloads/rotation-archives
+operationId: 
+summary: Create a ZIP from a public server rotation
+description: 
+sonnet: w — creates zip file
+
+#48 r16-e2d266aa51a6aec4 POST /spaces/{spaceId}/packs/install
+operationId: installPigeonPack
+summary: 
+description: 
+sonnet: w — no text; pack install
+
+#49 r16-e4847064e5a68cb6 POST /admin/videos/generate
+operationId: generateVideo
+summary: Generate video summary
+description: 
+sonnet: w — generate summary maybe stored
+
+#50 r16-e806330c5a25ab72 POST /api/v1/delivery/ask-questions/{projectID}/{activityID}
+operationId: AskQuestions
+summary: 
+description: 
+sonnet: w — no text
+
+#51 r16-e82939cce46eb30e PUT /devices/{deviceId}/programs
+operationId: putProgramsById
+summary: Select a program and start the appliance
+description: The appliance must be set manually to **'MobileStart'** or **'MobileControl'** in advance
+sonnet: x — starts appliance; physical action
+
+#52 r16-e96d8577c246ce86 PATCH /bookings/{id}/decline
+operationId: 
+summary: Decline booking (approval/admin)
+description: 
+sonnet: w — decline booking; may notify
+
+#53 r16-ea0a490d2722155b POST /api/v1/mariadb/update/
+operationId: mariadb_update
+summary: 
+description: 
+sonnet: w — no text; update
+
+#54 r16-f033fb2704559f47 POST /v1/3d/generations
+operationId: generate3D
+summary: Generate 3D models
+description: Generate 3D models from text prompts.
+
+**Available Tiers:**
+- `3d-1` / `fast` - Fast generation (~30 sec)
+- `3d-2` / `standard` / `default` / `hunyuan` - Standard quality (~2 min)
+- `3d-premium` / `premium` / `rodin` / `best` - Premium quality (~3 min)
+
+**Requires:** REPLICATE_API_KEY configured
+
+sonnet: w — generate model; maybe stored or billed
+
+#55 r16-f1a79c6314527938 POST /session
+operationId: addSession
+summary: Add a new session
+description: 
+sonnet: w — add session; maybe login
+
+#56 r16-f4f3e6ca456f1a22 POST /v1/previews/{previewId}/drafts
+operationId: generateDraft
+summary: Generate a grounded preview draft
+description: 
+sonnet: w — generate draft maybe stored
+
+#57 r16-f59a9a4fdd12c86d POST /api/newsletters/{newsletterID}/posts
+operationId: 
+summary: Create a post
+description: Create a new post for a newsletter owned by the authenticated editor
+sonnet: w — create post; may publish
+
+#58 r16-f72970a5677c62b6 POST /transparency/{userId}/gossip
+operationId: gossipKeyCheckpoint
+summary: 
+description: 
+sonnet: w — no text
+
+#59 r16-f987da614627a3cd PUT /session
+operationId: switchIdentity
+summary: Switch identity
+description: Change current identity for users with multiple accounts
+sonnet: x — switch identity may return session
+
+#60 r16-f9f636a9a6c6a406 POST /api/v1/osuser/create/
+operationId: osuser_create
+summary: 
+description: 
+sonnet: x — create os user that can log in
+
+#61 r16-fd521120d69083ed POST /api/userdetails/
+operationId: createUserDetail
+summary: 
+description: This viewset automatically provides `list`, `create`, `retrieve`,
+`update` actions.
+
+The list action will always return the current user's userdetail as a list
+or an empty list if the current user has no userdetail
+sonnet: w — no text; viewset create
+
+#62 r16-fd70ed09f1cd9352 PUT /api/collaborator/{id}/
+operationId: updateCollaborator
+summary: 
+description: This viewset automatically provides `list` actions.
+sonnet: x — no text; collaborator maybe access

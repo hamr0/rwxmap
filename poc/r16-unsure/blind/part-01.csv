@@ -1,0 +1,721 @@
+op_id,method,path,operationId,summary,description
+r16-0002abad14adbc6d,POST,/api/collections,post_api_collections,POST /api/collections,Not yet described in schemas/routes.ts — path and method were read from the handler.
+r16-000ad39422df1051,PATCH,/admin/users/{userId},updateAdminUser,Update a user's role or status,
+r16-0015053ed7080fb6,POST,/accounts/{hashedAccountId}/organisations/PostUpdateSelection,OrganisationPostUpdateSelection,Handle post-update selection,
+r16-0027554d233db310,POST,/profiles/matchmakers/{id}/submit,,Submit matchmaker profile for review,
+r16-004b0810ebe29558,POST,/api/v1/fabric/engine/stop,enginePostStop,,"Needs the operator credential, or the observer. An application acts through `/api/v1/fabric/apps/{id}/control` instead."
+r16-0050b139515176aa,PUT,/admin/v1/users/{email},savePlatformUser,"Change a user's name, role or advertiser. The email address cannot change.",
+r16-0054a59b4287296f,PATCH,/api/v1/users/{user_id},admin_update_user,"Edit a user's name, email, and/or role","At least one of `name` / `email` / `role` must be present (`extra`
+forbidden). Editing your OWN account here is refused (403) — use the
+profile editor (FR-019). Demoting the last remaining admin is refused
+(409, FR-010). Password is NOT changed here (use the password endpoint).
+"
+r16-00589c3e2cec8e56,PUT,/perm/{id},,Update a permission,Modify an existing permission
+r16-0067dd07f6130ecd,POST,/v1/dids,didCreate,Create a new DID.,
+r16-006971457b891c91,POST,/api/week,postApiWeek,,
+r16-0070af04fd0fc093,POST,/brief/generate,generateBrief,Generate a daily content brief,
+r16-007664ea373b9e72,POST,/homework,createHomework,,
+r16-0085c94a586b7b69,POST,/users/admin/students,,,Creates a new resource with data.
+r16-009897ecd9323b62,PATCH,/api/proxy/{path},proxyPatch,Proxy PATCH request to backend,"Reads JWT token from httpOnly cookie, forwards PATCH request with body to FastAPI backend
+with Authorization header. Returns backend response to client.
+"
+r16-00ad0453705d14e3,POST,/api/organizations/save,saveOrganization,,
+r16-00ad1fa437b4a4b6,POST,/write,Write,,
+r16-00adf1788abf7192,POST,/user/{id},,CRUD ACTION update,
+r16-00c6114a8c567f52,PATCH,/tenants/{id},,"P-2 — Update tenant (name, locale, local_accounts_enabled, mfa_freshness)","AUTH-1: tenant_owner only. Applies optimistic-locking (CONC-1..4). T-10 range: mfa_freshness_seconds in [60, 900]. T-15: on local_accounts_enabled change, calls RP synchronously — if RP errors, sets realm_sync_pending=true and returns 202."
+r16-00df5c70aec0adda,POST,/v1/pos/shift-close,closeShift,"Close shift, compute Z-report (expected vs counted cash, variance)",
+r16-00e9d85db07fe4bc,POST,/patch,,Apply a patch object to another object,
+r16-00ee92d36eaedd59,GET,/admin/find-notification-clear,AdminFindNotificationClear,Clears cached notification data.,
+r16-00fd5ce91ed9fbe6,POST,/staples/optional,postStaplesOptional,,
+r16-01017fe772f4dda3,POST,/300/sub_account/create,createSubAccount,Create a sub-account,"Creates a sub-account under the current account.
+Requires institution-level access and a valid product code.
+"
+r16-0112dc740305c107,POST,/v1/graphql,graphql,The query surface (GraphQL over composed method modules),"Standard GraphQL-over-HTTP endpoint executing the schema composed from api/graphql/core.graphql plus every registered method module in api/graphql/methods/ (design: docs/method-modules.md). Introspection is enabled; standard depth/complexity limits apply. Execution semantics (anchor limits before joins, deterministic ties, empty-vs-missing distinction, no score blending) are documented on the schema fields themselves. The Day-10 CFDE validation challenge is the persisted query api/graphql/queries/ibd-validation-challenge.graphql with its researcher-editable variables. Clients cannot write through GraphQL (no Mutation type; deposit stays on POST /v1/claims), but serving a result MINTS the claim it implies: the claim is synthesized from its index row, verified, and recorded with every assertion in one batch after the whole response succeeded (docs/inputs-and-outputs.md §3.5)."
+r16-013f8b5fcb077bdc,POST,/asset/reclassify,asset-reclassify,/asset/reclassify [POST],Retrieves the formats available for a specified asset.
+r16-0140ec9096e6319c,POST,/properties,createProperty,,
+r16-015448947fb7bf0d,GET,/api/v1/spatial/XRLinuxDriver/setup_ipc_values,spatial_XRLinuxDriver_setup_ipc_values,Setup IPC shared memory,"Set up shared memory IPC for pose data communication between driver and applications.
+
+--- Deep-Read Documentation ---
+
+C signature: void setup_ipc()
+Sets up shared memory IPC for pose data communication. Creates memory-mapped files for:
+  - Quaternion orientation (x, y, z, w)
+  - Euler angles (roll, pitch, yaw)
+  - Euler velocities
+  - Look-ahead prediction values
+Used by Breezy Desktop and other consumers to read head pose without direct connection.
+Source: XRLinuxDriver/src/ipc.c"
+r16-01560e94f0d05326,POST,/donors/{id}/payment-options,,Save One-Click Payment Option,
+r16-016833078545b75c,POST,/createRelatedUserPath,,create the user's path relation,allows you to create a new user's path relation if you are an admin
+r16-016e591b80c638d8,PUT,/player.php,,Update player details or role,
+r16-01854a37c18b7f05,POST,/{role-id:[2-9]}/ul/{ul-id}/queteurs,,Create a new Queteur,Create a queteur in current queteur's UL. Super admin can create queteur on other Uls (for first RCQ User or debug)
+r16-01a610d588458a78,POST,/admin/events/{id}/tickets,,Issue tickets,
+r16-01ac7690d019756e,POST,/register/organizer,registerOrganizer,,Register a new organizer
+r16-01ac7e79f527a6c4,POST,/billing/payment-methods/stripe/setup-intents/,CreatePaymentMethodStripeSetupIntent,Create stripe's setup intent for add new payment method.,
+r16-01ae753a1ef151d0,PUT,/menu,,,update role menus
+r16-01ba3303d3eff95f,PUT,/proxy/hosts,,Replace automatically learned custom relay hosts for the AI proxy,"Replaces only the Worker learned custom relay host list. Built-in provider hosts and hosts configured through ALLOWED_HOSTS are not changed. Sending an empty list clears the learned custom relay hosts. The Worker accepts host names or HTTPS Base URLs and stores host names only.
+"
+r16-01d4b8480dc5ebd5,POST,/api/v1/merchants/wallets/configure-address,,Configure address-only wallet,Configure an address-only wallet for receiving payments
+r16-01e4b9eed28683c6,POST,/api/invoices,post_api_invoices,POST /api/invoices,Not yet described in schemas/routes.ts — path and method were read from the handler.
+r16-01ef290eff2b0446,POST,/apps/{id}/custom-tables/{table_id}/rows,createCustomTableRow,Add a row,"Needs the table's `can_add` capability and a free row. Adding a row
+can run an app command; on those tables `Idempotency-Key` is honoured
+and a short cooldown applies per table. Row values are returned only
+when the key also has `custom_tables:read`.
+"
+r16-01fac2e9e2eda1b3,POST,/emailer_campaigns/{id}/add_contact_ids,SequencesEngagement_addContactsToSequence,Add contacts to sequence,Add one or more contacts to an email sequence
+r16-02079e07c8d096a9,POST,/battles/{battle_id}/guess,,Attempt to guess protected word,
+r16-020d26997fde48a5,PATCH,/api/auth/devices/{device_id},updateUserDeviceTrust,"Trust, untrust, or rename a remembered device",
+r16-021229d216858373,POST,/user/add,,,Register new app
+r16-022b4e670cf528be,POST,/api/calendar/integrate,,Integrate calendar,
+r16-0254c14e4d56188c,PUT,/api/self/accounts/{username},,Update account,"Partially updates fields on a Roblox account, respecting subuser permissions for passwords, cookies, devices, configs and folders."
+r16-02685fc9da210f62,POST,/v1/brand-report,brandReport,"Brand status, then an audit of each source found",Costs 1 + max_sources usage units. Can take several minutes.
+r16-028c5ef6a835b9eb,POST,/init-projects,,Initialize projects,(table: project)
+r16-028d2887338864dd,POST,/maintenance-windows,createMaintenanceWindow,Create a maintenance window,"A maintenance window suppresses automatic paging only: alerts matching it are still ingested and created, nothing is auto-resolved, and automation actions are evaluated separately. Announcements are optional: when announcementChannels is set, the window posts a message to those Slack or Microsoft Teams channels when it starts and when it ends. They do not affect which alerts the window suppresses. The API key grants organization-wide access: it can manage both global windows (no team) and windows scoped to any team in the organization."
+r16-029a465ca134be1c,POST,/api/editor/articles/,editor_articles_create,,
+r16-02ab42b270ed2d44,POST,/context/plaintext,,Provide context for plain text,Provide context for the model for plain text
+r16-02b0de57f5aa1385,POST,/submit_answer,submitInterviewAnswer,Submit interview answer and get follow-up question,Use during an active mock interview after the student answers a question.
+r16-02b2d2f05f2a9ecb,POST,/api/v1/sales,create_1,,
+r16-02bf52cb0f2dd1c9,POST,/direction/set_for_user,,set directions to user,receives direction ids and sets it to user
+r16-02d2bd00c7427d74,POST,/processes/{processId}/assignments,createProcessAssignment,,
+r16-02da859cd884aeff,POST,/admin/preview-clips/batch,,Generate preview clips batch,Generate preview clips for multiple media items
+r16-02e36aa09f5d78b1,POST,/api/method/lex.client_portal.create_matter,,Submit a Draft Matter for the authenticated Client,
+r16-02eb17075cf73a1e,POST,/v1/resume/tailor,tailorResume,Tailor the master resume for a job posting.,
+r16-030440387b0caa0a,POST,/api/v1/uploads/presigned-url,,Get presigned URL for upload,Generate presigned URL for uploading files directly to S3/MinIO
+r16-030c9dc59df6b5d9,POST,/qr-tokens/batch,,Pre-fetch signed tokens for offline use at the gate,"Fetched when a trip starts so the collector's code keeps working with no signal. Size the batch to the trip window — 20 tokens at 60s each covers only ~20 minutes against a window of up to 90.
+"
+r16-0315b5584205684c,POST,/print/text,printText,Print text,
+r16-0327662949d4db66,PUT,/platform/guilds/{guildId}/modules/{moduleKey},updatePlatformModule,,
+r16-033ab25cef3ed387,GET,/api/v1/spatial/rayneo-sdk/Algorithm.EnableSlamHeadTracker,spatial_rayneo_sdk_Algorithm_EnableSlamHeadTracker,Enable RayNeo 6DOF SLAM,"Unity/C#: Algorithm.EnableSlamHeadTracker();
+Starts 6DOF SLAM head tracking on RayNeo X2 using VGA camera + IMU fusion.
+Poll status with Algorithm.GetSlamStatus() -> SlamState:
+  INITIALIZING (warming up), TRACKING_SUCCESS (active), TRACKING_FAIL (lost).
+Stop with Algorithm.DisableSlamHeadTracker().
+Provides full 6DOF pose (position + rotation) for spatial computing.
+Source: RayNeo ARDK for Unity (Feishu docs)"
+r16-0347401f86713ab6,POST,/ideas/refine,,Refine an existing idea,
+r16-03af42d0b28a0a2c,POST,/v1/proof,verifyProof,,
+r16-03e33ed8e72f9d34,POST,/agent/reset,agent_reset_agent_reset_post,Agent Reset,
+r16-04053ec5b474e36b,POST,/api/billing/checkout-intents,createCheckoutIntent,,
+r16-040fdb9ee27e2347,POST,/merges,create_merge,Create merge,
+r16-042e262f2af6d7f5,POST,/api/v1/guilds/{guildId}/voice-channels/{channelId}/sessions/{sessionId}/summary,summarizeLiveTranscript,,Creates a short catch-up summary from finalized transcript segments while the session is recording.
+r16-043744bcd00bd0d8,POST,/api/v1/client/movement/waypoints,moveWaypoints,"Execute straight-line waypoints (raw-input; required mod, spec §16). No teleport fallback. Receipt reports per-leg boundaries; effects verified separately via world queries.
+",
+r16-04404e6bb0e062dd,PUT,/User,,Update a user,Create a new user with the provided details.
+r16-0447abdd80a5b139,POST,/event/{eventId}/participants/{userId},addParticipant,Add user into event,This can only be done by creator of the event
+r16-046cbfd57da95b8b,POST,/messages/{uid}/resume,,Resume the delivery of a campaign,Resume delivery of the specified campaign
+r16-0481f86f21792e9c,POST,/solutions/{id}/verify,,Verify a challenge flag,Verifies the flag for a challenge
+r16-048bfa266e156762,POST,/load,load,Loads currency price information from API,
+r16-04999825f823aba5,PATCH,/policies/{policy_id},endorsePolicy,Endorse (modify) a policy,
+r16-049bf197b1105797,POST,/sms-campaigns/campaigns,createSmsCampaign,Create an SMS campaign from opted-in contacts or groups,
+r16-04b385aaed488027,PUT,/api/backend/v1/payments/{organizationName}/synchronizeSubscription,synchronizeSubscription,,
+r16-04c6bc484066dc73,POST,/ai/tickets/{id}/summarize,,Summarize a ticket with LLM,"Generates a structured JSON summary of the ticket using the active
+`ticket_summarize` prompt version. An eval score is computed and
+persisted automatically. Use `?version=N` to pin a specific prompt
+version for A/B testing.
+"
+r16-050713f651b9184b,PUT,/agents/security/rules/{rule_id}/,agents_security_rules_update,,"API endpoint for retrieving, updating and deleting a security rule"
+r16-052425dd9cf7ca02,PUT,/v1/consents/ai-synthesis,grantAiSynthesisConsent,Grant AI-synthesis consent at the displayed policy version,"Idempotent. The body names the policy version the user was actually
+shown; a stale version is rejected rather than upgraded, because a grant
+against copy the user never read is not a grant. Adding a data category
+requires a new policy version and therefore a fresh grant.
+
+Granting never enqueues a reading. The next explicit Today request or
+scheduled reservation does that, so a re-grant cannot silently revive a
+revoked packet.
+"
+r16-05340e4d611b6059,POST,/v1/applications/draft,applicationDraft,Draft application,"Draft cover letter + tailored resume bullets, consent-based."
+r16-0545e8df36006711,POST,/companies/{slug}/claim,,Claim a company profile,
+r16-0555a9f768ce08f1,POST,/diet,post_diet,POST /diet,
+r16-0559c374c77b9e6d,POST,/users/loans,,This API creates a new loan for the authenticated user,
+r16-05650cea7a7f3338,POST,/convert/batch,convertBatch,Batch convert images,"Upload multiple files for asynchronous conversion.
+Returns immediately with a batch ID and job IDs (HTTP 202).
+Poll individual jobs via `GET /jobs/{id}` for status and download URLs.
+"
+r16-05749573d5572f35,POST,/admin/wiki/{action},adminWiki,Wikipedia / Wikidata matching (D105 P8–P10),
+r16-05917b9449723892,POST,/v1/image,ManageService_CreateImage,,
+r16-05b0ee850d7c0869,POST,/{providerId}/unapproved/add/select-how,SetHowToAddApprentice,,
+r16-05e5dfb77ee298d9,POST,/port,openPort,Open  a Port,(TODO)
+r16-064a971d4d2e2624,GET,/:userId/accounts,,Creates an account attached to a user,Creates an account attached to a user
+r16-0650b2a822662ff4,POST,/v1/chat/stream,,Create chat turn (streaming),"Server-Sent Events variant of /v1/chat. Each frame is `event: <type>\ndata: <json>`; types are start, token, tool, pending_action, done, error. Same request body and stage set as /v1/chat."
+r16-06519eca42f36f24,POST,/api/compliance/eu-ets/mrv,,EU ETS MRV Annual Emissions Return & Verifier Assurance (Regulation (EU) 2018/2066),
+r16-0659d8910b3a5c83,POST,/hermes/template/{merchantID},,POST /hermes/template/{merchantID},From template: hermes
+r16-065f00ba2bf6fd10,PATCH,/invoice/{id},updateInvoice,,"Enforces draft → sent/void, sent → paid/overdue/void, and overdue → paid/void transitions."
+r16-066bc5fd6cde8970,POST,/reserve/,,Reserve money,"Reserve money for given orderId, userId, serviceId and amount."
+r16-066c0d2b09b6f575,POST,/agent/draft,draftAgentTask,,
+r16-0694d01d4c7dc69d,POST,/{database}/{entity}/{recordId},insertEntityRecord,Insert a record of an entity (recordId 0),"The body is a record as GET gives it. Answer 201 with the new record (all fields) and meta.issues (warnings). A logged-in user is required; same-site requests with a JSON body only. rec_RecTypeID is the entity's.
+
+Fields and rules by entity:
+- **tag** - 2-1 the tag (required, at most 63 characters), 2-3 description (at most 250); rec_OwnerUGrpID
+  the user (default) or one of the user's groups. The same text of the same owner gives 409 duplicate with
+  ""existing"" (the tag id).
+
+- **bookmark** - 2-13 the record (required, visible to the user, not changed later), Rating 2-1190 (0-5),
+  2-4 notes, PrivateInfo 2-1192 (at most 140 characters, stored encrypted with the key of the installation;
+  without a key as text, with the warning not_encrypted in meta.issues). The owner is always the user; only
+  the user reads and changes their bookmarks. One bookmark per record and user (409 duplicate, existing).
+
+- **reminder** - 2-13 the record (required); exactly one recipient - Recipient 2-1193 (a user or a group)
+  or 2-23 (e-mail addresses, comma separated); 2-4 message (at most 1000 characters); 2-10 start date
+  YYYY-MM-DD (today by default); Frequency 2-1191 (a term of 2-10454, once by default).
+
+- **user** (administrators only) - record type System user 2-1107; the fields are named by DT_* constants
+  on the server (UserGroupCodes). A login name, an e-mail and a password are required; the password is
+  written only (hashed as legacy) and never given back.
+
+- **group** (any user, who becomes its admin) - record type System User Group 2-1108. A unique name is
+  required; the members (relmarker DT_GROUP_MEMBERSHIP 2-1200, the role as relation type) are written by
+  POST /group/{id}/assign only.
+
+- **website** (99-51) - the server adds the starter header, home content, footer and configuration, makes it
+  public and writes an ""About"" page for its top menu; language codes (""eng"") in DT_LANGUAGE become its terms.
+
+- **page** (99-52) - public unless the body says otherwise.
+- **report** (2-1104) - the file name (2-62) is set here and does not change later. It has only letters, digits, spaces
+  and - _ ( ) . , @, and starts with a letter, a digit or ""("" (422 otherwise); empty is made from the title; a new record gets an empty file or
+  takes a file without a record (registration).
+
+- **output** (2-1105, a generated report) - the query (2-12) may not have parameters $X$ (422); its file is
+  generated-reports/{record id}.{format}; the format comes from the template.
+
+
+The rules of website, page, report and output run for every write of their record type, also through /records/{recordId}."
+r16-06ec210f5353aabc,GET,/user/info/{id},,login user,login user
+r16-070d6f03d1e4be57,GET,/admin/bookings/get-emergency-toasts,,Update admin,Update admin
+r16-07150bbe4a844cd2,POST,/api/v1/payments/{payment_id}/verify,verify_payment_api_v1_payments__payment_id__verify_post,Verify Payment,
+r16-0721e3cda1d6aebc,POST,/api/onboarding/save,,Save onboarding progress,"Creates or updates an onboarding draft using its session ID.
+If requestSmsLink is true, a phone number is required and an SMS
+resume link is requested. Resume tokens expire after 30 days.
+"
+r16-072a65a4979c8c81,POST,/v1/devices/{deviceId}/connections/interrupt,interruptDeviceConnections,Close existing connections for a device on every gateway,
+r16-073c1ea32cc92503,POST,/hardware/test-print,testPrint,Test print,
+r16-074543268a1829fc,POST,/pens/{penName}/alpacas/{alpacaName}/shear,shearAlpaca,,
+r16-0787262c0c90608f,POST,/api/quizzes/extract,,Extract quiz details from flyer image using AI Vision,"Uploads flyer image to storage (local filesystem or Vercel Blob) and uses multi-modal AI (Google Gemini / OpenAI Vision) to parse title, date, time, venue, team size, fee, and organizer info. Only active when `vision` capability is enabled (`ENABLE_AI_VISION === ""true""` or AI key configured).
+"
+r16-07a54bbc5045d610,POST,/projects/{id}/investors,,Add investor to project,Add an investor's wallet address to a project
+r16-07b690ec7c2e5a1b,GET,/designer/login,,Login as designer,
+r16-07b75242305e009b,GET,/index/Nekopay/ticketReceive,,Claim a ticket,"Success: `code == ""0""`."
+r16-07c03bef0f1a2c8f,POST,/account,,CRUD ACTION create,
+r16-07c23a4b7cca3f7c,POST,/v1/sessions,create_session,POST /v1/sessions,
+r16-081a4df6a5294dd4,POST,/v1/approvals/{approval_id}/decisions,decideApproval,,
+r16-081ca14ba1ba5df0,POST,/api/v1/patient/appointment-history,appointmentHistory,Appointment History,
+r16-083b511ea5620a6f,POST,/api/clients/testAgent,exampleForTestingPurposesOnly,Example (for testing purposes only),Example (for testing purposes only)
+r16-083c97a5f3d41367,POST,/v1/schedules,createSchedule,Create a persistent schedule (re-run a Blueprint on a cron/interval/at trigger).,
+r16-0851c1bfe670e0b6,POST,/social-posts/{id}/schedule,scheduleSocialPost,Schedule a social post,
+r16-0852599d23ca2ef3,POST,/save/geoframes/attribution/journey,saveGeoframesAttributionJourney,Save attribution journey,"Based on destination also shows all Sources that were visited by a device. Includes dates seen to determine when the device went to each location (buyers journey). Csv contains Destination, ID, city, state, zipcode, zip4, Source Audience, Dates Seen, Date First Seen and Also Seen."
+r16-085de54fb6b161e3,POST,/users/me/username,usersClaimUsername,Chọn username duy nhất một lần,409 USERNAME_TAKEN hoặc USERNAME_ALREADY_SET. Username được trim/lowercase.
+r16-086763ac2d85dab9,POST,/api/content/v1/generate,generateCitedContent,"Build a diverse evidence pack, draft with MiniMax, and audit every paragraph citation",
+r16-086a0bd3d3c511d0,POST,/transactions,createCreditTransaction,"Record a credit transaction (e.g., admin adjustment, match win/loss).",This endpoint is primarily for system-initiated transactions (like match outcomes or admin adjustments). Direct user-to-user transfers should use /users/{senderId}/transfer.
+r16-086f6028f81ae2cb,GET,/api/v1/device/RayDesk/MoonlightBridge.sendScroll,device_RayDesk_MoonlightBridge_sendScroll,Send scroll event,Send scroll event to remote PC.
+r16-08779280046d9f83,POST,/verify,verifierVerify,Verifier verify result,
+r16-0878e003dcf679e2,PATCH,/api/v1/admin/course-instructors/{id}/,admin_course_instructors_partial_update,,Records create/update/delete performed through a ModelViewSet.
+r16-087f2e701bfc6183,PUT,/integrations/config/{type},updateIntegrationConfig,Update integration configuration,
+r16-08a02ac076c14188,POST,/optimize,optimizeSystem,Optimize system performance,"Analyzes and optimizes the target system using the same techniques that achieved 173.0x improvement in the Cybernetic platform itself.
+
+This endpoint applies the complete optimization pipeline:
+1. Performance analysis and bottleneck identification
+2. SPARC methodology for solution design
+3. Test-driven implementation
+4. Comprehensive validation
+"
+r16-08c03b2070bd1579,POST,/pharmacist,,Create a new Pharmacist,Create a new Pharmacist
+r16-08dfeaaa8ba88f8c,POST,/platform/v1/suppressions,suppression_record,"Record an additive, scoped suppression",Suppressions are additive and idempotent. v1 defines no release operation. A scope=global suppression also moves the lead lifecycle to SUPPRESSED; narrower scopes never change lifecycle state.
+r16-08f8304aa3b4140a,POST,/simulation/{cluster}/up,SimulationController_up,,
+r16-08f9bc3cb3f7435b,GET,/tessell-internal/network/vpcs/{id}/{action},applyActionOnVpcInternal,Apply given action on a VPC,
+r16-090bb771b465db20,POST,/kyc/verify,,KYC verification,
+r16-090bf83a3b2b0abb,POST,/api/posture-scores/posture-scores,,/api/posture-scores/posture-scores (POST),
+r16-09127e8c25ce7ad6,POST,/api/spaces/signed-url,,Get Spaces signed URL,
+r16-091a4741818dd2f7,PATCH,/v1/payment-links/{id},patchPaymentLink,"Re-price a reusable link, or close a one-time link","Send `askCents` to re-price (reusable links only) or `close: true` to
+close (one-time links only). An empty body is refused.
+Re-pricing a one-time link, or closing a reusable one, is
+`VALIDATION_ERROR`. Closing an already paid or expired one-time link
+changes nothing and answers the link as it is.
+"
+r16-092ac6d7f89c943d,POST,/v1/executions/{request_id}/approval,recordHumanApproval,Record an explicit human approval or rejection of a drafted model response.,"Records a human sign-off decision against a previously approved execution. This is the
+only path by which a draft becomes ""approved"", and it is deliberately narrow:
+
+* It records a decision **in the audit log only**. It does not publish the draft, submit it
+  to a clinical system, or trigger any downstream clinical action. Medarx has no autonomous
+  clinical write-back, and this endpoint does not create one.
+* It accepts no draft content. The draft already exists; the caller approves or rejects it by
+  `request_id`, and cannot edit or resubmit a modified payload through this path. Editing a
+  draft requires a new execution, which re-runs the whole privacy pipeline.
+* A rejected draft is recorded as a final disposition of `rejected`, not deleted. The audit log
+  is append-only.
+
+Requires a human-supplied reviewer identity. In Phase 1 this is a synthetic identifier, since
+the design's per-user authorization model is deferred to Phase 6.
+"
+r16-093a0f0480fdd9dd,POST,/investments,,Create a new investment,
+r16-095bb7c29dca56ec,PATCH,/api/admin/users/{id}/activate,,Activate user account,Convenience endpoint to activate a user account. Allowed role: `admin` only.
+r16-096a6f7622713f84,GET,/deepgram-token,getDeepgramToken,Get Deepgram API token for browser,Returns a token for Deepgram WebSocket STT in the browser
+r16-096e8685e98a167d,POST,/admin/container-system/identity-review/{id}/resolve,resolveCustomerIdentityReview,,
+r16-09974e783855fd8f,POST,/reports/custom,customReport,Generate custom report,Create custom report using report builder
+r16-099c1ecc027ed1d6,POST,/assignments/topics/assign,assignMemberToTopic,Assign an existing team member to an existing topic.,"Assign an existing member to a topic using IDs from the latest getWorkflow. projectId may be omitted for the single stored project, but must match if sent. Prevents duplicates, preserves unrelated data, and does not change progress or status."
+r16-09a21d82a845bb70,POST,/lessons/upload-url,,Generate Presigned Upload URL for Lesson Resource,Returns a presigned URL to upload a lesson resource (video/pdf) to SeaweedFS. Requires file extension.
+r16-09a2edfb840dfcf4,POST,/trainers,createTrainer,,
+r16-09a5418bfe195661,POST,/libraries/{library_id}/books/bulk/enrich,,Bulk enrich books,Creates an enrichment batch to refresh metadata for a list of books.
+r16-09aaee9bbfbf67d7,POST,/public/shares/{id}/open,,Return the ciphertext and count one open. No authentication; any origin.,
+r16-09adb33841dafc81,POST,/subscriptions/{id}/payment,,Record payment,Records a payment for a specific subscription
+r16-09af378c346dca29,PATCH,/api/v1/admin/users/{userID},adminUpdateUser,Update user,Requires admin role
+r16-09b8a8afb0bd5d7d,POST,/cars/{id}/images/presign,,Get S3 presigned upload URL (Dealer only),
+r16-09bc123b91da0632,PUT,/provision/mail/{domain},,Replace mail configuration in one atomic transaction,"Logically DELETE followed by POST in one transaction, after complete validation. Requires UPDATE_MAIL when recognized mail configuration exists, otherwise CREATE_MAIL. Does not require DELETE_MAIL or generic RR permissions. The zone's existence alone does not make a configuration an update. Permissions and ownership are checked on every affected name. Omitted policy sections use creation defaults; omitted/empty DKIM removes obsolete recognized selectors. Keep old selectors in the request during key rotation while signed messages remain in transit. CNAME and delegated DKIM subtrees are preserved; unsafe replacements conflict. Unrelated RRs always survive. Omitted address fields preserve addresses of retained MX hosts; obsolete dedicated addresses are removed only with validated exclusive ownership. Addresses created by provisioning can be updated while exclusive; manually created, modified, or shared addresses require the generic RR API for changes. Identical PUT makes no DNS writes, serial increments, notifications, or retry-budget resets. MTA-STS downgrades, removal, or incompatible enforced MX changes follow RFC 8461 retirement: atomically publish mode none and a new TXT ID, retain the current mail configuration, and schedule final replacement after all possibly cached policies expire, including older policies with longer max_age. Return status pending, transition ID, applied policy and earliest_completion (UTC Unix seconds). Poll GET /provision/mail/{domain}/status. A newer request atomically supersedes pending work; repeated identical requests reuse it, including terminal failures. Deferred work rechecks the initiating principal, ownership and DNS; unsafe manual edits fail without deleting them. Persisted retries default to five after the first attempt; timed_task_max_retries and timed_task_concurrency (default 8) are server variables. Limits and validation are the same as POST. Tenant impersonation is unsupported."
+r16-09c5b245e6f467b7,POST,/api/v1/payments/deposit,post_create_deposit_address,REQ-API-007: Get Bitcoin/Lightning deposit address,
+r16-09cff27c697ca194,PUT,/v1/team/edit/team,,Edit a team member's team,Edits a member and updates to Database
+r16-09d6c927040d4aa2,POST,/api/v1/invoice-adjustments/{adjustment_id}/resolve,billing_resolve_adjustment_api_v1_invoice_adjustments__adjustment_id__resolve_post,Resolve Adjustment,
+r16-09d98955f508522f,POST,/mills/json,,Process input JSON data,"Takes an input JSON document, validates it according to its json-schema.org definition,
+optionally encrypts the output before adding to IPFS, and returns a file object"
+r16-0a03ff0cd75c1d4f,POST,/api/story-dna/discover,discoverByStoryDNA,,
+r16-0a113a15e4a2ae9c,POST,/api/tickets,R219,R219: Issue Ticket (API),Issue ticket (auto-issued on RSVP or manually by ORG). Access: ORG or system
+r16-0a1d4fb9cdab2e58,POST,/whatsapp,WhatsappController_create,,
+r16-0a1f0e2ef4c17487,POST,/builder/directives,ingestBuilderDirective,,
+r16-0a25ac47134a818f,POST,/api/v1/subscriptions/{subscriptionId}/change-plan,,Change subscription plan,Mengganti snapshot benefit plan. Periode baru dimulai saat ini.
+r16-0a39dd2b481d2e47,POST,/submissions/{id}/inputs,,Submit risk assessment inputs,
+r16-0a3a86c40e25ecd3,GET,/add-postal-address-check-and-submit,addAddressCheckAndSubmit,Check and confirm the postal address.,
+r16-0a4385b74c877f63,POST,/extend,extend,Extend the signatures of a PDF,"Extends every signature of a PDF to PAdES-BASELINE-T, -LT or -LTA. The result is the input PDF followed by an incremental update, so the original signatures stay valid. LT embeds the certificates and revocation data the signatures need; T and LTA add a document timestamp from the server's TSA. A B-level signature extended to LT needs the TSA too: it gets a timestamp first. DSS checks the signatures first and refuses with `EXTENSION_FAILED` when one does not validate, a certificate is revoked or expired, revocation data is missing, every signature is already at a higher level than the target, or a timestamp is needed and no TSA is configured; a TSA that cannot be reached or answers badly is `TSA_FAILED`. Known DSS issue: on a PDF with a signed field whose `/Lock` restricts all fields (FieldMDP `Action=All`), DSS 6.5.1 reports the document timestamp its own LTA extension adds as a change the lock forbids (a `FieldMDP` / `SigFieldLock` warning when the result is validated); the verdict is unaffected.
+"
+r16-0a8ef42f216a2151,POST,/v1/licenses/activate,activateLicense,Bind a license seat to one app-generated installation identifier,
+r16-0a9f7c85511b3d69,POST,/site_accounts,siteAccountCreation,Create site account,Creates a site account
+r16-0aaea6b2dd98bbf4,POST,/api/lobbies/{lobbyId}/players,addPlayer,Add a player to lobby,Adds a new player to the lobby using their authenticated Player ID. Returns the complete lobby state after the player joins. Returns 409 if lobby is full.
+r16-0ab249b2280881c3,POST,/process/stop/{id},,Stop a Process,Stop a process by its ID
+r16-0abde5d914539663,POST,/api/users/{id}/reactivate,reactivateUser,Return a deactivated account to active,"`deactivated → active`, same `root_admin`-only scope and body as
+`/deactivate`. Cannot revive a `deleted` account (`409`) — that takes
+a fresh `POST /api/users`. Old sessions stay revoked: the person
+signs in again.
+"
+r16-0ad5c42126543670,POST,/api/v1/prd/phase1/clarify,clarifyPhase1,Phase 1 - Objective Clarification,Process clarification answers and validate with GraphRAG
+r16-0ae132f55f7ec246,PUT,/tppAccountsRequest/{ID}/error,NotifyErrorAccountRequest,NotifyErrorAccountRequest,"DFSP responds to the PISP if something went wrong with validating an OTP or secret.
+"
+r16-0ae418d6cba96703,POST,/exchange/create/self,,Create an Exchange by 2 Trainer ID and 2 Pokemon ID.,
+r16-0b20cb5b70260789,POST,/troubleTicket/{id}/reopen,reopenTroubleTicket,Reopens a Trouble Ticket,The operation allows the Buyer to send Ticket Resolution Confirmation by reopening it
+r16-0b24aa7517da2f2a,POST,/exams/gateway,,"Handles validations for exam, used by teachers and auxiliars",
+r16-0b287e7526e9c2bf,POST,/checkout/razorpay/verify-payment,,Idempotent HMAC SHA256 payment signature verification,
+r16-0b39380733f53d5b,POST,/states/store,setKVS,,Creates a KVS transaction (`type 9`)
+r16-0b407e4bda5edfe0,POST,/api/users/{id}/reactivate,reactivateUser,,
+r16-0b44e24112d0cc44,POST,/sub-accounts/create,,Criar subconta,"Cadastra um vendedor como subconta da sua loja, identificado pelo CPF ou CNPJ. Idempotente pelo `taxId`: se a subconta já existe, a API devolve a existente, com o saldo atual.
+"
+r16-0b45f5108402246a,PUT,/api/v1/people/{personId}/consent/{scope},updatePersonConsent,,
+r16-0b646fe36176c3ea,POST,/transaction/v2/return_non_serialized,returnItemNonSerialized,Return (non serialized),"Mark item(s) as returned by GTIN. This transaction will be registered as an EPCIS event with bizStep `urn:epcglobal:cbv:bizstep:retail_selling`. Because the request does not contain serialized item references, this transaction will not be processed in realtime stock. Use serialized item references when possible."
+r16-0b701a6f706d7b15,POST,/engine/ask,askIntent,One named check; returns the answer and its escrow receipt.,
+r16-0bb2b89a8a2f0781,POST,/auth/parameters,parameters,,
+r16-0bbfe62284eae685,POST,/s3/abortDatasetUpload,AbortDatasetUpload,Abort Dataset Upload,
+r16-0bc98928bedde4a1,PATCH,/namespaces/{namespace}/definitions/{definitionId}/versions/{version},setVersionState,"Deprecate, reinstate, or retire a version",
+r16-0bd2bc51dbbf5411,POST,/bo/merchant/{id}/setujui,boSetujuiMerchant,Setujui pengajuan merchant (id = nomor akun merchant); akun menjadi terverifikasi,
+r16-0bee46e0994d881a,GET,/simulation/run,runSimulation,,
+r16-0bf3b361b8e26507,POST,/api/users/{username}/groups/{GID},edit group,edit a group,
+r16-0c23d9626ab4e41a,POST,/admin/billing/payment-methods,createPaymentMethod,,
+r16-0c2a4f4097d3d615,POST,/v1/admin/users/{uid}/wallet/adjust,,Balance correction — never moves level (wallet.adjust),
+r16-0c353b0fde8c9422,POST,/uploads/presign,,Get a presigned URL for direct-to-storage upload,
+r16-0c4c04e12d97e808,POST,/meters,,Meter,
+r16-0c5151de24c468c8,PUT,/api/message,edit_message_handler,Edit a message,"Edit a message
+
+Edit a message which exists within the topic's chat history. This will delete the message and replace it with a new message. The new message will be generated by the AI based on the new content provided in the request body. The response will include Chunks first on the stream if the topic is using RAG. The structure will look like `[chunks]||mesage`. See docs.trieve.ai for more information."
+r16-0c5b9eba220bf831,POST,/nethlink,post_nethlink,Create a new extension and mark it as the NethLink endpoint.,
+r16-0c66ab66aa5ae8f9,POST,/projects/{projectId}/payees/{payeeId}/agreement,createAgreement,,
+r16-0c8611af3b9c718d,POST,/tessell-internal/iam/users/activate,activateUserInternal,First time activate user,
+r16-0c9f464100a1ab47,POST,/api/security/disable-admin,security_disable_admin,"Disables DavAdmin entirely (runs 'davcli admin off' in the background), after which DavAdmin must be managed via terminal.",**Access:** Administrator or user role (the reseller role is blocked).
+r16-0cacf22c33bcb011,PUT,/apps/{appId}/deployment,putAppDeployment,,
+r16-0cc240bac2b21126,POST,/api/audit/recommendations/{audit_id}/verification,verifyRecommendation,,
+r16-0cc8b88760eed605,POST,/payment-methods,createPaymentMethod,Create payment method,
+r16-0cdb45524d049c5b,POST,/api/dev/payment-events,,Simulate payment event (Development only),
+r16-0ce0526ed56f77d0,POST,/admin/orders/{id}/assign-school,assignOrderSchool,Credit a quarantined order to a school,Only for paid orders that have no donation yet (`ingestion_status = quarantined`). The school must be approved.
+r16-0ceb0207e8908b2a,POST,/v1/responses,aiGatewayResponses,,
+r16-0d26aa7c24c27497,POST,/pos/return,processReturn,Process return,Return items from previous sale
+r16-0d59da0cfb8bc13a,POST,/admin/change-requests/{id}/decisions,decideChangeRequest,Record an approval decision for a change request,
+r16-0d5b23235e90dbf9,POST,/api/v1/eval,evalCode,Evaluate raw IronShell code,
+r16-0d65636be21507e2,POST,/select,,Select,
+r16-0d6c04aa8a7185ce,POST,/api/chapters/id/{selectedChapter},,downloads chapter from OPT,downloads chapter from OPT
+r16-0d70fd918070e092,POST,/uaepass/signature/create-process,,Create signature process,Upload PDF document and create signature process
+r16-0d7919f814186438,POST,/api/providers/{provider}/verify,verifyCredentials,Verify credentials,Verify credentials for a provider by making a test API call
+r16-0d934c80777dc0fa,POST,/v1/cloud,CloudService_Create,,
+r16-0dbfae98f1f7e54c,POST,/v1/sagas/{id}/crash,,Simulate orchestrator crash mid-saga,
+r16-0dd4d9f9472d42cc,POST,/v1w/kyc/tryResetKYCSteps/users/{userId},,,"Checks if there are any kyc steps that should be reset, if so, it resets them and returns the updated latest user state."
+r16-0de202a7081b9b50,POST,/collector/history,save_history,Save stolen history from the clients,
+r16-0e07b740388ccd2f,POST,/folder/{id}/createurl,saveFolderCreateurl,,
+r16-0e0a4835220dd5e9,PUT,/{path},,Proxy request to upstream,"Authenticates the request, applies rate limiting, forwards to upstream, and records usage"
+r16-0e0ad6323a9da872,POST,/devices/gateways,post_devices_gateways,Create or update a gateway configuration and related trunks.,
+r16-0e11be8eaed99d20,POST,/suno/submit/music,,Create music,
+r16-0e248af3c542cdc0,GET,/rules/{rule_id}/counters/{counter_id}:reset,:ResetCounter,Reset counter,Reset a specific counter for a rule
+r16-0e3bc3388fc2bc76,GET,/role/,,Create role,Create role
+r16-0e4352ae05f603ef,POST,/quizzes,,Generate quiz from recent mistakes,
+r16-0e4f3540fed60fda,POST,/api/re/ext,createReParcelExt,Create return parcel,
+r16-0e716ee6ef8a8617,POST,/users/{id}/balance_adjustments,createBalanceAdjustment,Adjust a user's stardust balance,"Admin only. Grant (positive) or deduct (negative) stardust, recorded in the ledger with the given reason."
+r16-0e9d5aaf56aa9189,POST,/candidates/{id}/decisions,,"Record a decision for the candidate's current stage. advance moves them to the next stage, or to a final selected outcome if it was the last stage; hold keeps them at the current stage (e.g. an undecided or waitlisted-within-stage outcome); reject is a final outcome. A panelist on the candidate's current stage, or selection-process:decision:manage. Permission selection-process:decision:write.
+",
+r16-0eab0b5f6c07603f,PATCH,/api/v1/network_policy_rules/{id},updateNetworkPolicyRuleById,Update network policy rule fields by ID,
+r16-0ee35ea0a896d138,POST,/erc20,new_erc20,creates new erc20 contract,creates new erc20 contract using userId in POST data
+r16-0f0a75492c6a3407,POST,/model/train,trainModels,Train and compare multiple traffic classifiers,
+r16-0f0bef396daabf61,GET,/experiments/{id}/assign,experimentsIdAssignGet,Assign variant,
+r16-0f17d5672b88bd05,POST,/calendar-connections/,createCalendarConnection,,
+r16-0f4ab71e6cdf2ef5,POST,/candidates/{id}/logout,f018788c031933cba2901b4ad7b2e391,Mark candidate as if he left the exam,From the proctoring view this operation is same as finish
+r16-0f4f85db47015feb,GET,/users/me,,Verify JWT token and get user profile,
+r16-0f6679708062fb52,POST,/v1/prior-auths/{paId}/narrative,,Draft a medical-necessity narrative,
+r16-0f7a8f9c52d57207,GET,/v1/feedback/token,getFeedbackFormToken,Issue a feedback form token,"Called when the feedback panel opens. The token it returns carries the moment
+it was issued, sealed so the client cannot edit it, and `POST /v1/feedback`
+requires one: a submission that arrives faster than a person could have typed
+it, or with no token at all, is treated as automated.
+
+Deliberately a separate call rather than something embedded in the page: the
+site's HTML is cached at the edge, so anything baked into it would be shared
+by every visitor who got that copy and would be stale by an unbounded amount.
+"
+r16-0f984bbed891ac1b,POST,/api/recipes/{id}/place,post_api_recipes__id__place,POST /api/recipes/{id}/place,Not yet described in schemas/routes.ts — path and method were read from the handler.
+r16-0fbb08808ba0f99c,POST,/v1/dpus/{id}/renew,,Set when the lease ends,
+r16-0fd8eb9688f50762,POST,/api/cron/content-roi,,Compute content ROI summaries,
+r16-1019ab6a33107b07,PUT,/api/members/{id},updateMember,Atualizar membro,"O pedido exige name e email. Embora o DTO aceite tunaName, studentNumber, roleId e instrument, a implementação atual não persiste esses quatro campos. A palavra-passe é opcional nesta operação."
+r16-1079dc8e89fd0650,GET,/ws,,Send Update to Front,Send Update to Front
+r16-107a571e313b56cb,GET,/admin/orders/approve-order/{id},,Approve Order,Approve Order from admin side which is in processing state
+r16-108de059581f068c,POST,/up-subscriptions,UpSubscriptions,subscribe about status of a secure LCS-UP connection for a target UE,
+r16-10dc65e79d6bfa3a,POST,/IP.svc/GetMobileAppInfo,ipwsGetMobileAppInfo,Mobile app info — alerts and notification settings; sends usage statistics,
+r16-10ead87c3c94494f,POST,/Test1,Test1,,
+r16-110b327cabaf2081,POST,/uruchomienia/{uruchomienieId}/zatrzymaj,zatrzymajUruchomienie,Zatrzymanie uruchomienia,"Uruchomienie w kolejce kończy się od razu ze statusem `blad`. Trwające: jeśli konstrukcja się
+skończyła, solver oddaje najlepszy dotychczasowy plan (status `poprawny` / `z_naruszeniami`,
+`zatrzymane: true`); jeśli nie, status `blad` (ADR 0006). Odpowiedź wraca od razu, a końcowy stan
+przychodzi zdarzeniem `koniec` w SSE.
+"
+r16-11143e04599ac34e,POST,/api/v1/orders/scheduled,,Create a scheduled order,Creates a new scheduled order for the authenticated user
+r16-1125e2c38aa28eaa,POST,/internal/users/lookup-by-phone,internalLookupUserByPhone,Check if a phone number belongs to a Clay user,"Called by Payment Service during COD verification flow to determine
+if the recipient has a Clay account. Returns user_id and basic info
+if found, or `found: false` if no account exists.
+
+**Not exposed via API Gateway** — internal service-to-service only.
+"
+r16-112af613c8df5620,POST,/password/recover,,Get authenticated user profile,
+r16-112b51fa420a0179,POST,/automations,,Engage Sequence Construct,
+r16-113daacf9541a96a,POST,/api/v1/backoffice/meetings/{id}/settlement-document,DocumentsController_upload,,
+r16-114dd49e2ef7af3e,POST,/customers/{customerId}/payment_methods/add,addCustomerPaymentMethod,add a customer payment method,"Collect a payment method / credit card for a customer.
+
+Calling this method creates a short-lived [Stripe Checkout Session](https://stripe.com/payments/checkout) to allow your customers to enter payment method details. This API will return a Stripe URL to which you should redirect your customers to securely add their credit card information. Upon completion, Stripe will redirect back to the provided URLs.
+"
+r16-115aeb02abdb6686,POST,/coupons/{id}/use,useCoupon,Mark coupon as used and get redirect URL,
+r16-115fa44b85bc22ea,POST,/location,location,Location API,
+r16-116668bb44ab2d36,POST,/auth/link-device,linkDevice,Link device to company,Associates a device with a company using a company linking code
+r16-11696179fad65eac,POST,/profiles/admin,ProfilesController_updateAdminProfile,,
+r16-1172b8ec6f5ac105,GET,/api/v1/judges,,Register New Judge, Register new judge
+r16-117b549e3503cddc,GET,/user/profile/google,get-bind-google-user-profile,Bind Google User Profile based on parameter,Bind Google User Profile
+r16-118341a8942445f9,GET,/v1/billing/recipients/,,Updates Billing Recipients,"
+Required roles:
+ - can_read_billing"
+r16-119489ec211e10ed,GET,/api/v1/bookings/checkout-session/{tourId},,Create checkout session,Initializes a Paystack checkout session for a tour or runs a mock checkout session in test mode
+r16-11a75573bce4457a,POST,/finances/deposit,,Create a Deposit,creates an Deposit object.
+r16-11ce463e0b44b826,GET,/api/requests/{id}/accept/{token},,Accept a specific request through an email link.,
+r16-120d57033f2f7d82,POST,/tracking/sites,create_tracked_site,Allow a site origin,Allow a site origin. Audited.
+r16-1215a9db171259e0,POST,/listings/{id}/contact,,Reveal Contact Info,Records a match intent and reveals the landlord's contact information (phone number). Rate limited to prevent abuse.
+r16-1245c46b42915ab2,POST,/v1/runs/{runId}/turns,createTurn,,
+r16-124ffce990c29e93,POST,/kernels/{kernel_id}/interrupt,,Interrupt a kernel,
+r16-12557057404339cb,PUT,/schedules/{id}/teams,replaceScheduleTeams,Replace a schedule's owning teams,Replaces the complete set of teams that own the schedule. Requires schedule.manageTeamOwnership; it does not change the schedule configuration or rotations. Sending the current set changes nothing.
+r16-125cefc7b044fd4f,POST,/spaces/{space}/categories/{category-name}/things/{thing-id}/actions/{action-name},CreateActionFromCategory,Create Thing Action from a Category,"Creates a new Action resource for the given Thing's Action.
+
+> 🚧 **Limitations:** This operation will only work in the scope of the
+> given Category.
+"
+r16-1277ba9d04701e16,POST,/vulnerabilities/sqli/,sqli_post,,
+r16-127a4be3f566c77d,POST,/calibrate,,Calibrate the arm,Calibrates the robot. Should be done occasionally to affirm the robot is where we think it should be.
+r16-127efd6f75fe8b71,GET,/api/globaltix/token,getGlobaltixToken,Get Globaltix token in service,Retrieves the authentication token for Globaltix API access
+r16-1287429ce47933d0,POST,/v1/tasks/next,,Get next task,
+r16-128fc1b0079e698a,POST,/plugin/repository/session,saveSession,Save sessions,"Save/update/remove sessions
+"
+r16-12a9f0d8e2727a60,POST,/api/v1/investments/commitments,,Reserve an investment commitment,
+r16-12ae5edbe5394960,POST,/courses,,Manage courses collection,"GET - returns list of all courses, POST - creates a new course"
+r16-12c8e97f8df08635,PUT,/events/{eventId}/finalize-plan,,Finalize the selected AI plan option,
+r16-12f5268c0fa3ba55,POST,/group-shift-admin-relations,,Create group shift admin relation,
+r16-1309b77ce5a2b736,POST,/verification/documents/verify,verifyDocument,Verify an identity document,
+r16-132387c934386364,PUT,/instance/{siUUID}/{action},,Operate on a service instance,Commit an operation for specified service instance.
+r16-1328caf016265d24,GET,/user/referral/apply,,Apply referrals,Apply referrals amount to order
+r16-13475376d2d2bedc,POST,/organization/{keyOrganizationFiscalCode}/referents,insertReferent,Insert referent.,Insert a referent fiscalcode.
+r16-1365da6b27796dc6,POST,/tasks/seek,seekTasks,Seek executable tasks for an agent,"Returns pending tasks whose dependencies are completed and whose
+required skills are all included in the agent skills.
+Each returned task is also recorded as an assignment.
+"
+r16-136881c2f00a36d1,POST,/api/lob/{lob_id}/proof/verify,ProofController_verifyProofRequest,The Verify Proof Request API is called to verify a proof request,
+r16-1383eace922bb59c,POST,/api/automation/deploy/cf-pages,,Link Cloudflare Pages project,Check if a CF Pages project exists and can be linked
+r16-1386cd1515003303,POST,/sessions/{id}/summarize,summarizeSession,Generate session summary,
+r16-1397233c9633f0db,POST,/graphs/{graph_id}/compile,compile_graph,Compile the graph,
+r16-139c1ef478e767a4,POST,/user/modify_usertype,user.modify_usertype:POST,user.modify_usertype,
+r16-13a0c686a707a6fc,POST,/{collectionId},pushRecords,Write a batch of records,"Writes up to `maxBatchItems` records, each with optimistic concurrency: an item is written
+only if `baseVersion` names the record's version on the server, or is null and the record
+doesn't exist yet. Items are written independently and answered in order, one result each,
+so one rejected item doesn't fail the others. Each id appears at most once.
+
+**A conflict is a merge instruction.** A `409` item carries the server's current record.
+The client unseals it, merges, and pushes again with the current version.
+
+**A delete is a tombstone.** An item with `deleted: true` keeps the record's row, drops its
+ciphertext and sets `deletedAt`, so other devices learn of the delete on their next pull.
+It also deletes the record's blobs. Writing a record again over its tombstone, by naming
+the tombstone's version, is how a merge brings back a record deleted on another device.
+"
+r16-13a8d55eb45fbe62,POST,/conversion-plugins,createConversionPlugin,Register a conversion plugin,Requires the global.converter.manage permission. The plugin is enabled by default and installation is attempted immediately. Failed installation is retried periodically.
+r16-13c9d8ebce4ec0e3,POST,/v1/namespaces/{namespace_id}/chains/{chain_id}/seal,,Create Seal for a chain window within namespace boundary,
+r16-140cb2d0284edd37,PUT,/api/v1/sip-transports/{id}/,sip_transports_update,,"PJSIP transports.
+
+Every method requires a staff or superuser account — `cert_file` and
+`priv_key_file` carry TLS certificate/private key material in plaintext.
+
+Saving here only updates the database; changes reach Asterisk after a
+superuser runs ""Apply Changes"" in the admin. Deleting a transport still in
+use by a `SIPUser` or `SIPPeer` returns 409 instead of failing at the
+database level."
+r16-1434d94701f0e6e1,POST,/expertinvitelink,,,Creates a new resource with data.
+r16-143adefc44da157c,GET,/api/v1/stardust/stardust-core/Client.sync_event_loop,stardust_stardust_core_Client_sync_event_loop,Synchronous event loop,Run synchronous event loop with callback.
+r16-14489bf72c0e8a02,POST,/api/compliance/filings/{id}/compile,compileEeiData,Compile the EEI data for a filing,
+r16-144d33cd57163320,PUT,/api/product/settings/agent-policy/rules/{rule_id},,更新 an owner-scoped Agent authorization rule with optimistic concurrency.,
+r16-1459be6434e208fb,PATCH,/v1/parties/{partyId}/trip-status,,Advance the current user's trip status (forward-only),
+r16-14638eea56b87c51,POST,/api/lists/{list_id},changeList,"Add, update or remove an entry","`{entry}` adds an entry, or replaces the one named by `original`; `{action: remove, id}` removes one."
+r16-146fcd8bf1c2afa5,POST,/trust/edge,,Create trust edge,Create or update a trust relationship
+r16-1471ca19bb664bff,POST,/api/attachments/upload-url,createAttachmentUploadUrl,Step 1 of upload: get a signed upload URL,"Permission: `spending.write` (superadmin, admin).
+
+Upload flow:
+1. Call this to get `signedUrl` + `path`.
+2. `PUT` the file bytes straight to `signedUrl` (Supabase Storage — not this API).
+3. Call `POST /api/attachments` with `storagePath = path` to record it.
+
+Allowed types: PDF, PNG, JPEG, WebP. Max 10 MB.
+"
+r16-1487296fa1aa3370,POST,/{client}/products/{id},,Products endpoint,post product by ID
+r16-148df0497ff53b70,POST,/rest/export/statistics/create,,Create and return the word export with statistical results,Long Description
+r16-1490de7f18d4946b,POST,/production_tags/report_canceled,reportCanceledProductionTags,Report canceled tags,Updates the status of specified production tags to 'canceled'. Requires admin privileges.
+r16-1495bbe3a65edc83,POST,/vau/issuer-api/v1/stopadvices,stopAdviceUsingPOST,Issuer Stop Advice API,Issuer can place stop advice by providing following requested information
+r16-149ac5bdfb4b6790,PUT,/admin/job-notion-links/{ashbyJobId},setJobNotionLink,"Save (or replace) the Notion page linked to a job, then re-sync",
+r16-149e02354fe92a76,GET,/on,,Turn on,
+r16-14a85fa53bd6f992,POST,/sites/{siteExternalReferenceCode}/site-configurations,postSiteSiteConfiguration,,
+r16-14b4133435f7b0b3,PATCH,/urls/{id},updateUrl,Change a URL's destination,"Needs a read & write token, and the account must own the URL, be an editor of it, or be a superadmin. Short codes can't be changed."
+r16-14d100d834601fed,POST,/sessions,,Create Session,Create a new session
+r16-14dc5186a5f1fb08,POST,/v1/intents,createIntent,,
+r16-14dd313dc540c837,POST,/referrals,createReferral,Create a referral from structured clinical information,
+r16-14e0a553a781751b,POST,/api/v3/botx/events/stop_typing,,Stop typing,
+r16-14f6302b8340d9e0,POST,/v1/admin/drives/{id}/add-student,,Manually add a student to a drive,Admin forces a student registration for a drive
+r16-14f770322c23c748,POST,/wallet/address,,Create or retrieve a deposit address for a token,
+r16-14fd14a3c33231bc,POST,/orders/users/{userId},OrdersService_create,,Create a new order from user's cart
+r16-150f2ddb79cb25c6,POST,/contract/identity/claims/add,addClaimToIdentity,Add a claim to an identity,
+r16-152720ed867bf679,POST,/api/v1/device/{device_name}/stop,stop_device,Stop Device,"Stop a device (as-ophyd-api compatible).
+
+Calls the stop() method on the device if available. This is typically 
+used to abort a motor move or other ongoing operation.
+"
+r16-152a4aefc849f7e4,POST,/sessions/{sessionId}/profile/observation,ProfileController_appendObservation,,
+r16-153d2e28483e7153,POST,/nas,,Register or update a NAS / RADIUS client,
+r16-154292a1b95fdd20,POST,/api/v1/chats,,Create a 1:1 chat or a group chat,
+r16-154c4dd115f145a4,POST,/admin/a/is-logged-in,,Check current admin session status,
+r16-15534549d5875ed5,POST,/media,uploadMedia,,
+r16-15536e174c53cfcb,PUT,/workspace/api/v3/configured/status,,Get About info,Syncs demo with the git backend.
+r16-155445bf403ecea4,POST,/api/v1/correlate,correlate,,
+r16-1555ac93825eb134,PATCH,/nutritionists/{nutritionist_id}/appointment_requests/{id},answerAppointmentRequest,Accept or reject a request,"The nutritionist answers one of their pending requests. Accepting also rejects every other pending request of the nutritionist that overlaps it in time, and lists their ids in `rejected_ids`. Requests whose time has passed can still be answered.
+"
+r16-155b8096d48dad8b,POST,/inventory/stock-movements,createStockMovement,,
+r16-155d485afa4b1c2c,POST,/admin/data-protection/sql-backups,createSqlBackup,,
+r16-156144752200819e,POST,/api/v1/organizations/{id}/status/,api_v1_organizations_status_create,,
+r16-156c38d4e3794459,POST,/api/v1/brokerage/mock/credential/connect,verifyMockBrokerCredentialConnection,Verify the current owner's mock account with one read-only balance probe,
+r16-15719d07f7573b91,PUT,/instances/{instance_id}/modules/{module_name}/{model_name}/batch-sync-links,batch_sync_links_instances__instance_id__modules__module_name___model_name__batch_sync_links_put,Synchronize sets of links for multiple scopes in a single call,"Synchronize link sets for multiple scopes.
+
+**Permissions:** Requires write access to the target instance or space.
+
+**Notes:** Each scope is changed to exactly the desired set of linked IDs."
+r16-1573139fd44e68c3,POST,/auth/register/,,Create a BloodBridge user profile,Creates an application profile for an existing Firebase-authenticated user.
+r16-15740ea476f56f8c,POST,/upload/link,,Get file upload link,"Retrieve a link for uploading a file.
+"
+r16-158213ab9f017fd7,GET,/api/v1/ws/messenger,registerUserToHub,register user to WebSocket hub,Registers a user to the WebSocket hub and initiates connection
+r16-1592ef52fa54a6e7,POST,/raspberries/{mac_address},src.adapters.rest_api.raspberry_pis.change_os,ChangeRaspberryOS,Allows to change Operating System on given Raspberry system
+r16-1597abcf5848c081,POST,/bulk/brands/runs/{runId}/stop,stopBulkBrandRun,,
+r16-15a6c9e6ca4b5f4f,POST,/api/theft-score,scoreTheftRisk,,
+r16-15a855d531692392,POST,/safety/issues/{id}/status,setSafetyIssueStatus,,Stored `open` is the doctor app's `submitted`. Transitions: open -> acknowledged|investigating|closed; acknowledged -> investigating|closed; investigating -> closed; closed is terminal.
+r16-15ae8f41f30bda7e,POST,/previews,createPreview,Create preview environment,Create a new preview environment for a PR.
+r16-15da65e7d5572290,POST,/sessions/{id}/summarize,,Summarize a session (and optionally fork),
+r16-15e56a4f9512d997,POST,/services/{id}/env-vars/bulk,bulkUpsertEnvVars,Bulk upsert environment variables,Create or update multiple environment variables at once.
+r16-15f1a9efd2f3820b,POST,/presentations/verify,verifyPresentation,Verify a credential presentation,Verifies a credential bundle against a registered policy
+r16-15f62093d26dd6d1,POST,/shipment/dimensionsupdate,dimensionsupdate,dimensionsupdate,
+r16-15fe573548c72000,POST,/api/drone,create,,
+r16-161a923878cc352e,POST,/rest/work-history/export,,Create and return the word export with results of the given search request,Long Description
+r16-162b3cf1100e5032,POST,/contacts/{contactId}/unlockContact,unlockContact,Unlock Contact,Unlock Contact
+r16-164ca1015fae7d9e,GET,/private/mask-random-bulk/{amount},,create random maskConfig in bulk,
+r16-165187b921633461,PUT,/upload/multipart/abort,,Abort upload,Abort upload
+r16-16542033a3ac3f95,POST,/session,createSession,Create a new session,Creates a new session
+r16-16560815db789df1,POST,/api/v1/callbacks/daraja/{slug}/c2b/validation,,Validate a C2B payment,Decide whether to accept an incoming C2B payment. Any answer other than ResultCode 0 rejects it.
+r16-165bb47189448b27,POST,/v1/users,addUser,Add a user to your chat instance,
+r16-1671339fce5f1e3c,PATCH,/api/v1/clients/{client_id}/providers/{id},,Update a provider,"Updates an existing OAuth provider, validating client ownership. Admin only."
+r16-168925ed7683e057,PATCH,/internal/rooms/by-order/{orderId}/assign-driver,internalAssignDriver,Assign driver to chat room (triggered by Driver_Found event),"When a driver accepts an order, the room initially created with
+`driver_id = null` needs the driver assigned. Called internally
+when `Driver_Found` Kafka event is consumed.
+"
+r16-168d3e4681f3a7d4,POST,/vuln_compose/download,,Download compose assets for catalog entries,
+r16-16a04bb5aa94d61b,GET,/internal/v1/integrations/tiktok/tenants/{tenant_id}/connections/active/token,,Resolve active TikTok user token,Returns a decrypted user access token for the tenant's active TikTok connection. Intended for trusted MCP Gateway or worker callers.
+r16-16a7ae6b1aeaa5eb,PUT,/mc/api/v1/system/backup/export,putBackupExport,PUT export,Endpoint documented on page 664 of All Platform REST APIs.
+r16-16abd5fe2521dcf1,POST,/votes/{id}/cast,castVote,Cast Vote,Submit vote for an option
+r16-16c5844d715abd28,PUT,/api/end_users,,Update EndUser,"Confirm an end user is ready for async procesing by sending a status of ""ready"". The `end_user_id` must have previously been sent with at least one Transaction.
+"
+r16-16c5de1c4d21a009,PATCH,/sessoes/{sessaoId}/realizada,marcarSessaoRealizada,Marca a sessão como realizada,"PF6. Só é permitido após `dataHora` ter passado e a partir de
+`Agendada` ou `Confirmada`. `Realizada` é estado final e imutável.
+
+Em sessões de grupo, marque a presença individual de cada participante
+(`PATCH /sessoes/{id}/participantes/{participanteId}`) **antes** desta chamada.
+"
+r16-16c850077f5e405f,POST,/api/v1/execution/activation/plans/{plan_id}/verify,verifyStagedActivationPlan,,
+r16-16c9dca9d8f15acf,POST,/grouplist/{id}/add,saveGrouplistAdd,,
+r16-16cdf24b34f5e5d3,POST,/sessions,,Create a lightweight identity,
+r16-16d69ed5c8962bb7,POST,/api/v1/ingest/air-quality,,Ingest air quality,"Fetches current air quality at (lat, lon) from the Google Air Quality API and stores it."
+r16-16d733d63e829c06,POST,/api/v1/projects/{project_id}/artifacts/{artifact_id}/polish,polish_artifact,Polish Artifact,
+r16-16d8719bb402caf0,POST,/drafts,createCommandDraft,,
+r16-16de923de0a5f544,PUT,/api/otc/offers/{id}/counter,,Send counter-offer,"Either party may update the offer parameters (amount, price in RSD, premium in RSD, settlement date)."
+r16-16dffbfd2e44cb86,PUT,/users/{id},,Replace a user's profile,Requires access to the user; non-admins cannot promote to equal-or-higher roles or assign managers outside their hierarchy.
+r16-16ebe3ddb8001fe6,PUT,/core/marketplace/templates/{id},Update template,Update template,"Updates the details of a template. Modify the template name, description and/or `is_public` status to change the public/private visibility of the template."
+r16-16f0e3b978e7fa55,POST,/api/requirement-normalization/:id/mappings,,/api/requirement-normalization/:id/mappings (POST),
+r16-16f1afe85bfbf141,POST,/api/order/new,,"Create new order (raw input, unclear format)",
+r16-170f0427abd31f22,POST,/v1/actions/{actionId}/results,recordActionResult,,
+r16-1718a57af3040440,POST,/tickets/{ticket}/ai-triage,,"Automatically classify ticket category, priority, and team using Qwen AI",
+r16-172041054161d4bb,POST,/vault/setlock,buildSetLockTxn,Build time-lock transaction,
+r16-1728007ac0ec43ee,PATCH,/appointments/{id},,Reschedule or cancel appointment,
+r16-172bafa03f81fcf9,POST,/queries,createResearch,,Same owner/key/query returns the existing task. Changed query returns 409; one active task per user and at most twenty globally. A supplied public URL uses extraction. Cancellation cannot undo an external request already sent.
+r16-173067baa25820b7,POST,/api/admin/check-password,postAdminCheckPassword,Verify super-admin password gate,Used before exposing sensitive admin operations in the UI.
+r16-1730782a7ab769ab,GET,/index/nekopay/link,,Bind a physical card,"Success: `code == ""0""`."
+r16-173be38941be6cc9,POST,/api/v1/apps/loyalty-hub/program-actions,,Store,
+r16-173ca9ae54fe40c8,POST,/economy/posts/{post_id}/seals,,Give Seals to a post,Give 1-10 Seals to a post in the feed
+r16-173e4e4e00b69cc1,POST,/v1/api/seed/all,,Seed all sample data,Create all sample data (users and products) for testing
+r16-1746bcd7e421246f,PATCH,/admin/parent-subscriptions/{id}/cancel,patch_admin_parent-subscriptions__id_cancel,Update Cancel,PATCH /parent-subscriptions/:id/cancel
+r16-174fece0054f2755,POST,/api/ai/suggestions/{id}/apply-edited,applyEditedAiSuggestion,Apply an edited AI suggestion payload,
+r16-1778e115f07281d8,POST,/api/v1/applications/{application_id}/offer,offer_create_api_v1_applications__application_id__offer_post,Offer Create,
+r16-178a01583aca8551,PATCH,/candidates/{candidateId},updateCandidate,"Accept, reject, or modify a candidate",
+r16-178f4f6108ae9b98,POST,/api/v1/requester-sessions,RequesterSessions_create,Create requester session,Create requester session
+r16-17a96bb27dd89722,GET,/auth/challenge,auth_challenge,Request signed DauthZ challenge bound to an OOBI.,"The server will parse the OOBI to extract the entity's AID, resolve it
+to cache the KEL, create a challenge bound to that AID, sign it with
+the service's KERI key, and return the signed challenge as a CESR stream.
+
+Use `purpose=registration` for first-time signup (provisions a mailbox)
+or `purpose=identification` for login (issues a session token).
+
+**Requires `dauthz_state_dir` to be configured on the server.**"
+r16-17acb96af546adb5,POST,/image/{id}/history,saveImageHistory,,
+r16-17b1ff233db27c3d,POST,/customers/passagetries,unlockPassageEntry,unlockPassageEntry,
+r16-17d3e20d6385ae0e,POST,/admin/student/{student_id}/transcript,,Generate transcript details,
+r16-17d4e61e7a31473b,POST,/tasks/{task_id}/content/edit,editTaskContent,Improve existing post content,
+r16-17d794760223f64f,POST,/Test2,Test2,,
+r16-17fd09f4a0a97e13,POST,/invoices/{id}/nota-debito,createNotaDebito,Create Nota de Débito,"Creates a debit note (ND) referencing an existing active invoice.
+Requires Admin or Accountant role.
+Unlike NC, ND is NOT constrained by the original invoice amount.
+"
+r16-1803e1dade1c0a06,POST,/applications/{app_id}/screening,rescreen_applications__app_id__screening_post,Rescreen,
+r16-18089f4a69788c13,GET,/onboard/callback/{id},onboardCallbackGet,Onboarding callback (GET),
+r16-180fa5e5b83dae97,POST,/tasks/{taskId}/decisions,decideTask,Apply task decision,
+r16-181207b895e3a698,POST,/members/me/avatar-upload,grantAvatarUpload,Mint a presigned POST to upload a profile picture to the dedicated avatar bucket (US-3.2),
+r16-18289156eb9a7add,POST,/user/view/wishlist,UserViewWishList for user,ViewWishList for user,
+r16-182b7a3bdf276dfe,PATCH,/gates/{id},patchGatesById,Sửa cửa,"Q-001: HR chỉ được gửi default_policy. Gửi name, mode, threshold_level, custom_threshold, is_active hoặc trường ngoài quyền trả 403, không cập nhật một phần. OWNER giữ quyền sửa đầy đủ. Danh sách phòng ban dùng PUT allowed-departments."
+r16-184d13cba7e32e83,POST,/sessions/{id}/abandon,abandonSession,Mark a session as abandoned,"Idempotent: returns 204 if already abandoned. Refuses with 409 if
+the session is merged (history is immutable).
+"
+r16-186f7c456f5c95ce,POST,/api/cloudinary-signature,,Get a Cloudinary signature for secure uploads,
+r16-1880df9ae6ebd52b,POST,/sessions/{id}/revert,,Restore a file snapshot for the session,
+r16-189536b6a3771d82,POST,/payment/create,,Create Payment,Create page
+r16-189e9122aaab6dbd,POST,/api/files/aws-presigned,,Get AWS Presigned,"In order to upload a media (video, image, audio) or text file, you can request for a signed URL from the API.
+
+You must pass in the name of the file that you wish to upload, along with the file size in the request body. Additionally you can pass ""showAudioResult"" to select if the audio for a video being uploaded should also be \*evaluated.
+
+Once you have the signed URL, you can use it to PUT the file to Reality Defender (bearer token is not required for the PUT).
+
+The following formats are supported:
+
+- Video → .mp4, .mov (max size 100 MB)
+- Image → .jpg, .png, .jpeg, .gif, .webp (max size 10 MB)
+- Audio → .flac, .wav, .mp3, .m4a, .aac, .ogg (max size 20 MB)
+- Text → .txt (max size 5 MB with every 2000 characters considered as one scan)
+    
+
+\*Note: If you wish to evaluate the audio track from a video, our system will do this automatically (the feature must be enabled for your account). If you run the audio extraction yourself and upload the audio file separately, it may result in data loss and reduce the accuracy of the Audio models."
+r16-18a1486ddbabd598,PATCH,/admin/applications/{id}/status,updateApplicationStatus,Accept or reject a pending application,
+r16-18b63c799db5cae7,POST,/admin/bikes/{bike_id}/disable,disableBike,Disable a bicycle,"Mark a bicycle as disabled (Spec Section 8.3, key revocation step
+1: ""Admin marks the bike as disabled via the admin API""). The
+server stops issuing commands to this bike and routers stop
+relaying to its MAC address once they receive the revocation list
+update.
+"
+r16-18c63f1a45226124,POST,/api/v1/ai-training-runs/,ai_training_runs_create,,Reads allowed for the owning tenant; writes need admin/researcher.
+r16-18cce1acff4ee818,POST,/api/v1/upload/presign,,Get presigned upload URL,Generates a presigned URL for file upload (local storage in development)
+r16-18df661b921f1d37,PUT,/purchases/{purchase_id}/review,,Approve or reject a purchase,Approves or rejects the specified purchase and records the supplied comment.
+r16-190041e89adf95f7,POST,/v1/chat/completions,proxyChatCompletion,OpenAI-compatible proxy endpoint with PII masking,"Intercepts, masks PII, forwards to OpenAI, and rehydrates the response"
+r16-19013cefd5db5ea9,POST,/devices/{id}/action,,Control Device API,
+r16-192c83061ec13789,POST,/data-definitions/{dataDefinitionId}/apps,postDataDefinitionApp,,
+r16-19407ce1bee91fc8,PUT,/api/v1/orgs/{orgID}/policies/{policyID},updatePolicy,Update a policy (partial),
+r16-19463c4684aa72a9,POST,/v1/pkd/dsclist,uploadDscList,Upload Document Signer Certificate List,Upload or update a Document Signer Certificate List
+r16-195bb6ae70a57c86,POST,/api/1/vehicles/{vehicle_id}/command/charge_port_door_open,OpenChargePort,Open Charge Port,Opens and unlocks the charge port.
+r16-1967661da32b65e4,POST,/api/v1/bets,storeANewlyCreatedBet,Store a newly created bet.,
+r16-1976ca579d52edb5,POST,/api/v1/service,create,,
+r16-197a6c9323d29634,POST,/iot/v2/devices/{id}/pass,devices_v2_pass#check,check devices_v2_pass,Check if the password matches.
+r16-198426b12b60788e,POST,/api/positions,,Create a new position,Create a new trading position
+r16-19873411f612e617,POST,/api/home,goHome,Ir a posición home,
+r16-198969dd6fdccfb5,POST,/api/integrity/hold/{id}/release,releaseHold,Release a legal hold,"Releases an active legal hold, allowing normal disposition to resume."
+r16-198a27eabfdc3856,POST,/api/settings/modules,post_settings_modules,"Replaces the enabled_modules list in the modules config file, toggles the phpmyadmin/clamav docker-compose services to match, generates the DNS rndc key if a DNS module was newly enabled, and flags DavPanel for restart.",**Access:** Administrator or user role (the reseller role is blocked).
+r16-19ae3095b611cded,POST,/settings/language,post_settings_language,Legacy placeholder retained for backward compatibility (no-op).,
+r16-19c24bd9b301e3c0,POST,/v1/mcp,,Register external MCP server,"Register an external MCP server (spec 2026-07-28, stateless HTTP transport). Core connects at agent registration time and offers the server's tools as `<name>__<tool>`. A server belongs to one project stage; the name is unique per stage because it namespaces the tools. Credential-bearing headers (Authorization, X-Api-Key, ...) must reference an account env var like `Bearer ${NAME}`. Core rejects inline secrets and URL userinfo."
+r16-19c561f7d8412e65,GET,/api/subscriber/{id}/renew,,Renew a subscriber's subscription,"Renews a specific subscriber's subscription. Sets active status to true, resets start date to current date, 
+and calculates end date based on plan duration.
+"
+r16-19d6063ed1cbdf56,POST,/api/typeofdrone/select,select,,
+r16-1a09128074aa28a1,POST,/v1/connect/contests/{id}/save,,Save a contestant from eviction (judge/admin),"Saves a contestant marked for eviction during the grace period. Judges can save one contestant per stage; admins can save unlimited. Requires `contests:manage` or `contests:judge` permission.
+"
+r16-1a2297a25ac3876c,POST,/auth/activate_account,Activate account,Activate account,Activate account
+r16-1a27d3cd36bcb7b4,POST,/users/,,Create new user record in Library,Create new user record in Library
+r16-1a3808cdc9f2d48d,POST,/meets,MeetService_Create,,
+r16-1a39102bb5ed3497,POST,/contract/identity,createIdentity,Create new Identity contract and add it to the registry,
+r16-1a497b63fe29a517,GET,/v1/self,,UserInfo.,Add New User.
+r16-1a54f316042f5c49,POST,/resume/presigned-url,,Generate a presigned URL for resume upload,
+r16-1a6d300623a1ee04,POST,/workstation/oauth/,,"Create a workstation for an username, used to oauth",
+r16-1a98be7e13aaecff,PATCH,/vendor/orders/{order},,Advance the vendor's lines on an order,"Transitions this vendor's lines to `shipped` or `delivered`. The order-level status is a rollup — it only becomes `shipped` once every line across all vendors has shipped. `carrier`/`tracking_number` are allowed only with `shipped`. 404 if the vendor has no line on the order; 422 on an illegal transition (e.g. pending → delivered).
+"
+r16-1a9c56a0b41f911c,POST,/services/install,,Install a service,Install a named service with specified domain and optional configuration
+r16-1aababb70feb5c71,POST,/workspaces/{workspaceId}/campaigns/{campaignId}/state-transitions,changeCampaignState,Change campaign state,
+r16-1aafeba04a964b1b,POST,/v1/memory/context-assemblies,assembleMemoryContext,,
+r16-1ac3766ebf6cfd6f,POST,/scenery3d/loadscene,,Load a 3D scenery.,"Load the scenery identified by 'id'. 
+"
+r16-1aece3853afabdc7,PUT,/orders/return,,Return an order,Return an order for the authenticated user based on the provided order and product IDs.
+r16-1b078cb588d73939,POST,/incidents/{incidentId}/recommendations:generate,generateRecommendation,Generate or retrieve a recommendation for the current incident snapshot,
+r16-1b13c2f474fc118c,POST,/tasks:stream,createTaskStream,Create a task with streaming (SSE/WebSocket implemented by deployment),
+r16-1b22447e363087bc,POST,/v1/workspace/{workspaceId}/authorities,createWorkspaceAuthorities,,Create workspace authorities
+r16-1b25843d00d5408e,POST,/images/edit,editImage,Edit an existing image by image URL,
+r16-1b77d6f57f082899,POST,/conflicts/{id}/resolve,resolveConflict,Resolve a conflict,
+r16-1b79d382ec8eac69,POST,/api/models/rollout-groups,createModelRolloutGroup,,
+r16-1b87bea445724b1d,GET,/api/v1/guest/sign-in,guestSignIn,Sign in as a guest,Generates a new UUID to identify a guest user session.
+r16-1bda508cfbe0e83f,POST,/api/v1/tweets,,Create a new tweet,Create a new tweet with the provided content
+r16-1bdc3ba39a0b6190,POST,/api/v1/apps/integration-hub/settings,,Store,
+r16-1bea8562c87a88fa,POST,/v1/billing/dev-activate-business,devActivateBusiness,,Development only. Activates Business when BILLING_DEV_MODE is enabled.
+r16-1becb71f920ebc09,POST,/incidents/{public_code}/ai/{analysis_id}/review/,incidents_ai_review_create,,
+r16-1c07ba328137f423,POST,/api/mrf/matches/{match_id}/respond,mrf_match_respond,mrf_match_respond,
+r16-1c290d00618bfa88,PATCH,/ngo/publish,togglePublicProfile,Toggle public profile visibility,
+r16-1c4299c7e04fc763,POST,/api/wa/channels,,Create WhatsApp channel,Adds a new WhatsApp channel configuration. Requires Admin role.
+r16-1c847c500ea14318,POST,/reset,legacy_reset_reset_post,[DEPRECATED] Reset global env,**Deprecated.** Use ``POST /sessions/{session_id}/reset`` instead.
+r16-1c9cb6db81612175,POST,/agreements/{agreementId}/discounts/bucket,uploadBucket,uploadBucket,
+r16-1cc29ba3a52a20b3,POST,/account/activate_account,,,activate user account
+r16-1cdccca9cd8366db,GET,/datingdoc/{couple}/{chapter},,Unlock a premium chapter,
+r16-1ce2ba259a55bdf2,GET,/metaso/settings/blocked/delete,,Remove item from blocked list,Remove item from the blocked items list
+r16-1ce96affcba641e2,GET,/admin/find-provider-clear,AdminFindProviderClear,Clear cached provider find data,
+r16-1d4b379447af9597,POST,/project/{ProjectId}/problem/{ProblemId}/bet/{BetId}/end,,Update bet to finished,"Bets will automatically finish when the time has ended. If the bet can be finished before then, this will give the user to set the bet to the review stage."
+r16-1d571dfeeb4c9cda,POST,/api/config/mqtt,,Set MQTT trigger configuration,
+r16-1d57601689b5c49a,POST,/notifications-internal/v1/events,,Create event,
+r16-1d75da467a7e3160,GET,/oidc/logged/{provider},,OIDC logged callback,Callback endpoint called by OIDC providers after login.
+r16-1d858d89384b8164,POST,/free,,Set unload/free flags,
+r16-1d91b5d2d336d353,POST,/incidents/{incidentId}/resolution,resolveIncident,Resolve an acknowledged incident with evidence-backed notes,
+r16-1db8dd56ee67614a,GET,/github/installation,,GitHub App installation callback,Handles the redirect after a user installs the GitHub App. Stores the installation and syncs repositories.
+r16-1ddf9f7768150c8a,PUT,/user/profile,,User Update Profile,Admin Delete category
+r16-1e08d0a165561a72,POST,/v1/maishiv/knowledge-base/search,maishiv_searchKnowledgeBaseChunks,,"Retrieve up to n passages from the authenticated user's Maishiv knowledge base,
+without generating an answer. Only owned documents are returned. Times are
+nullable seconds and are provided only for a unique, reliable audio alignment.
+Each completed search costs $0.01 from the user's prepaid API balance,
+regardless of n or the number of matches. Zero-match searches are billable.
+Invalid requests, missing knowledge bases, and failed searches are not charged.
+Website subscriptions and daily question allowances do not apply."
+r16-1e0af7683ddab7b4,POST,/fi/v1/businesses/{subscriber_or_common_id}/bank-accounts,post-bank-accounts,Add Bank Account,Add a Bank Account.
+r16-1e1a37494f80825a,POST,/register,,register feature for new users,register feature for new users
+r16-1e34d7baaaaff754,POST,/other,,Placeholder (data kosong),
+r16-1e3a7e13c4332c74,POST,/a/json/ledger,,Admin Ledger Modifications,
+r16-1e3c761fce3062ec,POST,/browse,Browse,,
+r16-1e4dbcb095cf4656,POST,/teams/manage/admin,,,Creates a new resource with data.
+r16-1e77dc9cd2c5f114,POST,/financial-documents/{documentId}/allocate,allocatePayment,,
+r16-1e86a85befc93db5,PUT,/api/external/users/{id},,ChangeDisAccept external user,Change Accepted external user
+r16-1e87d4c645abdc52,POST,/git/create-pr,gitCreatePr,Create or update a Pull Request (guarded by confirm/dry_run),
+r16-1e898e711515e36c,POST,/api/v1/admin/sessions/{id}/decision,makeDecision,Make decision on eKYC session,
+r16-1eb788f0542d9473,PUT,/api/owner/companies/{cid}/login-policies/{pid}/default,,Make a policy the company default,
+r16-1ebc7487b821f93e,POST,/preferencias,preferenciasSave,,
+r16-1ef594b9334059dd,POST,/admin/licenses/{license}/verify,adminVerifyLicense,"Verify a pending licence (`agents.verify_licenses`, never your own)",
+r16-1f03e4b5745d4268,PATCH,/task-applies/{id}/approve,TaskApplyController_approveTaskApply,,
+r16-1f05d8f7b542b483,POST,/v1/devices,postV1Devices,Register a new device for the authenticated user.,
+r16-1f1aed573dcdf09a,POST,/robots/load,idOfRobotsLoad,,Percentage
+r16-1f400f9549e1bbab,POST,/v1/gateway/ticket,generateTicket,Generate a WebSocket connection ticket.,"Generates a short-lived, single-use ticket for establishing a WebSocket connection.
+This allows the client to authenticate via the `Authorization` header once, and then
+pass the ticket as a query parameter in the WebSocket handshake (where custom headers are often difficult to set).
+"

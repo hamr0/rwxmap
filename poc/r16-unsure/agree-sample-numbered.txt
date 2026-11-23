@@ -1,0 +1,709 @@
+#1 r16-0002abad14adbc6d POST /api/collections
+operationId: post_api_collections
+summary: POST /api/collections
+description: Not yet described in schemas/routes.ts — path and method were read from the handler.
+sonnet: w — ii undescribed create on collections
+opus: w (low) — ii plain create of collection
+
+#2 r16-01ac7690d019756e POST /register/organizer
+operationId: registerOrganizer
+summary: 
+description: Register a new organizer
+sonnet: x — g register account maybe login
+opus: x (low) — g registers organizer account
+
+#3 r16-046cbfd57da95b8b POST /messages/{uid}/resume
+operationId: 
+summary: Resume the delivery of a campaign
+description: Resume delivery of the specified campaign
+sonnet: x — resume sends messages out
+opus: x (high) — c resumes campaign delivery
+
+#4 r16-07a54bbc5045d610 POST /projects/{id}/investors
+operationId: 
+summary: Add investor to project
+description: Add an investor's wallet address to a project
+sonnet: x — adds investor to project; grant-like; tighter
+opus: x (low) — g adds investor to project
+
+#5 r16-09af378c346dca29 PATCH /api/v1/admin/users/{userID}
+operationId: adminUpdateUser
+summary: Update user
+description: Requires admin role
+sonnet: w — admin update user maybe role
+opus: w (low) — iii admin edits user
+
+#6 r16-0ceb0207e8908b2a POST /v1/responses
+operationId: aiGatewayResponses
+summary: 
+description: 
+sonnet: w — no text; tighter of r and w
+opus: w (low) — ii generates response via gateway
+
+#7 r16-1079dc8e89fd0650 GET /ws
+operationId: 
+summary: Send Update to Front
+description: Send Update to Front
+sonnet: x — sends update outward; tighter
+opus: x (low) — c GET sends update
+
+#8 r16-132387c934386364 PUT /instance/{siUUID}/{action}
+operationId: 
+summary: Operate on a service instance
+description: Commit an operation for specified service instance.
+sonnet: x — commit operation on instance
+opus: x (low) — unsure commits instance action
+
+#9 r16-155b8096d48dad8b POST /inventory/stock-movements
+operationId: createStockMovement
+summary: 
+description: 
+sonnet: w — no text stock movement
+opus: w (low) — ii records stock movement
+
+#10 r16-1728007ac0ec43ee PATCH /appointments/{id}
+operationId: 
+summary: Reschedule or cancel appointment
+description: 
+sonnet: x — reschedule or cancel; cancel may be final
+opus: x (low) — f cancel appointment
+
+#11 r16-19407ce1bee91fc8 PUT /api/v1/orgs/{orgID}/policies/{policyID}
+operationId: updatePolicy
+summary: Update a policy (partial)
+description: 
+sonnet: x — policy update; may widen access
+opus: x (low) — g policy update direction unstated
+
+#12 r16-1bdc3ba39a0b6190 POST /api/v1/apps/integration-hub/settings
+operationId: 
+summary: Store
+description: 
+sonnet: x — integration settings may hold credentials or endpoints
+opus: x (low) — D141 d integration settings
+
+#13 r16-1f05d8f7b542b483 POST /v1/devices
+operationId: postV1Devices
+summary: Register a new device for the authenticated user.
+description: 
+sonnet: x — D141d register device may push token
+opus: x (low) — D141 d registers device
+
+#14 r16-210c4c7d95e19c08 PATCH /api/v1/collections/{cid}
+operationId: 
+summary: Edit or publish/unpublish a pack (human only)
+description: Publishing requires at least one item; unpublishing makes `/p/<slug>.json` answer 404 while keeping the slug.
+sonnet: x — publish exposes pack
+opus: x (high) — c publishes pack publicly
+
+#15 r16-231afa10bfbe6db1 POST /auth/switch-profile
+operationId: switchToChildProfile
+summary: Parent opens a child's profile on the same device.
+description: 
+sonnet: x — profile switch maybe token; tighter
+opus: x (low) — D141a switch profile returns session
+
+#16 r16-25afd261cf01db8a POST /lists/split
+operationId: postListsSplit
+summary: 
+description: 
+sonnet: w — split lists no text
+opus: w (low) — iii splits list
+
+#17 r16-27f6a61cb2cf1f61 GET /streams/token
+operationId: 
+summary: Get LiveKit participant token
+description: 
+sonnet: x — GET returns working join token
+opus: x (high) — D141a returns participant access token
+
+#18 r16-2b03d1010696a013 POST /api/sessoes/{sessao_id}/pagamento/
+operationId: sessoes_pagamento_create
+summary: 
+description: 
+sonnet: x — d payment endpoint no text
+opus: x (low) — d creates session payment
+
+#19 r16-2dafe008e298ef2d POST /admin/student
+operationId: addStudent
+summary: adds a student
+description: Adds an student to the system
+sonnet: x — new student account may log in; g
+opus: x (low) — g student may be login user
+
+#20 r16-2fc9b645d8bd8345 GET /api/notifications/activate
+operationId: 
+summary: Activate notification.
+description: This endpoint activates a notification that has been added previously if the inactive notification hasn't expired yet (expires after 24h).
+sonnet: x — activates notification that sends; tighter
+opus: x (low) — c activates notification to send
+
+#21 r16-330b794b77e9512d POST /occupancy
+operationId: createOccupancyRecord
+summary: 
+description: 
+sonnet: w — occupancy no text
+opus: w (high) — ii creates occupancy record
+
+#22 r16-35a734d5e851bf02 POST /v1/execution/approvals/{approvalId}/confirm
+operationId: execution11
+summary: Verify real approval evidence and capability
+description: 
+sonnet: x — confirm approval commits action
+opus: x (low) — confirms approval for execution
+
+#23 r16-38bc97bea358c5dc GET /api/actor/search
+operationId: 
+summary: Add actor
+description: adding actor
+sonnet: w — GET search titled add; tighter
+opus: w (low) — ii adds actor
+
+#24 r16-3ca81503364344a0 POST /masters
+operationId: saveMaster
+summary: 
+description: 
+sonnet: w — no text; likely create
+opus: w (low) — ii saves master record
+
+#25 r16-3edeb1b19570dba0 POST /v1/interactions
+operationId: createInteraction
+summary: 
+description: 
+sonnet: w — ii record interaction; no text
+opus: w (low) — ii creates interaction
+
+#26 r16-4091c23a138551de POST /chats/{chatId}/ocr
+operationId: processOcr
+summary: Upload screenshot for OCR and AI analysis
+description: 
+sonnet: w — upload for OCR analysis
+opus: w (low) — ii upload screenshot for analysis
+
+#27 r16-432e180df8cd4ad4 POST /api/v1/dataset/revert
+operationId: dataset_service_revert_dataset
+summary: Revert a dataset
+description: This endpoint reverts a dataset
+sonnet: x — revert dataset loses later changes; tighter
+opus: x (low) — a revert discards later changes
+
+#28 r16-460b4cbe01aebb29 POST /tasks
+operationId: createAiTask
+summary: Submit a new AI task
+description: 
+sonnet: x — submit AI task runs job
+opus: x (high) — e submits AI task to run
+
+#29 r16-480e88dc8b7b631c GET /orange/callback
+operationId: orangeCallbackGET
+summary: orange callback route
+description: 
+sonnet: x — callback unknown; tighter
+opus: x (low) — d payment callback processes result
+
+#30 r16-49f5c913509bebe9 POST /admin/definitions/{action}
+operationId: adminDefinitions
+summary: Drafted definitions, reviewed (D105 P11)
+description: 
+sonnet: x — unclear admin definitions action; tighter letter
+opus: x (low) — unknown admin action
+
+#31 r16-4c82f1545a705fd2 GET /alumni/referral-links/{token}/validate
+operationId: 
+summary: Validate referral token
+description: 
+sonnet: x — validate referral token; tighter
+opus: x (low) — D141b validates token
+
+#32 r16-4de7665c1393cb93 POST /api/v1/uploads/file-signature
+operationId: 
+summary: Get Cloudinary Upload Signature
+description: Generates a signature and parameters for direct client-side upload to Cloudinary for chat files.
+sonnet: x — issues signed upload credential
+opus: x (low) — b issues upload signature
+
+#33 r16-5035420752358979 POST /voucher/use/{code}
+operationId: 
+summary: Use a voucher by code
+description: Increments the used count of a voucher code if valid and not expired.
+sonnet: x — uses up voucher; tighter x
+opus: x (high) — d uses voucher
+
+#34 r16-530d96e77fb11952 POST /v2/modulos/{id}/perfis
+operationId: 
+summary: (administrador geral) Criar perfil do módulo a partir das funcionalidades declaradas
+description: 
+sonnet: x — creates role from functions; g
+opus: x (low) — g creates permission profile
+
+#35 r16-5543b4f1e0579112 GET /service/signIn
+operationId: SignIn
+summary: 
+description: 
+sonnet: x — GET signIn may return token; no text
+opus: x (high) — D141a sign in
+
+#36 r16-57007fcd2651512c PATCH /systems/{systemId}/assessments/{assessmentId}
+operationId: updateAssessmentStatus
+summary: Update assessment status
+description: Advance the assessment lifecycle status (in_progress → in_review → completed) or cancel the assessment.
+sonnet: x — advance or cancel lifecycle one way
+opus: x (low) — f lifecycle advance or cancel
+
+#37 r16-5abf7b4de50de244 POST /events
+operationId: 
+summary: Create event (manual trigger)
+description: 
+sonnet: x — manual trigger event
+opus: x (high) — e manual trigger
+
+#38 r16-5d3c3d21e5871d7a POST /apiApp
+operationId: createApiApp
+summary: Create api app
+description: Create an api app for the authenticated user
+sonnet: x — api app probably issues key
+opus: x (low) — g api app likely issues credentials
+
+#39 r16-605e89ed1a6a5d6a POST /contactability/decisions
+operationId: decideContactability
+summary: 
+description: 
+sonnet: w — decisions no text
+opus: w (low) — records contactability decision
+
+#40 r16-6332a76f1b354b5c GET /oauth2/authorize
+operationId: 
+summary: 
+description: Create configuration
+
+sonnet: x — authorize may issue code
+opus: x (high) — OAuth authorize grants access
+
+#41 r16-6634fb4d77af6554 POST /api/config
+operationId: configure_api_config_post
+summary: Configure
+description: 
+sonnet: w — configure; no text
+opus: w (low) — sets configuration
+
+#42 r16-68fd7037591ae724 PATCH /api/bookings/{bookingID}/verify-payment
+operationId: 
+summary: Sitter verifies or rejects payment slip
+description: 
+sonnet: x — verify or reject payment slip
+opus: x (low) — d verifies or rejects payment
+
+#43 r16-6b98f05b735e58ab POST /friends/request
+operationId: postFriendsRequest
+summary: Create a friend request alias
+description: 
+sonnet: x — friend request may notify; tighter
+opus: x (high) — c sends friend request
+
+#44 r16-6f709b4b104b4179 POST /api/v1/transactions
+operationId: createTransaction
+summary: Record a new transaction (deposit or withdrawal)
+description: 
+sonnet: x — deposit or withdrawal record could move money
+opus: x (low) — d records deposit or withdrawal
+
+#45 r16-7265124968fc5c8f POST /api/pengajuan
+operationId: PengajuanController_create
+summary: 
+description: 
+sonnet: w — no text; submission create
+opus: w (low) — ii creates submission record
+
+#46 r16-74a0fd1177463d21 POST /alerts/subscribe
+operationId: 
+summary: Subscribe to Alert Notifications
+description: Register to receive alerts for network anomalies or potential disruptions.
+sonnet: x — alert subscription sends notifications; tighter
+opus: x (low) — c subscribes to alert notifications
+
+#47 r16-7795b0aa92345345 POST /app/verifyPasswordV2
+operationId: 
+summary: Verify password v2
+description: 
+sonnet: x — verify password check; D141b nearby
+opus: x (low) — D141 b verifies password
+
+#48 r16-7a40c4bb64a920f4 POST /api/users/verify
+operationId: 
+summary: Verify user identity
+description: Verify user passport and personal data
+sonnet: x — identity verification maybe D141b
+opus: x (low) — D141 b verifies identity
+
+#49 r16-7c554bfb1466fa26 PUT /admin/policies/{id}/activate
+operationId: activatePolicy
+summary: Activate policy version
+description: 
+sonnet: x — activate policy version; may govern access
+opus: x (low) — activates policy version access unstated
+
+#50 r16-7e95edf380359033 PATCH /reservations/{id}
+operationId: 
+summary: Confirm, cancel reservation, or check-out
+description: Manages the status of a reservation. Behavior depends on the `status`:
+- `active`: confirms user's reservation (check-in).
+- `completed`: sets status to completed, if reservation is active (check-out).
+- `cancelled`: cancels a planned reservation.
+sonnet: x — cancel reservation may be final; tighter
+opus: x (high) — D143 confirms or cancels reservation
+
+#51 r16-80e1b4c77fcde17c POST /string-no-format-not-nullable
+operationId: stringNoFormatNotNullable
+summary: 
+description: 
+sonnet: w — test endpoint no text; tighter pick
+opus: w (low) — no text tighter than r for POST
+
+#52 r16-8370cfbd93c5dadc POST /ipzs/{orgFiscalCode}/notices/{nav}/setStatus
+operationId: ipzsUpdateNoticeStatus
+summary: 
+description: 
+sonnet: w — set status no text
+opus: w (low) — iii sets notice status
+
+#53 r16-855f364ffdc71c46 GET /api/gate/payment/callback
+operationId: GetApiGatePaymentCallback
+summary: Get gate payment callback
+description: Implementation: `com/gatekeeper/feature/payment/presentation/PaymentRoutes.kt:56`. This entry completes the route inventory; consult docs/API.md for operation-specific rules and payload details.
+sonnet: x — payment callback may complete payment
+opus: x (low) — d payment callback completes payment
+
+#54 r16-870ec847c3698aa2 POST /saludos
+operationId: saludarPorPost
+summary: 
+description: 
+sonnet: w — no text; create likely
+opus: w (low) — no text tighter than r for POST
+
+#55 r16-8945cb5de4a8a4e9 POST /human-tasks/{task_id}/decisions
+operationId: decideHumanTask
+summary: 
+description: 
+sonnet: x — decision may approve; no text
+opus: x (low) — decision on human task lets flow proceed
+
+#56 r16-8b5a7819e2fd7158 PUT /proxy/api/{path}
+operationId: proxy_api_proxy_api__path__patch
+summary: Proxy Api
+description: Proxy API calls to the main API server
+sonnet: x — generic proxy PUT; unknown effect
+opus: x (low) — proxies arbitrary API writes unsure x
+
+#57 r16-8db8044284f8782a POST /competitors/scrape
+operationId: scrapeCompetitors
+summary: Scrape latest competitor content
+description: 
+sonnet: x — e runs scrape job
+opus: x (low) — e runs a scrape of outside content
+
+#58 r16-8ff664b727515b45 POST /api/identities
+operationId: createIdentity
+summary: Create a new identity
+description: 
+sonnet: x — identity may be login account
+opus: x (low) — g creates an identity
+
+#59 r16-92bec5921868456d POST /api/controls-mapping/controls-mapping
+operationId: 
+summary: /api/controls-mapping/controls-mapping (POST)
+description: 
+sonnet: w — no text; mapping write
+opus: w (low) — ii creates controls mapping
+
+#60 r16-949a5b448d4a8e8e POST /holidays
+operationId: post_holidays
+summary: HR Admin adds, edits or removes public holidays on the single org calendar.
+description: HR Admin adds, edits or removes public holidays on the single org calendar.
+sonnet: x — can remove holidays
+opus: x (low) — a can remove holidays
+
+#61 r16-97745872bd531fa7 POST /linear/operation/patch
+operationId: 
+summary: Apply JSON-Patch operations to Linear issues
+description: Translates a JSON-Patch document into one save_issue MCP tool call per targeted Linear issue. Only add/replace/remove are supported. The patch path must reference an issue file (e.g., `/issues/<uuid>.json/title`) where `<uuid>` is the Linear UUID, not the identifier (IRM-42).
+sonnet: x — patch may remove issues
+opus: x (low) — a patch can remove fields in outside system
+
+#62 r16-99e24e1ea3de7d1b PUT /api/v1/accounts/{accountUid}/email
+operationId: 
+summary: Update the email of an account. Must be signed in with specified account.
+description: 
+sonnet: x — changes login email
+opus: x (low) — b changes account login email
+
+#63 r16-9bf666b821c1e645 PATCH /clients/me/consents
+operationId: updateMyConsents
+summary: Atualizar consentimentos LGPD, geo e push
+description: 
+sonnet: x — consent incl push toggles
+opus: x (low) — g updates consents direction unstated
+
+#64 r16-9e0a20ee95740722 PATCH /v1/modules/{module_slug}/submissions/{submission_code}/finalize
+operationId: finalizeSubmission
+summary: Finalize a quiz submission
+description: Finalizes a quiz submission and calculates the final score
+sonnet: x — finalize one-way state
+opus: x (low) — f finalize submission computes final score
+
+#65 r16-a0d89c98d4bfdf46 POST /user
+operationId: addUser
+summary: Add a new User
+description: 
+sonnet: x — new user may log in; g
+opus: x (low) — g creates user that can log in
+
+#66 r16-a4325ffe00a76f51 POST /experiments/{experimentId}/stop
+operationId: stopExperiment
+summary: Request an owned Experiment to stop
+description: 
+sonnet: x — stop experiment may lose run
+opus: x (low) — f stopping experiment ends run
+
+#67 r16-a88233a418569ee6 POST /docusign/envelopes
+operationId: 
+summary: Create DocuSign envelope
+description: 
+sonnet: x — envelope may be sent to signers
+opus: x (low) — c envelope may be sent
+
+#68 r16-ab65a8d3500f9f78 POST /v1/live/{id}/seats/{index}
+operationId: 
+summary: Seat action: remove | mute | unmute | camera_off | camera_on | lock | unlock (host/room admin; mutes are enforced on the SFU)
+description: 
+sonnet: x — seat remove kicks member; tighter
+opus: x (low) — seat remove ejects participant
+
+#69 r16-ad82d94590754c37 POST /api/v1/evf/extractions/{extraction_id}/reviews
+operationId: evf_create_review
+summary: 
+description: 
+sonnet: w — reviews POST no text
+opus: w (low) — ii creates review
+
+#70 r16-af2713a87d8370bb POST /api/v1/groups/{group_id}/payments
+operationId: storeANewlyCreatedResourceInStorage
+summary: Store a newly created resource in storage.
+description: 
+sonnet: x — payment create could charge; tighter
+opus: x (low) — d records group payment
+
+#71 r16-b130f88bfbab8a5e GET /auth/callback
+operationId: callback
+summary: 
+description: 
+sonnet: x — auth callback; tighter
+opus: x (low) — d141 login callback
+
+#72 r16-b4439a41e6e32e61 GET /api/start
+operationId: 
+summary: Start Core
+description: It will setup the core if not done before
+sonnet: x — starts core setup; tighter
+opus: x (low) — e starts core setup
+
+#73 r16-b6a9b2f71d697220 POST /v1/payroll/summary
+operationId: 
+summary: Generate payroll summary
+description: Admin generates a summary for a payroll run
+sonnet: w — generate summary; maybe stored
+opus: w (low) — generates payroll summary
+
+#74 r16-b8d1f75ec88365d7 POST /backups/create
+operationId: backups-create-new-backup
+summary: /backups/create [POST]
+description: This take a local database and ensure that it is backed up to the cloud.
+sonnet: x — e runs backup to cloud
+opus: x (low) — e backup to cloud
+
+#75 r16-bae6305c4aa58e51 POST /api/ucf/mappings
+operationId: 
+summary: /api/ucf/mappings (POST)
+description: 
+sonnet: w — no text; create mapping
+opus: w (low) — ii creates mapping
+
+#76 r16-bd8509493666b73c PATCH /api/v1/visits/{id}
+operationId: pATCHapiv1visitsvisit
+summary: PATCH /api/v1/visits/{visit}
+description: Confirm or cancel a visit.
+  - Requester: can cancel their own pending visit.
+  - Listing owner: can confirm or cancel any pending visit.
+sonnet: x — confirm or cancel visit
+opus: x (low) — f confirm or cancel visit
+
+#77 r16-c0429f6f29234485 GET /nod
+operationId: 
+summary: Driver Cancel Client Ride
+description: generating template  which will be sended to driver
+sonnet: x — GET cancels ride and sends template; tighter
+opus: x (high) — c cancels ride and sends to driver
+
+#78 r16-c252ebd95e9359cf GET /api/v1/display/Blade_2_Template_App/ActionMenuActivity.getActionMenuGravity
+operationId: display_Blade_2_Template_App_ActionMenuActivity_getActionMenuGravity
+summary: Set Vuzix HUD menu position
+description: Set menu position. Returns Gravity.RIGHT for side menu or Gravity.CENTER for center menu.
+sonnet: w — GET set menu position
+opus: w (low) — summary says sets menu position
+
+#79 r16-c4d289763f1cecc3 POST /doc-cr-revision
+operationId: 
+summary: revision DocumentCr
+description: revision DocumentCr
+sonnet: w — revision no detail
+opus: w (low) — creates revision
+
+#80 r16-c729e2c1c299c248 POST /v1/identity/guest
+operationId: bootstrapGuest
+summary: Register or resume a guest installation (maps local user UUID)
+description: 
+sonnet: x — D141a guest identity may return token
+opus: x (low) — registers guest identity
+
+#81 r16-c8ede5b7b0d2a855 POST /form-definitions/{formDefinitionId}/relationships
+operationId: CreateFormRelationshipDefinition
+summary: 
+description: 
+sonnet: w — create relationship no text
+opus: w (low) — ii plain create of definition
+
+#82 r16-ca8c49db649b6909 POST /profile/{id}/show
+operationId: saveProfileShow
+summary: 
+description: 
+sonnet: w — no text; show toggle guess
+opus: w (low) — saves profile show setting
+
+#83 r16-cd0d40466d2df3f4 POST /appsec/7.0/apple/profiles
+operationId: createProfile
+summary: Create a provisioning profile
+description: 
+sonnet: x — creates signing credential
+opus: x (low) — creates signing provisioning profile
+
+#84 r16-ceed3591e5ff5012 POST /api/v1/keys/{master_SAE_ID}/dec_keys
+operationId: 
+summary: Get key(s) using key IDs
+description: 
+sonnet: x — returns key material
+opus: x (low) — hands out secret keys
+
+#85 r16-d2fefa6c2d8c525b POST /tenants/{tenant_id}/leads/{lead_id}/ack
+operationId: ackLead
+summary: The CRM stored the lead (or refused it for good); TripPlanner redacts it
+description: 
+sonnet: x — redacts lead data; gone
+opus: x (high) — a lead redacted
+
+#86 r16-d5d5f03b654ed072 POST /api/heatmap
+operationId: heatmap_create
+summary: 
+description: 
+sonnet: w — no text; could be read or store
+opus: w (low) — ii plain create
+
+#87 r16-d848769721615722 POST /v1/ports/{port}/http/{path}
+operationId: proxyHTTPPost
+summary: 
+description: See proxyHTTPGet; request bodies are streamed with limits
+sonnet: x — proxy to port; unknown effect
+opus: x (low) — e proxies request onward
+
+#88 r16-dbcb720c97ec540f GET /wallet/deposit/callback
+operationId: 
+summary: Handle deposit callback
+description: Handle callback from Paystack after deposit payment
+sonnet: x — payment callback confirms deposit
+opus: x (low) — d deposit callback credits wallet
+
+#89 r16-de9599d1df56d7b1 POST /evidence/video
+operationId: 
+summary: Upload video evidence to IPFS
+description: Accepts multipart form-data with a `file` field and a `tradeId` field.
+Supported MIME types: `video/mp4`, `video/webm`.
+Maximum file size: 50 MB.
+Supports optional `Idempotency-Key`.
+Error code references: `AUTH_ERROR`, `VALIDATION_ERROR`, `DOMAIN_ERROR`, `NOT_FOUND`, `INTERNAL_ERROR`.
+sonnet: x — IPFS upload may expose publicly; tighter
+opus: x (high) — c uploads to public IPFS
+
+#90 r16-e1602e25e3f709cd POST /admin/clients
+operationId: createClient
+summary: Create Client
+description: Registers a new client application for the tenant
+sonnet: x — registers client app may issue secret; D137
+opus: x (high) — g registers client application with credentials
+
+#91 r16-e3ba9042113a69a9 POST /IP.svc/SelectNaKlikCard
+operationId: ipwsSelectNaKlikCard
+summary: Select NaKlik card for payment
+description: 
+sonnet: w — select card for payment
+opus: w (low) — iii selects payment card setting
+
+#92 r16-e541099ce03b44f0 POST /api/v1/inscricoes
+operationId: postApiV1Inscricoes
+summary: 
+description: 
+sonnet: w — create; no text
+opus: w (low) — ii plain create of registration
+
+#93 r16-e7f6b7b65558ad86 POST /api/projects/{projectId}/docs/generate-overview
+operationId: 
+summary: Generate documentation overview
+description: Synthesizes executive overview from all documentation sections
+sonnet: w — generated overview maybe stored
+opus: w (low) — ii stores generated overview
+
+#94 r16-e9e48a146a5ac14d GET /auth/google/callback
+operationId: googleCallback
+summary: 
+description: 
+sonnet: x — D141a oauth callback may return token
+opus: x (high) — OAuth login callback D141a
+
+#95 r16-ecff7a83d35f0c7d POST /api/v1/devices
+operationId: 
+summary: Register device
+description: 
+sonnet: x — device register maybe push token; tighter
+opus: x (low) — D141d device registration
+
+#96 r16-f148f17d732b117a GET /recruiter/video-call/key
+operationId: 
+summary: Generate Video Call Key
+description: Generate a video call key and private link for interview.
+sonnet: x — generates working link and key
+opus: x (low) — b generates call key and private link
+
+#97 r16-f3dffd1f62cf73cc GET /api/transport/v1/auth/me
+operationId: 
+summary: Restore the authenticated session
+description: 
+sonnet: x — restore session may return token
+opus: x (low) — D141a restores session
+
+#98 r16-f63e70b8b56350d4 POST /settle
+operationId: 
+summary: Submit a channel update (state persisted)
+description: 
+sonnet: x — settles channel state; commits
+opus: x (low) — d settles payment channel update
+
+#99 r16-f96622e446ad33df POST /v1alpha1/users/{user}/trackers/{tracker}/activities
+operationId: TrackerService_CreateActivity
+summary: 
+description: 
+sonnet: w — activity create; no text
+opus: w (high) — ii plain create of activity
+
+#100 r16-fd2ca6d21b091150 POST /v1/judicial/enforcement/unseal
+operationId: enforcementUnseal
+summary: Unseal a previously sealed case.
+description: 
+sonnet: x — unseal case; exposes sealed
+opus: x (high) — c unseals case exposing it
