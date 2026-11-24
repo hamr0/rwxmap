@@ -1,0 +1,1037 @@
+candidates: poc/d141-mech/cand-r1.json  getAction 13, pathXWords 18
+set A join: {"total":106848,"droppedQuery":4258,"joined":{"ag":98759,"ex3":1377,"ex4":1505,"fx":949},"missing":{"ag":0,"ex3":0,"ex4":0,"fx":0}}  rows scored 102590
+set B join: {"truthSource":"data/exam7-2026-11-19/truth.csv","ops":1579,"truth":1579,"joined":1579,"opsWithoutTruth":0}  (truth source: data/exam7-2026-11-19/truth.csv)
+parity check, set A baseline letter vs export lean_letter: 0 mismatches of 102590
+
+################ SET A (102590 rows, 691 vendors) ################
+Right = fire on a truth-x row; wrong = fire on a truth r or w row. Fires = rows whose class changes (counts are true counts, never capped by the example sample).
+A word whose right fires all come from ONE vendor gets nothing under LOVO: it is not adopted for that vendor (no other vendor backs it) and for every other vendor it has no rows to fire on.
+Note: LOVO neutralises single-vendor words by construction.
+
+TOTALS (this set only)
+  baseline  exact 85784 (83.6%)  too loose 3155 (loose-1 2479, loose-2 676)  too tight 13651  of 102590
+  fitted    exact 85426 (83.3%)  too loose 2799 (loose-1 2223, loose-2 576)  too tight 14365  of 102590
+  LOVO      exact 85771 (83.6%)  too loose 3121 (loose-1 2452, loose-2 669)  too tight 13698  of 102590
+  joint fitted fires 1051 (right 335, wrong 716): loose-2 closed 100, loose-1 closed 235, new too-tight from r 246, new too-tight from w 447, other wrong 23
+  joint LOVO fires 81 (right 34, wrong 47): loose-2 closed 7, loose-1 closed 27, new too-tight from r 8, new too-tight from w 39, other wrong 0
+
+--- A / getAction / "login" ---
+  fires 30: right 14, wrong 16; loose-2 closed 14, loose-1 closed 0, new too-tight from r 15, new too-tight from w 0, other wrong 1
+  distinct vendors with a right fire: 11
+  LOVO: adopted for 1 of 691 vendors, right 0, wrong 4
+  per vendor (right/wrong): amazonaws.com 3/1, conjur.local 2/0, chatwoot.com 1/0, crucible.local 1/0, illumidesk.com 1/0, meshery.local 1/0, n-auth.com 1/1, openlinksw.com 1/0, smart-me.com 1/0, warwick.ac.uk 1/0, wikipathways.org 1/0, adobe.com 0/1, clever-cloud.com 0/1, cpy.re 0/1, dracoon.team 0/1, files.com 0/1, googleapis.com 0/1, linode.com 0/4, meraki.com 0/1, naviplancentral.com 0/1, ory.sh 0/1, testfire.net 0/1
+  right examples (14 of 14):
+    ag-007994 | amazonaws.com | GET /#Action=CreateLoginProfile |  | truth x r->x
+    ag-008028 | amazonaws.com | GET /#Action=DeleteLoginProfile |  | truth x r->x
+    ag-008262 | amazonaws.com | GET /#Action=UpdateLoginProfile |  | truth x r->x
+    ag-033847 | conjur.local | GET /authn-ldap/{service_id}/{account}/login | Gets the Conjur API key of a user given the LDAP username and password via HTTP Basic Authentication. | truth x r->x
+    ag-033851 | conjur.local | GET /authn/{account}/login | Gets the API key of a user given the username and password via HTTP Basic Authentication. | truth x r->x
+    ag-034364 | crucible.local | GET /rest-service/auth-v1/login |  | truth x r->x
+    ag-062696 | illumidesk.com | GET /auth/login/{provider}/ |  | truth x r->x
+    ag-068751 | meshery.local | GET /api/user/login | Handlers GET request for User login | truth x r->x
+    ag-103973 | n-auth.com | GET /servers/{serverid}/sessions/qr/login | Generate data for a login qr code | truth x r->x
+    ag-112696 | smart-me.com | GET /api/Account/login |  | truth x r->x
+    ag-120936 | warwick.ac.uk | GET /api/v2.0/login |  | truth x r->x
+    ag-121400 | wikipathways.org | GET /login |  | truth x r->x
+    ex4-0142 | chatwoot.com | GET /platform/api/v1/users/{id}/login | Get User SSO Link | truth x r->x
+    ag-107050 | openlinksw.com | GET /api/v1/login | Login | truth x r->x
+  wrong examples (15 of 16):
+    ag-000177 | adobe.com | GET /libs/granite/core/content/login.html |  | truth r r->x
+    ag-008096 | amazonaws.com | GET /#Action=GetLoginProfile |  | truth r r->x
+    ag-032597 | clever-cloud.com | GET /github/login |  | truth r r->x
+    ag-034160 | cpy.re | GET /api/v1/oauth-clients/local | Login prerequisite | truth r r->x
+    ag-036034 | dracoon.team | GET /v4/auth/openid/login | Initiate OpenID Connect authentication | truth w r->x
+    ag-038125 | files.com | GET /history/login | List site login history. | truth r r->x
+    ag-059914 | googleapis.com | GET /v1beta/{name}/loginProfile |  | truth r r->x
+    ag-066108 | linode.com | GET /account/logins | User Logins List All | truth r r->x
+    ag-066109 | linode.com | GET /account/logins/{loginId} | Login View | truth r r->x
+    ag-066398 | linode.com | GET /profile/logins | Logins List | truth r r->x
+    ag-066399 | linode.com | GET /profile/logins/{loginId} | Login View | truth r r->x
+    ag-068527 | meraki.com | GET /networks/{networkId}/splashLoginAttempts | List the splash login attempts for a network | truth r r->x
+    ag-103969 | n-auth.com | GET /servers/{serverid}/sessions/html/login | Generate HTML for the login block | truth r r->x
+    ag-104294 | naviplancentral.com | GET /api/auth/LoginConfiguration | Gets the login rules | truth r r->x
+    ag-115618 | testfire.net | GET /login | Check if any user is logged in | truth r r->x
+
+--- A / getAction / "signin" ---
+  fires 2: right 0, wrong 2; loose-2 closed 0, loose-1 closed 0, new too-tight from r 2, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): c19qrserver.local 0/2
+  right examples (0 of 0):
+  wrong examples (2 of 2):
+    ag-031806 | c19qrserver.local | GET /signin/{signinId} | Retrieve the information associated with a signin record | truth r r->x
+    ag-031808 | c19qrserver.local | GET /signins | Get signin info | truth r r->x
+
+--- A / getAction / "logon" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- A / getAction / "refresh" ---
+  fires 11: right 7, wrong 4; loose-2 closed 7, loose-1 closed 0, new too-tight from r 4, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 5
+  LOVO: adopted for 691 of 691 vendors, right 7, wrong 4
+  per vendor (right/wrong): amazonaws.com 3/4, hubapi.com 1/0, jellyfin.local 1/0, sinao.app 1/0, thetvdb.com 1/0
+  right examples (7 of 7):
+    ag-002387 | amazonaws.com | GET /#Action=CancelInstanceRefresh |  | truth x r->x
+    ag-002489 | amazonaws.com | GET /#Action=RollbackInstanceRefresh |  | truth x r->x
+    ag-002497 | amazonaws.com | GET /#Action=StartInstanceRefresh |  | truth x r->x
+    ag-062292 | hubapi.com | GET /oauth/v1/refresh-tokens/{token} |  | truth x r->x
+    ag-063720 | jellyfin.local | GET /Library/Refresh | Starts a library scan. | truth x r->x
+    ag-112377 | sinao.app | GET /refresh | Refresh a token | truth x r->x
+    ag-115814 | thetvdb.com | GET /refresh_token |  | truth x r->x
+  wrong examples (4 of 4):
+    ag-002423 | amazonaws.com | GET /#Action=DescribeInstanceRefreshes |  | truth r r->x
+    ag-011432 | amazonaws.com | GET /accounts/{AwsAccountId}/data-sets/{DataSetId}/refresh-properties |  | truth r r->x
+    ag-011434 | amazonaws.com | GET /accounts/{AwsAccountId}/data-sets/{DataSetId}/refresh-schedules |  | truth r r->x
+    ag-011438 | amazonaws.com | GET /accounts/{AwsAccountId}/data-sets/{DataSetId}/refresh-schedules/{ScheduleId} |  | truth r r->x
+
+--- A / getAction / "verify" ---
+  fires 56: right 23, wrong 33; loose-2 closed 23, loose-1 closed 0, new too-tight from r 23, new too-tight from w 0, other wrong 10
+  distinct vendors with a right fire: 9
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): amazonaws.com 15/16, googleapis.com 1/1, mist.com 1/0, neutrinoapi.net 1/1, rebilly.com 1/0, sendgrid.com 1/3, taxamo.com 1/0, vercel.com 1/0, vimeo.com 1/0, crediwatch.com 0/3, mailscript.com 0/1, mastodon.local 0/2, microsoft.com 0/1, nexmo.com 0/1, ory.sh 0/1, pandorabots.com 0/1, telnyx.com 0/2
+  right examples (15 of 23):
+    ag-004986 | amazonaws.com | GET /#Action=AttachVerifiedAccessTrustProvider |  | truth x r->x
+    ag-005164 | amazonaws.com | GET /#Action=CreateVerifiedAccessEndpoint |  | truth x r->x
+    ag-005166 | amazonaws.com | GET /#Action=CreateVerifiedAccessGroup |  | truth x r->x
+    ag-005310 | amazonaws.com | GET /#Action=DeleteVerifiedAccessEndpoint |  | truth x r->x
+    ag-005312 | amazonaws.com | GET /#Action=DeleteVerifiedAccessGroup |  | truth x r->x
+    ag-005314 | amazonaws.com | GET /#Action=DeleteVerifiedAccessInstance |  | truth x r->x
+    ag-005316 | amazonaws.com | GET /#Action=DeleteVerifiedAccessTrustProvider |  | truth x r->x
+    ag-005928 | amazonaws.com | GET /#Action=ModifyVerifiedAccessEndpointPolicy |  | truth x r->x
+    ag-005930 | amazonaws.com | GET /#Action=ModifyVerifiedAccessGroup |  | truth x r->x
+    ag-005932 | amazonaws.com | GET /#Action=ModifyVerifiedAccessGroupPolicy |  | truth x r->x
+    ag-006753 | amazonaws.com | GET /#Action=DeleteVerifiedEmailAddress |  | truth x r->x
+    ag-006849 | amazonaws.com | GET /#Action=VerifyDomainDkim |  | truth x r->x
+    ag-006853 | amazonaws.com | GET /#Action=VerifyEmailAddress |  | truth x r->x
+    ag-006855 | amazonaws.com | GET /#Action=VerifyEmailIdentity |  | truth x r->x
+    ag-013510 | amazonaws.com | GET /#Action=VerifySMSSandboxPhoneNumber |  | truth x r->x
+  wrong examples (15 of 33):
+    ag-005168 | amazonaws.com | GET /#Action=CreateVerifiedAccessInstance |  | truth w r->x
+    ag-005170 | amazonaws.com | GET /#Action=CreateVerifiedAccessTrustProvider |  | truth w r->x
+    ag-005594 | amazonaws.com | GET /#Action=DescribeVerifiedAccessEndpoints |  | truth r r->x
+    ag-005596 | amazonaws.com | GET /#Action=DescribeVerifiedAccessGroups |  | truth r r->x
+    ag-005598 | amazonaws.com | GET /#Action=DescribeVerifiedAccessInstanceLoggingConfigurations |  | truth r r->x
+    ag-005600 | amazonaws.com | GET /#Action=DescribeVerifiedAccessInstances |  | truth r r->x
+    ag-005602 | amazonaws.com | GET /#Action=DescribeVerifiedAccessTrustProviders |  | truth r r->x
+    ag-005644 | amazonaws.com | GET /#Action=DetachVerifiedAccessTrustProvider |  | truth w r->x
+    ag-005814 | amazonaws.com | GET /#Action=GetVerifiedAccessEndpointPolicy |  | truth r r->x
+    ag-005816 | amazonaws.com | GET /#Action=GetVerifiedAccessGroupPolicy |  | truth r r->x
+    ag-005926 | amazonaws.com | GET /#Action=ModifyVerifiedAccessEndpoint |  | truth w r->x
+    ag-005934 | amazonaws.com | GET /#Action=ModifyVerifiedAccessInstance |  | truth w r->x
+    ag-005936 | amazonaws.com | GET /#Action=ModifyVerifiedAccessInstanceLoggingConfiguration |  | truth w r->x
+    ag-005938 | amazonaws.com | GET /#Action=ModifyVerifiedAccessTrustProvider |  | truth w r->x
+    ag-006797 | amazonaws.com | GET /#Action=ListVerifiedEmailAddresses |  | truth r r->x
+
+--- A / getAction / "validate" ---
+  fires 25: right 3, wrong 22; loose-2 closed 3, loose-1 closed 0, new too-tight from r 22, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 3
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): britbox.co.uk 1/0, clever-cloud.com 1/1, dracoon.team 1/0, agco-ats.com 0/1, amazonaws.com 0/2, api2cart.com 0/1, atlassian.com 0/1, gambitcomm.local 0/1, ibanapi.com 0/2, journy.io 0/1, mermade.org.uk 0/1, netbird.io 0/1, neutrinoapi.net 0/2, randommer.io 0/1, shutterstock.com 0/1, sinao.app 0/1, taxamo.com 0/1, tvmaze.com 0/1, watchful.li 0/2, whapi.com 0/1
+  right examples (3 of 3):
+    ag-031124 | britbox.co.uk | GET /bt/token/validate |  | truth x r->x
+    ag-032882 | clever-cloud.com | GET /v4/addon-providers/addon-matomo/token/validate | Validate a keycloak token | truth x r->x
+    ag-036039 | dracoon.team | GET /v4/auth/reset_password/{token} | Validate information for password reset | truth x r->x
+  wrong examples (15 of 22):
+    ag-000516 | agco-ats.com | GET /api/v2/AuthorizationCodes/{id}/Validate | No Documentation Found. | truth r r->x
+    ag-003080 | amazonaws.com | GET /#Action=ValidateTemplate |  | truth r r->x
+    ag-006487 | amazonaws.com | GET /#Action=ValidateConfigurationSettings |  | truth r r->x
+    ag-015395 | api2cart.com | GET /cart.validate.json |  | truth r r->x
+    ag-017986 | atlassian.com | GET /rest/api/3/projectvalidate/key | Validate project key | truth r r->x
+    ag-032866 | clever-cloud.com | GET /self/validate_email |  | truth r r->x
+    ag-062442 | ibanapi.com | GET /validate | Validate IBAN | truth r r->x
+    ag-062443 | ibanapi.com | GET /validate-basic | Validate IBAN Basic | truth r r->x
+    ag-064341 | journy.io | GET /validate | Validate API key | truth r r->x
+    ag-068695 | mermade.org.uk | GET /validate | Validate an OpenAPI 3.0.x definition | truth r r->x
+    ag-110116 | randommer.io | GET /api/Phone/Validate | Validate a phone number | truth r r->x
+    ag-111973 | shutterstock.com | GET /v2/test/validate | Validate input | truth r r->x
+    ag-112159 | sinao.app | GET /apps/{appId}/banks/{id}/funnel/validate | Get the link to the funnel to validate a pro item (SCA) | truth r r->x
+    ag-115113 | taxamo.com | GET /api/v1/tax/vat_numbers/{tax_number}/validate | Validate VAT number | truth r r->x
+    ag-116888 | tvmaze.com | GET /auth/validate | Validate your authentication credentials | truth r r->x
+
+--- A / getAction / "authenticate" ---
+  fires 3: right 1, wrong 2; loose-2 closed 1, loose-1 closed 0, new too-tight from r 2, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 1
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0  [all right fires from one vendor: nothing under LOVO]
+  per vendor (right/wrong): stackexchange.com 1/0, dev.to 0/1, permit.io 0/1
+  right examples (1 of 1):
+    ag-114004 | stackexchange.com | GET /apps/{accessTokens}/de-authenticate |  | truth x r->x
+  wrong examples (2 of 2):
+    ag-034972 | dev.to | GET /api/users/me | The authenticated user | truth r r->x
+    ex4-0769 | permit.io | GET /v2/members/me | Get the authenticated account member | truth r r->x
+
+--- A / getAction / "authorize" ---
+  fires 33: right 14, wrong 19; loose-2 closed 14, loose-1 closed 0, new too-tight from r 17, new too-tight from w 0, other wrong 2
+  distinct vendors with a right fire: 6
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): amazonaws.com 9/0, apideck.com 1/0, authentiq.io 1/1, mastodon.local 1/0, shutterstock.com 1/0, smart-me.com 1/0, box.com 0/1, clever-cloud.com 0/1, digitallocker.gov.in 0/1, github.com 0/1, googleapis.com 0/3, linode.com 0/2, polar.sh 0/1, presalytics.io 0/1, supabase.com 0/1, trakt.tv 0/1, twilio.com 0/1, workos.com 0/4
+  right examples (14 of 14):
+    ag-004992 | amazonaws.com | GET /#Action=AuthorizeClientVpnIngress |  | truth x r->x
+    ag-004994 | amazonaws.com | GET /#Action=AuthorizeSecurityGroupEgress |  | truth x r->x
+    ag-004996 | amazonaws.com | GET /#Action=AuthorizeSecurityGroupIngress |  | truth x r->x
+    ag-006267 | amazonaws.com | GET /#Action=AuthorizeCacheSecurityGroupIngress |  | truth x r->x
+    ag-011571 | amazonaws.com | GET /#Action=AuthorizeDBSecurityGroupIngress |  | truth x r->x
+    ag-011855 | amazonaws.com | GET /#Action=AuthorizeClusterSecurityGroupIngress |  | truth x r->x
+    ag-011857 | amazonaws.com | GET /#Action=AuthorizeDataShare |  | truth x r->x
+    ag-011859 | amazonaws.com | GET /#Action=AuthorizeEndpointAccess |  | truth x r->x
+    ag-011861 | amazonaws.com | GET /#Action=AuthorizeSnapshotAccess |  | truth x r->x
+    ag-015880 | apideck.com | GET /vault/authorize/{service_id}/{application_id} | Authorize | truth x r->x
+    ag-018225 | authentiq.io | GET /authorize | Authenticate a user | truth x r->x
+    ag-068150 | mastodon.local | GET /oauth/authorize |  | truth x r->x
+    ag-111965 | shutterstock.com | GET /v2/oauth/authorize | Authorize applications | truth x r->x
+    ag-112749 | smart-me.com | GET /api/oauth/authorize |  | truth x r->x
+  wrong examples (15 of 19):
+    ag-018233 | authentiq.io | GET /{client_id}/iframe | Include a session iframe | truth r r->x
+    ag-030662 | box.com | GET /authorize | Authorize user | truth w r->x
+    ag-032627 | clever-cloud.com | GET /oauth/authorize |  | truth r r->x
+    ag-034997 | digitallocker.gov.in | GET /oauth2/1/authorize | Get Authorization Code | truth w r->x
+    ag-044965 | github.com | GET /setup/api/settings/authorized-keys | Get all authorized SSH keys | truth r r->x
+    ag-056045 | googleapis.com | GET /v1beta/apps/{appsId}/authorizedCertificates |  | truth r r->x
+    ag-056048 | googleapis.com | GET /v1beta/apps/{appsId}/authorizedCertificates/{authorizedCertificatesId} |  | truth r r->x
+    ag-056050 | googleapis.com | GET /v1beta/apps/{appsId}/authorizedDomains |  | truth r r->x
+    ag-066391 | linode.com | GET /profile/apps | Authorized Apps List | truth r r->x
+    ag-066393 | linode.com | GET /profile/apps/{appId} | Authorized App View | truth r r->x
+    ag-109768 | presalytics.io | GET /{id}/collaborators/authorize/{story_collaborator_userid}/{permissiontype} | Permissions: Story Authorization for a User | truth r r->x
+    ag-116941 | twilio.com | GET /2010-04-01/Accounts/{AccountSid}/AuthorizedConnectApps.json |  | truth r r->x
+    ex3-1216 | supabase.com | GET /v1/oauth/authorize | Authorize user through oauth | truth r r->x
+    ex4-1047 | polar.sh | GET /v1/oauth2/authorize | Authorize | truth r r->x
+    fx-0549 | workos.com | GET /user_management/authorize | Get an authorization URL | truth r r->x
+
+--- A / getAction / "otp" ---
+  fires 2: right 2, wrong 0; loose-2 closed 2, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 1
+  LOVO: adopted for 690 of 691 vendors, right 0, wrong 0  [all right fires from one vendor: nothing under LOVO]
+  per vendor (right/wrong): ndhm.gov.in 2/0
+  right examples (2 of 2):
+    ag-104484 | ndhm.gov.in | GET /v1/account/change/passwd/generateAadhaarOTP | Generate Aadhaar OTP on registrered mobile number. | truth x r->x
+    ag-104485 | ndhm.gov.in | GET /v1/account/change/passwd/generateMobileOTP | Generate Mobile OTP to start registration. | truth x r->x
+  wrong examples (0 of 0):
+
+--- A / getAction / "callback" ---
+  fires 11: right 3, wrong 8; loose-2 closed 3, loose-1 closed 0, new too-tight from r 8, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 3
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): apideck.com 1/0, clever-cloud.com 1/0, motaword.com 1/0, bunq.com 0/2, ote-godaddy.com 0/1, unicourt.com 0/5
+  right examples (3 of 3):
+    ag-015881 | apideck.com | GET /vault/callback | Callback | truth x r->x
+    ag-032592 | clever-cloud.com | GET /github/callback |  | truth x r->x
+    ag-103777 | motaword.com | GET /projects/{id}/callback/{actionType} | Trigger a call to your callback URL related to this project. | truth x r->x
+  wrong examples (8 of 8):
+    ag-108196 | ote-godaddy.com | GET /v1/certificates/{certificateId}/callback | Retrieve system stateful action callback url | truth r r->x
+    ag-118661 | unicourt.com | GET /callbacks | Get list of callback types with count for a requested Date. | truth r r->x
+    ag-118691 | unicourt.com | GET /caseDocumentOrder/callbacks | Get Case Document Order Callback list for a requested Date. | truth r r->x
+    ag-118692 | unicourt.com | GET /caseDocumentOrder/callbacks/{caseDocumentOrderCallbackId} | Get Case Document Order Callback for a requested Case Document Order Callback Id. | truth r r->x
+    ag-118693 | unicourt.com | GET /caseExport/callbacks | Get Case Export Callback list for a requested Date. | truth r r->x
+    ag-118694 | unicourt.com | GET /caseExport/callbacks/{caseExportCallbackId} | Get Case Export Callback for a requested Case Export Callback Id. | truth r r->x
+    ag-031741 | bunq.com | GET /user/{userID}/oauth-client/{oauth-clientID}/callback-url |  | truth r r->x
+    ag-031744 | bunq.com | GET /user/{userID}/oauth-client/{oauth-clientID}/callback-url/{itemId} |  | truth r r->x
+
+--- A / getAction / "token" ---
+  fires 131: right 32, wrong 99; loose-2 closed 32, loose-1 closed 0, new too-tight from r 98, new too-tight from w 0, other wrong 1
+  distinct vendors with a right fire: 24
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): azure.com 4/2, amazonaws.com 2/4, flickr.com 2/0, github.com 2/1, hubapi.com 2/0, phantauth.net 2/0, ably.io 1/0, autodealerdata.com 1/0, clerk.com 1/1, etherpad.local 1/0, gitea.io 1/1, googleapis.com 1/8, gsmtasks.com 1/1, meshery.local 1/0, mist.com 1/0, motaword.com 1/1, ory.sh 1/2, rebilly.com 1/5, slack.com 1/0, stackexchange.com 1/0, thetvdb.com 1/0, truanon.com 1/0, yodlee.com 1/0, zoom.us 1/0, adafruit.com 0/2, api.video 0/2, appcenter.ms 0/2, beezup.com 0/1, bungie.net 0/6, clever-cloud.com 0/2, coolify.io 0/6, docker.com 0/2, edrv.io 0/2, ijenko.net 0/1, increase.com 0/2, keycloak.local 0/1, launchdarkly.com 0/2, linode.com 0/2, magento.com 0/1, microsoft.com 0/13, netbird.io 0/3, netbox.dev 0/2, netlicensing.io 0/2, openstf.io 0/1, opensuse.org 0/1, shutterstock.com 0/1, stripe.com 0/1, supabase.com 0/1, superset.apache.local 0/1, threatjammer.com 0/1, tokenmetrics.com 0/1, trello.com 0/3, turbinelabs.io 0/1, twilio.com 0/1, vercel.com 0/4, workos.com 0/1, wowza.com 0/1
+  right examples (15 of 32):
+    ag-000052 | ably.io | GET /push/deviceRegistrations/{device_id}/resetUpdateToken | Reset a registered device's update token | truth x r->x
+    ag-013934 | amazonaws.com | GET /#Action=GetFederationToken |  | truth x r->x
+    ag-013936 | amazonaws.com | GET /#Action=GetSessionToken |  | truth x r->x
+    ag-018246 | autodealerdata.com | GET /getToken | Get a JWT from your API credentials | truth x r->x
+    ag-023432 | azure.com | GET /oauth2/token |  | truth x r->x
+    ag-024654 | azure.com | GET /identity/oauth2/token |  | truth x r->x
+    ag-028771 | azure.com | GET /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/functions/admin/token | Fetch a short lived token that can be exchanged for a master key. | truth x r->x
+    ag-028914 | azure.com | GET /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/slots/{slot}/functions/admin/token | Fetch a short lived token that can be exchanged for a master key. | truth x r->x
+    ag-037242 | etherpad.local | GET /checkToken | returns ok when the current api token is valid | truth x r->x
+    ag-038418 | flickr.com | GET /oauth/access_token |  | truth x r->x
+    ag-038419 | flickr.com | GET /oauth/request_token |  | truth x r->x
+    ag-040107 | gitea.io | GET /user/gpg_key_token | Get a Token to verify | truth x r->x
+    ag-044603 | github.com | GET /applications/{client_id}/tokens/{access_token} | Check an authorization | truth x r->x
+    ag-045632 | github.com | GET /applications/{client_id}/tokens/{access_token} | Check an authorization | truth x r->x
+    ag-059395 | googleapis.com | GET /v1/callback:generateToken |  | truth x r->x
+  wrong examples (15 of 99):
+    ag-004918 | amazonaws.com | GET /snapshots/{snapshotId}/blocks/{blockIndex}#blockToken |  | truth r r->x
+    ag-008216 | amazonaws.com | GET /#Action=SetSecurityTokenServicePreferences |  | truth w r->x
+    ag-013758 | amazonaws.com | GET /assignment/accounts#x-amz-sso_bearer_token |  | truth r r->x
+    ag-013760 | amazonaws.com | GET /federation/credentials#role_name&account_id&x-amz-sso_bearer_token |  | truth r r->x
+    ag-015315 | api.video | GET /upload-tokens | List all active upload tokens. | truth r r->x
+    ag-015318 | api.video | GET /upload-tokens/{uploadToken} | Show upload token | truth r r->x
+    ag-016556 | appcenter.ms | GET /v0.1/api_tokens |  | truth r r->x
+    ag-016601 | appcenter.ms | GET /v0.1/apps/{owner_name}/{app_name}/api_tokens |  | truth r r->x
+    ag-023470 | azure.com | GET /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/tokens |  | truth r r->x
+    ag-023472 | azure.com | GET /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/tokens/{tokenName} |  | truth r r->x
+    ag-029745 | beezup.com | GET /v2/user/customer/zendeskToken | Zendesk token | truth r r->x
+    ag-031265 | bungie.net | GET /Destiny2/Awa/GetActionToken/{correlationId}/ |  | truth r r->x
+    ag-031357 | bungie.net | GET /Tokens/Partner/History/{partnerApplicationId}/{targetBnetMembershipId}/ |  | truth r r->x
+    ag-031358 | bungie.net | GET /Tokens/Partner/History/{targetBnetMembershipId}/Application/{partnerApplicationId}/ |  | truth r r->x
+    ag-031359 | bungie.net | GET /Tokens/Rewards/BungieRewards/ |  | truth r r->x
+
+--- A / getAction / "exchange" ---
+  fires 25: right 3, wrong 22; loose-2 closed 3, loose-1 closed 0, new too-tight from r 22, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 2
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): amazonaws.com 2/4, ory.sh 1/0, gerermesaffaires.com 0/1, googleapis.com 0/2, interactivebrokers.com 0/1, microsoft.com 0/6, noosh.com 0/1, slack.com 0/1, stripe.com 0/2, tokenjay.app 0/2, xtrf.eu 0/1, zuora.com 0/1
+  right examples (3 of 3):
+    ag-004922 | amazonaws.com | GET /#Action=AcceptReservedInstancesExchangeQuote |  | truth x r->x
+    ag-011849 | amazonaws.com | GET /#Action=AcceptReservedNodeExchange |  | truth x r->x
+    ex3-1177 | ory.sh | GET /sessions/token-exchange | Exchange Session Token | truth x r->x
+  wrong examples (15 of 22):
+    ag-005792 | amazonaws.com | GET /#Action=GetReservedInstancesExchangeQuote |  | truth r r->x
+    ag-011987 | amazonaws.com | GET /#Action=DescribeReservedNodeExchangeStatus |  | truth r r->x
+    ag-012023 | amazonaws.com | GET /#Action=GetReservedNodeExchangeConfigurationOptions |  | truth r r->x
+    ag-012025 | amazonaws.com | GET /#Action=GetReservedNodeExchangeOfferings |  | truth r r->x
+    ag-039609 | gerermesaffaires.com | GET /spaces/{spaceId}/persons/{id}/exchange |  | truth r r->x
+    ag-055673 | googleapis.com | GET /v1/{organization}/dataExchanges |  | truth r r->x
+    ag-055674 | googleapis.com | GET /v1/{parent}/dataExchanges |  | truth r r->x
+    ag-063323 | interactivebrokers.com | GET /marketdata/exchange_components | Exchange Components | truth r r->x
+    ag-069839 | microsoft.com | GET /deviceManagement/exchangeConnectors | Get exchangeConnectors from deviceManagement | truth r r->x
+    ag-069843 | microsoft.com | GET /deviceManagement/exchangeConnectors/{deviceManagementExchangeConnector-id} | Get exchangeConnectors from deviceManagement | truth r r->x
+    ag-082983 | microsoft.com | GET /deviceManagement/exchangeOnPremisesPolicies | Get exchangeOnPremisesPolicies from deviceManagement | truth r r->x
+    ag-082987 | microsoft.com | GET /deviceManagement/exchangeOnPremisesPolicies/{deviceManagementExchangeOnPremisesPolicy-id} | Get exchangeOnPremisesPolicies from deviceManagement | truth r r->x
+    ag-082993 | microsoft.com | GET /deviceManagement/exchangeOnPremisesPolicy | Get exchangeOnPremisesPolicy from deviceManagement | truth r r->x
+    ag-096125 | microsoft.com | GET /roleManagement/exchange | Get exchange from roleManagement | truth r r->x
+    ag-106270 | noosh.com | GET /v1/workgroups/{workgroup_id}/exchangeRate | Get Exchange Rate List | truth r r->x
+
+--- A / getAction / "generate" ---
+  fires 49: right 7, wrong 42; loose-2 closed 7, loose-1 closed 0, new too-tight from r 35, new too-tight from w 0, other wrong 7
+  distinct vendors with a right fire: 6
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): ndhm.gov.in 2/4, amazonaws.com 1/2, mist.com 1/0, motaword.com 1/0, n-auth.com 1/3, solarvps.com 1/0, azure.com 0/1, britbox.co.uk 0/1, bunq.com 0/2, cycat.org 0/1, elevenlabs.io 0/1, fungenerators.com 0/2, googleapis.com 0/3, keycloak.local 0/1, mux.com 0/8, netboxdemo.com 0/1, orthanc-server.com 0/1, peoplegeneratorapi.live 0/4, randommer.io 0/1, spoonacular.com 0/1, statsocial.com 0/1, xtrf.eu 0/4
+  right examples (7 of 7):
+    ag-008072 | amazonaws.com | GET /#Action=GenerateOrganizationsAccessReport |  | truth x r->x
+    ag-103142 | mist.com | GET /api/v1/self/two_factor/token | generateQrCodeForVerification | truth x r->x
+    ag-103746 | motaword.com | GET /integrations/token | Generate a new access token for MotaWord's integrations service | truth x r->x
+    ag-103973 | n-auth.com | GET /servers/{serverid}/sessions/qr/login | Generate data for a login qr code | truth x r->x
+    ag-104484 | ndhm.gov.in | GET /v1/account/change/passwd/generateAadhaarOTP | Generate Aadhaar OTP on registrered mobile number. | truth x r->x
+    ag-104485 | ndhm.gov.in | GET /v1/account/change/passwd/generateMobileOTP | Generate Mobile OTP to start registration. | truth x r->x
+    ag-112886 | solarvps.com | GET /key/generate | Generate API Key | truth x r->x
+  wrong examples (15 of 42):
+    ag-008070 | amazonaws.com | GET /#Action=GenerateCredentialReport |  | truth w r->x
+    ag-008074 | amazonaws.com | GET /#Action=GenerateServiceLastAccessedDetails |  | truth w r->x
+    ag-021420 | azure.com | GET /subscriptions/{subscriptionId}/providers/Microsoft.Advisor/generateRecommendations/{operationId} |  | truth r r->x
+    ag-031089 | britbox.co.uk | GET /account/nonce |  | truth w r->x
+    ag-031429 | bunq.com | GET /user/{userID}/card/{cardID}/generated-cvc2/{itemId} |  | truth r r->x
+    ag-034446 | cycat.org | GET /generate/uuid |  | truth r r->x
+    ag-036887 | elevenlabs.io | GET /v1/history | Get Generated Items | truth r r->x
+    ag-038564 | fungenerators.com | GET /name/generate |  | truth r r->x
+    ag-038602 | fungenerators.com | GET /taunt/generate |  | truth r r->x
+    ag-055838 | googleapis.com | GET /androidpublisher/v3/applications/{packageName}/generatedApks/{versionCode} |  | truth r r->x
+    ag-057879 | googleapis.com | GET /{merchantId}/recommendations/generate |  | truth r r->x
+    ag-058837 | googleapis.com | GET /files/generateIds |  | truth r r->x
+    ag-064679 | keycloak.local | GET /{realm}/clients/{id}/evaluate-scopes/generate-example-access-token | Create JSON with payload of example access token | truth r r->x
+    ag-103967 | n-auth.com | GET /servers/{serverid}/sessions/html/enrol | Generate HTML to enrol a new user | truth r r->x
+    ag-103969 | n-auth.com | GET /servers/{serverid}/sessions/html/login | Generate HTML for the login block | truth r r->x
+
+--- A / pathXWords / "verify" ---
+  fires 15: right 12, wrong 3; loose-2 closed 0, loose-1 closed 12, new too-tight from r 0, new too-tight from w 3, other wrong 0
+  distinct vendors with a right fire: 7
+  LOVO: adopted for 691 of 691 vendors, right 12, wrong 3
+  per vendor (right/wrong): clicksend.com 3/0, frankiefinancial.io 3/0, azure.com 2/0, amazonaws.com 1/0, mandrillapp.com 1/0, mist.com 1/0, zuora.com 1/0, ote-godaddy.com 0/1, sendgrid.com 0/1, telnyx.com 0/1
+  right examples (12 of 12):
+    ag-006850 | amazonaws.com | POST /#Action=VerifyDomainDkim |  | truth x w->x
+    ag-028542 | azure.com | POST /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}/verifyDomainOwnership | Verify domain ownership for this certificate order. | truth x w->x
+    ag-029128 | azure.com | POST /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{name}/verifyDomainOwnership | Verify domain ownership for this certificate order | truth x w->x
+    ag-033061 | clicksend.com | PUT /account-verify/verify/{activation_token} | Verify new account | truth x w->x
+    ag-033105 | clicksend.com | PUT /email/address-verify/{email_address_id}/verify/{activation_token} | Verify Allowed Email Address | truth x w->x
+    ag-033135 | clicksend.com | PUT /forgot-password/verify | Verify Forgot Password | truth x w->x
+    ag-067884 | mandrillapp.com | POST /senders/verify-domain.json |  | truth x w->x
+    ag-102751 | mist.com | POST /api/v1/mobile/verify/{secret} | activateSdkInvite | truth x w->x
+    ag-123225 | zuora.com | PUT /v1/payment-methods/{payment-method-id}/verify | Verify a payment method | truth x w->x
+    ag-038499 | frankiefinancial.io | POST /document/{documentId}/verify | Update and Verify Document. | truth x w->x
+    ag-038519 | frankiefinancial.io | POST /entity/{entityId}/verify/pushToMobile | Update Entity and Push Self-Verification Link | truth x w->x
+    ag-038520 | frankiefinancial.io | POST /entity/{entityId}/verify/{checkType}/{resultLevel} | Update Entity and Verify Details | truth x w->x
+  wrong examples (3 of 3):
+    ag-108208 | ote-godaddy.com | POST /v1/certificates/{certificateId}/verifyDomainControl | Check Domain Control | truth w w->x
+    ag-111712 | sendgrid.com | PATCH /verified_senders/{id} | Edit Verified Sender | truth w w->x
+    ag-115590 | telnyx.com | PATCH /verify_profiles/{verify_profile_id} | Update a Verify profile | truth w w->x
+
+--- A / pathXWords / "verification" ---
+  fires 12: right 6, wrong 6; loose-2 closed 0, loose-1 closed 6, new too-tight from r 0, new too-tight from w 6, other wrong 0
+  distinct vendors with a right fire: 5
+  LOVO: adopted for 2 of 691 vendors, right 0, wrong 5
+  per vendor (right/wrong): appwrite.io 2/0, mailscript.com 1/0, ory.sh 1/0, twilio.com 1/1, yodlee.com 1/0, amazonaws.com 0/4, microsoft.com 0/1
+  right examples (6 of 6):
+    ag-017323 | appwrite.io | PUT /account/verification | Complete Email Verification | truth x w->x
+    ag-017458 | appwrite.io | PATCH /users/{userId}/verification | Update Email Verification | truth x w->x
+    ag-067824 | mailscript.com | POST /verifications | Start verification process for external email address or sms number | truth x w->x
+    ag-118265 | twilio.com | POST /v2/Services/{ServiceSid}/Verifications/{Sid} |  | truth x w->x
+    ag-122397 | yodlee.com | PUT /verification | Verify Challenge Deposit | truth x w->x
+    ex3-1171 | ory.sh | POST /self-service/verification | Complete Verification Flow | truth x w->x
+  wrong examples (6 of 6):
+    ag-006724 | amazonaws.com | POST /#Action=CreateCustomVerificationEmailTemplate |  | truth w w->x
+    ag-006844 | amazonaws.com | POST /#Action=UpdateCustomVerificationEmailTemplate |  | truth w w->x
+    ag-013252 | amazonaws.com | POST /v2/email/custom-verification-email-templates |  | truth w w->x
+    ag-013255 | amazonaws.com | PUT /v2/email/custom-verification-email-templates/{TemplateName} |  | truth w w->x
+    ag-070310 | microsoft.com | PATCH /domains/{domain-id}/verificationDnsRecords/{domainDnsRecord-id} | Update the navigation property verificationDnsRecords in domains | truth w w->x
+    ag-117646 | twilio.com | POST /v1/Tollfree/Verifications/{Sid} |  | truth w w->x
+
+--- A / pathXWords / "callback" ---
+  fires 3: right 3, wrong 0; loose-2 closed 0, loose-1 closed 3, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 3
+  LOVO: adopted for 691 of 691 vendors, right 3, wrong 0
+  per vendor (right/wrong): clever-cloud.com 1/0, ote-godaddy.com 1/0, visualstudio.com 1/0
+  right examples (3 of 3):
+    ag-032908 | clever-cloud.com | PUT /vendor/apps/{addonId}/migration_callback |  | truth x w->x
+    ag-108197 | ote-godaddy.com | PUT /v1/certificates/{certificateId}/callback | Register of certificate action callback | truth x w->x
+    ag-119650 | visualstudio.com | POST /api/v1/Environments/{environmentId}/_callback |  | truth x w->x
+  wrong examples (0 of 0):
+
+--- A / pathXWords / "endpoint" ---
+  fires 96: right 22, wrong 74; loose-2 closed 0, loose-1 closed 22, new too-tight from r 0, new too-tight from w 73, other wrong 1
+  distinct vendors with a right fire: 6
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): azure.com 9/18, amazonaws.com 5/21, svix.com 3/1, influxdata.com 2/1, microsoft.com 2/22, neon.com 1/4, digitalocean.com 0/1, googleapis.com 0/1, kubernetes.io 0/4, novu.co 0/1
+  right examples (15 of 22):
+    ag-005949 | amazonaws.com | POST /#Action=ModifyVpcEndpointConnectionNotification |  | truth x w->x
+    ag-005951 | amazonaws.com | POST /#Action=ModifyVpcEndpointServiceConfiguration |  | truth x w->x
+    ag-006982 | amazonaws.com | POST /#X-Amz-Target=AWSEvents.UpdateEndpoint |  | truth x w->x
+    ag-012422 | amazonaws.com | POST /endpoints/{EndpointName}/async-invocations#X-Amzn-SageMaker-InputLocation |  | truth x w->x
+    ag-012867 | amazonaws.com | POST /#X-Amz-Target=SageMaker.UpdateEndpoint |  | truth x w->x
+    ag-021774 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AppConfiguration/configurationStores/{configStoreName}/privateEndpointConnections/{privateEndpointConnectionName} |  | truth x w->x
+    ag-023197 | azure.com | PATCH /endpointSettings | Updates endpoint settings for an endpoint. | truth x w->x
+    ag-023636 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/privateEndpointConnections/{privateEndpointConnectionName} |  | truth x w->x
+    ag-024286 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DigitalTwins/digitalTwinsInstances/{resourceName}/endpoints/{endpointName} |  | truth x w->x
+    ag-025270 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DBforMariaDB/servers/{serverName}/privateEndpointConnections/{privateEndpointConnectionName} |  | truth x w->x
+    ag-025662 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DBforMySQL/servers/{serverName}/privateEndpointConnections/{privateEndpointConnectionName} |  | truth x w->x
+    ag-026027 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateLinkServices/{serviceName}/privateEndpointConnections/{peConnectionName} |  | truth x w->x
+    ag-026405 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DBforPostgreSQL/servers/{serverName}/privateEndpointConnections/{privateEndpointConnectionName} |  | truth x w->x
+    ag-027722 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/privateEndpointConnections/{privateEndpointConnectionName} |  | truth x w->x
+    ag-063079 | influxdata.com | PATCH /notificationEndpoints/{endpointID} | Update a notification endpoint | truth x w->x
+  wrong examples (15 of 74):
+    ag-003250 | amazonaws.com | POST /#Action=DescribeDomainEndpointOptions |  | truth r w->x
+    ag-003270 | amazonaws.com | POST /#Action=UpdateDomainEndpointOptions |  | truth w w->x
+    ag-003871 | amazonaws.com | POST /#X-Amz-Target=Comprehend_20171127.UpdateEndpoint |  | truth w w->x
+    ag-004670 | amazonaws.com | POST /#X-Amz-Target=AmazonDMSv20160101.ModifyEndpoint |  | truth w w->x
+    ag-005849 | amazonaws.com | POST /#Action=ModifyClientVpnEndpoint |  | truth w w->x
+    ag-005947 | amazonaws.com | POST /#Action=ModifyVpcEndpoint |  | truth w w->x
+    ag-005953 | amazonaws.com | POST /#Action=ModifyVpcEndpointServicePayerResponsibility |  | truth w w->x
+    ag-006914 | amazonaws.com | POST /2015-01-01/es/vpcEndpoints/update |  | truth w w->x
+    ag-007459 | amazonaws.com | POST /#X-Amz-Target=GlobalAccelerator_V20180706.AddCustomRoutingEndpoints |  | truth w w->x
+    ag-007460 | amazonaws.com | POST /#X-Amz-Target=GlobalAccelerator_V20180706.AddEndpoints |  | truth w w->x
+    ag-007496 | amazonaws.com | POST /#X-Amz-Target=GlobalAccelerator_V20180706.RemoveCustomRoutingEndpoints |  | truth w w->x
+    ag-007497 | amazonaws.com | POST /#X-Amz-Target=GlobalAccelerator_V20180706.RemoveEndpoints |  | truth w w->x
+    ag-007505 | amazonaws.com | POST /#X-Amz-Target=GlobalAccelerator_V20180706.UpdateEndpointGroup |  | truth w w->x
+    ag-007698 | amazonaws.com | POST /#X-Amz-Target=AWSGlue.UpdateDevEndpoint |  | truth w w->x
+    ag-010166 | amazonaws.com | PUT /origin_endpoints/{id} |  | truth w w->x
+
+--- A / pathXWords / "apns" ---
+  fires 4: right 4, wrong 0; loose-2 closed 0, loose-1 closed 4, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 1
+  LOVO: adopted for 690 of 691 vendors, right 0, wrong 0  [all right fires from one vendor: nothing under LOVO]
+  per vendor (right/wrong): amazonaws.com 4/0
+  right examples (4 of 4):
+    ag-011133 | amazonaws.com | PUT /v1/apps/{application-id}/channels/apns |  | truth x w->x
+    ag-011136 | amazonaws.com | PUT /v1/apps/{application-id}/channels/apns_sandbox |  | truth x w->x
+    ag-011139 | amazonaws.com | PUT /v1/apps/{application-id}/channels/apns_voip |  | truth x w->x
+    ag-011142 | amazonaws.com | PUT /v1/apps/{application-id}/channels/apns_voip_sandbox |  | truth x w->x
+  wrong examples (0 of 0):
+
+--- A / pathXWords / "push" ---
+  fires 31: right 16, wrong 15; loose-2 closed 0, loose-1 closed 16, new too-tight from r 0, new too-tight from w 15, other wrong 0
+  distinct vendors with a right fire: 9
+  LOVO: adopted for 685 of 691 vendors, right 8, wrong 15
+  per vendor (right/wrong): codat.io 5/8, alertersystem.com 2/2, azure.com 2/0, gitlab.com 2/0, amazonaws.com 1/1, coolify.io 1/0, frankiefinancial.io 1/0, mastodon.local 1/0, microsoft.com 1/0, ably.io 0/2, gsmtasks.com 0/2
+  right examples (15 of 16):
+    ag-001289 | alertersystem.com | PUT /api/transport-pushbullet/{id} | Replaces the TransportPushbullet resource. | truth x w->x
+    ag-001294 | alertersystem.com | PUT /api/transport-pushover/{id} | Replaces the TransportPushover resource. | truth x w->x
+    ag-012335 | amazonaws.com | POST /#X-Amz-Target=Route53Domains_v20140515.PushDomain |  | truth x w->x
+    ag-028739 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/config/pushsettings | Updates the Push settings associated with web app. | truth x w->x
+    ag-028884 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/slots/{slot}/config/pushsettings | Updates the Push settings associated with web app. | truth x w->x
+    ag-033483 | codat.io | PUT /companies/{companyId}/connections/{connectionId}/push/bankAccounts/{bankAccountId} | Update bank account | truth x w->x
+    ag-033485 | codat.io | PUT /companies/{companyId}/connections/{connectionId}/push/billCreditNotes/{billCreditNoteId} | Update bill credit note | truth x w->x
+    ag-033502 | codat.io | PUT /companies/{companyId}/connections/{connectionId}/push/invoices/{invoiceId} | Update invoice | truth x w->x
+    ag-033503 | codat.io | POST /companies/{companyId}/connections/{connectionId}/push/invoices/{invoiceId}/attachment | Push invoice attachment | truth x w->x
+    ag-033512 | codat.io | PUT /companies/{companyId}/connections/{connectionId}/push/suppliers/{supplierId} | Update supplier | truth x w->x
+    ag-055059 | gitlab.com | PUT /v3/projects/{id}/services/emails-on-push | Set emails-on-push service for project | truth x w->x
+    ag-055072 | gitlab.com | PUT /v3/projects/{id}/services/pushover | Set pushover service for project | truth x w->x
+    ag-068120 | mastodon.local | PUT /api/v1/push/subscription |  | truth x w->x
+    ag-069678 | microsoft.com | PATCH /deviceManagement/applePushNotificationCertificate | Update the navigation property applePushNotificationCertificate in deviceManagement | truth x w->x
+    fx-0911 | coolify.io | PATCH /notifications/pushover | Update Pushover notification settings | truth x w->x
+  wrong examples (15 of 15):
+    ag-000050 | ably.io | PATCH /push/deviceRegistrations/{device_id} | Update a device registration | truth w w->x
+    ag-000051 | ably.io | PUT /push/deviceRegistrations/{device_id} | Update a device registration | truth w w->x
+    ag-001249 | alertersystem.com | PUT /api/transport-octopush/{id} | Replaces the TransportOctopush resource. | truth w w->x
+    ag-001299 | alertersystem.com | PUT /api/transport-pushy/{id} | Replaces the TransportPushy resource. | truth w w->x
+    ag-011221 | amazonaws.com | PUT /v1/templates/{template-name}/push |  | truth w w->x
+    ag-033490 | codat.io | PUT /companies/{companyId}/connections/{connectionId}/push/bills/{billId} | Update bill | truth w w->x
+    ag-033491 | codat.io | POST /companies/{companyId}/connections/{connectionId}/push/bills/{billId}/attachments | Upload bill attachments | truth w w->x
+    ag-033493 | codat.io | PUT /companies/{companyId}/connections/{connectionId}/push/creditNotes/{creditNoteId} | Update creditNote | truth w w->x
+    ag-033495 | codat.io | PUT /companies/{companyId}/connections/{connectionId}/push/customers/{customerId} | Update customer | truth w w->x
+    ag-033497 | codat.io | POST /companies/{companyId}/connections/{connectionId}/push/directCosts/{directCostId}/attachment | Upload direct cost attachment | truth w w->x
+    ag-033499 | codat.io | POST /companies/{companyId}/connections/{connectionId}/push/directIncomes/{directIncomeId}/attachment | Create direct income attachment | truth w w->x
+    ag-033504 | codat.io | POST /companies/{companyId}/connections/{connectionId}/push/items | Create item | truth w w->x
+    ag-033510 | codat.io | PUT /companies/{companyId}/connections/{connectionId}/push/purchaseOrders/{purchaseOrderId} | Update purchase order | truth w w->x
+    ag-061437 | gsmtasks.com | PATCH /push_notifications/{id}/ |  | truth w w->x
+    ag-061438 | gsmtasks.com | PUT /push_notifications/{id}/ |  | truth w w->x
+
+--- A / pathXWords / "fcm" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- A / pathXWords / "oidc" ---
+  fires 3: right 3, wrong 0; loose-2 closed 0, loose-1 closed 3, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 1
+  LOVO: adopted for 690 of 691 vendors, right 0, wrong 0  [all right fires from one vendor: nothing under LOVO]
+  per vendor (right/wrong): github.com 3/0
+  right examples (3 of 3):
+    ag-040224 | github.com | PUT /orgs/{org}/actions/oidc/customization/sub | Set the customization template for an OIDC subject claim for an organization | truth x w->x
+    ag-040440 | github.com | PUT /repos/{owner}/{repo}/actions/oidc/customization/sub | Set the customization template for an OIDC subject claim for a repository | truth x w->x
+    ag-042707 | github.com | PUT /enterprises/{enterprise}/actions/oidc/customization/issuer | Set the GitHub Actions OIDC custom issuer policy for an enterprise | truth x w->x
+  wrong examples (0 of 0):
+
+--- A / pathXWords / "saml" ---
+  fires 3: right 1, wrong 2; loose-2 closed 0, loose-1 closed 1, new too-tight from r 0, new too-tight from w 2, other wrong 0
+  distinct vendors with a right fire: 1
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0  [all right fires from one vendor: nothing under LOVO]
+  per vendor (right/wrong): amazonaws.com 1/1, clerk.com 0/1
+  right examples (1 of 1):
+    ag-008271 | amazonaws.com | POST /#Action=UpdateSAMLProvider |  | truth x w->x
+  wrong examples (2 of 2):
+    ag-014627 | amazonaws.com | POST /#X-Amz-Target=WorkspacesService.ModifySamlProperties |  | truth w w->x
+    ex3-0182 | clerk.com | PATCH /saml_connections/{saml_connection_id} | Update a SAML Connection | truth w w->x
+
+--- A / pathXWords / "ldap" ---
+  fires 4: right 1, wrong 3; loose-2 closed 0, loose-1 closed 1, new too-tight from r 0, new too-tight from w 3, other wrong 0
+  distinct vendors with a right fire: 1
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0  [all right fires from one vendor: nothing under LOVO]
+  per vendor (right/wrong): github.com 1/1, amazonaws.com 0/1, googleapis.com 0/1
+  right examples (1 of 1):
+    ag-044567 | github.com | PATCH /admin/ldap/teams/{team_id}/mapping | Update LDAP mapping for a team | truth x w->x
+  wrong examples (3 of 3):
+    ag-004833 | amazonaws.com | POST /#X-Amz-Target=DirectoryService_20150416.EnableLDAPS |  | truth w w->x
+    ag-044569 | github.com | PATCH /admin/ldap/users/{username}/mapping | Update LDAP mapping for a user | truth w w->x
+    ag-059528 | googleapis.com | PATCH /v1alpha1/{name}/ldapssettings |  | truth w w->x
+
+--- A / pathXWords / "idp" ---
+  fires 18: right 3, wrong 15; loose-2 closed 0, loose-1 closed 3, new too-tight from r 0, new too-tight from w 15, other wrong 0
+  distinct vendors with a right fire: 1
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0  [all right fires from one vendor: nothing under LOVO]
+  per vendor (right/wrong): googleapis.com 3/14, dracoon.team 0/1
+  right examples (3 of 3):
+    ag-055830 | googleapis.com | PATCH /androidpublisher/v3/applications/{packageName}/edits/{editId}/testers/{track} |  | truth x w->x
+    ag-055831 | googleapis.com | PUT /androidpublisher/v3/applications/{packageName}/edits/{editId}/testers/{track} |  | truth x w->x
+    ag-055885 | googleapis.com | PATCH /androidpublisher/v3/{name} |  | truth x w->x
+  wrong examples (15 of 15):
+    ag-036231 | dracoon.team | PUT /v4/system/config/auth/openid/idps/{idp_id} | Update OpenID Connect IDP configuration | truth w w->x
+    ag-055808 | googleapis.com | POST /androidpublisher/v3/applications/{packageName}/edits/{editId}/apks/{apkVersionCode}/deobfuscationFiles/{deobfuscationFileType} |  | truth w w->x
+    ag-055810 | googleapis.com | PATCH /androidpublisher/v3/applications/{packageName}/edits/{editId}/apks/{apkVersionCode}/expansionFiles/{expansionFileType} |  | truth w w->x
+    ag-055811 | googleapis.com | POST /androidpublisher/v3/applications/{packageName}/edits/{editId}/apks/{apkVersionCode}/expansionFiles/{expansionFileType} |  | truth w w->x
+    ag-055812 | googleapis.com | PUT /androidpublisher/v3/applications/{packageName}/edits/{editId}/apks/{apkVersionCode}/expansionFiles/{expansionFileType} |  | truth w w->x
+    ag-055817 | googleapis.com | PATCH /androidpublisher/v3/applications/{packageName}/edits/{editId}/details |  | truth w w->x
+    ag-055818 | googleapis.com | PUT /androidpublisher/v3/applications/{packageName}/edits/{editId}/details |  | truth w w->x
+    ag-055823 | googleapis.com | PATCH /androidpublisher/v3/applications/{packageName}/edits/{editId}/listings/{language} |  | truth w w->x
+    ag-055824 | googleapis.com | PUT /androidpublisher/v3/applications/{packageName}/edits/{editId}/listings/{language} |  | truth w w->x
+    ag-055834 | googleapis.com | PATCH /androidpublisher/v3/applications/{packageName}/edits/{editId}/tracks/{track} |  | truth w w->x
+    ag-055835 | googleapis.com | PUT /androidpublisher/v3/applications/{packageName}/edits/{editId}/tracks/{track} |  | truth w w->x
+    ag-055844 | googleapis.com | PATCH /androidpublisher/v3/applications/{packageName}/inappproducts/{sku} |  | truth w w->x
+    ag-055845 | googleapis.com | PUT /androidpublisher/v3/applications/{packageName}/inappproducts/{sku} |  | truth w w->x
+    ag-055866 | googleapis.com | PATCH /androidpublisher/v3/applications/{packageName}/subscriptions/{productId} |  | truth w w->x
+    ag-055872 | googleapis.com | PATCH /androidpublisher/v3/applications/{packageName}/subscriptions/{productId}/basePlans/{basePlanId}/offers/{offerId} |  | truth w w->x
+
+--- A / pathXWords / "certificate" ---
+  fires 73: right 17, wrong 56; loose-2 closed 0, loose-1 closed 17, new too-tight from r 0, new too-tight from w 56, other wrong 0
+  distinct vendors with a right fire: 7
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): azure.com 8/25, amazonaws.com 3/18, microsoft.com 2/4, combell.com 1/1, keycloak.local 1/1, ote-godaddy.com 1/1, twilio.com 1/1, googleapis.com 0/1, hetzner.cloud 0/1, maif.local 0/2, sendgrid.com 0/1
+  right examples (15 of 17):
+    ag-008469 | amazonaws.com | PUT /certificates/{certificateId}#newStatus |  | truth x w->x
+    ag-008641 | amazonaws.com | PATCH /transfer-certificate/{certificateId}#targetAwsAccount |  | truth x w->x
+    ag-014146 | amazonaws.com | POST /#X-Amz-Target=TransferService.UpdateCertificate |  | truth x w->x
+    ag-021579 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/certificates/{certificateId} |  | truth x w->x
+    ag-024758 | azure.com | PATCH /certificates/{certificate-name}/policy | Updates the policy for a certificate. | truth x w->x
+    ag-028088 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorSimple/managers/{managerName}/certificates/{certificateName} |  | truth x w->x
+    ag-028531 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName} | Create or update a certificate purchase order. | truth x w->x
+    ag-028542 | azure.com | POST /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}/verifyDomainOwnership | Verify domain ownership for this certificate order. | truth x w->x
+    ag-029121 | azure.com | PATCH /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{name} | Create or update a certificate purchase order | truth x w->x
+    ag-029122 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{name} | Create or update a certificate purchase order | truth x w->x
+    ag-029128 | azure.com | POST /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{name}/verifyDomainOwnership | Verify domain ownership for this certificate order | truth x w->x
+    ag-033768 | combell.com | POST /sslcertificaterequests | Add a SSL certificate request | truth x w->x
+    ag-064672 | keycloak.local | POST /{realm}/clients/{id}/certificates/{attr}/upload | Upload certificate and eventually private key | truth x w->x
+    ag-069678 | microsoft.com | PATCH /deviceManagement/applePushNotificationCertificate | Update the navigation property applePushNotificationCertificate in deviceManagement | truth x w->x
+    ag-073597 | microsoft.com | POST /identity/apiConnectors/{identityApiConnector-id}/microsoft.graph.uploadClientCertificate | Invoke action uploadClientCertificate | truth x w->x
+  wrong examples (15 of 56):
+    ag-001523 | amazonaws.com | POST /#X-Amz-Target=CertificateManager.AddTagsToCertificate |  | truth w w->x
+    ag-001533 | amazonaws.com | POST /#X-Amz-Target=CertificateManager.RemoveTagsFromCertificate |  | truth w w->x
+    ag-001537 | amazonaws.com | POST /#X-Amz-Target=CertificateManager.UpdateCertificateOptions |  | truth w w->x
+    ag-001556 | amazonaws.com | POST /#X-Amz-Target=ACMPrivateCA.RestoreCertificateAuthority |  | truth w w->x
+    ag-001558 | amazonaws.com | POST /#X-Amz-Target=ACMPrivateCA.TagCertificateAuthority |  | truth w w->x
+    ag-001560 | amazonaws.com | POST /#X-Amz-Target=ACMPrivateCA.UpdateCertificateAuthority |  | truth w w->x
+    ag-001755 | amazonaws.com | PATCH /clientcertificates/{clientcertificate_id} |  | truth w w->x
+    ag-005965 | amazonaws.com | POST /#Action=ModifyVpnTunnelCertificate |  | truth w w->x
+    ag-006578 | amazonaws.com | POST /#Action=AddListenerCertificates |  | truth w w->x
+    ag-006634 | amazonaws.com | POST /#Action=RemoveListenerCertificates |  | truth w w->x
+    ag-007779 | amazonaws.com | PUT /greengrass/groups/{GroupId}/certificateauthorities/configuration/expiry |  | truth w w->x
+    ag-008275 | amazonaws.com | POST /#Action=UpdateServerCertificate |  | truth w w->x
+    ag-008458 | amazonaws.com | PUT /cacertificate/{caCertificateId} |  | truth w w->x
+    ag-008994 | amazonaws.com | PUT /wireless-gateways/{Id}/certificate |  | truth w w->x
+    ag-009510 | amazonaws.com | POST /#X-Amz-Target=Lightsail_20161128.AttachCertificateToDistribution |  | truth w w->x
+
+--- A / pathXWords / "whitelist" ---
+  fires 9: right 4, wrong 5; loose-2 closed 0, loose-1 closed 4, new too-tight from r 0, new too-tight from w 5, other wrong 0
+  distinct vendors with a right fire: 3
+  LOVO: adopted for 1 of 691 vendors, right 2, wrong 4
+  per vendor (right/wrong): bunq.com 2/4, mandrillapp.com 1/0, sendgrid.com 1/0, azure.com 0/1
+  right examples (4 of 4):
+    ag-067920 | mandrillapp.com | POST /whitelists/add.json |  | truth x w->x
+    ag-111520 | sendgrid.com | PATCH /mail_settings/address_whitelist | Update address whitelist mail settings | truth x w->x
+    ag-031789 | bunq.com | PUT /user/{userID}/whitelist-sdd-one-off/{itemId} |  | truth x w->x
+    ag-031794 | bunq.com | PUT /user/{userID}/whitelist-sdd-recurring/{itemId} |  | truth x w->x
+  wrong examples (5 of 5):
+    ag-027109 | azure.com | PUT /subscriptions/{subscriptionId}/providers/Microsoft.Security/locations/{ascLocation}/applicationWhitelistings/{groupName} |  | truth w w->x
+    ag-031722 | bunq.com | POST /user/{userID}/monetary-account/{monetary-accountID}/whitelist/{whitelistID}/whitelist-result/{whitelist-resultID}/note-attachment |  | truth w w->x
+    ag-031725 | bunq.com | PUT /user/{userID}/monetary-account/{monetary-accountID}/whitelist/{whitelistID}/whitelist-result/{whitelist-resultID}/note-attachment/{itemId} |  | truth w w->x
+    ag-031727 | bunq.com | POST /user/{userID}/monetary-account/{monetary-accountID}/whitelist/{whitelistID}/whitelist-result/{whitelist-resultID}/note-text |  | truth w w->x
+    ag-031730 | bunq.com | PUT /user/{userID}/monetary-account/{monetary-accountID}/whitelist/{whitelistID}/whitelist-result/{whitelist-resultID}/note-text/{itemId} |  | truth w w->x
+
+--- A / pathXWords / "admin" ---
+  fires 235: right 75, wrong 160; loose-2 closed 0, loose-1 closed 75, new too-tight from r 0, new too-tight from w 160, other wrong 0
+  distinct vendors with a right fire: 19
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): fecru.local 14/9, microsoft.com 10/41, amazonaws.com 8/7, azure.com 8/17, clearblade.com 7/14, ory.sh 7/2, loket.nl 4/5, wiremock.org 3/1, github.com 2/18, immich.app 2/4, mist.com 2/0, discourse.local 1/3, goharbor.io 1/0, i-cue.solutions 1/4, mastodon.local 1/1, meraki.com 1/0, ritc.io 1/1, testfire.net 1/0, whatsapp.local 1/0, apicurio.local 0/3, gamesparks.net 0/4, gitea.io 0/2, googleapis.com 0/23, storecove.com 0/1
+  right examples (15 of 75):
+    ag-002185 | amazonaws.com | POST /#X-Amz-Target=PhotonAdminProxyService.EnableUser |  | truth x w->x
+    ag-002199 | amazonaws.com | POST /#X-Amz-Target=PhotonAdminProxyService.UpdateEntitlement |  | truth x w->x
+    ag-004410 | amazonaws.com | POST /orgs/enableAdminAccount |  | truth x w->x
+    ag-005715 | amazonaws.com | POST /#Action=EnableIpamOrganizationAdminAccount |  | truth x w->x
+    ag-007866 | amazonaws.com | POST /admin/enable |  | truth x w->x
+    ag-007873 | amazonaws.com | POST /detector/{detectorId}/admin |  | truth x w->x
+    ag-009895 | amazonaws.com | POST /admin |  | truth x w->x
+    ag-013029 | amazonaws.com | POST /organization/admin/enable |  | truth x w->x
+    ag-022164 | azure.com | PUT /subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/diskmigrationjobs/{migrationId} |  | truth x w->x
+    ag-022204 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/ipPools/{ipPool} |  | truth x w->x
+    ag-022232 | azure.com | PUT /subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Subscriptions.Admin/offers/{offer}/offerDelegations/{offerDelegationName} |  | truth x w->x
+    ag-022311 | azure.com | POST /subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Update.Admin/updateLocations/{updateLocation}/updates/{updateName}/updateRuns/{runName}/rerun |  | truth x w->x
+    ag-025625 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DBforMySQL/servers/{serverName}/Administrators/activeDirectory |  | truth x w->x
+    ag-026375 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DBforPostgreSQL/servers/{serverName}/Administrators/activeDirectory |  | truth x w->x
+    ag-027728 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/administrators/{administratorName} |  | truth x w->x
+  wrong examples (15 of 160):
+    ag-002143 | amazonaws.com | POST /#X-Amz-Target=PhotonAdminProxyService.CopyImage |  | truth w w->x
+    ag-002195 | amazonaws.com | POST /#X-Amz-Target=PhotonAdminProxyService.TagResource |  | truth w w->x
+    ag-002197 | amazonaws.com | POST /#X-Amz-Target=PhotonAdminProxyService.UpdateApplication |  | truth w w->x
+    ag-002198 | amazonaws.com | POST /#X-Amz-Target=PhotonAdminProxyService.UpdateDirectoryConfig |  | truth w w->x
+    ag-002200 | amazonaws.com | POST /#X-Amz-Target=PhotonAdminProxyService.UpdateFleet |  | truth w w->x
+    ag-002202 | amazonaws.com | POST /#X-Amz-Target=PhotonAdminProxyService.UpdateStack |  | truth w w->x
+    ag-009898 | amazonaws.com | PATCH /admin/configuration |  | truth w w->x
+    ag-015500 | apicurio.local | PUT /admin/config/properties/{propertyName} | Update a configuration property | truth w w->x
+    ag-015506 | apicurio.local | PUT /admin/loggers/{logger} | Set a logger's configuration | truth w w->x
+    ag-015517 | apicurio.local | PUT /admin/rules/{rule} | Update global rule configuration | truth w w->x
+    ag-022122 | azure.com | PUT /subscriptions/{subscriptionId}/providers/Microsoft.Subscriptions.Admin/subscriptions/{targetSubscriptionId}/acquiredPlans/{planAcquisitionId} |  | truth w w->x
+    ag-022130 | azure.com | PUT /subscriptions/{subscriptionId}/resourcegroups/{resourceGroup}/providers/Microsoft.AzureBridge.Admin/activations/{activationName} |  | truth w w->x
+    ag-022133 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.InfrastructureInsights.Admin/regionHealths/{location}/alerts/{alertName} |  | truth w w->x
+    ag-022141 | azure.com | PUT /subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Backup.Admin/backupLocations/{location} |  | truth w w->x
+    ag-022148 | azure.com | POST /subscriptions/{subscriptionId}/providers/Microsoft.Commerce.Admin/updateEncryption |  | truth w w->x
+
+--- A / pathXWords / "owner" ---
+  fires 24: right 12, wrong 12; loose-2 closed 0, loose-1 closed 12, new too-tight from r 0, new too-tight from w 12, other wrong 0
+  distinct vendors with a right fire: 6
+  LOVO: adopted for 6 of 691 vendors, right 2, wrong 12
+  per vendor (right/wrong): influxdata.com 6/0, azure.com 2/6, amazonaws.com 1/0, apicurio.local 1/0, atlassian.com 1/0, zoom.us 1/0, appcenter.ms 0/1, gambitcomm.local 0/1, microsoft.com 0/1, openchannel.io 0/1, render.com 0/2
+  right examples (12 of 12):
+    ag-012474 | amazonaws.com | PUT /{Bucket}#ownershipControls |  | truth x w->x
+    ag-015532 | apicurio.local | PUT /groups/{groupId}/artifacts/{artifactId}/owner | Update artifact owner | truth x w->x
+    ag-017780 | atlassian.com | PUT /rest/api/3/filter/{id}/owner | Change filter owner | truth x w->x
+    ag-028542 | azure.com | POST /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}/verifyDomainOwnership | Verify domain ownership for this certificate order. | truth x w->x
+    ag-029128 | azure.com | POST /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{name}/verifyDomainOwnership | Verify domain ownership for this certificate order | truth x w->x
+    ag-063020 | influxdata.com | POST /buckets/{bucketID}/owners | Add an owner to a bucket | truth x w->x
+    ag-063050 | influxdata.com | POST /dashboards/{dashboardID}/owners | Add an owner to a dashboard | truth x w->x
+    ag-063103 | influxdata.com | POST /orgs/{orgID}/owners | Add an owner to an organization | truth x w->x
+    ag-063126 | influxdata.com | POST /scrapers/{scraperTargetID}/owners | Add an owner to a scraper target | truth x w->x
+    ag-063158 | influxdata.com | POST /tasks/{taskID}/owners | Add an owner to a task | truth x w->x
+    ag-063179 | influxdata.com | POST /telegrafs/{telegrafID}/owners | Add an owner to a Telegraf configuration | truth x w->x
+    ag-122496 | zoom.us | PUT /accounts/{accountId}/owner | Update the account owner | truth x w->x
+  wrong examples (12 of 12):
+    ag-016738 | appcenter.ms | PUT /v0.1/apps/{owner_name}/{app_name}/owner/device_sets/{id} |  | truth w w->x
+    ag-028661 | azure.com | PATCH /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DomainRegistration/domains/{domainName}/domainOwnershipIdentifiers/{name} | Creates an ownership identifier for a domain or updates identifier details for an existing identifer | truth w w->x
+    ag-028662 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DomainRegistration/domains/{domainName}/domainOwnershipIdentifiers/{name} | Creates an ownership identifier for a domain or updates identifier details for an existing identifer | truth w w->x
+    ag-028765 | azure.com | PATCH /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/domainOwnershipIdentifiers/{domainOwnershipIdentifierName} | Creates a domain ownership identifier for web app, or updates an existing ownership identifier. | truth w w->x
+    ag-028766 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/domainOwnershipIdentifiers/{domainOwnershipIdentifierName} | Creates a domain ownership identifier for web app, or updates an existing ownership identifier. | truth w w->x
+    ag-028908 | azure.com | PATCH /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/slots/{slot}/domainOwnershipIdentifiers/{domainOwnershipIdentifierName} | Creates a domain ownership identifier for web app, or updates an existing ownership identifier. | truth w w->x
+    ag-028909 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/slots/{slot}/domainOwnershipIdentifiers/{domainOwnershipIdentifierName} | Creates a domain ownership identifier for web app, or updates an existing ownership identifier. | truth w w->x
+    ag-082174 | microsoft.com | PATCH /deviceManagement/androidDeviceOwnerEnrollmentProfiles/{androidDeviceOwnerEnrollmentProfile-id} | Update the navigation property androidDeviceOwnerEnrollmentProfiles in deviceManagement | truth w w->x
+    ag-106945 | openchannel.io | PATCH /ownership/{ownershipId} | Updates ownership fields | truth w w->x
+    ex4-1173 | render.com | PUT /logs/streams/owner/{ownerId} | Update log stream | truth w w->x
+    ex4-1211 | render.com | PATCH /notification-settings/owners/{ownerId} | Update notification settings | truth w w->x
+    ag-038917 | gambitcomm.local | PUT /mimic/agent/{agentNum}/set/owner/{owner} | owner of the agent | truth w w->x
+
+--- A / pathXWords / "auth" ---
+  fires 74: right 30, wrong 44; loose-2 closed 0, loose-1 closed 30, new too-tight from r 0, new too-tight from w 44, other wrong 0
+  distinct vendors with a right fire: 8
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): microsoft.com 9/17, amazonaws.com 5/7, neon.com 5/4, azure.com 4/0, openbankingproject.ch 3/0, supabase.com 2/0, dracoon.team 1/3, keycloak.local 1/4, figshare.com 0/2, github.com 0/1, googleapis.com 0/1, immich.app 0/1, maif.local 0/2, rebilly.com 0/1, telnyx.com 0/1
+  right examples (15 of 30):
+    ag-001720 | amazonaws.com | POST /backend/{appId}/auth/{backendEnvironmentName} |  | truth x w->x
+    ag-001777 | amazonaws.com | PATCH /restapis/{restapi_id}/authorizers/{authorizer_id} |  | truth x w->x
+    ag-001877 | amazonaws.com | PATCH /v2/apis/{apiId}/authorizers/{authorizerId} |  | truth x w->x
+    ag-004832 | amazonaws.com | POST /#X-Amz-Target=DirectoryService_20150416.EnableClientAuthentication |  | truth x w->x
+    ag-008443 | amazonaws.com | PUT /authorizer/{authorizerName} |  | truth x w->x
+    ag-028725 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/config/authsettings | Updates the Authentication / Authorization settings associated with web app. | truth x w->x
+    ag-028870 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/slots/{slot}/config/authsettings | Updates the Authentication / Authorization settings associated with web app. | truth x w->x
+    ag-029229 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/config/authsettings | Updates the Authentication / Authorization settings associated with web app | truth x w->x
+    ag-029291 | azure.com | PUT /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/slots/{slot}/config/authsettings | Updates the Authentication / Authorization settings associated with web app | truth x w->x
+    ag-036252 | dracoon.team | PUT /v4/system/config/settings/auth | Update authentication settings | truth x w->x
+    ag-064624 | keycloak.local | PUT /{realm}/authentication/required-actions/{alias} | Update required action | truth x w->x
+    ag-069118 | microsoft.com | PATCH /authenticationMethodsPolicy | Update authenticationMethodsPolicy | truth x w->x
+    ag-069124 | microsoft.com | PATCH /authenticationMethodsPolicy/authenticationMethodConfigurations/{authenticationMethodConfiguration-id} | Update the navigation property authenticationMethodConfigurations in authenticationMethodsPolicy | truth x w->x
+    ag-076208 | microsoft.com | PATCH /policies/authenticationFlowsPolicy | Update authenticationFlowsPolicy | truth x w->x
+    ag-076211 | microsoft.com | PATCH /policies/authenticationMethodsPolicy | Update authenticationMethodsPolicy | truth x w->x
+  wrong examples (15 of 44):
+    ag-001556 | amazonaws.com | POST /#X-Amz-Target=ACMPrivateCA.RestoreCertificateAuthority |  | truth w w->x
+    ag-001558 | amazonaws.com | POST /#X-Amz-Target=ACMPrivateCA.TagCertificateAuthority |  | truth w w->x
+    ag-001560 | amazonaws.com | POST /#X-Amz-Target=ACMPrivateCA.UpdateCertificateAuthority |  | truth w w->x
+    ag-003761 | amazonaws.com | POST /#X-Amz-Target=AWSCognitoIdentityProviderService.UpdateAuthEventFeedback |  | truth w w->x
+    ag-007779 | amazonaws.com | PUT /greengrass/groups/{GroupId}/certificateauthorities/configuration/expiry |  | truth w w->x
+    ag-012030 | amazonaws.com | POST /#Action=ModifyAuthenticationProfile |  | truth w w->x
+    ag-014625 | amazonaws.com | POST /#X-Amz-Target=WorkspacesService.ModifyCertificateBasedAuthProperties |  | truth w w->x
+    ag-036226 | dracoon.team | PUT /v4/system/config/auth/ads/{ad_id} | Update Active Directory configuration | truth w w->x
+    ag-036231 | dracoon.team | PUT /v4/system/config/auth/openid/idps/{idp_id} | Update OpenID Connect IDP configuration | truth w w->x
+    ag-036235 | dracoon.team | PUT /v4/system/config/auth/radius | Update RADIUS configuration | truth w w->x
+    ag-037897 | figshare.com | PUT /account/articles/{article_id}/authors | Replace article authors | truth w w->x
+    ag-037939 | figshare.com | PUT /account/collections/{collection_id}/authors | Replace collection authors | truth w w->x
+    ag-040660 | github.com | PATCH /repos/{owner}/{repo}/import/authors/{author_id} | Map a commit author | truth w w->x
+    ag-056049 | googleapis.com | PATCH /v1beta/apps/{appsId}/authorizedCertificates/{authorizedCertificatesId} |  | truth w w->x
+    ag-064600 | keycloak.local | PUT /{realm}/authentication/config/{id} | Update authenticator configuration | truth w w->x
+
+--- A / pathXWords / "login" ---
+  fires 2: right 2, wrong 0; loose-2 closed 0, loose-1 closed 2, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 2
+  LOVO: adopted for 691 of 691 vendors, right 2, wrong 0
+  per vendor (right/wrong): amazonaws.com 1/0, ory.sh 1/0
+  right examples (2 of 2):
+    ag-008263 | amazonaws.com | POST /#Action=UpdateLoginProfile |  | truth x w->x
+    ex3-1145 | ory.sh | POST /self-service/login | Submit a Login Flow | truth x w->x
+  wrong examples (0 of 0):
+
+--- A / pathXWords / "remove" ---
+  fires 103: right 35, wrong 68; loose-2 closed 0, loose-1 closed 35, new too-tight from r 0, new too-tight from w 67, other wrong 1
+  distinct vendors with a right fire: 19
+  LOVO: adopted for 0 of 691 vendors, right 0, wrong 0
+  per vendor (right/wrong): amazonaws.com 10/27, asana.com 3/10, googleapis.com 3/0, wiremock.org 3/0, clicksend.com 2/0, autotask.net 1/0, azure.com 1/0, clerk.com 1/0, cpy.re 1/0, jira.local 1/0, journy.io 1/0, keycloak.local 1/0, microsoft.com 1/0, orthanc-server.com 1/0, slack.com 1/0, trakt.tv 1/6, truesight.local 1/0, zoomconnect.com 1/0, zulip.com 1/0, adafruit.com 0/1, apptigent.com 0/1, atlassian.com 0/3, ebay.com 0/1, hetzner.cloud 0/3, jokes.one 0/1, meraki.com 0/2, pdfblocks.com 0/4, quotes.rest 0/4, shipengine.com 0/1, snyk.io 0/1, telnyx.com 0/1, vtex.local 0/2
+  right examples (15 of 35):
+    ag-001728 | amazonaws.com | POST /backend/{appId}/config/remove |  | truth x w->x
+    ag-001736 | amazonaws.com | POST /backend/{appId}/remove |  | truth x w->x
+    ag-004779 | amazonaws.com | POST /#Action=RemoveFromGlobalCluster |  | truth x w->x
+    ag-004847 | amazonaws.com | POST /#X-Amz-Target=DirectoryService_20150416.RemoveRegion |  | truth x w->x
+    ag-006686 | amazonaws.com | POST /#X-Amz-Target=ElasticMapReduce.RemoveAutoScalingPolicy |  | truth x w->x
+    ag-006688 | amazonaws.com | POST /#X-Amz-Target=ElasticMapReduce.RemoveManagedScalingPolicy |  | truth x w->x
+    ag-008209 | amazonaws.com | POST /#Action=RemoveUserFromGroup |  | truth x w->x
+    ag-010301 | amazonaws.com | POST /RemoveSourceServerAction |  | truth x w->x
+    ag-010302 | amazonaws.com | POST /RemoveTemplateAction |  | truth x w->x
+    ag-011005 | amazonaws.com | POST /#X-Amz-Target=AWSOrganizationsV20161128.RemoveAccountFromOrganization |  | truth x w->x
+    ag-017512 | asana.com | POST /goals/{goal_gid}/removeFollowers | Remove a collaborator from a goal | truth x w->x
+    ag-017619 | asana.com | POST /teams/{team_gid}/removeUser | Remove a user from a team | truth x w->x
+    ag-017647 | asana.com | POST /workspaces/{workspace_gid}/removeUser | Remove a user from a workspace or organization | truth x w->x
+    ag-019780 | autotask.net | POST /V1.0/InventoryProducts/{parentId}/StockedItemsRemove |  | truth x w->x
+    ag-027508 | azure.com | POST /Nodes/{nodeName}/$/RemoveNodeState | Notifies Service Fabric that the persisted state on a node has been permanently removed or lost. | truth x w->x
+  wrong examples (15 of 68):
+    ag-001533 | amazonaws.com | POST /#X-Amz-Target=CertificateManager.RemoveTagsFromCertificate |  | truth w w->x
+    ag-002937 | amazonaws.com | PUT /amazonclouddirectory/2017-01-11/tags/remove |  | truth w w->x
+    ag-003207 | amazonaws.com | POST /#X-Amz-Target=CloudHsmFrontendService.RemoveTagsFromResource |  | truth w w->x
+    ag-003312 | amazonaws.com | POST /#X-Amz-Target=com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.RemoveTags |  | truth w w->x
+    ag-003522 | amazonaws.com | POST /#X-Amz-Target=CodeDeploy_20141006.RemoveTagsFromOnPremisesInstances |  | truth w w->x
+    ag-004320 | amazonaws.com | POST /#X-Amz-Target=DataPipeline.RemoveTags |  | truth w w->x
+    ag-004679 | amazonaws.com | POST /#X-Amz-Target=AmazonDMSv20160101.RemoveTagsFromResource |  | truth w w->x
+    ag-004781 | amazonaws.com | POST /#Action=RemoveSourceIdentifierFromSubscription |  | truth w w->x
+    ag-004783 | amazonaws.com | POST /#Action=RemoveTagsFromResource |  | truth w w->x
+    ag-004846 | amazonaws.com | POST /#X-Amz-Target=DirectoryService_20150416.RemoveIpRoutes |  | truth w w->x
+    ag-004848 | amazonaws.com | POST /#X-Amz-Target=DirectoryService_20150416.RemoveTagsFromResource |  | truth w w->x
+    ag-006570 | amazonaws.com | POST /#Action=RemoveTags |  | truth w w->x
+    ag-006634 | amazonaws.com | POST /#Action=RemoveListenerCertificates |  | truth w w->x
+    ag-006687 | amazonaws.com | POST /#X-Amz-Target=ElasticMapReduce.RemoveAutoTerminationPolicy |  | truth w w->x
+    ag-006689 | amazonaws.com | POST /#X-Amz-Target=ElasticMapReduce.RemoveTags |  | truth w w->x
+
+################ SET B (1579 rows, 6 vendors) ################
+Right = fire on a truth-x row; wrong = fire on a truth r or w row. Fires = rows whose class changes (counts are true counts, never capped by the example sample).
+A word whose right fires all come from ONE vendor gets nothing under LOVO: it is not adopted for that vendor (no other vendor backs it) and for every other vendor it has no rows to fire on.
+Note: LOVO neutralises single-vendor words by construction.
+
+TOTALS (this set only)
+  baseline  exact 1333 (84.4%)  too loose 72 (loose-1 54, loose-2 18)  too tight 174  of 1579
+  fitted    exact 1351 (85.6%)  too loose 49 (loose-1 43, loose-2 6)  too tight 179  of 1579
+  LOVO      exact 1331 (84.3%)  too loose 71 (loose-1 53, loose-2 18)  too tight 177  of 1579
+  joint fitted fires 28 (right 23, wrong 5): loose-2 closed 12, loose-1 closed 11, new too-tight from r 4, new too-tight from w 1, other wrong 0
+  joint LOVO fires 4 (right 1, wrong 3): loose-2 closed 0, loose-1 closed 1, new too-tight from r 2, new too-tight from w 1, other wrong 0
+
+--- B / getAction / "login" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / getAction / "signin" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / getAction / "logon" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / getAction / "refresh" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / getAction / "verify" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / getAction / "validate" ---
+  fires 1: right 0, wrong 1; loose-2 closed 0, loose-1 closed 0, new too-tight from r 1, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): harness.io 0/1
+  right examples (0 of 0):
+  wrong examples (1 of 1):
+    ex7-0045 | harness.io | GET /repos/{repo_ref}/codeowners/validate |  | truth r r->x
+
+--- B / getAction / "authenticate" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / getAction / "authorize" ---
+  fires 1: right 1, wrong 0; loose-2 closed 1, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 1
+  LOVO: adopted for 5 of 6 vendors, right 0, wrong 0  [all right fires from one vendor: nothing under LOVO]
+  per vendor (right/wrong): pipedrive.com 1/0
+  right examples (1 of 1):
+    ex7-0950 | pipedrive.com | GET /oauth/authorize | Requesting authorization | truth x r->x
+  wrong examples (0 of 0):
+
+--- B / getAction / "otp" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / getAction / "callback" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / getAction / "token" ---
+  fires 14: right 11, wrong 3; loose-2 closed 11, loose-1 closed 0, new too-tight from r 3, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 1
+  LOVO: adopted for 5 of 6 vendors, right 0, wrong 2  [all right fires from one vendor: nothing under LOVO]
+  per vendor (right/wrong): huggingface.co 11/1, harness.io 0/1, vikunja.io 0/1
+  right examples (11 of 11):
+    ex7-0285 | huggingface.co | GET /api/buckets/{namespace}/{repo}/xet-read-token | Xet read token | truth x r->x
+    ex7-0286 | huggingface.co | GET /api/buckets/{namespace}/{repo}/xet-write-token | Xet write token | truth x r->x
+    ex7-0318 | huggingface.co | GET /api/containers/{namespace}/{repo}/xet-read-token | Xet read token | truth x r->x
+    ex7-0319 | huggingface.co | GET /api/containers/{namespace}/{repo}/xet-write-token | Xet write token | truth x r->x
+    ex7-0353 | huggingface.co | GET /api/datasets/{namespace}/{repo}/xet-read-token/{rev} | Xet read token | truth x r->x
+    ex7-0354 | huggingface.co | GET /api/datasets/{namespace}/{repo}/xet-write-token/{rev} | Xet write token | truth x r->x
+    ex7-0412 | huggingface.co | GET /api/models/{namespace}/{repo}/xet-read-token/{rev} | Xet read token | truth x r->x
+    ex7-0413 | huggingface.co | GET /api/models/{namespace}/{repo}/xet-write-token/{rev} | Xet write token | truth x r->x
+    ex7-0512 | huggingface.co | GET /api/registry/token | Registry token | truth x r->x
+    ex7-0595 | huggingface.co | GET /api/spaces/{namespace}/{repo}/xet-read-token/{rev} | Xet read token | truth x r->x
+    ex7-0596 | huggingface.co | GET /api/spaces/{namespace}/{repo}/xet-write-token/{rev} | Xet write token | truth x r->x
+  wrong examples (3 of 3):
+    ex7-0255 | harness.io | GET /user/tokens |  | truth r r->x
+    ex7-0487 | huggingface.co | GET /api/organizations/{name}/settings/tokens | Member access tokens | truth r r->x
+    ex7-1538 | vikunja.io | GET /tokens | Get all api tokens of the current user | truth r r->x
+
+--- B / getAction / "exchange" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / getAction / "generate" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "verify" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "verification" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "callback" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "endpoint" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "apns" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "push" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "fcm" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "oidc" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "saml" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "ldap" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "idp" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "certificate" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "whitelist" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "admin" ---
+  fires 5: right 4, wrong 1; loose-2 closed 0, loose-1 closed 4, new too-tight from r 0, new too-tight from w 1, other wrong 0
+  distinct vendors with a right fire: 2
+  LOVO: adopted for 5 of 6 vendors, right 1, wrong 1
+  per vendor (right/wrong): vikunja.io 3/0, harness.io 1/1
+  right examples (4 of 4):
+    ex7-0006 | harness.io | PATCH /admin/users/{user_uid}/admin |  | truth x w->x
+    ex7-1410 | vikunja.io | PATCH /admin/projects/{id}/owner | Reassign project owner (admin) | truth x w->x
+    ex7-1414 | vikunja.io | PATCH /admin/users/{id}/admin | Promote or demote a user (admin) | truth x w->x
+    ex7-1415 | vikunja.io | PATCH /admin/users/{id}/status | Set a user's status (admin) | truth x w->x
+  wrong examples (1 of 1):
+    ex7-0005 | harness.io | PATCH /admin/users/{user_uid} |  | truth w w->x
+
+--- B / pathXWords / "owner" ---
+  fires 1: right 1, wrong 0; loose-2 closed 0, loose-1 closed 1, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 1
+  LOVO: adopted for 5 of 6 vendors, right 0, wrong 0  [all right fires from one vendor: nothing under LOVO]
+  per vendor (right/wrong): vikunja.io 1/0
+  right examples (1 of 1):
+    ex7-1410 | vikunja.io | PATCH /admin/projects/{id}/owner | Reassign project owner (admin) | truth x w->x
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "auth" ---
+  fires 6: right 6, wrong 0; loose-2 closed 0, loose-1 closed 6, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 1
+  LOVO: adopted for 5 of 6 vendors, right 0, wrong 0  [all right fires from one vendor: nothing under LOVO]
+  per vendor (right/wrong): openziti.io 6/0
+  right examples (6 of 6):
+    ex7-0653 | openziti.io | PATCH /auth-policies/{id} | Update the supplied fields on an Auth Policy | truth x w->x
+    ex7-0654 | openziti.io | PUT /auth-policies/{id} | Update all fields on an Auth Policy | truth x w->x
+    ex7-0661 | openziti.io | PATCH /authenticators/{id} | Update the supplied fields on an authenticator | truth x w->x
+    ex7-0662 | openziti.io | PUT /authenticators/{id} | Update all fields on an authenticator | truth x w->x
+    ex7-0701 | openziti.io | PATCH /current-identity/authenticators/{id} | Update the supplied fields on an authenticator of this identity | truth x w->x
+    ex7-0702 | openziti.io | PUT /current-identity/authenticators/{id} | Update all fields on an authenticator of this identity | truth x w->x
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "login" ---
+  fires 0: right 0, wrong 0; loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 0
+  LOVO: adopted for 0 of 6 vendors, right 0, wrong 0
+  per vendor (right/wrong): (none)
+  right examples (0 of 0):
+  wrong examples (0 of 0):
+
+--- B / pathXWords / "remove" ---
+  fires 1: right 1, wrong 0; loose-2 closed 0, loose-1 closed 1, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  distinct vendors with a right fire: 1
+  LOVO: adopted for 5 of 6 vendors, right 0, wrong 0  [all right fires from one vendor: nothing under LOVO]
+  per vendor (right/wrong): ringcentral.com 1/0
+  right examples (1 of 1):
+    ex7-1380 | ringcentral.com | POST /restapi/v1.0/glip/teams/{chatId}/remove | Remove Team Members | truth x w->x
+  wrong examples (0 of 0):
+
+changes vs baseline (joint fitted): A 1051, B 28

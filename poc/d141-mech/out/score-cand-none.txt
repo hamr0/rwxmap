@@ -1,0 +1,30 @@
+candidates: cand-none.json  getAction 0, pathXWords 0
+set A join: {"total":106848,"droppedQuery":4258,"joined":{"ag":98759,"ex3":1377,"ex4":1505,"fx":949},"missing":{"ag":0,"ex3":0,"ex4":0,"fx":0}}  rows scored 102590
+set B join: {"truthSource":"data/exam7-2026-11-19/truth.csv","ops":1579,"truth":1579,"joined":1579,"opsWithoutTruth":0}  (truth source: data/exam7-2026-11-19/truth.csv)
+parity check, set A baseline letter vs export lean_letter: 31 mismatches of 102590
+
+################ SET A (102590 rows, 691 vendors) ################
+Right = fire on a truth-x row; wrong = fire on a truth r or w row. Fires = rows whose class changes (counts are true counts, never capped by the example sample).
+A word whose right fires all come from ONE vendor gets nothing under LOVO: it is not adopted for that vendor (no other vendor backs it) and for every other vendor it has no rows to fire on.
+Note: LOVO neutralises single-vendor words by construction.
+
+TOTALS (this set only)
+  baseline  exact 85801 (83.6%)  too loose 3131 (loose-1 2462, loose-2 669)  too tight 13658  of 102590
+  fitted    exact 85801 (83.6%)  too loose 3131 (loose-1 2462, loose-2 669)  too tight 13658  of 102590
+  LOVO      exact 85801 (83.6%)  too loose 3131 (loose-1 2462, loose-2 669)  too tight 13658  of 102590
+  joint fitted fires 0 (right 0, wrong 0): loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  joint LOVO fires 0 (right 0, wrong 0): loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+
+################ SET B (1579 rows, 6 vendors) ################
+Right = fire on a truth-x row; wrong = fire on a truth r or w row. Fires = rows whose class changes (counts are true counts, never capped by the example sample).
+A word whose right fires all come from ONE vendor gets nothing under LOVO: it is not adopted for that vendor (no other vendor backs it) and for every other vendor it has no rows to fire on.
+Note: LOVO neutralises single-vendor words by construction.
+
+TOTALS (this set only)
+  baseline  exact 1333 (84.4%)  too loose 72 (loose-1 54, loose-2 18)  too tight 174  of 1579
+  fitted    exact 1333 (84.4%)  too loose 72 (loose-1 54, loose-2 18)  too tight 174  of 1579
+  LOVO      exact 1333 (84.4%)  too loose 72 (loose-1 54, loose-2 18)  too tight 174  of 1579
+  joint fitted fires 0 (right 0, wrong 0): loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+  joint LOVO fires 0 (right 0, wrong 0): loose-2 closed 0, loose-1 closed 0, new too-tight from r 0, new too-tight from w 0, other wrong 0
+
+changes vs baseline (joint fitted): A 0, B 0

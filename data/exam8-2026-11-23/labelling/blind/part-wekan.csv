@@ -1,0 +1,452 @@
+row_id,provider,method,path,operationId,summary,description
+ex8-1665,wekan.github.io,GET,/api/admin/attachment-settings,get_attachment_settings,Get the attachment storage / upload-block settings (GlobalAdmin),"Only the global admin can call this. Returns the Admin Panel >
+ Attachments settings document, including `limitSettings.attachmentsUploadBlocked`
+ and `limitSettings.avatarsUploadBlocked` plus the size limits. Cloud-storage
+ secret keys (S3 secretAccessKey, Azure accountKey/connectionString, GCS
+ credentials) are masked and never returned; a boolean `<field>Set` marker
+ shows whether a value exists.
+"
+ex8-1666,wekan.github.io,PUT,/api/admin/attachment-settings,update_attachment_settings,Update the attachment storage / upload-block settings (GlobalAdmin),"Only the global admin can call this. The request body is a
+ partial settings object (for example
+ `{""limitSettings"": {""avatarsUploadBlocked"": true}}`). It is applied through
+ the same update path as the `updateAttachmentStorageSettings` Meteor method,
+ so validation and `$set` semantics are identical: cloud-storage secrets left
+ blank are preserved. The masked, updated settings document is returned.
+"
+ex8-1667,wekan.github.io,GET,/api/admin/domains,get_admin_domains,List email domains with their user counts (GlobalAdmin),"Only the global admin can call this. Counts every user by the
+ domain part of their primary email address (the first address in `emails`),
+ mirroring the Admin Panel > People domain grouping. Domains are returned
+ sorted by descending count, then alphabetically.
+"
+ex8-1668,wekan.github.io,GET,/api/admin/oauth-providers,get_oauth_provider_settings,Get the OAuth login provider and passwordless settings,"The Admin Panel / People / Login section for Meteor's own
+ accounts-* login services (Google, GitHub, Facebook, X/Twitter, Meteor
+ Developer, Weibo, Meetup) and passwordless email codes. For every provider
+ field, the shared login style, the merge switch and passwordless it reports
+ which source is in effect - `env` (the `OAUTH_*` / `PASSWORDLESS_ENABLED`
+ environment variable), `admin` (a value saved in the Admin Panel) or
+ `unset` - and the resolved value. A provider's secret is reported ONLY as
+ `{ source, hasValue }`; its value is never returned. Only the global admin
+ can call this.
+"
+ex8-1669,wekan.github.io,PUT,/api/admin/oauth-providers/{providerKey},update_oauth_provider_settings,Update one OAuth login provider's Admin Panel settings,"The same save the Admin Panel makes: `enabled` and `id` are
+ stored as given, `secret` only when non-empty (an empty or missing secret
+ leaves the stored one untouched), and `loginStyle` must be `popup` or
+ `redirect` (anything else clears the per-provider override). The two
+ settings shared by every provider, `globalLoginStyle` and
+ `mergeExistingUsers`, may ride along. A value saved here wins over the
+ environment variable, and the provider is reconfigured at once, without a
+ restart. The response is the same source report as
+ get_oauth_provider_settings and never contains a secret. Only the global
+ admin can call this.
+"
+ex8-1670,wekan.github.io,GET,/api/admin/orgs,get_admin_orgs,List organizations with their feature toggles (GlobalAdmin),"Only the global admin can call this. Returns every organization
+ with its identifying fields and the per-org feature toggles shown as columns
+ in Admin Panel > People > Organizations.
+"
+ex8-1671,wekan.github.io,PUT,/api/admin/orgs/features,update_all_admin_org_features,Set one feature toggle on all organizations (GlobalAdmin),"Only the global admin can call this. The request body is
+ `{ field, value }` where `field` is one of `orgSharedTemplates`,
+ `orgPropagateMembersToBoards` or `orgSyncMembersFromAuth` and `value` is a
+ boolean. The field is `$set` on ALL organizations. Returns the number of
+ organizations updated.
+"
+ex8-1672,wekan.github.io,PUT,/api/admin/orgs/{org}/features,update_admin_org_features,Set feature toggles on one organization (GlobalAdmin),"Only the global admin can call this. The request body may
+ contain any of `orgSharedTemplates`, `orgPropagateMembersToBoards` and
+ `orgSyncMembersFromAuth` (booleans); only those whitelisted fields are
+ `$set` on the organization. Returns the updated organization.
+"
+ex8-1673,wekan.github.io,PUT,/api/admin/passwordless,update_passwordless_settings,Turn passwordless (email sign-in code) login on or off,"The Admin Panel override of `PASSWORDLESS_ENABLED`. While it
+ is off, the sign-in-code form is not shown and the token request and the
+ login attempt are both refused, so the package can neither create accounts
+ nor send codes. Takes effect at once, without a restart. Only the global
+ admin can call this.
+"
+ex8-1674,wekan.github.io,GET,/api/admin/problems,get_admin_problems,Get the Admin Panel / Problems status overview,"What Admin Panel / Problems / Summary shows: every migration or
+ repair in progress, the detected problems (broken cards, lists missing their
+ swimlane, failing login-page checks), and for each event stream (`security`,
+ `speed`, `tests`, `cpu`, `database`, `integrity`) how many problems are newer
+ than its acknowledgment. The same overview `snap run wekan.problems` prints.
+ Only the global admin can call this.
+"
+ex8-1675,wekan.github.io,GET,/api/admin/problems/{stream},get_admin_problem_stream,Get one page of an Admin Panel / Problems event stream,"One page of a stream's rows, newest first (the `api` usage
+ stream sorts by count): `security` (Security Report), `speed`, `tests`,
+ `cpu`, `database` (restarts, storage and disk-space findings, indexes
+ created), `integrity` and `api`. Each row is a SUMMARY that accumulates -
+ `count`, `firstAt`..`at`, `actors` - never a row per event. Only the global
+ admin can call this.
+"
+ex8-1676,wekan.github.io,POST,/api/admin/problems/{stream}/acknowledge,acknowledge_admin_problem_stream,Acknowledge the new problems of an event stream,"Marks everything currently in the stream as seen, the way the
+ Admin Panel's acknowledge button does, so `get_admin_problems` reports zero
+ new problems for it until the next one is recorded. Only the global admin
+ can call this.
+"
+ex8-1677,wekan.github.io,GET,/api/admin/teams,get_admin_teams,List teams with their feature toggles (GlobalAdmin),"Only the global admin can call this. Returns every team with
+ its identifying fields and the per-team feature toggles shown as columns in
+ Admin Panel > People > Teams.
+"
+ex8-1678,wekan.github.io,PUT,/api/admin/teams/features,update_all_admin_team_features,Set one feature toggle on all teams (GlobalAdmin),"Only the global admin can call this. The request body is
+ `{ field, value }` where `field` is one of `teamSharedTemplates`,
+ `teamPropagateMembersToBoards` or `teamSyncMembersFromAuth` and `value` is a
+ boolean. The field is `$set` on ALL teams. Returns the number of teams
+ updated.
+"
+ex8-1679,wekan.github.io,PUT,/api/admin/teams/{team}/features,update_admin_team_features,Set feature toggles on one team (GlobalAdmin),"Only the global admin can call this. The request body may
+ contain any of `teamSharedTemplates`, `teamPropagateMembersToBoards` and
+ `teamSyncMembersFromAuth` (booleans); only those whitelisted fields are
+ `$set` on the team. Returns the updated team.
+"
+ex8-1680,wekan.github.io,POST,/api/attachment/copy,copy_attachment,Copy an attachment to another card,"Copy an existing attachment to a target card, creating a new attachment.
+
+Permissions: requires membership of the source board (to read it) and
+write access to the target board, which must allow attachments. Honours
+the admin API upload limits.
+"
+ex8-1681,wekan.github.io,DELETE,/api/attachment/delete/{attachmentId},delete_attachment,Delete an attachment,"Delete an attachment.
+
+Permissions: requires write access to the attachment's board (read-only /
+comment-only / worker members are rejected).
+"
+ex8-1682,wekan.github.io,GET,/api/attachment/download-background/{boardId},download_board_background,Download the board's current background image as base64,"Returns the board's active background image metadata together with the
+image bytes base64-encoded in `base64Data`. Requires board membership.
+"
+ex8-1683,wekan.github.io,GET,/api/attachment/download/{attachmentId},download_attachment,Download an attachment as base64,"Returns the attachment metadata together with the file contents
+base64-encoded in `base64Data`. The maximum size is bounded by the admin
+Attachment Storage Settings (`apiDownloadMaxBytes`).
+
+Permissions: requires active membership of the attachment's board.
+"
+ex8-1684,wekan.github.io,GET,/api/attachment/info/{attachmentId},get_attachment_info,Get attachment metadata,"Returns attachment metadata (name, size, type, storage backend, board /
+swimlane / list / card IDs and available versions) without the file
+contents.
+
+Permissions: requires active membership of the attachment's board.
+"
+ex8-1685,wekan.github.io,GET,/api/attachment/list/{boardId},list_board_attachments,List all attachments of a board,"List every attachment on a board. Use the swimlane / list / card
+variants of this path to narrow the result.
+
+Permissions: requires active membership of the board.
+"
+ex8-1686,wekan.github.io,GET,/api/attachment/list/{boardId}/{swimlaneId},list_swimlane_attachments,List attachments of a board filtered by swimlane,
+ex8-1687,wekan.github.io,GET,/api/attachment/list/{boardId}/{swimlaneId}/{listId},list_list_attachments,List attachments of a board filtered by swimlane and list,
+ex8-1688,wekan.github.io,GET,/api/attachment/list/{boardId}/{swimlaneId}/{listId}/{cardId},list_card_attachments,List attachments of a single card,"List attachments filtered down to one card. The card must belong to the
+given board.
+
+Permissions: requires active membership of the board.
+"
+ex8-1689,wekan.github.io,POST,/api/attachment/move,move_attachment,Move an attachment to another card,"Move an existing attachment to a target card by updating its metadata.
+
+Permissions: requires write access to both the source board (the
+attachment is removed from it) and the target board, which must allow
+attachments.
+"
+ex8-1690,wekan.github.io,POST,/api/attachment/upload,upload_attachment,Upload a file as a card attachment,"Upload a file to a card. The file content is sent base64-encoded in the
+JSON body. The maximum size is bounded by the admin Attachment Storage
+Settings (`apiUploadMaxBytes`) and a hard server safety cap (64 MB).
+
+Permissions: requires a valid auth token, write access to the target
+board (read-only / comment-only / worker members are rejected), and the
+board must allow attachments.
+"
+ex8-1691,wekan.github.io,POST,/api/attachment/upload-background,upload_board_background,Upload a board background image,"Upload an image and set it as the board's active background. The file
+content is sent base64-encoded in the JSON body and stored using the
+current Admin Panel / Attachments / Default Storage backend (the same
+storage used by card attachment uploads). Board-admin is required.
+"
+ex8-1692,wekan.github.io,GET,/api/boards,get_boards,,
+ex8-1693,wekan.github.io,POST,/api/boards,post_boards,,
+ex8-1694,wekan.github.io,POST,/api/boards/import,import_board,"Import a whole board (with its lists, cards, swimlanes, custom fields  and automation rules) from a WeKan board export","Accepts a WeKan board export JSON (the body returned by
+ `GET /api/boards/:boardId/export`) and recreates the board — including its
+ **rules / triggers / actions (workflows)** and other data — in the
+ authenticated user's account. Combined with the export endpoint, this allows
+ migrating all boards (and their workflows) from another WeKan instance over the
+ REST API: list the remote boards, export each, then POST each here. An optional
+ `membersMapping` ({ sourceUserId: localUserId }) maps members; unmapped members
+ are simply not added.
+"
+ex8-1695,wekan.github.io,POST,/api/boards/import/{source},import_board_from,Import a board from another tool's export,"Generalized import: `:source` is one of `trello`, `wekan`, `csv`,
+ `jira`, `kanboard`, `excel`, `deck` (NextCloud Deck), `openproject`, `github`,
+ `gitlab`, `gitea`, `forgejo`, `asana`, `zenkit`. The request body is that
+ tool's export JSON (sent directly, or wrapped as `{ ""board"": <export> }`);
+ an optional `membersMapping` maps members. Reuses the same import engine as
+ the UI.
+"
+ex8-1696,wekan.github.io,POST,/api/boards/{boardId}/swimlanes/{swimlaneId}/lists/{listId}/ics,import_ics,Import an iCalendar (.ics) file into a board as cards,"Parses the supplied iCalendar text and creates one card per VEVENT on the
+given board / list / swimlane, populating each card's `startAt` (DTSTART)
+and `dueAt` (DTEND, or DTSTART when there is no DTEND) so the imported
+events appear on the Calendar and Gantt views.
+
+Permissions: requires a valid auth token and write access to the board
+(read-only / comment-only / worker members are rejected; site admins are
+allowed).
+"
+ex8-1697,wekan.github.io,DELETE,/api/boards/{board},delete_board,,
+ex8-1698,wekan.github.io,GET,/api/boards/{board},get_board,,
+ex8-1699,wekan.github.io,GET,/api/boards/{board}/attachments,get_board_attachments,,
+ex8-1700,wekan.github.io,GET,/api/boards/{board}/attachments/deleted,get_board_deleted_attachments,Get the soft-deleted attachments of a board,"Deleting an attachment from a card is a soft delete: the file
+ is kept, the card hides it, and the card history can restore it. This lists
+ the attachments of a board that are currently deleted, with who deleted each
+ and when, so a script can find one to restore. The live attachments are at
+ `GET /api/boards/:boardId/attachments`. Requires board access.
+"
+ex8-1701,wekan.github.io,DELETE,/api/boards/{board}/attachments/{attachment},delete_board_attachment,Soft-delete an attachment,"The same ""Delete"" the card offers: the attachment gets
+ `deletedAt`, `deletedBy` and `deleteBatchId`, its file is kept, the card and
+ the minicard badge hide it, its cover is unset if it was the card's cover,
+ and the card history records who deleted it. Restore it with
+ `POST /api/boards/:boardId/attachments/:attachmentId/restore`. There is no
+ hard delete of a single attachment over the API. Requires permission to
+ edit the card the attachment is on (or write access to the board for a
+ board-level attachment). Idempotent: an already-deleted attachment is left
+ as it is.
+"
+ex8-1702,wekan.github.io,GET,/api/boards/{board}/attachments/{attachment}/export,exportJson,This route is used to export a attachement to a json file format.,"If user is already logged-in, pass loginToken as param
+ ""authToken"": '/api/boards/:boardId/attachments/:attachmentId/export?authToken=:token'
+"
+ex8-1703,wekan.github.io,POST,/api/boards/{board}/attachments/{attachment}/restore,restore_board_attachment,Restore a soft-deleted attachment,"The card history's Restore for an attachment row: clears the
+ delete mark so the card, its attachment count and the minicard badge include
+ the attachment again, and records the restore in the card history. The
+ cover is never re-set by a restore. Requires the same permission as
+ deleting. Idempotent: `restored` is false for an attachment that is not
+ deleted.
+"
+ex8-1704,wekan.github.io,GET,/api/boards/{board}/boardViewSettings,get_board_view_settings,Get the Board Settings / Board View of a board,"Which entries of the Board View menu this board offers and
+ which one it opens in, separately for when the board is public and when it
+ is private, and the order the menu lists them in. `boardViewSettings` has
+ every view key exactly once with both `showOnPublic` and `showOnPrivate`
+ made explicit (a board that never opened the popup shows every view), the
+ two defaults are resolved (missing or unknown reads as
+ `board-view-swimlanes`), and `boardViewOrder` is made whole: every view
+ exactly once, unknown keys dropped, missing ones appended in default order.
+ `keys` lists the known view keys. Requires board access.
+"
+ex8-1705,wekan.github.io,PUT,/api/boards/{board}/boardViewSettings,update_board_view_settings,Set the Board Settings / Board View of a board,"Sets any subset of `boardViewSettings` (an object of
+ `""<view>"": { showOnPublic, showOnPrivate }`, each side optional),
+ `defaultPublicBoardView`, `defaultPrivateBoardView` and `boardViewOrder`
+ (an array of view keys), with the rules the Board View popup applies: a
+ default is always shown on its side (setting a default also shows it, and
+ hiding a side's current default is refused with 400 - set another default
+ first), an unknown view key anywhere in the body is a 400, and the order is
+ normalised so the menu lists every view exactly once. Defaults are applied
+ before the show flags, so one request can move the default and hide the
+ old one. Requires the caller to be a board admin (or site admin). Returns
+ the settings in effect, in the same shape as GET.
+"
+ex8-1706,wekan.github.io,GET,/api/boards/{board}/calendar.ics,exportCalendarIcs,Subscribable iCalendar (.ics) feed of a board's card dates.,"Answers GitHub issue #2836 (""CalDAV or iCal Support"") - #808
+ added the in-app Calendar VIEW, this is the separate EXPORT/subscribe
+ feed the issue actually asked for. One VEVENT per Received / Start-End
+ span / Due date a card has, the same four dates the Calendar view (#808)
+ draws (see models/lib/calendarFilter.js and models/lib/icalExport.js).
+ This is one-way and read-only: paste the URL into a calendar app's
+ ""subscribe to URL"" feature. Full two-way CalDAV sync is a much larger,
+ separate, stateful sync protocol and is out of scope.
+"
+ex8-1707,wekan.github.io,GET,/api/boards/{board}/cardFieldOrder,get_board_card_field_order,Get the order of the opened card's sections,"The Board Settings ""card field order"": the sequence in which
+ the opened card draws its Labels, Dates, Members, Custom Fields and
+ Description sections. Always returns every one of the five keys exactly
+ once, in effect - a board that never changed the setting gets the default
+ `labels, dates, members, customFields, description`. Requires board access.
+"
+ex8-1708,wekan.github.io,PUT,/api/boards/{board}/cardFieldOrder,update_board_card_field_order,Set the order of the opened card's sections,"Stores a new card field order for the board. The order is
+ normalised the way the card renders it: unknown keys are dropped,
+ duplicates keep their first position, and any of the five keys left out is
+ appended in its default position - so the card always draws every section
+ exactly once. Requires the caller to be a board admin (or site admin).
+ Returns the order in effect.
+"
+ex8-1709,wekan.github.io,GET,/api/boards/{board}/cardSettings,get_board_card_settings,Get the Board Settings / Card Settings of a board,"The card feature toggles of Board Settings / Card Settings -
+ which card fields and features this board offers (`allowsDescriptionTitle`,
+ `allowsLabels`, `allowsChecklists`, `allowsAttachments`, `allowsComments`,
+ `allowsActivities`, …, each `true`/`false`) - and the three card-aging day
+ thresholds (`cardAgingDays1`..`cardAgingDays3`). Requires board access.
+"
+ex8-1710,wekan.github.io,PUT,/api/boards/{board}/cardSettings,update_board_card_settings,Set the Board Settings / Card Settings of a board,"Sets any subset of the card feature toggles (any `allows*`
+ key of the board, as `true`/`false`) and of the card-aging thresholds
+ (`cardAgingDays1`..`cardAgingDays3`, non-negative integers). Keys not in
+ the body are left as they are; a body with no recognised key is a 400.
+ Requires board administrator access. Returns the settings in effect, in the same
+ shape as GET.
+"
+ex8-1711,wekan.github.io,DELETE,/api/boards/{board}/cards/bulk,delete_board_cards_bulk,,
+ex8-1712,wekan.github.io,POST,/api/boards/{board}/cards/labels,post_board_cards_labels,,
+ex8-1713,wekan.github.io,GET,/api/boards/{board}/cards/{card}/checklists,get_board_card_checklists,,
+ex8-1714,wekan.github.io,POST,/api/boards/{board}/cards/{card}/checklists,post_board_card_checklists,,
+ex8-1715,wekan.github.io,DELETE,/api/boards/{board}/cards/{card}/checklists/{checklist},delete_board_card_checklist,,
+ex8-1716,wekan.github.io,GET,/api/boards/{board}/cards/{card}/checklists/{checklist},get_board_card_checklist,,
+ex8-1717,wekan.github.io,PUT,/api/boards/{board}/cards/{card}/checklists/{checklist},put_board_card_checklist,,
+ex8-1718,wekan.github.io,POST,/api/boards/{board}/cards/{card}/checklists/{checklist}/items,post_board_card_checklist_items,,
+ex8-1719,wekan.github.io,DELETE,/api/boards/{board}/cards/{card}/checklists/{checklist}/items/{item},delete_board_card_checklist_item,,
+ex8-1720,wekan.github.io,GET,/api/boards/{board}/cards/{card}/checklists/{checklist}/items/{item},get_board_card_checklist_item,,
+ex8-1721,wekan.github.io,PUT,/api/boards/{board}/cards/{card}/checklists/{checklist}/items/{item},put_board_card_checklist_item,,
+ex8-1722,wekan.github.io,GET,/api/boards/{board}/cards/{card}/comments,get_board_card_comments,,
+ex8-1723,wekan.github.io,POST,/api/boards/{board}/cards/{card}/comments,post_board_card_comments,,
+ex8-1724,wekan.github.io,DELETE,/api/boards/{board}/cards/{card}/comments/{comment},delete_board_card_comment,,
+ex8-1725,wekan.github.io,GET,/api/boards/{board}/cards/{card}/comments/{comment},get_board_card_comment,,
+ex8-1726,wekan.github.io,PUT,/api/boards/{board}/cards/{card}/comments/{comment},put_board_card_comment,,
+ex8-1727,wekan.github.io,GET,/api/boards/{board}/cards/{card}/dependencies,get_card_dependencies,Get one card's dependencies,
+ex8-1728,wekan.github.io,POST,/api/boards/{board}/cards/{card}/dependencies,new_card_dependency,Add (or update) a typed dependency line from a card to another card,"The target card must be on the same board. If the dependency
+ already exists, its type/color/icon are updated.
+"
+ex8-1729,wekan.github.io,DELETE,/api/boards/{board}/cards/{card}/dependencies/{target},delete_card_dependency,Remove a dependency line from a card,
+ex8-1730,wekan.github.io,PUT,/api/boards/{board}/cards/{card}/dependencies/{target},edit_card_dependency,"Edit a dependency line's type, color or icon",
+ex8-1731,wekan.github.io,GET,/api/boards/{board}/cardsByCustomField/{customField}/{customFieldValue},get_board_customFieldValue,,
+ex8-1732,wekan.github.io,GET,/api/boards/{board}/cards_count,get_board_cards_count,,
+ex8-1733,wekan.github.io,GET,/api/boards/{board}/charts/{chartKey}/exportExcel,exportChartExcel,Export one board report chart to Excel (.xlsx).,"Pass the loginToken as the `authToken` query param for private
+ boards: `/api/boards/:boardId/charts/:chartKey/exportExcel?authToken=:token`.
+"
+ex8-1734,wekan.github.io,GET,/api/boards/{board}/charts/{chartKey}/exportPDF,exportChartPDF,"Export one board report chart (Dashboard, Burndown, Burnup, CFD,  Control Chart, Cycle/Lead Time, Flow Efficiency, Throughput, WIP Run) to PDF.","Pass the loginToken as the `authToken` query param for private
+ boards: `/api/boards/:boardId/charts/:chartKey/exportPDF?authToken=:token`.
+"
+ex8-1735,wekan.github.io,POST,/api/boards/{board}/copy,post_board_copy,,
+ex8-1736,wekan.github.io,GET,/api/boards/{board}/custom-fields,get_board_custom-fields,,
+ex8-1737,wekan.github.io,POST,/api/boards/{board}/custom-fields,post_board_custom-fields,,
+ex8-1738,wekan.github.io,DELETE,/api/boards/{board}/custom-fields/{customField},delete_board_customField,,
+ex8-1739,wekan.github.io,GET,/api/boards/{board}/custom-fields/{customField},get_board_customField,,
+ex8-1740,wekan.github.io,PUT,/api/boards/{board}/custom-fields/{customField},put_board_customField,,
+ex8-1741,wekan.github.io,POST,/api/boards/{board}/custom-fields/{customField}/dropdown-items,post_board_customField_dropdown-items,,
+ex8-1742,wekan.github.io,DELETE,/api/boards/{board}/custom-fields/{customField}/dropdown-items/{dropdownItem},delete_board_customField_dropdownItem,,
+ex8-1743,wekan.github.io,PUT,/api/boards/{board}/custom-fields/{customField}/dropdown-items/{dropdownItem},put_board_customField_dropdownItem,,
+ex8-1744,wekan.github.io,GET,/api/boards/{board}/dependencies,get_board_dependencies,"Get all card dependency lines (""Red Strings"") of a board",
+ex8-1745,wekan.github.io,GET,/api/boards/{board}/domains,get_board_domains,Get the email domains a board is shared with,"#5850: returns the `domains` array of a board. Each entry is an
+ object `{ domain: ""example.com"", isActive: true }`. Requires a site admin
+ (Authentication.checkUserId); a board's own members get the same list as
+ part of GET /api/boards/:boardId.
+"
+ex8-1746,wekan.github.io,POST,/api/boards/{board}/domains,add_board_domain,Share a board with an email domain,"#5850: add a single email domain to a board's `domains` array
+ with `isActive: true`, leaving any existing domains in place. The domain is
+ trimmed and lowercased and must look like a domain (contain a '.', no '@' and
+ no whitespace); it is added only if not already present. Requires the caller
+ to be a board admin (or site admin). Returns the updated domains array.
+"
+ex8-1747,wekan.github.io,DELETE,/api/boards/{board}/domains/{domain},delete_board_domain,Stop sharing a board with an email domain,"#5850: remove a single email domain from a board's `domains`
+ array. The domain in the path is trimmed and lowercased before matching.
+ Requires the caller to be a board admin (or site admin). Returns the updated
+ domains array; a domain the board does not have is HTTP 404.
+"
+ex8-1748,wekan.github.io,GET,/api/boards/{board}/export,exportJson,This route is used to export the board to a json file format.,"If user is already logged-in, pass loginToken as param
+ ""authToken"": '/api/boards/:boardId/export?authToken=:token'
+
+ See https://blog.kayla.com.au/server-side-route-authentication-in-meteor/
+ for detailed explanations
+"
+ex8-1749,wekan.github.io,GET,/api/boards/{board}/export/csv,exportCSV/TSV,This route is used to export the board to a CSV or TSV file format.,"If user is already logged-in, pass loginToken as param
+
+ See https://blog.kayla.com.au/server-side-route-authentication-in-meteor/
+ for detailed explanations
+"
+ex8-1750,wekan.github.io,GET,/api/boards/{board}/export/{format},exportExternal,"Export the board as a NextCloud Deck / Kanboard / OpenProject /  GitHub / GitLab / Gitea / Forgejo / Jira / Asana / Zenkit / Trello style  JSON, a Taiga project dump (JSON), or Markdown.",
+ex8-1751,wekan.github.io,GET,/api/boards/{board}/exportExcel,exportExcel,This route is used to export the board Excel.,"If user is already logged-in, pass loginToken as param
+ ""authToken"": '/api/boards/:boardId/exportExcel?authToken=:token'
+
+ See https://blog.kayla.com.au/server-side-route-authentication-in-meteor/
+ for detailed explanations
+"
+ex8-1752,wekan.github.io,GET,/api/boards/{board}/exportPDF,exportBoardPDF,"Export a whole board to PDF (board title, lists and their cards).","Pass the loginToken as the `authToken` query param for private
+ boards: `/api/boards/:boardId/exportPDF?authToken=:token`.
+"
+ex8-1753,wekan.github.io,GET,/api/boards/{board}/exportZip,exportZip,"Export as a .zip - the JSON document, and the attachments as files.","The same export the JSON route produces, with the attachments
+ beside it as the files they are instead of base64 inside the document, so a
+ board whose attachments are too large for one JSON string still exports.
+ Takes the same `fields`, `swimlaneId`, `listId`, `cardId` and `checklistId`
+ parameters as every other export.
+"
+ex8-1754,wekan.github.io,GET,/api/boards/{board}/integrations,get_board_integrations,,
+ex8-1755,wekan.github.io,POST,/api/boards/{board}/integrations,post_board_integrations,,
+ex8-1756,wekan.github.io,DELETE,/api/boards/{board}/integrations/{int},delete_board_int,,
+ex8-1757,wekan.github.io,GET,/api/boards/{board}/integrations/{int},get_board_int,,
+ex8-1758,wekan.github.io,PUT,/api/boards/{board}/integrations/{int},put_board_int,,
+ex8-1759,wekan.github.io,DELETE,/api/boards/{board}/integrations/{int}/activities,delete_board_int_activities,,
+ex8-1760,wekan.github.io,POST,/api/boards/{board}/integrations/{int}/activities,post_board_int_activities,,
+ex8-1761,wekan.github.io,PUT,/api/boards/{board}/labels,put_board_labels,,
+ex8-1762,wekan.github.io,GET,/api/boards/{board}/lists,get_board_lists,,
+ex8-1763,wekan.github.io,POST,/api/boards/{board}/lists,post_board_lists,,
+ex8-1764,wekan.github.io,DELETE,/api/boards/{board}/lists/{list},delete_board_list,,
+ex8-1765,wekan.github.io,GET,/api/boards/{board}/lists/{list},get_board_list,,
+ex8-1766,wekan.github.io,PUT,/api/boards/{board}/lists/{list},put_board_list,,
+ex8-1767,wekan.github.io,POST,/api/boards/{board}/lists/{list}/archive,post_board_list_archive,,
+ex8-1768,wekan.github.io,GET,/api/boards/{board}/lists/{list}/cards,get_board_list_cards,,
+ex8-1769,wekan.github.io,POST,/api/boards/{board}/lists/{list}/cards,post_board_list_cards,,
+ex8-1770,wekan.github.io,POST,/api/boards/{board}/lists/{list}/cards/bulk,post_board_list_cards_bulk,,
+ex8-1771,wekan.github.io,DELETE,/api/boards/{board}/lists/{list}/cards/{card},delete_board_list_card,,
+ex8-1772,wekan.github.io,GET,/api/boards/{board}/lists/{list}/cards/{card},get_board_list_card,,
+ex8-1773,wekan.github.io,PUT,/api/boards/{board}/lists/{list}/cards/{card},put_board_list_card,,
+ex8-1774,wekan.github.io,POST,/api/boards/{board}/lists/{list}/cards/{card}/archive,post_board_list_card_archive,,
+ex8-1775,wekan.github.io,DELETE,/api/boards/{board}/lists/{list}/cards/{card}/assignees/{assignee},delete_board_list_card_assignee,,
+ex8-1776,wekan.github.io,POST,/api/boards/{board}/lists/{list}/cards/{card}/assignees/{assignee},post_board_list_card_assignee,,
+ex8-1777,wekan.github.io,POST,/api/boards/{board}/lists/{list}/cards/{card}/copy,post_board_list_card_copy,,
+ex8-1778,wekan.github.io,POST,/api/boards/{board}/lists/{list}/cards/{card}/customFields/{customField},post_board_list_card_customField,,
+ex8-1779,wekan.github.io,GET,/api/boards/{board}/lists/{list}/cards/{card}/exportExcel,exportExcelCard,"Export a single card to Excel (.xlsx), formatted for DIN A4 Portrait printing.","If user is already logged-in, pass loginToken as param
+ ""authToken"": '/api/boards/:boardId/lists/:listId/cards/:cardId/exportExcel?authToken=:token'
+
+ Optional query param ""fields"" is a comma-separated list of sections to include.
+ Valid values: people, board-info, dates, description, checklists, subtasks, comments
+ Omitting ""fields"" includes all sections.
+"
+ex8-1780,wekan.github.io,GET,/api/boards/{board}/lists/{list}/cards/{card}/exportPDF,exportExcel,This route is used to export the board Excel.,"If user is already logged-in, pass loginToken as param
+ ""authToken"": '/api/boards/:boardId/exportExcel?authToken=:token'
+
+ See https://blog.kayla.com.au/server-side-route-authentication-in-meteor/
+ for detailed explanations
+"
+ex8-1781,wekan.github.io,DELETE,/api/boards/{board}/lists/{list}/cards/{card}/members/{member},delete_board_list_card_member,,
+ex8-1782,wekan.github.io,POST,/api/boards/{board}/lists/{list}/cards/{card}/members/{member},post_board_list_card_member,,
+ex8-1783,wekan.github.io,POST,/api/boards/{board}/lists/{list}/cards/{card}/unarchive,post_board_list_card_unarchive,,
+ex8-1784,wekan.github.io,GET,/api/boards/{board}/lists/{list}/cards_count,get_board_list_cards_count,,
+ex8-1785,wekan.github.io,POST,/api/boards/{board}/lists/{list}/copy,post_board_list_copy,,
+ex8-1786,wekan.github.io,POST,/api/boards/{board}/lists/{list}/move,post_board_list_move,,
+ex8-1787,wekan.github.io,POST,/api/boards/{board}/lists/{list}/unarchive,post_board_list_unarchive,,
+ex8-1788,wekan.github.io,POST,/api/boards/{board}/members/{member},post_board_member,,
+ex8-1789,wekan.github.io,POST,/api/boards/{board}/members/{user}/add,post_board_user_add,,
+ex8-1790,wekan.github.io,POST,/api/boards/{board}/members/{user}/remove,post_board_user_remove,,
+ex8-1791,wekan.github.io,GET,/api/boards/{board}/rules,get_board_rules,Get the list of automation rules of a board,
+ex8-1792,wekan.github.io,POST,/api/boards/{board}/rules,new_board_rule,Add an automation rule to a board,"The trigger and action are embedded inline. See the Rules
+ documentation for the available trigger activityTypes and action actionTypes.
+ Trigger matching fields that are omitted (e.g. userId, listName,
+ swimlaneName, cardTitle) default to the '*' wildcard, so e.g. issue #2674's
+ ""remove a member when a card is moved away from a list"" only needs
+ trigger {activityType: 'moveCard', oldListName: '...'} and
+ action {actionType: 'removeMember', username: '...'}.
+"
+ex8-1793,wekan.github.io,DELETE,/api/boards/{board}/rules/{rule},delete_board_rule,Remove an automation rule (and its trigger and action),
+ex8-1794,wekan.github.io,GET,/api/boards/{board}/rules/{rule},get_board_rule,Get a single automation rule,
+ex8-1795,wekan.github.io,PUT,/api/boards/{board}/rules/{rule},edit_board_rule,Edit an automation rule,"Any of title, enabled, trigger and action may be supplied; the trigger
+ and action documents are replaced ($set) when present. A supplied trigger
+ that includes an activityType gets its missing matching fields defaulted
+ to the '*' wildcard, like on creation.
+"
+ex8-1796,wekan.github.io,GET,/api/boards/{board}/swimlanes,get_board_swimlanes,,
+ex8-1797,wekan.github.io,POST,/api/boards/{board}/swimlanes,post_board_swimlanes,,
+ex8-1798,wekan.github.io,DELETE,/api/boards/{board}/swimlanes/{swimlane},delete_board_swimlane,,
+ex8-1799,wekan.github.io,GET,/api/boards/{board}/swimlanes/{swimlane},get_board_swimlane,,
+ex8-1800,wekan.github.io,PUT,/api/boards/{board}/swimlanes/{swimlane},put_board_swimlane,,
+ex8-1801,wekan.github.io,GET,/api/boards/{board}/swimlanes/{swimlane}/cards,get_board_swimlane_cards,,
+ex8-1802,wekan.github.io,POST,/api/boards/{board}/swimlanes/{swimlane}/copy,post_board_swimlane_copy,,
+ex8-1803,wekan.github.io,POST,/api/boards/{board}/swimlanes/{swimlane}/move,post_board_swimlane_move,,
+ex8-1804,wekan.github.io,PUT,/api/boards/{board}/title,put_board_title,,
+ex8-1805,wekan.github.io,GET,/api/boards_count,get_boards_count,,
+ex8-1806,wekan.github.io,GET,/api/cards/{card},get_card,,
+ex8-1807,wekan.github.io,POST,/api/createtoken/{user},post_user,,
+ex8-1808,wekan.github.io,POST,/api/deletetoken,post_deletetoken,,
+ex8-1809,wekan.github.io,POST,/api/import/zip,importZip,Import a .zip export - the document and its attachment files.,"POST the .zip as the request body. Takes the same `fields`,
+ `swimlaneId`, `listId`, `cardId` and `checklistId` parameters as the
+ exports: with one of those ids it imports beside that thing, without one it
+ imports the whole document into the board named by `boardId`.
+"
+ex8-1810,wekan.github.io,GET,/api/settings,get_global_settings,Get the global Admin Panel settings,"Only the global admin can call this. SMTP/mail-server
+ credentials are never returned.
+"
+ex8-1811,wekan.github.io,PUT,/api/settings,update_global_settings,Update the global Admin Panel settings,"Only the global admin can call this. The request body is an
+ object whose keys are settings fields to update (see get_global_settings for
+ the list). Unknown keys and `mailServer` are ignored.
+"
+ex8-1812,wekan.github.io,GET,/api/user,get_user,,
+ex8-1813,wekan.github.io,GET,/api/user/cards,get_user_cards,,
+ex8-1814,wekan.github.io,GET,/api/users,get_users,,
+ex8-1815,wekan.github.io,POST,/api/users,post_users,,
+ex8-1816,wekan.github.io,DELETE,/api/users/{user},delete_user,Delete a user and confirm that one account was removed,"Global administrators receive the deleted id; a missing id
+ returns HTTP 404 without reporting a deletion.
+"
+ex8-1817,wekan.github.io,GET,/api/users/{user},get_user,,
+ex8-1818,wekan.github.io,PUT,/api/users/{user},put_user,,
+ex8-1819,wekan.github.io,GET,/api/users/{user}/boards,get_user_boards,,
+ex8-1820,wekan.github.io,POST,/users/login,login,Login with REST API,
+ex8-1821,wekan.github.io,POST,/users/register,register,Register with REST API,"Notes:
+  - You will need to provide the token for any of the authenticated methods.
+"

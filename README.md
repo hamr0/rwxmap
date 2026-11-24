@@ -49,7 +49,7 @@ rwxmap reads specs and writes every format. The deciding is rules, plus a model 
 
 How it decides:
 
-- Method floor: GET, HEAD, OPTIONS and QUERY are r, unless the name is a one-way action (logout, revoke, close), which raises it to x. DELETE is x. PUT and PATCH are w, raised to x by a path word (role, member, token, webhook and the like) or a credential-set verb. POST is x, lowered to w by a content noun (tag, file, comment and the like) or a short list of verbs, or to r by a read verb (list, get, search and the like).
+- Method floor: GET, HEAD, OPTIONS and QUERY are r, unless the name is a one-way action (logout, revoke, close, refresh), which raises it to x. DELETE is x. PUT and PATCH are w, raised to x by a path word (role, member, token, webhook and the like) or a credential-set verb. POST is x, lowered to w by a content noun (tag, file, comment and the like) or a short list of verbs, or to r by a read verb (list, get, search and the like).
 - Unsure rows get a marker. `loose`: a PUT, PATCH or POST left at w or r; a reviewer checks if it should be x (most too-loose rows live here). `tight`: an x that may be stricter than needed, including rows the second pass could not decide; too tight costs usability, not safety. `settled`: nothing lowered it, nothing is doubtful; not signed, not verified.
 - Still unsure: x plus review. Never a looser guess.
 
@@ -63,7 +63,7 @@ How it decides:
 | mechanical | `rwxmap spec.json --engine mechanical` | rules only | offline; nothing downloaded; same answer every run | no model at all |
 
 rwxlite is a small local model, a separate project: [github.com/hamr0/rwxlite](https://github.com/hamr0/rwxlite), npm package `rwxlite`.
-Install it with `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.4`. Without it, modes a and b run mechanically and say `rwxlite: off (mechanical)`.
+Install it with `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.5`. Without it, modes a and b run mechanically and say `rwxlite: off (mechanical)`.
 
 What leaves your machine: mechanical, nothing. Modes a and b, only the model download from GitHub. Mode c, each checked row's method, path, operationId, summary and description go to Jev.
 
@@ -73,15 +73,15 @@ Each exam was scored once, through the real CLI, on complete official APIs the r
 
 | mode | exam | exact | too loose | too tight |
 |---|---|---|---|---|
-| **a** (default) | #7, 1579 ops | 1432 (90.7%) | 66 (4.2%) | 81 (5.1%) |
-| b (`--confidence 85`) | #7, 1579 ops | 1449 (91.8%) | 39 (2.5%) | 91 (5.8%) |
+| **a** (default) | #8, 1821 ops | 1653 (90.8%) | 60 (3.3%) | 108 (5.9%) |
+| b (`--confidence 85`) | #8, 1821 ops | 1656 (90.9%) | 44 (2.4%) | 121 (6.6%) |
 | c (Jev, one run) | #3, 1377 ops | 1250 (90.8%) | 16 (1.2%) | 111 (8.1%) |
-| mechanical | #7, 1579 ops | 1333 (84.4%) | 72 (4.6%) | 174 (11.0%) |
+| mechanical | #8, 1821 ops | 1556 (85.4%) | 73 (4.0%) | 192 (10.5%) |
 
 - Too loose (looser than the truth label) is the safety cost; too tight is a usability cost. They are never merged into one number.
-- Exam #7 (2026-11-20): ringcentral, openziti, gitness (harness.io), huggingface, pipedrive, vikunja. Scored once through the real CLI; the same rows came out of the npm install of rwxlite 0.4.0 with 0 differences. Two blind labellers on different models (Sonnet and Opus) agreed on 1513 rows; a person ruled the other 66. Agreement shows consistency, not truth. 15 of mode a's 66 too-loose rows are GET calls that hand out tokens or authorization (e.g. huggingface xet-read-token); a GET is settled r and never reaches the model.
+- Exam #8 (2026-11-23): gitbook, baserow, looker, wekan (wekan.github.io), shortcut, bitrise. Scored once through the real CLI; the same rows came out of the npm install of rwxlite 0.5.0 with 0 differences. Two blind labellers on different models (Sonnet and Opus) agreed on 1711 rows; a person ruled the other 110. Agreement shows consistency, not truth. 12 of mode a's 60 too-loose rows are settled GET rows (e.g. baserow tokens check, baserow licenses check, looker embed sso validate); a GET is settled r and never reaches the model.
 - Mode c comes from exam #3 (2026-11-04, 7 other APIs, older truth and rules), so it does not compare directly, and Jev can answer differently on the next run.
-- The 0.90 cut was tuned on exam #5 (mode a 1269 / 40 / 134 of 1443) and held on exams #6 and #7 (exam #7 with rwxlite 0.4.0; on exam #6 mode a was 1434 / 35 / 119 of 1588 with 0.3.1). An exam is used up once scored.
+- The 0.90 cut was tuned on exam #5 (mode a 1269 / 40 / 134 of 1443) and held on exams #6, #7 and #8 (exam #8 with rwxlite 0.5.0; on exam #7 mode a was 1432 / 66 / 81 of 1579 with 0.4.0, and on exam #6 1434 / 35 / 119 of 1588 with 0.3.1). An exam is used up once scored.
 - Mode b's `--confidence` was swept on exams #5 and #6 (3031 rows, 12 vendors) and 85 picked: at 90 and 85 no vendor leaked more than mechanical, at 70 four did. On exam #6, exact / too loose / too tight: 95 1288 / 13 / 287; 90 1388 / 17 / 183; 85 1424 / 19 / 145; 70 1441 / 29 / 118. 85 is the default (D140, from 0.12.0).
 
 ## Ways to use it
@@ -173,15 +173,15 @@ Exit 0 on success, 1 on any failure. An existing output file is not overwritten 
 
 <details><summary>rwxlite model</summary>
 
-- A run that uses rwxlite fetches the manifest of the pinned rwxlite release, v0.4.0 (a small request), downloads the model if it is not cached, checks every sha256, and only then puts it in place.
+- A run that uses rwxlite fetches the manifest of the pinned rwxlite release, v0.5.0 (a small request), downloads the model if it is not cached, checks every sha256, and only then puts it in place (a cached folder of that model that fails the check is replaced by the fresh download).
 - Default: the exact fp32 model, about 91 MB, downloaded once. `--model small`: the int8 model, about 23 MB.
 - Cache: `$XDG_CACHE_HOME/rwxmap`, else `~/.cache/rwxmap/`, one folder per model.
 - Downloads are https only, from github.com and its githubusercontent.com hosts, capped at 200 MB. A failed or tampered download installs nothing.
 - Offline (manifest unreachable): the run uses the verified cached model of the pinned version and says "using cached <model>, could not reach the release". With none cached it prints `rwxlite: off (mechanical) — <reason>` and runs mechanically. It never stops the run.
-- The model is pinned in each rwxmap release. A new model replaces it only by the maintainer's decision, on exam numbers published here (0.3.1 shipped that way, D139; 0.4.0, D142). The combined JSON records the model string.
-- The `rwxlite` package is optional; you install it. Use `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.4`: on Linux x64, `onnxruntime-node` otherwise downloads about 285 MB of GPU (CUDA/TensorRT) libraries.
-- Only rwxlite package versions 0.4.x are accepted (D135). Any other version turns the second pass off (mechanical alone, reason printed).
-- Without the package: `rwxlite: off (mechanical) — the rwxlite package is not installed (npm install rwxlite@0.4)`.
+- The model is pinned in each rwxmap release. A new model replaces it only by the maintainer's decision, on exam numbers published here (0.3.1 shipped that way, D139; 0.4.0, D142; 0.5.0, D145). The combined JSON records the model string.
+- The `rwxlite` package is optional; you install it. Use `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.5`: on Linux x64, `onnxruntime-node` otherwise downloads about 285 MB of GPU (CUDA/TensorRT) libraries.
+- Only rwxlite package versions 0.5.x are accepted (D135). Any other version turns the second pass off (mechanical alone, reason printed).
+- Without the package: `rwxlite: off (mechanical) — the rwxlite package is not installed (npm install rwxlite@0.5)`.
 
 </details>
 

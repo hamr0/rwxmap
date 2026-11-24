@@ -9016,3 +9016,164 @@ b 70    | 2718  89.7% |   71   2.3% |    8   0.3% |   79   2.6% |  234   7.7% | 
 - Process (as for exam #7): rwxlite sends its r16 provider/spec list and ops CSV paths after collection and before labelling or training; rwxmap runs the copy check by a pre-set rule and sends the drop list; then the exam #8 rwxmap ref and prereg. D141 in mechanical stays deferred to exam #8.
 - Lesson: freeze and send the exam vendors before the peer collects. Its previous pull (r15) already held looker and wekan copies: looker 159 (github 81, swaggerhub 78) and wekan 17 (github 14, swaggerhub 3) flagged specs, per poc/exam7-shortlist/r15-check/summary.txt.
 - Where: poc/exam7-shortlist/picked.tsv, poc/exam7-shortlist/r15-check/summary.txt, docs/product/prd.md (Next in order, item 5).
+
+## 2026-11-20 — v0.12.0 released (rwxlite 0.4.0 pin, D140)
+
+- What: released rwxmap 0.12.0: D140 (mode b default --confidence 85) and the rwxlite 0.4.0 pin (D142; RWXLITE_TAG v0.4.0, accepted range 0.4.x, LOWER_MIN_P 0.90). PR #25 merged to main as a281ad4, release commit 3888ef9, tag v0.12.0, npm latest 0.12.0 via publish.yml run 44778037315 (all steps green).
+- Checklist (docs/product/release-checklist.md, items 1-12 all run): 1-8 pass (666/666 tests, typecheck, four proofs, conformance 6/6 with the browser check skipped, check:live 4 PASS 0 CHANGED 0 FAIL, install check, new-user hand run, README commands). 9 self-review 0 Fix-now, branch-review ready at a779e30. 10 CHANGELOG and version bump. 11 CI green on PR #25, then tag on main. 12 npm view 0.12.0, then a clean registry install.
+- Published bytes, clean registry install with no .env: `npm install rwxmap@0.12.0`, `npx rwxmap` on a paypal spec: exit 0, 3 files written, rwxmapVersion 0.12.0, "rwxlite: off (mechanical) ... (npm install rwxlite@0.4)". Then `ONNXRUNTIME_NODE_INSTALL=skip npm install rwxlite@0.4` (0.4.0) with an empty XDG cache: model downloaded from the v0.4.0 release, "rwxlite: on (rwxlite-0.4.0+4608f470)", exit 0.
+- Lessons: (1) Release checklist item 8 needs a placeholder rule: three README examples (./openapi.yaml, api.example.com) cannot run as written, and the user ruled them placeholders; the checklist should say so instead of leaving the runner to decide each time. (2) Wording like "from the next release" written on a branch goes stale at that branch's own release; it had to be fixed in a docs commit just before the release commit.
+- Where: CHANGELOG.md 0.12.0, docs/product/prd.md (Pin pass, What is next item 3), docs/wiki/decisions-log.md (D140, D142).
+
+## 2026-11-20 — Exam #8 copy check of rwxlite r16 GitHub collection
+
+- What: ran the exam #7 copy rule unchanged (poc/exam7-shortlist/r15-check) on rwxlite's r16 GitHub collection against the six frozen exam #8 reserve specs (gitbook, baserow, looker, wekan, shortcut, bitrise). Rule: op key is METHOD plus normalised path; flag at 5 or more shared ops and 25% or more of the r16 spec's ops; name match exact, label or segment on the six aliases. Commit dc3a0e0, folder poc/exam8-r16-check/.
+- Inputs: ops-r16-github.csv.gz (sha256 8aa27faa…, 807,949 rows, 35,810 specs) and vendors-r16-github.csv (sha256 7152fc05…, 32,725 vendor_keys).
+- Result: 260 specs flagged (looker 213, wekan 38, gitbook 5, baserow 5; shortcut 0, bitrise 0); name matches 0. Drop list is 260 specs and 4,680 of 807,949 ops (0.58%).
+- Flags are generic CRUD look-alikes (at most 18 of looker's 502 ops shared); no real copy found. They are dropped anyway, because the rule was set before the check.
+- Checks: the orchestrator's re-run gave a byte-identical drop list; the selftests pass, and they fail when the threshold is broken by hand.
+- What it taught: a pre-set rule is applied as written even when the flags look harmless; looker and wekan again carry most of the look-alikes, as they did for r15.
+- Where: poc/exam8-r16-check/drop-list.csv, drop-summary.txt, summary.txt.
+
+## 2026-11-21 — R13 teacher-disagreement review (359 rows)
+
+- What: rwxlite sent 359 R13 rows where its bge teacher disagreed with the R13 label (sha 941bed2f…). Ruled against BRIEF-v4, the D141 addendum and D136/D137 by reading every row. User ruling: follow the prior rulings, loosen or tighten as they say, and share what is unsure.
+- Output: poc/r16-r13-review/answers.csv, sha256 b3965c9c01a31107c4e75a1481c54772fa648de8cf624332ba6b0a034b743f35 (build.mjs). Sent as is; rwxlite applied it.
+- Numbers (of 359 rows): 97 changed, 262 kept. Changes: w->r 25, x->r 9, x->w 26, w->x 32, r->x 4, r->w 1. Certainty: sure 292, doubt 56, lean 11.
+- Finding sent to rwxlite: bge's floor-post x->w suggestions are only about half right.
+- What it taught: a peer's teacher-disagreement list is a review pile, not truth. About half of bge's floor-post x->w suggestions were real x by the brief.
+
+## 2026-11-21 — r15 Sonnet second-pass review (263 rows)
+
+- What: rwxlite sent 263 r15 rows where its Sonnet second pass disagreed with the r15 label (sha 163362eb…). Ruled by reading every row against the brief and the standing rulings.
+- Output: poc/r16-r13-review/answers-r15.csv, sha256 2f137bac12dc6aebbe2b7f60f5b4494a88ede3820aa3ef462a8a9ab6618483af (build-r15.mjs). Sent; rwxlite applied it.
+- Numbers (of 263 rows): 163 changed (r->w 37, w->r 29, x->w 31, x->r 23, r->x 22, w->x 21), 100 kept. Certainty: sure 167, doubt 88, lean 8.
+- Kept by standing rulings: an unattached security-policy create stays w; username availability and voucher-token checks stay x (D141 b).
+- The 17 public post, article, poll and banner rows stay x under clause c, tagged doubt. The user confirmed this on 2026-11-21.
+- What it taught: 88 of 263 rows are doubt, so a model's disagreement list is a pile to read row by row, not a list of errors.
+
+## 2026-11-21 — 400-row holdout answer key
+
+- What: rwxlite sent a 400-row holdout (sha 28365fcb…, Sonnet letters a4c6c3af…) for an answer key. By user ruling, Sonnet's letters were used as recommendations, not read blind. The key is therefore NOT independent: it is built from the letters of the labeller it grades.
+- Output: poc/r16-r13-review/answers-h400.csv, sha256 0a61e2e0c4835a42abeb9436b1e1ac1b75e9409194f5f9405c249a3a4ceb10c9 (build-h400.mjs).
+- Numbers (of 400 rows): 370 keep Sonnet's letter, 30 changed (w->x 27, r->x 1, r->w 2).
+- rwxlite readout, labelled not independent: Sonnet exact 370 of 400 (92.5%), too loose 30, too tight 0. By Sonnet confidence: sure 126 of 126; likely 192 of 211 (19 loose); unsure 52 of 63 (11 loose).
+- What it taught: an answer key built from the graded labeller's letters is not independent; say so in every readout. An ambiguous user reply ("key rows with sonnet as recs") got a one-line check before acting.
+
+## 2026-11-21 — D143 ruled: creating a booking or reservation is x
+
+- What: user ruling D143 (2026-11-21): creating a booking or reservation is x by BRIEF-v4 clause d (it could be an airline, hotel or restaurant commitment). Recorded in the decisions log, the PRD and data/relabel-v4-2026-11-05/BRIEF-v4-addendum-D143.md.
+- Scope: a booking or reservation held for a person (seat, room, table, slot, ticket, item, including holds and booking intents) is x. Internal holds stay w: inventory or stock, balance, credit, quota, IP, handle, runtime, upload capacity, package identity. Searches, quotes, previews and availability checks stay r.
+- The 2 cloud capacity reservations (AWS, GCP) stay w as internal holds; the user confirmed this on 2026-11-21.
+- User reasoning: less split on words is easier to rule; agent actions should lean x; a hotel booking with cancellation is still x (fees, venue notified, slot held).
+- Mechanical already says x (POST floor), so D143 aligns the model with mechanical.
+- Cost: before D143 the r15 training labels held about 224 w against 105 x booking creates (rough keyword count); rwxmap exams #3 to #7 hold almost none. Risk is x spreading onto plain creates; rwxlite will report the too-tight rate on POST creates in its English dev set before and after the relabel.
+- Exam #8 vendors likely have no booking APIs, so the exam will not show D143's effect.
+- What it taught: one letter per family is easier to rule than a text-dependent split.
+- Where: docs/wiki/decisions-log.md (D143), docs/product/prd.md, data/relabel-v4-2026-11-05/BRIEF-v4-addendum-D143.md.
+
+## 2026-11-21 — D143 relabel passes over rwxlite sets
+
+- What: rwxlite sent keyword candidate rows for the D143 rule (same columns each time). Each was read row by row and ruled against D143 and its scope. Files in poc/r16-r13-review/ with build scripts beside them.
+- r16, answers-d143.csv: 526 rows; 313 changed (w->x 294, r->x 3, r->w 15, w->r 1); sure 492, lean 19, doubt 15; sha256 prefix 9e30fb56. Sent; rwxlite applied it.
+- r15, answers-d143-r15.csv: 237 rows; 123 changed (w->x 116, r->x 4, r->w 1, w->r 2); sure 224, lean 7, doubt 6; sha256 prefix 663849b5. Sent.
+- R13, answers-d143-r13.csv: 13 rows; 4 changed (w->x); sure 9, lean 3, doubt 1; sha256 prefix 1d15573d.
+- dev, answers-d143-dev.csv: 9 rows; 7 changed (w->x); sure 4, doubt 4, lean 1; sha256 prefix 9364587d.
+- Note: 2 ids (r15s-91134d69873e68ec, r15s-91fb6096d37b2a5e) sit in both r15 files (answers-r15.csv and answers-d143-r15.csv) and get r in both, so they are consistent.
+- Exam #7: the 147 exam #7 mistakes enter r16 training at x3 weight. Our user told rwxlite to do this (confirmed 2026-11-21). Exam #7 is burned, so it is used for training only.
+- What it taught: keyword candidate passes over-catch (searches, stock holds), so read every row and keep internal holds out of the booking rule.
+
+## 2026-11-21 — PRD status moved to learnings
+
+Removed verbatim from the PRD "What is next" section (the PRD keeps one current status). Some of these facts are also in earlier entries.
+
+0.10.0 is released (D133/D135, PR #19, npm 0.10.0, rwxlite 0.2.1 on
+npm). The truth-v4 relabel (D137) is done and handed to rwxlite
+(2026-11-06; plan `docs/wiki/truth-v4-plan.md`, steps 0-5).
+
+
+Mechanical v4 ships by D138 (2026-11-07). Exam #5 (1443 ops, v4 truth)
+gate was NO-GO on too tight, 183 vs 178 for v3, and the user overrode it
+because too loose fell from 77 to 59. Mode a as scored then (rwxlite 0.2.0) was
+looser than mechanical alone on v4 truth (94 vs 59 too loose on exam #5):
+it was trained before D137 widened x.
+
+
+Shipped in 0.11.0 (D139, user override 2026-11-07, commit 5e6b9cb): src/
+ships rwxlite R13 (rwxlite 0.3.1) with the lowering cut-off LOWER_MIN_P at
+0.90, overriding D135 (R13 failed its exact bar) and D136 (cut-off 0.97),
+for the same reason as D138: fewer leaks matter more than more review asks.
+Pin: RWXLITE_TAG v0.3.1, cache fallback 0.3.1, accepted package range 0.3.x
+(0.2.x and 0.4.0 refused); 617 tests, guards for tag/fallback agreement,
+range, cut and credential-set never lowered, each broken by hand once.
+Verified 2026-11-07: GitHub release v0.3.1 assets and npm rwxlite@0.3.1
+sha256/integrity match rwxlite's list and the exam #5 addendum; the
+published package differs from the exam #5 tarball only in comments and
+README/CHANGELOG/package.json metadata. Real install on exam #5 (npm
+0.3.1, model downloaded into an empty cache, current src/), mode a, 1443
+ops, exact / too loose / too tight: 1269 / 40 (38 loose-1, 2 loose-2) /
+134; 78 lowered, 63 undecided; equal to the replay at 0.90. Against the
+scored 0.2.0 at 0.97 (1272 / 94 / 77) too loose falls from 94 to 40 and too
+tight rises from 77 to 134 (exam #5, where the 0.90 cut was tuned).
+
+1. D140 built 2026-11-19 (mode b default 85; commit 96ebb46; 617/617 tests, typecheck, conformance 6/6).
+2. Exam #7 rwxmap ref frozen 2026-11-19 at 96ebb46 (mechanical identical to 1c25be1, plus D140); nothing under src/ changed until exam #7 was scored (done 2026-11-20). Sent to rwxlite, which trains round 15 on the lean at that ref (lean equals 1c25be1, 0 diffs on 106,848 ids).
+3. Exam #7: vendors frozen 2026-11-18 (ringcentral, openziti, gitness,
+   huggingface, pipedrive, vikunja; six more in reserve;
+   poc/exam7-shortlist/picked.tsv), kept out of rwxlite round 15 (copy check
+   poc/exam7-shortlist/r15-check, 319 specs dropped). Specs are fetched and
+   frozen at exam build. Inputs are in data/exam7-2026-11-19/ (1579 operations, from the shortlist bytes fetched 2026-11-18, sha256-checked). Labelled blind (A = Sonnet, B = Opus; BRIEF-v4 plus the D141 addendum; 12 files validated). 66 of 1579 operations were disputed and the user ruled all 66 on 2026-11-19 (45 x, 21 w). Candidate: rwxlite 0.4.0 (round 15; rwxlite's user waived its val guards: teacher too loose 115 vs 104, student 120 vs 104, rwxlite's figures). Scored once 2026-11-20 through the real CLI at rwxmap 7dce23e: a-base (0.3.1 as shipped) 1431 exact / 68 too loose (50 loose-1, 18 loose-2) / 80 too tight; a-cand (0.4.0) 1432 / 66 (50 loose-1, 16 loose-2) / 81, all of 1579. D142 verdict GO (too loose 66 vs 68 with a limit of +15; exact 1432 vs 1431; too tight 81 vs 80, beside the gate); it would also pass D135 same-or-better. D133 bar passes for both models. Exam #7 is BURNED for both sides. Done 2026-11-20: rwxlite 0.4.0 released (GitHub release v0.4.0 at rwxlite db328e6; npm rwxlite@0.4.0 latest); the rwxmap pin pass to 0.4.0 is built and verified from a clean install (commit 2d622ea; see the Pin pass paragraph above). Released 2026-11-20: rwxmap 0.12.0 (D140 plus the 0.4.0 pin) published to npm after docs/product/release-checklist.md ran items 1-12; PR #25 merged as a281ad4, release commit 3888ef9, tag v0.12.0. Pre-registration and results docs/wiki/exam-prereg-exam7.md; scorer and rows data/exam7-2026-11-19/score/.
+
+Done (2026-11-19): export-v4-d141 (D141 relabel of rwxlite's round 13 train
+and val, tighten-only, lean at 1c25be1),
+data/export-v4-d141-2026-11-19/, see learnings. Merge rule for D141 training labels, agreed with rwxlite for both halves (R13 rows and r15): raises stay; a lower applies only where a D141 family directly orders it, which in practice is (c), an update of the group object itself (not creates, not sub-resources such as calendar or policies, and not SCIM Groups PATCH, which changes members) with no member/role/permission wording; every other lower reverts. R13: 2 lowers kept (ag-069342, ag-071594), 297 not applied; export commit f62e1c2. r15: 0 kept, 162 reverted.
+
+## 2026-11-22 — r16 unsure pile ruled (3,853 rows)
+
+- What: rwxlite sent 3,853 rows its Sonnet labeller was unsure on (unsure-for-rwxmap.csv sha256 starts 5605d483): 3,791 train and 62 dev. Plan A, picked by the user: the orchestrator rules dev by hand. For train, Opus labels blind and the orchestrator reads every disagreement plus a deterministic 100-row sample of agreeing rows.
+- Dev: three versions, all kept on disk; only v3 is applied. v1 (754ea4bb…) used the doubt rule too widely. v2 (77b53fbe…) moved 18 rows x->w per BRIEF-v4 (ii): a plain create is w, provision counts as create, and "may" is not evidence. v3 (sha256 c123b896b56b338c7e16f6704570ed521d6da2d8b5b4ff3286fedc404d505a9c) puts newsletter post r16-f59a9a4fdd12c86d back to x (doubt), per the user's ruling that public posts and articles are x.
+- Train: 8 blind Opus labellers on BRIEF-v4 plus the D141 and D143 addenda. Every output was validated, and about 80% of Opus letters were low confidence. Three labellers appended hand-written rows through shell heredocs. That broke the brief, but no label came from code, so the rows were kept. Opus agreed with Sonnet on 2,817 rows and disagreed on 974. All 974 were read and ruled (rulings-train.txt): Opus's letter on 890, of which 348 are doubt; Sonnet's on 76; an explicit letter on 8. Of the 100 agreeing rows sampled, 99 stand and 1 generic proxy PUT (r16-8b5a7819e2fd7158) goes to w.
+- Result: answers-train.csv sha256 92daa73bc69b9302591b580a26609a029716734f7cf8449bb0f758c28459ffff: x 2,663, w 1,017, r 111. Against Sonnet: w->x 643, x->w 126, w->r 61, x->r 15, r->x 24, r->w 25. Lean 3,443, doubt 348.
+- Readings applied across the pile: presigned or signed upload URLs are x (a working secret handed out). Plain creates with no send, charge or login named are w. A no-text action POST is x by the doubt rule. A generic proxy PUT/PATCH is w. A restartable stop is w. Public posts and articles are x. Changing a login email is x; editing a plain email field is w. Employee, customer and candidate creates are w unless a login is named. Checkout and setup intents are x (doubt), as are KYC and identity verifies. The user may rule the presigned-URL and login-email readings differently; one correction file covers either.
+- Handoff: rwxlite verified both shas, uses dev v3 and applies all train answers at full weight. Its r16 teacher then passed rwxlite's dev floor. On dev subset (b), 3,286 rows, mode a at 0.90: 3,099 exact / 36 too loose / 151 too tight. r15 teacher: 3,087 / 37 / 162. 0.4.0 student: 3,064 / 42 / 180. These are rwxlite's figures, not measured here.
+- What it taught: re-read the labelling brief in full before ruling a big pile (dev v1 over-applied the doubt rule against (ii)). Apply a user ruling to every pile, including one already sent, by correcting with a new version and never overwriting. For a big pile, default to the blind second labeller's letter, record only the exceptions, and save rulings to a repo file batch by batch. The pile leans x because of the doubt rule on rows with little text, so expect too tight to rise on it.
+- Where: poc/r16-unsure/ (README.md lists the files).
+
+## 2026-11-23 — D144: D141 in mechanical, 4 words
+
+- What: the user ruled four words into two existing step 2 lists and nothing more (D144). GET_ACTION gains `refresh` (3 to 4). PATH_X_WORDS gains `verify`, `callback`, `login` (36 to 39). No new rule, no new rule name. Code: src/step2.js, tests in src/step2.test.js. Measured in poc/d141-mech/ (README.md lists the files; score.mjs, out/score-cand-r1.txt).
+- Bar: D100 tighten-only, more right than wrong under leave-one-vendor-out. Set A is the D141 relabel of rwxlite's round 13 rows (102,590 non-QUERY rows, 691 vendors, truth label_d141).
+- Numbers (LOVO, set A): refresh 7 right / 4 wrong over 5 vendors; verify 12 / 3 over 7; callback 3 / 0 over 3; login 2 / 0 over 2; together 24 right / 7 wrong. All 31 raises are r to x (11 GETs) or w to x (20); 0 rows lowered. Set A baseline against src: too loose 3155 -> 3131, too tight 13651 -> 13658 (out/score-cand-none.txt). 149 POST rows already x change rule from floor-post to path-x-word, letters unchanged. Exam #7 (burned): 0 rows raised, 4 POSTs change rule floor-post -> path-x-word, baseline 72 / 174 unchanged.
+- Failed the bar (27 words): on GET login, signin, logon, verify, validate, authenticate, authorize, otp, callback, token, exchange, generate; as path words verification, endpoint, apns, push, fcm, oidc, saml, ldap, idp, certificate, whitelist, admin, owner, auth, remove.
+- Proof: poc/mech-v4/proof-copy.mjs no longer pins differences == 0. It pins exactly 53 differing rows of 16,486 (every one get-action or path-x-word with a D144 word matched, none lowered), 8 of which change letter (all w to x), and prints each. Hand-broken twice in a scratch copy: a 5th word (`domain`) in src gave 133 differences, 80 outside D144, three pins failed; forcing verify rows to r gave 39 lowered, two pins failed.
+- What it taught: the obvious D141 nouns (token, admin, endpoint, certificate) fail LOVO, the same lesson as step 2's earlier word mining; only a few verbs and nouns transfer. About 40 POST token-issuing rows go to r through step 1's read verbs, out of reach of step 2; this is recorded, not fixed, per the user's guidance to keep mechanical simple with no carve-outs and add only words that help more than they hurt.
+- Gate note: check:live showed api.ibanforge.com drift (42 -> 40 ops), site drift unrelated to D144, not re-recorded. score.mjs's parity guard pins the pre-D144 lean and now exits 2 by design (README note).
+- PRD item 3 as it stood before D144 replaced it (moved verbatim): "D141 in mechanical: deferred to exam #8 (user ruling 2026-11-19). A step 3 x word list for the D141 families, matched at lead position. Bar, set before building: tighten-only adoption per D100 (more right than wrong, and neither too loose nor too tight gets worse), scored leave-one-vendor-out on the tuning sets with loose-1 and loose-2 counted separately; its own D-number when built. Known limit until then: login-token GETs (GET /api/login/refresh) stay r in mechanical and mode a, because settled GET r rows never reach the second pass." The step 3 word list as written there was not what was built; D144 is two step 2 list additions.
+- Where: poc/d141-mech/, src/step2.js, poc/mech-v4/proof-copy.mjs.
+
+## 2026-11-23 — Exam #8 scored: rwxlite 0.5.0 (round 16) D142 GO
+
+- What: exam #8 (1821 ops, gitbook, baserow, looker, wekan, shortcut, bitrise; labelled blind by Sonnet and Opus, 110 disputes ruled by the user) scored once through the real CLI at rwxmap 474ecb1, exit 0, joins 1821/1821 for all five configs, truth sha256 0dfc8b42 verified. Candidate rwxlite 0.5.0 (rwxlite 67f732c2, model rwxlite-0.5.0+82fa50c3) against shipped 0.4.0 (rwxlite-0.4.0+4608f470); retag diff was exactly the RWXLITE_TAG line (v0.4.0 to v0.5.0). rwxlite committed its prediction hashes at 37ac8c4 before it read the truth and its result at bb6f107 (rwxlite's record); its scorer reproduced mode a and b85 exactly and our lean with 0 differences.
+- Numbers (exact / loose-1 / loose-2 / too loose / too tight, of 1821): mech (v4 plus D144) 1556 / 61 / 12 / 73 / 192; a-base (0.4.0, the shipped headline) 1631 / 53 / 12 / 65 / 125; a-cand (0.5.0) 1653 / 48 / 12 / 60 / 108; b85-base 1643 / 39 / 8 / 47 / 131 (asked 207); b85-cand 1656 / 37 / 7 / 44 / 121 (asked 191). Model calls in mode a: sent 773 in both; a-base raised 20, lowered 77, kept 576, undecided 100; a-cand raised 20, lowered 89, kept 575, undecided 89.
+- D142 gate: GO. Too loose 60 vs 65 (limit +18), exact 1653 vs 1631 (+22), too tight 108 vs 125 beside the gate. D133 mode a bar: a-base FAILS the exact half (1631 against mech 1556 plus 92 = 1648); a-cand passes both halves (60 <= 73; 1653 >= 1648). D140 mode b at 85 is reported only, no bar. Mech with D144 is reported only (no bar): the first unseen-vendor number for D144.
+- What changed between a-base and a-cand (31 rows): 7 leaks closed (baserow upload-via-url, gitbook openapi PATCH and context-connections, looker connections, ldap_config and mobile device, wekan board domains) and 2 opened, both x read as w (bitrise provisioning-profiles uploaded POST, gitbook storage/upload POST). 19 tight to exact (16 are POST), 2 exact to tight, 1 tight to tight. Net: too loose -5, too tight -17.
+- The 12 GET leaks (loose-2) are the same in mech, a-base and a-cand: settled GET rows (baserow preview exchange, tokens check, licenses check and two callbacks, gitbook publishing preview and two pdf, looker derived_table start and stop and embed sso validate) that never reach the model.
+- rwxlite's figures, not measured here: standalone fp32 base 1673 / 91 / 57, cand 1683 / 86 / 52; with the 26 collided exam ops removed (1,795 rows) cand 1627 / 60 / 108 against base 1606 / 64 / 125.
+- Lessons: (1) Mode a gained this time, +22 exact against exam #7's +1, mostly tight to exact on POST creates (16 of the 19 tight-to-exact rows are POST). (2) The 12 settled GET leaks are out of the model's reach, as at exam #7 (15 there); only mode b moves any, and the candidate in mode b leaves 6 of the 12, at 11 too-tight GET rows. (3) The shipped 0.4.0 failed D133 on these vendors (1631 against the 1648 needed), so passing the D133 exact bar depends on the vendor set; 0.4.0 passed it on exam #7. (4) Truth was built before the prereg and the code ref, a deviation from exam #7. The order held up because the truth sha was held, D144's words were measured only on set A and the burned exam #7, and D144 never touched exam #8 rows. The lean was built after the ref and was not read against truth.
+- Next: rwxlite releases 0.5.0 (its push, tag and publish wait for its user), then an rwxmap pin pass to v0.5.0 (RWXLITE_TAG, cache fallback, accepted range 0.5.x) verified from a clean install, then a release through docs/product/release-checklist.md that quotes exam #8. Exam #8 is BURNED for both sides.
+- Where: data/exam8-2026-11-23/score/score.txt and rows-*.csv, docs/wiki/exam-prereg-exam8.md (Results and findings), docs/wiki/decisions-log.md (D145), docs/product/prd.md (What is next).
+
+## 2026-11-23 — pin pass: rwxlite 0.5.0
+
+- What: pinned rwxlite 0.5.0 (D145 GO): RWXLITE_TAG v0.5.0 in src/modeldownload.js (cache fallback 0.5.0 and accepted package range 0.5.x derive from it), LOWER_MIN_P unchanged at 0.90 (exam #8 measured 0.5.0 at 0.90; comment updated). Tests re-pinned in modeldownload, rwxliteengine and cli test files: the range test accepts 0.5.0, 0.5.1, 0.5.17 and refuses 0.4.0, 0.4.17, 0.6.0, 0.3.1, 0.2.x, 0.1.9, 1.5.0; the offline-cache test refuses a 0.4.0 cache. 674 of 674 tests, typecheck, exam #8 scorer tests 38 of 38, conformance 6/6 pass. Hand-break in a scratch copy (RWXLITE_TAG back to v0.4.0): 35 tests go red (99 pass, 35 fail of 134 across the three files).
+- Verified before editing (by the orchestrator): npm rwxlite@0.5.0 gitHead 92ad8ae2 equals tag v0.5.0; its src/ and package.json (minus gitHead) are byte-identical to the scored ref 67f732c. GitHub release v0.5.0 assets: model-fp32.onnx 82fa50c3, manifest-exact.json b576eb72, vocab.txt 07eced37, model-int8-pc.onnx fac72395, manifest.json 9ecefd18.
+- Real install, exam #8 (burned, no new score): rwxmap packed from this tree plus npm rwxlite@0.5.0 in a clean folder with no .env, empty XDG cache; model downloaded from the release by the CLI itself. All six vendors, mode a and mode b (--engine rwxlite, default 85): model string rwxlite-0.5.0+82fa50c3 on all 12 runs, 1821 of 1821 operations joined (0 unmatched, 0 duplicates), 0 rows differ from rows-a-cand.csv and rows-b85-cand.csv on class and marker. Destructive is not in the committed rows, so it is not compared (228 true in both modes). The comparison script was checked by pointing it at the wrong rows file (mode a against rows-b85-cand: 85 differ; against rows-a-base: 31 differ). One --model small run (wekan) downloaded model-int8-pc.onnx and recorded rwxlite-0.5.0+fac72395.
+- Lesson: same as D139 and D142. Prove the pin through the real install on the scored exam; zero differing rows is the proof, and a comparer is trusted only after it is shown to fail on the wrong file. Scripts and outputs: .claude/scratchpad/pin050/ (run.sh, compare.mjs).
+
+## 2026-11-23 — corrupt cached model is replaced
+
+- What: src/modeldownload.js now removes a folder at the final model path after the fresh download verifies, then renames the stage into place. Before, a cached folder that failed the check made the rename hit ENOTEMPTY, the run stayed "rwxlite: off" and re-downloaded every time. A download that fails verification still leaves the old folder untouched (new test).
+- Proof: the old test deleted the corrupt folder by hand before the run, which hid the bug; it now leaves it in place. With the rmrf line removed in a scratch copy, that test goes red. npm test also runs the exam #8 score and labelling tests (724 total).
+- Also: poc/d141-mech/score.mjs exits 2 on a parity stop without writing out/score-<name>.txt, so a rerun no longer overwrites committed D144 evidence.
+- Lesson: a test that cleans up the failure state by hand cannot catch the code that was meant to clean it up.
+- Where: src/modeldownload.js, src/modeldownload.test.js, package.json, poc/d141-mech/score.mjs.

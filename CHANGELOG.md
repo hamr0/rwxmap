@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2026-11-23
+
+### Changed
+
+- **rwxlite is pinned to model release v0.5.0 (D145, GO on exam #8).** `RWXLITE_TAG` is `v0.5.0`; the offline cache fallback and the accepted `rwxlite` npm package range (now 0.5.x, install `rwxlite@0.5`) follow from it. A 0.4.x package is refused (rwxlite off, mechanical, with the reason printed). `LOWER_MIN_P` stays 0.90: exam #8 measured 0.5.0 at that cut. On exam #8 (1821 operations: gitbook, baserow, looker, wekan, shortcut, bitrise; scored once on 2026-11-23 through the real CLI, burned), exact / too loose / too tight: mode a with 0.5.0 1653 / 60 / 108 (0.4.0: 1631 / 65 / 125); mode b at 85 with 0.5.0 1656 / 44 / 121 (0.4.0: 1643 / 47 / 131); mechanical 1556 / 73 / 192. The D142 gate (exact no lower, too loose at most 18 rows more) passed: exact +22, too loose -5. Run through the npm install of rwxlite 0.5.0 with an empty cache, the same 1821 rows came out with 0 differences from the scored rows. 12 of mode a's 60 too-loose rows are settled GET calls (e.g. baserow tokens check, baserow licenses check, looker embed sso validate); a GET never reaches the model.
+- **Mechanical words (D144, user ruling 2026-11-23):** `refresh` joins the one-way GET actions (a GET, HEAD, OPTIONS or QUERY whose name holds logout, revoke, close or refresh is x), and `verify`, `callback` and `login` join the 36 path words that raise a PUT, PATCH or POST to x (now 39). On the six tuning sets (16,486 operations) 53 rows differ from before, 8 of them change letter, and none is lowered. On exam #8 mechanical alone is 1556 exact, 73 too loose, 192 too tight.
+- **A corrupt cached model is replaced.** A cached model folder that fails the sha256 check is now replaced by a freshly downloaded, verified one. Before, the rename onto the old folder failed, so every run stayed "rwxlite: off" and downloaded again. A download that itself fails the check leaves the old folder alone.
+- **README "How good it is" quotes exam #8** for modes a, b at 85 and mechanical, and notes the 12 settled GET leaks. Mode c keeps its exam #3 numbers. The README's GET rule and model-cache text carry the changes above.
+- **Dev only:** `npm test` now also runs the exam #8 scorer and labelling tests (724 tests); the exam #8 record is in `data/exam8-2026-11-23/`. The `poc/d141-mech/score.mjs` parity stop exits 2 without writing `out/score-<name>.txt`, so the documented rerun no longer overwrites committed D144 evidence.
+
 ## [0.12.0] - 2026-11-20
 
 ### Changed

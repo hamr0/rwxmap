@@ -1,0 +1,400 @@
+1|r16-18eecc91bbafb372|S r/likely|GET /auth/google|Initiate Google OAuth2 Login | Redirects user to Google OAuth2 consent screen for profile and email scopes.|S: GET login redirect page
+2|r16-1cc73c33a79273fb|S r/sure|GET /{year}/drivers/{driver}/driverstandings/| | Placement of a driver in the Drivers' Championship in a given year|S: GET standings read
+3|r16-4ecef60363328520|S r/likely|GET /admin/tagihan/create|Menampilkan form pembuatan tagihan. | Hanya menampilkan data penggunaan yang belum memiliki tagihan.|S: GET form display
+4|r16-7f10935572c5f93f|S r/likely|GET /platforms/{platform}/environments/{environment}/experiments/{experimentKey}/assign|Assign user to experiment variation (Public) | Get variation assignment for a user. Returns consistent assignment based on userId.|S: i returns assignment
+5|r16-f3a36a36388e581e|S r/likely|GET /auth/login|Initiate OIDC login | Redirects to the OIDC provider's login page|S: GET login redirect
+6|r16-0a045397f5091281|S r/sure|POST /api/v1/intel/dbsec/ai-alerts|Post Dbsec Ai Alerts | Live DAM AI alert analysis over tenant-scoped database security telemetry. Ingests three signal sources bounded strictly by the caller's tenancy scope: - Imperva / Thales DAM alerts (Alert model — source = imperva | thales | dam) - Datab…|S: i advisory analysis only
+7|r16-0b59ad9c8b4efba3|S r/sure|POST /domain-search|Find all emails at a domain with role-based groupings | |S: i lookup of emails
+8|r16-0c9db1d26831d6f1|S r/sure|POST /cgi/get_dataset_list.cgi|Return datasets for a permalink, layout, search scope, or default layout | Priority is permalink_share_id, then layout_share_id, then a search (scope, optional search_terms full-text + tag match), then the user's current layout, then the domain default layout.…|S: i returns dataset list
+9|r16-0e5897e5c725fbac|S r/sure|POST /wurcsframework/1.2.14/wurcs2mass|Calculate Mass | Calculate the mass from WURCS.|S: i calculation
+10|r16-0fb9df3c4e15b7ff|S r/sure|POST /api/v1/patient/payment-history|Payment history | |S: i reads payment history
+11|r16-0fe94d68889dd7e0|S r/sure|POST /mgmt.v1alpha1.UserAccountService/GetAccountOnboardingConfig|GetAccountOnboardingConfig | Retrieves the onboarding config for the account.|S: reads onboarding config
+12|r16-119171f738f8472c|S r/sure|POST /users/{userId}/memory/search|Search memory chunks by semantic similarity | Performs semantic search on stored memory chunks using pgvector cosine similarity. Returns top-K most relevant chunks.|S: i semantic search
+13|r16-12184cfe267b3f89|S r/likely|POST /asset/{asset}|/asset/{asset} [POST] Scoped to an Asset | Retrieves a snapshot of a specific asset, along with the user requesting the snapshot.|S: i retrieves snapshot
+14|r16-12210eb45061010c|S r/sure|POST /mmavailablebalances|Get available balances for bots | Get available balances for starting a bot or adding additional balance to a running bot. **Route:** `mmavailablebalances` |S: i reads available balances
+15|r16-130f5471660fa563|S r/likely|POST /images/edit-bulk|Edit an image with multiple prompts in bulk (image-to-image) | Applies multiple prompt variations to a source image|S: i generated image returned
+16|r16-1459487a261ce59d|S r/sure|POST /ai/notes|Convert text to bullet-point notes | |S: i text conversion returned
+17|r16-1644d5ee1b903662|S r/sure|POST /jd/label|Classify a JD | Classify a job description into job_type / level / locale / channel. **Stub**: returns plausible values derived from simple heuristics. Replace with LLM call in production.|S: i classify
+18|r16-192efc716b39ef8b|S r/sure|POST /domain|Test a domain's email configuration | Analyzes DNS records (MX, SPF, DMARC, BIMI) for a domain without requiring an actual email to be sent. Returns results immediately.|S: i DNS test
+19|r16-1bbdaa30756e7b1b|S r/likely|POST /image/edit|/api/v1/image/edit | Edit or modify an image based on the supplied prompt. The image can be provided either as a multipart form-data file upload or as a base64-encoded string in a JSON request.|S: i generated image returned
+20|r16-1e776e218c7cd37d|S r/likely|POST /api/v1/verify-file|Verify a file against its .ots proof | Multipart upload: field "file" (original content) and field "ots" (detached proof). Returns the full verification result.|S: i verify file proof not login
+21|r16-1f2e1bd1d25b1cd1|S r/sure|POST /geoframe/tradearea|Get devices matched to households and workplaces within a specified radius of a geoframe. | Get devices matched to households and workplaces within a specified radius of a geoframe.|S: i geo query
+22|r16-230b7f5bd7e5a338|S r/sure|POST /socket/item-list-by-owner|item-list-by-owner-request | Lists items belonging to a canonical ownership descriptor. Ownership contract: - `owner.ownerType` must be a valid canonical type. - For `player-character` owners, `owner.playerId` must match the authenticated actor's playerId. - C…|S: i lists items
+23|r16-23a33a42a99e623f|S r/sure|POST /analytics/unclassified-assets|Get unclassified assets analytics | Retrieve analytics for unclassified assets|S: i analytics read
+24|r16-33ffb7229e4e8123|S r/sure|POST /mortgage-compute|Compute mortgage result and qualification | Calculates amortization, equity, and loan qualification. If qualified, use `/loan-profiles` to store the profile and `/loan-profiles/onboard/{reference_code}` to begin KYC onboarding. Ideal for building guided buyer …|S: i calculation
+25|r16-362f153f364654d8|S r/sure|POST /IP.svc/SearchGlobalListItemInfoSideBuyInCircle|Side-buy places within a circle | |S: i search
+26|r16-36a60b468993e852|S r/sure|POST /IP.svc/GetSmsTickets|List SMS tickets (per city) | |S: i list tickets
+27|r16-38a2555ca9101fd3|S r/sure|POST /api/v1/content/detect|Detect URL type | Determines if a URL is an RSS/Atom feed or a web page. This is a non-blocking operation with a 10-second timeout. Used by mobile apps to provide smart URL submission (e.g., showing "Add Feed" vs "Add" button). |S: i detect URL type
+28|r16-39d61a43e30d80e5|S r/sure|POST /api/v1/ocr|Process OCR for identity documents | Extracts text and data from Indonesian identity documents (KTP or Passport) using GlairAI OCR service. This endpoint processes uploaded document images and returns structured data including personal information, document nu…|S: i OCR extraction
+29|r16-3b93a3dbbc0f1dc1|S r/likely|POST /v1/audit|Audit a public URL | |S: i audit URL
+30|r16-40edbe03b5810ca3|S r/sure|POST /api/v1/pricing/quote|Get quote | |S: i quote
+31|r16-428c82f9a4f384aa|S r/sure|POST /explore/discover|Discover interesting places nearby | Given coordinates, returns interesting historical facts and stories about nearby buildings and spaces|S: i facts returned
+32|r16-45d44bab8b05208f|S r/sure|POST /labels|Get known labels — exchange, mixer, darknet, defi protocol, whale | |S: i known labels lookup
+33|r16-496688c6c74abd0b|S r/sure|POST /auth/login/discover|Which sign-in methods to offer | Answers from the address's DOMAIN alone: a company that registered the domain on an SSO connection gets that connection; a company with that verified domain gets what its default policy allows; any other domain gets the default…|S: i login method lookup
+34|r16-4975723f585b9130|S r/likely|POST /image/edit-detail|Detail edit an image using a text prompt | |S: i generated image returned
+35|r16-4bb4d554e083e6fe|S r/sure|POST /api/queries/preview|Validate and execute a cross-sheet query preview. | |S: i query preview
+36|r16-4ceea1167bfaf071|S r/likely|POST /IP.svc/GetTickets|Synchronise tickets (delta sync by transaction codes) | |S: i delta sync read
+37|r16-4d0f622eb534d7a0|S r/sure|POST /searches/locations|Search Location Entities. Can perform more complex filtering based on the query defined in the request body. | |S: i search
+38|r16-539c05114cbd4df0|S r/likely|POST /api/v1/cards|Get Cards | Get Cards|S: i get cards
+39|r16-54c98c6f641c4529|S r/sure|POST /api/update-recipients|Get update recipients | Get all email addresses that can receive updates from an email address.|S: i lookup recipients
+40|r16-55373c69e7767dce|S r/sure|POST /api.php?action=get_archive_files|TV-archive segment files of a stream | `glob(ARCHIVE_PATH/<stream_id>/*.ts)` (src/Public/Controllers/Api/InternalApiController.php:328-332). File names are `Y-m-d:H-i.ts` (one per minute). HTTP route removed in this build: 404. |S: i lists archive files
+41|r16-567163ddc1979dac|S r/sure|POST /batch|Batch decode up to 20 QR/barcode image URLs | |S: i decode
+42|r16-56c00d6cd92ff679|S r/sure|POST /api/compute|Compute | Compute a math operation: add, sub, mul, div, pow.|S: i math calculation
+43|r16-583c6f33e825368e|S r/likely|POST /auth/internal/userinfo/|Returns User Info. | This endpoint receives an Access Token from another service and returns information regarding that user.|S: i returns user info
+44|r16-5b53c8e2876b7c16|S r/sure|POST /wine/wines/scan_label|Scan wine by uploading a label | Get results from scanning an uploaded image of type jpeg or png.|S: i scan returns result
+45|r16-5cb8d278c7ff788d|S r/sure|POST /transactions/inquiry|Inquiry Transaction | Check transaction status by reference number|S: i status check
+46|r16-5dbd7d9167a84524|S r/sure|POST /api/xdr/add-beneficiary|Build unsigned add_beneficiary XDR | Returns an unsigned add_beneficiary transaction for Freighter to sign. shareBps must be 1–10000.|S: i builds unsigned transaction
+47|r16-651e8f7f40fe23e3|S r/sure|POST /ask|Answer a question from retrieved context | Retrieves top-k chunks (hybrid search, same ranking as `/search`), builds a document-grounded prompt with citations, then either: - `stream: true` (default) — answers over **Server-Sent Events** (`text/event-stream`).…|S: i answer returned
+48|r16-6683c31fd1f05cb2|S r/sure|POST /api/v1/events/export|Export filtered events (POST variant for larger filters) | |S: i export
+49|r16-6a2e741f17f43f01|S r/sure|POST /properties/category|Get all properties by category | Retrieves a list of properties for a specific category with pagination|S: i list properties
+50|r16-6b588ec8ade7c209|S r/sure|POST /transcription|Transcribe audio to text | Converts an uploaded audio file into text using the selected transcription model【545893155843003†screenshot】.|S: i transcription returned
+51|r16-6d42dff580712c2c|S r/sure|POST /IP.svc/ComputeTicketPartial|Compute partial (subtotal) ticket result | |S: i compute
+52|r16-70fa16503b40f498|S r/sure|POST /runtime/operations/aix.uploads.status|Get upload resume status for an AIX upload. | |S: i status read
+53|r16-713d59514b021873|S r/sure|POST /Sum|Sum the contents of a CSV file | Receives a CSV file and sum its contents in formatted form|S: i sum
+54|r16-73d87d7c4f551f3e|S r/sure|POST /integrations/puppetserver/catalog/compare|Compare catalogs | Compare catalogs between two environments for a node|S: i compare
+55|r16-7d552303c5d0d166|S r/sure|POST /twitter/post/comments|Get Tweet Comments | Fetch comments/replies for a tweet (requires Twitter token authentication)|S: i fetch comments
+56|r16-80374eca0ecf71ea|S r/sure|POST /v1/ai/process-note|Process raw text into structured note | |S: i process note returned
+57|r16-80b23d5c2e360d74|S r/sure|POST /v5/spends|Get multiple spend records | Get spend information for multiple transaction outputs|S: i get spends
+58|r16-847d9d0caf888f2c|S r/sure|POST /v1/crossborder/hs-classification/items|Predicts the HS Code for a parcel | This operation predicts the HS Code for a parcel being shipped internationally and gives the level of confidence in the prediction.|S: i prediction
+59|r16-8540d5ba7c0c809d|S r/likely|POST /interviews/{id}/ai-ask|Ask the AI interviewer a question (SSE stream) | |S: i AI answer
+60|r16-866039e77633ecdb|S r/sure|POST /api/tiktok/post|Download Tiktok Post | Download a TikTok post and its associated metadata.|S: i download metadata
+61|r16-881b4fdcd54ea712|S r/sure|POST /api/v1/batch-search|batch search subjects by system/action/resource | batch search the subjects who have the permission of that system/action/resource|S: i batch search
+62|r16-8a8bd745370fcc77|S r/likely|POST /v1w/kyc/checkFaceKYCStatus/users/{userId}| | Checks if user already passed face kyc on other tenants and if its available|S: i status check not login
+63|r16-8dfc29065f987594|S r/sure|POST /compare|Request AI semantic comparison | |S: i comparison returned
+64|r16-8ff9961f585480cc|S r/sure|POST /IP.svc/SearchGlobalListItemInfoExt|Global list-item (place) autocomplete | |S: i autocomplete
+65|r16-9175abdb37f07369|S r/sure|POST /next-page|Read the next page relative to your current position. | Read the next page relative to your current position.|S: i reads next page
+66|r16-91d29e9db07c88c0|S r/sure|POST /IP.svc/GetCTBaseTicket|Base (existing) commuter ticket | |S: i reads ticket
+67|r16-93335417e4798d59|S r/sure|POST /get-mhucdh-by-mahaid|Get Citizen data form MHUCDH | Get Citizen data form MHUCDH|S: i get data
+68|r16-94dddb85639f204c|S r/sure|POST /socket/market-list-by-location|market-list-by-location-request | Lists nearby markets from a barycentric position. SW-13C ship-external route entity feed authority: - This endpoint is the authoritative Forge contract source for route entity feeds consumed by ship-external-view. - Route feed…|S: i lists markets
+69|r16-95962d2d616c6c52|S r/sure|POST /wishlist.Wishlist/ListWishlistItems| | |S: list items
+70|r16-95d8f1b3a60946ba|S r/sure|POST /IP.svc/TryFindGlobalListItemInfoExt|Try to resolve pasted text into known list items | |S: i resolve text
+71|r16-969bf117d7f2a4e4|S r/likely|POST /generate-scheduled-item|Generate a scheduled item from a text prompt | Use AI to generate a scheduled item from a natural language prompt|S: i generated item returned
+72|r16-9a4596fa220dd186|S r/sure|POST /extract-action-items|Extract action items | |S: i extract
+73|r16-9c0df0c450aa92cd|S r/sure|POST /api/v1/diag/upload|Consume a body and report the server-side throughput (any authenticated principal) | Reads the request body in chunks without buffering or storing it and returns the measured rate, so the client can compare what it sent with what actually arrived. Above 25 MB …|S: i throughput test nothing stored
+74|r16-a119edaf1171c9d8|S r/sure|POST /search/categories|Search categories | Search categories by name, slug, or description|S: i search
+75|r16-a8647e49c5f7f8db|S r/sure|POST /v1/providers/search|Search for providers matching criteria, returns summary information. | |S: i search
+76|r16-aef641558c5103f3|S r/sure|POST /v1/predict-locations|Predict future threat infrastructure locations | |S: i prediction
+77|r16-b001951345c563fe|S r/sure|POST /otrs/nph-genericinterface.pl/Webservice/RESTConnector/TicketSearch|TicketSearch | Ticket search contains a huge amount of possible parameters including time based ones. All parameters you add are a logical AND. To see all posibilites take a look into [Kernel::GenericInterface::Operation::Ticket::TicketSearch]|S: i ticket search
+78|r16-b0945cc2c8df1363|S r/sure|POST /api/agent/calculators/file-a-claim|Estimate whether filing an auto claim is likely cheaper than paying out of pocket. | Estimates the long-run cost of filing an auto claim by combining the deductible with projected premium impact, then returns a simple file-claim versus pay-out-of-pocket recomm…|S: i estimate
+79|r16-b522dec0c907b69a|S r/likely|POST /api/teammanager/team-players/detail| | |S: i detail read
+80|r16-b5d0bef935c0e897|S r/sure|POST /operations/plaid.item.get|Read the Plaid Item and transaction update status for the bound connection. | |S: i reads status
+81|r16-b5db86a6f3366ce9|S r/likely|POST /get_location| | |S: i get location
+82|r16-b80c40ec644c5cb1|S r/sure|POST /api/search/structured|Structured search with complex criteria | Execute complex structured searches with multiple criteria types and logical operators. Supports semantic text search, topic filtering, date ranges, metadata filtering, and element structure filtering combined with AND…|S: i structured search
+83|r16-b8760ec7496ff725|S r/likely|POST /render/stream|Render with streaming progress | Same as `/render` but returns a Server-Sent Events stream with progress updates followed by the final result. Used by the playground. **Event types:** - `data: {...}` — progress event with `stage`, `message`, `elapsed`, `durati…|S: i render output returned
+84|r16-bc48cb0dd9592a3c|S r/likely|POST /v1/sample/header|BindHeader | example bind header|S: i example echo
+85|r16-bd000ec66a56d2d5|S r/likely|POST /callContract|Call contract | call contract method and retrieves values.|S: i contract read call
+86|r16-bd3e72fa06e14d2d|S r/sure|POST /{session_code}/inner_html|Get inner HTML from element | Get inner HTML from element|S: i gets HTML
+87|r16-c88912aec9a66e58|S r/likely|POST /repos/{repoId}/impact/{nodeId}/explain| | |S: i explain impact
+88|r16-c9596635667e8976|S r/sure|POST /v1/judicial/verification/filing-delegation|Verify a filing delegation chain. | |S: i verify chain not login
+89|r16-cc1709d9bcd9d188|S r/sure|POST /metrics/api/v1/query|Instant metric query, form-encoded (mimics Prometheus's /api/v1/query; POST-only, matching Grafana's Prometheus datasource default request mode) | |S: i query
+90|r16-cf0f5cb5c306a126|S r/likely|POST /edit_image|Edit an existing image based on text instructions | |S: i generated image returned
+91|r16-d574bc3cbd320933|S r/unsure|POST /api/v1/agent/file-classification| | |S: file classification no text
+92|r16-d778360f1e571798|S r/sure|POST /api/v1/cv/file|Cv File | PDF or Word (.docx) CV to plain text. The text is shown to the person, who then reads it with POST /cv/parse. Nothing is stored.|S: i nothing stored
+93|r16-d8ea99d8f413791d|S r/sure|POST /landslide/predict|Predict landslide risk from uploaded image and location data | |S: i prediction
+94|r16-d93085de4dc486cb|S r/sure|POST /api/orderEntry/labelRequest|Compute Order Entry Labels-section column set + cell defaults | Returns the dynamic two-table column set + per-cell default + max + source tag + locked flag for the given candidate order (set of tests + samples). Pure read; idempotent; no persistence. Implemen…|S: i pure read
+95|r16-d9a29a15006ef855|S r/sure|POST /cards.list|Get cards list | 1. **Personal cards** - `POST /api/v1/card/list` 2. **Cards of user** - `POST /api/v1/card/list '{"authorId": USER_ID}'` - `TODO:` Add pagination later - `TODO:` Maybe there is should be OData-like format instead of partial params - `TODO:` Ad…|S: i list cards
+96|r16-d9f0d91576680c23|S r/likely|POST /guide/assistant|Ask the authenticated TimeNation user guide assistant | |S: i assistant answer
+97|r16-da7b825a904b8df1|S r/sure|POST /mgmt.v1alpha1.ConnectionDataService/GetConnectionInitStatements|GetConnectionInitStatements | For a specific connection, returns the init table statements. Mostly useful for SQL-based Connections. Used primarily by the CLI sync command to create table schema init statement.|S: i reads statements
+98|r16-da929e4b91ab4d8f|S r/sure|POST /operations/linkedin.comments.list|List comments for a LinkedIn post. | |S: i list comments
+99|r16-daea596268831bc9|S r/sure|POST /api/v1/ai/resume/compare|Compare Resume Versions | Compare two resume versions Args: version1_id: First version ID version2_id: Second version ID current_user: Authenticated user db: Database session Returns: ComparisonResult with differences Raises: 404: One or both versions not foun…|S: i compare
+100|r16-dbe5dabc41421741|S r/sure|POST /tasks/attribution|Attribution Task | Endpoint for Attribution of Products for a Specific Sales Channel, it provides attribution for products, specifically tailored to the requirements of different sales channels. It extracts the desired attributes for a product, based on its de…|S: i extract attributes
+101|r16-dd7a4ee28d233cd9|S r/sure|POST /crypto/get_exchange_assets|Gets all coin pairs traded in specified exchange | This endpoint returns all the Available currency pairs|S: i list pairs
+102|r16-e0fd3c5c74a4186c|S r/sure|POST /ai/label|Generate a label for text | |S: i generated label
+103|r16-e79f8d49af02fc2c|S r/sure|POST /{api_version}/ybot/choose/{bot_id}|Request a move from a specific bot | Returns the coordinates of the move chosen by a specific bot for a given game position (YEN format).|S: i move returned
+104|r16-ec1caad29cb94814|S r/likely|POST /image/edit|Edit an image using a text prompt | |S: i generated image returned
+105|r16-ec4599ad6330c44b|S r/sure|POST /ingester.v1.IngesterService/LabelNames|LabelNames | |S: i label names
+106|r16-ed0d2380030ff5ed|S r/sure|POST /api/r/{repoId}/run/tagJson|Analyzes the provided page descriptions and finds tagged text chunks in the page. | |S: i analysis
+107|r16-ee206ba0da9efc65|S r/sure|POST /owner/restaurant/{id}/tables/availability|Check table availability | Check table availability for specific date/time at the restaurant|S: i availability check
+108|r16-eeca024f0bdcfa90|S r/sure|POST /api/ai-process-text|Extract vocabulary words from arbitrary text | Teacher-only. Pastes text → returns candidate words.|S: i extract words
+109|r16-efe04ab548079ba9|S r/likely|POST /v1/sample/body|BindBody | example bind body json|S: i example echo
+110|r16-f2cc224e612acad6|S r/sure|POST /compliance/api/v3/controls/summary|List controls filtered by connector, benchmark, tags | |S: i list controls
+111|r16-f386d23d5137b3d3|S r/sure|POST /v1/github/read-file|Read GitHub file | |S: i read file
+112|r16-f48a157de594b774|S r/likely|POST /schedules|get our recording schedules | |S: i get schedules
+113|r16-f514fa77929407ad|S r/sure|POST /v1/sign/predict|Predict one isolated sign from one short video clip. | Called by the signer web client against the loopback Sign Service. The browser-local demo mode does not require an internal API key. |S: i prediction
+114|r16-f5c5c39c556079f1|S r/sure|POST /ddm/file_metadata/|Retrieve metadata for multiple files by their IDs | List of file IDs to retrieve metadata|S: i metadata read
+115|r16-f72c100a28e63153|S r/sure|POST /query/assets|Query assets | Query assets with filters, aggregations, and sorting|S: i query
+116|r16-f929f3322d38e3c9|S r/likely|POST /rpc/openstatus.private_location.v1.PrivateLocationService/GetPrivateLocation|GetPrivateLocation | GetPrivateLocation retrieves a single private location by ID, including its agent token.|S: i get location read
+117|r16-fcf340cd1ff15598|S r/likely|POST /api/v1/job/update|List Jobs | List Jobs with details|S: i lists jobs
+118|r16-fde69534fd72f24e|S r/sure|POST /zerx.v1.PageTemplateService/ListPageTemplates|ListPageTemplates | |S: i list templates
+119|r16-ff985509609ab926|S r/likely|POST /scheduling/suggest| | |S: i scheduling suggestion
+120|r16-02cbe702f71336f8|S w/likely|GET /notifications/mark_as_read/{slug}/|Mark notification as read by user | |S: iii marks notification read
+121|r16-0d0fdb204c1bbc1c|S w/likely|GET /portal.php?type=vod&action=set_fav|Add movie to favourites | Appends `video_id` to `fav_channels.movie` if absent. Source: `src/Ministra/PortalHandler.php:1084`. Auth: requires a device verified by `stb/get_profile` under the presented Bearer token (header `Authorization: Bearer <token>` or `to…|S: iii adds movie to favourites
+122|r16-0f9d7903cb95464f|S w/likely|GET /updateclass|Updates a specified class | The **UpdateClass** command updates a specified class.|S: iii updates a class
+123|r16-10ccc87c1fa5b8e9|S w/likely|GET /command/switchOff|Switch off the device. | |S: device switch off toggle
+124|r16-1b4ad554113f877f|S w/likely|GET /link/{provider}/callback|OAuth callback landing for an account link | The redirect target registered with the provider. The state is consumed before the token exchange, so a callback can never be replayed, whatever its outcome. On success an npc.identity.signal_link record is minted: …|S: ii callback records link no token stored
+125|r16-236b9ec78f370849|S w/likely|GET /record/{id}/new|Create record with id | |S: ii creates record
+126|r16-2431e20ef2fcded4|S w/likely|GET /command/cloudRecordingsOff|Turn cloud recordings off for the device. | |S: toggle recordings off
+127|r16-6e8a2709568fcff3|S w/likely|GET /config/ir|Enable or disable the IR receiver (off by default; most boards don't fit the TSOP38238) | |S: toggle IR receiver
+128|r16-8f0292c50b74bda7|S w/likely|GET /stats/instagram/editcatalogitem|Update picture link in Instagram BIO link | |S: iii update link
+129|r16-9df7a0da4f15bd4f|S w/likely|GET /command/setObjectState|Set the run state of a device (ZoneMinder-style function) | |S: iii set device state
+130|r16-a6340e12a5a93de7|S w/likely|GET /machine/disconnect|Disconnect from the machine | |S: disconnect can reconnect
+131|r16-a9fe0ce8b7844f78|S w/likely|GET /api/v1/stardust/stardust-protostar/Application.create|Create app from desktop file | Create application from .desktop file for hex launcher.|S: ii create app
+132|r16-aa80a106e37ad23f|S w/unsure|GET /cards|FetchCards | Create a new task|S: GET text says create task
+133|r16-ab593542203ad736|S w/likely|GET /q/untagrecording|Remove a tag from a recording | |S: iii remove tag toggle
+134|r16-aca94bd6382d07de|S w/likely|GET /api/v1/audio/mobileapp/AudioRecorder.stopRecording|Pebble ring stop recording | Stop audio recording from Pebble ring.|S: stop recording
+135|r16-acc02762d5f63902|S w/unsure|GET /register|Register session entry (not implemented) | |S: register session not implemented
+136|r16-b181aa561c141d32|S w/likely|GET /command/objectdetectoff|Turn object recognition off | |S: toggle detection off
+137|r16-b34e113055fd6695|S w/likely|GET /admin/add-provider|Add new provider | |S: ii add provider
+138|r16-b96248cf3d18fdf8|S w/likely|GET /command/setInterval|Set the interval for the specified field | |S: iii sets interval
+139|r16-bd6097d465106586|S w/unsure|GET /unknown| | NewHandler creates a new user handler|S: no usable text
+140|r16-c0970fa3bfc4ca07|S w/likely|GET /api/v1/spatial/XRLinuxDriver/StopXR|Stop RayNeo XR | Stop XR mode on RayNeo glasses. --- Deep-Read Documentation --- RayNeo SDK: Stops XR mode. Releases camera and SLAM resources. Source: RayNeo ARDK, XRLinuxDriver/src/devices/rayneo.c|S: stop XR mode
+141|r16-c3e345ded6559396|S w/likely|GET /command/scheduleOn|Turn schedule on for a device, group or location. | |S: toggle schedule on
+142|r16-d4ea143b837d97e3|S w/unsure|GET /apply/standards/applications/index|Resets page index and redirects to applications. | |S: resets page index state
+143|r16-d4fc47a8004e1a28|S w/likely|GET /api/v1/device/headset-utils/Connection.start|Start glasses connection | Start persistent connection to glasses.|S: start connection
+144|r16-e252c26754eba377|S w/likely|GET /lobby/envs|Update server environments | Update server environments|S: iii updates environments
+145|r16-edda3422de302513|S w/likely|GET /api/v1/gesture/TAPLINKX3/CustomKeyboardView.clearHover|Clear keyboard hover | Clear hover highlight.|S: iii clear hover
+146|r16-f000fa7c309d0fbf|S w/likely|GET /gallery/{id}/update-views|Update Gallery views | Set views +1|S: iii increments views
+147|r16-f879bec5a1ea1854|S w/likely|GET /#request=setreservedslotamount|Set the reserved slot count | `SetReservedSlotAmount(nil, amount)`; `sv_reserved_slots` does the same and prints the result. |S: iii sets slot count
+148|r16-0794ff4c7e9e2475|S w/likely|PATCH /op/update-subscribes|updateSubscribes | when a user loses connection with centrifugo, subscriptions to all channels are automatically lost, in order to restore the subscription when the token expires or disconnects, this route is used|S: iii restores channel subscriptions
+149|r16-0fb0439a77dbf81a|S w/likely|PATCH /media-share/disable-moderation| | Disable moderation for incoming media|S: iii toggle moderation off
+150|r16-205b630bbd7e95b3|S w/likely|PATCH /api/admin/participations/{id}/result|Record, change or clear a bout result | Administrators only. `result` must be sent; `null` clears it. The fighter's record moves with it. Needs an accepted offer and an event that has happened and was not cancelled. |S: iii record or clear result
+151|r16-2848e7d20ee0f861|S w/likely|PATCH /api/v1/seats/{flightId}/{seatNumber}|Update seat status | Updates a seat status and publishes seat.updated event to EventBridge. Called internally by booking-service. Invalidates Redis cache. |S: iii updates seat status
+152|r16-2bcd0b1d9afa1870|S w/likely|PATCH /m/{id}|Updates a member. | |S: iii updates a member
+153|r16-4ac217445ffb1ee0|S w/likely|PATCH /api/server0/users/identity/{identity_type}/{uid}|Update a user by external identity | |S: iii update user
+154|r16-72a5c32563b0635c|S w/likely|PATCH /api/v1/manage/coupons/{coupon_id}| | Base for all /api/v1/manage endpoints: authenticated active staff + completed MFA + explicit per-method permission (`permission_map`). Unmapped methods are denied.|S: iii update coupon
+155|r16-8d1a1de4fff409f6|S w/likely|PATCH /tessell-internal/network/private-link/{id}|Update Private Link | |S: iii update private link
+156|r16-debd161550212e02|S w/unsure|PATCH /Secretumlacertarum/yashers|Get some interesting information | TOP SECRET. Needs Authorization: Bearer token|S: PATCH with read-like text
+157|r16-edbea826907cd21c|S w/likely|PATCH /api/users/{id}/activate|Admin - activate user | |S: toggle activate
+158|r16-04107d226774a642|S w/likely|POST /bulk-index|Bulk index documents | Accepts a JSON array of documents. Items without a "text" field use the entire object as the document body.|S: ii index documents into own store
+159|r16-0602652bf6628a12|S w/likely|POST /api/v1/mdm/sources/add|Create Mmd Unit Sources | |S: ii plain create
+160|r16-06d45db82f31c32d|S w/likely|POST /services|Create new additional service | |S: ii plain create
+161|r16-07584e10e9c2d55b|S w/likely|POST /product.Product/CreateProductV2| | |S: ii create product
+162|r16-09ace86d9a12f5aa|S w/unsure|POST /v1/realize/pricing-requests|Query current provider pricing and issue an immutable quote | |S: issues stored quote after pricing query
+163|r16-09ea99c116972934|S w/likely|POST /likes|Post details for a given Id | Post details of like corresponding to the input Id|S: ii create like record
+164|r16-0b3123aff732653a|S w/likely|POST /admin/certification/questions|Create certification question (admin only) | |S: ii plain create
+165|r16-0c313f31cfdebd0b|S w/likely|POST /process/video/upload|Process uploaded video file (synchronous) | Upload and process a video file synchronously. This operation blocks until processing is complete. For large files (>50MB), use the async endpoint instead. |S: ii upload and process file
+166|r16-0c72304e6f219830|S w/likely|POST /api/dsh/reviews|dsh_review_create | |S: ii create review
+167|r16-0cc627ab891a403a|S w/likely|POST /curriculum-documents|Create a new curriculum document | Creates a new curriculum document for the given academic year and school.|S: ii plain create
+168|r16-0e303278a63197d7|S w/likely|POST /api/files/write|Write file | Writes content to a file in the WordPress directory|S: iii writes a file
+169|r16-141bb762736a625e|S w/likely|POST /api/v2.1/companies/{companyId}/users/{uniqueUserId}/checkin-text|Check in with a text report | This operation checks the worker in for a default time or a custom time if the optional interval is provided.|S: iii worker check in
+170|r16-163a69c274fab0c2|S w/likely|POST /assets/from-template|Instantiate an asset tree from a template | |S: ii create asset tree
+171|r16-18b05e4ce70a452a|S w/likely|POST /session/{sessionUuid}/userCapturedTarget|User captured target | |S: iii records captured target
+172|r16-25550e99cad8466d|S w/unsure|POST /api/domains/provision| | |S: provision domain no text
+173|r16-274bfc8055fd0e9b|S w/likely|POST /favoritos/{product_id}|Agregar favorito | |S: ii add favourite
+174|r16-28bcf951078607e3|S w/likely|POST /campaigns/{id}/items|List or create campaign items | GET: List all custom items for a campaign. POST: Create a new custom item (GM only).|S: ii create custom item
+175|r16-2942615966eb7b04|S w/likely|POST /users/{userId}/disclaimer|Acknowledge disclaimer | |S: iii acknowledge disclaimer
+176|r16-2aac7f72b0dcc7b4|S w/likely|POST /students/create|Add a new student | Add a new student to the university DB|S: ii plain create
+177|r16-2f72a8409a37ffc0|S w/likely|POST /restaurant/{id}/menu|Add a new menu item for a restaurant | |S: ii plain create
+178|r16-368613322757faf6|S w/likely|POST /value-list-definitions/{id}/values|Lägg till ett värde | Kräver `value-list:manage` (admin). Värdets maximala längd styrs av listans kopplade fält. Ett nytt värde i userRole kan inte tilldelas förrän rollen och dess rättigheter har definierats i koden. Det första värdet aktiverar validering mot…|S: ii add list value
+179|r16-37264151ee057cef|S w/likely|POST /event/human-output|Record content shown to a human user | |S: ii records event
+180|r16-37301626df0620b9|S w/likely|POST /calendars/checkin|Checkin | Checkin|S: iii checkin
+181|r16-383bf83ddcfa2a14|S w/likely|POST /user/nethlink|Record a NethLink heartbeat (last-seen) | Upserts the NethLink last-seen row for the authenticated user (one row per user). The username is taken from the JWT and the timestamp is generated server-side. The optional body carries the client's extension and, add…|S: iii heartbeat upsert
+182|r16-3947a4a98c65e2f6|S w/likely|POST /workspaces/{workspaceId}/archive|Archive workspace | |S: iii archive toggle
+183|r16-39a7d7223aca5fef|S w/likely|POST /api/loot/{userId}/loot-points|Award a LootPoints entry for a member (Quartermaster or Admin) | Adds an immutable LootPoints ledger entry. Requires the Quartermaster or Admin role. Amount is a signed whole integer (negative entries are corrections); reason is required. |S: ii ledger entry corrections possible
+184|r16-3b7b3515c8c31a79|S w/likely|POST /api/v2.1/companies/{companyId}/users/{uniqueUserId}/checkin|Check in | This operation checks the worker in for a default time or a custom time if the optional interval is provided.|S: iii worker check in
+185|r16-3b9e9637e9a77003|S w/likely|POST /catalogs|Create catalog item | Creates new catalog item with image upload|S: ii plain create
+186|r16-3d03a90dadd2a3ee|S w/likely|POST /auth/social/groups/block|Block group | Prevent further interaction with a group|S: toggle block
+187|r16-439d3a61eeac656f|S w/likely|POST /weekmenus|Save user weekly menus with timestamp validation | Saves weekly menus for the authenticated user with optimistic concurrency control. The request must include both the menu data and the lastModified timestamp received from the last GET request. If another clie…|S: iii save menus
+188|r16-449eab5911f159ec|S w/likely|POST /api/stock/adjust|Adjust stock with a reason and note | Apply a signed adjustment to on-hand stock and write exactly one `adjust` movement. The free-text `note` is required so every count change is explainable (US5-AC4). The adjustment is rejected, with no movement written and …|S: iii stock adjust
+189|r16-482a16b7346ca7a2|S w/likely|POST /api/knowledge-bases/{kbId}/documents|Upload one document to a knowledge base | |S: ii upload document
+190|r16-49e10f52413125b4|S w/likely|POST /save_scan|Save Scan | |S: ii save scan
+191|r16-4ba42ada63e8ff12|S w/unsure|POST /api/shop/identify|Identify item | Identifies an item (costs gold based on item quality)|S: identify item costs gold
+192|r16-4c8997786302613d|S w/likely|POST /api/boxes|Post boxes | Create a box|S: ii plain create
+193|r16-4d1bf577c8f6b88e|S w/likely|POST /taxonomy/suggestions|Submit a vendor category suggestion | Records the authenticated vendor's proposal for admin review. The vendor identity is derived from server-side ownership, not supplied in the request. The vendor may continue to use the nearest approved category. A suggesti…|S: ii records suggestion
+194|r16-4e7fc0aec0c5825c|S w/likely|POST /api/v1/lists/{id}/items|Adicionar jogo à lista 🔒 | O jogo é resolvido via `igdbId`/`id` numérico (find-or-create) ou reutiliza o `id` do banco quando é um cuid. |S: ii add to list
+195|r16-52280d4577e0233a|S w/likely|POST /context/projects/initialize|Initialize Project Code Graph | Initialize a new project's code dependency graph in Neo4j. Creates Symbol nodes and CALLS relationships for all provided files. Returns 409 if project already exists. |S: ii creates graph
+196|r16-55071bd52e0ff634|S w/likely|POST /v1/admin/quizzes/{quizId}/questions/import|Import a bounded batch of questions into a draft quiz | |S: ii import into draft
+197|r16-557f6607508f4d82|S w/likely|POST /restapi/v1/submissions|Create submission | Create a new competition submission (competitors only)|S: ii plain create
+198|r16-564c0eab80b30d26|S w/likely|POST /api/v1/admin/localized-messages|Create a localized message | |S: ii plain create
+199|r16-57925cf93cf78d40|S w/likely|POST /lexradar/inventions|Create invention | |S: ii plain create
+200|r16-584041d10a7113a3|S w/likely|POST /api/v1/usage/record/{teamId}|Record usage | Record query usage for a team|S: iii records usage
+201|r16-5cbc38cfecec67a6|S w/likely|POST /api/v1/trends/ingest/rising|Ingest rising queries | Ingests search queries that are rapidly increasing in popularity.|S: ii ingest data
+202|r16-5e0cecc86bedda4f|S w/likely|POST /api/courses/{course_id}/chapters/{chapter_id}/quiz/attempts|Grade a quiz attempt of the signed-in learner and save it; the correct answers come back only when the attempt passes | |S: ii grade and save attempt
+203|r16-5e461023fde9d0f6|S w/likely|POST /databases|Create a new database | |S: ii plain create
+204|r16-63d4f11f36c00cc2|S w/unsure|POST /api/decline_event| | Update news |S: decline event text says update news
+205|r16-67de935131819c60|S w/likely|POST /docs|Create document | Create document for specified event and current user in the current time and return its id.|S: ii create document
+206|r16-67fc6424a1d3f505|S w/likely|POST /api/v2.1/companies/{companyId}/users/{uniqueUserId}/checkin-audio|Check in with an audio recording | This operation checks the worker in for a default time or a custom time if the optional interval is provided, and includes an audio attachment.|S: iii check in
+207|r16-6b299d6430b6c85a|S w/likely|POST /v1/store/equip|Equip/unequip a frame or entry animation | |S: toggle equip
+208|r16-6b3928a04c43e984|S w/likely|POST /rag-documents|Upload RAG document | Uploads one source document as multipart/form-data, stores it, creates a RAG document record, and starts asynchronous processing. If neither courseId nor draftCourseId is supplied, a new draftCourseId is returned. Idempotency is scoped to…|S: ii upload document
+209|r16-6b5887b8589cb936|S w/unsure|POST /files/uploads|Request signed URLs for file upload | Returns pre-signed S3 URLs for direct browser upload|S: returns presigned upload URLs
+210|r16-6b8349d619dbdd6a|S w/likely|POST /api/chat/chat-with-notes|Grounded Q&A over generated notes workspace | Submits a student query grounded strictly against the generated workspace notes, terminology definitions, and syllabus graph. Automatically persists multi-turn dialogue history. |S: iii persists dialogue history
+211|r16-6e1c8a1f5b8cb335|S w/likely|POST /v1/endpoints/{endpointId}/disable|Disable delivery to an endpoint | |S: toggle delivery off
+212|r16-72428157a780f793|S w/likely|POST /inventory/beers|Add a beer | Inserts a new beer into the inventory.|S: ii plain create
+213|r16-7300e5e8149e85b9|S w/likely|POST /stock_adjustments|Write stock off, or correct a count | |S: iii stock correction
+214|r16-75b05868856e3011|S w/likely|POST /file-search-replace| | Searches for a specified string in a file and replaces it with a new string. Use with caution.|S: iii replaces text in file
+215|r16-75cef741ac72de0e|S w/likely|POST /kanban/tasks|Create Kanban task | |S: ii plain create
+216|r16-79e72989f6feb381|S w/likely|POST /admin/nodes|Create a node (draft) | |S: ii create draft
+217|r16-7ab42f3cc5ec244d|S w/likely|POST /api/v1/attendance/check-in|Employee Check In | Check-in for currently authenticated employee or on-behalf by HR/Admin.|S: iii check in
+218|r16-7be92a11edf96012|S w/likely|POST /uploads/{id}/verify|Verify Upload | Verify an uploaded document (admin only)|S: iii marks upload verified
+219|r16-877f97fdaeb8ba1f|S w/likely|POST /enrollment|adds an enrollment | Adds an enrollment to the system|S: ii plain create
+220|r16-8940fc36dc75624e|S w/likely|POST /api/validations/{validationId}/measures/from-template|Instantiate all catalog templates for the ticket's poste type | Requires `TECH_VAL`, `TECH_PREP`, or `ADMIN_IT`. Ticket MUST be in `EN_COURS`. Idempotent — re-invocation creates zero additional measures for templates already present on the ticket. Each newly c…|S: ii creates measures
+221|r16-89d4e53ac097ac86|S w/unsure|POST /metrics/{type}|Get data from type | Post a metric|S: post a metric ambiguous
+222|r16-8b0b3f5a3bfcae8a|S w/unsure|POST /on_update| | Returns updated service with updated runtime object|S: on update no clear text
+223|r16-951fd797d5678eba|S w/likely|POST /fill/target_custom_field|Workflow to fill a specific unfilled custom fields on a document | ## Supported Custom Field Types Currently this projects predicting the following kinds of custom fields: - [x] Boolean - [x] Date - [x] Integer - [x] Number - [x] Monetary - [x] Text - [x] Sele…|S: iii fills custom field
+224|r16-96ed9586463e2eb9|S w/unsure|POST /files|Discover drives, locate repos, or read/write allowlisted files | Restricted to CONNECTOR_FILE_PATHS. list_drives shows device roots and allowlisted roots per drive. locate_repo finds project candidates under allowlisted roots by markers such as .git, AGENTS.md…|S: discover read or write files
+225|r16-97eb6e2e37a163b6|S w/likely|POST /api/v1/sites/{siteId}/annotations|Create or update a Change Calendar annotation | |S: iii create or update annotation
+226|r16-97f8cc4ecedf07db|S w/likely|POST /clients/{clientId}/assignments|Assign client to agent or team | |S: iii assign client
+227|r16-9bd5c9352d269ea1|S w/likely|POST /levels/{level_id}/students|Assign students to level | Assign multiple students to a given level/class section.|S: iii assign students to level
+228|r16-9c7d8d00af70f438|S w/likely|POST /process-file|Process File | Process an uploaded CSV already stored in receivedFiles. Returns number of rows loaded into the database.|S: ii loads rows
+229|r16-9e61fe274eac1b1d|S w/likely|POST /checkin|Check in with QR code (Staff only) | Check in an attendee using QR code|S: iii check in
+230|r16-9e667bf3e7b5785f|S w/likely|POST /core/virtual-machines/{virtual_machine_id}/detach-volumes|Detach volumes from virtual machine | Detaches one or more volumes currently attached to an existing virtual machine. Include the virtual machine ID in the path and the volume IDs in the request body to detach the specified volumes from the designated virtual …|S: detach toggle
+231|r16-a7850e8d460af2c0|S w/likely|POST /api/v1/goals|Create a savings goal | |S: ii plain create
+232|r16-a8b3e8091fd05f54|S w/likely|POST /school_years|Post a school_year to database [OK] | Return a id if successful|S: ii plain create
+233|r16-a96453376ca28565|S w/likely|POST /api/v1/trends/ingest/interest|Ingest interest over time | Ingests historical interest data for a specific phrase and timeframe.|S: ii ingest
+234|r16-aa189437b7880f40|S w/unsure|POST /lawyer/upload-signature|Get signed Cloudinary upload params for the profile picture | Returns signed Cloudinary params for a direct browser-to-Cloudinary upload. Call this before /lawyer/update-profile when changing the profile image. |S: signed upload params
+235|r16-ab4a8b76d075e152|S w/likely|POST /workspaces/{id}/tasks|Create task | |S: ii plain create
+236|r16-ac3722a0331ad7be|S w/unsure|POST /speech-to-text/job/v1/upload-files|Get presigned upload URLs for a batch job | Generates presigned upload URLs for audio files that will be processed in a speech-to-text bulk job. |S: presigned upload URLs
+237|r16-ae65c9d200dcb9a2|S w/likely|POST /api/v1/incidents|Create or detect a new production incident | |S: ii create incident
+238|r16-afdc97b2c066d17b|S w/likely|POST /documents/{documentId}/archive|Archives a document without losing history | |S: archive keeps history
+239|r16-b1c8476a0cb661af|S w/likely|POST /majors/store|Creates a new Major. | |S: ii plain create
+240|r16-b27bfeab83e4d5c5|S w/likely|POST /business/{businessID}/follow/user/{userID}|Follow a user by a business | Retrieve all comments for a given post|S: ii follow
+241|r16-b29095970ada4b53|S w/likely|POST /mailbox/create|Creates a new (random) email address mailbox. | |S: ii create mailbox
+242|r16-b3adfa284357d4d7|S w/unsure|POST /files-return/upload-link/{id}|Get return files upload link | Get the upload link to return files to the share sender. |S: upload link
+243|r16-b3f6b771baae48a3|S w/likely|POST /redundantgroups/{redundant_group_id}/jobs|Add Jobs to Redundant Group | Add Jobs to Redundant Group|S: iii add jobs to group
+244|r16-b52acca6d594d506|S w/likely|POST /{session_code}/type|Type value | Type value|S: iii types into session
+245|r16-b5fb5610e480ff3f|S w/likely|POST /review/{review_card_id}/submit|Submit a rating for a review card | Writes one `review_attempts` row (history) and updates `review_cards` (latest state). Returns the computed next interval. |S: iii records rating
+246|r16-b8f675e34f5e2b4c|S w/likely|POST /api/suggest/record|Record query for suggestions | |S: ii records query
+247|r16-bb44f427bd42d41c|S w/likely|POST /category_groups|Post a category_group to database [OK] | Return a id if successful|S: ii plain create
+248|r16-cb22638f4de7cb51|S w/likely|POST /dashboard/changelog|Create a changelog item using a project query parameter | |S: ii plain create
+249|r16-ceb80a22ebac0e0d|S w/unsure|POST /api/v1/predict/|Create Prediction | |S: create prediction stored
+250|r16-cfd6d65854b13be0|S w/likely|POST /api/v1/admin/default-categories|Add a default category (site admins only) | Groups that already exist keep their own list.|S: ii plain create
+251|r16-d0da9460006fb55a|S w/unsure|POST /v1/vehicle-resolutions| | |S: no text
+252|r16-d593c94fffc9c8d5|S w/likely|POST /api/v1/checkinout|Sign in and sign out parameters accept full ISO8601 or simple HH:MM time strings. | |S: iii check in out
+253|r16-d5fbac2b4588e84c|S w/likely|POST /agents/{agentId}/vcs/unstage|Unstage files | |S: iii unstage files
+254|r16-d938780f8e1d6d9c|S w/likely|POST /api/temp/serviceoverview/reorder/|Reorder overviews | Reorder overviews Body: - overview_order: List of overview IDs in the desired order|S: iii reorder
+255|r16-d9d2474263095211|S w/unsure|POST /api/reviews|POST /api/reviews | Not yet described in schemas/routes.ts — path and method were read from the handler.|S: create review no detail
+256|r16-dc12106d960db578|S w/likely|POST /todo|Creates a Task item | creates a Task item|S: ii plain create
+257|r16-dd6fd106d2bf4266|S w/likely|POST /events/{eventId}/attend|Mark interest in attending an event | |S: iii mark attending
+258|r16-df2d02e596cde6f0|S w/likely|POST /api/kyc/me/documents/{docId}|Upload KYC document | |S: ii upload document
+259|r16-df457df0c62b5d6a|S w/likely|POST /foods|Create food | Create food|S: ii plain create
+260|r16-e573a21dc77555e3|S w/likely|POST /api/images|Create image | Adds an image to the repository. Image is not added if it already exists in the repository (hash match), or if the file size is larger than allowed (see config)|S: ii create image
+261|r16-e5fa8d47ce951bb1|S w/likely|POST /proposals|Orchestrate and create a new portfolio proposal | |S: ii create proposal
+262|r16-eb015061ff75808f|S w/likely|POST /chapters|Manage chapters collection | GET - returns list of chapters (filtered by course_id), POST - creates a new chapter|S: ii create chapter
+263|r16-f17ffc14028614dd|S w/likely|POST /entrega/entregas|Criar entrega | |S: ii plain create
+264|r16-f96f7d3680050d44|S w/likely|POST /batches/{batch_id}/teachers|Assign teacher to batch | Creates a teacher-batch assignment relation.|S: iii assignment relation
+265|r16-fd9ff2fe52685283|S w/likely|POST /databases/profiles/governance/options-profiles|Create a new Options Profile | |S: ii plain create
+266|r16-fdeffe0f355527db|S w/likely|POST /v1/vessels/{vesselId}/skippers|Add a vessel-owned skipper | Server-generates `id`. Idempotent for a case-insensitive, trimmed duplicate name. No update endpoint exists for a skipper.|S: ii plain create
+267|r16-08d88927ad35c501|S w/likely|PUT /bookings/services/cancel/employees/{id}|putEmployeeBookingServiceCancelTime | |S: iii sets cancel time on booking service
+268|r16-2408f13c032c2438|S w/unsure|PUT /collector/location|Location ping while online or on the way | Send about every 30 seconds while online. While the collector has an ACCEPTED pickup, the household receives `collector.location`. |S: location ping household sees it
+269|r16-32c40d926d84dc7a|S w/likely|PUT /api/v1/categories/{id}/| | PUT /categories/{id} and DELETE /categories/{id} -- both Museum Manager only (FR-CAT-002). No GET here: Document 04 has no single- category retrieve endpoint, only the list at /categories.|S: iii PUT category edit
+270|r16-360f895991ee3e1c|S w/likely|PUT /v1/ops/tenants/{id}/license/usage|Report a tenant's active user counts | The user-count reporter sends each tenant's active full, operational and self-service users, hourly. The hourly licence check evaluates every licence with the last full-user count and writes dev.depot.ops.license.changed.…|S: iii reports usage counts
+271|r16-46f090ae941ca2b5|S w/likely|PUT /api/payments/{payment}|Actualizar (también acepta PATCH) | Permiso requerido: `update payments` (roles: admin). Todos los campos son opcionales.|S: iii update payment record
+272|r16-6aeed57ed33deda2|S w/likely|PUT /university/{id}|Update university (partial) | Send multipart (optional `icon` + `university` JSON string) or a plain JSON body. A new icon replaces (and deletes) the previous one. |S: iii update university
+273|r16-7249351d3f312841|S w/likely|PUT /api/v1/admin/trust/site-policies/{site}|Write a site's moderation posture wholesale (omitted fields are CLEARED back to the platform default) | Platform staff with trust.term_manage (admin/ren) only. A null override means the site inherits the platform default.|S: iii write moderation settings
+274|r16-7bcb367f693c6c08|S w/likely|PUT /api/admin/configs/{...}| | Overwrite a whitelisted config file's raw YAML content|S: iii overwrite config
+275|r16-8c5da6b085701a49|S w/likely|PUT /owners/{ownername}|OwnersController_update / Owner情報の更新 | |S: iii update owner
+276|r16-8f1325fb27bd6e34|S w/likely|PUT /users/me|Updates the information about the authenticated user | Updates the information about the authenticated user NOTE: With this API you can't change your password or email. For that, see the relative APIs. |S: iii update own profile
+277|r16-9a59ca62fd7a417a|S w/likely|PUT /{uuid_str}/{key}|Put Clipboard Item | |S: iii put clipboard item
+278|r16-a55d6c9652f28f3e|S w/likely|PUT /groups/{groupId}/notification-subscriptions/{userId}/{topicKey}|Subscribe group user to a notification topic | |S: iii subscribe to topic
+279|r16-ec2921f2d6addd8e|S w/likely|PUT /admin/agencies/{id}/subscription|Assign/override a subscription | |S: iii assign subscription
+280|r16-1071411edec97394|S x/sure|GET /refresh|Refresh access token | |S: D141a refresh returns access token
+281|r16-1099dcc514559364|S x/likely|GET /schedule/delete|Delete a schedule by name | |S: a delete schedule on GET
+282|r16-1c51491d09160ed9|S x/likely|GET /api/auth/verify|Verify JWT token and get user | |S: D141b pure token check
+283|r16-3015d0611948e8fd|S x/unsure|GET /google_callback|Google authentication callback | Callback endpoint for Google authentication flow|S: D141a auth callback returns token
+284|r16-3c69dc449d91d96d|S x/likely|GET /q/analyticsclear|Clear a camera's heatmap or paths | |S: a clears heatmap data
+285|r16-3e5d570b1d8f61e7|S x/likely|GET /reset-password| | Request a code to reset password of a user|S: D141b reset code sent
+286|r16-46e100ae5558b40c|S x/sure|GET /email/verify/{user}|Verify email | Verifies a user's email using a signed URL.|S: D141b verify email
+287|r16-472ee5636f98d1d5|S x/sure|GET /auth/oidc/token| | Handle OIDC callback and exchange authorization code for session token|S: D141a OIDC returns session token
+288|r16-4e3014c5679149df|S x/likely|GET /invoices/{id}/email|Send an invoice email | |S: c sends invoice email
+289|r16-628110b94a7cf36e|S x/likely|GET /api/v1/accesstokenissue/rw/statistics|issueBucketStatisticsRWAccessToken | Issues a Google Storage access token for accessing the tenant's folder with statistics|S: issues storage access token
+290|r16-667d3118281a49a0|S x/likely|GET /v1/auth/google/callback|Google OAuth callback | |S: D141a OAuth callback session
+291|r16-6dbc38abaa91b534|S x/likely|GET /users/refresh-token| | |S: D141a refresh token
+292|r16-7c84ea4db0677815|S x/likely|GET /login|Create a FreePBX admin session cookie. | Returns `{ "success": true }` after seeding the AMP session as the `admin` user.|S: D141a creates admin session
+293|r16-a2dc308990eb8bce|S x/likely|GET /api/v1/users/invite-check|Check invite token | Check if an invite token is valid and whether the user already exists.|S: D141b invite token check
+294|r16-a7cadad4be65476b|S x/likely|GET /user/{id}/addgrouptouser| | |S: g adds group to user
+295|r16-ba6a238dd8448d19|S x/unsure|GET /api/payments/vtb/callback|VTB asynchronous payment callback (GET). | |S: d payment callback confirms
+296|r16-c2426637ff04bee3|S x/sure|GET /api/v1/auth|User login | |S: D141a user login
+297|r16-da0b901a7e576630|S x/sure|GET /api/v1/users/login|Login | Login User using ID and password|S: D141a login
+298|r16-deae227b45091f2c|S x/likely|GET /user/request-otp| | Generate OTP code for OTP verification|S: D141 generates OTP
+299|r16-f49ea680437f84ba|S x/sure|GET /api/v1/auth/verify|Verify user email token | Verifies a user's email using a verification token and marks the user as verified|S: D141b verify email token
+300|r16-fe199bcb424bb8eb|S x/sure|GET /verify-token|Verify JWT token | Verify if the provided JWT token is valid|S: D141b token validity
+301|r16-0e3abfb56575fcf5|S x/likely|PATCH /orders/{orderNumber}|Cancel an order | |S: f cancels an order
+302|r16-29eb9f557ada75b2|S x/unsure|PATCH /bookings/{id}|Update booking status (admin confirm/cancel) | |S: confirm or cancel booking
+303|r16-4000895ce47ffe80|S x/unsure|PATCH /api/v1/matches/{id}/status|Transition match status | Allowed transitions: `pending → accepted | declined | cancelled`, `accepted → completed | cancelled`. Accept/decline is receiver-only; cancel/complete either participant. |S: f status includes cancel complete
+304|r16-416821dda9ab0e4c|S x/unsure|PATCH /scim/v2/Users/{id}|Patch a user (SCIM) | |S: SCIM user patch may change access
+305|r16-57d143bca1a50c5c|S x/unsure|PATCH /orders/{id}/status|Apply an allowed order status transition | |S: order status transition
+306|r16-6f1c3002c4a0c8ab|S x/unsure|PATCH /api/reservations/{id}/confirm| | |S: confirm reservation
+307|r16-b17f8e595e5dc5c3|S x/unsure|PATCH /oauth2/loginRequest/{id}| | Updates the resource identified by id using data.|S: login request update
+308|r16-b1d86053b91840a8|S x/unsure|PATCH /api/subscriptions|Cancel, pause, or resume subscription | |S: f includes cancel subscription
+309|r16-c628949735c8a0c1|S x/unsure|PATCH /rides/{id}/customer-counter|Send a customer counter offer for a ride | |S: c counter offer sent
+310|r16-d0cbd341b69ea260|S x/likely|PATCH /api/v0/profile|Update User Profile | Updates the authenticated user's profile details. Allows modification of name, email, and password. Only fields provided in the payload will be updated. Passwords will be re-hashed prior to updating the database. |S: b can change password
+311|r16-e6c3a69facdaf18c|S x/unsure|PATCH /loans/{loanId}/return|Tiếp nhận hoàn trả sách | Yêu cầu PROCESS_RETURN. Tiếp nhận phiếu BORROWED hoặc OVERDUE, ghi thời điểm nhận trả. Nguyên vẹn không phạt: RETURNED và hoàn 1 khả dụng. Có phạt: FINE_PENDING, chưa hoàn khả dụng. Hư hại chỉ được hoàn sau thu đủ và phục hồi; mất khô…|S: receives return creates penalty
+312|r16-e9f965a7da2a644d|S x/likely|PATCH /api/admin/accounts/{accountId}|Đổi tên hiển thị, khóa hoặc mở khóa tài khoản | Khóa tài khoản thì các phiên đang mở của tài khoản đó hết hiệu lực trong vòng một phút. Không khóa được chính mình hay tài khoản hoạt động cuối cùng (409). |S: b lock ends sessions
+313|r16-f1088e0355f04b57|S x/unsure|PATCH /subscriptions/{subscriptionId}|Updates a (HTTP callback) subscription. | # General Some **parts** of an individual (existing) HTTP callback subscription will be updated on the server (therefore PATCH, see also https://jsonapi.org/faq/#wheres-put ). # Details As specified in JSON API at leas…|S: D141d updates callback subscription
+314|r16-0533cbe7654e8712|S x/sure|POST /me/2fa/disable|Disable email-based two-factor authentication | |S: D141 turning 2FA off
+315|r16-08f7a9b76a4ee00d|S x/sure|POST /auth/login|Authenticate User | Login a user with email and password.|S: D141a login returns token
+316|r16-0fbc3bbb6514da90|S x/sure|POST /adminotpvalidation|Otp validation | Otp Validation for admin login|S: D141b OTP validation for login
+317|r16-0fd201129cb39314|S x/unsure|POST /v1/organizations/{org_id}/messages|Create a new message | Create a new message with the provided details|S: iv create message may be sent
+318|r16-126aef1993bdf9bd|S x/likely|POST /connections/{provider}/consent|Grant or revoke one social connection's supported API scopes | |S: g grant or revoke scopes unspecified
+319|r16-1dbd42dbc02188ca|S x/sure|POST /is-user-email-exists|Check if user email exists | Checks if a user's email exists in the system|S: D141b is email registered
+320|r16-1f5da9cf437829c4|S x/likely|POST /AdminLogin|Admin login | Validates admin credentials (plain text match)|S: D141a admin login
+321|r16-2504e36072cadaf0|S x/unsure|POST /organization/seller|adds a new seller or updates existing | Adds or updates a user with user_type seller in the database|S: g adds seller user account
+322|r16-26fe6a09e32d3ab9|S x/unsure|POST /accounts/movements|Create account movement | Create a new movement (credit or debit) in the account|S: d credit or debit money movement
+323|r16-2b9ddf217a19f8f9|S x/unsure|POST /update_match|Send match data to Orchestrator | **Binary calls this endpoint on Mentoroid Backend.** Called by the coaching binary when a match ends. Sends match session data to the Orchestrator for PGA (Post-Game Analysis) processing. **Base URL:** `https://dev.mentoroid.a…|S: e sends match data to orchestrator
+324|r16-2c90de3a38b731fd|S x/likely|POST /self-descriptions/{selfDescriptionId}/revoke|Change the lifecycle state of a SelfDescription to revoked. | |S: b revokes self description
+325|r16-32af9512165fc67b|S x/sure|POST /auth/mfa/disable|Disable MFA (recent auth + TOTP code) | |S: D141 MFA off
+326|r16-34ca876850f017c4|S x/unsure|POST /api/tickets/{ticketId}|R222: Validate Ticket (API) | Mark ticket as used (scanner role). Access: ORG/scanner|S: marks ticket used scanner
+327|r16-392f52847ce4615a|S x/likely|POST /users/k-manager/create|Create Kitchen Manager | Create a new kitchen manager|S: g creates login account
+328|r16-396d739ef1a72191|S x/unsure|POST /api/v1/messages|Create a new message | Creates a new message with optional image upload to GCS|S: iv create message may be sent
+329|r16-3ee8e9ac772cc0f3|S x/sure|POST /api/auth/totp/disable|Disable TOTP 2FA | Disables TOTP for the user. Requires a valid TOTP code to confirm identity.|S: D141 TOTP off
+330|r16-4270960139349c74|S x/sure|POST /api/auth/verify-mfa|Verify MFA Challenge | Validates an RFC 6238 6-digit TOTP code against the MFA challenge ticket.|S: D141b verify MFA code
+331|r16-46c86a5cfead1395|S x/sure|POST /login/otp|Validates user's OTP code | |S: D141b validate OTP
+332|r16-48ca65dbc469539f|S x/sure|POST /auth/mfa/disable| | API endpoint to disable MFA.|S: D141 MFA off
+333|r16-4a333a48e49c4dff|S x/sure|POST /pages/configuracoes.php|Altera a senha ou exclui a conta | O campo `acao` indica qual operação o formulário executa.|S: b password change or account delete
+334|r16-4a6984b2d6c7b687|S x/likely|POST /topup|Top up wallet | Add balance to wallet|S: d adds wallet balance
+335|r16-4cffe69c22a49ef8|S x/sure|POST /auth/verify|Check if an access or id token is issued by sentinel and returns claims | |S: D141b token check
+336|r16-4dda7d97b7a20888|S x/sure|POST /auth/password-reset/verify|Verify password reset token | Check if a password reset token is valid|S: D141b reset token check
+337|r16-51086dfe158ece90|S x/sure|POST /tokenIsValid|Validate token | Check if the provided token is valid|S: D141b token validity
+338|r16-51685c13261d185b|S x/likely|POST /mail/users/remove|Remove mail user | Removes an existing mail user.|S: a removes mail user
+339|r16-53fa514d22d3c8dc|S x/unsure|POST /api/matches/verify-qr|Verify match QR token and return match metadata | |S: verify QR token
+340|r16-55b40005e4832768|S x/unsure|POST /users|adds a new user or updates existing | Adds or updates a user in the database|S: g adds or updates user
+341|r16-58c3a203782261d0|S x/unsure|POST /eth/signTypedDataV4|Sign Typed Data V4 | Signs typed structured data according to EIP-712|S: signs data with key
+342|r16-5dda2b970aff090b|S x/likely|POST /orgs/{org_id}/iam/groups/{group_id}/service-principals| | |S: g add service principal to group
+343|r16-6373d8790c01c506|S x/sure|POST /auth/verify-token|Verify token | Verify if a token is valid (returns boolean)|S: D141b token validity
+344|r16-64a6eb3524e5c171|S x/unsure|POST /admin/securityGuard/add-security-guard|Add SecurityGuard | Add SecurityGuard|S: g adds guard account
+345|r16-66bffaa53d085f65|S x/unsure|POST /business/auth/register|Register new business | Register a new business in the system|S: g register business account
+346|r16-685844c99eef673a|S x/sure|POST /customer/verify-otp|Verify customer OTP | Verify the entered 6 digit OTP|S: D141b verify OTP
+347|r16-69ac1ed24f8d0705|S x/likely|POST /api/v1/messages/upload-file|Send message with files | |S: c sends message
+348|r16-791c511011d4946c|S x/sure|POST /api/v1/account/email/exists|Check if email exists | |S: D141b email exists
+349|r16-7a8fb128910d87cb|S x/unsure|POST /v1/projects/{projectId}/uploads/{uploadId}/complete|Mark upload as complete (triggers processing) | |S: e triggers processing
+350|r16-8205e8a072baf588|S x/unsure|POST /friends|Send a friend request or add a friend | |S: c friend request sent
+351|r16-85237fcf40eb8658|S x/unsure|POST /api/verify-card|Verify a card key | |S: verify card key
+352|r16-85283e257675af31|S x/unsure|POST /returnorders/labels|Create a return order and its label | You can use this REST operation to create a label, label data or QR code for a return order via the API. Thereby the parcel can be channelled into the logistics network of Hermes Germany. You can create the label in three …|S: d creates carrier return label
+353|r16-8bb431ff2dddaeec|S x/sure|POST /users/token/validateToken|Validates whether a given token is valid - primarily for inter-service communication | |S: D141b token validity
+354|r16-91aeae701f8fb0a8|S x/unsure|POST /update|Checks whether a daemon update is available and can download and verify one.. | Checks whether a daemon update is available and can download and verify one. Restricted endpoints and methods are only registered when the daemon runs without --restricted-rpc and …|S: e downloads update
+355|r16-941f24e909ec67d1|S x/likely|POST /resources/{id}/delete/{costTypeID}|delete CostType from a resource | |S: a deletes cost type
+356|r16-98153dd361d78ae0|S x/unsure|POST /api/graphql|GraphQL endpoint | GraphQL endpoint exposing the same data as REST. See schema introspection or `backend/internal/graphql/schema.go` for the full type definition. Request body is the standard GraphQL POST shape (`query`, optional `variables`, optional `operati…|S: graphql could mutate
+357|r16-9b4c9f087154cf80|S x/likely|POST /auth/login|Validate Firebase token | Validate Firebase token and get customer profile|S: D141a login with token
+358|r16-a0ff2d0f0a36843a|S x/likely|POST /transactions/create/card-to-wallet|Card to wallet transfer | |S: d money transfer
+359|r16-a1cf30df0c74a6f9|S x/likely|POST /auth/verify|Verify JWT token | Validate a JWT token and return user information if valid.|S: D141b JWT check
+360|r16-ab0dca123624e7f8|S x/likely|POST /accounts/{address}/signers|Add a signer | Adds a new signer to the smart account|S: g adds signer
+361|r16-b11153ed8ecfa43b|S x/likely|POST /verify/email|Verify a single email address | Verify email address validity|S: D141b verify email
+362|r16-bb80073293d99331|S x/sure|POST /auth/mfa/disable|Disable MFA for user account | Disables multi-factor authentication. Requires valid TOTP code or backup code.|S: D141 MFA off
+363|r16-c00e894de62c6f37|S x/sure|POST /2fa/disable|Disable 2FA | Disable 2FA (requires password and TOTP code)|S: D141 2FA off
+364|r16-cd172207524ea523|S x/sure|POST /auth/verify|Verify user email | Verifies the user's email by checking the provided pin code against stored values.|S: D141b verify email pin
+365|r16-d006d5bc2491f4cc|S x/likely|POST /v1/tickets/{id}|Confirm ticket reservation | Confirms a reserved ticket (payment) before it expires. Requires attendee authentication.|S: d confirms payment
+366|r16-d54d15884bf087b9|S x/unsure|POST /api/rooms/{room}/poker/raise|Bet or raise | |S: d poker bet
+367|r16-dca041e45f79c056|S x/unsure|POST /alerts/{id}|Add or remove an alert's IP to/from whitelist or blacklist | Adds the IP address of an alert with the given ID to the whitelist or blacklist based on the 'add' query parameter|S: g whitelist or blacklist access
+368|r16-dd0ad4d7eb52ae7b|S x/unsure|POST /room/{room_id}/ws/token|Get a one-time token used to open a room's game WebSocket | |S: issues one-time token
+369|r16-dfb60ac29ed020b8|S x/sure|POST /v1/auth/existing-email|Check if user exists with this email or not | |S: D141b email exists
+370|r16-e5ab99e15690acb9|S x/sure|POST /api/mfa/disable|Disable MFA | Disable MFA for current user|S: D141 MFA off
+371|r16-e6181820bec0ca3e|S x/likely|POST /expert/signupexpert|Sign Up | get string by ID|S: g signup creates account
+372|r16-e7a16108787a7c2d|S x/sure|POST /users/token/validateToken/admin|Validates whether a given token is a valid admin token | |S: D141b token validity
+373|r16-ed18fa41e58b65bf|S x/likely|POST /distributions/upload|Validate and upload distribution CSV data for a given month | If the target month already has data, existing rows are deleted before inserting. Returns validation errors before writing if any partner names are unknown, inactive, or waitlisted. |S: a deletes existing rows
+374|r16-efdf038b9bdd1e7b|S x/unsure|POST /users/me/credits|Add credits to user account | Adds credits to the current user's account|S: d adds credits
+375|r16-f48d7edd28b09a09|S x/likely|POST /api/v2/cards/{id}/pin|Set card PIN | Sets the 4-digit PIN for a card|S: D141 sets card PIN credential
+376|r16-fd2a70978837869f|S x/likely|POST /api/login|Summary of login | |S: D141a login
+377|r16-fec5d0e34389b289|S x/unsure|POST /api/v1/workspaces|Create a Workspace | Creates a Workspace in an Organization. Only Organization Owners and Administrators can create Workspaces. A creator who holds an Organization Membership receives a Workspace Membership as Workspace Owner. |S: g creator gets owner membership
+378|r16-0544a740b14ae23d|S x/likely|PUT /tree/owners|Update tree's owners. Not used now, but implemented for the amazing future. | |S: g set owners without saying narrow or widen
+379|r16-1c44011cc8fcd88f|S x/sure|PUT /update-password/{id}|Update user password. | Update user's password.|S: b password change D130
+380|r16-268967e8ecd77509|S x/sure|PUT /api/v1/restricted/users-update-password/{uid}|Change a user's password | Change the password of an existing user by ID|S: b change password D130
+381|r16-2f69e1d7cddc29e9|S x/likely|PUT /projects/{id}|PUT /projects/{id} | Partial update. Omitting `members` leaves the roster untouched; sending an empty array clears it. Field updates and roster changes are applied in one transaction.|S: e empty members array clears roster
+382|r16-3269942f6b45dfc6|S x/sure|PUT /user/totp/disable|Disable TOTP | Disable TOTP|S: D141 TOTP off
+383|r16-44dfd95a2706f45b|S x/likely|PUT /users/{userID}/auth|Update a User's Authentication | |S: b updates authentication credential
+384|r16-5c5494466606cbdd|S x/likely|PUT /api/tenants/{tenantId}/slack|Bind Slack workspace | Binds or updates a Slack workspace to an existing tenant. Each Slack workspace can only be bound to one tenant. |S: D141d binds Slack destination
+385|r16-6cfc12c1925f6a2a|S x/likely|PUT /profiles|Create, update, or delete one or more profiles | Create, update, or delete one or more profiles in a single request. This is the recommended way of creating, updating and deleting profiles.|S: a can delete profiles
+386|r16-6dc0bf2fcd36c3a5|S x/unsure|PUT /v1/operator/accounts/{userId}/developer|Enable or disable developer entitlement | |S: g developer entitlement grant
+387|r16-6f091175e97a70d0|S x/unsure|PUT /order/{id}|Accept order | Seller accept order|S: d seller accepts order
+388|r16-78d53c9559412d70|S x/unsure|PUT /v2/pairings/{pairing_id}|Store one message of the exchange. | The order is `old_public` from a signed-in device, `new_public` from the new device, then `wrapped_key` from a signed-in device. Each is set once. A message from the wrong side answers 403, one out of order or already set 4…|S: sets wrapped key exchange
+389|r16-9047483e0a3e74ea|S x/unsure|PUT /v1/users|User create | |S: g user create can log in
+390|r16-9b9b9358ff528af1|S x/likely|PUT /users/me/security|Update security settings | Update current user's security settings like 2FA|S: D141 settings can turn off 2FA
+391|r16-a1aff3df4112b69f|S x/likely|PUT /user/payments/topup|Top Up Balance | top up balance by giving nominal in request body|S: d top up balance
+392|r16-b2bbd44fe8c9680d|S x/sure|PUT /user/verify/{id}|Verify User | Sample Payload: <br> `{`<br>`"otp": "ABCDEF" `<br>`}`|S: D141b verify OTP
+393|r16-b55435d80b96782d|S x/sure|PUT /integrations/omie/connection|Atualizar credenciais Omie (ADMIN) | |S: D141 stores credentials
+394|r16-b5cee9681720e4c2|S x/unsure|PUT /miles-balance/{passengerID}/deduct|Deduct miles from passenger balance | Fails atomically if balance is insufficient.|S: d deducts balance
+395|r16-ba7ef59fb37e3775|S x/unsure|PUT /admin/reviews/{id}/moderate|Moderate review | Approve or reject a review (admin only)|S: approve or reject review publishes
+396|r16-cbe7023a6753b09c|S x/sure|PUT /forgottenpassword| | Generate new password|S: b generates new password
+397|r16-d9915b9e0ef1ece6|S x/sure|PUT /api/campaigns/{id}/exotel-creds|Save campaign Exotel credentials | Stores per-campaign Exotel API credentials. Pass empty strings to revert to platform defaults.|S: D141 stores API credentials
+398|r16-db0c938751580a4b|S x/sure|PUT /users|Update a user's password | |S: b update password D130
+399|r16-f75913a01a0dad64|S x/unsure|PUT /policies/{policyId}|Update Policy | Update an existing policy|S: g policy update unspecified
+400|r16-fa8b2376930077b7|S x/unsure|PUT /bookings/{bookingId}/callback-device|Assign or reconfirm the callback device for one consultation | |S: D141d callback device

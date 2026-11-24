@@ -12,7 +12,7 @@ import { checkRwxlitePackage, loadRwxliteEngine, readRwxliteVersion, RWXLITE_PAC
  * The two steps the CLI runs: the package check, then the model load on the lib it returned.
  * @param {{dir: string, model: string, importer?: (name: string) => Promise<any>, versionReader?: () => string, threads?: number}} o
  */
-const load = async ({ importer, versionReader = () => '0.4.0', ...o }) => {
+const load = async ({ importer, versionReader = () => '0.5.0', ...o }) => {
   const pkg = await checkRwxlitePackage({ importer, versionReader });
   return pkg.status === 'off' ? pkg : loadRwxliteEngine({ ...o, lib: pkg.lib });
 };
@@ -91,7 +91,7 @@ test('loadRwxliteEngine: rows are sent in chunks of 64', async () => {
 
 test('loadRwxliteEngine: package not installed -> off with the install hint; other import errors are named', async () => {
   const missing = async () => { throw Object.assign(new Error("Cannot find package 'rwxlite' imported from /x/rwxliteengine.js"), { code: 'ERR_MODULE_NOT_FOUND' }); };
-  assert.deepEqual(await load({ dir: '/d', model: MODEL, importer: missing }), { status: 'off', reason: 'the rwxlite package is not installed (npm install rwxlite@0.4)' });
+  assert.deepEqual(await load({ dir: '/d', model: MODEL, importer: missing }), { status: 'off', reason: 'the rwxlite package is not installed (npm install rwxlite@0.5)' });
   const otherMissing = async () => { throw Object.assign(new Error("Cannot find package 'zzz' imported from /x/rwxlite/index.js"), { code: 'ERR_MODULE_NOT_FOUND' }); };
   const o = await load({ dir: '/d', model: MODEL, importer: otherMissing });
   assert.equal(o.status, 'off');
@@ -114,40 +114,40 @@ test('loadRwxliteEngine: an answerer whose model string differs from the verifie
   assert.match(r.reason, /rwxlite-0\.1\.0\+ffffffff.*verified folder is rwxlite-0\.1\.0\+0123abcd/);
 });
 
-test('loadRwxliteEngine (D135, D142): package 0.4.0, 0.4.1 and 0.4.17 are on; 0.3.1, 0.3.x, 0.5.0, 0.2.0, 0.2.1, 0.1.9, 1.4.0 are off with the reason', async () => {
-  assert.equal(RWXLITE_PACKAGE_RANGE, '0.4.x');
+test('loadRwxliteEngine (D135, D142): package 0.5.0, 0.5.1 and 0.5.17 are on; 0.4.0, 0.4.17, 0.6.0, 0.3.1, 0.2.0, 0.2.1, 0.1.9, 1.5.0 are off with the reason', async () => {
+  assert.equal(RWXLITE_PACKAGE_RANGE, '0.5.x');
   const answerer = { model: MODEL, answerMany: async (reqs) => reqs.map(() => ok(0.1, 0.2)) };
-  for (const v of ['0.4.0', '0.4.1', '0.4.17']) {
+  for (const v of ['0.5.0', '0.5.1', '0.5.17']) {
     const r = await load({ dir: '/d', model: MODEL, importer: fake(answerer), versionReader: () => v });
     assert.equal(r.status, 'on', v);
   }
-  for (const v of ['0.3.1', '0.3.17', '0.5.0', '0.2.0', '0.2.1', '0.1.9', '1.4.0']) {
+  for (const v of ['0.4.0', '0.4.17', '0.6.0', '0.3.1', '0.2.0', '0.2.1', '0.1.9', '1.5.0']) {
     const r = await load({ dir: '/d', model: MODEL, importer: fake(answerer), versionReader: () => v });
-    assert.deepEqual(r, { status: 'off', reason: `the rwxlite package is ${v}; this rwxmap accepts 0.4.x (D135); npm install rwxlite@0.4` }, v);
+    assert.deepEqual(r, { status: 'off', reason: `the rwxlite package is ${v}; this rwxmap accepts 0.5.x (D135); npm install rwxlite@0.5` }, v);
   }
 });
 
 test('loadRwxliteEngine (D135): pre-release, garbage, non-string and unreadable versions are off (fail closed)', async () => {
   const answerer = { model: MODEL, answerMany: async () => [] };
-  for (const v of ['0.4.0-beta', '0.4', 'x.y.z', '', undefined, 2, null]) {
+  for (const v of ['0.5.0-beta', '0.5', 'x.y.z', '', undefined, 2, null]) {
     const r = await load({ dir: '/d', model: MODEL, importer: fake(answerer), versionReader: () => /** @type {any} */ (v) });
     assert.equal(r.status, 'off', String(v));
-    assert.match(/** @type {any} */ (r).reason, /^the rwxlite package is .*this rwxmap accepts 0\.4\.x \(D135\); npm install rwxlite@0\.4$/, String(v));
+    assert.match(/** @type {any} */ (r).reason, /^the rwxlite package is .*this rwxmap accepts 0\.5\.x \(D135\); npm install rwxlite@0\.5$/, String(v));
   }
   const r = await load({ dir: '/d', model: MODEL, importer: fake(answerer), versionReader: () => { throw new Error('boom'); } });
-  assert.deepEqual(r, { status: 'off', reason: 'the rwxlite package version could not be read (boom); this rwxmap accepts 0.4.x (D135); npm install rwxlite@0.4' });
-  assert.equal(versionInRange('0.4.0+build'), false);
+  assert.deepEqual(r, { status: 'off', reason: 'the rwxlite package version could not be read (boom); this rwxmap accepts 0.5.x (D135); npm install rwxlite@0.5' });
+  assert.equal(versionInRange('0.5.0+build'), false);
 });
 
 test('readRwxliteVersion: walks up from the resolved entry to the package.json named rwxlite', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'rwxlite-ver-'));
   try {
     fs.mkdirSync(path.join(root, 'src'), { recursive: true });
-    fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: 'rwxlite', version: '0.4.0' }));
+    fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: 'rwxlite', version: '0.5.0' }));
     fs.writeFileSync(path.join(root, 'src', 'package.json'), JSON.stringify({ name: 'other', version: '9.9.9' }));
     const resolve = () => pathToFileURL(path.join(root, 'src', 'index.js')).href;
-    assert.equal(readRwxliteVersion(resolve), '0.4.0');
-    fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: 'not-rwxlite', version: '0.4.0' }));
+    assert.equal(readRwxliteVersion(resolve), '0.5.0');
+    fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: 'not-rwxlite', version: '0.5.0' }));
     assert.throws(() => readRwxliteVersion(resolve));
     assert.throws(() => readRwxliteVersion(() => { throw new Error('not installed'); }), /not installed/);
   } finally {

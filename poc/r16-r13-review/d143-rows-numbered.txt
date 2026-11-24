@@ -1,0 +1,526 @@
+1|r16-8c19dff85a496ef3|r|POST /account/list/daterange|listBookingsByDateRange|Alle Buchungen für einem Zeitraum auslesen | Auslesen aller Buchungen deren Buchungsdatum in einem bestimmten Zeitraum liegen.
+2|r16-e033b37684e66ce0|r|POST /accounts/{accountId}/bookings/search|searchBookingsInAccount|Search bookings in one account | Search bookings in one account 
+3|r16-b018f10d08995456|r|POST /api/ai/suggest-slots||Rank candidate slots for a booking | 
+4|r16-87c8822edb5cf0c0|r|POST /api/bookings/{booking_id}/check-payment|bookings.check_payment_post|Verify payment status (syncs with the provider). | Verify payment status (syncs with the provider). Auth: User JWT.
+5|r16-cc1d67c86040fd83|r|POST /api/bookings/availability|checkAvailability|Check jet availability | Checks if a jet is available for booking in a specific time period
+6|r16-6f3472d2d84ddd9b|r|POST /api/bookings/quote|getPriceQuote|Get price quote | Returns a price quote for booking a jet
+7|r16-949fcfed09cd09d3|r|POST /api/bookings/search|searchBooking|Search for a booking by reference number | 
+8|r16-6ecc3e4f974f4860|r|POST /api/checkin/search|searchForCheckIn|Search for a booking for check-in | 
+9|r16-f5f6be3616311c25|r|POST /api/my-reservations|myReservations|List reservations for a contact email | 
+10|r16-d294ed6c3080bbdc|r|POST /api/reservation/summary||Get Reservation Summary | 
+11|r16-c9749ca81a314fb0|r|POST /api/reservations/get|getReservations| | 
+12|r16-778996a1e86c3347|r|POST /api/reservations/list|listReservations| | 
+13|r16-79d485b570c8fc2d|r|POST /api/reservations/search|search_reservations_api_reservations_search_post|Search Reservations | Buscar reservaciones por múltiples criterios
+14|r16-f3cbee67602dd2cb|r|POST /api/rooms/bookings/properties/{propertyId}/booking|getInfoForAvailableRoom|Check for available room. | 
+15|r16-cd45e490fd80d656|r|POST /api/temp/multiservicebooking/suggest_sequence/||Suggest optimal sequence for multiple services | Suggest optimal sequence for multiple services
+16|r16-cf178e3492a3293f|r|POST /api/v1/bookings/{id}/check-in/|checkInBooking| | POST /bookings/{id}/check-in -- Cashier only (FR-TICKET-001 - FR-TICKET-003, FR-TICKET-005). Takes no request body (UAT round 1): the Cashier no longer suppl…
+17|r16-9142e6493a0ef2c8|r|POST /api/v1/itineraries/outlook||Itinerary booking outlook | Historical outlook for 2–4 ordered legs and each connection. Always 200. A leg with no history has a null outlook and an error, not …
+18|r16-8dfeac8c73d304b9|r|POST /api/v1/workshop-booking-group-lookups||Guest lookup of a group by group code and one contact proof | Replaces POST /booking-lookups (FR-048). Exactly one of `contactEmail` or `contactPhone`; both, or…
+19|r16-fe0d0a44cca6d72e|r|POST /bookings/{booking_id}/drivers-license/upload-url||Get presigned URL for license upload | 
+20|r16-f4f6f9e1254f6ed1|r|POST /bookings/{bookingId}/check-in||Check in to booking | 
+21|r16-9a82feaaba8ac70b|r|POST /bookings/{bookingId}/guest-registration-submissions/search|searchBookingGuestRegistrationSubmissions|Search guest registration submissions | Search for booking guest registrations
+22|r16-41aefd192f3af07a|r|POST /bookings/{bookingId}/guests/search|searchBookingGuests|Search Booking Guest | Search for guest within scope of bookings: - PM's bookings within their owned listings - Guests to see guest book of their current bookin…
+23|r16-cd77750c2abf995f|r|POST /bookings/{id}/cancellation-preview|cancellationPreview|Preview refund allocation | 
+24|r16-15ff4e4db8d6f938|r|POST /bookings/{id}/check-in||Check-in guest | Process check-in for a booking and set room status to occupied
+25|r16-8ddb45c1b059fa43|r|POST /bookings/{id}/check-in||Check in guest on arrival date (Staff & Admin) | 
+26|r16-c6bb1ccf14ab53c7|r|POST /bookings/{id}/check-in||Check-in booking | Mark a booking as checked in (allowed from 30 minutes before start until booked_to). The deposit is refunded to the member's balance.
+27|r16-1f0c9445bbe5fa76|r|POST /bookings/{id}/check-out||Register check-out now (005 FR-003) | Only when `status` = `departing` (checkOut = today, not checked out), otherwise 422 INVALID_STATUS.
+28|r16-b9e9cf38fc164aac|r|POST /bookings/{id}/check-out||Check-out guest | Process check-out for a booking and set room status to cleaning
+29|r16-8a2a950de9b9b33d|r|POST /bookings/{id}/checkin|checkIn|Check in a guest (changes status to checked_in) | 
+30|r16-94050b5ace2c33b9|r|POST /bookings/calculate-price||Calculate price for a potential booking | 
+31|r16-f6b426c7187eec11|r|POST /bookings/check-availability||Check resource availability | 
+32|r16-eea4bbc13846c3da|r|POST /bookings/estimate|getFareEstimate|Upfront fare estimate for instant or advance-scheduled trip | 
+33|r16-542598b78ad78146|r|POST /bookings/fare/calculate|calculateFare|Calculate fare for a journey | 
+34|r16-7e3631b1787d15fc|r|POST /bookings/preview||Calculate booking cost estimate | 
+35|r16-acb33b635be3de73|r|POST /bookings/quote|quoteBooking|Price a booking | Shows the full price breakdown (member discount, 10% tax, 2% service fee). Nothing is reserved.
+36|r16-2ff79dbd98301e78|r|POST /bookings/ride/quote||Calculate authoritative server-side ride fare quote | 
+37|r16-8755f258a05b9c12|r|POST /events-manager/v1/bookings/validate|validateBooking|Validate booking | Validates booking input without saving it. Availability, ticket, and required guest data checks run through the Events Manager booking object…
+38|r16-b40c7504f8cf8888|r|POST /events/api/v1/event/events/{id}/attendance||Get number of tickets booked using booking code | 
+39|r16-22d099a8b89ff43e|r|POST /find-availability|findAvailability|Find open reservation slots. | Returns availability slots by party_size, time_window, cuisine, and price_level.
+40|r16-c09a9b811ef2326a|r|POST /fishing/sources/detect|detectFishingSource|Probe a URL to guess its reservation platform, name, and vessel list before registering it as a source | 
+41|r16-2ded1d580672cab5|r|POST /intent|createIntent|Parse free text into a structured BookingIntent | Layer 1. May use an LLM. Not on the rush-hour hot path: normally called the night before, or once at conversat…
+42|r16-81462d65e7b0c9d6|r|POST /listings/{listingId}/bookings/search|searchBookingsInListing|Search bookings in one listing | Search bookings in one listing 
+43|r16-c8bb2d5ac6049cd5|r|POST /optimize-seating|optimizeSeating|Optimize seating/table assignment for a set of bookings. | Returns an optimized seating plan maximizing covers and turn efficiency.
+44|r16-190bc4a7aa31d47d|r|POST /parcel-bookings/estimate|estimateParcel|Get parcel delivery fare estimate | 
+45|r16-d3ffde7fc37f9cdd|r|POST /platform/v1/change-sets/{id}/validate|validatePlatformChangeSet|Capture target snapshots and reserve targets. | 
+46|r16-0647093b5c5cea59|r|POST /predict-no-show-risk|predictNoShowRisk|Predict no-show risk for a booking context. | Returns a no_show_risk score with contributing factors.
+47|r16-3d4e14943fa87ea7|r|POST /preservation_agreements||Return a summary of user-specific preservation agreement privileges of the specified user | 
+48|r16-2150a2987fe2fc0b|r|POST /pricing/calculate|calculatePrice|Calculate dynamic booking price | 
+49|r16-28e627757f6aabf9|r|POST /pricing/calculate||Calculate booking price | 
+50|r16-a601564e41ba14c9|r|POST /pricing/estimate||Estimate price before booking | 
+51|r16-6618bdbdc043eba6|r|POST /recommend-reservation|recommendReservation|One-call workflow — recommend the best reservation. | Orchestrates find-availability + predict-no-show-risk and returns a recommended slot with availability, pr…
+52|r16-ffa113e35e3b2dd6|r|POST /reservation/{id}/check||CHECKS IF THE IT IS AVAILABLE FOR RESERVATION | This api CHECKS IF THE IT IS AVAILABLE FOR RESERVATION
+53|r16-1510138c7bd529b7|r|POST /reservation/get|getReservation|Retrieve an existing reservation | Protected operation. Requires Authorization header. 
+54|r16-89fa6de00eb3c4f2|r|POST /reservations||find reservations | Finds all reservations for a given time period; Filter can be campus or campus + building or campus + building + room
+55|r16-a59f50af61b5dc97|r|POST /reservations/{reservation_id}/checkout|checkOut|Register item return with photo evidence | Only the renter can check out. Transitions: delivered → returned. Photo is required as evidence of item condition at …
+56|r16-000ba955728bfc03|r|POST /reservations/{reservationId}/check-in|checkIn|Check in for a reservation | Marks the customer as present: by the customer ("I'm here") or by the operator of that laundromat ("Mark present"). Anyone else get…
+57|r16-a140b68726a79063|r|POST /reservations/{reservationId}/check-in|checkInReservation|Check in the guest on a reservation | Renamed from `checkInGuest` in 0.3.0.
+58|r16-a9c401bdb19f5a0a|r|POST /reservations/check||Create Reservation | Create New Reservation
+59|r16-6178ed05c9c1e91b|r|POST /reservations4Room||find reservations (without roominfo) | Finds reservations for a given room and time period (For optimization, roominfo is not in response) 
+60|r16-ee1f413c8b396e9f|r|POST /smart-tourist/bookings/{bookingId}/cancel/preview|getSmartTouristCancellationPreview|Get penalty and refund preview before cancellation | 
+61|r16-3a1d5ccf77b1140b|r|POST /trips/lookup|lookupTrip|Look up a booking request | 
+62|r16-fd8bc02c144827dc|r|POST /usage/check|checkUsage|Check and reserve image usage | 
+63|r16-fac8616aa8c296b1|r|POST /v1/bookings/{id}/check-in||Registra check-in (confirmed → checked_in) | 
+64|r16-49d3d7483be83928|r|POST /v1/bookings/{id}/check-out||Registra check-out (checked_in → completed) | 
+65|r16-30f763ac5b8e5b0e|r|POST /v1/me/decisions/{decision_id}/compare|compareDecision|Reserved for a later milestone | 
+66|r16-f9e8ad24a72c444f|r|POST /v1/pnr/verify||Verify passenger booking via airline checker | 
+67|r16-7cf78eb0e909be42|r|POST /v1/query/stream||Reserved streaming endpoint (not implemented in v1) | 
+68|r16-c8b0eb03e2dd7ac1|w|POST /{tenant}/api/v0/bookings|| | Creates new booking
+69|r16-993c4d10f87de9cb|w|POST /accounts/{employerAccountId}/reservations/{id}/select-course|PostEmployerSelectCourse|Submit the selected course for a reservation | 
+70|r16-bd9862791c88db20|w|POST /accounts/{employerAccountId}/reservations/select-legal-entity/{id}|PostEmployerSelectLegalEntity|Submit the selected legal entity | 
+71|r16-db611bf20b2c24a6|w|POST /add|addByBookingJSON|Adds booking | Adds an associated with user with given parameters. NotificationPeriod is optional and must look like {number}s,{number}m or {number}h. Implement…
+72|r16-3a9a320b7f61c32f|w|POST /admin/booking-maintenance/toggle||Toggle booking maintenance mode | 
+73|r16-6ab12afce1c03ade|w|POST /admin/bookings|createBooking|Create a manual booking (walk-in or locked date) (admin only) | Create a new booking for a guest or lock a date without a specific guest. Requires admin authent…
+74|r16-977e31262f50867f|w|POST /admin/bookings/add-new-route||Add New Route | Add New Route
+75|r16-68c44d25e5dfc725|w|POST /admin/hosting/storage/targets/{targetId}/reserve|createStorageReserve|Provision the exact emergency reserve while healthy | 
+76|r16-4ef9c796cfec0f97|w|POST /admin/notification-settings||Change reservation notification preference | 
+77|r16-5ed7179496fae0b0|w|POST /admin/reservations/{id}/consume-seats|consumeSeats|Admin - mark seats as consumed (checked in) for a confirmed reservation | 
+78|r16-d6575f03a8d88ec9|w|POST /admin/reserved-usernames|adminAddReservedUsername|Add a reserved username | 
+79|r16-97358f238c820175|w|POST /agency/{agency_id}/client/{client_id}/booking-preference/requires-booking-password|setRequiresBookingPassword|Will Set Requires Booking Password | 
+80|r16-d37df34edbda6c1b|w|POST /agency/{agency_id}/client/{client_id}/booking-preference/requires-po-number|setRequiresPONumber|Will Set requires PO Number | 
+81|r16-25c275e19e584b16|w|POST /agency/{agency_id}/client/{client_id}/booking-preference/requires-shift-ref-number|setRequiresShiftRefNumber|Will Set requires Shift Ref Number | 
+82|r16-f8d72ad4db306c26|w|POST /agency/{agency_id}/client/{client_id}/booking-preference/requires-unique-po-number|setRequiresUniquePONumber|Will Set requires Unique PO Number | 
+83|r16-2f8b17ea88bd0ec4|w|POST /agency/bookings/{bookingId}/assign|assignBooking|Assign the nearest available truck and driver | 
+84|r16-c23c52ffc2a9dcab|w|POST /api/account/balance/reserve|account-reserve-balance|ReserveBalance | reserve balance from account
+85|r16-3d1a21ad15e8232e|w|POST /api/admin/bookings/{booking_id}/update-status|admin.bookings_update_status_post|Admin sets a scheduled booking's legacy status through the state machine. | Admin sets a scheduled booking's legacy status through the state machine. Auth: Admi…
+86|r16-c3eb8b2c4e6457e7|w|POST /api/admin/reviews|createAdminReview|Create a review without a booking | For testimonials collected outside the booking flow. Guest-submitted reviews still go through `POST /api/reviews`. 
+87|r16-182a1fd38571a461|w|POST /api/arb/bookings|arb_booking_create|arb_booking_create | 
+88|r16-893ac75570d7114c|w|POST /api/arb/bookings/{booking_id}/amendments|arb_amendment_create|arb_amendment_create | 
+89|r16-b1faa0e18064c0f9|w|POST /api/arb/bookings/{booking_id}/status|arb_booking_status_update|arb_booking_status_update | 
+90|r16-b2b03095899c3ed3|w|POST /api/book|create-booking|Create booking | create booking
+91|r16-291c2bd6c04899c3|w|POST /api/booking||Create Booking | 
+92|r16-5075121e77dc12a6|w|POST /api/booking||Create a booking | 
+93|r16-fa57026191446901|w|POST /api/booking||Create new booking | 
+94|r16-006b591a3c2c8c03|w|POST /api/bookings||Create ambulance booking | 
+95|r16-118864100aa679a8|w|POST /api/bookings|createBooking|Opret en ny booking | 
+96|r16-12a2f5e084f73794|w|POST /api/bookings||Create seat or wheelchair bay reservation | 
+97|r16-1a1655b4d1db8bfa|w|POST /api/bookings||Create a booking request for an experience | 
+98|r16-1a4fa7b65556ff06|w|POST /api/bookings||Store booking lead | 
+99|r16-203e33967805b5f5|w|POST /api/bookings||Create new booking | 
+100|r16-2d61f80dbfbd62d9|w|POST /api/bookings||Create a new booking for the selected time slot. | 
+101|r16-39650b87ed06f2af|w|POST /api/bookings||Create a new booking (Lock Seats) | Creates a new pending booking and locks the specified seats for 5 minutes.
+102|r16-4394a20d93941359|w|POST /api/bookings|bookings.create_post|Create a scheduled booking. | Create a scheduled booking. Auth: User JWT.
+103|r16-5934b2154d3743b0|w|POST /api/bookings|BookingsController_create|Create a booking (public, no auth required) | 
+104|r16-5b6480934d2949c7|w|POST /api/bookings||Create a booking (initiates saga) | 
+105|r16-5deff7e01c6f266a|w|POST /api/bookings|createBooking|Create a new booking | 
+106|r16-603c411f3037412e|w|POST /api/bookings|createBooking|Create a random lunch buddy booking | Creates an active booking for the current user and one randomly selected available buddy on the requested date.
+107|r16-84d40d5d58c62eb0|w|POST /api/bookings||Create a booking (idempotent) | The Idempotency-Key header is required. Repeating a request with the same key and body returns the original 201 response with `I…
+108|r16-a57cbd670e1739df|w|POST /api/bookings|| | Create a new booking
+109|r16-b292bde242948790|w|POST /api/bookings|postBooking|Create an appointment | Creates an appointment in Zoho Bookings. Returns `booking_id` and the formatted `timeslot` string for use as a Zoho Books custom field. …
+110|r16-b2d81847e162eca2|w|POST /api/bookings|storeANewBooking|Store a new booking. | 
+111|r16-b685f5e0ae7c51d9|w|POST /api/bookings||Create a booking for a tour | 
+112|r16-cecc2d1241ee2e0c|w|POST /api/bookings||Create booking and return QR | 
+113|r16-d0c5c000e7403293|w|POST /api/bookings||Create a booking request | 
+114|r16-e4952476f0c3b04c|w|POST /api/bookings||Create a new booking for a sun bed | 
+115|r16-e685bfc832a40a3e|w|POST /api/bookings|createBooking|Create a booking | Creates a new booking for a jet
+116|r16-e8fb300eed4333b1|w|POST /api/bookings||Create an atomic farmer booking | 
+117|r16-f79046e8d426d70a|w|POST /api/bookings||Reserve a room | 
+118|r16-fdba0673163f92e1|w|POST /api/bookings||Create a booking 🔵 | 
+119|r16-ed14c2b996dbf435|w|POST /api/bookings/|create_booking_api_bookings__post|Create a booking | Books a resource slot. Uses pessimistic locking to guarantee zero double-bookings. Returns QR code token and check-in deadline (15 min).
+120|r16-92e5ab452fb89368|w|POST /api/bookings/{booking_id}/assign-driver|bookings.assign_driver_post|Admin assigns a driver to a booking (admin only). | Admin assigns a driver to a booking (admin only). Auth: User JWT.
+121|r16-1b0c4db94540959b|w|POST /api/bookings/{booking_id}/dropoff-proof|bookings.upload_dropoff_proof_post|upload dropoff proof | Auth: User JWT.
+122|r16-90972c4c79528144|w|POST /api/bookings/{booking_id}/pickup-proof|bookings.upload_pickup_proof_post|upload pickup proof | Auth: User JWT.
+123|r16-ccdb463d051a3ce8|w|POST /api/bookings/{bookingID}/in-flight-perks||Attach an in-flight perks voucher to a booking | 
+124|r16-cb553626fbbc5d72|w|POST /api/bookings/{bookingID}/reports||Submit pet care daily report with photo (US 7-3) | Allowed during active service when booking is in in_progress status.
+125|r16-d8b49fa4325c85d7|w|POST /api/bookings/{bookingId}/seats/{bookingSeatId}/ticket||Generate unique ticket for confirmed booking seat | 
+126|r16-c2f8dc94881f924e|w|POST /api/bookings/{id}/vessel-overbooking|recordVesselOverbooking|Record that the carrier reported vessel overbooking | 
+127|r16-551ed2c17df33a0a|w|POST /api/bookings/create|createBooking|Create a new booking (JWT required) | 
+128|r16-fee6841f93a80b13|w|POST /api/bookings/hold||Acquire atomic 10-minute Redis TTL lock (SETNX) on selected seats | 
+129|r16-74ed0cc7f9cf3420|w|POST /api/bookings/reserve||Reserve seats for a travel | Create a new booking reservation with pending status. Seats are locked for 15 minutes and must be confirmed via payment. **Business…
+130|r16-6374f310c5422b20|w|POST /api/buy/reserve||Reserve a fiat-buy quote | 
+131|r16-6110a4cbf5f0d31e|w|POST /api/child-id-allocator/{parentId}/allocate||Reserve the next child bead id under a parent | Two-phase: allocate() reserves synchronously under a lease (default 60000ms); the caller must run `bd create --i…
+132|r16-b99d029621b9b307|w|POST /api/confirmQuotes||Create a new booking | 
+133|r16-fa4bb4b2629de844|w|POST /api/creations/{creationId}/images/uploads|createShowcaseImageUpload|Reserve a one-use showcase-image upload ticket | Requires the creation owner, exact Origin, and JSON. The returned Bearer token expires after ten minutes and is…
+134|r16-d40abffae6a21e26|w|POST /api/devices/reserve|reserveDevice|Reserves a device | Reserves a device and returns it (if successful)
+135|r16-2cdfec079247218b|w|POST /api/event-types/{id}/bookings|createBooking| | Checks the data, then the event type, then whether the interval is a slot, then whether it overlaps a booking of any event type.
+136|r16-d83e253e09a59308|w|POST /api/inventory/reservation|reserveInventory| | 
+137|r16-ad57768d0c4fb2c6|w|POST /api/inventory/reservations||Reserve stock with idempotency and TTL | 
+138|r16-9c2491e127bc9922|w|POST /api/inventory/reserve||Reserve stock (business result always in payload) | 
+139|r16-f808eb8e513214b6|w|POST /api/inventory/reserve|reserve| | 
+140|r16-0aa93dc71139b05b|w|POST /api/inventory/reserve-stock||Reserve stock | Reserve stock for pending orders or services
+141|r16-8d1a37ee222e6d43|w|POST /api/inventory/warehouses/{sku}/reserve||Reserve stock from best warehouse | 
+142|r16-6c853da21b46dcfe|w|POST /api/logistics/bookings/{bookingId}/container-number|recordContainerNumber|Record the container number | 
+143|r16-4715b3eb05613951|w|POST /api/logistics/bookings/{bookingId}/examination-hold|recordExaminationHold|Record a CBP examination hold | 
+144|r16-e4c8eb85ef73704a|w|POST /api/logistics/bookings/{bookingId}/vessel-departed|recordVesselDeparted|Record the vessel's departure | 
+145|r16-e2d17b5c5a0a22d5|w|POST /api/me/avatar/uploads|createProfileImageUpload|Reserve a one-use profile-image upload ticket | Requires an active onboarded account, exact Origin, and JSON. The returned Bearer token expires after ten minute…
+146|r16-27465d9c6f78b7ba|w|POST /api/requests/reservations/{book_id}|reserveBook| | 
+147|r16-3231f0c99123d595|w|POST /api/reservation||Create New Reservation | Create Reservation for User
+148|r16-23102c29c7ccf956|w|POST /api/reservations|createReservation|Create a reservation | Accepts only `NewReservation` fields. The server assigns `id`, `requester`, `status` (`pending`), `submittedAt`, empty `history`, and com…
+149|r16-2a00025df97e0f67|w|POST /api/reservations|createReservation|Rezervace titulu | Oprávnění: student. Volný výtisk se přidělí do konce data přidělení +3 dny; jinak čekání ve frontě. 409: READER_BLOCKED, DUPLICATE_RESERVATIO…
+150|r16-3bde66cca8cf1fc1|w|POST /api/reservations||Create reservation | Create a reservation for on-spot payment/pickup.
+151|r16-755807a797b8160d|w|POST /api/reservations|createReservation|Book a table | 
+152|r16-7b809c58f96f5e80|w|POST /api/reservations||Create a reservation (verified residents only) | 
+153|r16-7cbe7a1f44a274f6|w|POST /api/reservations||Create reservation (public) | 
+154|r16-885e2fb10f5c18a6|w|POST /api/reservations|createReservation|Place a hold on a media item | Queues a reservation for the authenticated member. Enforces per-member reservation limits and prevents duplicate holds for the sa…
+155|r16-c416cf01a6d617e0|w|POST /api/reservations|create_reservation| | Creates a new reservation
+156|r16-cc2e7145e91ae583|w|POST /api/reservations||create | 
+157|r16-cf63afc6176a8ed4|w|POST /api/reservations|postApiReservations| | 
+158|r16-d33061f480000dd4|w|POST /api/reservations|createReservation|Créer une réservation | Requires an open event budget. The agreed price is committed only after Budget approval; refusals and interrupted calls return a recover…
+159|r16-e4c03f93ab2075cf|w|POST /api/reservations||Reserve Bus | 
+160|r16-e74ee951469835dd|w|POST /api/reservations||Create a reservation | Target-platform contract; not implemented by the chat PoC.
+161|r16-233afa2a5cf9caf3|w|POST /api/reservations/update/{reservation_id}|postApiReservationsUpdateReservation_id| | 
+162|r16-3681f18338f6b4d8|w|POST /api/reserve|createReservation|Reserve a repeater prefix | 
+163|r16-10355c49ea14217c|w|POST /api/reserve/{point_id}|reserve_point_api_reserve__point_id__post|Reserve Point | 
+164|r16-2bd2986b94ed3ad4|w|POST /api/reserve/{point_id}/{minutes}|reserve_point_api_reserve__point_id___minutes__post|Reserve Point | 
+165|r16-78a5b336a7df92f8|w|POST /api/reviews|submitReview|Submit a review for a booking | 
+166|r16-c247598fb00d7c85|w|POST /api/ridebooking/trip||Create a new trip | Creates a trip with provided trip details
+167|r16-90512d44bde99cac|w|POST /api/rooms/{roomId}/reserve||Reserve a spot in a room | Reserve a participant slot in a room in advance Reserve a participant slot in a room in advance (max 5 registered viewers)
+168|r16-5017a31a90e8dbab|w|POST /api/rooms/properties/{propertyId}/rooms/{roomId}/booking|booking|Reserve a room in a time. | 
+169|r16-a4dc063db06873db|w|POST /api/rooms/reservations||Create a reservation for a room | 
+170|r16-6d238dd3ca6474b0|w|POST /api/study-groups||Create a reservation-backed Study Group as a student | 
+171|r16-4c45c9f167dcccc7|w|POST /api/trips-bookings-update|trips.update_booking_post|Update notes / seat count on a trip booking (status changes: see /api/trips-booking-status-update). Party-restricted. | Update notes / seat count on a trip book…
+172|r16-636245615dfb5f2d|w|POST /api/users/{username}/bookings/{homestay_booking}|createBooking|User Create Booking | 
+173|r16-496717baeeae35cb|w|POST /api/v1/admin/bookings/{reference}/notes||Add an internal note | 
+174|r16-f12520d6037d3807|w|POST /api/v1/assistant/conversations/{id}/turns|Reserveprivateturn|Reserve private turn | 
+175|r16-92ea35aee8c700ae|w|POST /api/v1/balance/reserve|reserve|Reserve | Reserve money
+176|r16-7bfd65b6533861c5|w|POST /api/v1/booking/manage/process||Agent marks a booking processing (docs OK + KYC approved) | 
+177|r16-43975b7e5958a1a8|w|POST /api/v1/bookings||Create an instant, scheduled, or recurring booking | 
+178|r16-4724359c385aca84|w|POST /api/v1/bookings||Create a conflict-checked vehicle booking | 
+179|r16-7583cb132b65bd75|w|POST /api/v1/bookings||Create booking (legacy route) | This route exists in code but creation logic expects `campgroundId` in path params. Prefer `POST /api/v1/campgrounds/{campground…
+180|r16-a643b7fa1ede8ec8|w|POST /api/v1/bookings||Create a booking | Requires `bookings:create` permission.
+181|r16-ad70f9749a8cbd15|w|POST /api/v1/bookings||Create a new booking | Create a new booking with seat selection
+182|r16-b4c92e0de4744737|w|POST /api/v1/bookings||Book a consultation slot | Protected against race conditions using row-level slot locking and database unique constraints. Requires `Idempotency-Key` header to …
+183|r16-b516307af78bef0b|w|POST /api/v1/bookings|createBooking|Create a booking | Create a booking on behalf of a customer. Requires the `Idempotency-Key` header (Stripe pattern). A retry with the same key + same body repla…
+184|r16-f16c8e8b3efa2d77|w|POST /api/v1/bookings|holdSeats|Hold seats | Reserves one seat per passenger on an upcoming flight and returns a `HELD` booking. The hold expires at `expires_at` (15 minutes by default) unless…
+185|r16-f31eade6a24ec8eb|w|POST /api/v1/bookings/||Create a booking | Create a new booking
+186|r16-25323b886b38cf81|w|POST /api/v1/bookings/{consultationId}/prescriptions|createPrescription|Create a draft prescription | Assigned doctor only. Items may only change before signing.
+187|r16-ff29c2534290525c|w|POST /api/v1/bookings/{id}/assign||Assign driver to booking | 
+188|r16-cf9998c36837702c|w|POST /api/v1/bookings/{id}/flag-mismatch/|flagBookingMismatch| | POST /bookings/{id}/flag-mismatch/ -- Cashier only (UAT round 1, Document 02 Sec 2.5's policy update). The other branch of the gate-side check-in decision, a…
+189|r16-3df4052fd839e8d1|w|POST /api/v1/bookings/{id}/inspection||Record the return inspection (admin) | One inspection per booking. The scheduled return is the end of `returnDate` in UTC (23:59:59.999Z). `lateHours` is the ov…
+190|r16-6d69da05f80d4e19|w|POST /api/v1/bookings/{id}/review||Create review | Create review for a confirmed booking
+191|r16-5b00c5211cad802c|w|POST /api/v1/bookings/{reference}/check-in/|bookings_check_in_create|Check in (from the app, or by the custodian) | 
+192|r16-c735b4b3ac02f752|w|POST /api/v1/bookings/create||Create a new booking | Create a new booking
+193|r16-ca62626d1e038a2e|w|POST /api/v1/bookings/create|createBooking|Create a new booking | **Requires role**: `user_client_role` Initiates the principal flow of the app by creating a new booking. 
+194|r16-7416b8f5991c70b5|w|POST /api/v1/bookings/guest||Create a guest booking | Create a booking without authentication for guest users
+195|r16-6b2ba1183b954e3c|w|POST /api/v1/bookings/hold||Create a seat hold | 
+196|r16-09411a6d56c90227|w|POST /api/v1/bookings/recurring||Create recurring bookings | Create recurring bookings
+197|r16-1f3c85f35b0b0618|w|POST /api/v1/business_registry/long_reserve_domains||Reserve domains for 1 year with payment | Creates a paid long-term domain reservation (1 year). This endpoint does **not** reserve the domains immediately — it …
+198|r16-466452f318d37181|w|POST /api/v1/business_registry/reserve_domains||Reserve domains for 7 days without payment | Creates free short-term domain reservations (7 days). Reserved domains receive a unique **registration code** (`pas…
+199|r16-586489ab45145ad6|w|POST /api/v1/campgrounds/{campgroundId}/bookings||Create booking for campground | 
+200|r16-0dd72c9317472f53|w|POST /api/v1/customer/bookings||Create a customer booking from a quote | Tenant + session user identity (no extra RBAC wrapper; behind RequireAPIAuth). Body requires `quote_id`; honors `Idempo…
+201|r16-dc7b1eceb34ba47e|w|POST /api/v1/energy-reservations||Reserve part of an Energy Position | 
+202|r16-28bc14ee5b4d3bc5|w|POST /api/v1/events/{eventID}/reservations||Reserve a place at an event | 
+203|r16-bda75f68c233a2ed|w|POST /api/v1/files|initializeUpload|Reserve quota and initialize a direct upload | Requires `files:write`. Send the same `Idempotency-Key` to safely retry for 24 hours. The returned URL is a tempo…
+204|r16-5a644d778b0d47e9|w|POST /api/v1/handles/reserve|post_post_api_v1_handles_reserve| | 
+205|r16-cc69b5c3f96d08a1|w|POST /api/v1/inventory/products/{id}/reserve/{quantity}||Reserve product quantity | Reserves a quantity of a product
+206|r16-4ef0cbe3c17b6f65|w|POST /api/v1/inventory/reserve||Reserve SKU quantities for an order | 
+207|r16-50f7c851801a3f34|w|POST /api/v1/inventory/reserve|reserve| | 
+208|r16-54817601bbfaf8b3|w|POST /api/v1/manage/venues/{venue_id}/bookings/{booking_code}/check-in|pOST|POST . | ../bookings/{code}/check-in: the player arrived. From an hour before the start until it ends.
+209|r16-0b3f258edb245640|w|POST /api/v1/operations-cost/departures/{departureCode}/reservations/{reservationId}/extraordinary-cancellation|recordExtraordinaryCancellation|Record the extraordinary cancellation of a reservation in execution (HU-OPS-005) | Only a departure in execution accepts it (`422 INVALID_STATUS_TRANSITION` oth…
+210|r16-bb36cfc839a16969|w|POST /api/v1/owner/venues/{venueId}/bookings/{bookingId}/no-show|noShow| | 
+211|r16-93a4c052c64589a1|w|POST /api/v1/partnership/restaurants/{restaurant_pk}/reservations/|restaurants_reservations_create|Create a restaurant reservation | Creates a new reservation for a guest at the specified restaurant if there is availability. At minimum you must provide `start…
+212|r16-fff72b515139798b|w|POST /api/v1/payments/checkout-session/{bookingId}||Create Stripe checkout session | Creates a Stripe Checkout Session for the authenticated user and booking (USER role).
+213|r16-03ce3be3e7c14e8e|w|POST /api/v1/products/{id}/reserve||Reserve product stock. | 
+214|r16-23ed773ae00ba79b|w|POST /api/v1/quota/reservations|reserve|Reserve quota atomically (FR-7, Challenge 1) | 
+215|r16-61b12091795596d6|w|POST /api/v1/rentals||Create a reservation (conflict-checked against the unit's calendar) | 
+216|r16-b29f9a407b54395e|w|POST /api/v1/reservation||Create a reservation | 
+217|r16-000d977a017af91d|w|POST /api/v1/reservations|createReservation|Reserve units of an item (idempotent) | 
+218|r16-451c75d7bdfd3497|w|POST /api/v1/reservations||Reserve a car type for a date/time and number of days | 
+219|r16-9e189df0f4fc1509|w|POST /api/v1/reservations||Create Reservation | Create a new parking spot reservation
+220|r16-a07b89ae7469a258|w|POST /api/v1/reservations||Create a new reservation | Create a new court reservation
+221|r16-b0869d5a92c930c2|w|POST /api/v1/reservations|createReservation|Create reservation request | 
+222|r16-ccf2f6ba705cb7f5|w|POST /api/v1/reservations|createReservationUsingPOST|Save a reservation | 
+223|r16-fc79c477014b719b|w|POST /api/v1/reservations||Create a reservation | 
+224|r16-595d285689e53ac1|w|POST /api/v1/reservations/create||create reservation | Create product amount reservation
+225|r16-a0c8240ee289cf3c|w|POST /api/v1/reservations/create||Create reservation | Create reservation
+226|r16-78fc3afa2f59cfdf|w|POST /api/v1/resources/{id}/reserve||Reserve with expected version | 
+227|r16-b2ac44457a3b7edf|w|POST /api/v1/seats/reserve||Reserve a seat | Reserve a seat for a user temporarily
+228|r16-b63c254bb4c4f170|w|POST /api/v1/table-reservations||Create reservation | 
+229|r16-56f9310f2dee4c4a|w|POST /api/v1/ticket-types/reserve/{eventId}|reserveTicket|Reserve tickets (internal use) | 🔧 **Internal use only** Reserve tickets for a specific event. This endpoint is intended to be consumed by the `booking-service…
+230|r16-2cf8fc1d558b4658|w|POST /api/v1/user/car-booking/temp/store||Create Temporary Booking | 
+231|r16-673e6b5637b7e455|w|POST /api/v1/users/reservations/|CreateReservation| | 
+232|r16-812554e5c9758ccd|w|POST /auth/booking/create||Reserve slot | Book a service slot for a customer
+233|r16-12dfc7080e56b185|w|POST /balances/{user_id}/reserve|ReserveFromBalance|ReserveFromBalance reserve value from user's balance | 
+234|r16-ac86bf4815af8b7a|w|POST /book||Create a booking | 
+235|r16-5f1a7aaa3369f16e|w|POST /booking|createBooking|Create a booking for a given route and userId | Create a booking for a given route and userId
+236|r16-62aecc0031dd913e|w|POST /booking||Create booking | 
+237|r16-b32d8c424b73ec36|w|POST /booking|createBooking|Buat booking baru | 
+238|r16-e7b5b696a152842d|w|POST /booking||Adds new booking entry | Creates function which adds new user data to database
+239|r16-73b55d02186259d7|w|POST /booking-intents||Create a booking intent (proposal door) | Opens a booking in `Draft`. `Idempotency-Key` is accepted and inert — the same key does not dedupe a different id, and…
+240|r16-45240f82fa160610|w|POST /booking-series|createBookingSeries|Create linked scheduled occurrences | 
+241|r16-eeda39444ea981ae|w|POST /booking/{professional_id}||Create a booking for a professional | Allows a logged-in user to create a booking with a professional.
+242|r16-a316aba4d1073653|w|POST /booking/{slug}/reserve||Book a slot | 
+243|r16-d8165fd3b09f240f|w|POST /booking/appointments|createAppointment|Create a new appointment | This operation allows creating a new appointment in the system. It requires an appointment structure as input. If the operation is su…
+244|r16-53dbe0b25abfbd97|w|POST /booking/checks|createCheck|Create a booking check of specific trip | A `CheckResponse` with an unique `checkId` will be returned, given a `Check` including a list of `segmentGroups` and i…
+245|r16-e1052f765e5542bb|w|POST /booking/reserve|reserveBooking|Reserve tickets for an event | Acquires a short-lived reservation (Redis lock + DB row). Requires `X-User-ID`. 
+246|r16-12a36195f3bb1135|w|POST /bookings|createBooking|Create a booking request | 
+247|r16-1ad204ecabfde76a|w|POST /bookings|createBooking|Create a booking (admin) | Admin-created booking (e.g. walk-in or phone booking). Bypasses availability checks if `force: true` is provided. Customers should us…
+248|r16-23c879ac1aca16ed|w|POST /bookings||Create request-based booking | 
+249|r16-26567a01a4dfb04d|w|POST /bookings||Create booking and reserve dates | 
+250|r16-26f0c0842b7e8aa2|w|POST /bookings||Create new booking | Create a new haulage booking request
+251|r16-2d017af232719128|w|POST /bookings||Create booking with idempotency and Redis lock | 
+252|r16-303591b4a7983bde|w|POST /bookings||Create a booking for a selected route for a single passenger | 
+253|r16-37e5ce6f1cd3103e|w|POST /bookings|createBooking|Create a Booking | Creates one synthetic Booking and Session. Requires `bookings:write`.
+254|r16-3ec78a43a6a472b2|w|POST /bookings|createBooking|Create booking | Create a new booking for a property
+255|r16-4439842f86098413|w|POST /bookings||Create an on-hold booking and reserve shared inventory | 
+256|r16-44ade0d4833edc80|w|POST /bookings||Create a new booking for a selected artisan and service | 
+257|r16-47c6c85cc3079722|w|POST /bookings|createBooking|Create a new booking (workspace, apartment, etc.) | 
+258|r16-53f1aabe67426064|w|POST /bookings|createBooking|Reserve an appointment | 
+259|r16-56b8afebde15ea02|w|POST /bookings||Create a booking for an event | 
+260|r16-59ad35cde52ad4b0|w|POST /bookings|postBooking| | Create a new booking.
+261|r16-5f336cc5d0b06e20|w|POST /bookings|create_booking_bookings_post|Create Booking | 
+262|r16-61ad893827cd50b0|w|POST /bookings||Create a property viewing booking (Customer only) - Handled in ACID Transaction | 
+263|r16-69f540e9786ea03f|w|POST /bookings||Buat booking baru | Customer membuat booking studio
+264|r16-6cd75c0636f0d064|w|POST /bookings|createBooking|Create a reservation | 
+265|r16-6da3e03baa6780c3|w|POST /bookings||Create a booking (Customer only) | 
+266|r16-7640ee6a49a34a30|w|POST /bookings|Bookings_create| | 
+267|r16-774e3b8069ee4245|w|POST /bookings|createBooking|Create a confirmed appointment | 
+268|r16-7f1246b0679b9c98|w|POST /bookings|createBooking|Create a procurement slot booking | 
+269|r16-b29004492971d5e3|w|POST /bookings|createBooking|Create a new booking (farmer) | 
+270|r16-b297a4b167440a25|w|POST /bookings|BookingsController_create|Create a new booking | 
+271|r16-b4542afa2240de55|w|POST /bookings|createBooking|Create a demo booking after server-side availability validation | 
+272|r16-b51a1e87cba84758|w|POST /bookings|createBooking|Create a new booking / advance reservation | 
+273|r16-b55f1baf41b4abfe|w|POST /bookings||Create a new booking/event | 
+274|r16-c35b065b6d2bfedd|w|POST /bookings||Create new booking request (Owner) | 
+275|r16-c4e7bb9eba067801|w|POST /bookings|createBooking|Tạo booking | userId bỏ trống nghĩa là đặt cho bản thân. Manager scope dựa trên department của booking owner; shared resource (departmentId=null) bookable cho m…
+276|r16-cf0c579b6ffea8ca|w|POST /bookings||Create a new booking request | Create a new booking request and get redirect URL for payment
+277|r16-d47bd1ac5a5ffd92|w|POST /bookings|createBooking|Create a booking for a parking slot | 
+278|r16-d4f51932d5abcdc2|w|POST /bookings|createBookingRequest|Create a booking request | 
+279|r16-d5ecab31a0c98a98|w|POST /bookings||Create a booking for a worker to attend a facility-maintenance job | 
+280|r16-d7d75311479b0ba8|w|POST /bookings||Create enquiry | 
+281|r16-da1e00ed5effc11e|w|POST /bookings||Create booking (standard service or custom) | 
+282|r16-eab1bb39e12d5c70|w|POST /bookings||Creates a booking from a live hold (quotes and freezes pricing at this moment) | 
+283|r16-ed1586fcaf7ffe4d|w|POST /bookings||Create booking (Ride, Laundry, or Food) | 
+284|r16-eee7b2305910792b|w|POST /bookings|createBooking|Create a booking (student) | 
+285|r16-f15b3ea0bc3ef97d|w|POST /bookings||Create a space reservation (Concurrency safe) | 
+286|r16-fb82f68047ed2f75|w|POST /bookings||Create booking (auth required) | 
+287|r16-fce227c766a6b0c0|w|POST /bookings||Atomically hold seats for 15 minutes, capped at departure | Unique trip/seat claims and serializable transactions guard against double booking. Fare is calculat…
+288|r16-c376533f6989d912|w|POST /bookings/||Create booking | 
+289|r16-4e7c9b0cb6d0f72c|w|POST /bookings/{booking_id}/edit/|changeBookingSeat|Change every seat in a reservation in the same booking class | Revalidates authority, confirmed status, departure time, seat activity, and ticket class. `seat_i…
+290|r16-cdb3f15220086a6a|w|POST /bookings/{bookingId}/counter-propose|counterProposeBooking|Mentor proposes a different time for the booking | 
+291|r16-1e2ce5499379c594|w|POST /bookings/{bookingId}/guests|addBookingGuests|Add guests to booking | Add guest data to booking
+292|r16-95b0abf35e332729|w|POST /bookings/{bookingId}/return/photos||Upload return checklist items | 
+293|r16-1699bc7e9ec38fe2|w|POST /bookings/{id}||create a booking | create booking in the database
+294|r16-cff89c73de87b313|w|POST /bookings/{id}/assign||Assign a game master to a booking | 
+295|r16-584f5ac3d45e73f4|w|POST /bookings/{id}/issues||Raise issue against booking with evidence | 
+296|r16-4b6d4d7df8d512d5|w|POST /bookings/{id}/no-show||Record a no-show by hand (the scheduler also does this). Permission facility-booking:booking:manage. | 
+297|r16-c3c58d2820a08060|w|POST /bookings/{id}/no-show||Mark rider as No Show | 
+298|r16-2c84ccfb342b4417|w|POST /bookings/{id}/notes|addBookingNote|Add internal note to booking | Append a timestamped internal note to a booking. Useful for tracking communications, special requests, etc. 
+299|r16-c30e6e252197115f|w|POST /bookings/{id}/pause||Pause a booking | Pause an active booking. Requires speed below 7 km/h. Saves the current GPS position.
+300|r16-0d79be395ec34d58|w|POST /bookings/{id}/pay|markBookingAsPaid|Mark booking as fully paid | 
+301|r16-889d7cfd0b561107|w|POST /bookings/{id}/pickup-proposals||Create pickup proposal | 
+302|r16-68f3d759475e1020|w|POST /bookings/{id}/rate||Submit rating after completed trip | 
+303|r16-07b1948634be59db|w|POST /bookings/{id}/reorder||Clone a previous booking into a new draft for the customer to confirm | 
+304|r16-bd4e43fac4bb8ced|w|POST /bookings/{id}/report||Create a report for a booking | Submits an incident report for a specific booking
+305|r16-1c2fd6d9b5d79372|w|POST /bookings/{id}/reschedule|rescheduleBooking|Move a session to a new time (trainer) | 
+306|r16-c0b1d10bf640aac3|w|POST /bookings/{id}/reschedule|rescheduleBooking|Reschedule a booking | Moves a booking to a new start time (and optionally to another staff member). The new start is re-checked exactly like create: working an…
+307|r16-b842490c23e3af98|w|POST /bookings/{id}/resume||Resume a paused booking | Resume a previously paused booking. Returns the saved pause position to resume GPS tracking from.
+308|r16-08548f68ca22c85a|w|POST /bookings/{id}/review||Submit a review for a completed booking | 
+309|r16-66c77213b01d0732|w|POST /bookings/{id}/review|createReview|Review a completed booking | Creates one review for a completed booking. Only the customer who owns the booking can review it. Requires the `CUSTOMER` role. 
+310|r16-86f831f766eea6b0|w|POST /bookings/{id}/reviews||Submit review for completed booking | 
+311|r16-474c2d76c61ebc5f|w|POST /bookings/{id}/status||Update booking status and optional clinical notes | 
+312|r16-31d58dd2347e49cc|w|POST /bookings/{property_id}||Create booking | Create a new booking
+313|r16-719239e651eb3443|w|POST /bookings/bulk|bulkCreateBookings|Bulk-create bookings | Imports up to 200 bookings in one request - built for migrations and channel back-fills. `mode` works exactly as on the calendar bulk end…
+314|r16-c5d21165269ebc43|w|POST /bookings/checkout/create|createCheckout|Create checkout session | Create a checkout session with payment intent for a booking intent
+315|r16-94015413b178c887|w|POST /bookings/conflicts/resolve|resolveBookingConflicts| | 
+316|r16-86f98a32bcc3a08a|w|POST /bookings/create||Create a booking | Create a new booking with the provided data
+317|r16-8a5de330af0832e2|w|POST /bookings/create||Creates a new booking | Allows a user to create a booking for a workshop. The user must be authenticated.
+318|r16-2542e3728e8916db|w|POST /bookings/create-session|createBookingSession|Create booking and payment session | Create a new tour booking and Stripe payment session for checkout. **Access:** Open to all users including guests - **Authe…
+319|r16-0f69b73253d00838|w|POST /bookings/discounts|createDiscount|Create a discount | 
+320|r16-5abc23148692e256|w|POST /bookings/employees/substituterequests|createSubstituteRequest|createSubstituteRequest | 
+321|r16-fe90996d4c0b0f03|w|POST /bookings/groupactivities/bookfamily/customers/{id}|setBookingDetailsForCustomerFamilyMembers|setBookingDetailsForCustomerFamilyMembers | 
+322|r16-b182eb6cc43ded3e|w|POST /bookings/hold||Hold seats for a trip | 
+323|r16-c494a6dd16533be4|w|POST /bookings/hold|createBookingHold|Create booking hold with confirmation URL | Creates a temporary booking hold that expires after a set time. Returns a confirmation URL for the customer to compl…
+324|r16-ccbdf903f86ee533|w|POST /bookings/hold||Hold a room atomically with transaction and duplicate-key fallback | 
+325|r16-09fc38166862d764|w|POST /bookings/intent/create|createBookingIntent|Create booking intent | Create a new booking intent for checkout (no authentication required)
+326|r16-7a190db87c0c394c|w|POST /bookings/lock||Lock a seat (uses Redis lock under the hood) | 
+327|r16-ecdc5bda8bc78384|w|POST /bookings/payments||Add payment to booking | Record a new payment (cash, credit_card, debit_card, bank_transfer) for a booking
+328|r16-d06af508e922dcb7|w|POST /bookings/quick-book|quickBook|Quick book reservation | Create a reservation directly without going through booking intent flow
+329|r16-07fdcb87518ebe77|w|POST /bookings/reserve||Reserve seats | Temporarily lock seats for a user session during checkout (10 min expiry)
+330|r16-e3b8cb4349d45779|w|POST /bookings/tariffs|createTariff|Create a tariff | 
+331|r16-9b23b3697dc804f5|w|POST /bookings/update-payment-status||Update booking payment status | 
+332|r16-ba3ee39c76135696|w|POST /bookingtype||Create New Booking Type. | Create a new Booking Type.
+333|r16-afa1659fd5deaa0f|w|POST /books/{book_id}/reserve|reserveInventory|Reserve inventory for a book | Reserve a specific quantity of a book for a limited time period, typically used during checkout processes. **Features:** - Tempor…
+334|r16-59d4bc508ab7378e|w|POST /budgets/{department}/reserve|budgets-reserve|Reserve an amount against a department's budget | No CRUD verb prefix matches 'reserve', so this is an action_style: sub-resource action. Subtracts amount from …
+335|r16-ae308a651372e127|w|POST /business/booking/{bookingId}/assign||Assign booking to driver/vehicle | 
+336|r16-9919c9b8bf378d1b|w|POST /capacity/reservations|createSlotReservation|Reserve dock-slot capacity for a week | 
+337|r16-8909b6dc24cb564d|w|POST /cars/{id}/reserve||Reserve a car | Reserves an available car for a customer.
+338|r16-dcdeb3d607ab48e2|w|POST /cart/reserve/store/{storeId}/item/{itemId}|reserveStockItem|Reserve item to be notified when store stocks up | 
+339|r16-56b6436022c0ee49|w|POST /checkout|checkout|Checkout a reservation | Creates a checkout session for a reservation
+340|r16-c6d938f645adcf56|w|POST /checkout/intent/create|createBookingIntent|Start a new booking (ALWAYS call this first) | Public endpoint. Creates a booking intent to begin the checkout process. REQUIRED as the first step for all new h…
+341|r16-12c007379b1450d4|w|POST /clinic-reservations|createClinicReservation|Create clinic reservation | 
+342|r16-586a399d497a83aa|w|POST /compliance/doctors/{userId}/suspend||Suspend a clinician (de-list, block booking) | 
+343|r16-41cfe804fc054c92|w|POST /concerts/{id}/zones/{zone_id}/seats/{seat_number}/reserve||Reserve a Seat | Reserves a seat for a concert by locking it for the current session
+344|r16-d9f8a5dd62172def|w|POST /conversions/job_booked|recordJobBooked|Record job booking conversion | 
+345|r16-c14d8efae601f0b9|w|POST /cottage/{name}/booking||Create booking | Register a booking for a cottage
+346|r16-9f69316590671595|w|POST /courts/{id}/bookings||Create court booking | Book one or more available time slots for a specific court.
+347|r16-bb3332a138226cfe|w|POST /create|createbooking|create booking | 
+348|r16-bf155a75126d7d4f|w|POST /credits/reservations|reserveCredits| | 
+349|r16-d7098c2c6e66d7e4|w|POST /customer/bookings/add-entourage-booking||add entourage booking | add entourage booking
+350|r16-744721d9ee489e60|w|POST /customer/bookings/add-onsiteProtection-booking||add booking | add booking
+351|r16-20ac198b4e3c96e1|w|POST /customer/bookings/add-review||Add Review for guard | Add Review for guard
+352|r16-826de25d8791a4bc|w|POST /customer/bookings/add-securityRide-booking||add booking | add booking
+353|r16-3f8f740f1c298b37|w|POST /customer/reservations/{id}/ratings|submitRating|Submit Rating and Comment for Reservation | Submits a multi-factor user review and overall score rating for a previous completed session.
+354|r16-c547084ea46d1400|w|POST /customers/{customerId}/bookings/groupactivities|curatedCreateCustomerGroupActivityBooking|Create a customer group activity booking | 
+355|r16-60fcbe0a412aa1b5|w|POST /debug/chargers/{id}/status|debugSetChargerStatus|Force a charger's status (cannot override an active reservation) | 
+356|r16-a9c6b1c0779adcf2|w|POST /documents/upload|uploadDocument|Upload document for a booking | [Extra Feature: documents] Upload a document related to a booking (metadata and content). 
+357|r16-f5c724616f40a169|w|POST /documents/upload-url||Reserve a document row and return a presigned S3 POST | Presigned **POST**, not PUT: POST can enforce `content-length-range` and `Content-Type` in the policy, s…
+358|r16-5f9ca828d03868a3|w|POST /driver/trips/{bookingId}/status|updateTripStatus|Update the current trip status | 
+359|r16-da297624b927d202|w|POST /edge/bookings|addBookingUsingPOST|addBooking | 
+360|r16-79f4d455cd451530|w|POST /enrollments/{id}/seats|updateEnrollmentSeats|Change the number of seats in a booking | 
+361|r16-72d30992d5b39dae|w|POST /event-requests/{eventRequestId}/technical-request/reservations||Atomically reserve all lines in the approved current request | 
+362|r16-6c0a47d2f9831ffc|w|POST /events||Create a new event to assign bookings | 
+363|r16-bd317d656c3a93f0|w|POST /events|trackEvent|Record a first-party conversion event (call_click, book_click, booking_completed, landing_view) | 
+364|r16-95479049304a52b3|w|POST /events-manager/v1/bookings|createBooking|Create booking | Creates a booking for an event using ticket-space selections. Anonymous booking creation is disabled by default in the service unless explicitl…
+365|r16-98f48de741342e00|w|POST /events/{eventId}/attendance||Validate attendance using booking ID | 
+366|r16-2e492a575cfe62a3|w|POST /events/{eventId}/bookings|createBooking|Create booking (manual seat assignment) | Org member. Manual booking path — separate from the seating draft flow. Creates a booking for an available seat immedi…
+367|r16-ac5341c779d43ce8|w|POST /events/{eventId}/bookings/batch|createBookingsBatch|Create bookings in batch (seat grid) | Org member. Manual booking path — separate from the seating draft flow. Creates one guest and one booking per item in a s…
+368|r16-4df324381f1b840e|w|POST /events/{eventId}/reservations|createReservation|Reserve tickets (create a hold) | Creates a `PENDING` hold and decrements available inventory inside one PostgreSQL transaction guarded by a `SELECT ... FOR UPD…
+369|r16-f5396b4e69390365|w|POST /events/{eventId}/seats/{seatId}/reserve|reserveSeat|Reserve a held seat | 
+370|r16-76eb1f0c494301d9|w|POST /events/{id}/holds||Reserve tickets (atomic hold, 10 min TTL) | Atomically captures qty available tickets of the category (SELECT … FOR UPDATE SKIP LOCKED). Concurrent reservers ge…
+371|r16-68f4e3199b29039b|w|POST /events/{id}/reservation||Make reservation for a workshop | Make reservation for a workshop by providing its ID, name and email
+372|r16-9d25ea0a0ddbabb1|w|POST /events/{id}/reserve||Reserve tickets | Create a temporary reservation for tickets. Tickets are held for 5 minutes. **Validation Rules:** - Event must exist and be active - Event mus…
+373|r16-ef5bac455060c000|w|POST /exchange/b2bpartner|addB2BBooking|Receive Exchange B2B Partner Data | 
+374|r16-830601947384a56c|w|POST /exchange/single|addBooking|Book | 
+375|r16-45e739260b802802|w|POST /facility/{facilityId}/timeSlot/{timeSlotId}/Reservation|createReservation|Create a reservation | 
+376|r16-cafaabafc04fb9d8|w|POST /finances/documents|create_booking_and_payment_file|Creates a single booking and payment document containing all expenses ready for payment. | 
+377|r16-92fbac2a42a21c49|w|POST /fishing/sources/{id}/vessels|addFishingSourceVessels|Add vessels to a fishing reservation source | 
+378|r16-e72db7961521efc5|w|POST /gamingCenters/{id}/reservations|createReservationAsStaff|Create Reservation (Operator/Staff) | Creates a new station reservation directly via operator/staff panel.
+379|r16-95ee14ecc8d5f1a0|w|POST /gamingCenters/{id}/reservations/{rid}/no-show|markReservationNoShow|Mark Reservation as No-Show | Marks the booking as missed due to customer absence.
+380|r16-9864e8dc58ceb33a|w|POST /garden/reservations|createGardenReservation|Reserve the garden table for an evening | 
+381|r16-330320f5ebeaebc6|w|POST /guard/bookings/add-new-polylines||Add new polylines | Add new polylines
+382|r16-43af8cf4d164ed4b|w|POST /guard/bookings/add-review||Add Review for customer | Add Review for customer
+383|r16-a6ae7f17b3065d7f|w|POST /guest/bookings|GuestBookings_createBooking| | 
+384|r16-0afe9f174aec0d42|w|POST /hospedes|createHospede|Create a new hospede (reservation) | 
+385|r16-0dc7466b27520e77|w|POST /ingestion-flow-files/reservation|createIngestionFlowFileReservation|create-ingestion-flow-file-reservation | 
+386|r16-ba962500b1c98ed6|w|POST /intake/online||Create Online Booking | Pre-registers an existing patient online. Does NOT generate a physical queue ticket yet; generates an `online_active_key` and QR identif…
+387|r16-cdc1de6a2398ddd7|w|POST /internal/reservations|createReservation|Atomically hold seats for an order | Used by the Admission Service saga. The operation is idempotent per `operationId`: replaying the same payload returns the s…
+388|r16-1e91f21d6f8bec58|w|POST /internal/stock/reservations|reserveStock|Reserve stock for a checkout group | Reserves stock for all items in a checkout group. All-or-nothing: if any item has insufficient stock, the entire reservatio…
+389|r16-1f565e27f7819c1c|w|POST /inventory/reservations|createReservation|Create an inventory reservation for an order | 
+390|r16-e522c617259ea81e|w|POST /inventory/reservations||Bước tiến — giữ hàng cho đơn (idempotent theo reserve_op_id) | 
+391|r16-8bbf1e17eadb662e|w|POST /inventory/reservations/{id}/commit||Move ACTIVE to COMMITTED and subtract onHand once | 
+392|r16-2723ffbd356c2369|w|POST /inventory/reservations/{id}/release||Move ACTIVE to RELEASED; repeated release is idempotent | 
+393|r16-032808e34e63beee|w|POST /inventory/reserve|reserveStock|Reserve stock | Reserves stock for later use
+394|r16-dd089ac254fe5072|w|POST /inventory/reserve/{product_id}||Reserve stock | Reserve stock for a product (typically for pending orders)
+395|r16-e217909a345f88d7|w|POST /ip-inventory/assign-ip-serviceId|assignIpServiceId|Assign reserved IP addresses to a service | Assigns one or more reserved IP addresses to the given service. The current parser accepts the task shape, where eac…
+396|r16-84122b283e70636b|w|POST /ip-inventory/reserve-ip|reserveIp|Reserve IP addresses | Reserves an available IP address for the given service and requested address family. `ipType` is parsed case-insensitively as `IPv4`, `IP…
+397|r16-6c7e27a591ad7774|w|POST /IP.svc/ChangeReservation|ipwsChangeReservation|Change seat reservation (connection/time/direction) | 
+398|r16-0405eea3debf4bf3|w|POST /IP.svc/SetTckPlaceReservations|ipwsSetTckPlaceReservations|Choose seat reservations (coach/place selection) | 
+399|r16-718809e392f38b68|w|POST /IP.svc/TryTckReservePlace|ipwsTryTckReservePlace|Try to reserve selected places without committing | 
+400|r16-a480906cd36adfa2|w|POST /items/{item_id}/reservations|createReservation|Request a reservation | Creates a reservation in "requested" status. Validates: - Dates are valid (end_date >= start_date, start_date >= today) - User is not th…
+401|r16-3b226f5ee66c7e10|w|POST /jobs|createJob|Customer creates a job booking | 
+402|r16-65d5f09f2bf91b9f|w|POST /journey/{journeyId}/block|blockSeat|Block a seat for a journey when a booking is made | Block a seat for a journey when a booking is made
+403|r16-68dd2da7656ac829|w|POST /laundry/bookings|createLaundryBooking|Book an available laundry slot | 
+404|r16-54f666893954de81|w|POST /listings/{listingId}/manual-bookings|createManualBooking|Create a manual booking | Create a manual booking
+405|r16-c65f759e76ae663d|w|POST /listings/{listingId}/snoozes|snoozeListing|Create a snooze booking | Create a snooze booking 
+406|r16-75c3cce10f0e3a8b|w|POST /loyalty/reservations/{userId}/{cartId}|createLoyaltyReservation|Create a loyalty reservation for a cart | Reserves points for an in-flight checkout so balances remain accurate while payment authorization completes. Requires …
+407|r16-fa16b82e665dfc0c|w|POST /machines/{machineId}/bookings|createBooking| | 
+408|r16-4f76123ce254c57a|w|POST /management/api/v1/reservations|createReservationUsingPOST_1|Save a reservation | 
+409|r16-ef4583f2fa6a5e9e|w|POST /master/save-booking-estimation||Save Booking Estimation | Save Booking Estimation
+410|r16-459a9e4afcc08ee2|w|POST /me/bookings||Create a new booking for the authenticated user | Create a new room booking for the currently authenticated user
+411|r16-a52eb4aac9934b02|w|POST /mini/market/reserve|reserveMiniMarketPool|Reserve coins from primary market pool | 
+412|r16-f510725bd51d8986|w|POST /my-courses/{bookingId}/resume|uploadResume|Upload resume | Uploads a resume file for the booking.
+413|r16-9d3476920700490f|w|POST /orders/{id}/reserve||Reserve Stock for Customer Order | Validates available inventory and reserves required KG without overselling.
+414|r16-be3437d88aa5e9cb|w|POST /orders/{orderId}/reservations|reserveInventoryForOrder|Reserve inventory for product lines | 
+415|r16-3f23ed0dd8450408|w|POST /orders/reserve||Reserve order (INIT -> RESERVED) | 
+416|r16-d4e30901b1c0a9bf|w|POST /orders/valuecardreservations|reserveValueCardForOrder|reserveValueCardForOrder | 
+417|r16-0f3789f0e9ee7177|w|POST /organizations/{orgId}/bookings|createBooking|Create booking | 
+418|r16-62c8727ce2dfd1bd|w|POST /partners/{partner_id}/reserve|reserveCredit|Reserve credit limit | Mengurangi credit limit secara atomic (untuk transaksi baru)
+419|r16-d518c79b54247f08|w|POST /pick-tasks/{taskId}/close-short|closePickTaskShort|Close the remainder (also with 0 posted); the reservation does not shrink (pack §8.19) | 
+420|r16-df150b4930dd7bd5|w|POST /pickup/reserve|reserveForPickup|Reserve for pickup | 
+421|r16-9143049552e2902e|w|POST /portal/v1/cpo/reservations|portalCpoCreateReservation|CPO – create a reservation | 
+422|r16-f1e6fc483b9badef|w|POST /process/status/reserved/||Try to reserve the appointments in a process | 
+423|r16-91b76532849f7ba3|w|POST /product-service/products/{id}/reserve||Kurangi stok produk (dipanggil service lain) | 
+424|r16-7a6bcda22d5d36c0|w|POST /products/{id}/reserve||Create a stock reservation (backorder) | 
+425|r16-6d2192d5b2b50f38|w|POST /properties/{property}/reservations||Buyer creates reservation for property | 
+426|r16-8c2364ef1309360f|w|POST /protected/update-booking||Update a booking | Update a booking of specified bookingId with the specified update input consist of status(pending/confirm/complete) and paymentStatus(pending…
+427|r16-20f3ce0f145b6073|w|POST /public/gamingCenters/{slug}/reservations|publicOnlineReservation|Public Online Reservation | Allows public users or visitors to reserve a slot online using a gaming center's unique slug.
+428|r16-686ca39b8af46005|w|POST /public/salons/{salonSlug}/bookings||Create an online booking | 
+429|r16-0a6c3e3a304366e9|w|POST /ratings|createRating|Submit a rating for a completed booking | 
+430|r16-bf2cf4b893e8c1e1|w|POST /ratings||Submit rating for a completed booking | 
+431|r16-5e3e7acb8932980a|w|POST /records||Create a booking record (status Pending) | Supports both registered passengers and guests (`isGuest: true`). Accepts both camelCase and PascalCase field names. …
+432|r16-c418fe8684cd8f9d|w|POST /rentals|CreateRental|Create a reservation intent (tenant) | Validates the preconditions (tenant active, listing published, no calendar overlap, operator terms accepted when required…
+433|r16-811fa29063f74794|w|POST /rentals/book||Reserve a rental car or bike | 
+434|r16-a66ecd3620daaa1e|w|POST /reservation|reserveTable|Create a new reservation | Book a table at a restaurant
+435|r16-ca9a874554e80a80|w|POST /reservation|makeReservation|Create a new reservation | FR6: The user must be able to reserve a parking spot
+436|r16-a6bdf651dbe7a9f8|w|POST /reservation/admin-edit||Edit an approved reservation | The administrator must be able to approve both the current room and the destination room. A room with a null enabled flag remains…
+437|r16-be425067e740c274|w|POST /reservation/create||Create new reservation | Create new reservation, requires authentication with user role
+438|r16-41f07f0dd506d77b|w|POST /reservation/modify|modifyReservation|Modify a reservation (supports dry-run) | Protected operation. Requires Authorization header. 
+439|r16-81fea4ce6e0393ed|w|POST /reservation/modify||Requester edit, limited to two changes | 
+440|r16-0aac9520ec9076b9|w|POST /reservations|createReservation|Create a reservation (no account needed) | 
+441|r16-31de6ad209b8b99d|w|POST /reservations||Create an explicit reservation | Explicit confirmed choice, separate from the read-only preview. Binds facility+route+source snapshot+party size and revalidates…
+442|r16-3440569920dadc7b|w|POST /reservations|CreateReservationById|Create reservation providing an id and a payload | Creates reservation based on the id supplied
+443|r16-5166ffd11b10011e|w|POST /reservations|create-reservation|Create a reservation | 
+444|r16-599ae23bbbc86139|w|POST /reservations||Reserve a bay | Idempotency-Key header prevents duplicate reservations. Server arbitrates conflicting requests.
+445|r16-5aa192524e626554|w|POST /reservations|createReservation|Hold stock for a sector (idempotent, distributed-locked) | The main event. Requires an admitted queue token. Decrements available_inventory atomically under a d…
+446|r16-5c21dbfc30fe0a2c|w|POST /reservations||Reserve an item | Reserve item with limited stock
+447|r16-68887257ac88bd5d|w|POST /reservations||Create new reservation | Create new reservation
+448|r16-6b345fb1ee15551a|w|POST /reservations||create reservation | create reservation
+449|r16-71214cccd4850d69|w|POST /reservations||Create one or more reservations (US-05, US-12, FR-07, FR-12) | 
+450|r16-93760cdf3c1be659|w|POST /reservations|createReservation| | 
+451|r16-964cc784f0f71e16|w|POST /reservations||Disabled until a contention test passes | 
+452|r16-aa523969d65d31bc|w|POST /reservations||Create temporary reservation | 
+453|r16-ab33330f262d8789|w|POST /reservations|createReservation|Create reservation with consultation types | 
+454|r16-abcfcce9334a4efc|w|POST /reservations||add reservation | 
+455|r16-b955f026c3119909|w|POST /reservations||Create a reservation or check-in directly | Manages the creation of a parking session. Behavior depends on the `reservation_type`: - `schedule`: Advance booking…
+456|r16-e99bf7d6d4ae18b2|w|POST /reservations|createReservation|Reserve units for a product/warehouse | Reserve units. Returns 409 if insufficient stock available.
+457|r16-eb153e1665557437|w|POST /reservations|postReservations|Snowpeak create reservation resource | 
+458|r16-f2c8e98586ff17cf|w|POST /reservations|ReservationsCreate|Create reservation | Create reservation
+459|r16-fb29b8cf4fa04ca6|w|POST /reservations|makeReservation|Make a reservation | Make a new reservation
+460|r16-84e8582a58df5d40|w|POST /reservations/||Create a new reservation | 
+461|r16-a6a40131cb75e533|w|POST /reservations/{id}/extend||Extends a 'hold' reservation | Extends an active 'hold' reservation by a fixed duration. Can only be used once per reservation.
+462|r16-58c4ca3e8796002e|w|POST /reservations/{id}/restore|restoreReservation|Restore deleted reservation | 
+463|r16-f2137172c1420201|w|POST /reservations/{id}/services|addReservationService| | 
+464|r16-578c99a74297d18d|w|POST /reservations/{partner_reservation_id}/modify|modifyReservation|Apply a re-priced quote to an existing reservation | Changes a confirmed reservation's dates, unit and/or guests (adults, children's ages, pets) — always within…
+465|r16-14b981d20eb65f45|w|POST /reservations/{reservation_id}/report|reportProblem|Report a problem (freezes deposit) | Both owner and renter can report. Only from "delivered" or "returned" status. Creates REPORT + FREEZE in a single database …
+466|r16-82f91df55183c8cf|w|POST /reserve|reserve|Reserve inventory | Request to reserve N units of an item. Returns immediately with a reservation ID and TTL. The reservation will be held for a configurable TT…
+467|r16-99cc97ca70efcb93|w|POST /reserve|reserve|Reserve item | Reserve items in warehouse
+468|r16-aebd5777d0037b12|w|POST /reserve|reserve|Place an equipment reservation | Verified. Shared with class booking; equipment uses `type=equipment` and primitive `time`/`duration`/`attending_persons` (not l…
+469|r16-68df43e41f606afe|w|POST /reserve_bed||Reserve Bed | Reserve bed(s) at a specific hospital with safety buffer logic.
+470|r16-c501c34b225c374d|w|POST /reserve-products||Reserves products | Reserves products and updates their quantities
+471|r16-3d3be58fe645abeb|w|POST /reserve/{id}/{minutes}||Reserve point with minutes | 
+472|r16-57b37e6422e142a1|w|POST /ReserveRooms|create-ReserveRoom|Create ReserveRoom | Create ReserveRoom
+473|r16-2d10b7f5272eeb61|w|POST /resources/{resource}/bookings|createBooking|Create a booking | Rejects overlap with other bookings, but does not enforce blackouts. An existing Idempotency-Key for this resource returns the stored booking…
+474|r16-bb600ac97c7f27aa|w|POST /restaurants.php||Reserve a table | 
+475|r16-8cab83e00874e4ce|w|POST /restaurants/{restaurantId}/reservations|createReservation|Create reservation | 
+476|r16-b85865acade31a96|w|POST /reviews||Post a review after booking completion | 
+477|r16-b8551a29cd96d73e|w|POST /rooms/{room_id}/reservations|reserveRoom|Create a reservation | Reserves the specified room for the requested time span. Returns **409 Conflict** if the time range overlaps an existing reservation. 
+478|r16-f6e23b0cf6649258|w|POST /rooms/{slug}/uploads|initiateUpload|Reserve capacity and initialize a single or multipart upload | 
+479|r16-fb351a4c231aef93|w|POST /sales-orders/{id}/reserve||Admin-only transactional inventory reservation | 
+480|r16-d95138edaf88d3c4|w|POST /sales/{saleId}/reservations||Reserve one unit (hot path) | Admission order: gateway (JWT, validation, token bucket) → idempotency guard → per-customer limit → Redis stock gate → inventory d…
+481|r16-e1f139861e75a4c2|w|POST /salons/{salonId}/bookings||Create a booking (Panel) | 
+482|r16-2d6f9611b56f2415|w|POST /salons/{salonId}/bookings/{bookingId}/no-show||Mark booking as no-show | 
+483|r16-78f9df1fe1d5dc27|w|POST /seats/{seatId}/reserve||Reserve a seat | 
+484|r16-929418bb1069cdec|w|POST /seats/reserve|reserveSeats|Reserve a list of theatre seats with status PENDING for 2 hours | 
+485|r16-6ef215d88ea5b19f|w|POST /seller/variants/{id}/inventory-adjustments||Adjust onHand with reason and actor audit; cannot go below reserved | 
+486|r16-76e187366d7c1ed3|w|POST /service_options/reserve||Reserve a service option | 
+487|r16-a388184da8a668cd|w|POST /service-provider/reservations|createReservation|Create a new reservation | Book a table at a restaurant. This endpoint is used by external systems (tour operators, hotel booking systems) to make reservations …
+488|r16-35f0aeaf7554b067|w|POST /shops/{slug}/bookings|createBooking|Create a new booking | 
+489|r16-f055b9f8f9989bdc|w|POST /slot-holds|holdSlot|Hold a slot while the booking is filled in | Claims a start time the moment the user taps it, before the rest of the form exists. Three clients now compete for …
+490|r16-900011445fa8aff3|w|POST /slots/{slotId}/reserve|reserveSlot|Reserve a slot for 30 seconds | 
+491|r16-0891967f82ff4ff1|w|POST /smart-tourist/bookings|createSmartTouristBooking|Book a locker with duration and check-in time | 
+492|r16-43b5dba8c6a21ff3|w|POST /spaces/{spaceId}/bookings||Book a space. | Always created unpaid; a later `POST /bookings/{bookingId}/paid` marks it paid. A cancelled booking blocks no slot. An unpaid booking holds its …
+493|r16-0fb96451f41a4827|w|POST /stock/reserve|reserveStock|Reserve stock for order | Reserve inventory for a pending order
+494|r16-1e9df16d60224234|w|POST /tasks/{task_id}/effects/reserve||Reserve an idempotency slot before an external call | Call this before every side effect that the outside world sees, such as an email, a payment, or a webhook.…
+495|r16-7b27202eabeaf5d1|w|POST /tenants/{tenantId}/reservations||Create reservation | 
+496|r16-44b545f4ddb8d174|w|POST /tickets/{id}/reserve||Reserve a ticket | Reserve a ticket for a user for 10 minutes. The ticket must be available or have an expired reservation.
+497|r16-99f099b8219d7be0|w|POST /tickets/reserve||Reserve a ticket | Reserve a ticket for an event (15-minute hold)
+498|r16-f97f425bc55d4cc9|w|POST /tickets/reserve|reserveSeats|Temporarily reserve seats (Soft-Lock) | 
+499|r16-08b814c9ec3acc07|w|POST /tools/meta/reservation-draft/create|createPausedMetaReservationDraft|Create the approved Parma reservations campaign as PAUSED Meta objects only | This operation never activates delivery or spend. It is blocked unless the server …
+500|r16-6ac313761b3920f0|w|POST /tours.php||Create a tour booking | 
+501|r16-cd4ade45b7e9c97d|w|POST /tours/reservation||Add reservation data to the database | 
+502|r16-b040bf8fa34c6632|w|POST /transaction/v2/reserve|reserveItems|Reserve | Item(s) are temporarily reserved for a customer. The item is awaiting pickup by the customer. Examples: e-reservation, reservation by telephone. This …
+503|r16-ec81f4fff21e096c|w|POST /usage-events|recordUsageEvent|Record usage event and reserve limits | 
+504|r16-8b7955ea92970340|w|POST /usage/reserve||Reserve one usage unit (idempotent on the intent) | 
+505|r16-cc875ef45e47991a|w|POST /users/bookings||Book an appointment | Book a 30-minute appointment slot with a coach
+506|r16-62be4ad4b2f60456|w|POST /v1/bookings||Create slot booking | Creates a CPU or GPU booking from code-defined categories and slot templates selected by SLOT_CONFIG_PROFILE. New bookings are inserted as…
+507|r16-8a89d492d04b4352|w|POST /v1/bookings|createBooking|Hold seats and create a booking | Fares are recomputed server-side; any `fareAmount` sent by the client is ignored. The hold expires at `holdExpiresAt`. **Roles…
+508|r16-cfabec49053e8367|w|POST /v1/bookings|create_1|Create a booking | Only available to authenticated users.
+509|r16-12bbc8b951a34624|w|POST /v1/cart/reserve|reserveCart|Sepeti fiyatlandır ve taslak sipariş aç | Sepeti sunucuda fiyatlandırıp taslak sipariş açar ve `orderId` üretir (T7.5, order-service `CreateDraftOrder`). Tutar …
+510|r16-c83c93154837fb8b|w|POST /v1/events|ingestEvent|Ingest impression / click / booking (idempotent) | 
+511|r16-66fe10ae74d824de|w|POST /v1/holds|createHold|Atomically check and reserve every component for the given line items | In one transaction: expire overdue holds; 404 if the store is unknown; 422 if any item i…
+512|r16-7391b6b02fb44503|w|POST /v1/inventory/reserve||Reserve inventory for an order (idempotent) | 
+513|r16-2dc32bcc26417e2c|w|POST /v1/me/shares/uploads||Reserve a bounded private session upload | Accepts signed integrity metadata plus bounded owner-only display hints. Transcript turns upload directly to the retu…
+514|r16-2c067bdd6921aa1e|w|POST /v1/producer-training/sessions/uploads||Reserve an idempotent encrypted producer-training bundle upload | 
+515|r16-0e65798884c25fff|w|POST /v1/reservations||Create booking | Create a new charging reservation
+516|r16-e1b7581dda25691e|w|POST /v1/reservations||Create reservation | Create a new reservation with one or more room items.
+517|r16-0a448bd867024d2b|w|POST /v1/reservations/hold||Hold a room for booking | Creates a room hold reservation with hold TTL prior to payment initiation
+518|r16-18438f6218221739|w|POST /v1/reserve|reserve|Reserve compute resources | Reserve compute resources by tier before deploying. Returns a runtime ID that can be used in subsequent deploy requests. 
+519|r16-503039464f794657|w|POST /v1/runtimes/{runtime_id}/extend|extendRuntime|Extend runtime reservation | Extend the expiration of a runtime reservation.
+520|r16-41ea29cda17322c8|w|POST /v1/runtimes/reserve|reserveRuntime|Reserve a runtime | Reserve a runtime environment for a bot with specified resource requirements.
+521|r16-33b590795b494a22|w|POST /v1/tickets||Reserve a ticket | Reserves a ticket for an event with a 15-minute TTL. Requires attendee authentication.
+522|r16-aab606f8b5143cf2|w|POST /v1/voice/sessions|createVoiceSession|Create (reserve) a voice session. | Reserves a voice session for a live-voice target. Each active session holds an EXCLUSIVE provider-account lease and an EXCLU…
+523|r16-3e70b7a838539b79|w|POST /vehicle/park|parkVehicle|Save a vehicle parking session and reserve one available space | 
+524|r16-52dd5f1dc068c6c1|w|POST /webinar/me|reserveWebinarSeat|Reserve or reactivate the signed-in attendee's seat | 
+525|r16-3f21a875982e69a1|w|POST /wlt/promotion-funding/reservations|reserveWltPromotionFunding| | 
+526|r16-304c54145636fe7a|w|POST /workshop-designs/{designId}/attach-to-booking|attachWorkshopDesignToBooking|Return a validated snapshot for Workshop Booking | This is a facade-backed integration command. Feature-012 does not create the booking, hold, invoice, payment …

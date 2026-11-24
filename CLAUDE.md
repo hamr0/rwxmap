@@ -34,9 +34,10 @@ saw, labelled blind by seven labellers. It was scored once and is
 BURNED (D24): 85.3% exact, 12.4% leaks, 2.3% over-tight. That was the
 project's first honest generalization number, now history. Any
 rule change from here needs a new exam, never a re-score of a burned one.
-The one to quote is `data/exam6-2026-11-08/`: 1588 operations across 5
-complete official APIs, scored once on 2026-11-08 through the npm install;
-mode a 90.3% exact, 2.2% too loose, 7.5% too tight.
+The one to quote is `data/exam8-2026-11-23/`: 1821 operations across complete
+official APIs, scored once (D145 GO); mode a with rwxlite 0.5.0: 1653 exact /
+60 too loose / 108 too tight (90.8% / 3.3% / 5.9%). Exams #6 and #7 are burned
+history.
 The ten vendors locked away for that next exam are named in
 `docs/logs/pre-registered-split-2026-09-18.md`; nobody reads or mines
 them.

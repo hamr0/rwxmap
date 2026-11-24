@@ -1,0 +1,440 @@
+exam #8 scorer · run 2026-11-23T18:50:24.633Z
+rwxmap ref 474ecb1dc77330d389c2ae68099bee4e08b487bd; N 1821; configs mech, a-base, a-cand, b85-base, b85-cand
+
+== mech ==  model(s): (none)
+join: matched 1821 · unmatched ops 0 · unmatched output 0 · duplicate keys 0
+(shares are: of the group's own rows | of all 1821 rows)
+overall          n 1821 · exact 1556 (85.4% | 85.4%) · loose-1 61 (3.3% | 3.3%) · loose-2 12 (0.7% | 0.7%) · TOO LOOSE 73 (4.0% | 4.0%) · TOO TIGHT 192 (10.5% | 10.5%)
+markers on the 73 too-loose rows: tight 0 · loose 61 · settled 12
+by vendor:
+  baserow.io       n  488 · exact 397 (81.4% | 21.8%) · loose-1 12 (2.5% | 0.7%) · loose-2 6 (1.2% | 0.3%) · TOO LOOSE 18 (3.7% | 1.0%) · TOO TIGHT 73 (15.0% | 4.0%)
+  bitrise.io       n  128 · exact 120 (93.8% | 6.6%) · loose-1 4 (3.1% | 0.2%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 4 (3.1% | 0.2%) · TOO TIGHT 4 (3.1% | 0.2%)
+  gitbook.com      n  403 · exact 356 (88.3% | 19.5%) · loose-1 15 (3.7% | 0.8%) · loose-2 3 (0.7% | 0.2%) · TOO LOOSE 18 (4.5% | 1.0%) · TOO TIGHT 29 (7.2% | 1.6%)
+  looker.com       n  502 · exact 426 (84.9% | 23.4%) · loose-1 22 (4.4% | 1.2%) · loose-2 3 (0.6% | 0.2%) · TOO LOOSE 25 (5.0% | 1.4%) · TOO TIGHT 51 (10.2% | 2.8%)
+  shortcut.com     n  143 · exact 126 (88.1% | 6.9%) · loose-1 1 (0.7% | 0.1%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 1 (0.7% | 0.1%) · TOO TIGHT 16 (11.2% | 0.9%)
+  wekan.github.io  n  157 · exact 131 (83.4% | 7.2%) · loose-1 7 (4.5% | 0.4%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 7 (4.5% | 0.4%) · TOO TIGHT 19 (12.1% | 1.0%)
+by method:
+  DELETE           n  227 · exact 224 (98.7% | 12.3%) · loose-1 0 (0.0% | 0.0%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 0 (0.0% | 0.0%) · TOO TIGHT 3 (1.3% | 0.2%)
+  GET              n  821 · exact 809 (98.5% | 44.4%) · loose-1 0 (0.0% | 0.0%) · loose-2 12 (1.5% | 0.7%) · TOO LOOSE 12 (1.5% | 0.7%) · TOO TIGHT 0 (0.0% | 0.0%)
+  PATCH            n  188 · exact 146 (77.7% | 8.0%) · loose-1 38 (20.2% | 2.1%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 38 (20.2% | 2.1%) · TOO TIGHT 4 (2.1% | 0.2%)
+  POST             n  481 · exact 296 (61.5% | 16.3%) · loose-1 8 (1.7% | 0.4%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 8 (1.7% | 0.4%) · TOO TIGHT 177 (36.8% | 9.7%)
+  PUT              n  104 · exact 81 (77.9% | 4.4%) · loose-1 15 (14.4% | 0.8%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 15 (14.4% | 0.8%) · TOO TIGHT 8 (7.7% | 0.4%)
+every too-loose row (73): id | vendor | method | path | truth | predicted | marker
+  ex8-0013 | baserow.io | PATCH | /api/admin/auth-provider/{auth_provider_id}/ | x | w | loose
+  ex8-0035 | baserow.io | PATCH | /api/admin/users/{user_id}/ | x | w | loose
+  ex8-0043 | baserow.io | PATCH | /api/agent/{agent_id}/configuration/ | x | w | loose
+  ex8-0063 | baserow.io | PUT | /api/ai-providers/features/{feature_type}/ | x | w | loose
+  ex8-0071 | baserow.io | PATCH | /api/ai-providers/{provider_id}/ | x | w | loose
+  ex8-0127 | baserow.io | PATCH | /api/builder/domains/{domain_id}/ | x | w | loose
+  ex8-0144 | baserow.io | GET | /api/builder/preview/exchange/{token}/ | x | r | settled
+  ex8-0181 | baserow.io | PATCH | /api/database/admin/views/{view_id}/ | x | w | loose
+  ex8-0207 | baserow.io | PATCH | /api/database/fields/{field_id}/ | x | w | loose
+  ex8-0236 | baserow.io | GET | /api/database/tokens/check/ | x | r | settled
+  ex8-0338 | baserow.io | GET | /api/licenses/{id}/check/ | x | r | settled
+  ex8-0346 | baserow.io | PATCH | /api/mcp/endpoint/{endpoint_id}/ | x | w | loose
+  ex8-0384 | baserow.io | GET | /api/sso/oauth2/callback/{provider_id}/ | x | r | settled
+  ex8-0403 | baserow.io | PATCH | /api/templates/{slug}/ | x | w | loose
+  ex8-0420 | baserow.io | PATCH | /api/user-source/{user_source_id}/ | x | w | loose
+  ex8-0424 | baserow.io | GET | /api/user-source/{user_source_uid}/sso/oauth2/openid_connect/callback/ | x | r | settled
+  ex8-0446 | baserow.io | GET | /api/webhooks/{webhook_uid}/ | x | r | settled
+  ex8-0470 | baserow.io | PATCH | /api/workspaces/users/{workspace_user_id}/ | x | w | loose
+  ex8-0513 | bitrise.io | POST | /apps/{app-slug}/build-certificates/{build-certificate-slug}/uploaded | x | w | loose
+  ex8-0524 | bitrise.io | PATCH | /apps/{app-slug}/builds/{build-slug}/artifacts/{artifact-slug} | x | w | loose
+  ex8-0542 | bitrise.io | PUT | /apps/{app-slug}/github-app-connection-configuration | x | w | loose
+  ex8-0560 | bitrise.io | POST | /apps/{app-slug}/provisioning-profiles/{provisioning-profile-slug}/uploaded | x | w | loose
+  ex8-0641 | gitbook.com | PATCH | /git/installations/{installationId} | x | w | loose
+  ex8-0693 | gitbook.com | PUT | /orgs/{organizationId}/agent/conversations/{conversationId} | x | w | loose
+  ex8-0706 | gitbook.com | POST | /orgs/{organizationId}/domains | x | w | loose
+  ex8-0709 | gitbook.com | PATCH | /orgs/{organizationId}/domains/{emailDomain} | x | w | loose
+  ex8-0739 | gitbook.com | PATCH | /orgs/{organizationId}/openapi/{specSlug} | x | w | loose
+  ex8-0740 | gitbook.com | PUT | /orgs/{organizationId}/openapi/{specSlug} | x | w | loose
+  ex8-0752 | gitbook.com | PATCH | /orgs/{organizationId}/saml/{samlProviderId} | x | w | loose
+  ex8-0764 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId} | x | w | loose
+  ex8-0790 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/channels/{siteChannelId} | x | w | loose
+  ex8-0795 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/context-connections/{siteContextConnectionId} | x | w | loose
+  ex8-0823 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/mcp-servers/{siteMcpServerId} | x | w | loose
+  ex8-0835 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/publishing/auth | x | w | loose
+  ex8-0837 | gitbook.com | GET | /orgs/{organizationId}/sites/{siteId}/publishing/preview | x | r | settled
+  ex8-0846 | gitbook.com | PUT | /orgs/{organizationId}/sites/{siteId}/redirects | x | w | loose
+  ex8-0872 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/site-spaces/{siteSpaceId} | x | w | loose
+  ex8-0894 | gitbook.com | POST | /orgs/{organizationId}/storage/upload | x | w | loose
+  ex8-0949 | gitbook.com | GET | /spaces/{spaceId}/change-requests/{changeRequestId}/pdf | x | r | settled
+  ex8-0989 | gitbook.com | GET | /spaces/{spaceId}/pdf | x | r | settled
+  ex8-1028 | looker.com | POST | /alerts | x | w | loose
+  ex8-1032 | looker.com | PATCH | /alerts/{alert_id} | x | w | loose
+  ex8-1033 | looker.com | PUT | /alerts/{alert_id} | x | w | loose
+  ex8-1063 | looker.com | PATCH | /cloud_storage | x | w | loose
+  ex8-1079 | looker.com | PATCH | /connections/{connection_name} | x | w | loose
+  ex8-1119 | looker.com | PATCH | /custom_welcome_email | x | w | loose
+  ex8-1120 | looker.com | PUT | /custom_welcome_email_test | x | w | loose
+  ex8-1160 | looker.com | PATCH | /dashboards/{lookml_dashboard_id}/sync | x | w | loose
+  ex8-1169 | looker.com | GET | /derived_table/{materialization_id}/stop | x | r | settled
+  ex8-1170 | looker.com | GET | /derived_table/{model_name}/{view_name}/start | x | r | settled
+  ex8-1178 | looker.com | GET | /embed/sso/validate | x | r | settled
+  ex8-1215 | looker.com | POST | /groups/{group_id}/groups | x | w | loose
+  ex8-1218 | looker.com | POST | /groups/{group_id}/users | x | w | loose
+  ex8-1238 | looker.com | PATCH | /ldap_config | x | w | loose
+  ex8-1270 | looker.com | PATCH | /mobile/device/{device_id} | x | w | loose
+  ex8-1277 | looker.com | PATCH | /model_sets/{model_set_id} | x | w | loose
+  ex8-1289 | looker.com | PATCH | /oidc_config | x | w | loose
+  ex8-1308 | looker.com | PATCH | /projects/{project_id} | x | w | loose
+  ex8-1330 | looker.com | PUT | /projects/{project_id}/git_branch | x | w | loose
+  ex8-1382 | looker.com | PATCH | /saml_config | x | w | loose
+  ex8-1396 | looker.com | PATCH | /scheduled_plans/{scheduled_plan_id} | x | w | loose
+  ex8-1407 | looker.com | PATCH | /setting | x | w | loose
+  ex8-1419 | looker.com | PATCH | /ssh_server/{ssh_server_id} | x | w | loose
+  ex8-1425 | looker.com | PATCH | /ssh_tunnel/{ssh_tunnel_id} | x | w | loose
+  ex8-1516 | looker.com | PATCH | /workforce_config | x | w | loose
+  ex8-1532 | shortcut.com | PUT | /api/v3/custom-fields/{custom-field-public-id} | x | w | loose
+  ex8-1666 | wekan.github.io | PUT | /api/admin/attachment-settings | x | w | loose
+  ex8-1671 | wekan.github.io | PUT | /api/admin/orgs/features | x | w | loose
+  ex8-1672 | wekan.github.io | PUT | /api/admin/orgs/{org}/features | x | w | loose
+  ex8-1673 | wekan.github.io | PUT | /api/admin/passwordless | x | w | loose
+  ex8-1678 | wekan.github.io | PUT | /api/admin/teams/features | x | w | loose
+  ex8-1679 | wekan.github.io | PUT | /api/admin/teams/{team}/features | x | w | loose
+  ex8-1746 | wekan.github.io | POST | /api/boards/{board}/domains | x | w | loose
+
+== a-base ==  model(s): rwxlite-0.4.0+4608f470
+join: matched 1821 · unmatched ops 0 · unmatched output 0 · duplicate keys 0
+(shares are: of the group's own rows | of all 1821 rows)
+overall          n 1821 · exact 1631 (89.6% | 89.6%) · loose-1 53 (2.9% | 2.9%) · loose-2 12 (0.7% | 0.7%) · TOO LOOSE 65 (3.6% | 3.6%) · TOO TIGHT 125 (6.9% | 6.9%)
+rwxlite: sent 773 · raised 20 · lowered 77 · kept 576 · undecided (asked, scored x) 100
+markers on the 65 too-loose rows: tight 0 · loose 53 · settled 12
+by vendor:
+  baserow.io       n  488 · exact 419 (85.9% | 23.0%) · loose-1 12 (2.5% | 0.7%) · loose-2 6 (1.2% | 0.3%) · TOO LOOSE 18 (3.7% | 1.0%) · TOO TIGHT 51 (10.5% | 2.8%)
+  bitrise.io       n  128 · exact 124 (96.9% | 6.8%) · loose-1 2 (1.6% | 0.1%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 2 (1.6% | 0.1%) · TOO TIGHT 2 (1.6% | 0.1%)
+  gitbook.com      n  403 · exact 366 (90.8% | 20.1%) · loose-1 10 (2.5% | 0.5%) · loose-2 3 (0.7% | 0.2%) · TOO LOOSE 13 (3.2% | 0.7%) · TOO TIGHT 24 (6.0% | 1.3%)
+  looker.com       n  502 · exact 445 (88.6% | 24.4%) · loose-1 22 (4.4% | 1.2%) · loose-2 3 (0.6% | 0.2%) · TOO LOOSE 25 (5.0% | 1.4%) · TOO TIGHT 32 (6.4% | 1.8%)
+  shortcut.com     n  143 · exact 141 (98.6% | 7.7%) · loose-1 1 (0.7% | 0.1%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 1 (0.7% | 0.1%) · TOO TIGHT 1 (0.7% | 0.1%)
+  wekan.github.io  n  157 · exact 136 (86.6% | 7.5%) · loose-1 6 (3.8% | 0.3%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 6 (3.8% | 0.3%) · TOO TIGHT 15 (9.6% | 0.8%)
+by method:
+  DELETE           n  227 · exact 224 (98.7% | 12.3%) · loose-1 0 (0.0% | 0.0%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 0 (0.0% | 0.0%) · TOO TIGHT 3 (1.3% | 0.2%)
+  GET              n  821 · exact 809 (98.5% | 44.4%) · loose-1 0 (0.0% | 0.0%) · loose-2 12 (1.5% | 0.7%) · TOO LOOSE 12 (1.5% | 0.7%) · TOO TIGHT 0 (0.0% | 0.0%)
+  PATCH            n  188 · exact 148 (78.7% | 8.1%) · loose-1 32 (17.0% | 1.8%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 32 (17.0% | 1.8%) · TOO TIGHT 8 (4.3% | 0.4%)
+  POST             n  481 · exact 365 (75.9% | 20.0%) · loose-1 10 (2.1% | 0.5%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 10 (2.1% | 0.5%) · TOO TIGHT 106 (22.0% | 5.8%)
+  PUT              n  104 · exact 85 (81.7% | 4.7%) · loose-1 11 (10.6% | 0.6%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 11 (10.6% | 0.6%) · TOO TIGHT 8 (7.7% | 0.4%)
+every too-loose row (65): id | vendor | method | path | truth | predicted | marker
+  ex8-0035 | baserow.io | PATCH | /api/admin/users/{user_id}/ | x | w | loose
+  ex8-0043 | baserow.io | PATCH | /api/agent/{agent_id}/configuration/ | x | w | loose
+  ex8-0063 | baserow.io | PUT | /api/ai-providers/features/{feature_type}/ | x | w | loose
+  ex8-0071 | baserow.io | PATCH | /api/ai-providers/{provider_id}/ | x | w | loose
+  ex8-0127 | baserow.io | PATCH | /api/builder/domains/{domain_id}/ | x | w | loose
+  ex8-0144 | baserow.io | GET | /api/builder/preview/exchange/{token}/ | x | r | settled
+  ex8-0181 | baserow.io | PATCH | /api/database/admin/views/{view_id}/ | x | w | loose
+  ex8-0207 | baserow.io | PATCH | /api/database/fields/{field_id}/ | x | w | loose
+  ex8-0236 | baserow.io | GET | /api/database/tokens/check/ | x | r | settled
+  ex8-0338 | baserow.io | GET | /api/licenses/{id}/check/ | x | r | settled
+  ex8-0346 | baserow.io | PATCH | /api/mcp/endpoint/{endpoint_id}/ | x | w | loose
+  ex8-0384 | baserow.io | GET | /api/sso/oauth2/callback/{provider_id}/ | x | r | settled
+  ex8-0396 | baserow.io | POST | /api/teams/{team_id}/subjects/ | x | w | loose
+  ex8-0403 | baserow.io | PATCH | /api/templates/{slug}/ | x | w | loose
+  ex8-0415 | baserow.io | POST | /api/user-files/upload-via-url/ | x | w | loose
+  ex8-0420 | baserow.io | PATCH | /api/user-source/{user_source_id}/ | x | w | loose
+  ex8-0424 | baserow.io | GET | /api/user-source/{user_source_uid}/sso/oauth2/openid_connect/callback/ | x | r | settled
+  ex8-0446 | baserow.io | GET | /api/webhooks/{webhook_uid}/ | x | r | settled
+  ex8-0524 | bitrise.io | PATCH | /apps/{app-slug}/builds/{build-slug}/artifacts/{artifact-slug} | x | w | loose
+  ex8-0542 | bitrise.io | PUT | /apps/{app-slug}/github-app-connection-configuration | x | w | loose
+  ex8-0706 | gitbook.com | POST | /orgs/{organizationId}/domains | x | w | loose
+  ex8-0709 | gitbook.com | PATCH | /orgs/{organizationId}/domains/{emailDomain} | x | w | loose
+  ex8-0739 | gitbook.com | PATCH | /orgs/{organizationId}/openapi/{specSlug} | x | w | loose
+  ex8-0740 | gitbook.com | PUT | /orgs/{organizationId}/openapi/{specSlug} | x | w | loose
+  ex8-0764 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId} | x | w | loose
+  ex8-0790 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/channels/{siteChannelId} | x | w | loose
+  ex8-0792 | gitbook.com | POST | /orgs/{organizationId}/sites/{siteId}/context-connections | x | w | loose
+  ex8-0795 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/context-connections/{siteContextConnectionId} | x | w | loose
+  ex8-0823 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/mcp-servers/{siteMcpServerId} | x | w | loose
+  ex8-0837 | gitbook.com | GET | /orgs/{organizationId}/sites/{siteId}/publishing/preview | x | r | settled
+  ex8-0872 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/site-spaces/{siteSpaceId} | x | w | loose
+  ex8-0949 | gitbook.com | GET | /spaces/{spaceId}/change-requests/{changeRequestId}/pdf | x | r | settled
+  ex8-0989 | gitbook.com | GET | /spaces/{spaceId}/pdf | x | r | settled
+  ex8-1028 | looker.com | POST | /alerts | x | w | loose
+  ex8-1032 | looker.com | PATCH | /alerts/{alert_id} | x | w | loose
+  ex8-1033 | looker.com | PUT | /alerts/{alert_id} | x | w | loose
+  ex8-1063 | looker.com | PATCH | /cloud_storage | x | w | loose
+  ex8-1075 | looker.com | POST | /connections | x | w | loose
+  ex8-1079 | looker.com | PATCH | /connections/{connection_name} | x | w | loose
+  ex8-1119 | looker.com | PATCH | /custom_welcome_email | x | w | loose
+  ex8-1160 | looker.com | PATCH | /dashboards/{lookml_dashboard_id}/sync | x | w | loose
+  ex8-1169 | looker.com | GET | /derived_table/{materialization_id}/stop | x | r | settled
+  ex8-1170 | looker.com | GET | /derived_table/{model_name}/{view_name}/start | x | r | settled
+  ex8-1178 | looker.com | GET | /embed/sso/validate | x | r | settled
+  ex8-1215 | looker.com | POST | /groups/{group_id}/groups | x | w | loose
+  ex8-1238 | looker.com | PATCH | /ldap_config | x | w | loose
+  ex8-1268 | looker.com | POST | /mobile/device | x | w | loose
+  ex8-1270 | looker.com | PATCH | /mobile/device/{device_id} | x | w | loose
+  ex8-1277 | looker.com | PATCH | /model_sets/{model_set_id} | x | w | loose
+  ex8-1289 | looker.com | PATCH | /oidc_config | x | w | loose
+  ex8-1308 | looker.com | PATCH | /projects/{project_id} | x | w | loose
+  ex8-1330 | looker.com | PUT | /projects/{project_id}/git_branch | x | w | loose
+  ex8-1387 | looker.com | POST | /scheduled_plans | x | w | loose
+  ex8-1396 | looker.com | PATCH | /scheduled_plans/{scheduled_plan_id} | x | w | loose
+  ex8-1407 | looker.com | PATCH | /setting | x | w | loose
+  ex8-1419 | looker.com | PATCH | /ssh_server/{ssh_server_id} | x | w | loose
+  ex8-1425 | looker.com | PATCH | /ssh_tunnel/{ssh_tunnel_id} | x | w | loose
+  ex8-1516 | looker.com | PATCH | /workforce_config | x | w | loose
+  ex8-1532 | shortcut.com | PUT | /api/v3/custom-fields/{custom-field-public-id} | x | w | loose
+  ex8-1666 | wekan.github.io | PUT | /api/admin/attachment-settings | x | w | loose
+  ex8-1671 | wekan.github.io | PUT | /api/admin/orgs/features | x | w | loose
+  ex8-1672 | wekan.github.io | PUT | /api/admin/orgs/{org}/features | x | w | loose
+  ex8-1678 | wekan.github.io | PUT | /api/admin/teams/features | x | w | loose
+  ex8-1679 | wekan.github.io | PUT | /api/admin/teams/{team}/features | x | w | loose
+  ex8-1746 | wekan.github.io | POST | /api/boards/{board}/domains | x | w | loose
+
+== a-cand ==  model(s): rwxlite-0.5.0+82fa50c3
+join: matched 1821 · unmatched ops 0 · unmatched output 0 · duplicate keys 0
+(shares are: of the group's own rows | of all 1821 rows)
+overall          n 1821 · exact 1653 (90.8% | 90.8%) · loose-1 48 (2.6% | 2.6%) · loose-2 12 (0.7% | 0.7%) · TOO LOOSE 60 (3.3% | 3.3%) · TOO TIGHT 108 (5.9% | 5.9%)
+rwxlite: sent 773 · raised 20 · lowered 89 · kept 575 · undecided (asked, scored x) 89
+markers on the 60 too-loose rows: tight 0 · loose 48 · settled 12
+by vendor:
+  baserow.io       n  488 · exact 423 (86.7% | 23.2%) · loose-1 11 (2.3% | 0.6%) · loose-2 6 (1.2% | 0.3%) · TOO LOOSE 17 (3.5% | 0.9%) · TOO TIGHT 48 (9.8% | 2.6%)
+  bitrise.io       n  128 · exact 123 (96.1% | 6.8%) · loose-1 3 (2.3% | 0.2%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 3 (2.3% | 0.2%) · TOO TIGHT 2 (1.6% | 0.1%)
+  gitbook.com      n  403 · exact 371 (92.1% | 20.4%) · loose-1 9 (2.2% | 0.5%) · loose-2 3 (0.7% | 0.2%) · TOO LOOSE 12 (3.0% | 0.7%) · TOO TIGHT 20 (5.0% | 1.1%)
+  looker.com       n  502 · exact 451 (89.8% | 24.8%) · loose-1 19 (3.8% | 1.0%) · loose-2 3 (0.6% | 0.2%) · TOO LOOSE 22 (4.4% | 1.2%) · TOO TIGHT 29 (5.8% | 1.6%)
+  shortcut.com     n  143 · exact 142 (99.3% | 7.8%) · loose-1 1 (0.7% | 0.1%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 1 (0.7% | 0.1%) · TOO TIGHT 0 (0.0% | 0.0%)
+  wekan.github.io  n  157 · exact 143 (91.1% | 7.9%) · loose-1 5 (3.2% | 0.3%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 5 (3.2% | 0.3%) · TOO TIGHT 9 (5.7% | 0.5%)
+by method:
+  DELETE           n  227 · exact 224 (98.7% | 12.3%) · loose-1 0 (0.0% | 0.0%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 0 (0.0% | 0.0%) · TOO TIGHT 3 (1.3% | 0.2%)
+  GET              n  821 · exact 809 (98.5% | 44.4%) · loose-1 0 (0.0% | 0.0%) · loose-2 12 (1.5% | 0.7%) · TOO LOOSE 12 (1.5% | 0.7%) · TOO TIGHT 0 (0.0% | 0.0%)
+  PATCH            n  188 · exact 151 (80.3% | 8.3%) · loose-1 30 (16.0% | 1.6%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 30 (16.0% | 1.6%) · TOO TIGHT 7 (3.7% | 0.4%)
+  POST             n  481 · exact 383 (79.6% | 21.0%) · loose-1 7 (1.5% | 0.4%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 7 (1.5% | 0.4%) · TOO TIGHT 91 (18.9% | 5.0%)
+  PUT              n  104 · exact 86 (82.7% | 4.7%) · loose-1 11 (10.6% | 0.6%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 11 (10.6% | 0.6%) · TOO TIGHT 7 (6.7% | 0.4%)
+every too-loose row (60): id | vendor | method | path | truth | predicted | marker
+  ex8-0035 | baserow.io | PATCH | /api/admin/users/{user_id}/ | x | w | loose
+  ex8-0043 | baserow.io | PATCH | /api/agent/{agent_id}/configuration/ | x | w | loose
+  ex8-0063 | baserow.io | PUT | /api/ai-providers/features/{feature_type}/ | x | w | loose
+  ex8-0071 | baserow.io | PATCH | /api/ai-providers/{provider_id}/ | x | w | loose
+  ex8-0127 | baserow.io | PATCH | /api/builder/domains/{domain_id}/ | x | w | loose
+  ex8-0144 | baserow.io | GET | /api/builder/preview/exchange/{token}/ | x | r | settled
+  ex8-0181 | baserow.io | PATCH | /api/database/admin/views/{view_id}/ | x | w | loose
+  ex8-0207 | baserow.io | PATCH | /api/database/fields/{field_id}/ | x | w | loose
+  ex8-0236 | baserow.io | GET | /api/database/tokens/check/ | x | r | settled
+  ex8-0338 | baserow.io | GET | /api/licenses/{id}/check/ | x | r | settled
+  ex8-0346 | baserow.io | PATCH | /api/mcp/endpoint/{endpoint_id}/ | x | w | loose
+  ex8-0384 | baserow.io | GET | /api/sso/oauth2/callback/{provider_id}/ | x | r | settled
+  ex8-0396 | baserow.io | POST | /api/teams/{team_id}/subjects/ | x | w | loose
+  ex8-0403 | baserow.io | PATCH | /api/templates/{slug}/ | x | w | loose
+  ex8-0420 | baserow.io | PATCH | /api/user-source/{user_source_id}/ | x | w | loose
+  ex8-0424 | baserow.io | GET | /api/user-source/{user_source_uid}/sso/oauth2/openid_connect/callback/ | x | r | settled
+  ex8-0446 | baserow.io | GET | /api/webhooks/{webhook_uid}/ | x | r | settled
+  ex8-0524 | bitrise.io | PATCH | /apps/{app-slug}/builds/{build-slug}/artifacts/{artifact-slug} | x | w | loose
+  ex8-0542 | bitrise.io | PUT | /apps/{app-slug}/github-app-connection-configuration | x | w | loose
+  ex8-0560 | bitrise.io | POST | /apps/{app-slug}/provisioning-profiles/{provisioning-profile-slug}/uploaded | x | w | loose
+  ex8-0706 | gitbook.com | POST | /orgs/{organizationId}/domains | x | w | loose
+  ex8-0709 | gitbook.com | PATCH | /orgs/{organizationId}/domains/{emailDomain} | x | w | loose
+  ex8-0740 | gitbook.com | PUT | /orgs/{organizationId}/openapi/{specSlug} | x | w | loose
+  ex8-0764 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId} | x | w | loose
+  ex8-0790 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/channels/{siteChannelId} | x | w | loose
+  ex8-0795 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/context-connections/{siteContextConnectionId} | x | w | loose
+  ex8-0823 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/mcp-servers/{siteMcpServerId} | x | w | loose
+  ex8-0837 | gitbook.com | GET | /orgs/{organizationId}/sites/{siteId}/publishing/preview | x | r | settled
+  ex8-0872 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/site-spaces/{siteSpaceId} | x | w | loose
+  ex8-0894 | gitbook.com | POST | /orgs/{organizationId}/storage/upload | x | w | loose
+  ex8-0949 | gitbook.com | GET | /spaces/{spaceId}/change-requests/{changeRequestId}/pdf | x | r | settled
+  ex8-0989 | gitbook.com | GET | /spaces/{spaceId}/pdf | x | r | settled
+  ex8-1028 | looker.com | POST | /alerts | x | w | loose
+  ex8-1032 | looker.com | PATCH | /alerts/{alert_id} | x | w | loose
+  ex8-1033 | looker.com | PUT | /alerts/{alert_id} | x | w | loose
+  ex8-1063 | looker.com | PATCH | /cloud_storage | x | w | loose
+  ex8-1079 | looker.com | PATCH | /connections/{connection_name} | x | w | loose
+  ex8-1119 | looker.com | PATCH | /custom_welcome_email | x | w | loose
+  ex8-1160 | looker.com | PATCH | /dashboards/{lookml_dashboard_id}/sync | x | w | loose
+  ex8-1169 | looker.com | GET | /derived_table/{materialization_id}/stop | x | r | settled
+  ex8-1170 | looker.com | GET | /derived_table/{model_name}/{view_name}/start | x | r | settled
+  ex8-1178 | looker.com | GET | /embed/sso/validate | x | r | settled
+  ex8-1215 | looker.com | POST | /groups/{group_id}/groups | x | w | loose
+  ex8-1270 | looker.com | PATCH | /mobile/device/{device_id} | x | w | loose
+  ex8-1277 | looker.com | PATCH | /model_sets/{model_set_id} | x | w | loose
+  ex8-1289 | looker.com | PATCH | /oidc_config | x | w | loose
+  ex8-1308 | looker.com | PATCH | /projects/{project_id} | x | w | loose
+  ex8-1330 | looker.com | PUT | /projects/{project_id}/git_branch | x | w | loose
+  ex8-1387 | looker.com | POST | /scheduled_plans | x | w | loose
+  ex8-1396 | looker.com | PATCH | /scheduled_plans/{scheduled_plan_id} | x | w | loose
+  ex8-1407 | looker.com | PATCH | /setting | x | w | loose
+  ex8-1419 | looker.com | PATCH | /ssh_server/{ssh_server_id} | x | w | loose
+  ex8-1425 | looker.com | PATCH | /ssh_tunnel/{ssh_tunnel_id} | x | w | loose
+  ex8-1516 | looker.com | PATCH | /workforce_config | x | w | loose
+  ex8-1532 | shortcut.com | PUT | /api/v3/custom-fields/{custom-field-public-id} | x | w | loose
+  ex8-1666 | wekan.github.io | PUT | /api/admin/attachment-settings | x | w | loose
+  ex8-1671 | wekan.github.io | PUT | /api/admin/orgs/features | x | w | loose
+  ex8-1672 | wekan.github.io | PUT | /api/admin/orgs/{org}/features | x | w | loose
+  ex8-1678 | wekan.github.io | PUT | /api/admin/teams/features | x | w | loose
+  ex8-1679 | wekan.github.io | PUT | /api/admin/teams/{team}/features | x | w | loose
+
+== b85-base ==  model(s): rwxlite-0.4.0+4608f470
+join: matched 1821 · unmatched ops 0 · unmatched output 0 · duplicate keys 0
+(shares are: of the group's own rows | of all 1821 rows)
+overall          n 1821 · exact 1643 (90.2% | 90.2%) · loose-1 39 (2.1% | 2.1%) · loose-2 8 (0.4% | 0.4%) · TOO LOOSE 47 (2.6% | 2.6%) · TOO TIGHT 131 (7.2% | 7.2%)
+rwxlite: sent 1821 · raised 6 · lowered 100 · kept 1508 · undecided (asked, scored x) 207
+markers on the 47 too-loose rows: tight 0 · loose 41 · settled 6
+by vendor:
+  baserow.io       n  488 · exact 422 (86.5% | 23.2%) · loose-1 10 (2.0% | 0.5%) · loose-2 3 (0.6% | 0.2%) · TOO LOOSE 13 (2.7% | 0.7%) · TOO TIGHT 53 (10.9% | 2.9%)
+  bitrise.io       n  128 · exact 123 (96.1% | 6.8%) · loose-1 1 (0.8% | 0.1%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 1 (0.8% | 0.1%) · TOO TIGHT 4 (3.1% | 0.2%)
+  gitbook.com      n  403 · exact 369 (91.6% | 20.3%) · loose-1 6 (1.5% | 0.3%) · loose-2 4 (1.0% | 0.2%) · TOO LOOSE 10 (2.5% | 0.5%) · TOO TIGHT 24 (6.0% | 1.3%)
+  looker.com       n  502 · exact 451 (89.8% | 24.8%) · loose-1 16 (3.2% | 0.9%) · loose-2 1 (0.2% | 0.1%) · TOO LOOSE 17 (3.4% | 0.9%) · TOO TIGHT 34 (6.8% | 1.9%)
+  shortcut.com     n  143 · exact 140 (97.9% | 7.7%) · loose-1 2 (1.4% | 0.1%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 2 (1.4% | 0.1%) · TOO TIGHT 1 (0.7% | 0.1%)
+  wekan.github.io  n  157 · exact 138 (87.9% | 7.6%) · loose-1 4 (2.5% | 0.2%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 4 (2.5% | 0.2%) · TOO TIGHT 15 (9.6% | 0.8%)
+by method:
+  DELETE           n  227 · exact 224 (98.7% | 12.3%) · loose-1 0 (0.0% | 0.0%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 0 (0.0% | 0.0%) · TOO TIGHT 3 (1.3% | 0.2%)
+  GET              n  821 · exact 804 (97.9% | 44.2%) · loose-1 0 (0.0% | 0.0%) · loose-2 6 (0.7% | 0.3%) · TOO LOOSE 6 (0.7% | 0.3%) · TOO TIGHT 11 (1.3% | 0.6%)
+  PATCH            n  188 · exact 153 (81.4% | 8.4%) · loose-1 22 (11.7% | 1.2%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 22 (11.7% | 1.2%) · TOO TIGHT 13 (6.9% | 0.7%)
+  POST             n  481 · exact 375 (78.0% | 20.6%) · loose-1 10 (2.1% | 0.5%) · loose-2 2 (0.4% | 0.1%) · TOO LOOSE 12 (2.5% | 0.7%) · TOO TIGHT 94 (19.5% | 5.2%)
+  PUT              n  104 · exact 87 (83.7% | 4.8%) · loose-1 7 (6.7% | 0.4%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 7 (6.7% | 0.4%) · TOO TIGHT 10 (9.6% | 0.5%)
+every too-loose row (47): id | vendor | method | path | truth | predicted | marker
+  ex8-0043 | baserow.io | PATCH | /api/agent/{agent_id}/configuration/ | x | w | loose
+  ex8-0063 | baserow.io | PUT | /api/ai-providers/features/{feature_type}/ | x | w | loose
+  ex8-0071 | baserow.io | PATCH | /api/ai-providers/{provider_id}/ | x | w | loose
+  ex8-0127 | baserow.io | PATCH | /api/builder/domains/{domain_id}/ | x | w | loose
+  ex8-0144 | baserow.io | GET | /api/builder/preview/exchange/{token}/ | x | r | settled
+  ex8-0200 | baserow.io | POST | /api/database/fields/password-authentication/ | x | r | loose
+  ex8-0207 | baserow.io | PATCH | /api/database/fields/{field_id}/ | x | w | loose
+  ex8-0338 | baserow.io | GET | /api/licenses/{id}/check/ | x | r | settled
+  ex8-0346 | baserow.io | PATCH | /api/mcp/endpoint/{endpoint_id}/ | x | w | loose
+  ex8-0348 | baserow.io | POST | /api/mcp/endpoints/ | x | w | loose
+  ex8-0396 | baserow.io | POST | /api/teams/{team_id}/subjects/ | x | w | loose
+  ex8-0415 | baserow.io | POST | /api/user-files/upload-via-url/ | x | w | loose
+  ex8-0420 | baserow.io | PATCH | /api/user-source/{user_source_id}/ | x | w | loose
+  ex8-0524 | bitrise.io | PATCH | /apps/{app-slug}/builds/{build-slug}/artifacts/{artifact-slug} | x | w | loose
+  ex8-0676 | gitbook.com | POST | /integrations/{integrationName}/render | x | r | loose
+  ex8-0706 | gitbook.com | POST | /orgs/{organizationId}/domains | x | w | loose
+  ex8-0709 | gitbook.com | PATCH | /orgs/{organizationId}/domains/{emailDomain} | x | w | loose
+  ex8-0792 | gitbook.com | POST | /orgs/{organizationId}/sites/{siteId}/context-connections | x | w | loose
+  ex8-0795 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/context-connections/{siteContextConnectionId} | x | w | loose
+  ex8-0823 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/mcp-servers/{siteMcpServerId} | x | w | loose
+  ex8-0837 | gitbook.com | GET | /orgs/{organizationId}/sites/{siteId}/publishing/preview | x | r | settled
+  ex8-0872 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/site-spaces/{siteSpaceId} | x | w | loose
+  ex8-0949 | gitbook.com | GET | /spaces/{spaceId}/change-requests/{changeRequestId}/pdf | x | r | settled
+  ex8-0989 | gitbook.com | GET | /spaces/{spaceId}/pdf | x | r | settled
+  ex8-1032 | looker.com | PATCH | /alerts/{alert_id} | x | w | loose
+  ex8-1033 | looker.com | PUT | /alerts/{alert_id} | x | w | loose
+  ex8-1063 | looker.com | PATCH | /cloud_storage | x | w | loose
+  ex8-1075 | looker.com | POST | /connections | x | w | loose
+  ex8-1079 | looker.com | PATCH | /connections/{connection_name} | x | w | loose
+  ex8-1119 | looker.com | PATCH | /custom_welcome_email | x | w | loose
+  ex8-1178 | looker.com | GET | /embed/sso/validate | x | r | settled
+  ex8-1268 | looker.com | POST | /mobile/device | x | w | loose
+  ex8-1270 | looker.com | PATCH | /mobile/device/{device_id} | x | w | loose
+  ex8-1277 | looker.com | PATCH | /model_sets/{model_set_id} | x | w | loose
+  ex8-1387 | looker.com | POST | /scheduled_plans | x | w | loose
+  ex8-1396 | looker.com | PATCH | /scheduled_plans/{scheduled_plan_id} | x | w | loose
+  ex8-1407 | looker.com | PATCH | /setting | x | w | loose
+  ex8-1408 | looker.com | POST | /smtp_settings | x | w | loose
+  ex8-1419 | looker.com | PATCH | /ssh_server/{ssh_server_id} | x | w | loose
+  ex8-1425 | looker.com | PATCH | /ssh_tunnel/{ssh_tunnel_id} | x | w | loose
+  ex8-1516 | looker.com | PATCH | /workforce_config | x | w | loose
+  ex8-1532 | shortcut.com | PUT | /api/v3/custom-fields/{custom-field-public-id} | x | w | loose
+  ex8-1652 | shortcut.com | POST | /api/v3/stories/{story-public-id}/comments/{comment-public-id}/unlink-from-slack | x | w | loose
+  ex8-1666 | wekan.github.io | PUT | /api/admin/attachment-settings | x | w | loose
+  ex8-1671 | wekan.github.io | PUT | /api/admin/orgs/features | x | w | loose
+  ex8-1672 | wekan.github.io | PUT | /api/admin/orgs/{org}/features | x | w | loose
+  ex8-1678 | wekan.github.io | PUT | /api/admin/teams/features | x | w | loose
+
+== b85-cand ==  model(s): rwxlite-0.5.0+82fa50c3
+join: matched 1821 · unmatched ops 0 · unmatched output 0 · duplicate keys 0
+(shares are: of the group's own rows | of all 1821 rows)
+overall          n 1821 · exact 1656 (90.9% | 90.9%) · loose-1 37 (2.0% | 2.0%) · loose-2 7 (0.4% | 0.4%) · TOO LOOSE 44 (2.4% | 2.4%) · TOO TIGHT 121 (6.6% | 6.6%)
+rwxlite: sent 1821 · raised 5 · lowered 116 · kept 1509 · undecided (asked, scored x) 191
+markers on the 44 too-loose rows: tight 0 · loose 38 · settled 6
+by vendor:
+  baserow.io       n  488 · exact 428 (87.7% | 23.5%) · loose-1 12 (2.5% | 0.7%) · loose-2 2 (0.4% | 0.1%) · TOO LOOSE 14 (2.9% | 0.8%) · TOO TIGHT 46 (9.4% | 2.5%)
+  bitrise.io       n  128 · exact 119 (93.0% | 6.5%) · loose-1 1 (0.8% | 0.1%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 1 (0.8% | 0.1%) · TOO TIGHT 8 (6.3% | 0.4%)
+  gitbook.com      n  403 · exact 373 (92.6% | 20.5%) · loose-1 5 (1.2% | 0.3%) · loose-2 4 (1.0% | 0.2%) · TOO LOOSE 9 (2.2% | 0.5%) · TOO TIGHT 21 (5.2% | 1.2%)
+  looker.com       n  502 · exact 453 (90.2% | 24.9%) · loose-1 13 (2.6% | 0.7%) · loose-2 1 (0.2% | 0.1%) · TOO LOOSE 14 (2.8% | 0.8%) · TOO TIGHT 35 (7.0% | 1.9%)
+  shortcut.com     n  143 · exact 140 (97.9% | 7.7%) · loose-1 2 (1.4% | 0.1%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 2 (1.4% | 0.1%) · TOO TIGHT 1 (0.7% | 0.1%)
+  wekan.github.io  n  157 · exact 143 (91.1% | 7.9%) · loose-1 4 (2.5% | 0.2%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 4 (2.5% | 0.2%) · TOO TIGHT 10 (6.4% | 0.5%)
+by method:
+  DELETE           n  227 · exact 224 (98.7% | 12.3%) · loose-1 0 (0.0% | 0.0%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 0 (0.0% | 0.0%) · TOO TIGHT 3 (1.3% | 0.2%)
+  GET              n  821 · exact 804 (97.9% | 44.2%) · loose-1 0 (0.0% | 0.0%) · loose-2 6 (0.7% | 0.3%) · TOO LOOSE 6 (0.7% | 0.3%) · TOO TIGHT 11 (1.3% | 0.6%)
+  PATCH            n  188 · exact 147 (78.2% | 8.1%) · loose-1 22 (11.7% | 1.2%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 22 (11.7% | 1.2%) · TOO TIGHT 19 (10.1% | 1.0%)
+  POST             n  481 · exact 394 (81.9% | 21.6%) · loose-1 8 (1.7% | 0.4%) · loose-2 1 (0.2% | 0.1%) · TOO LOOSE 9 (1.9% | 0.5%) · TOO TIGHT 78 (16.2% | 4.3%)
+  PUT              n  104 · exact 87 (83.7% | 4.8%) · loose-1 7 (6.7% | 0.4%) · loose-2 0 (0.0% | 0.0%) · TOO LOOSE 7 (6.7% | 0.4%) · TOO TIGHT 10 (9.6% | 0.5%)
+every too-loose row (44): id | vendor | method | path | truth | predicted | marker
+  ex8-0030 | baserow.io | POST | /api/admin/templates/{template_id}/unblock/ | x | w | loose
+  ex8-0043 | baserow.io | PATCH | /api/agent/{agent_id}/configuration/ | x | w | loose
+  ex8-0063 | baserow.io | PUT | /api/ai-providers/features/{feature_type}/ | x | w | loose
+  ex8-0071 | baserow.io | PATCH | /api/ai-providers/{provider_id}/ | x | w | loose
+  ex8-0077 | baserow.io | POST | /api/application/{application_id}/user-sources/ | x | w | loose
+  ex8-0127 | baserow.io | PATCH | /api/builder/domains/{domain_id}/ | x | w | loose
+  ex8-0144 | baserow.io | GET | /api/builder/preview/exchange/{token}/ | x | r | settled
+  ex8-0207 | baserow.io | PATCH | /api/database/fields/{field_id}/ | x | w | loose
+  ex8-0328 | baserow.io | PATCH | /api/integrations/mcp/{integration_id}/tools/ | x | w | loose
+  ex8-0338 | baserow.io | GET | /api/licenses/{id}/check/ | x | r | settled
+  ex8-0346 | baserow.io | PATCH | /api/mcp/endpoint/{endpoint_id}/ | x | w | loose
+  ex8-0396 | baserow.io | POST | /api/teams/{team_id}/subjects/ | x | w | loose
+  ex8-0415 | baserow.io | POST | /api/user-files/upload-via-url/ | x | w | loose
+  ex8-0420 | baserow.io | PATCH | /api/user-source/{user_source_id}/ | x | w | loose
+  ex8-0524 | bitrise.io | PATCH | /apps/{app-slug}/builds/{build-slug}/artifacts/{artifact-slug} | x | w | loose
+  ex8-0676 | gitbook.com | POST | /integrations/{integrationName}/render | x | r | loose
+  ex8-0709 | gitbook.com | PATCH | /orgs/{organizationId}/domains/{emailDomain} | x | w | loose
+  ex8-0792 | gitbook.com | POST | /orgs/{organizationId}/sites/{siteId}/context-connections | x | w | loose
+  ex8-0795 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/context-connections/{siteContextConnectionId} | x | w | loose
+  ex8-0823 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/mcp-servers/{siteMcpServerId} | x | w | loose
+  ex8-0837 | gitbook.com | GET | /orgs/{organizationId}/sites/{siteId}/publishing/preview | x | r | settled
+  ex8-0872 | gitbook.com | PATCH | /orgs/{organizationId}/sites/{siteId}/site-spaces/{siteSpaceId} | x | w | loose
+  ex8-0949 | gitbook.com | GET | /spaces/{spaceId}/change-requests/{changeRequestId}/pdf | x | r | settled
+  ex8-0989 | gitbook.com | GET | /spaces/{spaceId}/pdf | x | r | settled
+  ex8-1032 | looker.com | PATCH | /alerts/{alert_id} | x | w | loose
+  ex8-1033 | looker.com | PUT | /alerts/{alert_id} | x | w | loose
+  ex8-1063 | looker.com | PATCH | /cloud_storage | x | w | loose
+  ex8-1079 | looker.com | PATCH | /connections/{connection_name} | x | w | loose
+  ex8-1119 | looker.com | PATCH | /custom_welcome_email | x | w | loose
+  ex8-1178 | looker.com | GET | /embed/sso/validate | x | r | settled
+  ex8-1268 | looker.com | POST | /mobile/device | x | w | loose
+  ex8-1270 | looker.com | PATCH | /mobile/device/{device_id} | x | w | loose
+  ex8-1277 | looker.com | PATCH | /model_sets/{model_set_id} | x | w | loose
+  ex8-1387 | looker.com | POST | /scheduled_plans | x | w | loose
+  ex8-1396 | looker.com | PATCH | /scheduled_plans/{scheduled_plan_id} | x | w | loose
+  ex8-1407 | looker.com | PATCH | /setting | x | w | loose
+  ex8-1419 | looker.com | PATCH | /ssh_server/{ssh_server_id} | x | w | loose
+  ex8-1425 | looker.com | PATCH | /ssh_tunnel/{ssh_tunnel_id} | x | w | loose
+  ex8-1532 | shortcut.com | PUT | /api/v3/custom-fields/{custom-field-public-id} | x | w | loose
+  ex8-1652 | shortcut.com | POST | /api/v3/stories/{story-public-id}/comments/{comment-public-id}/unlink-from-slack | x | w | loose
+  ex8-1666 | wekan.github.io | PUT | /api/admin/attachment-settings | x | w | loose
+  ex8-1671 | wekan.github.io | PUT | /api/admin/orgs/features | x | w | loose
+  ex8-1672 | wekan.github.io | PUT | /api/admin/orgs/{org}/features | x | w | loose
+  ex8-1678 | wekan.github.io | PUT | /api/admin/teams/features | x | w | loose
+
+== D142 gate (agreed by the user before any exam #8 score existed: exact no fewer, too loose at most +1.0 point = +18 rows of 1821) ==
+a-cand (GATE) vs a-base: too loose 60 vs 65 (-5) -> OK (need <= +18); exact 1653 vs 1631 (+22) -> OK (need >=)  => GO: round 16 may replace 0.4.0
+  beside the gate, not part of it: too tight 108 vs 125 (-17), of 1821
+
+== D133 mode a bar vs mech (reported only, for both models; it is not the D142 gate) ==
+mode a a-base: too loose 65 vs mech 73 -> OK; exact 1631 (89.6%) vs mech 1556 (85.4%), need >= mech + 92 = 1648 -> FAIL  => FAIL
+mode a a-cand: too loose 60 vs mech 73 -> OK; exact 1653 (90.8%) vs mech 1556 (85.4%), need >= mech + 92 = 1648 -> OK  => PASS
+
+== D140 mode b at confidence 85 (no bar, reported) ==
+mode b b85-base: exact 1643 (90.2%), too loose 47 (loose-1 39, loose-2 8; 2.6%), too tight 131 (7.2%), asked 207 (11.4%)
+mode b b85-cand: exact 1656 (90.9%), too loose 44 (loose-1 37, loose-2 7; 2.4%), too tight 121 (6.6%), asked 191 (10.5%)
+
+rows where a-base and a-cand differ (31): id | vendor | method | path | truth | base->cand | base result -> cand result
+  ex8-0183 | baserow.io | POST | /api/database/data-sync/database/{database_id}/ | w | x->w | tight -> exact
+  ex8-0273 | baserow.io | PATCH | /api/database/views/group_by/{view_group_by_id}/ | w | x->w | tight -> exact
+  ex8-0302 | baserow.io | POST | /api/database/views/{view_id}/group_bys/ | w | x->w | tight -> exact
+  ex8-0415 | baserow.io | POST | /api/user-files/upload-via-url/ | x | w->x | loose-1 -> exact
+  ex8-0443 | baserow.io | PATCH | /api/user/undo/ | w | x->w | tight -> exact
+  ex8-0451 | baserow.io | POST | /api/workspaces/ | w | w->x | exact -> tight
+  ex8-0560 | bitrise.io | POST | /apps/{app-slug}/provisioning-profiles/{provisioning-profile-slug}/uploaded | x | x->w | exact -> loose-1
+  ex8-0739 | gitbook.com | PATCH | /orgs/{organizationId}/openapi/{specSlug} | x | w->x | loose-1 -> exact
+  ex8-0792 | gitbook.com | POST | /orgs/{organizationId}/sites/{siteId}/context-connections | x | w->x | loose-1 -> exact
+  ex8-0814 | gitbook.com | POST | /orgs/{organizationId}/sites/{siteId}/insights/events | w | x->w | tight -> exact
+  ex8-0815 | gitbook.com | POST | /orgs/{organizationId}/sites/{siteId}/insights/events/aggregate | r | x->r | tight -> exact
+  ex8-0894 | gitbook.com | POST | /orgs/{organizationId}/storage/upload | x | x->w | exact -> loose-1
+  ex8-0908 | gitbook.com | POST | /orgs/{organizationId}/translations | w | x->w | tight -> exact
+  ex8-0931 | gitbook.com | POST | /spaces/{spaceId}/change-requests/{changeRequestId}/comments/{commentId}/replies | w | x->w | tight -> exact
+  ex8-1075 | looker.com | POST | /connections | x | w->x | loose-1 -> exact
+  ex8-1201 | looker.com | POST | /golden_queries | w | x->w | tight -> exact
+  ex8-1238 | looker.com | PATCH | /ldap_config | x | w->x | loose-1 -> exact
+  ex8-1242 | looker.com | PUT | /ldap_config/test_user_info | r | w->x | tight -> tight
+  ex8-1257 | looker.com | POST | /looks | w | x->w | tight -> exact
+  ex8-1268 | looker.com | POST | /mobile/device | x | w->x | loose-1 -> exact
+  ex8-1295 | looker.com | PATCH | /password_config | w | w->x | exact -> tight
+  ex8-1351 | looker.com | POST | /queries | w | x->w | tight -> exact
+  ex8-1413 | looker.com | POST | /sql_queries | w | x->w | tight -> exact
+  ex8-1590 | shortcut.com | PUT | /api/v3/key-results/{key-result-public-id} | w | x->w | tight -> exact
+  ex8-1676 | wekan.github.io | POST | /api/admin/problems/{stream}/acknowledge | w | x->w | tight -> exact
+  ex8-1714 | wekan.github.io | POST | /api/boards/{board}/cards/{card}/checklists | w | x->w | tight -> exact
+  ex8-1728 | wekan.github.io | POST | /api/boards/{board}/cards/{card}/dependencies | w | x->w | tight -> exact
+  ex8-1746 | wekan.github.io | POST | /api/boards/{board}/domains | x | w->x | loose-1 -> exact
+  ex8-1763 | wekan.github.io | POST | /api/boards/{board}/lists | w | x->w | tight -> exact
+  ex8-1776 | wekan.github.io | POST | /api/boards/{board}/lists/{list}/cards/{card}/assignees/{assignee} | w | x->w | tight -> exact
+  ex8-1786 | wekan.github.io | POST | /api/boards/{board}/lists/{list}/move | w | x->w | tight -> exact
